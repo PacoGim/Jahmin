@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "Filter.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n\timport { songIndex } from '../store/index.store'\n\n\t// let groupBy = ['Genre']\n\tlet genres = []\n\tlet firstFilter = []\n\tlet finalFilter = []\n\t// let filterBy = 'Genre'\n\tlet filterBy = ['Genre', 'Artist']\n\n\t// $: {\n\t// \tfirstFilter = []\n\t// \t$songIndex.forEach((song) => {\n\t// \t\tif (!firstFilter.includes(song[filterBy])) {\n\t// \t\t\tfirstFilter.push(song[filterBy])\n\t// \t\t\tfirstFilter = firstFilter.sort((a, b) => {\n\t// \t\t\t\treturn String(a).localeCompare(String(b))\n\t// \t\t\t})\n\t// \t\t}\n\t// \t})\n\t// }\n\n\tfunction showFilteredSongs(filter) {\n\t\tfinalFilter = []\n\t\t$songIndex.forEach((song) => {\n\t\t\tif (song[filterBy] === filter) {\n\t\t\t\tfinalFilter.push(song)\n\t\t\t\tfinalFilter = finalFilter\n\t\t\t}\n\t\t})\n\t}\n\n\tfunction filterArray() {}\n\n\tlet options = ['Artist', 'Album', 'AlbumArtist', 'Year', 'Genre', 'Composer']\n</script>\n\n<select bind:value={filterBy}>\n\t<option value=\"Genre\">Genre</option>\n\t<option value=\"Artist\">Artist</option>\n</select>\n\n<div>\n\t<first-filter>\n\t\t{#each firstFilter as filter, index (index)}\n\t\t\t<p on:click={() => showFilteredSongs(filter)}>{filter}</p>\n\t\t{/each}\n\t</first-filter>\n</div>\n\n<style>\n\tdiv {\n\t\tdisplay: flex;\n\t\tflex-direction: row;\n\t}\n</style>\n"
+  ],
+  "names": [],
+  "mappings": "AAmDC,GAAG,eAAC,CAAC,AACJ,OAAO,CAAE,IAAI,CACb,cAAc,CAAE,GAAG,AACpB,CAAC"
+}
