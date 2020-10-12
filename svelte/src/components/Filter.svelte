@@ -1,56 +1,118 @@
-<script>
-	import { songIndex } from '../store/index.store'
+<script lang="ts">
+	import { onMount } from 'svelte'
 
-	// let groupBy = ['Genre']
-	let genres = []
-	let firstFilter = []
-	let finalFilter = []
-	// let filterBy = 'Genre'
-	let filterBy = ['Genre', 'Artist']
+	import { songIndex, allSongFilters } from '../store/index.store'
 
-	// $: {
-	// 	firstFilter = []
-	// 	$songIndex.forEach((song) => {
-	// 		if (!firstFilter.includes(song[filterBy])) {
-	// 			firstFilter.push(song[filterBy])
-	// 			firstFilter = firstFilter.sort((a, b) => {
-	// 				return String(a).localeCompare(String(b))
-	// 			})
-	// 		}
-	// 	})
-	// }
+	export let index = undefined
 
-	function showFilteredSongs(filter) {
-		finalFilter = []
-		$songIndex.forEach((song) => {
-			if (song[filterBy] === filter) {
-				finalFilter.push(song)
-				finalFilter = finalFilter
+	export let filterType = undefined
+	let previousFilterType = undefined
+
+	let previousUserSelect = undefined
+
+	let selection = undefined
+
+	$: {
+		// console.log(selection)
+
+		if (selection !== undefined) {
+			if ($allSongFilters[index]?.['data']) {
+				$allSongFilters[index] = { data: $allSongFilters[index]['data'], userSelection: selection }
+			} else {
+				$allSongFilters[index] = { userSelection: selection }
 			}
-		})
+		}
 	}
 
-	function filterArray() {}
+	/*
 
-	let options = ['Artist', 'Album', 'AlbumArtist', 'Year', 'Genre', 'Composer']
+    Genre -> AlbumArtist -> Date
+
+  */
+
+	let currentArray = []
+
+	$: {
+		// Gets the user selection of the previous category.
+		let userSelection = $allSongFilters[index - 1]?.['userSelection'] || undefined
+
+		// If the Category or the user selectino has changed (prevents re running if no changes happened).
+		if (previousFilterType !== filterType || previousUserSelect !== userSelection) {
+			previousFilterType = filterType
+			previousUserSelect = userSelection
+
+			if (userSelection === undefined) {
+				let results = []
+
+				$songIndex.forEach((song) => {
+					if (!results.includes(song[filterType])) {
+						results.push(song[filterType])
+					}
+				})
+
+				results = results.sort((a, b) => String(a).localeCompare(String(b)))
+
+				$allSongFilters[index] = { data: results }
+				currentArray = $allSongFilters[index]['data']
+			} else {
+				console.log(filterType, userSelection)
+			}
+		} else {
+			// console.log($allSongFilters)
+			currentArray = $allSongFilters[index]['data']
+		}
+	}
+
+	onMount(() => {})
+
+	function cutWord(word) {
+		try {
+			if (word.length >= 20) {
+				return word.substr(0, 18) + '...'
+			} else {
+				return word
+			}
+		} catch (error) {
+			return word
+		}
+	}
 </script>
 
-<select bind:value={filterBy}>
-	<option value="Genre">Genre</option>
-	<option value="Artist">Artist</option>
-</select>
-
-<div>
-	<first-filter>
-		{#each firstFilter as filter, index (index)}
-			<p on:click={() => showFilteredSongs(filter)}>{filter}</p>
-		{/each}
-	</first-filter>
-</div>
+<filter-component>
+	{#each currentArray as item, index (index)}
+		<item title={item}>
+			<input type="radio" id="{item}{index}{filterType}" bind:group={selection} value={item} />
+			<label for="{item}{index}{filterType}"> {cutWord(item)} </label>
+		</item>
+	{/each}
+</filter-component>
 
 <style>
-	div {
+	filter-component {
+		display: flex;
+		flex-direction: column;
+	}
+
+	item {
 		display: flex;
 		flex-direction: row;
+		cursor: pointer;
+	}
+
+	item label {
+		cursor: pointer;
+	}
+
+	item input[type='radio'] {
+		display: none;
+	}
+
+	item input[type='radio']:checked + label {
+		color: green;
+		font-variation-settings: 'wght' 100;
+	}
+
+	item input[type='radio']:checked + label::before {
+		content: '• ';
 	}
 </style>

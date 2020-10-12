@@ -23,6 +23,7 @@ let recursivityControl = 0
 
 // Main function
 export function scanFolders(collectionName:string,rootFolders: string[]) {
+	console.log(`Scanning Folders ${recursivityControl}`)
 	if (rootFolders.length <= 0) return
 
 	let folderPath = rootFolders[0]
@@ -68,6 +69,7 @@ export function scanFolders(collectionName:string,rootFolders: string[]) {
 }
 
 function getFilesMetaTag(collectionName:string,files: [string]) {
+	console.log('Get Files MetaTag',files)
 	let timer = 0
 	let counter = 0
 

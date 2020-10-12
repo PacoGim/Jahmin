@@ -1,4 +1,5 @@
 dependencies:
+  easydropdown: 4.2.0
   exiftool-vendored: 12.2.0
   json-beautify: 1.1.1
   jsonfile: 6.0.1
@@ -7,6 +8,7 @@ dependencies:
   string-hash: 1.1.3
 devDependencies:
   '@types/jsonfile': 6.0.0
+  '@types/node': 14.11.5
   '@types/string-hash': 1.1.1
   concurrently: 5.3.0
   electron: 10.1.2
@@ -58,6 +60,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-jiE3QIxJ8JLNcb1Ps6rDbysDhN4xa8DJJvuC9prr6w+1tIh+QAbYyNF3tyiZNLDBIuBCf4KEcV2UvQm/V60xfA==
+  /@types/node/14.11.5:
+    dev: true
+    resolution:
+      integrity: sha512-jVFzDV6NTbrLMxm4xDSIW/gKnk8rQLF9wAzLWIOg+5nU6ACrIMndeBdXci0FGtqJbP9tQvm6V39eshc96TO2wQ==
   /@types/string-hash/1.1.1:
     dev: true
     resolution:
@@ -195,6 +201,10 @@ packages:
     dev: true
     resolution:
       integrity: sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
+  /custom-event-polyfill/1.0.6:
+    dev: false
+    resolution:
+      integrity: sha512-3FxpFlzGcHrDykwWu+xWVXZ8PfykM/9/bI3zXb953sh+AjInZWcQmrnmvPoZgiqNjmbtTm10PWvYqvRW527x6g==
   /date-fns/2.16.1:
     dev: true
     engines:
@@ -249,6 +259,13 @@ packages:
     dev: true
     resolution:
       integrity: sha1-7gHdHKwO08vH/b6jfcCo8c4ALOI=
+  /easydropdown/4.2.0:
+    dependencies:
+      custom-event-polyfill: 1.0.6
+      helpful-merge: 0.2.0
+    dev: false
+    resolution:
+      integrity: sha512-oicfb/8VT2e9s1nCqzBEB2qCXvuJl4nQnHT6ej+HG8Ot6vNkymxKOL9qE1G4h2uMe16xFW9NF1/WiOIF6yX00g==
   /electron/10.1.2:
     dependencies:
       '@electron/get': 1.12.2
@@ -452,6 +469,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-tdRU3CGZriJWmfNGfloH87lVuv0=
+  /helpful-merge/0.2.0:
+    dev: false
+    resolution:
+      integrity: sha512-lqbBl4TU15okBJ4C8hx7PBEcqtaxxsWLOypdhpsZbRvBTaibNqTXWpG6W59S0FTBeL7hx3K4MXdz8EJVcZ3CCQ==
   /hosted-git-info/2.8.8:
     dev: true
     resolution:
@@ -1062,8 +1083,10 @@ packages:
       integrity: sha1-x+sXyT4RLLEIb6bY5R+wZnt5pfk=
 specifiers:
   '@types/jsonfile': ^6.0.0
+  '@types/node': ^14.11.5
   '@types/string-hash': ^1.1.1
   concurrently: ^5.3.0
+  easydropdown: ^4.2.0
   electron: ^10.1.2
   exiftool-vendored: ^12.2.0
   json-beautify: ^1.1.1

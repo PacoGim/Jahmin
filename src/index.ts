@@ -35,5 +35,6 @@ app.on('activate', () => {
 
 ipcMain.handle('get-index', async (evt, arg) => {
 	let index = await createFilesIndex(collectionName)
+	// scanFolders(collectionName,['/Volumes/Maxtor/Music'])
 	return index
 })

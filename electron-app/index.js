@@ -67,9 +67,12 @@ electron_1.ipcMain.handle('get-index', function (evt, arg) { return __awaiter(vo
     var index;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, knotdb_1.createFilesIndex(collectionName)];
+            case 0: return [4 /*yield*/, knotdb_1.createFilesIndex(collectionName)
+                // scanFolders(collectionName,['/Volumes/Maxtor/Music'])
+            ];
             case 1:
                 index = _a.sent();
+                // scanFolders(collectionName,['/Volumes/Maxtor/Music'])
                 return [2 /*return*/, index];
         }
     });

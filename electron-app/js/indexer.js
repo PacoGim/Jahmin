@@ -57,6 +57,7 @@ var depth = [];
 var recursivityControl = 0;
 // Main function
 function scanFolders(collectionName, rootFolders) {
+    console.log("Scanning Folders " + recursivityControl);
     if (rootFolders.length <= 0)
         return;
     var folderPath = rootFolders[0];
@@ -98,6 +99,7 @@ function scanFolders(collectionName, rootFolders) {
 exports.scanFolders = scanFolders;
 function getFilesMetaTag(collectionName, files) {
     var _this = this;
+    console.log('Get Files MetaTag', files);
     var timer = 0;
     var counter = 0;
     setInterval(function () {
