@@ -1,88 +1,32 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
-
-	import { songIndex, allSongFilters } from '../store/index.store'
+	import { cutWord } from '../helpers/index.helper'
+	import { filterSongs } from '../helpers/songFilter.helper'
+	import { userSelectedTagsToGroup, userSelectedValueToFilter } from '../store/index.store'
 
 	export let index = undefined
-
 	export let filterType = undefined
-	let previousFilterType = undefined
-
-	let previousUserSelect = undefined
-
-	let selection = undefined
-
-	$: {
-		// console.log(selection)
-
-		if (selection !== undefined) {
-			if ($allSongFilters[index]?.['data']) {
-				$allSongFilters[index] = { data: $allSongFilters[index]['data'], userSelection: selection }
-			} else {
-				$allSongFilters[index] = { userSelection: selection }
-			}
-		}
-	}
-
-	/*
-
-    Genre -> AlbumArtist -> Date
-
-  */
 
 	let currentArray = []
 
 	$: {
-		// Gets the user selection of the previous category.
-		let userSelection = $allSongFilters[index - 1]?.['userSelection'] || undefined
-
-		// If the Category or the user selectino has changed (prevents re running if no changes happened).
-		if (previousFilterType !== filterType || previousUserSelect !== userSelection) {
-			previousFilterType = filterType
-			previousUserSelect = userSelection
-
-			if (userSelection === undefined) {
-				let results = []
-
-				$songIndex.forEach((song) => {
-					if (!results.includes(song[filterType])) {
-						results.push(song[filterType])
-					}
-				})
-
-				results = results.sort((a, b) => String(a).localeCompare(String(b)))
-
-				$allSongFilters[index] = { data: results }
-				currentArray = $allSongFilters[index]['data']
-			} else {
-				console.log(filterType, userSelection)
-			}
-		} else {
-			// console.log($allSongFilters)
-			currentArray = $allSongFilters[index]['data']
-		}
-	}
-
-	onMount(() => {})
-
-	function cutWord(word) {
-		try {
-			if (word.length >= 20) {
-				return word.substr(0, 18) + '...'
-			} else {
-				return word
-			}
-		} catch (error) {
-			return word
-		}
+		currentArray = filterSongs($userSelectedTagsToGroup, $userSelectedValueToFilter, index)
 	}
 </script>
 
 <filter-component>
-	{#each currentArray as item, index (index)}
+	<item title="All {filterType}">
+		<input type="radio" id="all{filterType}" bind:group={$userSelectedValueToFilter[index]} value={undefined} />
+		<label for="all{filterType}"> {filterType} ({currentArray.length}) </label>
+	</item>
+	{#each currentArray as item, i (i)}
 		<item title={item}>
-			<input type="radio" id="{item}{index}{filterType}" bind:group={selection} value={item} />
-			<label for="{item}{index}{filterType}"> {cutWord(item)} </label>
+			<input type="radio" id="{item}{i}{filterType}" bind:group={$userSelectedValueToFilter[index]} value={item} />
+
+			{#if item && item[filterType] !== undefined}
+				<label for="{item}{i}{filterType}"> {cutWord(item[filterType])} </label>
+			{:else}
+				<label for="{item}{i}{filterType}"> {cutWord(item)} </label>
+			{/if}
 		</item>
 	{/each}
 </filter-component>

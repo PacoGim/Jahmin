@@ -2,7 +2,7 @@ import { TagType } from '../types/tag.type'
 
 import fs from 'fs'
 import path from 'path'
-import { addData, createFilesIndex, readData } from './knotdb'
+import { addData, createFilesIndex, readData } from './knotdb.service'
 import { customAlphabet } from 'nanoid'
 const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
 

@@ -37,20 +37,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
-var knotdb_1 = require("./js/knotdb");
+var config_service_1 = require("./services/config.service");
+var knotdb_service_1 = require("./services/knotdb.service");
 var collectionName = 'music';
 function createWindow() {
-    // Create the browser window.
-    var win = new electron_1.BrowserWindow({
-        width: 1920,
-        height: 1080,
+    var config = config_service_1.loadConfig(electron_1.app);
+    var options = {
+        title: 'Jahmin',
+        x: 0,
+        y: 0,
+        width: 800,
+        height: 800,
         webPreferences: {
             nodeIntegration: true,
             worldSafeExecuteJavaScript: true
         }
-    });
-    win.webContents.openDevTools();
-    win.loadFile('index.html');
+    };
+    if (config['bounds'] !== undefined) {
+        var bounds = config['bounds'];
+        var area = electron_1.screen.getDisplayMatching(bounds).workArea;
+        if (bounds.x >= area.x &&
+            bounds.y >= area.y &&
+            bounds.x + bounds.width <= area.x + area.width &&
+            bounds.y + bounds.height <= area.y + area.height) {
+            options['x'] = bounds['x'];
+            options['y'] = bounds['y'];
+        }
+        if (bounds.width <= area.width || bounds.height <= area.height) {
+            options['height'] = bounds['height'];
+            options['width'] = bounds['width'];
+        }
+    }
+    else {
+        console.log('No Config');
+    }
+    // Create the browser window.
+    var window = new electron_1.BrowserWindow(options);
+    window.webContents.openDevTools();
+    window.loadFile('index.html');
+    window.on('resize', function () { return saveWindowBounds(window); }).on('move', function () { return saveWindowBounds(window); });
 }
 electron_1.app.whenReady().then(createWindow);
 electron_1.app.on('window-all-closed', function () {
@@ -59,6 +84,7 @@ electron_1.app.on('window-all-closed', function () {
     }
 });
 electron_1.app.on('activate', function () {
+    // console.log(app.getPath('appData'))
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
@@ -67,7 +93,7 @@ electron_1.ipcMain.handle('get-index', function (evt, arg) { return __awaiter(vo
     var index;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, knotdb_1.createFilesIndex(collectionName)
+            case 0: return [4 /*yield*/, knotdb_service_1.createFilesIndex(collectionName)
                 // scanFolders(collectionName,['/Volumes/Maxtor/Music'])
             ];
             case 1:
@@ -77,3 +103,23 @@ electron_1.ipcMain.handle('get-index', function (evt, arg) { return __awaiter(vo
         }
     });
 }); });
+electron_1.ipcMain.handle('open-config', function () {
+    console.log('Open Config File');
+    // shell.showItemInFolder(configFilePath)
+    return;
+});
+var saveConfigDebounce;
+function saveWindowBounds(window) {
+    if (saveConfigDebounce)
+        clearTimeout(saveConfigDebounce);
+    saveConfigDebounce = setTimeout(function () {
+        config_service_1.saveConfig(electron_1.app, {
+            bounds: {
+                x: window.getPosition()[0],
+                y: window.getPosition()[1],
+                width: window.getSize()[0],
+                height: window.getSize()[1]
+            }
+        });
+    }, 250);
+}

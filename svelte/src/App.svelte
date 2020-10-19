@@ -6,7 +6,7 @@
 
 	import { onMount } from 'svelte'
 
-	const { ipcRenderer } = require('electron')
+	const { ipcRenderer,shell } = require('electron')
 
 	onMount(() => {
 		ipcRenderer.invoke('get-index', 'lol').then((result) => {
