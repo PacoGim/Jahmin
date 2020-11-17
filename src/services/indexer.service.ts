@@ -1,13 +1,11 @@
-import { TagType } from '../types/tag.type'
+// import { TagType } from '../types/tag.type'
 
 import fs from 'fs'
 import path from 'path'
-import { addData, createFilesIndex, readData } from './knotdb.service'
-import { customAlphabet } from 'nanoid'
-const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
-
-const ExifTool = require('exiftool-vendored').ExifTool
-const exiftool = new ExifTool({ taskTimeoutMillis: 1000 })
+import { parseFile } from 'music-metadata'
+import { createData, readData } from './loki.service'
+// import { customAlphabet } from 'nanoid'
+// const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
 
 const formats = ['.flac', '.m4a', '.mp3', '.wav', '.ogg', '.opus']
 
@@ -22,7 +20,7 @@ let depth: [string] = []
 let recursivityControl = 0
 
 // Main function
-export function scanFolders(collectionName:string,rootFolders: string[]) {
+export function scanFolders(rootFolders: string[]) {
 	console.log(`Scanning Folders ${recursivityControl}`)
 	if (rootFolders.length <= 0) return
 
@@ -40,7 +38,7 @@ export function scanFolders(collectionName:string,rootFolders: string[]) {
 			recursivityControl++
 
 			// Recursive Call
-			scanFolders(collectionName,rootFolders)
+			scanFolders(rootFolders)
 
 			// Recursivity control when previous recursive call done.
 			recursivityControl--
@@ -60,114 +58,248 @@ export function scanFolders(collectionName:string,rootFolders: string[]) {
 
 		// If more root folders are available, the recursion call restarts. If not, it is done scanning folders.
 		if (rootFolders.length > 0) {
-			scanFolders(collectionName,rootFolders)
+			scanFolders(rootFolders)
 		} else {
 			console.log('Done ', filesCollection.length)
-			getFilesMetaTag(collectionName,filesCollection)
+			// console.log(mm)
+			getFilesMetaTag(filesCollection)
 		}
 	}
 }
 
-function getFilesMetaTag(collectionName:string,files: [string]) {
-	console.log('Get Files MetaTag',files)
-	let timer = 0
-	let counter = 0
+function getFilesMetaTag(files: string[]) {
+	files.forEach((filePath, index) => {
+		const extension = filePath.split('.').pop() || ''
+		const fileStats = fs.statSync(filePath)
 
-	setInterval(() => {
-		timer++
-	}, 1000)
+		let song = readData({ SourceFile: filePath })
 
-	files.forEach(async (filePath, index) => {
-		let file = undefined
-		let isDiffTime = false
+		if (song) {
 
-		try {
-			file = readData(collectionName,filePath)
-		} catch (error) {}
-
-		if (file) {
-			isDiffTime = fs.statSync(filePath).mtimeMs !== file['LastModified']
-		}
-
-		if (file === undefined || isDiffTime === true) {
-			exiftool
-				.read(filePath)
-				.then(async (tags: TagType) => {
-					let fileTags: TagType = {
-						ID: nanoid(),
-						SourceFile: tags['SourceFile'] || '',
-						FileType: tags['FileType'] || '',
-						FileSize: tags['FileSize'] || '',
-						Duration: tags['Duration'] || 0,
-						Title: tags['Title'] || '',
-						Artist: tags['Artist'] || '',
-						Album: tags['Album'] || '',
-						Genre: tags['Genre'] || '',
-						Comment: tags['Comment'] || '',
-						Composer: tags['Composer'] || '',
-						SampleRate: tags['SampleRate'] || '',
-						LastModified: fs.statSync(tags['SourceFile']).mtimeMs,
-						Knot:''
-					}
-
-					if (tags['FileType'] === 'MP3') {
-						Object.assign(fileTags, {
-							Track: tags['Track'],
-							AlbumArtist: tags['Band'],
-							Date: tags['DateTimeOriginal'],
-							DiskNumber: tags['PartOfSet'],
-							BitRate: tags['AudioBitrate']
-						})
-					} else if (tags['FileType'] === 'M4A') {
-						Object.assign(fileTags, {
-							Track: tags['TrackNumber'],
-							AlbumArtist: tags['AlbumArtist'],
-							Date: tags['ContentCreateDate'],
-							DiskNumber: tags['DiskNumber'],
-							BitRate: tags['AvgBitrate'],
-							SampleRate: tags['AudioSampleRate'],
-							BitDepth: tags['AudioBitsPerSample']
-						})
-					} else if (tags['FileType'] === 'FLAC') {
-						Object.assign(fileTags, {
-							Track: tags['TrackNumber'],
-							AlbumArtist: tags['Albumartist'],
-							Date: tags['Date'],
-							DiskNumber: tags['Discnumber'],
-							BitDepth: tags['BitsPerSample']
-						})
-					} else if (tags['FileType'] === 'OGG' || tags['FileType'] === 'OPUS') {
-						Object.assign(fileTags, {
-							Track: tags['TrackNumber'],
-							AlbumArtist: tags['Albumartist'],
-							Date: tags['Date'],
-							DiskNumber: tags['Discnumber']
-						})
-					} else if (tags['FileType'] === 'WAV') {
-						Object.assign(fileTags, {
-							BitDepth: tags['BitsPerSample']
-						})
-					}
-
-					// Adds file metatag to db
-					await addData(collectionName, fileTags)
-
-					let time = parseTime((files.length / counter) * timer)
-
-					console.log(Number((100 / files.length) * (counter + 1)).toFixed(2), `% ${counter + 1} out of ${files.length} Done `, `ETA: ${time} at ${Math.round(counter / timer)} files/s`)
-
-					if (files.length === counter + 1) {
-						console.log('Done')
-						createFilesIndex(collectionName)
-					}
-					counter++
-				})
-				.catch((err: any) => console.log(filePath, err))
-		}else{
-			counter++
+		} else {
+			parseAndSaveFile(filePath, extension, fileStats)
 		}
 	})
 }
+
+function parseAndSaveFile(filePath: string, extension: string, fileStats: fs.Stats) {
+	parseFile(filePath)
+		.then((metadata) => {
+			let doc: any = {
+				SourceFile: filePath,
+				Extension: extension,
+				Size: fileStats.size,
+				Duration: metadata['format']['duration'] || 0,
+				Title: metadata['common']['title'] || undefined,
+				Artist: metadata['common']['artist'] || undefined,
+				Album: metadata['common']['album'] || undefined,
+				Genre: getGenre(metadata, extension),
+				Comment: getComment(metadata, extension),
+				Composer: getComposer(metadata),
+				SampleRate: metadata['format']['sampleRate'] || undefined,
+				LastModified: fileStats.mtimeMs || undefined,
+				Year: metadata['common']['year'] || undefined,
+				Date: metadata['common']['date'] || undefined,
+				Track: metadata['common']['track']['no'] || undefined,
+				AlbumArtist: metadata['common']['albumartist'] || undefined,
+				DiskNumber: metadata['common']['disk']['no'] || undefined,
+				BitRate: metadata['format']['bitrate'] || undefined,
+				BitDepth: metadata['format']['bitsPerSample'] || undefined,
+				Rating: getRating(metadata, extension)
+			}
+
+			for (let i in doc) {
+				if (doc[i] === undefined) {
+					delete doc[i]
+				}
+			}
+
+			let result = createData(doc)
+
+			if (result === null) {
+			}
+		})
+		.catch((err) => {
+			console.error(err.message)
+		})
+}
+
+function getComposer(doc: any) {
+	let composer = doc['common']['composer']
+	if (typeof composer === 'object') composer = composer[0]
+	return composer
+}
+
+function getGenre(doc: any, extension: string) {
+	if (extension === 'm4a') {
+		let genre
+
+		genre = doc['native']['iTunes'].find((i: any) => i['id'] === '©gen')
+
+		if (genre) return genre['value']
+	}
+
+	let genre = doc['common']['genre']
+	if (typeof genre === 'object') genre = genre[0]
+	return genre
+}
+
+function getComment(doc: any, extension: string) {
+	if (['ogg', 'opus', 'flac'].includes(extension)) {
+		let comment = doc['native']['vorbis'].find((i: any) => i['id'].toLowerCase() === 'description')
+		if (comment) return comment['value']
+
+		comment = doc['native']['vorbis'].find((i: any) => i['id'].toLowerCase() === 'comment')
+		if (comment) return comment['value']
+		else return ''
+	} else if (extension === 'mp3') {
+		let comment = doc['native']['ID3v2.4'].find((i: any) => i['id'].toLowerCase() === 'txxx:comment')
+		if (comment) return comment['value']
+
+		comment = doc['common']['comment']
+		if (typeof comment === 'object') comment = comment[0]
+		if (comment) return comment
+		else return ''
+	} else {
+		let comment = doc['common']['comment']
+		if (typeof comment === 'object') comment = comment[0]
+		return comment
+	}
+}
+
+function getRating(doc: any, extension: string) {
+	if (extension === 'm4a') {
+		let rating = doc['native']['iTunes'].find((i: any) => i['id'].toLowerCase() === 'rate')
+		if (rating) return Number(rating['value'])
+		else return ''
+	} else if (extension === 'ogg' || extension === 'opus') {
+		let rating = doc['native']['vorbis'].find((i: any) => i['id'].toLowerCase() === 'ratingpercent')
+
+		if (rating) return Number(rating['value'])
+
+		rating = doc['native']['vorbis'].find((i: any) => i['id'].toLowerCase() === 'rating')
+
+		if (rating) return getStars(rating['value'], 100)
+		else return ''
+	} else if (extension === 'mp3') {
+		let rating = doc['native']['ID3v2.4'].find((i: any) => i['id'].toLowerCase() === 'txxx:ratingpercent')
+		if (rating) return Number(rating['value'])
+
+		rating = doc['native']['ID3v2.4'].find((i: any) => i['id'].toLowerCase() === 'popm')
+		if (rating) return getStars(rating['value']['rating'], 255)
+	} else if (extension === 'flac') {
+		let rating = doc['native']['vorbis'].find((i: any) => i['id'].toLowerCase() === 'rating')
+		if (rating) return Number(rating['value'])
+		else return ''
+	} else {
+		return 'Not Defined'
+	}
+}
+
+function getStars(value: number, maxValue: number) {
+	return Number((100 / maxValue) * value)
+}
+
+// function getFilesMetaTag(collectionName:string,files: [string]) {
+// 	console.log('Get Files MetaTag',files)
+// 	let timer = 0
+// 	let counter = 0
+
+// 	setInterval(() => {
+// 		timer++
+// 	}, 1000)
+
+// 	files.forEach(async (filePath, index) => {
+// 		let file = undefined
+// 		let isDiffTime = false
+
+// 		try {
+// 			file = readData(collectionName,filePath)
+// 		} catch (error) {}
+
+// 		if (file) {
+// 			isDiffTime = fs.statSync(filePath).mtimeMs !== file['LastModified']
+// 		}
+
+// 		if (file === undefined || isDiffTime === true) {
+// 			exiftool
+// 				.read(filePath)
+// 				.then(async (tags: TagType) => {
+// 					let fileTags: TagType = {
+// 						ID: nanoid(),
+// 						SourceFile: tags['SourceFile'] || '',
+// 						FileType: tags['FileType'] || '',
+// 						FileSize: tags['FileSize'] || '',
+// 						Duration: tags['Duration'] || 0,
+// 						Title: tags['Title'] || '',
+// 						Artist: tags['Artist'] || '',
+// 						Album: tags['Album'] || '',
+// 						Genre: tags['Genre'] || '',
+// 						Comment: tags['Comment'] || '',
+// 						Composer: tags['Composer'] || '',
+// 						SampleRate: tags['SampleRate'] || '',
+// 						LastModified: fs.statSync(tags['SourceFile']).mtimeMs,
+// 						Knot:''
+// 					}
+
+// 					if (tags['FileType'] === 'MP3') {
+// 						Object.assign(fileTags, {
+// 							Track: tags['Track'],
+// 							AlbumArtist: tags['Band'],
+// 							Date: tags['DateTimeOriginal'],
+// 							DiskNumber: tags['PartOfSet'],
+// 							BitRate: tags['AudioBitrate']
+// 						})
+// 					} else if (tags['FileType'] === 'M4A') {
+// 						Object.assign(fileTags, {
+// 							Track: tags['TrackNumber'],
+// 							AlbumArtist: tags['AlbumArtist'],
+// 							Date: tags['ContentCreateDate'],
+// 							DiskNumber: tags['DiskNumber'],
+// 							BitRate: tags['AvgBitrate'],
+// 							SampleRate: tags['AudioSampleRate'],
+// 							BitDepth: tags['AudioBitsPerSample']
+// 						})
+// 					} else if (tags['FileType'] === 'FLAC') {
+// 						Object.assign(fileTags, {
+// 							Track: tags['TrackNumber'],
+// 							AlbumArtist: tags['Albumartist'],
+// 							Date: tags['Date'],
+// 							DiskNumber: tags['Discnumber'],
+// 							BitDepth: tags['BitsPerSample']
+// 						})
+// 					} else if (tags['FileType'] === 'OGG' || tags['FileType'] === 'OPUS') {
+// 						Object.assign(fileTags, {
+// 							Track: tags['TrackNumber'],
+// 							AlbumArtist: tags['Albumartist'],
+// 							Date: tags['Date'],
+// 							DiskNumber: tags['Discnumber']
+// 						})
+// 					} else if (tags['FileType'] === 'WAV') {
+// 						Object.assign(fileTags, {
+// 							BitDepth: tags['BitsPerSample']
+// 						})
+// 					}
+
+// 					// Adds file metatag to db
+// 					await addData(collectionName, fileTags)
+
+// 					let time = parseTime((files.length / counter) * timer)
+
+// 					console.log(Number((100 / files.length) * (counter + 1)).toFixed(2), `% ${counter + 1} out of ${files.length} Done `, `ETA: ${time} at ${Math.round(counter / timer)} files/s`)
+
+// 					if (files.length === counter + 1) {
+// 						console.log('Done')
+// 						createFilesIndex(collectionName)
+// 					}
+// 					counter++
+// 				})
+// 				.catch((err: any) => console.log(filePath, err))
+// 		}else{
+// 			counter++
+// 		}
+// 	})
+// }
 
 function parseTime(timeInSeconds: number) {
 	if (timeInSeconds >= 3600) {

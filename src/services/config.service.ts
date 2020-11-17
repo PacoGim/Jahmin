@@ -3,7 +3,6 @@ import { ConfigType } from '../types/config.type'
 import fs from 'fs'
 import path from 'path'
 
-import beautifyJSON from 'json-beautify'
 import { App } from 'electron'
 
 const getConfigPathFile = (app:App) => {
@@ -40,7 +39,7 @@ export function saveConfig(app: App, newConfig: any) {
 
 	config = Object.assign(config, newConfig)
 
-	fs.writeFileSync(getConfigPathFile(app), beautifyJSON(config, null, 2, 0))
+	fs.writeFileSync(getConfigPathFile(app), JSON.stringify(config,null,2))
 }
 
 function getDefaultConfigFile() {

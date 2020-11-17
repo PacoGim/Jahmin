@@ -1,12 +1,29 @@
 import { app, BrowserWindow, ipcMain, protocol, screen, shell } from 'electron'
 import { loadConfig, saveConfig } from './services/config.service'
+import path from 'path'
 
 import { scanFolders } from './services/indexer.service'
-import { createFilesIndex, index } from './services/knotdb.service'
+import { createData, loadDb } from './services/loki.service'
 
 const collectionName = 'music'
 
-function createWindow() {
+export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
+
+async function createWindow() {
+	await loadDb()
+
+	scanFolders(['/Volumes/Maxtor/Music/Chillout', '/Volumes/Maxtor/Music/Chiptune'])
+
+	// Create the browser window.
+	const window = new BrowserWindow(loadOptions())
+
+	window.webContents.openDevTools()
+	window.loadFile('index.html')
+
+	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
+}
+
+function loadOptions() {
 	const config = loadConfig(app)
 
 	const options = {
@@ -44,13 +61,7 @@ function createWindow() {
 		console.log('No Config')
 	}
 
-	// Create the browser window.
-	const window = new BrowserWindow(options)
-
-	window.webContents.openDevTools()
-	window.loadFile('index.html')
-
-	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
+	return options
 }
 
 app.whenReady().then(createWindow)
@@ -69,9 +80,10 @@ app.on('activate', () => {
 })
 
 ipcMain.handle('get-index', async (evt, arg) => {
-	let index = await createFilesIndex(collectionName)
+	// let index = await createFilesIndex(collectionName)
 	// scanFolders(collectionName,['/Volumes/Maxtor/Music'])
-	return index
+	// return index
+	return ''
 })
 
 ipcMain.handle('open-config', () => {

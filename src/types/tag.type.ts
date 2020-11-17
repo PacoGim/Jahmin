@@ -1,9 +1,8 @@
 export type TagType = {
 	[index: string]: string | number
-	ID:string
 	SourceFile: string
-	FileType: string
-	FileSize: string
+	Extension: string
+	Size: number
 	Duration: number
 	Title: string
 	Artist: string
@@ -11,7 +10,14 @@ export type TagType = {
 	Genre: string
 	Comment: string
 	Composer: string
-	SampleRate: string
+	SampleRate: number
 	LastModified: number
-	Knot:string
+	Year: string
+	Date: string
+	Track: string
+	AlbumArtist: string
+	DiskNumber: number
+	BitRate: number
+	BitDepth: number
+	Rating: number
 }
