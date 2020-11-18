@@ -16,14 +16,15 @@ exports.appDataPath = void 0;
 const electron_1 = require("electron");
 const config_service_1 = require("./services/config.service");
 const path_1 = __importDefault(require("path"));
-const indexer_service_1 = require("./services/indexer.service");
+const ipc_service_1 = require("./services/ipc.service");
+ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");
 const collectionName = 'music';
 exports.appDataPath = path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
 function createWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         yield loki_service_1.loadDb();
-        indexer_service_1.scanFolders(['/Volumes/Maxtor/Music/Chillout', '/Volumes/Maxtor/Music/Chiptune']);
+        // scanFolders(['/Volumes/Maxtor/Music'])
         // Create the browser window.
         const window = new electron_1.BrowserWindow(loadOptions());
         window.webContents.openDevTools();
@@ -75,17 +76,6 @@ electron_1.app.on('activate', () => {
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
-});
-electron_1.ipcMain.handle('get-index', (evt, arg) => __awaiter(void 0, void 0, void 0, function* () {
-    // let index = await createFilesIndex(collectionName)
-    // scanFolders(collectionName,['/Volumes/Maxtor/Music'])
-    // return index
-    return '';
-}));
-electron_1.ipcMain.handle('open-config', () => {
-    console.log('Open Config File');
-    // shell.showItemInFolder(configFilePath)
-    return;
 });
 let saveConfigDebounce;
 function saveWindowBounds(window) {

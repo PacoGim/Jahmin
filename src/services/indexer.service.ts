@@ -19,6 +19,10 @@ let depth: [string] = []
 // Variable that keeps the recursivity amount to reactively know when the recursivity is done.
 let recursivityControl = 0
 
+let totalFiles = 0
+let timer = 0
+let counter = 0
+
 // Main function
 export function scanFolders(rootFolders: string[]) {
 	console.log(`Scanning Folders ${recursivityControl}`)
@@ -62,66 +66,92 @@ export function scanFolders(rootFolders: string[]) {
 		} else {
 			console.log('Done ', filesCollection.length)
 			// console.log(mm)
+			totalFiles = filesCollection.length
+
+			setInterval(() => {
+				timer++
+
+				let time = parseTime((totalFiles / counter) * timer)
+
+				console.log(
+					Number((100 / totalFiles) * (counter + 1)).toFixed(2),
+					`% ${counter + 1} out of ${totalFiles} Done `,
+					`ETA: ${time} at ${Math.round(counter / timer)} files/s`
+				)
+			}, 1000)
 			getFilesMetaTag(filesCollection)
 		}
 	}
 }
 
-function getFilesMetaTag(files: string[]) {
-	files.forEach((filePath, index) => {
-		const extension = filePath.split('.').pop() || ''
-		const fileStats = fs.statSync(filePath)
+async function getFilesMetaTag(files: string[]) {
+	if (files.length === 0) return console.log('Done')
 
-		let song = readData({ SourceFile: filePath })
+	let filePath = files.shift()
 
-		if (song) {
+	if (!filePath) return console.log('Done')
 
-		} else {
-			parseAndSaveFile(filePath, extension, fileStats)
-		}
-	})
+	const extension = filePath.split('.').pop() || ''
+	const fileStats = fs.statSync(filePath)
+
+	let doc = readData({ SourceFile: filePath })
+	let isDiffTime = false
+
+	if (doc) {
+		isDiffTime = fs.statSync(filePath).mtimeMs !== doc['LastModified']
+	}
+
+	// console.time(filePath)
+	if (doc === null || isDiffTime === true) {
+		await parseAndSaveFile(filePath, extension, fileStats)
+	}
+	// console.timeEnd(filePath)
+
+	counter++
+
+	process.nextTick(() => getFilesMetaTag(files))
 }
 
-function parseAndSaveFile(filePath: string, extension: string, fileStats: fs.Stats) {
-	parseFile(filePath)
-		.then((metadata) => {
-			let doc: any = {
-				SourceFile: filePath,
-				Extension: extension,
-				Size: fileStats.size,
-				Duration: metadata['format']['duration'] || 0,
-				Title: metadata['common']['title'] || undefined,
-				Artist: metadata['common']['artist'] || undefined,
-				Album: metadata['common']['album'] || undefined,
-				Genre: getGenre(metadata, extension),
-				Comment: getComment(metadata, extension),
-				Composer: getComposer(metadata),
-				SampleRate: metadata['format']['sampleRate'] || undefined,
-				LastModified: fileStats.mtimeMs || undefined,
-				Year: metadata['common']['year'] || undefined,
-				Date: metadata['common']['date'] || undefined,
-				Track: metadata['common']['track']['no'] || undefined,
-				AlbumArtist: metadata['common']['albumartist'] || undefined,
-				DiskNumber: metadata['common']['disk']['no'] || undefined,
-				BitRate: metadata['format']['bitrate'] || undefined,
-				BitDepth: metadata['format']['bitsPerSample'] || undefined,
-				Rating: getRating(metadata, extension)
-			}
-
-			for (let i in doc) {
-				if (doc[i] === undefined) {
-					delete doc[i]
+function parseAndSaveFile(filePath: string, extension: string, fileStats: fs.Stats): Promise<void> {
+	return new Promise((resolve, reject) => {
+		parseFile(filePath)
+			.then((metadata) => {
+				let doc: any = {
+					SourceFile: filePath,
+					Extension: extension,
+					Size: fileStats.size,
+					Duration: metadata['format']['duration'] || 0,
+					Title: metadata['common']['title'] || undefined,
+					Artist: metadata['common']['artist'] || undefined,
+					Album: metadata['common']['album'] || undefined,
+					Genre: getGenre(metadata, extension),
+					Comment: getComment(metadata, extension),
+					Composer: getComposer(metadata),
+					SampleRate: metadata['format']['sampleRate'] || undefined,
+					LastModified: fileStats.mtimeMs || undefined,
+					Year: metadata['common']['year'] || undefined,
+					Date: metadata['common']['date'] || undefined,
+					Track: metadata['common']['track']['no'] || undefined,
+					AlbumArtist: metadata['common']['albumartist'] || undefined,
+					DiskNumber: metadata['common']['disk']['no'] || undefined,
+					BitRate: metadata['format']['bitrate'] || undefined,
+					BitDepth: metadata['format']['bitsPerSample'] || undefined,
+					Rating: getRating(metadata, extension)
 				}
-			}
 
-			let result = createData(doc)
+				for (let i in doc) {
+					if (doc[i] === undefined) {
+						delete doc[i]
+					}
+				}
 
-			if (result === null) {
-			}
-		})
-		.catch((err) => {
-			console.error(err.message)
-		})
+				setTimeout(() => createData(doc), 0)
+			})
+			.catch((err) => {
+				console.error('Parse File', err.message)
+			})
+			.finally(() => resolve())
+	})
 }
 
 function getComposer(doc: any) {

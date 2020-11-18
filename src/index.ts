@@ -2,6 +2,10 @@ import { app, BrowserWindow, ipcMain, protocol, screen, shell } from 'electron'
 import { loadConfig, saveConfig } from './services/config.service'
 import path from 'path'
 
+import { loadIPC } from './services/ipc.service'
+loadIPC()
+
+
 import { scanFolders } from './services/indexer.service'
 import { createData, loadDb } from './services/loki.service'
 
@@ -12,7 +16,7 @@ export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
 async function createWindow() {
 	await loadDb()
 
-	scanFolders(['/Volumes/Maxtor/Music/Chillout', '/Volumes/Maxtor/Music/Chiptune'])
+	// scanFolders(['/Volumes/Maxtor/Music'])
 
 	// Create the browser window.
 	const window = new BrowserWindow(loadOptions())
@@ -77,19 +81,6 @@ app.on('activate', () => {
 	if (BrowserWindow.getAllWindows().length === 0) {
 		createWindow()
 	}
-})
-
-ipcMain.handle('get-index', async (evt, arg) => {
-	// let index = await createFilesIndex(collectionName)
-	// scanFolders(collectionName,['/Volumes/Maxtor/Music'])
-	// return index
-	return ''
-})
-
-ipcMain.handle('open-config', () => {
-	console.log('Open Config File')
-	// shell.showItemInFolder(configFilePath)
-	return
 })
 
 let saveConfigDebounce: NodeJS.Timeout

@@ -1,6 +1,6 @@
 import loki from 'lokijs'
 
-import {TagType} from '../types/tag.type'
+import { TagType } from '../types/tag.type'
 
 //@ts-expect-error
 import lfsa from 'lokijs/src/loki-fs-structured-adapter'
@@ -36,18 +36,29 @@ export function loadDb(): Promise<void> {
 				databaseInitialize().then(() => resolve())
 			},
 			autosave: true,
-			autosaveInterval: 250
+			autosaveInterval: 2000
 		})
 	})
 }
 
-export function createData(newDoc: object) {
+export function getCollection() {
+	const collection = db.getCollection(collectionName).find({ Genre: { $eq: 'Electronic' } })
+	return collection
+}
+
+export function createData(newDoc: TagType) {
 	try {
 		const collection = db.getCollection(collectionName)
 
 		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
 
-		return collection.insert(newDoc)
+		let oldDoc = readData({ SourceFile: newDoc['SourceFile'] })
+
+		if (oldDoc) {
+			return updateData({ $loki: oldDoc['$loki'] }, newDoc)
+		} else {
+			return collection.insert(newDoc)
+		}
 	} catch (error) {
 		handleErrors(error)
 		return null
@@ -69,7 +80,7 @@ export function readDataById(id: any) {
 
 export function readData(query: any) {
 	try {
-		const collection:Collection<TagType> = db.getCollection(collectionName)
+		const collection: Collection<TagType> = db.getCollection(collectionName)
 
 		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
 

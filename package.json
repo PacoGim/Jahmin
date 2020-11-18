@@ -5,7 +5,7 @@
 	"main": "electron-app/dist/index.js",
 	"scripts": {
 		"transpile:ts": "cd ./src && tsc -w",
-		"dev": "concurrently \"npm run transpile:ts\" \"pnpm run start\" ",
+		"dev": "concurrently \"pnpm run start\" ",
 		"start": "electron electron-app"
 	},
 	"repository": {

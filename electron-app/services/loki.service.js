@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.loadDb = void 0;
+exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.loadDb = void 0;
 const lokijs_1 = __importDefault(require("lokijs"));
 //@ts-expect-error
 const loki_fs_structured_adapter_1 = __importDefault(require("lokijs/src/loki-fs-structured-adapter"));
@@ -28,17 +28,28 @@ function loadDb() {
                 databaseInitialize().then(() => resolve());
             },
             autosave: true,
-            autosaveInterval: 250
+            autosaveInterval: 2000
         });
     });
 }
 exports.loadDb = loadDb;
+function getCollection() {
+    const collection = db.getCollection(collectionName).find({ Genre: { $eq: 'Electronic' } });
+    return collection;
+}
+exports.getCollection = getCollection;
 function createData(newDoc) {
     try {
         const collection = db.getCollection(collectionName);
         if (!collection)
             throw new Error(`Collection ${collectionName} not created/available.`);
-        return collection.insert(newDoc);
+        let oldDoc = readData({ SourceFile: newDoc['SourceFile'] });
+        if (oldDoc) {
+            return updateData({ $loki: oldDoc['$loki'] }, newDoc);
+        }
+        else {
+            return collection.insert(newDoc);
+        }
     }
     catch (error) {
         handleErrors(error);

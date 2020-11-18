@@ -1,5 +1,14 @@
 "use strict";
 // import { TagType } from '../types/tag.type'
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -19,6 +28,9 @@ let filesCollection = [];
 let depth = [];
 // Variable that keeps the recursivity amount to reactively know when the recursivity is done.
 let recursivityControl = 0;
+let totalFiles = 0;
+let timer = 0;
+let counter = 0;
 // Main function
 function scanFolders(rootFolders) {
     console.log(`Scanning Folders ${recursivityControl}`);
@@ -57,60 +69,77 @@ function scanFolders(rootFolders) {
         else {
             console.log('Done ', filesCollection.length);
             // console.log(mm)
+            totalFiles = filesCollection.length;
+            setInterval(() => {
+                timer++;
+                let time = parseTime((totalFiles / counter) * timer);
+                console.log(Number((100 / totalFiles) * (counter + 1)).toFixed(2), `% ${counter + 1} out of ${totalFiles} Done `, `ETA: ${time} at ${Math.round(counter / timer)} files/s`);
+            }, 1000);
             getFilesMetaTag(filesCollection);
         }
     }
 }
 exports.scanFolders = scanFolders;
 function getFilesMetaTag(files) {
-    files.forEach((filePath, index) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (files.length === 0)
+            return console.log('Done');
+        let filePath = files.shift();
+        if (!filePath)
+            return console.log('Done');
         const extension = filePath.split('.').pop() || '';
         const fileStats = fs_1.default.statSync(filePath);
-        let song = loki_service_1.readData({ SourceFile: filePath });
-        if (song) {
-            console.log(song['Title']);
+        let doc = loki_service_1.readData({ SourceFile: filePath });
+        let isDiffTime = false;
+        if (doc) {
+            isDiffTime = fs_1.default.statSync(filePath).mtimeMs !== doc['LastModified'];
         }
-        else {
-            parseAndSaveFile(filePath, extension, fileStats);
+        // console.time(filePath)
+        if (doc === null || isDiffTime === true) {
+            yield parseAndSaveFile(filePath, extension, fileStats);
         }
+        // console.timeEnd(filePath)
+        counter++;
+        process.nextTick(() => getFilesMetaTag(files));
     });
 }
 function parseAndSaveFile(filePath, extension, fileStats) {
-    music_metadata_1.parseFile(filePath)
-        .then((metadata) => {
-        let doc = {
-            SourceFile: filePath,
-            Extension: extension,
-            Size: fileStats.size,
-            Duration: metadata['format']['duration'] || 0,
-            Title: metadata['common']['title'] || undefined,
-            Artist: metadata['common']['artist'] || undefined,
-            Album: metadata['common']['album'] || undefined,
-            Genre: getGenre(metadata, extension),
-            Comment: getComment(metadata, extension),
-            Composer: getComposer(metadata),
-            SampleRate: metadata['format']['sampleRate'] || undefined,
-            LastModified: fileStats.mtimeMs || undefined,
-            Year: metadata['common']['year'] || undefined,
-            Date: metadata['common']['date'] || undefined,
-            Track: metadata['common']['track']['no'] || undefined,
-            AlbumArtist: metadata['common']['albumartist'] || undefined,
-            DiskNumber: metadata['common']['disk']['no'] || undefined,
-            BitRate: metadata['format']['bitrate'] || undefined,
-            BitDepth: metadata['format']['bitsPerSample'] || undefined,
-            Rating: getRating(metadata, extension)
-        };
-        for (let i in doc) {
-            if (doc[i] === undefined) {
-                delete doc[i];
+    return new Promise((resolve, reject) => {
+        music_metadata_1.parseFile(filePath)
+            .then((metadata) => {
+            let doc = {
+                SourceFile: filePath,
+                Extension: extension,
+                Size: fileStats.size,
+                Duration: metadata['format']['duration'] || 0,
+                Title: metadata['common']['title'] || undefined,
+                Artist: metadata['common']['artist'] || undefined,
+                Album: metadata['common']['album'] || undefined,
+                Genre: getGenre(metadata, extension),
+                Comment: getComment(metadata, extension),
+                Composer: getComposer(metadata),
+                SampleRate: metadata['format']['sampleRate'] || undefined,
+                LastModified: fileStats.mtimeMs || undefined,
+                Year: metadata['common']['year'] || undefined,
+                Date: metadata['common']['date'] || undefined,
+                Track: metadata['common']['track']['no'] || undefined,
+                AlbumArtist: metadata['common']['albumartist'] || undefined,
+                DiskNumber: metadata['common']['disk']['no'] || undefined,
+                BitRate: metadata['format']['bitrate'] || undefined,
+                BitDepth: metadata['format']['bitsPerSample'] || undefined,
+                Rating: getRating(metadata, extension)
+            };
+            for (let i in doc) {
+                if (doc[i] === undefined) {
+                    delete doc[i];
+                }
             }
-        }
-        let result = loki_service_1.createData(doc);
-        if (result === null) {
-        }
-    })
-        .catch((err) => {
-        console.error(err.message);
+            setTimeout(() => loki_service_1.createData(doc), 0);
+        })
+            .catch((err) => {
+            console.error('Parse File', err.message);
+        })
+            .finally(() => resolve());
     });
 }
 function getComposer(doc) {

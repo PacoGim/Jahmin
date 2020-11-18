@@ -1,30 +1,44 @@
 <script lang="ts">
-	import Library from './includes/Library.svelte'
-	import Filter from './includes/Filtering.svelte'
-
 	import { songIndex } from './store/index.store'
 
 	import { onMount } from 'svelte'
 
-	const { ipcRenderer,shell } = require('electron')
+	import Navigation from './includes/Navigation.svelte'
+	import ArtGrid from './includes/ArtGrid.svelte'
+	import Grouping from './includes/Grouping.svelte'
+	import Player from './includes/Player.svelte'
+	import SongList from './includes/SongList.svelte'
+	import Details from './includes/Details.svelte'
+
+	const { ipcRenderer, shell } = require('electron')
 
 	onMount(() => {
-		ipcRenderer.invoke('get-index', 'lol').then((result) => {
+		ipcRenderer.invoke('get-songs').then((result) => {
 			// result = result.slice(0, 10)
-			// console.log(result)
-			$songIndex = result
+			console.log(result)
+			// $songIndex = result
 		})
 	})
 </script>
 
 <main>
-	<h1>Jahmin</h1>
-	<!-- <Library/> -->
-
-	{#if $songIndex.length>0}
-	<Filter/>
-	{/if}
+	<!-- <Navigation /> -->
+	<!-- <ArtGrid /> -->
+	<Grouping />
+	<!-- <Player /> -->
+	<!-- <SongList /> -->
+	<!-- <Details /> -->
 </main>
 
 <style>
+	main {
+		height: 100%;
+		/* display: grid;
+		grid-template-columns: 0.3fr 0.8fr 2.2fr 0.7fr;
+		grid-template-rows: 1.9fr 0.9fr 0.2fr;
+		grid-template-areas:
+			'navigation-svlt grouping-svlt art-grid-svlt details-svlt'
+			'navigation-svlt grouping-svlt song-list-svlt details-svlt'
+			'navigation-svlt player-svlt player-svlt player-svlt'; */
+	}
 </style>
