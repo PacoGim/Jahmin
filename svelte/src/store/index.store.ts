@@ -10,8 +10,8 @@ type FilterType = {
 
 export let allSongFilters: Writable<FilterType[]> = writable([])
 
-
-export let userSelectedTagsToGroup: Writable<string[]> = writable(['Genre', 'AlbumArtist', 'Album'])
+// 'Genre', 'AlbumArtist', 'Album'
+export let valuesToGroup: Writable<string[]> = writable([])
 
 // Value choosen by the user to filter out the specified tag from the song index.
-export let userSelectedValueToFilter: Writable<string[]> = writable(['Anime'])
+export let valuesToFilter: Writable<string[]> = writable(['Anime'])

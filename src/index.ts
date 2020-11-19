@@ -1,10 +1,9 @@
 import { app, BrowserWindow, ipcMain, protocol, screen, shell } from 'electron'
-import { loadConfig, saveConfig } from './services/config.service'
+import { getConfig, saveConfig } from './services/config.service'
 import path from 'path'
 
 import { loadIPC } from './services/ipc.service'
 loadIPC()
-
 
 import { scanFolders } from './services/indexer.service'
 import { createData, loadDb } from './services/loki.service'
@@ -28,7 +27,7 @@ async function createWindow() {
 }
 
 function loadOptions() {
-	const config = loadConfig(app)
+	const config = getConfig()
 
 	const options = {
 		title: 'Jahmin',
@@ -89,7 +88,7 @@ function saveWindowBounds(window: BrowserWindow) {
 	if (saveConfigDebounce) clearTimeout(saveConfigDebounce)
 
 	saveConfigDebounce = setTimeout(() => {
-		saveConfig(app, {
+		saveConfig({
 			bounds: {
 				x: window.getPosition()[0],
 				y: window.getPosition()[1],

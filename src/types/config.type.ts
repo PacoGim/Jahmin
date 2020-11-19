@@ -1,5 +1,11 @@
 export type ConfigType = {
-	bounds: BoundsType|undefined
+	bounds?: BoundsType
+	order: OrderType
+}
+
+type OrderType = {
+	grouping: string[]
+	filtering?: string[]
 }
 
 type BoundsType = {

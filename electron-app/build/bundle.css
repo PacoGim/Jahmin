@@ -1,10 +1,10 @@
 main.svelte-waov0p{height:100%}
-filter-component.svelte-z59xpe.svelte-z59xpe.svelte-z59xpe{display:flex;flex-direction:column}item.svelte-z59xpe.svelte-z59xpe.svelte-z59xpe{display:flex;flex-direction:row;cursor:pointer}item.svelte-z59xpe label.svelte-z59xpe.svelte-z59xpe{cursor:pointer}item.svelte-z59xpe input[type='radio'].svelte-z59xpe.svelte-z59xpe{display:none}item.svelte-z59xpe input[type='radio'].svelte-z59xpe:checked+label.svelte-z59xpe{color:green;font-variation-settings:'wght' 100}item.svelte-z59xpe input[type='radio'].svelte-z59xpe:checked+label.svelte-z59xpe::before{content:'• '}
+order.svelte-1y69wut{display:inline-block}
 art-grid-svlt.svelte-z3yo5k{grid-area:art-grid-svlt;background-color:#222}
 details-svlt.svelte-aofg9s{grid-area:details-svlt;background-color:#444}
-filtering-component.svelte-1p16jwb{display:flex;flex-direction:row}
 grouping-svlt.svelte-1m8c5c{display:block;height:100%;width:100%;grid-area:grouping-svlt;background-color:#111}
 navigation-svlt.svelte-se2ouc{grid-area:navigation-svlt;background-color:#666}
+grouping-svlt.svelte-ttlru6{display:flex;height:100%;width:100%;grid-area:grouping-svlt;background-color:#111;flex-direction:row}
 player-svlt.svelte-5wqdl9{grid-area:player-svlt;background-color:#555}
 song-list-svlt.svelte-1f78hff{grid-area:song-list-svlt;background-color:#333}
 

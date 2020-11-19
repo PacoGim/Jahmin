@@ -5,21 +5,24 @@
 
 	import Navigation from './includes/Navigation.svelte'
 	import ArtGrid from './includes/ArtGrid.svelte'
-	import Grouping from './includes/Grouping.svelte'
+	import Grouping from './includes/Ordering.svelte'
 	import Player from './includes/Player.svelte'
 	import SongList from './includes/SongList.svelte'
 	import Details from './includes/Details.svelte'
+	import Controller from './includes/Controller.svelte'
 
-	const { ipcRenderer, shell } = require('electron')
+	// const { ipcRenderer, shell } = require('electron')
 
-	onMount(() => {
-		ipcRenderer.invoke('get-songs').then((result) => {
-			// result = result.slice(0, 10)
-			console.log(result)
-			// $songIndex = result
-		})
-	})
+	// onMount(() => {
+	// 	ipcRenderer.invoke('get-songs').then((result) => {
+	// 		// result = result.slice(0, 10)
+	// 		console.log(result)
+	// 		// $songIndex = result
+	// 	})
+	// })
 </script>
+
+<Controller />
 
 <main>
 	<!-- <Navigation /> -->

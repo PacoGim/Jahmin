@@ -34,7 +34,7 @@ function loadDb() {
 }
 exports.loadDb = loadDb;
 function getCollection() {
-    const collection = db.getCollection(collectionName).find({ Genre: { $eq: 'Electronic' } });
+    const collection = db.getCollection(collectionName).find();
     return collection;
 }
 exports.getCollection = getCollection;

@@ -33,7 +33,7 @@ function createWindow() {
     });
 }
 function loadOptions() {
-    const config = config_service_1.loadConfig(electron_1.app);
+    const config = config_service_1.getConfig();
     const options = {
         title: 'Jahmin',
         x: 0,
@@ -82,7 +82,7 @@ function saveWindowBounds(window) {
     if (saveConfigDebounce)
         clearTimeout(saveConfigDebounce);
     saveConfigDebounce = setTimeout(() => {
-        config_service_1.saveConfig(electron_1.app, {
+        config_service_1.saveConfig({
             bounds: {
                 x: window.getPosition()[0],
                 y: window.getPosition()[1],

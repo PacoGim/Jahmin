@@ -3,10 +3,10 @@ import { ConfigType } from '../types/config.type'
 import fs from 'fs'
 import path from 'path'
 
-import { App } from 'electron'
+import deepmerge from 'deepmerge'
+import { appDataPath } from '..'
 
-const getConfigPathFile = (app:App) => {
-	const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
+const getConfigPathFile = () => {
 	const configFileName = 'config.json'
 	const configFilePath = path.join(appDataPath, configFileName)
 
@@ -17,14 +17,13 @@ const getConfigPathFile = (app:App) => {
 	return configFilePath
 }
 
-export function loadConfig(app: App): ConfigType {
+export function getConfig(): ConfigType {
 	let config: ConfigType
 
-	if (fs.existsSync(getConfigPathFile(app))) {
+	if (fs.existsSync(getConfigPathFile())) {
 		try {
-			config = JSON.parse(fs.readFileSync(getConfigPathFile(app), { encoding: 'utf-8' }))
+			config = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' }))
 		} catch (error) {
-			//TODO Alert Config File Error
 			config = getDefaultConfigFile()
 		}
 	} else {
@@ -34,16 +33,18 @@ export function loadConfig(app: App): ConfigType {
 	return config
 }
 
-export function saveConfig(app: App, newConfig: any) {
-	let config = loadConfig(app)
+export function saveConfig(newConfig: any) {
+	let config = getConfig()
 
-	config = Object.assign(config, newConfig)
+	config = deepmerge(config, newConfig)
 
-	fs.writeFileSync(getConfigPathFile(app), JSON.stringify(config,null,2))
+	fs.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2))
 }
 
 function getDefaultConfigFile() {
 	return {
-		bounds: undefined
+		order: {
+			grouping: ['Genre']
+		}
 	}
 }
