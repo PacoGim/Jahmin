@@ -1,7 +1,7 @@
-export function cutWord(word) {
+export function cutWord(word, maxLength) {
 	try {
-		if (word.length >= 20) {
-			return word.substr(0, 18) + '...'
+		if (word.length >= maxLength) {
+			return word.substr(0, maxLength - 1) + '...'
 		} else {
 			return word
 		}

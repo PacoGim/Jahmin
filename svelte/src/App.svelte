@@ -9,7 +9,7 @@
 	import Player from './includes/Player.svelte'
 	import SongList from './includes/SongList.svelte'
 	import Details from './includes/Details.svelte'
-	import Controller from './includes/Controller.svelte'
+	import Controller from './controller/Controller.svelte'
 
 	// const { ipcRenderer, shell } = require('electron')
 

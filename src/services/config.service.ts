@@ -44,7 +44,16 @@ export function saveConfig(newConfig: any) {
 function getDefaultConfigFile() {
 	return {
 		order: {
-			grouping: ['Genre']
+			grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
+			filtering: []
 		}
 	}
 }
+// function getDefaultConfigFile() {
+// 	return {
+// 		order: {
+// 			grouping: ['Genre'],
+// 			filtering: []
+// 		}
+// 	}
+// }

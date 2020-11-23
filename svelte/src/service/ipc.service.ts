@@ -15,3 +15,11 @@ export function getConfig() {
 		})
 	})
 }
+
+export function saveConfig(newConfig: object) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('save-config', newConfig).then((result) => {
+			resolve(result)
+		})
+	})
+}

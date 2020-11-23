@@ -5,7 +5,7 @@ export type ConfigType = {
 
 type OrderType = {
 	grouping: string[]
-	filtering?: string[]
+	filtering: string[]
 }
 
 type BoundsType = {
