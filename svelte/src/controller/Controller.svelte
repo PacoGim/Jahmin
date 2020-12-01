@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getConfig } from '../service/ipc.service'
-	import { valuesToFilter, valuesToGroup } from '../store/index.store'
+	import { getConfig, saveConfig } from '../service/ipc.service'
+	import { valuesToFilter, valuesToGroup, versioning } from '../store/index.store'
 
 	/*
 		index.store.ts -> Watch valuesToGroup and valuesToFilter changes from Order Components (Filtering)
@@ -17,28 +17,43 @@
 
 	onMount(() => {
 		loadConfig()
-		// TODO fetch config values to group/filter
 	})
 
 	$: {
+		// if first time running, saves the current filters to a variable to check later if it changed (in fn updateFilters).
+		$valuesToFilter
+		// console.log($valuesToFilter)
 		if (isFirstRun) {
-			previousFilter = $valuesToFilter
+			// console.log(1)
+			updatePreviousFilter()
 			isFirstRun = false
 		} else {
+			// console.log(2)
 			updateFilters()
 		}
 	}
 
+	function updatePreviousFilter() {
+		previousFilter = [...$valuesToFilter]
+	}
+
 	function updateFilters() {
+		// if the value changed save them to config file.
 		if (previousFilter.toString() !== $valuesToFilter.toString()) {
-			previousFilter = $valuesToFilter
-			saveConfig()
+			previousFilter = [...$valuesToFilter]
+			saveConfig({
+				order: {
+					filtering: $valuesToFilter
+				}
+			}).then((result) => {
+				if (result === true) {
+					$versioning = Date.now()
+				}
+			})
 		}
 	}
 
-	function saveConfig(){
-
-	}
+	// function saveConfig() {}
 
 	async function loadConfig() {
 		let config = await getConfig()

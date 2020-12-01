@@ -17,6 +17,7 @@ const getConfigPathFile = () => {
     return configFilePath;
 };
 function getConfig() {
+    var _a, _b, _c;
     let config;
     if (fs_1.default.existsSync(getConfigPathFile())) {
         try {
@@ -29,13 +30,22 @@ function getConfig() {
     else {
         config = getDefaultConfigFile();
     }
+    if (((_a = config === null || config === void 0 ? void 0 : config['order']) === null || _a === void 0 ? void 0 : _a['grouping']) === undefined || ((_c = (_b = config === null || config === void 0 ? void 0 : config['order']) === null || _b === void 0 ? void 0 : _b['grouping']) === null || _c === void 0 ? void 0 : _c.length) === 0) {
+        config['order']['grouping'] = ['Extension', 'Genre', 'AlbumArtist', 'Album'];
+    }
     return config;
 }
 exports.getConfig = getConfig;
 function saveConfig(newConfig) {
     let config = getConfig();
-    config = deepmerge_1.default(config, newConfig);
-    fs_1.default.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2));
+    config = deepmerge_1.default(config, newConfig, { arrayMerge: (destinationArray, sourceArray) => sourceArray });
+    try {
+        fs_1.default.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2));
+        return true;
+    }
+    catch (error) {
+        return false;
+    }
 }
 exports.saveConfig = saveConfig;
 function getDefaultConfigFile() {

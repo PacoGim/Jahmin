@@ -30,15 +30,24 @@ export function getConfig(): ConfigType {
 		config = getDefaultConfigFile()
 	}
 
+	if (config?.['order']?.['grouping'] === undefined || config?.['order']?.['grouping']?.length === 0) {
+		config['order']['grouping'] = ['Extension', 'Genre', 'AlbumArtist', 'Album']
+	}
+
 	return config
 }
 
 export function saveConfig(newConfig: any) {
 	let config = getConfig()
 
-	config = deepmerge(config, newConfig)
+	config = deepmerge(config, newConfig, { arrayMerge: (destinationArray: any[], sourceArray: any[]) => sourceArray })
 
-	fs.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2))
+	try {
+		fs.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2))
+		return true
+	} catch (error) {
+		return false
+	}
 }
 
 function getDefaultConfigFile() {

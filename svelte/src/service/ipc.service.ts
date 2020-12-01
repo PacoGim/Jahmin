@@ -1,8 +1,9 @@
 const { ipcRenderer } = require('electron')
 
-export function getOrder(index: number) {
+export function getOrder(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-order', index).then((result) => {
+			//TODO Gets called too many times
 			resolve(result)
 		})
 	})

@@ -17,11 +17,14 @@ function orderSongs(index, grouping, filtering) {
         }
         // If i === index means that it should be grouping since user selection does not matter now.
         if (i === index) {
-            // Grouping
+            // <<<<< Grouping >>>>>
             filteredArray.forEach((song) => {
                 // Group by i or index since they match it should be grouped.
                 // i === index -> 4 === 4 -> Group by Album Artist since it is the last grouping array element.
                 let valueToGroupBy = song[grouping[i]];
+                if (['', undefined, null, 'undefined', 'null'].includes(valueToGroupBy)) {
+                    valueToGroupBy = 'Unknown';
+                }
                 // Prevents data repetition / Grouping by logic.
                 if (!tempArray.includes(valueToGroupBy)) {
                     tempArray.push(valueToGroupBy);
@@ -29,12 +32,16 @@ function orderSongs(index, grouping, filtering) {
             });
         }
         else {
+            // <<<<< Filtering >>>>>
             let groupBy = grouping[i];
             let filterBy = filtering[i];
             filteredArray = filteredArray.filter((song) => {
                 // If one of the filters is not defined or null, add the songs the the list anyway.
-                if (filterBy === undefined || filterBy === null) {
-                    return true;
+                if (['Unknown', '', undefined, null, 'undefined', 'null'].includes(filterBy)) {
+                    // console.log(song['groupBy'])
+                    // return true
+                    // return song[groupBy] === undefined
+                    return ['Unknown', '', undefined, null, 'undefined', 'null'].includes(song[groupBy]);
                 }
                 else {
                     return song[groupBy] === filterBy;

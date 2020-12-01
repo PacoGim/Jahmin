@@ -725,6 +725,7 @@ var app = (function () {
     function getOrder(index) {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('get-order', index).then((result) => {
+                //TODO Gets called too many times
                 resolve(result);
             });
         });
@@ -732,6 +733,13 @@ var app = (function () {
     function getConfig() {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('get-config').then((result) => {
+                resolve(result);
+            });
+        });
+    }
+    function saveConfig(newConfig) {
+        return new Promise((resolve, reject) => {
+            ipcRenderer.invoke('save-config', newConfig).then((result) => {
                 resolve(result);
             });
         });
@@ -745,11 +753,11 @@ var app = (function () {
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[15] = list[i];
-    	child_ctx[0] = i;
+    	child_ctx[3] = i;
     	return child_ctx;
     }
 
-    // (50:0) {#if orderedSongs}
+    // (54:0) {#if orderedSongs}
     function create_if_block(ctx) {
     	let order;
     	let item;
@@ -760,7 +768,7 @@ var app = (function () {
     	let label;
     	let t1;
     	let t2;
-    	let t3_value = /*orderedSongs*/ ctx[2].length + "";
+    	let t3_value = /*orderedSongs*/ ctx[1].length + "";
     	let t3;
     	let t4;
     	let label_for_value;
@@ -770,9 +778,9 @@ var app = (function () {
     	let each_1_lookup = new Map();
     	let mounted;
     	let dispose;
-    	let each_value = /*orderedSongs*/ ctx[2];
+    	let each_value = /*orderedSongs*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[0];
+    	const get_key = ctx => /*item*/ ctx[15]["id"];
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -788,7 +796,7 @@ var app = (function () {
     			input = element("input");
     			t0 = space();
     			label = element("label");
-    			t1 = text(/*config*/ ctx[1]);
+    			t1 = text(/*group*/ ctx[0]);
     			t2 = text(" (");
     			t3 = text(t3_value);
     			t4 = text(")");
@@ -799,23 +807,23 @@ var app = (function () {
     			}
 
     			attr_dev(input, "type", "radio");
-    			attr_dev(input, "id", input_id_value = "all" + /*config*/ ctx[1]);
+    			attr_dev(input, "id", input_id_value = "all" + /*group*/ ctx[0]);
     			input.__value = input_value_value = null;
     			input.value = input.__value;
-    			/*$$binding_groups*/ ctx[6][0].push(input);
-    			add_location(input, file$2, 53, 3, 2135);
-    			attr_dev(label, "for", label_for_value = "all" + /*config*/ ctx[1]);
-    			add_location(label, file$2, 54, 3, 2214);
-    			attr_dev(item, "title", item_title_value = "All " + /*config*/ ctx[1]);
-    			add_location(item, file$2, 52, 2, 2104);
+    			/*$$binding_groups*/ ctx[5][0].push(input);
+    			add_location(input, file$2, 56, 3, 2091);
+    			attr_dev(label, "for", label_for_value = "all" + /*group*/ ctx[0]);
+    			add_location(label, file$2, 57, 3, 2169);
+    			attr_dev(item, "title", item_title_value = "All " + /*group*/ ctx[0]);
+    			add_location(item, file$2, 55, 2, 2061);
     			attr_dev(order, "class", "svelte-qh678t");
-    			add_location(order, file$2, 50, 1, 2003);
+    			add_location(order, file$2, 54, 1, 2051);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, order, anchor);
     			append_dev(order, item);
     			append_dev(item, input);
-    			input.checked = input.__value === /*selection*/ ctx[3];
+    			input.checked = input.__value === /*selection*/ ctx[2];
     			append_dev(item, t0);
     			append_dev(item, label);
     			append_dev(label, t1);
@@ -829,32 +837,32 @@ var app = (function () {
     			}
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[5]);
+    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[4]);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*config*/ 2 && input_id_value !== (input_id_value = "all" + /*config*/ ctx[1])) {
+    			if (dirty & /*group*/ 1 && input_id_value !== (input_id_value = "all" + /*group*/ ctx[0])) {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*selection*/ 8) {
-    				input.checked = input.__value === /*selection*/ ctx[3];
+    			if (dirty & /*selection*/ 4) {
+    				input.checked = input.__value === /*selection*/ ctx[2];
     			}
 
-    			if (dirty & /*config*/ 2) set_data_dev(t1, /*config*/ ctx[1]);
-    			if (dirty & /*orderedSongs*/ 4 && t3_value !== (t3_value = /*orderedSongs*/ ctx[2].length + "")) set_data_dev(t3, t3_value);
+    			if (dirty & /*group*/ 1) set_data_dev(t1, /*group*/ ctx[0]);
+    			if (dirty & /*orderedSongs*/ 2 && t3_value !== (t3_value = /*orderedSongs*/ ctx[1].length + "")) set_data_dev(t3, t3_value);
 
-    			if (dirty & /*config*/ 2 && label_for_value !== (label_for_value = "all" + /*config*/ ctx[1])) {
+    			if (dirty & /*group*/ 1 && label_for_value !== (label_for_value = "all" + /*group*/ ctx[0])) {
     				attr_dev(label, "for", label_for_value);
     			}
 
-    			if (dirty & /*config*/ 2 && item_title_value !== (item_title_value = "All " + /*config*/ ctx[1])) {
+    			if (dirty & /*group*/ 1 && item_title_value !== (item_title_value = "All " + /*group*/ ctx[0])) {
     				attr_dev(item, "title", item_title_value);
     			}
 
-    			if (dirty & /*orderedSongs, cutWord, selection*/ 12) {
-    				const each_value = /*orderedSongs*/ ctx[2];
+    			if (dirty & /*orderedSongs, cutWord, selection*/ 6) {
+    				const each_value = /*orderedSongs*/ ctx[1];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, order, destroy_block, create_each_block, null, get_each_context);
@@ -862,7 +870,7 @@ var app = (function () {
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(order);
-    			/*$$binding_groups*/ ctx[6][0].splice(/*$$binding_groups*/ ctx[6][0].indexOf(input), 1);
+    			/*$$binding_groups*/ ctx[5][0].splice(/*$$binding_groups*/ ctx[5][0].indexOf(input), 1);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d();
@@ -877,14 +885,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(50:0) {#if orderedSongs}",
+    		source: "(54:0) {#if orderedSongs}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (57:2) {#each orderedSongs as item, index (index)}
+    // (60:2) {#each orderedSongs as item, index (item['id'])}
     function create_each_block(key_1, ctx) {
     	let item;
     	let input;
@@ -892,7 +900,7 @@ var app = (function () {
     	let input_value_value;
     	let t0;
     	let label;
-    	let t1_value = cutWord(/*item*/ ctx[15], 20) + "";
+    	let t1_value = cutWord(/*item*/ ctx[15]["value"], 20) + "";
     	let t1;
     	let label_for_value;
     	let t2;
@@ -911,58 +919,58 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = space();
     			attr_dev(input, "type", "radio");
-    			attr_dev(input, "id", input_id_value = "" + (/*item*/ ctx[15] + /*index*/ ctx[0]));
-    			input.__value = input_value_value = /*item*/ ctx[15];
+    			attr_dev(input, "id", input_id_value = /*item*/ ctx[15]["id"]);
+    			input.__value = input_value_value = /*item*/ ctx[15]["value"];
     			input.value = input.__value;
-    			/*$$binding_groups*/ ctx[6][0].push(input);
-    			add_location(input, file$2, 58, 4, 2365);
-    			attr_dev(label, "for", label_for_value = "" + (/*item*/ ctx[15] + /*index*/ ctx[0]));
-    			add_location(label, file$2, 59, 4, 2447);
-    			attr_dev(item, "title", item_title_value = /*item*/ ctx[15]);
-    			add_location(item, file$2, 57, 3, 2341);
+    			/*$$binding_groups*/ ctx[5][0].push(input);
+    			add_location(input, file$2, 61, 4, 2332);
+    			attr_dev(label, "for", label_for_value = /*item*/ ctx[15]["id"]);
+    			add_location(label, file$2, 62, 4, 2420);
+    			attr_dev(item, "title", item_title_value = /*item*/ ctx[15]["value"]);
+    			add_location(item, file$2, 60, 3, 2299);
     			this.first = item;
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, item, anchor);
     			append_dev(item, input);
-    			input.checked = input.__value === /*selection*/ ctx[3];
+    			input.checked = input.__value === /*selection*/ ctx[2];
     			append_dev(item, t0);
     			append_dev(item, label);
     			append_dev(label, t1);
     			append_dev(item, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "change", /*input_change_handler_1*/ ctx[7]);
+    				dispose = listen_dev(input, "change", /*input_change_handler_1*/ ctx[6]);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*orderedSongs*/ 4 && input_id_value !== (input_id_value = "" + (/*item*/ ctx[15] + /*index*/ ctx[0]))) {
+    			if (dirty & /*orderedSongs*/ 2 && input_id_value !== (input_id_value = /*item*/ ctx[15]["id"])) {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*orderedSongs*/ 4 && input_value_value !== (input_value_value = /*item*/ ctx[15])) {
+    			if (dirty & /*orderedSongs*/ 2 && input_value_value !== (input_value_value = /*item*/ ctx[15]["value"])) {
     				prop_dev(input, "__value", input_value_value);
     				input.value = input.__value;
     			}
 
-    			if (dirty & /*selection*/ 8) {
-    				input.checked = input.__value === /*selection*/ ctx[3];
+    			if (dirty & /*selection*/ 4) {
+    				input.checked = input.__value === /*selection*/ ctx[2];
     			}
 
-    			if (dirty & /*orderedSongs*/ 4 && t1_value !== (t1_value = cutWord(/*item*/ ctx[15], 20) + "")) set_data_dev(t1, t1_value);
+    			if (dirty & /*orderedSongs*/ 2 && t1_value !== (t1_value = cutWord(/*item*/ ctx[15]["value"], 20) + "")) set_data_dev(t1, t1_value);
 
-    			if (dirty & /*orderedSongs*/ 4 && label_for_value !== (label_for_value = "" + (/*item*/ ctx[15] + /*index*/ ctx[0]))) {
+    			if (dirty & /*orderedSongs*/ 2 && label_for_value !== (label_for_value = /*item*/ ctx[15]["id"])) {
     				attr_dev(label, "for", label_for_value);
     			}
 
-    			if (dirty & /*orderedSongs*/ 4 && item_title_value !== (item_title_value = /*item*/ ctx[15])) {
+    			if (dirty & /*orderedSongs*/ 2 && item_title_value !== (item_title_value = /*item*/ ctx[15]["value"])) {
     				attr_dev(item, "title", item_title_value);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(item);
-    			/*$$binding_groups*/ ctx[6][0].splice(/*$$binding_groups*/ ctx[6][0].indexOf(input), 1);
+    			/*$$binding_groups*/ ctx[5][0].splice(/*$$binding_groups*/ ctx[5][0].indexOf(input), 1);
     			mounted = false;
     			dispose();
     		}
@@ -972,7 +980,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(57:2) {#each orderedSongs as item, index (index)}",
+    		source: "(60:2) {#each orderedSongs as item, index (item['id'])}",
     		ctx
     	});
 
@@ -981,7 +989,7 @@ var app = (function () {
 
     function create_fragment$2(ctx) {
     	let if_block_anchor;
-    	let if_block = /*orderedSongs*/ ctx[2] && create_if_block(ctx);
+    	let if_block = /*orderedSongs*/ ctx[1] && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -996,7 +1004,7 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*orderedSongs*/ ctx[2]) {
+    			if (/*orderedSongs*/ ctx[1]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -1080,15 +1088,18 @@ var app = (function () {
     	let { index } = $$props;
     	let { group } = $$props;
     	let config;
-    	let orderedSongs = undefined;
+    	let orderedSongs = [];
     	let selection = undefined;
     	let isSelectionDirty = false;
 
     	function setFilterInStore() {
     		for (let i = 0; i < $valuesToGroup.length; i++) {
+    			// Sets undefined or empty string to null to get a full array.
     			if (i === index) {
     				set_store_value(valuesToFilter, $valuesToFilter[i] = selection, $valuesToFilter);
-    			} else if ($valuesToFilter[i] === null || $valuesToFilter[i] === undefined) {
+    			} else if (["Unknown", "", undefined, null, "undefined", "null"].includes($valuesToFilter[i])) {
+    				set_store_value(valuesToFilter, $valuesToFilter[i] = null, $valuesToFilter);
+    			} else if (i > index) {
     				set_store_value(valuesToFilter, $valuesToFilter[i] = null, $valuesToFilter);
     			}
     		}
@@ -1096,21 +1107,13 @@ var app = (function () {
 
     	function fetchSongs() {
     		return __awaiter(this, void 0, void 0, function* () {
-    			$$invalidate(2, orderedSongs = yield getOrder(index));
+    			$$invalidate(1, orderedSongs = yield getOrder(index));
     		});
     	}
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
-    		var _a, _b;
-    		$$invalidate(1, config = yield getConfig());
-
-    		$$invalidate(1, config = (_b = (_a = config === null || config === void 0
-    		? void 0
-    		: config["order"]) === null || _a === void 0
-    		? void 0
-    		: _a["grouping"]) === null || _b === void 0
-    		? void 0
-    		: _b[index]);
+    		config = yield getConfig();
+    		$$invalidate(2, selection = config["order"]["filtering"][index]);
     	}));
 
     	const writable_props = ["index", "group"];
@@ -1123,17 +1126,17 @@ var app = (function () {
 
     	function input_change_handler() {
     		selection = this.__value;
-    		$$invalidate(3, selection);
+    		$$invalidate(2, selection);
     	}
 
     	function input_change_handler_1() {
     		selection = this.__value;
-    		$$invalidate(3, selection);
+    		$$invalidate(2, selection);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("index" in $$props) $$invalidate(0, index = $$props.index);
-    		if ("group" in $$props) $$invalidate(4, group = $$props.group);
+    		if ("index" in $$props) $$invalidate(3, index = $$props.index);
+    		if ("group" in $$props) $$invalidate(0, group = $$props.group);
     	};
 
     	$$self.$capture_state = () => ({
@@ -1160,11 +1163,11 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ("__awaiter" in $$props) __awaiter = $$props.__awaiter;
-    		if ("index" in $$props) $$invalidate(0, index = $$props.index);
-    		if ("group" in $$props) $$invalidate(4, group = $$props.group);
-    		if ("config" in $$props) $$invalidate(1, config = $$props.config);
-    		if ("orderedSongs" in $$props) $$invalidate(2, orderedSongs = $$props.orderedSongs);
-    		if ("selection" in $$props) $$invalidate(3, selection = $$props.selection);
+    		if ("index" in $$props) $$invalidate(3, index = $$props.index);
+    		if ("group" in $$props) $$invalidate(0, group = $$props.group);
+    		if ("config" in $$props) config = $$props.config;
+    		if ("orderedSongs" in $$props) $$invalidate(1, orderedSongs = $$props.orderedSongs);
+    		if ("selection" in $$props) $$invalidate(2, selection = $$props.selection);
     		if ("isSelectionDirty" in $$props) $$invalidate(8, isSelectionDirty = $$props.isSelectionDirty);
     	};
 
@@ -1173,8 +1176,9 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*selection, isSelectionDirty*/ 264) {
+    		if ($$self.$$.dirty & /*selection, group, isSelectionDirty*/ 261) {
     			 {
+    				console.log(group, " ", selection);
 
     				isSelectionDirty === true
     				? setFilterInStore()
@@ -1191,11 +1195,10 @@ var app = (function () {
     	};
 
     	return [
-    		index,
-    		config,
+    		group,
     		orderedSongs,
     		selection,
-    		group,
+    		index,
     		input_change_handler,
     		$$binding_groups,
     		input_change_handler_1
@@ -1205,7 +1208,7 @@ var app = (function () {
     class Order extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { index: 0, group: 4 });
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { index: 3, group: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -1217,11 +1220,11 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*index*/ ctx[0] === undefined && !("index" in props)) {
+    		if (/*index*/ ctx[3] === undefined && !("index" in props)) {
     			console_1.warn("<Order> was created without expected prop 'index'");
     		}
 
-    		if (/*group*/ ctx[4] === undefined && !("group" in props)) {
+    		if (/*group*/ ctx[0] === undefined && !("group" in props)) {
     			console_1.warn("<Order> was created without expected prop 'group'");
     		}
     	}
@@ -1660,17 +1663,16 @@ var app = (function () {
     	return block;
     }
 
-    function saveConfig() {
-    	
-    }
-
     function instance$7($$self, $$props, $$invalidate) {
     	let $valuesToFilter;
+    	let $versioning;
     	let $valuesToGroup;
     	validate_store(valuesToFilter, "valuesToFilter");
     	component_subscribe($$self, valuesToFilter, $$value => $$invalidate(2, $valuesToFilter = $$value));
+    	validate_store(versioning, "versioning");
+    	component_subscribe($$self, versioning, $$value => $$invalidate(3, $versioning = $$value));
     	validate_store(valuesToGroup, "valuesToGroup");
-    	component_subscribe($$self, valuesToGroup, $$value => $$invalidate(3, $valuesToGroup = $$value));
+    	component_subscribe($$self, valuesToGroup, $$value => $$invalidate(4, $valuesToGroup = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Controller", slots, []);
 
@@ -1724,14 +1726,26 @@ var app = (function () {
 
     	onMount(() => {
     		loadConfig();
-    	}); // TODO fetch config values to group/filter
+    	});
+
+    	function updatePreviousFilter() {
+    		previousFilter = [...$valuesToFilter];
+    	}
 
     	function updateFilters() {
+    		// if the value changed save them to config file.
     		if (previousFilter.toString() !== $valuesToFilter.toString()) {
-    			previousFilter = $valuesToFilter;
+    			previousFilter = [...$valuesToFilter];
+
+    			saveConfig({ order: { filtering: $valuesToFilter } }).then(result => {
+    				if (result === true) {
+    					set_store_value(versioning, $versioning = Date.now(), $versioning);
+    				}
+    			});
     		}
     	}
 
+    	// function saveConfig() {}
     	function loadConfig() {
     		var _a, _b;
 
@@ -1766,14 +1780,17 @@ var app = (function () {
     		__awaiter,
     		onMount,
     		getConfig,
+    		saveConfig,
     		valuesToFilter,
     		valuesToGroup,
+    		versioning,
     		previousFilter,
     		isFirstRun,
+    		updatePreviousFilter,
     		updateFilters,
-    		saveConfig,
     		loadConfig,
     		$valuesToFilter,
+    		$versioning,
     		$valuesToGroup
     	});
 
@@ -1788,12 +1805,17 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*isFirstRun, $valuesToFilter*/ 6) {
+    		if ($$self.$$.dirty & /*$valuesToFilter, isFirstRun*/ 6) {
     			 {
+
+    				// console.log($valuesToFilter)
     				if (isFirstRun) {
-    					previousFilter = $valuesToFilter;
+    					// console.log(1)
+    					updatePreviousFilter();
+
     					$$invalidate(1, isFirstRun = false);
     				} else {
+    					// console.log(2)
     					updateFilters();
     				}
     			}

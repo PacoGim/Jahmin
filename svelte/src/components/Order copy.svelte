@@ -13,18 +13,14 @@
 
 	$: {
 		selection
-		console.log(group, ' ', selection)
 		isSelectionDirty === true ? setFilterInStore() : (isSelectionDirty = true)
 	}
 
 	function setFilterInStore() {
 		for (let i = 0; i < $valuesToGroup.length; i++) {
-			// Sets undefined or empty string to null to get a full array.
 			if (i === index) {
 				$valuesToFilter[i] = selection
-			} else if (['Unknown', '', undefined, null, 'undefined', 'null'].includes($valuesToFilter[i])) {
-				$valuesToFilter[i] = null
-			} else if (i > index) {
+			} else if ($valuesToFilter[i] === undefined || $valuesToFilter[i] === '') {
 				$valuesToFilter[i] = null
 			}
 		}
@@ -41,20 +37,22 @@
 
 	onMount(async () => {
 		config = await getConfig()
-		selection = config['order']['filtering'][index]
+		config = config?.['order']?.['grouping']?.[index]
 	})
+
+
 </script>
 
 {#if orderedSongs}
 	<order>
-		<item title="All {group}">
-			<input type="radio" id="all{group}" bind:group={selection} value={null} />
-			<label for="all{group}"> {group} ({orderedSongs.length}) </label>
+		<item title="All {config}">
+			<input type="radio" id="all{config}" bind:group={selection} value={null} />
+			<label for="all{config}"> {config} ({orderedSongs.length}) </label>
 		</item>
-		{#each orderedSongs as item, index (item['id'])}
-			<item title={item['value']}>
-				<input type="radio" id={item['id']} bind:group={selection} value={item['value']} />
-				<label for={item['id']}> {cutWord(item['value'], 20)} </label>
+		{#each orderedSongs as item, index (index)}
+			<item title={item}>
+				<input type="radio" id="{item}{index}" bind:group={selection} value={item} />
+				<label for="{item}{index}"> {cutWord(item, 20)} </label>
 			</item>
 		{/each}
 	</order>
