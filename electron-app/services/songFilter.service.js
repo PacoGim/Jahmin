@@ -35,17 +35,30 @@ function orderSongs(index, grouping, filtering) {
             // <<<<< Filtering >>>>>
             let groupBy = grouping[i];
             let filterBy = filtering[i];
+            console.log(index, groupBy, filterBy);
             filteredArray = filteredArray.filter((song) => {
                 // If one of the filters is not defined or null, add the songs the the list anyway.
-                if (['Unknown', '', undefined, null, 'undefined', 'null'].includes(filterBy)) {
-                    // console.log(song['groupBy'])
-                    // return true
-                    // return song[groupBy] === undefined
-                    return ['Unknown', '', undefined, null, 'undefined', 'null'].includes(song[groupBy]);
+                if (['null', null].includes(filterBy)) {
+                    return true;
                 }
-                else {
+                else if (['Unknown'].includes(filterBy)) {
+                    return ['Unknown', '', undefined, 'undefined'].includes(song[groupBy]);
+                }
+                else if (song[groupBy]) {
                     return song[groupBy] === filterBy;
                 }
+                else {
+                    return true;
+                }
+                // if (['null', null].includes(filterBy)) {
+                // 	return true
+                // } else if (['Unknown', '', undefined, 'undefined'].includes(filterBy)) {
+                // 	// console.log(song['groupBy'])
+                // 	// return song[groupBy] === undefined
+                // 	return ['Unknown', '', undefined, 'undefined'].includes(song[groupBy])
+                // } else {
+                // 	return song[groupBy] === filterBy
+                // }
             });
         }
     }

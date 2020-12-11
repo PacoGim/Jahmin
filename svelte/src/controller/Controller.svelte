@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { getConfig, saveConfig } from '../service/ipc.service'
-	import { valuesToFilter, valuesToGroup, versioning } from '../store/index.store'
+	import { valuesToFilter, isValuesToFilterChanged, valuesToGroup, versioning, storeConfig } from '../store/index.store'
 
 	/*
 		index.store.ts -> Watch valuesToGroup and valuesToFilter changes from Order Components (Filtering)
@@ -12,7 +12,7 @@
 		When Versioning changes -> Order re-fetches the songs.
 	*/
 
-	let previousFilter = undefined
+	let previousFilter = [...$valuesToFilter]
 	let isFirstRun = true
 
 	onMount(() => {
@@ -21,33 +21,33 @@
 
 	$: {
 		// if first time running, saves the current filters to a variable to check later if it changed (in fn updateFilters).
-		$valuesToFilter
-		// console.log($valuesToFilter)
-		if (isFirstRun) {
-			// console.log(1)
-			updatePreviousFilter()
-			isFirstRun = false
-		} else {
-			// console.log(2)
+		if ($isValuesToFilterChanged === true) {
 			updateFilters()
+			$isValuesToFilterChanged = false
+		} else {
+			setPreviousFilters()
 		}
 	}
 
-	function updatePreviousFilter() {
+	function setPreviousFilters() {
 		previousFilter = [...$valuesToFilter]
 	}
 
 	function updateFilters() {
+		console.log('Updating Filters')
+
 		// if the value changed save them to config file.
 		if (previousFilter.toString() !== $valuesToFilter.toString()) {
+			console.log('Saving Filters')
 			previousFilter = [...$valuesToFilter]
 			saveConfig({
 				order: {
 					filtering: $valuesToFilter
 				}
-			}).then((result) => {
-				if (result === true) {
+			}).then((newConfig) => {
+				if (newConfig) {
 					$versioning = Date.now()
+					$storeConfig = newConfig
 				}
 			})
 		}
@@ -58,12 +58,15 @@
 	async function loadConfig() {
 		let config = await getConfig()
 
+		$storeConfig = { ...config }
+
 		if (config?.['order']?.['grouping']) {
 			$valuesToGroup = config['order']['grouping']
 		}
 
-		if (config?.['order']?.['filtering']) {
-			$valuesToFilter = config['order']['filtering']
-		}
+		// Loads the filtering from the config file.
+		// if (config?.['order']?.['filtering']) {
+		// 	$valuesToFilter = config['order']['filtering']
+		// }
 	}
 </script>

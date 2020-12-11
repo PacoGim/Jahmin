@@ -2,28 +2,28 @@ dependencies:
   '@types/lokijs': 1.5.3
   deepmerge: 4.2.2
   easydropdown: 4.2.0
-  exiftool-vendored: 12.2.0
+  exiftool-vendored: 13.0.0
   json-beautify: 1.1.1
-  jsonfile: 6.0.1
+  jsonfile: 6.1.0
   lokijs: 1.5.11
   lowdb: 1.0.0
-  music-metadata: 7.5.0
-  nanoid: 3.1.19
+  music-metadata: 7.5.1
+  nanoid: 3.1.20
   string-hash: 1.1.3
 devDependencies:
   '@types/jsonfile': 6.0.0
   '@types/nanoid': 2.1.0
-  '@types/node': 14.11.5
+  '@types/node': 14.14.12
   '@types/string-hash': 1.1.1
   concurrently: 5.3.0
-  electron: 10.1.2
+  electron: 11.0.4
   electron-window-state: 5.0.3
-  typescript: 4.0.2
+  typescript: 4.1.2
 lockfileVersion: 5.2
 packages:
   /@electron/get/1.12.2:
     dependencies:
-      debug: 4.1.1
+      debug: 4.3.1
       env-paths: 2.2.0
       fs-extra: 8.1.0
       got: 9.6.0
@@ -76,24 +76,24 @@ packages:
     dev: true
     resolution:
       integrity: sha512-xdkn/oRTA0GSNPLIKZgHWqDTWZsVrieKomxJBOQUK9YDD+zfSgmwD5t4WJYra5S7XyhTw7tfvwznW+pFexaepQ==
-  /@types/node/12.12.61:
+  /@types/node/12.19.8:
     dev: true
     resolution:
-      integrity: sha512-+/KPk6uV9qGfVX0y2uUj3y8O0Z6KZWUy3XTS0uQGYYF+iXGtepm9GPETdcRq+hGmErkLOr5QJDX8vuymkwu4sA==
+      integrity: sha512-D4k2kNi0URNBxIRCb1khTnkWNHv8KSL1owPmS/K5e5t8B2GzMReY7AsJIY1BnP5KdlgC4rj9jk2IkDMasIE7xg==
   /@types/node/14.11.2:
     dev: true
     resolution:
       integrity: sha512-jiE3QIxJ8JLNcb1Ps6rDbysDhN4xa8DJJvuC9prr6w+1tIh+QAbYyNF3tyiZNLDBIuBCf4KEcV2UvQm/V60xfA==
-  /@types/node/14.11.5:
-    dev: true
+  /@types/node/14.14.12:
     resolution:
-      integrity: sha512-jVFzDV6NTbrLMxm4xDSIW/gKnk8rQLF9wAzLWIOg+5nU6ACrIMndeBdXci0FGtqJbP9tQvm6V39eshc96TO2wQ==
+      integrity: sha512-ASH8OPHMNlkdjrEdmoILmzFfsJICvhBsFfAum4aKZ/9U4B6M6tTmTPh+f3ttWdD74CEGV5XvXWkbyfSdXaTd7g==
   /@types/node/14.14.7:
+    dev: true
     resolution:
       integrity: sha512-Zw1vhUSQZYw+7u5dAwNbIA9TuTotpzY/OF7sJM9FqPOF3SPjKnxrjoTktXDZgUjybf4cWVBP7O8wvKdSaGHweg==
   /@types/readable-stream/2.3.9:
     dependencies:
-      '@types/node': 14.14.7
+      '@types/node': 14.14.12
       safe-buffer: 5.2.1
     dev: false
     resolution:
@@ -116,17 +116,17 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==
-  /batch-cluster/5.11.2:
+  /batch-cluster/6.0.0:
     dev: false
     engines:
       node: '>=10.0.0'
     resolution:
-      integrity: sha512-+9ZL6DKnUS75i1aDH8ltCa4q4P5oHo7LYZkKnH7BBbERPqkTxt2lCtkLHo/p37yv2SSr5BVNABnfRrtgq0fv9g==
-  /boolean/3.0.1:
+      integrity: sha512-MzCUEMvgCk2ZPo6GdO4nX9aCHbBBmhwNws1KsHgqYbSQ922NAZiRbc3XhbciIe4MidRpDtX2CgXKQvjRA+4L1Q==
+  /boolean/3.0.2:
     dev: true
     optional: true
     resolution:
-      integrity: sha512-HRZPIjPcbwAVQvOTxR4YE3o8Xs98NqbbL1iEZDCz7CL8ql0Lt5iOyJFxfnAB0oFs8Oh02F/lLlg30Mexv46LjA==
+      integrity: sha512-RwywHlpCRc3/Wh81MiCKun4ydaIFyW5Ea6JbL6sRCVx5q5irDw7pMXBUFYF/jArQ6YrG36q0kpovc9P/Kd3I4g==
   /buffer-crc32/0.2.13:
     dev: true
     resolution:
@@ -219,7 +219,7 @@ packages:
       integrity: sha512-8MhqOB6PWlBfA2vJ8a0bSFKATOdWlHiQlk11IfmQBPaHVP8oP2gsh2MObE6UR3hqDHqvaIvLTyceNW6obVuFHQ==
   /config-chain/1.1.12:
     dependencies:
-      ini: 1.3.5
+      ini: 1.3.7
       proto-list: 1.2.4
     dev: true
     optional: true
@@ -231,12 +231,12 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
-  /core-js/3.6.5:
+  /core-js/3.8.1:
     dev: true
     optional: true
     requiresBuild: true
     resolution:
-      integrity: sha512-vZVEEwZoIsI+vPEuoF9Iqf5H7/M3eeQqWlQnYa8FSKKePuYTf5MWnxb5SDAzCa60b3JBRS5g9b+Dq7b1y/RCrA==
+      integrity: sha512-9Id2xHY1W7m8hCl8NkhQn5CufmF/WuR30BTRewvCXc1aZd3kMECwNZ69ndLbekKfakw9Rf2Xyc+QR6E7Gg+obg==
   /core-util-is/1.0.2:
     dev: true
     resolution:
@@ -257,16 +257,9 @@ packages:
     dev: true
     resolution:
       integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
-  /debug/4.1.1:
+  /debug/4.3.1:
     dependencies:
       ms: 2.1.2
-    dev: true
-    resolution:
-      integrity: sha512-pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==
-  /debug/4.2.0:
-    dependencies:
-      ms: 2.1.2
-    dev: false
     engines:
       node: '>=6.0'
     peerDependencies:
@@ -275,7 +268,7 @@ packages:
       supports-color:
         optional: true
     resolution:
-      integrity: sha512-IX2ncY78vDTjZMFUdmsvIRFY2Cf4FnD0wRs+nQwJU8Lu99/tPFdb0VybiiMTPe3I6rQmwsqQqRBvxU+bZ/I8sg==
+      integrity: sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==
   /decamelize/1.2.0:
     dev: true
     engines:
@@ -334,10 +327,10 @@ packages:
       node: '>=8.0.0'
     resolution:
       integrity: sha512-1mNTwCfkolXl3kMf50yW3vE2lZj0y92P/HYWFBrb+v2S/pCka5mdwN3cagKm458A7NjndSwijynXgcLWRodsVg==
-  /electron/10.1.2:
+  /electron/11.0.4:
     dependencies:
       '@electron/get': 1.12.2
-      '@types/node': 12.12.61
+      '@types/node': 12.19.8
       extract-zip: 1.7.0
     dev: true
     engines:
@@ -345,7 +338,7 @@ packages:
     hasBin: true
     requiresBuild: true
     resolution:
-      integrity: sha512-SvN8DcKCmPZ0UcQSNAJBfaUu+LGACqtRhUn1rW0UBLHgdbbDM76L0GU5/XGQEllH5pu5bwlCZwax3srzIl+Aeg==
+      integrity: sha512-ipfQ28Km52iuDSe9VK0G5uuyxi8qy8szg+01kQTRXZFCLlpgsgU+vQxWkld2tkhXWdu+H3dmgYHvWtoijOvhjw==
   /emoji-regex/7.0.3:
     dev: true
     resolution:
@@ -393,31 +386,31 @@ packages:
     optional: true
     resolution:
       integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
-  /exiftool-vendored.exe/12.6.0:
+  /exiftool-vendored.exe/12.12.0:
     dev: false
     optional: true
     os:
       - win32
     resolution:
-      integrity: sha512-gJSjt1YyVU5B1WfuP7TVv7rGM3MnM0V5zw+Q7mM3zzvKl4WAmkQaPPkRGDoRZUhFqK8bUz2WbcniZOgw5LGcnA==
-  /exiftool-vendored.pl/12.6.0:
+      integrity: sha512-XdY82N8K4LOe3TLI0Mg3MA1/gve3AevO5XjJpFwE2PSki72gUnsZwriI+0J8gaAY7L2O//43dtrZArC5mN9O7A==
+  /exiftool-vendored.pl/12.12.0:
     dev: false
     optional: true
     os:
       - '!win32'
     resolution:
-      integrity: sha512-XeALcaaPKQWhEYiUik3KmhBLFKYNd44OWZLi7x8lvys5VH1a5ZpSNhErp+teeaPs0PkPWCImieElaXLIo9DG6g==
-  /exiftool-vendored/12.2.0:
+      integrity: sha512-C9EJauh1aoK5DudZcP79BSjr4YyskHn9r0T3BPkgCGT6MxZTzJTxMsS2T09rhloyf4dWlAZbwGg7Y8re7RbEZA==
+  /exiftool-vendored/13.0.0:
     dependencies:
-      batch-cluster: 5.11.2
+      batch-cluster: 6.0.0
       luxon: 1.25.0
       tz-lookup: 6.1.25
     dev: false
     optionalDependencies:
-      exiftool-vendored.exe: 12.6.0
-      exiftool-vendored.pl: 12.6.0
+      exiftool-vendored.exe: 12.12.0
+      exiftool-vendored.pl: 12.12.0
     resolution:
-      integrity: sha512-1YKbJf1Ttm3TqcRlJQrSUgQGOR0kKhyIpUnD+dFppoinl0E0KHandBKqEtLirwFVOtaUnOjjx9ywRGOoipyumA==
+      integrity: sha512-JL7+JdyGRmJRB25w4Ij0jIaW0bvBML8QrOnmdzbhdq2A+swi12ZPQsw8A4TrPPUyPG2+jJkWaKZX8Qc0BUF7Zw==
   /extract-zip/1.7.0:
     dependencies:
       concat-stream: 1.6.2
@@ -487,12 +480,12 @@ packages:
       integrity: sha512-nBF+F1rAZVCu/p7rjzgA+Yb4lfYXrpl7a6VmJrU8wF9I1CKvP/QwPNZHnOlwbTkY6dvtFIzFMSyQXbLoTQPRpA==
   /global-agent/2.1.12:
     dependencies:
-      boolean: 3.0.1
-      core-js: 3.6.5
+      boolean: 3.0.2
+      core-js: 3.8.1
       es6-error: 4.1.1
       matcher: 3.0.0
       roarr: 2.15.4
-      semver: 7.3.2
+      semver: 7.3.4
       serialize-error: 7.0.1
     dev: true
     engines:
@@ -567,11 +560,11 @@ packages:
   /inherits/2.0.4:
     resolution:
       integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
-  /ini/1.3.5:
+  /ini/1.3.7:
     dev: true
     optional: true
     resolution:
-      integrity: sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+      integrity: sha512-iKpRpXP+CrP2jyrxvg1kMUpXDyRUFDWurxbnVT1vQPx+Wz9uCYsMIqYuSBLV+PAaZG/d7kRLKRFc9oDMsH+mFQ==
   /is-arrayish/0.2.1:
     dev: true
     resolution:
@@ -618,14 +611,14 @@ packages:
       graceful-fs: 4.2.4
     resolution:
       integrity: sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=
-  /jsonfile/6.0.1:
+  /jsonfile/6.1.0:
     dependencies:
-      universalify: 1.0.0
+      universalify: 2.0.0
     dev: false
     optionalDependencies:
       graceful-fs: 4.2.4
     resolution:
-      integrity: sha512-jR2b5v7d2vIOust+w3wtFKZIfpC2pnRmFAhAC/BuweZFQR8qZzxH1OyrQ10HmdVYiXWkYUqPVsz91cG7EL2FBg==
+      integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==
   /keyv/3.1.0:
     dependencies:
       json-buffer: 3.0.0
@@ -672,6 +665,15 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==
+  /lru-cache/6.0.0:
+    dependencies:
+      yallist: 4.0.0
+    dev: true
+    engines:
+      node: '>=10'
+    optional: true
+    resolution:
+      integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   /luxon/1.25.0:
     dev: false
     resolution:
@@ -715,10 +717,10 @@ packages:
   /ms/2.1.2:
     resolution:
       integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
-  /music-metadata/7.5.0:
+  /music-metadata/7.5.1:
     dependencies:
       content-type: 1.0.4
-      debug: 4.2.0
+      debug: 4.3.1
       file-type: 16.0.1
       media-typer: 1.1.0
       strtok3: 6.0.4
@@ -727,14 +729,14 @@ packages:
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-PLem0psHyfYfDuZ3ir7EMXsOtkJsCgQNG0e9wvjgYeeAG2WPpwSZkPaTmuJUUIX7hxojj8VhG+iwuz/f+BpXgQ==
-  /nanoid/3.1.19:
+      integrity: sha512-rkYf+LmlAaKMHSrXxxUbj53jQsCER+5MhoiqFDvsJ2aQ3jOyNbH0HqUoSc9ipYdSBCx27hAXaA/VCUfM+J8v/g==
+  /nanoid/3.1.20:
     dev: false
     engines:
       node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1
     hasBin: true
     resolution:
-      integrity: sha512-giCapaolEGFzITf00P2rSIjWoY3aWS3bb7AzjnfFJH4EOaAPLtyUrr3C5nQ//x4v1wTcU1JgtBpOKPOqqHrakg==
+      integrity: sha512-a1cQNyczgKbLX9jwbS/+d7W8fX/RfgYR7lVWwWOGIPNgK2m0MWvrGF6/m4kk6U3QcFMnZf3RIhL0v2Jgh/0Uxw==
   /normalize-package-data/2.5.0:
     dependencies:
       hosted-git-info: 2.8.8
@@ -928,7 +930,7 @@ packages:
       integrity: sha1-kYcg7ztjHFZCvgaPFa3lpG9Loec=
   /roarr/2.15.4:
     dependencies:
-      boolean: 3.0.1
+      boolean: 3.0.2
       detect-node: 2.0.4
       globalthis: 1.0.1
       json-stringify-safe: 5.0.1
@@ -972,14 +974,16 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
-  /semver/7.3.2:
+  /semver/7.3.4:
+    dependencies:
+      lru-cache: 6.0.0
     dev: true
     engines:
       node: '>=10'
     hasBin: true
     optional: true
     resolution:
-      integrity: sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
+      integrity: sha512-tCfb2WLjqFAtXn4KEdxIhalnRtoKFN7nAwj0B3ZXCbQloV2tq5eDbcTmT68JJD3nRJq24/XgxtQKFIpQdtvmVw==
   /serialize-error/7.0.1:
     dependencies:
       type-fest: 0.13.1
@@ -1076,7 +1080,7 @@ packages:
       integrity: sha512-rqWMKwsbN9APU47bQTMEYTPcwdpKDtmf1jVhHzNW2cL1WqAxaM9iBb9t5P2fj+RV2YsErUWgQzHD5JwV0uCTEQ==
   /sumchecker/3.0.1:
     dependencies:
-      debug: 4.1.1
+      debug: 4.3.1
     dev: true
     engines:
       node: '>= 8.0'
@@ -1152,13 +1156,13 @@ packages:
     dev: true
     resolution:
       integrity: sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
-  /typescript/4.0.2:
+  /typescript/4.1.2:
     dev: true
     engines:
       node: '>=4.2.0'
     hasBin: true
     resolution:
-      integrity: sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
+      integrity: sha512-thGloWsGH3SOxv1SoY7QojKi0tc+8FnOmiarEGMbd/lar7QOEd3hvlx3Fp5y6FlDUGl9L+pd4n2e+oToGMmhRQ==
   /tz-lookup/6.1.25:
     dev: false
     resolution:
@@ -1169,12 +1173,12 @@ packages:
       node: '>= 4.0.0'
     resolution:
       integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==
-  /universalify/1.0.0:
+  /universalify/2.0.0:
     dev: false
     engines:
       node: '>= 10.0.0'
     resolution:
-      integrity: sha512-rb6X1W158d7pRQBg5gkR8uPaSfiids68LTJQYOtEUhoJUWBdaQHsuT/EUduxXYxcrt4r5PJ4fuHW1MHT6p0qug==
+      integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==
   /url-parse-lax/3.0.0:
     dependencies:
       prepend-http: 2.0.0
@@ -1219,6 +1223,11 @@ packages:
     dev: true
     resolution:
       integrity: sha512-r9S/ZyXu/Xu9q1tYlpsLIsa3EeLXXk0VwlxqTcFRfg9EhMW+17kbt9G0NrgCmhGb5vT2hyhJZLfDGx+7+5Uj/w==
+  /yallist/4.0.0:
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
   /yargs-parser/13.1.2:
     dependencies:
       camelcase: 5.3.1
@@ -1252,19 +1261,19 @@ specifiers:
   '@types/jsonfile': ^6.0.0
   '@types/lokijs': ^1.5.3
   '@types/nanoid': ^2.1.0
-  '@types/node': ^14.11.5
+  '@types/node': ^14.14.12
   '@types/string-hash': ^1.1.1
   concurrently: ^5.3.0
   deepmerge: ^4.2.2
   easydropdown: ^4.2.0
-  electron: ^10.1.2
+  electron: ^11.0.4
   electron-window-state: ^5.0.3
-  exiftool-vendored: ^12.2.0
+  exiftool-vendored: ^13.0.0
   json-beautify: ^1.1.1
-  jsonfile: ^6.0.1
+  jsonfile: ^6.1.0
   lokijs: ^1.5.11
   lowdb: ^1.0.0
-  music-metadata: ^7.5.0
-  nanoid: ^3.1.19
+  music-metadata: ^7.5.1
+  nanoid: ^3.1.20
   string-hash: ^1.1.3
-  typescript: ^4.0.2
+  typescript: ^4.1.2

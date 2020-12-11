@@ -37,11 +37,12 @@ function getConfig() {
 }
 exports.getConfig = getConfig;
 function saveConfig(newConfig) {
+    // console.log(newConfig)
     let config = getConfig();
     config = deepmerge_1.default(config, newConfig, { arrayMerge: (destinationArray, sourceArray) => sourceArray });
     try {
         fs_1.default.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2));
-        return true;
+        return config;
     }
     catch (error) {
         return false;

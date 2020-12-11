@@ -17,3 +17,5 @@ export let valuesToGroup: Writable<string[]> = writable([])
 
 // Value choosen by the user to filter out the specified tag from the song index.
 export let valuesToFilter: Writable<string[]> = writable([])
+export let isValuesToFilterChanged: Writable<boolean> = writable(false)
+export let storeConfig: Writable<any> = writable(undefined)

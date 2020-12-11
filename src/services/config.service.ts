@@ -38,13 +38,14 @@ export function getConfig(): ConfigType {
 }
 
 export function saveConfig(newConfig: any) {
+	// console.log(newConfig)
 	let config = getConfig()
 
 	config = deepmerge(config, newConfig, { arrayMerge: (destinationArray: any[], sourceArray: any[]) => sourceArray })
 
 	try {
 		fs.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2))
-		return true
+		return config
 	} catch (error) {
 		return false
 	}

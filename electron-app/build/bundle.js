@@ -101,7 +101,7 @@ var app = (function () {
     }
     function get_current_component() {
         if (!current_component)
-            throw new Error(`Function called outside component initialization`);
+            throw new Error('Function called outside component initialization');
         return current_component;
     }
     function onMount(fn) {
@@ -304,7 +304,7 @@ var app = (function () {
         for (let i = 0; i < list.length; i++) {
             const key = get_key(get_context(ctx, list, i));
             if (keys.has(key)) {
-                throw new Error(`Cannot have duplicate keys in a keyed each`);
+                throw new Error('Cannot have duplicate keys in a keyed each');
             }
             keys.add(key);
         }
@@ -408,6 +408,9 @@ var app = (function () {
         }
         set_current_component(parent_component);
     }
+    /**
+     * Base class for Svelte components. Used when dev=false.
+     */
     class SvelteComponent {
         $destroy() {
             destroy_component(this, 1);
@@ -432,49 +435,49 @@ var app = (function () {
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.29.0' }, detail)));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.31.0' }, detail)));
     }
     function append_dev(target, node) {
-        dispatch_dev("SvelteDOMInsert", { target, node });
+        dispatch_dev('SvelteDOMInsert', { target, node });
         append(target, node);
     }
     function insert_dev(target, node, anchor) {
-        dispatch_dev("SvelteDOMInsert", { target, node, anchor });
+        dispatch_dev('SvelteDOMInsert', { target, node, anchor });
         insert(target, node, anchor);
     }
     function detach_dev(node) {
-        dispatch_dev("SvelteDOMRemove", { node });
+        dispatch_dev('SvelteDOMRemove', { node });
         detach(node);
     }
     function listen_dev(node, event, handler, options, has_prevent_default, has_stop_propagation) {
-        const modifiers = options === true ? ["capture"] : options ? Array.from(Object.keys(options)) : [];
+        const modifiers = options === true ? ['capture'] : options ? Array.from(Object.keys(options)) : [];
         if (has_prevent_default)
             modifiers.push('preventDefault');
         if (has_stop_propagation)
             modifiers.push('stopPropagation');
-        dispatch_dev("SvelteDOMAddEventListener", { node, event, handler, modifiers });
+        dispatch_dev('SvelteDOMAddEventListener', { node, event, handler, modifiers });
         const dispose = listen(node, event, handler, options);
         return () => {
-            dispatch_dev("SvelteDOMRemoveEventListener", { node, event, handler, modifiers });
+            dispatch_dev('SvelteDOMRemoveEventListener', { node, event, handler, modifiers });
             dispose();
         };
     }
     function attr_dev(node, attribute, value) {
         attr(node, attribute, value);
         if (value == null)
-            dispatch_dev("SvelteDOMRemoveAttribute", { node, attribute });
+            dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
-            dispatch_dev("SvelteDOMSetAttribute", { node, attribute, value });
+            dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
     }
     function prop_dev(node, property, value) {
         node[property] = value;
-        dispatch_dev("SvelteDOMSetProperty", { node, property, value });
+        dispatch_dev('SvelteDOMSetProperty', { node, property, value });
     }
     function set_data_dev(text, data) {
         data = '' + data;
         if (text.wholeText === data)
             return;
-        dispatch_dev("SvelteDOMSetData", { node: text, data });
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
         text.data = data;
     }
     function validate_each_argument(arg) {
@@ -493,17 +496,20 @@ var app = (function () {
             }
         }
     }
+    /**
+     * Base class for Svelte components with some minor dev-enhancements. Used when dev=true.
+     */
     class SvelteComponentDev extends SvelteComponent {
         constructor(options) {
             if (!options || (!options.target && !options.$$inline)) {
-                throw new Error(`'target' is a required option`);
+                throw new Error("'target' is a required option");
             }
             super();
         }
         $destroy() {
             super.$destroy();
             this.$destroy = () => {
-                console.warn(`Component was already destroyed`); // eslint-disable-line no-console
+                console.warn('Component was already destroyed'); // eslint-disable-line no-console
             };
         }
         $capture_state() { }
@@ -568,8 +574,10 @@ var app = (function () {
     let valuesToGroup = writable([]);
     // Value choosen by the user to filter out the specified tag from the song index.
     let valuesToFilter = writable([]);
+    let isValuesToFilterChanged = writable(false);
+    let storeConfig = writable(undefined);
 
-    /* src/includes/Navigation.svelte generated by Svelte v3.29.0 */
+    /* src/includes/Navigation.svelte generated by Svelte v3.31.0 */
 
     const file = "src/includes/Navigation.svelte";
 
@@ -638,7 +646,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/ArtGrid.svelte generated by Svelte v3.29.0 */
+    /* src/includes/ArtGrid.svelte generated by Svelte v3.31.0 */
 
     const file$1 = "src/includes/ArtGrid.svelte";
 
@@ -745,19 +753,20 @@ var app = (function () {
         });
     }
 
-    /* src/components/Order.svelte generated by Svelte v3.29.0 */
+    /* src/components/Order.svelte generated by Svelte v3.31.0 */
 
     const { console: console_1 } = globals;
+
     const file$2 = "src/components/Order.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
+    	child_ctx[20] = list[i];
     	child_ctx[3] = i;
     	return child_ctx;
     }
 
-    // (54:0) {#if orderedSongs}
+    // (123:0) {#if orderedSongs}
     function create_if_block(ctx) {
     	let order;
     	let item;
@@ -768,7 +777,7 @@ var app = (function () {
     	let label;
     	let t1;
     	let t2;
-    	let t3_value = /*orderedSongs*/ ctx[1].length + "";
+    	let t3_value = /*orderedSongs*/ ctx[2].length + "";
     	let t3;
     	let t4;
     	let label_for_value;
@@ -778,9 +787,9 @@ var app = (function () {
     	let each_1_lookup = new Map();
     	let mounted;
     	let dispose;
-    	let each_value = /*orderedSongs*/ ctx[1];
+    	let each_value = /*orderedSongs*/ ctx[2];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*item*/ ctx[15]["id"];
+    	const get_key = ctx => /*item*/ ctx[20]["id"];
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -810,20 +819,20 @@ var app = (function () {
     			attr_dev(input, "id", input_id_value = "all" + /*group*/ ctx[0]);
     			input.__value = input_value_value = null;
     			input.value = input.__value;
-    			/*$$binding_groups*/ ctx[5][0].push(input);
-    			add_location(input, file$2, 56, 3, 2091);
+    			/*$$binding_groups*/ ctx[8][0].push(input);
+    			add_location(input, file$2, 125, 3, 4209);
     			attr_dev(label, "for", label_for_value = "all" + /*group*/ ctx[0]);
-    			add_location(label, file$2, 57, 3, 2169);
+    			add_location(label, file$2, 126, 3, 4287);
     			attr_dev(item, "title", item_title_value = "All " + /*group*/ ctx[0]);
-    			add_location(item, file$2, 55, 2, 2061);
+    			add_location(item, file$2, 124, 2, 4179);
     			attr_dev(order, "class", "svelte-qh678t");
-    			add_location(order, file$2, 54, 1, 2051);
+    			add_location(order, file$2, 123, 1, 4169);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, order, anchor);
     			append_dev(order, item);
     			append_dev(item, input);
-    			input.checked = input.__value === /*selection*/ ctx[2];
+    			input.checked = input.__value === /*selection*/ ctx[1];
     			append_dev(item, t0);
     			append_dev(item, label);
     			append_dev(label, t1);
@@ -837,7 +846,7 @@ var app = (function () {
     			}
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[4]);
+    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[7]);
     				mounted = true;
     			}
     		},
@@ -846,12 +855,12 @@ var app = (function () {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*selection*/ 4) {
-    				input.checked = input.__value === /*selection*/ ctx[2];
+    			if (dirty & /*selection*/ 2) {
+    				input.checked = input.__value === /*selection*/ ctx[1];
     			}
 
     			if (dirty & /*group*/ 1) set_data_dev(t1, /*group*/ ctx[0]);
-    			if (dirty & /*orderedSongs*/ 2 && t3_value !== (t3_value = /*orderedSongs*/ ctx[1].length + "")) set_data_dev(t3, t3_value);
+    			if (dirty & /*orderedSongs*/ 4 && t3_value !== (t3_value = /*orderedSongs*/ ctx[2].length + "")) set_data_dev(t3, t3_value);
 
     			if (dirty & /*group*/ 1 && label_for_value !== (label_for_value = "all" + /*group*/ ctx[0])) {
     				attr_dev(label, "for", label_for_value);
@@ -862,7 +871,7 @@ var app = (function () {
     			}
 
     			if (dirty & /*orderedSongs, cutWord, selection*/ 6) {
-    				const each_value = /*orderedSongs*/ ctx[1];
+    				const each_value = /*orderedSongs*/ ctx[2];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, order, destroy_block, create_each_block, null, get_each_context);
@@ -870,7 +879,7 @@ var app = (function () {
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(order);
-    			/*$$binding_groups*/ ctx[5][0].splice(/*$$binding_groups*/ ctx[5][0].indexOf(input), 1);
+    			/*$$binding_groups*/ ctx[8][0].splice(/*$$binding_groups*/ ctx[8][0].indexOf(input), 1);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d();
@@ -885,14 +894,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(54:0) {#if orderedSongs}",
+    		source: "(123:0) {#if orderedSongs}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (60:2) {#each orderedSongs as item, index (item['id'])}
+    // (129:2) {#each orderedSongs as item, index (item['id'])}
     function create_each_block(key_1, ctx) {
     	let item;
     	let input;
@@ -900,7 +909,7 @@ var app = (function () {
     	let input_value_value;
     	let t0;
     	let label;
-    	let t1_value = cutWord(/*item*/ ctx[15]["value"], 20) + "";
+    	let t1_value = cutWord(/*item*/ ctx[20]["value"], 20) + "";
     	let t1;
     	let label_for_value;
     	let t2;
@@ -919,58 +928,58 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = space();
     			attr_dev(input, "type", "radio");
-    			attr_dev(input, "id", input_id_value = /*item*/ ctx[15]["id"]);
-    			input.__value = input_value_value = /*item*/ ctx[15]["value"];
+    			attr_dev(input, "id", input_id_value = /*item*/ ctx[20]["id"]);
+    			input.__value = input_value_value = /*item*/ ctx[20]["value"];
     			input.value = input.__value;
-    			/*$$binding_groups*/ ctx[5][0].push(input);
-    			add_location(input, file$2, 61, 4, 2332);
-    			attr_dev(label, "for", label_for_value = /*item*/ ctx[15]["id"]);
-    			add_location(label, file$2, 62, 4, 2420);
-    			attr_dev(item, "title", item_title_value = /*item*/ ctx[15]["value"]);
-    			add_location(item, file$2, 60, 3, 2299);
+    			/*$$binding_groups*/ ctx[8][0].push(input);
+    			add_location(input, file$2, 130, 4, 4450);
+    			attr_dev(label, "for", label_for_value = /*item*/ ctx[20]["id"]);
+    			add_location(label, file$2, 131, 4, 4538);
+    			attr_dev(item, "title", item_title_value = /*item*/ ctx[20]["value"]);
+    			add_location(item, file$2, 129, 3, 4417);
     			this.first = item;
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, item, anchor);
     			append_dev(item, input);
-    			input.checked = input.__value === /*selection*/ ctx[2];
+    			input.checked = input.__value === /*selection*/ ctx[1];
     			append_dev(item, t0);
     			append_dev(item, label);
     			append_dev(label, t1);
     			append_dev(item, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "change", /*input_change_handler_1*/ ctx[6]);
+    				dispose = listen_dev(input, "change", /*input_change_handler_1*/ ctx[9]);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*orderedSongs*/ 2 && input_id_value !== (input_id_value = /*item*/ ctx[15]["id"])) {
+    			if (dirty & /*orderedSongs*/ 4 && input_id_value !== (input_id_value = /*item*/ ctx[20]["id"])) {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*orderedSongs*/ 2 && input_value_value !== (input_value_value = /*item*/ ctx[15]["value"])) {
+    			if (dirty & /*orderedSongs*/ 4 && input_value_value !== (input_value_value = /*item*/ ctx[20]["value"])) {
     				prop_dev(input, "__value", input_value_value);
     				input.value = input.__value;
     			}
 
-    			if (dirty & /*selection*/ 4) {
-    				input.checked = input.__value === /*selection*/ ctx[2];
+    			if (dirty & /*selection*/ 2) {
+    				input.checked = input.__value === /*selection*/ ctx[1];
     			}
 
-    			if (dirty & /*orderedSongs*/ 2 && t1_value !== (t1_value = cutWord(/*item*/ ctx[15]["value"], 20) + "")) set_data_dev(t1, t1_value);
+    			if (dirty & /*orderedSongs*/ 4 && t1_value !== (t1_value = cutWord(/*item*/ ctx[20]["value"], 20) + "")) set_data_dev(t1, t1_value);
 
-    			if (dirty & /*orderedSongs*/ 2 && label_for_value !== (label_for_value = /*item*/ ctx[15]["id"])) {
+    			if (dirty & /*orderedSongs*/ 4 && label_for_value !== (label_for_value = /*item*/ ctx[20]["id"])) {
     				attr_dev(label, "for", label_for_value);
     			}
 
-    			if (dirty & /*orderedSongs*/ 2 && item_title_value !== (item_title_value = /*item*/ ctx[15]["value"])) {
+    			if (dirty & /*orderedSongs*/ 4 && item_title_value !== (item_title_value = /*item*/ ctx[20]["value"])) {
     				attr_dev(item, "title", item_title_value);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(item);
-    			/*$$binding_groups*/ ctx[5][0].splice(/*$$binding_groups*/ ctx[5][0].indexOf(input), 1);
+    			/*$$binding_groups*/ ctx[8][0].splice(/*$$binding_groups*/ ctx[8][0].indexOf(input), 1);
     			mounted = false;
     			dispose();
     		}
@@ -980,7 +989,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(60:2) {#each orderedSongs as item, index (item['id'])}",
+    		source: "(129:2) {#each orderedSongs as item, index (item['id'])}",
     		ctx
     	});
 
@@ -989,7 +998,7 @@ var app = (function () {
 
     function create_fragment$2(ctx) {
     	let if_block_anchor;
-    	let if_block = /*orderedSongs*/ ctx[1] && create_if_block(ctx);
+    	let if_block = /*orderedSongs*/ ctx[2] && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -1004,7 +1013,7 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*orderedSongs*/ ctx[1]) {
+    			if (/*orderedSongs*/ ctx[2]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -1037,15 +1046,21 @@ var app = (function () {
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $storeConfig;
     	let $valuesToGroup;
     	let $valuesToFilter;
+    	let $isValuesToFilterChanged;
     	let $versioning;
+    	validate_store(storeConfig, "storeConfig");
+    	component_subscribe($$self, storeConfig, $$value => $$invalidate(5, $storeConfig = $$value));
     	validate_store(valuesToGroup, "valuesToGroup");
-    	component_subscribe($$self, valuesToGroup, $$value => $$invalidate(9, $valuesToGroup = $$value));
+    	component_subscribe($$self, valuesToGroup, $$value => $$invalidate(10, $valuesToGroup = $$value));
     	validate_store(valuesToFilter, "valuesToFilter");
-    	component_subscribe($$self, valuesToFilter, $$value => $$invalidate(10, $valuesToFilter = $$value));
+    	component_subscribe($$self, valuesToFilter, $$value => $$invalidate(11, $valuesToFilter = $$value));
+    	validate_store(isValuesToFilterChanged, "isValuesToFilterChanged");
+    	component_subscribe($$self, isValuesToFilterChanged, $$value => $$invalidate(12, $isValuesToFilterChanged = $$value));
     	validate_store(versioning, "versioning");
-    	component_subscribe($$self, versioning, $$value => $$invalidate(11, $versioning = $$value));
+    	component_subscribe($$self, versioning, $$value => $$invalidate(6, $versioning = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Order", slots, []);
 
@@ -1089,32 +1104,74 @@ var app = (function () {
     	let { group } = $$props;
     	let config;
     	let orderedSongs = [];
-    	let selection = undefined;
-    	let isSelectionDirty = false;
+    	let selection = null;
+    	let isSelectionChanged = false;
+    	let isConfigLoading = true;
 
-    	function setFilterInStore() {
-    		for (let i = 0; i < $valuesToGroup.length; i++) {
-    			// Sets undefined or empty string to null to get a full array.
+    	function cleanFilters() {
+    		for (let i = index; i < $valuesToGroup.length; i++) {
     			if (i === index) {
     				set_store_value(valuesToFilter, $valuesToFilter[i] = selection, $valuesToFilter);
-    			} else if (["Unknown", "", undefined, null, "undefined", "null"].includes($valuesToFilter[i])) {
-    				set_store_value(valuesToFilter, $valuesToFilter[i] = null, $valuesToFilter);
-    			} else if (i > index) {
+    			} else {
     				set_store_value(valuesToFilter, $valuesToFilter[i] = null, $valuesToFilter);
     			}
     		}
+
+    		console.log($valuesToFilter);
+    		set_store_value(isValuesToFilterChanged, $isValuesToFilterChanged = true, $isValuesToFilterChanged);
     	}
 
+    	function setSelectionFromConfigStore() {
+    		$$invalidate(1, selection = $storeConfig["order"]["filtering"][index]);
+    		set_store_value(valuesToFilter, $valuesToFilter[index] = selection, $valuesToFilter);
+    	}
+
+    	/*
+        App loads.
+            Gets config file filtering. <Object>
+            Set app state with config file filtering. Store and Component.
+            When user selects:
+                Clear filters
+                Save to config
+                Update Store and Selection
+
+    */
+    	// Sets the selection when changed either from config file or the cleanFilters.
+    	function setSelection() {
+    		// console.count($valuesToGroup[index], index)
+    		$$invalidate(1, selection = $valuesToFilter[index]);
+    	}
+
+    	/*
+    function cleanFilters() {
+        // Do NOT save config if it is being loaded from the config file. Prevents sending/saving false data to config file.
+        console.count(index)
+        if (isConfigLoading === true) return
+
+        // console.log('Filter Changed', index, $valuesToGroup[index])
+
+        for (let i = 0; i < $valuesToGroup.length; i++) {
+            // Sets undefined or empty string to null to get a full array.
+            if (i === index) {
+                $valuesToFilter[i] = selection
+                // } else if (['Unknown', '', undefined, 'undefined', 'null', null].includes($valuesToFilter[i])) {
+            } else if (['', undefined, 'undefined', 'null', null].includes($valuesToFilter[i])) {
+                $valuesToFilter[i] = null
+            } else if (i > index) {
+                $valuesToFilter[i] = null
+            }
+        }
+        // setSelection()
+
+        // Triggers a save config in Controller.
+        $isValuesToFilterChanged = true
+    }
+    */
     	function fetchSongs() {
     		return __awaiter(this, void 0, void 0, function* () {
-    			$$invalidate(1, orderedSongs = yield getOrder(index));
+    			$$invalidate(2, orderedSongs = yield getOrder(index));
     		});
     	}
-
-    	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
-    		config = yield getConfig();
-    		$$invalidate(2, selection = config["order"]["filtering"][index]);
-    	}));
 
     	const writable_props = ["index", "group"];
 
@@ -1126,12 +1183,12 @@ var app = (function () {
 
     	function input_change_handler() {
     		selection = this.__value;
-    		$$invalidate(2, selection);
+    		$$invalidate(1, selection);
     	}
 
     	function input_change_handler_1() {
     		selection = this.__value;
-    		$$invalidate(2, selection);
+    		$$invalidate(1, selection);
     	}
 
     	$$self.$$set = $$props => {
@@ -1148,16 +1205,23 @@ var app = (function () {
     		versioning,
     		valuesToFilter,
     		valuesToGroup,
+    		isValuesToFilterChanged,
+    		storeConfig,
     		index,
     		group,
     		config,
     		orderedSongs,
     		selection,
-    		isSelectionDirty,
-    		setFilterInStore,
+    		isSelectionChanged,
+    		isConfigLoading,
+    		cleanFilters,
+    		setSelectionFromConfigStore,
+    		setSelection,
     		fetchSongs,
+    		$storeConfig,
     		$valuesToGroup,
     		$valuesToFilter,
+    		$isValuesToFilterChanged,
     		$versioning
     	});
 
@@ -1166,9 +1230,10 @@ var app = (function () {
     		if ("index" in $$props) $$invalidate(3, index = $$props.index);
     		if ("group" in $$props) $$invalidate(0, group = $$props.group);
     		if ("config" in $$props) config = $$props.config;
-    		if ("orderedSongs" in $$props) $$invalidate(1, orderedSongs = $$props.orderedSongs);
-    		if ("selection" in $$props) $$invalidate(2, selection = $$props.selection);
-    		if ("isSelectionDirty" in $$props) $$invalidate(8, isSelectionDirty = $$props.isSelectionDirty);
+    		if ("orderedSongs" in $$props) $$invalidate(2, orderedSongs = $$props.orderedSongs);
+    		if ("selection" in $$props) $$invalidate(1, selection = $$props.selection);
+    		if ("isSelectionChanged" in $$props) $$invalidate(4, isSelectionChanged = $$props.isSelectionChanged);
+    		if ("isConfigLoading" in $$props) isConfigLoading = $$props.isConfigLoading;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -1176,19 +1241,39 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*selection, group, isSelectionDirty*/ 261) {
-    			 {
-    				console.log(group, " ", selection);
-
-    				isSelectionDirty === true
-    				? setFilterInStore()
-    				: $$invalidate(8, isSelectionDirty = true);
+    		if ($$self.$$.dirty & /*$storeConfig*/ 32) {
+    			// $: {
+    			// 	selection
+    			// 	isSelectionChanged === true ? cleanFilters() : (isSelectionChanged = true)
+    			// }
+    			// $: {
+    			// 	$valuesToFilter
+    			// 	setSelection()
+    			// }
+    			// $: {
+    			// 	console.count()
+    			// 	console.log($valuesToFilter)
+    			// }
+    			 if ($storeConfig !== undefined) {
+    				setSelectionFromConfigStore();
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$versioning*/ 2048) {
+    		if ($$self.$$.dirty & /*selection, isSelectionChanged*/ 18) {
     			 {
-    				console.log($versioning);
+
+    				if (isSelectionChanged) {
+    					cleanFilters();
+    				} else {
+    					$$invalidate(4, isSelectionChanged = true);
+    				}
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*$versioning*/ 64) {
+    			// // Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
+    			 {
+    				console.log($versioning, " Fetching songs");
     				fetchSongs();
     			}
     		}
@@ -1196,9 +1281,12 @@ var app = (function () {
 
     	return [
     		group,
-    		orderedSongs,
     		selection,
+    		orderedSongs,
     		index,
+    		isSelectionChanged,
+    		$storeConfig,
+    		$versioning,
     		input_change_handler,
     		$$binding_groups,
     		input_change_handler_1
@@ -1246,7 +1334,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/Ordering.svelte generated by Svelte v3.29.0 */
+    /* src/includes/Ordering.svelte generated by Svelte v3.31.0 */
     const file$3 = "src/includes/Ordering.svelte";
 
     function get_each_context$1(ctx, list, i) {
@@ -1430,7 +1518,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/Player.svelte generated by Svelte v3.29.0 */
+    /* src/includes/Player.svelte generated by Svelte v3.31.0 */
 
     const file$4 = "src/includes/Player.svelte";
 
@@ -1499,7 +1587,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/SongList.svelte generated by Svelte v3.29.0 */
+    /* src/includes/SongList.svelte generated by Svelte v3.31.0 */
 
     const file$5 = "src/includes/SongList.svelte";
 
@@ -1568,7 +1656,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/Details.svelte generated by Svelte v3.29.0 */
+    /* src/includes/Details.svelte generated by Svelte v3.31.0 */
 
     const file$6 = "src/includes/Details.svelte";
 
@@ -1637,7 +1725,9 @@ var app = (function () {
     	}
     }
 
-    /* src/controller/Controller.svelte generated by Svelte v3.29.0 */
+    /* src/controller/Controller.svelte generated by Svelte v3.31.0 */
+
+    const { Object: Object_1, console: console_1$1 } = globals;
 
     function create_fragment$7(ctx) {
     	const block = {
@@ -1665,14 +1755,20 @@ var app = (function () {
 
     function instance$7($$self, $$props, $$invalidate) {
     	let $valuesToFilter;
+    	let $isValuesToFilterChanged;
     	let $versioning;
+    	let $storeConfig;
     	let $valuesToGroup;
     	validate_store(valuesToFilter, "valuesToFilter");
     	component_subscribe($$self, valuesToFilter, $$value => $$invalidate(2, $valuesToFilter = $$value));
+    	validate_store(isValuesToFilterChanged, "isValuesToFilterChanged");
+    	component_subscribe($$self, isValuesToFilterChanged, $$value => $$invalidate(0, $isValuesToFilterChanged = $$value));
     	validate_store(versioning, "versioning");
     	component_subscribe($$self, versioning, $$value => $$invalidate(3, $versioning = $$value));
+    	validate_store(storeConfig, "storeConfig");
+    	component_subscribe($$self, storeConfig, $$value => $$invalidate(4, $storeConfig = $$value));
     	validate_store(valuesToGroup, "valuesToGroup");
-    	component_subscribe($$self, valuesToGroup, $$value => $$invalidate(4, $valuesToGroup = $$value));
+    	component_subscribe($$self, valuesToGroup, $$value => $$invalidate(5, $valuesToGroup = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Controller", slots, []);
 
@@ -1720,7 +1816,7 @@ var app = (function () {
         Order watches versioning number.
         When Versioning changes -> Order re-fetches the songs.
     */
-    	let previousFilter = undefined;
+    	let previousFilter = [...$valuesToFilter];
 
     	let isFirstRun = true;
 
@@ -1728,18 +1824,22 @@ var app = (function () {
     		loadConfig();
     	});
 
-    	function updatePreviousFilter() {
+    	function setPreviousFilters() {
     		previousFilter = [...$valuesToFilter];
     	}
 
     	function updateFilters() {
+    		console.log("Updating Filters");
+
     		// if the value changed save them to config file.
     		if (previousFilter.toString() !== $valuesToFilter.toString()) {
+    			console.log("Saving Filters");
     			previousFilter = [...$valuesToFilter];
 
-    			saveConfig({ order: { filtering: $valuesToFilter } }).then(result => {
-    				if (result === true) {
+    			saveConfig({ order: { filtering: $valuesToFilter } }).then(newConfig => {
+    				if (newConfig) {
     					set_store_value(versioning, $versioning = Date.now(), $versioning);
+    					set_store_value(storeConfig, $storeConfig = newConfig, $storeConfig);
     				}
     			});
     		}
@@ -1747,10 +1847,11 @@ var app = (function () {
 
     	// function saveConfig() {}
     	function loadConfig() {
-    		var _a, _b;
+    		var _a;
 
     		return __awaiter(this, void 0, void 0, function* () {
     			let config = yield getConfig();
+    			set_store_value(storeConfig, $storeConfig = Object.assign({}, config), $storeConfig);
 
     			if ((_a = config === null || config === void 0
     			? void 0
@@ -1759,21 +1860,13 @@ var app = (function () {
     			: _a["grouping"]) {
     				set_store_value(valuesToGroup, $valuesToGroup = config["order"]["grouping"], $valuesToGroup);
     			}
-
-    			if ((_b = config === null || config === void 0
-    			? void 0
-    			: config["order"]) === null || _b === void 0
-    			? void 0
-    			: _b["filtering"]) {
-    				set_store_value(valuesToFilter, $valuesToFilter = config["order"]["filtering"], $valuesToFilter);
-    			}
     		});
     	}
 
     	const writable_props = [];
 
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Controller> was created with unknown prop '${key}'`);
+    	Object_1.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Controller> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -1782,22 +1875,26 @@ var app = (function () {
     		getConfig,
     		saveConfig,
     		valuesToFilter,
+    		isValuesToFilterChanged,
     		valuesToGroup,
     		versioning,
+    		storeConfig,
     		previousFilter,
     		isFirstRun,
-    		updatePreviousFilter,
+    		setPreviousFilters,
     		updateFilters,
     		loadConfig,
     		$valuesToFilter,
+    		$isValuesToFilterChanged,
     		$versioning,
+    		$storeConfig,
     		$valuesToGroup
     	});
 
     	$$self.$inject_state = $$props => {
     		if ("__awaiter" in $$props) __awaiter = $$props.__awaiter;
     		if ("previousFilter" in $$props) previousFilter = $$props.previousFilter;
-    		if ("isFirstRun" in $$props) $$invalidate(1, isFirstRun = $$props.isFirstRun);
+    		if ("isFirstRun" in $$props) isFirstRun = $$props.isFirstRun;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -1805,24 +1902,20 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$valuesToFilter, isFirstRun*/ 6) {
+    		if ($$self.$$.dirty & /*$isValuesToFilterChanged*/ 1) {
     			 {
-
-    				// console.log($valuesToFilter)
-    				if (isFirstRun) {
-    					// console.log(1)
-    					updatePreviousFilter();
-
-    					$$invalidate(1, isFirstRun = false);
-    				} else {
-    					// console.log(2)
+    				// if first time running, saves the current filters to a variable to check later if it changed (in fn updateFilters).
+    				if ($isValuesToFilterChanged === true) {
     					updateFilters();
+    					set_store_value(isValuesToFilterChanged, $isValuesToFilterChanged = false, $isValuesToFilterChanged);
+    				} else {
+    					setPreviousFilters();
     				}
     			}
     		}
     	};
 
-    	return [];
+    	return [$isValuesToFilterChanged];
     }
 
     class Controller extends SvelteComponentDev {
@@ -1839,7 +1932,7 @@ var app = (function () {
     	}
     }
 
-    /* src/App.svelte generated by Svelte v3.29.0 */
+    /* src/App.svelte generated by Svelte v3.31.0 */
     const file$7 = "src/App.svelte";
 
     function create_fragment$8(ctx) {
