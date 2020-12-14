@@ -16,6 +16,7 @@ async function createWindow() {
 	await loadDb()
 
 	// scanFolders(['/Volumes/Maxtor/Music'])
+	// scanFolders(['/Volumes/Maxtor/Music/Electronic/Goldfrapp - Believer'])
 
 	// Create the browser window.
 	const window = new BrowserWindow(loadOptions())

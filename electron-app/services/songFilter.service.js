@@ -35,7 +35,7 @@ function orderSongs(index, grouping, filtering) {
             // <<<<< Filtering >>>>>
             let groupBy = grouping[i];
             let filterBy = filtering[i];
-            console.log(index, groupBy, filterBy);
+            //TODO Why Unknown stuff appears?
             filteredArray = filteredArray.filter((song) => {
                 // If one of the filters is not defined or null, add the songs the the list anyway.
                 if (['null', null].includes(filterBy)) {
@@ -46,9 +46,6 @@ function orderSongs(index, grouping, filtering) {
                 }
                 else if (song[groupBy]) {
                     return song[groupBy] === filterBy;
-                }
-                else {
-                    return true;
                 }
                 // if (['null', null].includes(filterBy)) {
                 // 	return true

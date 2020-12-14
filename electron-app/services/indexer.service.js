@@ -152,6 +152,9 @@ function getGenre(doc, extension) {
     if (extension === 'm4a') {
         let genre;
         genre = doc['native']['iTunes'].find((i) => i['id'] === '©gen');
+        if (genre === undefined || (genre === null || genre === void 0 ? void 0 : genre['value']) === '') {
+            genre = doc['native']['iTunes'].find((i) => i['id'] === 'gnre');
+        }
         if (genre)
             return genre['value'];
     }

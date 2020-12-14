@@ -1,31 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { cutWord } from '../service/index.service'
-	import { getConfig, getOrder } from '../service/ipc.service'
+	import { getOrder } from '../service/ipc.service'
 	import { versioning, valuesToFilter, valuesToGroup, isValuesToFilterChanged, storeConfig } from '../store/index.store'
 
 	export let index
 	export let group
-	let config
 	let orderedSongs = []
 	let selection = null
 	let isSelectionChanged = false
-	let isConfigLoading = true
-
-	// $: {
-	// 	selection
-	// 	isSelectionChanged === true ? cleanFilters() : (isSelectionChanged = true)
-	// }
-
-	// $: {
-	// 	$valuesToFilter
-	// 	setSelection()
-	// }
-
-	// $: {
-	// 	console.count()
-	// 	console.log($valuesToFilter)
-	// }
 
 	$: if ($storeConfig !== undefined) {
 		setSelectionFromConfigStore()
@@ -58,70 +41,15 @@
 		$valuesToFilter[index] = selection
 	}
 
-	// // Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
+	// Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
 	$: {
 		console.log($versioning, ' Fetching songs')
 		fetchSongs()
 	}
 
-	/*
-		App loads.
-			Gets config file filtering. <Object>
-			Set app state with config file filtering. Store and Component.
-			When user selects:
-				Clear filters
-				Save to config
-				Update Store and Selection
-
-	*/
-
-	// Sets the selection when changed either from config file or the cleanFilters.
-	function setSelection() {
-		// console.count($valuesToGroup[index], index)
-		selection = $valuesToFilter[index]
-	}
-
-	/*
-	function cleanFilters() {
-		// Do NOT save config if it is being loaded from the config file. Prevents sending/saving false data to config file.
-		console.count(index)
-		if (isConfigLoading === true) return
-
-		// console.log('Filter Changed', index, $valuesToGroup[index])
-
-		for (let i = 0; i < $valuesToGroup.length; i++) {
-			// Sets undefined or empty string to null to get a full array.
-			if (i === index) {
-				$valuesToFilter[i] = selection
-				// } else if (['Unknown', '', undefined, 'undefined', 'null', null].includes($valuesToFilter[i])) {
-			} else if (['', undefined, 'undefined', 'null', null].includes($valuesToFilter[i])) {
-				$valuesToFilter[i] = null
-			} else if (i > index) {
-				$valuesToFilter[i] = null
-			}
-		}
-		// setSelection()
-
-		// Triggers a save config in Controller.
-		$isValuesToFilterChanged = true
-	}
-*/
 	async function fetchSongs() {
 		orderedSongs = await getOrder(index)
 	}
-
-	// onMount(async () => {
-	// 	config = await getConfig()
-
-	// 	if (config?.['order']?.['filtering']) {
-	// 		// selection = config['order']['filtering'][index]
-	// 		// $valuesToFilter[index] = config['order']['filtering'][index]
-	// 	}
-
-	// 	/* Gives time for the reactive statement to be registered, otherwise isConfigLoaded is set to false before
-	// 	 the selection reactive statement exists.*/
-	// 	setTimeout(() => (isConfigLoading = false), 100)
-	// })
 </script>
 
 {#if orderedSongs}
@@ -141,7 +69,57 @@
 
 <style>
 	order {
+		--highlight-color: #333;
+
 		display: flex;
 		flex-direction: column;
+		overflow-y: auto;
+		height: 100%;
+		/* background-color: rgba(255,255,255,.05); */
+		border-right: 1px rgba(255, 255, 255, 0.75) solid;
+		padding: 0 1rem;
+		font-size: 0.8rem;
+	}
+
+	order:first-of-type {
+		/* border-right: none; */
+	}
+	order item label {
+		border-radius: 5px;
+		margin: 0.25rem 0;
+		padding: 0 0.5rem;
+	}
+	order item:hover label {
+		background-color: var(--highlight-color);
+	}
+
+	order item label {
+		user-select: none;
+		display: flex;
+		align-items: center;
+	}
+
+	order item label {
+		cursor: pointer;
+	}
+
+	order item input[type='radio'] {
+		display: none;
+	}
+
+	order item input[type='radio'] + label::before {
+		content: '●';
+		font-size: 1.25rem;
+		margin-right: 2px;
+		opacity: 0;
+	}
+	order item input[type='radio']:checked + label {
+		background-color: var(--highlight-color);
+	}
+
+	order item input[type='radio']:checked + label::before {
+		content: '●';
+		opacity: 1;
+		margin-right: 2px;
 	}
 </style>

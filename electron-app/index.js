@@ -25,6 +25,7 @@ function createWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         yield loki_service_1.loadDb();
         // scanFolders(['/Volumes/Maxtor/Music'])
+        // scanFolders(['/Volumes/Maxtor/Music/Electronic/Goldfrapp - Believer'])
         // Create the browser window.
         const window = new electron_1.BrowserWindow(loadOptions());
         window.webContents.openDevTools();

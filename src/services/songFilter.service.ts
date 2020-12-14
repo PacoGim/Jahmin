@@ -38,7 +38,6 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 			// <<<<< Filtering >>>>>
 			let groupBy = grouping[i]
 			let filterBy = filtering[i]
-			console.log(index, groupBy, filterBy)
 
 			//TODO Why Unknown stuff appears?
 
@@ -50,8 +49,6 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 					return ['Unknown', '', undefined, 'undefined'].includes(song[groupBy])
 				} else if (song[groupBy]) {
 					return song[groupBy] === filterBy
-				} else {
-					return true
 				}
 
 				// if (['null', null].includes(filterBy)) {

@@ -761,12 +761,12 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[17] = list[i];
     	child_ctx[3] = i;
     	return child_ctx;
     }
 
-    // (123:0) {#if orderedSongs}
+    // (59:0) {#if orderedSongs}
     function create_if_block(ctx) {
     	let order;
     	let item;
@@ -789,7 +789,7 @@ var app = (function () {
     	let dispose;
     	let each_value = /*orderedSongs*/ ctx[2];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*item*/ ctx[20]["id"];
+    	const get_key = ctx => /*item*/ ctx[17]["id"];
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -819,14 +819,16 @@ var app = (function () {
     			attr_dev(input, "id", input_id_value = "all" + /*group*/ ctx[0]);
     			input.__value = input_value_value = null;
     			input.value = input.__value;
+    			attr_dev(input, "class", "svelte-1xamkw0");
     			/*$$binding_groups*/ ctx[8][0].push(input);
-    			add_location(input, file$2, 125, 3, 4209);
+    			add_location(input, file$2, 61, 3, 2107);
     			attr_dev(label, "for", label_for_value = "all" + /*group*/ ctx[0]);
-    			add_location(label, file$2, 126, 3, 4287);
+    			attr_dev(label, "class", "svelte-1xamkw0");
+    			add_location(label, file$2, 62, 3, 2185);
     			attr_dev(item, "title", item_title_value = "All " + /*group*/ ctx[0]);
-    			add_location(item, file$2, 124, 2, 4179);
-    			attr_dev(order, "class", "svelte-qh678t");
-    			add_location(order, file$2, 123, 1, 4169);
+    			add_location(item, file$2, 60, 2, 2077);
+    			attr_dev(order, "class", "svelte-1xamkw0");
+    			add_location(order, file$2, 59, 1, 2067);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, order, anchor);
@@ -894,14 +896,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(123:0) {#if orderedSongs}",
+    		source: "(59:0) {#if orderedSongs}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (129:2) {#each orderedSongs as item, index (item['id'])}
+    // (65:2) {#each orderedSongs as item, index (item['id'])}
     function create_each_block(key_1, ctx) {
     	let item;
     	let input;
@@ -909,7 +911,7 @@ var app = (function () {
     	let input_value_value;
     	let t0;
     	let label;
-    	let t1_value = cutWord(/*item*/ ctx[20]["value"], 20) + "";
+    	let t1_value = cutWord(/*item*/ ctx[17]["value"], 20) + "";
     	let t1;
     	let label_for_value;
     	let t2;
@@ -928,15 +930,17 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = space();
     			attr_dev(input, "type", "radio");
-    			attr_dev(input, "id", input_id_value = /*item*/ ctx[20]["id"]);
-    			input.__value = input_value_value = /*item*/ ctx[20]["value"];
+    			attr_dev(input, "id", input_id_value = /*item*/ ctx[17]["id"]);
+    			input.__value = input_value_value = /*item*/ ctx[17]["value"];
     			input.value = input.__value;
+    			attr_dev(input, "class", "svelte-1xamkw0");
     			/*$$binding_groups*/ ctx[8][0].push(input);
-    			add_location(input, file$2, 130, 4, 4450);
-    			attr_dev(label, "for", label_for_value = /*item*/ ctx[20]["id"]);
-    			add_location(label, file$2, 131, 4, 4538);
-    			attr_dev(item, "title", item_title_value = /*item*/ ctx[20]["value"]);
-    			add_location(item, file$2, 129, 3, 4417);
+    			add_location(input, file$2, 66, 4, 2348);
+    			attr_dev(label, "for", label_for_value = /*item*/ ctx[17]["id"]);
+    			attr_dev(label, "class", "svelte-1xamkw0");
+    			add_location(label, file$2, 67, 4, 2436);
+    			attr_dev(item, "title", item_title_value = /*item*/ ctx[17]["value"]);
+    			add_location(item, file$2, 65, 3, 2315);
     			this.first = item;
     		},
     		m: function mount(target, anchor) {
@@ -954,11 +958,11 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*orderedSongs*/ 4 && input_id_value !== (input_id_value = /*item*/ ctx[20]["id"])) {
+    			if (dirty & /*orderedSongs*/ 4 && input_id_value !== (input_id_value = /*item*/ ctx[17]["id"])) {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*orderedSongs*/ 4 && input_value_value !== (input_value_value = /*item*/ ctx[20]["value"])) {
+    			if (dirty & /*orderedSongs*/ 4 && input_value_value !== (input_value_value = /*item*/ ctx[17]["value"])) {
     				prop_dev(input, "__value", input_value_value);
     				input.value = input.__value;
     			}
@@ -967,13 +971,13 @@ var app = (function () {
     				input.checked = input.__value === /*selection*/ ctx[1];
     			}
 
-    			if (dirty & /*orderedSongs*/ 4 && t1_value !== (t1_value = cutWord(/*item*/ ctx[20]["value"], 20) + "")) set_data_dev(t1, t1_value);
+    			if (dirty & /*orderedSongs*/ 4 && t1_value !== (t1_value = cutWord(/*item*/ ctx[17]["value"], 20) + "")) set_data_dev(t1, t1_value);
 
-    			if (dirty & /*orderedSongs*/ 4 && label_for_value !== (label_for_value = /*item*/ ctx[20]["id"])) {
+    			if (dirty & /*orderedSongs*/ 4 && label_for_value !== (label_for_value = /*item*/ ctx[17]["id"])) {
     				attr_dev(label, "for", label_for_value);
     			}
 
-    			if (dirty & /*orderedSongs*/ 4 && item_title_value !== (item_title_value = /*item*/ ctx[20]["value"])) {
+    			if (dirty & /*orderedSongs*/ 4 && item_title_value !== (item_title_value = /*item*/ ctx[17]["value"])) {
     				attr_dev(item, "title", item_title_value);
     			}
     		},
@@ -989,7 +993,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(129:2) {#each orderedSongs as item, index (item['id'])}",
+    		source: "(65:2) {#each orderedSongs as item, index (item['id'])}",
     		ctx
     	});
 
@@ -1102,11 +1106,9 @@ var app = (function () {
 
     	let { index } = $$props;
     	let { group } = $$props;
-    	let config;
     	let orderedSongs = [];
     	let selection = null;
     	let isSelectionChanged = false;
-    	let isConfigLoading = true;
 
     	function cleanFilters() {
     		for (let i = index; i < $valuesToGroup.length; i++) {
@@ -1126,47 +1128,6 @@ var app = (function () {
     		set_store_value(valuesToFilter, $valuesToFilter[index] = selection, $valuesToFilter);
     	}
 
-    	/*
-        App loads.
-            Gets config file filtering. <Object>
-            Set app state with config file filtering. Store and Component.
-            When user selects:
-                Clear filters
-                Save to config
-                Update Store and Selection
-
-    */
-    	// Sets the selection when changed either from config file or the cleanFilters.
-    	function setSelection() {
-    		// console.count($valuesToGroup[index], index)
-    		$$invalidate(1, selection = $valuesToFilter[index]);
-    	}
-
-    	/*
-    function cleanFilters() {
-        // Do NOT save config if it is being loaded from the config file. Prevents sending/saving false data to config file.
-        console.count(index)
-        if (isConfigLoading === true) return
-
-        // console.log('Filter Changed', index, $valuesToGroup[index])
-
-        for (let i = 0; i < $valuesToGroup.length; i++) {
-            // Sets undefined or empty string to null to get a full array.
-            if (i === index) {
-                $valuesToFilter[i] = selection
-                // } else if (['Unknown', '', undefined, 'undefined', 'null', null].includes($valuesToFilter[i])) {
-            } else if (['', undefined, 'undefined', 'null', null].includes($valuesToFilter[i])) {
-                $valuesToFilter[i] = null
-            } else if (i > index) {
-                $valuesToFilter[i] = null
-            }
-        }
-        // setSelection()
-
-        // Triggers a save config in Controller.
-        $isValuesToFilterChanged = true
-    }
-    */
     	function fetchSongs() {
     		return __awaiter(this, void 0, void 0, function* () {
     			$$invalidate(2, orderedSongs = yield getOrder(index));
@@ -1200,7 +1161,6 @@ var app = (function () {
     		__awaiter,
     		onMount,
     		cutWord,
-    		getConfig,
     		getOrder,
     		versioning,
     		valuesToFilter,
@@ -1209,14 +1169,11 @@ var app = (function () {
     		storeConfig,
     		index,
     		group,
-    		config,
     		orderedSongs,
     		selection,
     		isSelectionChanged,
-    		isConfigLoading,
     		cleanFilters,
     		setSelectionFromConfigStore,
-    		setSelection,
     		fetchSongs,
     		$storeConfig,
     		$valuesToGroup,
@@ -1229,11 +1186,9 @@ var app = (function () {
     		if ("__awaiter" in $$props) __awaiter = $$props.__awaiter;
     		if ("index" in $$props) $$invalidate(3, index = $$props.index);
     		if ("group" in $$props) $$invalidate(0, group = $$props.group);
-    		if ("config" in $$props) config = $$props.config;
     		if ("orderedSongs" in $$props) $$invalidate(2, orderedSongs = $$props.orderedSongs);
     		if ("selection" in $$props) $$invalidate(1, selection = $$props.selection);
     		if ("isSelectionChanged" in $$props) $$invalidate(4, isSelectionChanged = $$props.isSelectionChanged);
-    		if ("isConfigLoading" in $$props) isConfigLoading = $$props.isConfigLoading;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -1242,18 +1197,6 @@ var app = (function () {
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$storeConfig*/ 32) {
-    			// $: {
-    			// 	selection
-    			// 	isSelectionChanged === true ? cleanFilters() : (isSelectionChanged = true)
-    			// }
-    			// $: {
-    			// 	$valuesToFilter
-    			// 	setSelection()
-    			// }
-    			// $: {
-    			// 	console.count()
-    			// 	console.log($valuesToFilter)
-    			// }
     			 if ($storeConfig !== undefined) {
     				setSelectionFromConfigStore();
     			}
@@ -1271,7 +1214,7 @@ var app = (function () {
     		}
 
     		if ($$self.$$.dirty & /*$versioning*/ 64) {
-    			// // Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
+    			// Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
     			 {
     				console.log($versioning, " Fetching songs");
     				fetchSongs();

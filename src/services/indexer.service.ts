@@ -105,6 +105,7 @@ async function getFilesMetaTag(files: string[]) {
 	if (doc === null || isDiffTime === true) {
 		await parseAndSaveFile(filePath, extension, fileStats)
 	}
+
 	// console.timeEnd(filePath)
 
 	counter++
@@ -165,6 +166,10 @@ function getGenre(doc: any, extension: string) {
 		let genre
 
 		genre = doc['native']['iTunes'].find((i: any) => i['id'] === '©gen')
+
+		if (genre === undefined || genre?.['value'] === '') {
+			genre = doc['native']['iTunes'].find((i: any) => i['id'] === 'gnre')
+		}
 
 		if (genre) return genre['value']
 	}
