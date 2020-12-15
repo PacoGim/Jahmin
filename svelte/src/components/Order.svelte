@@ -75,19 +75,16 @@
 		flex-direction: column;
 		overflow-y: auto;
 		height: 100%;
-		/* background-color: rgba(255,255,255,.05); */
 		border-right: 1px rgba(255, 255, 255, 0.75) solid;
 		padding: 0 1rem;
 		font-size: 0.8rem;
 	}
 
-	order:first-of-type {
-		/* border-right: none; */
-	}
 	order item label {
 		border-radius: 5px;
 		margin: 0.25rem 0;
 		padding: 0 0.5rem;
+		text-align: center;
 	}
 	order item:hover label {
 		background-color: var(--highlight-color);

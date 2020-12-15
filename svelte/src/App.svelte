@@ -10,38 +10,37 @@
 	import SongList from './includes/SongList.svelte'
 	import Details from './includes/Details.svelte'
 	import Controller from './controller/Controller.svelte'
+	import { getAlbums } from './service/ipc.service'
 
 	// const { ipcRenderer, shell } = require('electron')
 
-	// onMount(() => {
-	// 	ipcRenderer.invoke('get-songs').then((result) => {
-	// 		// result = result.slice(0, 10)
-	// 		console.log(result)
-	// 		// $songIndex = result
-	// 	})
-	// })
+	onMount(() => {
+
+		// Calls the IPC once to wait for the filtering to be done.
+		getAlbums()
+	})
 </script>
 
 <Controller />
 
 <main>
-	<!-- <Navigation /> -->
-	<!-- <ArtGrid /> -->
+	<Navigation />
+	<ArtGrid />
 	<Grouping />
-	<!-- <Player /> -->
-	<!-- <SongList /> -->
-	<!-- <Details /> -->
+	<Player />
+	<SongList />
+	<Details />
 </main>
 
 <style>
 	main {
 		height: 100%;
-		/* display: grid;
-		grid-template-columns: 0.3fr 0.8fr 2.2fr 0.7fr;
-		grid-template-rows: 1.9fr 0.9fr 0.2fr;
+		display: grid;
+		grid-template-columns: 64px auto 8fr 256px;
+		grid-template-rows: 2fr 1fr 64px;
 		grid-template-areas:
 			'navigation-svlt grouping-svlt art-grid-svlt details-svlt'
 			'navigation-svlt grouping-svlt song-list-svlt details-svlt'
-			'navigation-svlt player-svlt player-svlt player-svlt'; */
+			'navigation-svlt player-svlt player-svlt player-svlt';
 	}
 </style>

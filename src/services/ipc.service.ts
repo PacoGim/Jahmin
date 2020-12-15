@@ -3,6 +3,7 @@ import { getConfig, saveConfig } from './config.service'
 import { getCollection } from './loki.service'
 import { orderSongs } from './songFilter.service'
 import { nanoid } from 'nanoid'
+import { getNewPromiseAlbumArray } from '../globals'
 
 export function loadIPC() {
 	ipcMain.handle('get-songs', async (evt, arg) => {
@@ -45,5 +46,11 @@ export function loadIPC() {
 		console.log('Open Config File')
 		// shell.showItemInFolder(configFilePath)
 		return
+	})
+
+	ipcMain.handle('get-albums', async () => {
+
+		// Waits for the filtering to be done then return the result.
+		return await getNewPromiseAlbumArray()
 	})
 }

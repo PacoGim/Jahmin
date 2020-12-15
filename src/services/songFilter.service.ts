@@ -1,3 +1,4 @@
+import { setAlbumArray } from '../globals'
 import { getCollection } from './loki.service'
 
 export function orderSongs(index: number, grouping: string[], filtering: string[]) {
@@ -20,6 +21,11 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 		// If i === index means that it should be grouping since user selection does not matter now.
 		if (i === index) {
 			// <<<<< Grouping >>>>>
+
+			if (index === grouping.length - 1) {
+				setAlbumArray(filteredArray)
+			}
+
 			filteredArray.forEach((song) => {
 				// Group by i or index since they match it should be grouped.
 				// i === index -> 4 === 4 -> Group by Album Artist since it is the last grouping array element.
@@ -38,8 +44,6 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 			// <<<<< Filtering >>>>>
 			let groupBy = grouping[i]
 			let filterBy = filtering[i]
-
-			//TODO Why Unknown stuff appears?
 
 			filteredArray = filteredArray.filter((song: any) => {
 				// If one of the filters is not defined or null, add the songs the the list anyway.

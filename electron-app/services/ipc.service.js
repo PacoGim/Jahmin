@@ -15,6 +15,7 @@ const config_service_1 = require("./config.service");
 const loki_service_1 = require("./loki.service");
 const songFilter_service_1 = require("./songFilter.service");
 const nanoid_1 = require("nanoid");
+const globals_1 = require("../globals");
 function loadIPC() {
     electron_1.ipcMain.handle('get-songs', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         console.log('IPC Get Songs');
@@ -49,5 +50,9 @@ function loadIPC() {
         // shell.showItemInFolder(configFilePath)
         return;
     });
+    electron_1.ipcMain.handle('get-albums', () => __awaiter(this, void 0, void 0, function* () {
+        // Waits for the filtering to be done then return the result.
+        return yield globals_1.getNewPromiseAlbumArray();
+    }));
 }
 exports.loadIPC = loadIPC;

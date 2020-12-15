@@ -24,3 +24,14 @@ export function saveConfig(newConfig: object) {
 		})
 	})
 }
+
+export function getAlbums() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-albums').then((result) => {
+			console.log(result)
+			// When the results arrive, recursive call to wait for the eventual new filtering.
+			resolve(result)
+			getAlbums()
+		})
+	})
+}
