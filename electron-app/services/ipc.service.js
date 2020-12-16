@@ -15,7 +15,8 @@ const config_service_1 = require("./config.service");
 const loki_service_1 = require("./loki.service");
 const songFilter_service_1 = require("./songFilter.service");
 const nanoid_1 = require("nanoid");
-const globals_1 = require("../globals");
+const albumFiltering_service_1 = require("./albumFiltering.service");
+const albumArt_service_1 = require("./albumArt.service");
 function loadIPC() {
     electron_1.ipcMain.handle('get-songs', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         console.log('IPC Get Songs');
@@ -31,7 +32,6 @@ function loadIPC() {
         let grouping = config['order']['grouping'] || [];
         let filtering = config['order']['filtering'] || [];
         let result = songFilter_service_1.orderSongs(arg, grouping, filtering);
-        // result=result.map((value)=>{id:nanoid(),item:value})
         result = result.map((value) => ({
             id: nanoid_1.nanoid(),
             value
@@ -52,7 +52,10 @@ function loadIPC() {
     });
     electron_1.ipcMain.handle('get-albums', () => __awaiter(this, void 0, void 0, function* () {
         // Waits for the filtering to be done then return the result.
-        return yield globals_1.getNewPromiseAlbumArray();
+        return yield albumFiltering_service_1.getNewPromiseAlbumArray();
+    }));
+    electron_1.ipcMain.handle('get-cover', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
+        return yield albumArt_service_1.getAlbumCover(rootDir);
     }));
 }
 exports.loadIPC = loadIPC;

@@ -1,4 +1,4 @@
-import { setAlbumArray } from '../globals'
+import { setAlbumArray } from './albumFiltering.service'
 import { getCollection } from './loki.service'
 
 export function orderSongs(index: number, grouping: string[], filtering: string[]) {
@@ -23,7 +23,13 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 			// <<<<< Grouping >>>>>
 
 			if (index === grouping.length - 1) {
-				setAlbumArray(filteredArray)
+				// Filters one last time to remove the last chosen filter, otherwise, the array would countain ALL the songs with the last selected filter for the album grouping. Only if a last grouping was selected.
+				if (filtering[i] !== null) {
+					let lastFilter = filteredArray.filter((song) => song[grouping[i]] === filtering[i])
+					setAlbumArray(lastFilter)
+				} else {
+					setAlbumArray(filteredArray)
+				}
 			}
 
 			filteredArray.forEach((song) => {

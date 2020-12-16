@@ -12,6 +12,8 @@ export let versioning: Writable<number> = writable(Date.now())
 
 export let allSongFilters: Writable<FilterType[]> = writable([])
 
+export let albums: Writable<any> = writable([])
+
 // 'Genre', 'AlbumArtist', 'Album'
 export let valuesToGroup: Writable<string[]> = writable([])
 

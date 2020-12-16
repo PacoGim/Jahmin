@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron')
+import { albums } from '../store/index.store'
 
 export function getOrder(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
@@ -25,13 +26,21 @@ export function saveConfig(newConfig: object) {
 	})
 }
 
-export function getAlbums() {
+export function getAlbums(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-albums').then((result) => {
-			console.log(result)
+			albums.set(result)
+			resolve()
 			// When the results arrive, recursive call to wait for the eventual new filtering.
-			resolve(result)
 			getAlbums()
+		})
+	})
+}
+
+export function getCover(rootDir) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-cover', rootDir).then((result) => {
+			resolve(result)
 		})
 	})
 }

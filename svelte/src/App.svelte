@@ -14,11 +14,7 @@
 
 	// const { ipcRenderer, shell } = require('electron')
 
-	onMount(() => {
 
-		// Calls the IPC once to wait for the filtering to be done.
-		getAlbums()
-	})
 </script>
 
 <Controller />

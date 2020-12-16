@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.orderSongs = void 0;
-const globals_1 = require("../globals");
+const albumFiltering_service_1 = require("./albumFiltering.service");
 const loki_service_1 = require("./loki.service");
 function orderSongs(index, grouping, filtering) {
     // Retrieves the songs from DB.
@@ -20,7 +20,14 @@ function orderSongs(index, grouping, filtering) {
         if (i === index) {
             // <<<<< Grouping >>>>>
             if (index === grouping.length - 1) {
-                globals_1.setAlbumArray(filteredArray);
+                // Filters one last time to remove the last chosen filter, otherwise, the array would countain ALL the songs with the last selected filter for the album grouping. Only if a last grouping was selected.
+                if (filtering[i] !== null) {
+                    let lastFilter = filteredArray.filter((song) => song[grouping[i]] === filtering[i]);
+                    albumFiltering_service_1.setAlbumArray(lastFilter);
+                }
+                else {
+                    albumFiltering_service_1.setAlbumArray(filteredArray);
+                }
             }
             filteredArray.forEach((song) => {
                 // Group by i or index since they match it should be grouped.

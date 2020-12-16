@@ -3,7 +3,8 @@ import { getConfig, saveConfig } from './config.service'
 import { getCollection } from './loki.service'
 import { orderSongs } from './songFilter.service'
 import { nanoid } from 'nanoid'
-import { getNewPromiseAlbumArray } from '../globals'
+import { getNewPromiseAlbumArray } from './albumFiltering.service'
+import { getAlbumCover } from './albumArt.service'
 
 export function loadIPC() {
 	ipcMain.handle('get-songs', async (evt, arg) => {
@@ -24,7 +25,6 @@ export function loadIPC() {
 		let filtering = config['order']['filtering'] || []
 		let result: any[] = orderSongs(arg, grouping, filtering)
 
-		// result=result.map((value)=>{id:nanoid(),item:value})
 		result = result.map((value) => ({
 			id: nanoid(),
 			value
@@ -49,8 +49,11 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('get-albums', async () => {
-
 		// Waits for the filtering to be done then return the result.
 		return await getNewPromiseAlbumArray()
+	})
+
+	ipcMain.handle('get-cover', async (evt, rootDir) => {
+		return await getAlbumCover(rootDir)
 	})
 }
