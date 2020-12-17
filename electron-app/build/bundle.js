@@ -705,9 +705,9 @@ var app = (function () {
     			if (img.src !== (img_src_value = /*imageSrc*/ ctx[0])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-1keh8xn");
-    			add_location(img, file$1, 17, 7, 319);
+    			add_location(img, file$1, 38, 7, 920);
     			attr_dev(album_1, "class", "svelte-1keh8xn");
-    			add_location(album_1, file$1, 17, 0, 312);
+    			add_location(album_1, file$1, 38, 0, 913);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -743,19 +743,36 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Album", slots, []);
     	let { album } = $$props;
-    	let imageSrc; /* Image Source URL */
+    	let { index } = $$props;
+    	let imageSrc = undefined; /* Image Source URL */
 
+    	// var observer =body > main > art-grid-svlt > album:nth-child(32) > img
+    	// body > main > art-grid-svlt > album:nth-child(1)
+    	// observer.observe(document.querySelector('#main-container'))
     	onMount(() => {
-    		getCover(album["RootDir"]).then(result => {
-    			console.log(result);
-
-    			if (result !== null) {
-    				$$invalidate(0, imageSrc = result);
-    			}
-    		});
+    		addIntersectionObserver();
     	});
 
-    	const writable_props = ["album"];
+    	function fetchAlbumCover() {
+    		getCover(album["RootDir"]).then(result => {
+    			if (result !== null) {
+    				$$invalidate(0, imageSrc = result);
+    			} else {
+    				console.log("Got null");
+    			}
+    		});
+    	}
+
+    	function addIntersectionObserver() {
+    		new IntersectionObserver(entries => {
+    				if (entries[0].isIntersecting === true && imageSrc === undefined) {
+    					fetchAlbumCover();
+    				}
+    			},
+    		{ threshold: 0 }).observe(document.querySelector(`art-grid-svlt > album:nth-child(${index + 1})`));
+    	}
+
+    	const writable_props = ["album", "index"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1.warn(`<Album> was created with unknown prop '${key}'`);
@@ -763,12 +780,22 @@ var app = (function () {
 
     	$$self.$$set = $$props => {
     		if ("album" in $$props) $$invalidate(1, album = $$props.album);
+    		if ("index" in $$props) $$invalidate(2, index = $$props.index);
     	};
 
-    	$$self.$capture_state = () => ({ onMount, getCover, album, imageSrc });
+    	$$self.$capture_state = () => ({
+    		onMount,
+    		getCover,
+    		album,
+    		index,
+    		imageSrc,
+    		fetchAlbumCover,
+    		addIntersectionObserver
+    	});
 
     	$$self.$inject_state = $$props => {
     		if ("album" in $$props) $$invalidate(1, album = $$props.album);
+    		if ("index" in $$props) $$invalidate(2, index = $$props.index);
     		if ("imageSrc" in $$props) $$invalidate(0, imageSrc = $$props.imageSrc);
     	};
 
@@ -776,13 +803,13 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [imageSrc, album];
+    	return [imageSrc, album, index];
     }
 
     class Album extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { album: 1 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { album: 1, index: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -797,6 +824,10 @@ var app = (function () {
     		if (/*album*/ ctx[1] === undefined && !("album" in props)) {
     			console_1.warn("<Album> was created without expected prop 'album'");
     		}
+
+    		if (/*index*/ ctx[2] === undefined && !("index" in props)) {
+    			console_1.warn("<Album> was created without expected prop 'index'");
+    		}
     	}
 
     	get album() {
@@ -804,6 +835,14 @@ var app = (function () {
     	}
 
     	set album(value) {
+    		throw new Error("<Album>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get index() {
+    		throw new Error("<Album>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set index(value) {
     		throw new Error("<Album>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -814,17 +853,21 @@ var app = (function () {
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[1] = list[i];
+    	child_ctx[3] = i;
     	return child_ctx;
     }
 
-    // (16:1) {#each $albums as album (album['ID'])}
+    // (21:1) {#each $albums as album, index (album['ID'])}
     function create_each_block(key_1, ctx) {
     	let first;
     	let album;
     	let current;
 
     	album = new Album({
-    			props: { album: /*album*/ ctx[1] },
+    			props: {
+    				album: /*album*/ ctx[1],
+    				index: /*index*/ ctx[3]
+    			},
     			$$inline: true
     		});
 
@@ -844,6 +887,7 @@ var app = (function () {
     		p: function update(ctx, dirty) {
     			const album_changes = {};
     			if (dirty & /*$albums*/ 1) album_changes.album = /*album*/ ctx[1];
+    			if (dirty & /*$albums*/ 1) album_changes.index = /*index*/ ctx[3];
     			album.$set(album_changes);
     		},
     		i: function intro(local) {
@@ -865,7 +909,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(16:1) {#each $albums as album (album['ID'])}",
+    		source: "(21:1) {#each $albums as album, index (album['ID'])}",
     		ctx
     	});
 
@@ -896,8 +940,8 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(art_grid_svlt, "class", "svelte-cc9o8e");
-    			add_location(art_grid_svlt, file$2, 14, 0, 301);
+    			set_custom_element_data(art_grid_svlt, "class", "svelte-yzpeue");
+    			add_location(art_grid_svlt, file$2, 19, 0, 494);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -967,6 +1011,11 @@ var app = (function () {
     	onMount(() => {
     		// Calls the IPC once to wait for the filtering to be done.
     		getAlbums();
+
+    		// Whenever a filter is selected resest the scroll to top.
+    		isValuesToFilterChanged.subscribe(() => {
+    			document.querySelector("art-grid-svlt").scrollTop = 0;
+    		});
     	});
 
     	const writable_props = [];
@@ -980,6 +1029,7 @@ var app = (function () {
     		Album,
     		getAlbums,
     		albums,
+    		isValuesToFilterChanged,
     		$albums
     	});
 
