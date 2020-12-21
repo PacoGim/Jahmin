@@ -36,7 +36,7 @@
 	}
 </script>
 
-<album><img src={imageSrc} alt="" /></album>
+<album><img src={imageSrc} alt={album['Album']} /></album>
 
 <style>
 	album:last-of-type {
@@ -44,8 +44,9 @@
 	}
 
 	album {
-		height: 128px;
-		width: 128px;
+		display: block;
+		height: var(--cover-dimension);
+		width: var(--cover-dimension);
 	}
 
 	img {

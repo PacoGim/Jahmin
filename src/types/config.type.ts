@@ -1,6 +1,11 @@
 export type ConfigType = {
 	bounds?: BoundsType
 	order: OrderType
+	art: ArtType
+}
+
+type ArtType = {
+	dimension: number
 }
 
 type OrderType = {

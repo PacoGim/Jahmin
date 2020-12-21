@@ -4,7 +4,18 @@
 
 	import { getAlbums } from '../service/ipc.service'
 
-	import { albums, isValuesToFilterChanged } from '../store/index.store'
+	import { albums, isValuesToFilterChanged, storeConfig } from '../store/index.store'
+
+	$: if ($storeConfig !== undefined) {
+		let dimension
+		try {
+			dimension = $storeConfig['art']['dimension']
+		} catch (error) {
+			dimension = 128
+		} finally {
+			document.documentElement.style.setProperty('--cover-dimension', `${dimension}px`)
+		}
+	}
 
 	onMount(() => {
 		// Calls the IPC once to wait for the filtering to be done.
@@ -31,8 +42,8 @@
 		grid-area: art-grid-svlt;
 		background-color: #222;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, 128px);
-		grid-template-rows: repeat(auto-fit, 128px);
+		grid-template-columns: repeat(auto-fit, var(--cover-dimension));
+		grid-template-rows: repeat(auto-fit, var(--cover-dimension));
 		gap: 10px;
 	}
 </style>

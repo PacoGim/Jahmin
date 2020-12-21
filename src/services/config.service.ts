@@ -56,6 +56,9 @@ function getDefaultConfigFile() {
 		order: {
 			grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
 			filtering: []
+		},
+		art: {
+			dimension: 128
 		}
 	}
 }
