@@ -13,14 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanFolders = void 0;
+exports.scanFolders = exports.validFormats = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const music_metadata_1 = require("music-metadata");
 const loki_service_1 = require("./loki.service");
 // import { customAlphabet } from 'nanoid'
 // const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
-const formats = ['.flac', '.m4a', '.mp3', '.wav', '.ogg', '.opus'];
+exports.validFormats = ['.flac', '.m4a', '.mp3', '.wav', '.ogg', '.opus'];
 //@ts-expect-error
 let filesCollection = [];
 // Variable thats keeps the actual folder scan depth.
@@ -54,7 +54,7 @@ function scanFolders(rootFolders) {
         }
         else {
             // If the item is not a folder, then, it only processes the item with the available formats set above.
-            if (formats.includes(getExtension(item)))
+            if (exports.validFormats.includes(getExtension(item)))
                 filesCollection.push(fileAbsolutePath);
         }
     });

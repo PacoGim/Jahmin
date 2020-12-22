@@ -7,7 +7,7 @@ import { createData, readData } from './loki.service'
 // import { customAlphabet } from 'nanoid'
 // const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
 
-const formats = ['.flac', '.m4a', '.mp3', '.wav', '.ogg', '.opus']
+export const validFormats = ['.flac', '.m4a', '.mp3', '.wav', '.ogg', '.opus']
 
 //@ts-expect-error
 let filesCollection: [string] = []
@@ -51,7 +51,7 @@ export function scanFolders(rootFolders: string[]) {
 			depth.pop()
 		} else {
 			// If the item is not a folder, then, it only processes the item with the available formats set above.
-			if (formats.includes(getExtension(item))) filesCollection.push(fileAbsolutePath)
+			if (validFormats.includes(getExtension(item))) filesCollection.push(fileAbsolutePath)
 		}
 	})
 

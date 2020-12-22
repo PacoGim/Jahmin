@@ -43,7 +43,7 @@
 		background-color: #222;
 		display: grid;
 		grid-template-columns: repeat(auto-fit, var(--cover-dimension));
-		grid-template-rows: repeat(auto-fit, var(--cover-dimension));
+		grid-template-rows: repeat(auto-fit, auto);
 		gap: 10px;
 	}
 </style>

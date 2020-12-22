@@ -22,11 +22,23 @@ const image_info_1 = __importDefault(require("image-info"));
 const __1 = require("..");
 const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
-const validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+const validVideoExtensions = ['gif', 'mp4'];
+const validImageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+const validExtensions = [...validImageExtensions, ...validVideoExtensions];
 const validNames = ['cover', 'folder', 'front', 'art'];
 function getAlbumCover(rootDir) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
         let imagePathArray = [];
+        let rootDirHashed = hash_sum_1.default(rootDir);
+        let config = config_service_1.getConfig();
+        let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
+        let artDirPath = path_1.default.join(__1.appDataPath, 'art', String(dimension));
+        let artPath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
+        if (fs_1.default.existsSync(artPath)) {
+            return resolve({ fileType: 'image', filePath: artPath });
+        }
+        console.log('Stuff', rootDir);
         try {
             fs_1.default.readdirSync(rootDir).forEach((file) => {
                 const ext /*extension*/ = file.split('.').pop();
@@ -42,25 +54,26 @@ function getAlbumCover(rootDir) {
             return resolve(null);
         }
         imagePathArray = imagePathArray.filter((imagePath) => validNames.includes(getFileNameWithoutExtension(imagePath)));
-        // If no images are found in music folder
-        // TODO Get image from song file
+        // If no images with proper naming are found in folder
         if (imagePathArray.length === 0) {
             return resolve(null);
         }
+        const videoCoverFound = imagePathArray.find((file) => validVideoExtensions.includes(file.split('.').pop()));
+        if (videoCoverFound) {
+            return resolve({ fileType: 'video', filePath: videoCoverFound });
+        }
+        const webpCoverFound = imagePathArray.find((file) => file.split('.').pop() === 'webp');
+        if (webpCoverFound) {
+            return resolve({ fileType: 'image', filePath: webpCoverFound });
+        }
         let bestImagePath = yield getBestImageFromArray(imagePathArray);
-        let compressedImagePath = getImageCompressed(bestImagePath);
-        if (compressedImagePath !== undefined) {
-            resolve(compressedImagePath);
-        }
-        else {
-            resolve(bestImagePath);
-            //Compress Image AFTER sending it the renderer to avoid waiting for compression.
-            compressImage(bestImagePath);
-        }
+        // let compressedImagePath = getImageCompressed(bestImagePath)
+        resolve({ fileType: 'image', filePath: bestImagePath });
+        //Compress Image AFTER sending it the renderer to avoid waiting for compression.
+        compressImage(bestImagePath, artDirPath, artPath);
     }));
 }
 exports.getAlbumCover = getAlbumCover;
-function getImageFromFile() { }
 function getImageCompressed(filePath) {
     var _a;
     let config = config_service_1.getConfig();
@@ -75,15 +88,12 @@ function getImageCompressed(filePath) {
         return undefined;
     }
 }
-function compressImage(filePath) {
+function compressImage(filePath, artDirPath, compressedFilePath) {
     var _a;
     let config = config_service_1.getConfig();
     let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
-    let artDirPath = path_1.default.join(__1.appDataPath, 'art', String(dimension));
-    let fileHash = `${hash_sum_1.default(filePath)}.webp`;
-    let compressedFilePath = path_1.default.join(artDirPath, fileHash);
     if (!fs_1.default.existsSync(artDirPath)) {
-        original_fs_1.mkdirSync(artDirPath);
+        original_fs_1.mkdirSync(artDirPath, { recursive: true });
     }
     sharp_1.default(filePath)
         .resize({

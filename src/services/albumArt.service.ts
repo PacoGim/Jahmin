@@ -10,12 +10,26 @@ import { appDataPath } from '..'
 import { mkdirSync } from 'original-fs'
 import { getConfig } from './config.service'
 
-const validExtensions = ['jpg', 'jpeg', 'png', 'gif']
+const validVideoExtensions = ['gif', 'mp4']
+const validImageExtensions = ['jpg', 'jpeg', 'png', 'webp']
+const validExtensions = [...validImageExtensions, ...validVideoExtensions]
 const validNames = ['cover', 'folder', 'front', 'art']
 
 export function getAlbumCover(rootDir: /* Root Directory */ string) {
 	return new Promise(async (resolve, reject) => {
 		let imagePathArray: string[] = []
+		let rootDirHashed = hash(rootDir)
+		let config = getConfig()
+		let dimension = config?.['art']?.['dimension']
+		let artDirPath = path.join(appDataPath, 'art', String(dimension))
+		let artPath = path.join(artDirPath, rootDirHashed) + '.webp'
+
+		if (fs.existsSync(artPath)) {
+			return resolve({ fileType: 'image', filePath: artPath })
+		}
+
+		console.log('Stuff', rootDir)
+
 		try {
 			fs.readdirSync(rootDir).forEach((file) => {
 				const ext /*extension*/ = file.split('.').pop()
@@ -33,27 +47,32 @@ export function getAlbumCover(rootDir: /* Root Directory */ string) {
 
 		imagePathArray = imagePathArray.filter((imagePath) => validNames.includes(getFileNameWithoutExtension(imagePath)))
 
-		// If no images are found in music folder
-		// TODO Get image from song file
+		// If no images with proper naming are found in folder
 		if (imagePathArray.length === 0) {
 			return resolve(null)
 		}
 
+		const videoCoverFound = imagePathArray.find((file) => validVideoExtensions.includes(file.split('.').pop()))
+
+		if (videoCoverFound) {
+			return resolve({ fileType: 'video', filePath: videoCoverFound })
+		}
+
+		const webpCoverFound = imagePathArray.find((file) => file.split('.').pop() === 'webp')
+
+		if (webpCoverFound) {
+			return resolve({ fileType: 'image', filePath: webpCoverFound })
+		}
+
 		let bestImagePath = await getBestImageFromArray(imagePathArray)
 
-		let compressedImagePath = getImageCompressed(bestImagePath)
+		// let compressedImagePath = getImageCompressed(bestImagePath)
 
-		if (compressedImagePath !== undefined) {
-			resolve(compressedImagePath)
-		} else {
-			resolve(bestImagePath)
-			//Compress Image AFTER sending it the renderer to avoid waiting for compression.
-			compressImage(bestImagePath)
-		}
+		resolve({ fileType: 'image', filePath: bestImagePath })
+		//Compress Image AFTER sending it the renderer to avoid waiting for compression.
+		compressImage(bestImagePath, artDirPath, artPath)
 	})
 }
-
-function getImageFromFile() {}
 
 function getImageCompressed(filePath: string) {
 	let config = getConfig()
@@ -69,15 +88,12 @@ function getImageCompressed(filePath: string) {
 	}
 }
 
-function compressImage(filePath: string) {
+function compressImage(filePath: string, artDirPath: string, compressedFilePath: string) {
 	let config = getConfig()
 	let dimension = config?.['art']?.['dimension']
-	let artDirPath = path.join(appDataPath, 'art', String(dimension))
-	let fileHash = `${hash(filePath)}.webp`
-	let compressedFilePath = path.join(artDirPath, fileHash)
 
 	if (!fs.existsSync(artDirPath)) {
-		mkdirSync(artDirPath)
+		mkdirSync(artDirPath, { recursive: true })
 	}
 
 	sharp(filePath)
