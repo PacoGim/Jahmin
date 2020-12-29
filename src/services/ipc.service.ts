@@ -3,7 +3,7 @@ import { getConfig, saveConfig } from './config.service'
 import { getCollection } from './loki.service'
 import { orderSongs } from './songFilter.service'
 import { nanoid } from 'nanoid'
-import { getNewPromiseAlbumArray } from './albumFiltering.service'
+import { getAlbumArray, getNewPromiseAlbumArray } from './albumFiltering.service'
 import { getAlbumCover } from './albumArt.service'
 
 export function loadIPC() {
@@ -51,6 +51,11 @@ export function loadIPC() {
 	ipcMain.handle('get-albums', async () => {
 		// Waits for the filtering to be done then return the result.
 		return await getNewPromiseAlbumArray()
+	})
+
+	ipcMain.handle('get-album-song', (evt, albumName) => {
+		let albums = getAlbumArray().filter((x: any) => x['Album'] === albumName)
+		return albums
 	})
 
 	ipcMain.handle('get-cover', async (evt, rootDir) => {

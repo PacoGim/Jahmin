@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte'
-	import { getCover } from '../service/ipc.service'
+	import { getAlbumSong, getCover } from '../service/ipc.service'
+	import { songList } from '../store/index.store'
 
 	export let album
 	export let index
@@ -36,9 +37,15 @@
 			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
 		).observe(document.querySelector(`art-grid-svlt > album:nth-child(${index + 1})`))
 	}
+
+	async function fetchAlbumSongList(albumName) {
+		let songs = await getAlbumSong(albumName)
+		songs = songs.sort((a, b) => a['Track'] - b['Track'])
+		$songList = songs
+	}
 </script>
 
-<album>
+<album on:click={() => fetchAlbumSongList(album['Album'])}>
 	{#if coverType === undefined}<img src="./img/audio.svg" class="loader" alt="" />{/if}
 	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
 	{#if coverType === 'image'}<img src={coverSrc} alt={album['Album']} />{/if}

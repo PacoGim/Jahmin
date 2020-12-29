@@ -5,6 +5,6 @@
 <style>
   details-svlt{
     grid-area: details-svlt;
-    background-color: #444;
+    background-color: rgba(0,0,0,.25);
   }
 </style>

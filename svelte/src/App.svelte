@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { songIndex } from './store/index.store'
-
-	import { onMount } from 'svelte'
-
 	import Navigation from './includes/Navigation.svelte'
 	import ArtGrid from './includes/ArtGrid.svelte'
 	import Grouping from './includes/Ordering.svelte'
@@ -10,11 +6,7 @@
 	import SongList from './includes/SongList.svelte'
 	import Details from './includes/Details.svelte'
 	import Controller from './controller/Controller.svelte'
-	import { getAlbums } from './service/ipc.service'
-
-	// const { ipcRenderer, shell } = require('electron')
-
-
+	import BackgroundArt from './includes/BackgroundArt.svelte'
 </script>
 
 <Controller />
@@ -26,6 +18,7 @@
 	<Player />
 	<SongList />
 	<Details />
+	<BackgroundArt />
 </main>
 
 <style>

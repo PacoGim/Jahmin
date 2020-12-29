@@ -17,7 +17,7 @@ import { valuesToGroup } from "../store/index.store";
 		height: 100%;
 		width: 100%;
 		grid-area: grouping-svlt;
-		background-color: #111;
+		background-color: rgba(0,0,0,.25);
 		flex-direction: row;
 	}
 </style>

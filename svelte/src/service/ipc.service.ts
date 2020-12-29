@@ -44,3 +44,11 @@ export function getCover(rootDir) {
 		})
 	})
 }
+
+export function getAlbumSong(albumName) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-album-song', albumName).then((result) => {
+			resolve(result)
+		})
+	})
+}

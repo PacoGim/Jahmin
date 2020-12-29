@@ -40,7 +40,7 @@
 		overflow-y: auto;
 		height: 100%;
 		grid-area: art-grid-svlt;
-		background-color: #222;
+		background-color: rgba(0,0,0,.3);
 		display: grid;
 		grid-template-columns: repeat(auto-fit, var(--cover-dimension));
 		grid-template-rows: repeat(auto-fit, auto);

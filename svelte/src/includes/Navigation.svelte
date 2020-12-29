@@ -5,6 +5,6 @@
 <style>
 	navigation-svlt {
     grid-area: navigation-svlt;
-		background-color: #666;
+		/* background-color: rgba(255,255,255,.05); */
 	}
 </style>

@@ -1,7 +1,5 @@
 import { Writable, writable } from 'svelte/store'
 
-export let songIndex: Writable<string[]> = writable([])
-
 type FilterType = {
 	userSelection?: string
 	filter: string
@@ -21,3 +19,6 @@ export let valuesToGroup: Writable<string[]> = writable([])
 export let valuesToFilter: Writable<string[]> = writable([])
 export let isValuesToFilterChanged: Writable<boolean> = writable(false)
 export let storeConfig: Writable<any> = writable(undefined)
+
+
+export let songList: Writable<any[]> = writable(undefined)

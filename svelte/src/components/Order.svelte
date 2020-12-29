@@ -69,7 +69,8 @@
 
 <style>
 	order {
-		--highlight-color: #333;
+		/* --highlight-color: #333; */
+		--highlight-color: rgba(255,255,255,.25);
 
 		display: flex;
 		flex-direction: column;
