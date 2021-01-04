@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { tweened } from 'svelte/motion'
-	import { cubicOut } from 'svelte/easing'
-
 	import type { TagType } from '../../types/tag.type'
 
 	import { onMount } from 'svelte'
 
 	import { songList } from '../store/index.store'
 	import { songIndex } from '../store/player.store'
+	import { getWaveformData } from '../service/waveform.service'
+	import { drawWaveform } from '../service/draw.service'
 
 	let volume: number = 0
 	let progress: number = 0
+	let songArrayBuffer: ArrayBuffer
 
 	let currentSong: TagType = undefined
 
@@ -28,6 +28,7 @@
 	let player: HTMLAudioElement = undefined
 
 	function playSong(index) {
+
 		if (index === null) return false
 
 		if ($songList === undefined) {
@@ -36,10 +37,25 @@
 			}, 1000)
 		}
 
+		player.pause()
+
 		currentSong = $songList[index]
 
-		player.src = currentSong['SourceFile']
-		player.play()
+		fetch(currentSong['SourceFile'])
+			.then((data) => data.arrayBuffer())
+			.then((arrayBuffer) => {
+				songArrayBuffer = arrayBuffer
+				const blob = new Blob([songArrayBuffer])
+				const url = window.URL.createObjectURL(blob)
+				player.src = url
+				player.play()
+
+				document.querySelector('canvas').style.opacity = '0'
+				getWaveformData(songArrayBuffer).then((waveformData) => {
+					document.querySelector('canvas').style.opacity = '1'
+					drawWaveform(waveformData)
+				})
+			})
 	}
 
 	function selectSong() {}
@@ -54,7 +70,7 @@
 			localStorage.setItem('volume', String(volume))
 		}
 
-		// player.volume = volume
+		player.volume = volume
 	})
 
 	function saveVolumeChange() {
@@ -72,7 +88,7 @@
 
 	let pauseDebounce
 
-	function bar() {
+	function changeDuration() {
 		player.pause()
 
 		let progressValue = document.querySelector('#inputProgress').value
@@ -87,13 +103,22 @@
 	}
 
 	let playingInterval
+	let counter = 0
+	// counter = counter + 100
+
+	// if (counter === 200) {
+	// 	getWaveformData(songArrayBuffer).then((waveformData) => {
+	// 		drawWaveform(waveformData)
+	// 	})
+	// }
 
 	function startInterval() {
 		console.log('Start')
+		// getWaveform(currentSong['SourceFile'])
+
 		clearInterval(playingInterval)
 
 		playingInterval = setInterval(() => {
-
 			progress = (100 / currentSong['Duration']) * player.currentTime
 			document.documentElement.style.setProperty('--song-time', `${progress}%`)
 		}, 100)
@@ -102,6 +127,7 @@
 	function stopInterval() {
 		console.log('Stop')
 		clearInterval(playingInterval)
+		counter = 0
 	}
 </script>
 
@@ -125,10 +151,10 @@
 			min="0"
 			max="100"
 			step="0.1"
-			on:mousedown={() => bar()}
-			on:input={() => bar()} />
-		<progress-background />
-		<progress-foreground>{Math.round(progress)}%</progress-foreground>
+			on:mousedown={() => changeDuration()}
+			on:input={() => changeDuration()} />
+		<canvas id="progress-background" />
+		<progress-foreground />
 	</player-progress>
 </player-svlt>
 
@@ -149,7 +175,7 @@
 		top: 0;
 		left: 0;
 		display: block;
-		height: 16px;
+		height: 64px;
 	}
 	player-progress input {
 		opacity: 0;
@@ -164,14 +190,17 @@
 
 	player-progress progress-foreground {
 		z-index: 1;
-		background-color: rgba(255,255,255,.25);
+		mix-blend-mode: difference;
+		/* background-color: rgba(255, 255, 255, 0.25); */
+		background-color: #fff;
 		min-width: var(--song-time);
 		transition: min-width 100ms linear;
 	}
 
-	player-progress progress-background {
+	player-progress #progress-background {
 		z-index: 0;
-		background-color: rgba(255,255,255,.25);
+		transition: opacity .3s ease-in-out;
+		/* background-color: rgba(255, 255, 255, 0.25); */
 		width: 100%;
 	}
 </style>

@@ -4,13 +4,6 @@ var app = (function () {
     'use strict';
 
     function noop() { }
-    const identity = x => x;
-    function assign(tar, src) {
-        // @ts-ignore
-        for (const k in src)
-            tar[k] = src[k];
-        return tar;
-    }
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -55,41 +48,6 @@ var app = (function () {
     function set_store_value(store, ret, value = ret) {
         store.set(value);
         return ret;
-    }
-
-    const is_client = typeof window !== 'undefined';
-    let now = is_client
-        ? () => window.performance.now()
-        : () => Date.now();
-    let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
-
-    const tasks = new Set();
-    function run_tasks(now) {
-        tasks.forEach(task => {
-            if (!task.c(now)) {
-                tasks.delete(task);
-                task.f();
-            }
-        });
-        if (tasks.size !== 0)
-            raf(run_tasks);
-    }
-    /**
-     * Creates a new task that runs on each raf frame
-     * until it returns a falsy value or is aborted
-     */
-    function loop(callback) {
-        let task;
-        if (tasks.size === 0)
-            raf(run_tasks);
-        return {
-            promise: new Promise(fulfill => {
-                tasks.add(task = { c: callback, f: fulfill });
-            }),
-            abort() {
-                tasks.delete(task);
-            }
-        };
     }
 
     function append(target, node) {
@@ -2208,111 +2166,67 @@ var app = (function () {
     	}
     }
 
-    function cubicOut(t) {
-        const f = t - 1.0;
-        return f * f * f + 1.0;
-    }
-
-    function is_date(obj) {
-        return Object.prototype.toString.call(obj) === '[object Date]';
-    }
-
-    function get_interpolator(a, b) {
-        if (a === b || a !== a)
-            return () => a;
-        const type = typeof a;
-        if (type !== typeof b || Array.isArray(a) !== Array.isArray(b)) {
-            throw new Error('Cannot interpolate values of different type');
-        }
-        if (Array.isArray(a)) {
-            const arr = b.map((bi, i) => {
-                return get_interpolator(a[i], bi);
-            });
-            return t => arr.map(fn => fn(t));
-        }
-        if (type === 'object') {
-            if (!a || !b)
-                throw new Error('Object cannot be null');
-            if (is_date(a) && is_date(b)) {
-                a = a.getTime();
-                b = b.getTime();
-                const delta = b - a;
-                return t => new Date(a + t * delta);
-            }
-            const keys = Object.keys(b);
-            const interpolators = {};
-            keys.forEach(key => {
-                interpolators[key] = get_interpolator(a[key], b[key]);
-            });
-            return t => {
-                const result = {};
-                keys.forEach(key => {
-                    result[key] = interpolators[key](t);
-                });
-                return result;
-            };
-        }
-        if (type === 'number') {
-            const delta = b - a;
-            return t => a + t * delta;
-        }
-        throw new Error(`Cannot interpolate ${type} values`);
-    }
-    function tweened(value, defaults = {}) {
-        const store = writable(value);
-        let task;
-        let target_value = value;
-        function set(new_value, opts) {
-            if (value == null) {
-                store.set(value = new_value);
-                return Promise.resolve();
-            }
-            target_value = new_value;
-            let previous_task = task;
-            let started = false;
-            let { delay = 0, duration = 400, easing = identity, interpolate = get_interpolator } = assign(assign({}, defaults), opts);
-            if (duration === 0) {
-                if (previous_task) {
-                    previous_task.abort();
-                    previous_task = null;
-                }
-                store.set(value = target_value);
-                return Promise.resolve();
-            }
-            const start = now() + delay;
-            let fn;
-            task = loop(now => {
-                if (now < start)
-                    return true;
-                if (!started) {
-                    fn = interpolate(value, new_value);
-                    if (typeof duration === 'function')
-                        duration = duration(value, new_value);
-                    started = true;
-                }
-                if (previous_task) {
-                    previous_task.abort();
-                    previous_task = null;
-                }
-                const elapsed = now - start;
-                if (elapsed > duration) {
-                    store.set(value = new_value);
-                    return false;
-                }
-                // @ts-ignore
-                store.set(value = fn(easing(elapsed / duration)));
-                return true;
-            });
-            return task.promise;
-        }
-        return {
-            set,
-            update: (fn, opts) => set(fn(target_value, value), opts),
-            subscribe: store.subscribe
-        };
-    }
-
     let songIndex = writable(null);
+
+    function getWaveformData(arrayBuffer) {
+        return new Promise(async (resolve, reject) => {
+            let ctx = new window.AudioContext();
+            let audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            let filteredData = filterData(audioBuffer);
+            let normalizedData = normalizeData(filteredData);
+            resolve(normalizedData);
+        });
+    }
+    function filterData(audioBuffer) {
+        const rawData = audioBuffer.getChannelData(0);
+        const samples = 65535;
+        const blockSize = Math.floor(rawData.length / samples);
+        const filteredData = [];
+        for (let i = 0; i < samples; i++) {
+            let blockStart = blockSize * i;
+            let sum = 0;
+            for (let j = 0; j < blockSize; j++) {
+                sum = sum + Math.abs(rawData[blockStart + j]);
+            }
+            filteredData.push(sum / blockSize);
+        }
+        return filteredData;
+    }
+    function normalizeData(filteredData) {
+        const multiplier = Math.pow(Math.max(...filteredData), -1);
+        return filteredData.map((n) => n * multiplier);
+    }
+
+    function drawWaveform(normalizedData) {
+        const canvas = document.querySelector('canvas');
+        const dpr = window.devicePixelRatio || 1;
+        const padding = 0;
+        canvas.width = canvas.offsetWidth * dpr;
+        canvas.height = (canvas.offsetHeight + padding * 2) * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.translate(0, canvas.offsetHeight / 2 + padding);
+        const width = canvas.offsetWidth / normalizedData.length;
+        for (let i = 0; i < normalizedData.length; i++) {
+            const x = width * i;
+            let y = normalizedData[i] * canvas.offsetHeight;
+            if (y < 0 || y > canvas.offsetHeight / 2) {
+                y = 0;
+            }
+            drawLineSegment(ctx, x, y, width, (i + 1) % 2);
+        }
+    }
+    function drawLineSegment(ctx, x, y, width, isEven) {
+        ctx.strokeStyle = `#fff`;
+        ctx.lineWidth = 0.2;
+        ctx.beginPath();
+        y = isEven ? y : -y;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + width, y);
+        ctx.lineTo(x + width, 0);
+        ctx.stroke();
+    }
 
     /* src/includes/Player.svelte generated by Svelte v3.31.0 */
 
@@ -2334,12 +2248,9 @@ var app = (function () {
     	let player_progress;
     	let input1;
     	let t4;
-    	let progress_background;
+    	let canvas;
     	let t5;
     	let progress_foreground;
-    	let t6_value = Math.round(/*progress*/ ctx[2]) + "";
-    	let t6;
-    	let t7;
     	let mounted;
     	let dispose;
 
@@ -2357,36 +2268,35 @@ var app = (function () {
     			player_progress = element("player-progress");
     			input1 = element("input");
     			t4 = space();
-    			progress_background = element("progress-background");
+    			canvas = element("canvas");
     			t5 = space();
     			progress_foreground = element("progress-foreground");
-    			t6 = text(t6_value);
-    			t7 = text("%");
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$5, 85, 2, 2463);
+    			add_location(track, file$5, 108, 2, 3285);
     			audio.controls = audio_controls_value = true;
-    			add_location(audio, file$5, 79, 1, 2290);
+    			add_location(audio, file$5, 102, 1, 3112);
     			attr_dev(input0, "type", "range");
     			attr_dev(input0, "min", "0");
     			attr_dev(input0, "max", "1");
     			attr_dev(input0, "step", "0.01");
-    			add_location(input0, file$5, 87, 1, 2500);
-    			add_location(span, file$5, 88, 1, 2572);
+    			add_location(input0, file$5, 110, 1, 3322);
+    			add_location(span, file$5, 111, 1, 3394);
     			attr_dev(input1, "id", "inputProgress");
     			attr_dev(input1, "type", "range");
     			attr_dev(input1, "min", "0");
     			attr_dev(input1, "max", "100");
     			attr_dev(input1, "step", "0.1");
-    			attr_dev(input1, "class", "svelte-1xeihws");
-    			add_location(input1, file$5, 91, 2, 2658);
-    			set_custom_element_data(progress_background, "class", "svelte-1xeihws");
-    			add_location(progress_background, file$5, 99, 2, 2802);
-    			set_custom_element_data(progress_foreground, "class", "svelte-1xeihws");
-    			add_location(progress_foreground, file$5, 100, 2, 2828);
-    			set_custom_element_data(player_progress, "class", "svelte-1xeihws");
-    			add_location(player_progress, file$5, 90, 1, 2638);
-    			set_custom_element_data(player_svlt, "class", "svelte-1xeihws");
-    			add_location(player_svlt, file$5, 77, 0, 2249);
+    			attr_dev(input1, "class", "svelte-g92p4i");
+    			add_location(input1, file$5, 114, 2, 3480);
+    			attr_dev(canvas, "id", "progress-background");
+    			attr_dev(canvas, "class", "svelte-g92p4i");
+    			add_location(canvas, file$5, 122, 2, 3646);
+    			set_custom_element_data(progress_foreground, "class", "svelte-g92p4i");
+    			add_location(progress_foreground, file$5, 123, 2, 3684);
+    			set_custom_element_data(player_progress, "class", "svelte-g92p4i");
+    			add_location(player_progress, file$5, 113, 1, 3460);
+    			set_custom_element_data(player_svlt, "class", "svelte-g92p4i");
+    			add_location(player_svlt, file$5, 100, 0, 3071);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2405,22 +2315,20 @@ var app = (function () {
     			append_dev(player_svlt, player_progress);
     			append_dev(player_progress, input1);
     			append_dev(player_progress, t4);
-    			append_dev(player_progress, progress_background);
+    			append_dev(player_progress, canvas);
     			append_dev(player_progress, t5);
     			append_dev(player_progress, progress_foreground);
-    			append_dev(progress_foreground, t6);
-    			append_dev(progress_foreground, t7);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(audio, "play", /*play_handler*/ ctx[8], false, false, false),
-    					listen_dev(audio, "pause", /*pause_handler*/ ctx[9], false, false, false),
-    					listen_dev(audio, "ended", /*ended_handler*/ ctx[10], false, false, false),
-    					listen_dev(audio, "volumechange", /*volumechange_handler*/ ctx[11], false, false, false),
-    					listen_dev(input0, "change", /*input0_change_input_handler*/ ctx[12]),
-    					listen_dev(input0, "input", /*input0_change_input_handler*/ ctx[12]),
-    					listen_dev(input1, "mousedown", /*mousedown_handler*/ ctx[13], false, false, false),
-    					listen_dev(input1, "input", /*input_handler*/ ctx[14], false, false, false)
+    					listen_dev(audio, "play", /*play_handler*/ ctx[7], false, false, false),
+    					listen_dev(audio, "pause", /*pause_handler*/ ctx[8], false, false, false),
+    					listen_dev(audio, "ended", /*ended_handler*/ ctx[9], false, false, false),
+    					listen_dev(audio, "volumechange", /*volumechange_handler*/ ctx[10], false, false, false),
+    					listen_dev(input0, "change", /*input0_change_input_handler*/ ctx[11]),
+    					listen_dev(input0, "input", /*input0_change_input_handler*/ ctx[11]),
+    					listen_dev(input1, "mousedown", /*mousedown_handler*/ ctx[12], false, false, false),
+    					listen_dev(input1, "input", /*input_handler*/ ctx[13], false, false, false)
     				];
 
     				mounted = true;
@@ -2432,7 +2340,6 @@ var app = (function () {
     			}
 
     			if (dirty & /*volume*/ 1 && t2_value !== (t2_value = Math.floor(/*volume*/ ctx[0] * 100) + "")) set_data_dev(t2, t2_value);
-    			if (dirty & /*progress*/ 4 && t6_value !== (t6_value = Math.round(/*progress*/ ctx[2]) + "")) set_data_dev(t6, t6_value);
     		},
     		i: noop,
     		o: noop,
@@ -2472,12 +2379,13 @@ var app = (function () {
     	validate_store(songIndex, "songIndex");
     	component_subscribe($$self, songIndex, $$value => $$invalidate(1, $songIndex = $$value));
     	validate_store(songList, "songList");
-    	component_subscribe($$self, songList, $$value => $$invalidate(18, $songList = $$value));
+    	component_subscribe($$self, songList, $$value => $$invalidate(20, $songList = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Player", slots, []);
     	
     	let volume = 0;
     	let progress = 0;
+    	let songArrayBuffer;
     	let currentSong = undefined;
     	let player = undefined;
 
@@ -2493,20 +2401,35 @@ var app = (function () {
     			);
     		}
 
+    		player.pause();
     		currentSong = $songList[index];
-    		$$invalidate(7, player.src = currentSong["SourceFile"], player);
-    		player.play();
+
+    		fetch(currentSong["SourceFile"]).then(data => data.arrayBuffer()).then(arrayBuffer => {
+    			songArrayBuffer = arrayBuffer;
+    			const blob = new Blob([songArrayBuffer]);
+    			const url = window.URL.createObjectURL(blob);
+    			$$invalidate(6, player.src = url, player);
+    			player.play();
+    			document.querySelector("canvas").style.opacity = "0";
+
+    			getWaveformData(songArrayBuffer).then(waveformData => {
+    				document.querySelector("canvas").style.opacity = "1";
+    				drawWaveform(waveformData);
+    			});
+    		});
     	}
 
     	onMount(() => {
-    		$$invalidate(7, player = document.querySelector("audio"));
+    		$$invalidate(6, player = document.querySelector("audio"));
     		$$invalidate(0, volume = Number(localStorage.getItem("volume")));
 
     		if (isNaN(volume) || volume > 1) {
     			$$invalidate(0, volume = 1);
     			localStorage.setItem("volume", String(volume));
     		}
-    	}); // player.volume = volume
+
+    		$$invalidate(6, player.volume = volume, player);
+    	});
 
     	function saveVolumeChange() {
     		localStorage.setItem("volume", String(player.volume));
@@ -2514,7 +2437,7 @@ var app = (function () {
 
     	let pauseDebounce;
 
-    	function bar() {
+    	function changeDuration() {
     		player.pause();
     		let progressValue = document.querySelector("#inputProgress").value;
     		document.documentElement.style.setProperty("--song-time", `${progressValue}%`);
@@ -2522,7 +2445,7 @@ var app = (function () {
 
     		pauseDebounce = setTimeout(
     			() => {
-    				$$invalidate(7, player.currentTime = currentSong["Duration"] / (100 / progressValue), player);
+    				$$invalidate(6, player.currentTime = currentSong["Duration"] / (100 / progressValue), player);
     				player.play();
     			},
     			200
@@ -2530,14 +2453,23 @@ var app = (function () {
     	}
 
     	let playingInterval;
+    	let counter = 0;
 
+    	// counter = counter + 100
+    	// if (counter === 200) {
+    	// 	getWaveformData(songArrayBuffer).then((waveformData) => {
+    	// 		drawWaveform(waveformData)
+    	// 	})
+    	// }
     	function startInterval() {
     		console.log("Start");
+
+    		// getWaveform(currentSong['SourceFile'])
     		clearInterval(playingInterval);
 
     		playingInterval = setInterval(
     			() => {
-    				$$invalidate(2, progress = 100 / currentSong["Duration"] * player.currentTime);
+    				progress = 100 / currentSong["Duration"] * player.currentTime;
     				document.documentElement.style.setProperty("--song-time", `${progress}%`);
     			},
     			100
@@ -2547,6 +2479,7 @@ var app = (function () {
     	function stopInterval() {
     		console.log("Stop");
     		clearInterval(playingInterval);
+    		counter = 0;
     	}
 
     	const writable_props = [];
@@ -2565,17 +2498,18 @@ var app = (function () {
     		$$invalidate(0, volume);
     	}
 
-    	const mousedown_handler = () => bar();
-    	const input_handler = () => bar();
+    	const mousedown_handler = () => changeDuration();
+    	const input_handler = () => changeDuration();
 
     	$$self.$capture_state = () => ({
-    		tweened,
-    		cubicOut,
     		onMount,
     		songList,
     		songIndex,
+    		getWaveformData,
+    		drawWaveform,
     		volume,
     		progress,
+    		songArrayBuffer,
     		currentSong,
     		player,
     		playSong,
@@ -2583,8 +2517,9 @@ var app = (function () {
     		saveVolumeChange,
     		updatePlayerDuration,
     		pauseDebounce,
-    		bar,
+    		changeDuration,
     		playingInterval,
+    		counter,
     		startInterval,
     		stopInterval,
     		$songIndex,
@@ -2593,11 +2528,13 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ("volume" in $$props) $$invalidate(0, volume = $$props.volume);
-    		if ("progress" in $$props) $$invalidate(2, progress = $$props.progress);
+    		if ("progress" in $$props) progress = $$props.progress;
+    		if ("songArrayBuffer" in $$props) songArrayBuffer = $$props.songArrayBuffer;
     		if ("currentSong" in $$props) currentSong = $$props.currentSong;
-    		if ("player" in $$props) $$invalidate(7, player = $$props.player);
+    		if ("player" in $$props) $$invalidate(6, player = $$props.player);
     		if ("pauseDebounce" in $$props) pauseDebounce = $$props.pauseDebounce;
     		if ("playingInterval" in $$props) playingInterval = $$props.playingInterval;
+    		if ("counter" in $$props) counter = $$props.counter;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -2611,11 +2548,11 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*player, volume*/ 129) {
+    		if ($$self.$$.dirty & /*player, volume*/ 65) {
     			 {
     				//TODO This seems to run more than once
     				if (player) {
-    					$$invalidate(7, player.volume = volume, player);
+    					$$invalidate(6, player.volume = volume, player);
     				}
     			}
     		}
@@ -2624,9 +2561,8 @@ var app = (function () {
     	return [
     		volume,
     		$songIndex,
-    		progress,
     		saveVolumeChange,
-    		bar,
+    		changeDuration,
     		startInterval,
     		stopInterval,
     		player,

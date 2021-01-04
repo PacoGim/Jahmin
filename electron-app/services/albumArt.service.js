@@ -38,7 +38,6 @@ function getAlbumCover(rootDir) {
         if (fs_1.default.existsSync(artPath)) {
             return resolve({ fileType: 'image', filePath: artPath });
         }
-        console.log('Stuff', rootDir);
         try {
             fs_1.default.readdirSync(rootDir).forEach((file) => {
                 const ext /*extension*/ = file.split('.').pop();

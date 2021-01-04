@@ -28,8 +28,6 @@ export function getAlbumCover(rootDir: /* Root Directory */ string) {
 			return resolve({ fileType: 'image', filePath: artPath })
 		}
 
-		console.log('Stuff', rootDir)
-
 		try {
 			fs.readdirSync(rootDir).forEach((file) => {
 				const ext /*extension*/ = file.split('.').pop()
