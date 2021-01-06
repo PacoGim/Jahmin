@@ -4,9 +4,12 @@
 	import { onMount } from 'svelte'
 
 	import { songList } from '../store/index.store'
-	import { songIndex } from '../store/player.store'
+	import { songIndex, playing } from '../store/player.store'
 	import { getWaveformData } from '../service/waveform.service'
 	import { drawWaveform } from '../service/draw.service'
+	import NextButton from '../components/NextButton.svelte'
+	import PreviousButton from '../components/PreviousButton.svelte'
+	import PlayButton from '../components/PlayButton.svelte'
 
 	let volume: number = 0
 	let progress: number = 0
@@ -28,7 +31,6 @@
 	let player: HTMLAudioElement = undefined
 
 	function playSong(index) {
-
 		if (index === null) return false
 
 		if ($songList === undefined) {
@@ -37,7 +39,7 @@
 			}, 1000)
 		}
 
-		player.pause()
+		// player.pause()
 
 		currentSong = $songList[index]
 
@@ -114,6 +116,8 @@
 
 	function startInterval() {
 		console.log('Start')
+		$playing = true
+
 		// getWaveform(currentSong['SourceFile'])
 
 		clearInterval(playingInterval)
@@ -126,6 +130,7 @@
 
 	function stopInterval() {
 		console.log('Stop')
+		$playing = false
 		clearInterval(playingInterval)
 		counter = 0
 	}
@@ -141,9 +146,15 @@
 		on:volumechange={() => saveVolumeChange()}>
 		<track kind="captions" />
 	</audio>
+
+	<player-buttons>
+		<PreviousButton />
+		<PlayButton />
+		<NextButton />
+	</player-buttons>
+
 	<input type="range" min="0" max="1" step="0.01" bind:value={volume} />
-	<span>{Math.floor(volume * 100)}</span>
-	<!-- <span>|</span> -->
+
 	<player-progress>
 		<input
 			id="inputProgress"
@@ -163,6 +174,18 @@
 		grid-area: player-svlt;
 		display: flex;
 		/* background-color: rgba(255,255,255,.25); */
+	}
+
+	audio {
+		position: fixed;
+		top: 0;
+		left: 0;
+	}
+
+	player-buttons {
+		height: 100%;
+		display: flex;
+		flex-direction: row;
 	}
 
 	player-progress {
@@ -199,7 +222,7 @@
 
 	player-progress #progress-background {
 		z-index: 0;
-		transition: opacity .3s ease-in-out;
+		transition: opacity 0.3s ease-in-out;
 		/* background-color: rgba(255, 255, 255, 0.25); */
 		width: 100%;
 	}

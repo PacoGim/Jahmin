@@ -2,9 +2,13 @@ import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
 import { getCollection } from './loki.service'
 import { orderSongs } from './songFilter.service'
-import { nanoid } from 'nanoid'
+// import { nanoid } from 'nanoid'
 import { getAlbumArray, getNewPromiseAlbumArray } from './albumFiltering.service'
 import { getAlbumCover } from './albumArt.service'
+import { getAlbumColors } from './getAlbumColors.fn'
+
+import { customAlphabet } from 'nanoid'
+const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
 	ipcMain.handle('get-songs', async (evt, arg) => {
@@ -60,5 +64,9 @@ export function loadIPC() {
 
 	ipcMain.handle('get-cover', async (evt, rootDir) => {
 		return await getAlbumCover(rootDir)
+	})
+
+	ipcMain.handle('get-album-colors', async (evt, albumImagePath) => {
+		return await getAlbumColors(albumImagePath)
 	})
 }

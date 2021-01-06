@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte'
-	import { getAlbumSong, getCover } from '../service/ipc.service'
+	import { getAlbumColorsIPC, getAlbumSong, getCover } from '../service/ipc.service'
 	import { songList } from '../store/index.store'
 
 	export let album
@@ -43,9 +43,27 @@
 		songs = songs.sort((a, b) => a['Track'] - b['Track'])
 		$songList = songs
 	}
+
+	async function getAlbumColors(id: string) {
+		let albumImagePath: string = document.querySelector(`#${id}`).querySelector('img').getAttribute('src')
+
+		if (albumImagePath) {
+			getAlbumColorsIPC(albumImagePath).then((colors) => {
+				document.documentElement.style.setProperty('--low-color', `#${colors['lowColor']}`)
+				document.documentElement.style.setProperty('--mid-color', `#${colors['midColor']}`)
+				document.documentElement.style.setProperty('--hi-color', `#${colors['hiColor']}`)
+			})
+		}
+	}
 </script>
 
-<album on:click={() => fetchAlbumSongList(album['Album'])}>
+<album
+	id={album['ID']}
+	on:click={() => {
+		document.querySelector('song-list-svlt').scrollTop = 0
+		fetchAlbumSongList(album['Album'])
+		getAlbumColors(album['ID'])
+	}}>
 	{#if coverType === undefined}<img src="./img/audio.svg" class="loader" alt="" />{/if}
 	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
 	{#if coverType === 'image'}<img src={coverSrc} alt={album['Album']} />{/if}

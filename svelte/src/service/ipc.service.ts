@@ -45,9 +45,17 @@ export function getCover(rootDir) {
 	})
 }
 
-export function getAlbumSong(albumName) {
+export function getAlbumSong(albumName): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album-song', albumName).then((result) => {
+			resolve(result)
+		})
+	})
+}
+
+export function getAlbumColorsIPC(albumImagePath) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-album-colors', albumImagePath).then((result) => {
 			resolve(result)
 		})
 	})

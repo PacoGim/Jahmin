@@ -7,7 +7,7 @@
 	import { songIndex } from '../store/player.store'
 
 	onMount(() => {
-		$songIndex = 1
+		// $songIndex = 1
 	})
 </script>
 

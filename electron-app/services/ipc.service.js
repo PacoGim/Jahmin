@@ -14,9 +14,12 @@ const electron_1 = require("electron");
 const config_service_1 = require("./config.service");
 const loki_service_1 = require("./loki.service");
 const songFilter_service_1 = require("./songFilter.service");
-const nanoid_1 = require("nanoid");
+// import { nanoid } from 'nanoid'
 const albumFiltering_service_1 = require("./albumFiltering.service");
 const albumArt_service_1 = require("./albumArt.service");
+const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
+const nanoid_1 = require("nanoid");
+const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-songs', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         console.log('IPC Get Songs');
@@ -33,7 +36,7 @@ function loadIPC() {
         let filtering = config['order']['filtering'] || [];
         let result = songFilter_service_1.orderSongs(arg, grouping, filtering);
         result = result.map((value) => ({
-            id: nanoid_1.nanoid(),
+            id: nanoid(),
             value
         }));
         return result;
@@ -60,6 +63,9 @@ function loadIPC() {
     });
     electron_1.ipcMain.handle('get-cover', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
         return yield albumArt_service_1.getAlbumCover(rootDir);
+    }));
+    electron_1.ipcMain.handle('get-album-colors', (evt, albumImagePath) => __awaiter(this, void 0, void 0, function* () {
+        return yield getAlbumColors_fn_1.getAlbumColors(albumImagePath);
     }));
 }
 exports.loadIPC = loadIPC;

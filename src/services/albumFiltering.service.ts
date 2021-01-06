@@ -1,4 +1,5 @@
-import { nanoid } from "nanoid"
+import { customAlphabet } from 'nanoid'
+const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 let albumArray: object[] = []
 
@@ -17,7 +18,7 @@ export function setAlbumArray(newAlbumArray: any[]) {
 
 		if (!foundAlbum) {
 			newArray.push({
-				ID:nanoid(),
+				ID: nanoid(),
 				Album: song['Album'],
 				RootDir: song['SourceFile'].split('/').slice(0, -1).join('/'),
 				AlbumArtist: song['AlbumArtist'],

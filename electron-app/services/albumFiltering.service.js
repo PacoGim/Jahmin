@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNewPromiseAlbumArray = exports.getAlbumArray = exports.setAlbumArray = void 0;
 const nanoid_1 = require("nanoid");
+const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 let albumArray = [];
 // External resolve. When resolve result set, the promise will be resolved.
 let resolvePromise = null;
@@ -14,7 +15,7 @@ function setAlbumArray(newAlbumArray) {
         let foundAlbum = newArray.find((i) => i['Album'] === song['Album']);
         if (!foundAlbum) {
             newArray.push({
-                ID: nanoid_1.nanoid(),
+                ID: nanoid(),
                 Album: song['Album'],
                 RootDir: song['SourceFile'].split('/').slice(0, -1).join('/'),
                 AlbumArtist: song['AlbumArtist'],
