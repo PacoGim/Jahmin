@@ -9,6 +9,14 @@
 	margin: 0;
 }
 
+:root {
+	--hi-color: #fff;
+	--mid-color: #808080;
+	--low-color: #000;
+
+	--button-size: 1.25rem;
+}
+
 html {
 	height: 100%;
 }
@@ -31,14 +39,14 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color:#fff; /* color of the scroll thumb */
+	background-color: #fff; /* color of the scroll thumb */
 	/* border-radius: 200px; roundness of the scroll thumb */
 	/* border: 4px solid #fff; creates padding around scroll thumb */
 }
 
-svg.player-button{
-	transition: fill 300ms linear;
+svg.player-button {
+	transition: fill 300ms ease-in-out;
 	height: 100%;
 	width: auto;
-	fill: var(--hi-color);
+	fill: var(--low-color);
 }

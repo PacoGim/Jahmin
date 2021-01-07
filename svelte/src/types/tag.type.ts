@@ -14,7 +14,7 @@ export type TagType = {
 	LastModified: number
 	Year: string
 	Date: string
-	Track: string
+	Track: number
 	AlbumArtist: string
 	DiskNumber: number
 	BitRate: number

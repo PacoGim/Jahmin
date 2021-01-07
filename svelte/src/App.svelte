@@ -24,12 +24,13 @@
 <style>
 	main {
 		height: 100%;
+		overflow-y: hidden;
 		display: grid;
 		grid-template-columns: 64px auto 8fr 256px;
 		grid-template-rows: 2fr 1fr 64px;
 		grid-template-areas:
 			'navigation-svlt grouping-svlt art-grid-svlt details-svlt'
 			'navigation-svlt grouping-svlt song-list-svlt details-svlt'
-			'navigation-svlt player-svlt player-svlt player-svlt';
+			'navigation-svlt grouping-svlt player-svlt details-svlt';
 	}
 </style>

@@ -1,4 +1,5 @@
 import { Writable, writable } from 'svelte/store'
+import type { TagType } from '../types/tag.type'
 
 type FilterType = {
 	userSelection?: string
@@ -20,5 +21,6 @@ export let valuesToFilter: Writable<string[]> = writable([])
 export let isValuesToFilterChanged: Writable<boolean> = writable(false)
 export let storeConfig: Writable<any> = writable(undefined)
 
+export let songList: Writable<TagType[]> = writable(undefined)
 
-export let songList: Writable<any[]> = writable(undefined)
+export let isDoneDrawing: Writable<boolean> = writable(false)

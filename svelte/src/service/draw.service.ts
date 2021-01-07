@@ -1,3 +1,5 @@
+import { isDoneDrawing } from '../store/index.store'
+
 export function drawWaveform(normalizedData) {
 	const canvas: HTMLCanvasElement = document.querySelector('canvas')
 	const dpr = window.devicePixelRatio || 1
@@ -10,27 +12,36 @@ export function drawWaveform(normalizedData) {
 
 	const width = canvas.offsetWidth / normalizedData.length
 
-
-
-	for (let i = 0; i < normalizedData.length; i++) {
-		const x = width * i
-		let y = normalizedData[i] * canvas.offsetHeight
-		if (y < 0 || y > canvas.offsetHeight / 2) {
-			y = 0
-		}
-
-		drawLineSegment(ctx, x, y, width, (i + 1) % 2)
-	}
+	processData(width, 0, normalizedData, canvas, ctx, window.getComputedStyle(document.body).getPropertyValue('--low-color'))
 }
 
-function drawLineSegment(ctx: CanvasRenderingContext2D, x: number, y: number, width, isEven) {
-	ctx.strokeStyle = `#fff`
-	ctx.lineWidth = 0.2
-	ctx.beginPath()
-	y = isEven ? y : -y
-	ctx.moveTo(x, 0)
-	ctx.lineTo(x, y)
-	ctx.lineTo(x + width, y)
-	ctx.lineTo(x + width, 0)
-	ctx.stroke()
+function processData(width, index, normalizedData, canvas, ctx, color) {
+	if (index > normalizedData.length - 1) {
+		isDoneDrawing.set(true)
+		return
+	}
+	const x = width * index
+	let y = normalizedData[index] * canvas.offsetHeight
+	if (y < 0) {
+		y = 0
+	}
+
+	drawLineSegment(ctx, x, y, width, (index + 1) % 2, color).then(() => {
+		processData(width, ++index, normalizedData, canvas, ctx, color)
+	})
+}
+
+function drawLineSegment(ctx: CanvasRenderingContext2D, x: number, y: number, width, isEven, color) {
+	return new Promise((resolve, reject) => {
+		ctx.strokeStyle = color
+		ctx.lineWidth = 0.2
+		ctx.beginPath()
+		y = isEven ? y : -y
+		ctx.moveTo(x, 0)
+		ctx.lineTo(x, y)
+		ctx.lineTo(x + width, y)
+		ctx.lineTo(x + width, 0)
+		ctx.stroke()
+		resolve('')
+	})
 }

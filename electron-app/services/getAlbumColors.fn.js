@@ -8,7 +8,6 @@ const sharp_1 = __importDefault(require("sharp"));
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 function getAlbumColors(albumImagePath) {
     return new Promise((resolve, reject) => {
-        console.log('Get Album Colors', albumImagePath);
         sharp_1.default(albumImagePath)
             .resize(1, 1)
             .raw()

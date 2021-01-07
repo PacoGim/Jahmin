@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { TagType } from '../../types/tag.type'
+	import type { TagType } from '../types/tag.type'
 
 	import { onMount } from 'svelte'
 
-	import { songList } from '../store/index.store'
-	import { songIndex, playing } from '../store/player.store'
+	import { isDoneDrawing, songList } from '../store/index.store'
+	import { playlistIndex, isPlaying, playlist } from '../store/player.store'
 	import { getWaveformData } from '../service/waveform.service'
 	import { drawWaveform } from '../service/draw.service'
 	import NextButton from '../components/NextButton.svelte'
@@ -17,8 +17,21 @@
 
 	let currentSong: TagType = undefined
 
+	let player: HTMLAudioElement = undefined
+
+	let drawWaveformDebounce: NodeJS.Timeout = undefined
+
 	$: {
-		playSong($songIndex)
+		$playlistIndex
+		playSong()
+	}
+
+	$: {
+		let canvasElement = document.querySelector('canvas')
+
+		if (canvasElement) {
+			canvasElement.style.opacity = $isDoneDrawing ? '1' : '0'
+		}
 	}
 
 	$: {
@@ -28,20 +41,19 @@
 		}
 	}
 
-	let player: HTMLAudioElement = undefined
+	$: {
+		// console.log($songList)
+	}
 
-	function playSong(index) {
-		if (index === null) return false
-
-		if ($songList === undefined) {
-			return setTimeout(() => {
-				playSong(index)
-			}, 1000)
+	function playSong() {
+		if ($playlist?.['SongList'] === undefined) {
+			return
 		}
 
-		// player.pause()
+		// currentSong = $songList[index]
+		currentSong = $playlist['SongList'][$playlistIndex]
 
-		currentSong = $songList[index]
+		// console.log(currentSong)
 
 		fetch(currentSong['SourceFile'])
 			.then((data) => data.arrayBuffer())
@@ -52,10 +64,14 @@
 				player.src = url
 				player.play()
 
-				document.querySelector('canvas').style.opacity = '0'
+				$isDoneDrawing = false
+
 				getWaveformData(songArrayBuffer).then((waveformData) => {
-					document.querySelector('canvas').style.opacity = '1'
-					drawWaveform(waveformData)
+					clearTimeout(drawWaveformDebounce)
+
+					drawWaveformDebounce = setTimeout(() => {
+						drawWaveform(waveformData)
+					}, 1000)
 				})
 			})
 	}
@@ -93,6 +109,7 @@
 	function changeDuration() {
 		player.pause()
 
+		//@ts-ignore
 		let progressValue = document.querySelector('#inputProgress').value
 		document.documentElement.style.setProperty('--song-time', `${progressValue}%`)
 
@@ -116,7 +133,7 @@
 
 	function startInterval() {
 		console.log('Start')
-		$playing = true
+		$isPlaying = true
 
 		// getWaveform(currentSong['SourceFile'])
 
@@ -130,26 +147,25 @@
 
 	function stopInterval() {
 		console.log('Stop')
-		$playing = false
+		$isPlaying = false
 		clearInterval(playingInterval)
 		counter = 0
 	}
 </script>
 
 <player-svlt>
-	<!-- <h1>Player</h1> -->
 	<audio
 		controls={true}
 		on:play={() => startInterval()}
 		on:pause={() => stopInterval()}
-		on:ended={() => $songIndex++}
+		on:ended={() => $playlistIndex++}
 		on:volumechange={() => saveVolumeChange()}>
 		<track kind="captions" />
 	</audio>
 
 	<player-buttons>
-		<PreviousButton />
-		<PlayButton />
+		<PreviousButton {player} />
+		<PlayButton {player} />
 		<NextButton />
 	</player-buttons>
 
@@ -173,7 +189,10 @@
 	player-svlt {
 		grid-area: player-svlt;
 		display: flex;
-		/* background-color: rgba(255,255,255,.25); */
+		align-items: center;
+		background-color: var(--hi-color);
+
+		transition: background-color 300ms ease-in-out;
 	}
 
 	audio {
@@ -183,14 +202,20 @@
 	}
 
 	player-buttons {
-		height: 100%;
+		height: var(--button-size);
 		display: flex;
 		flex-direction: row;
+	}
+
+	:global(player-buttons > *) {
+		cursor: pointer;
+		margin: 0 0.75rem;
 	}
 
 	player-progress {
 		position: relative;
 		width: 100%;
+		height: 64px;
 	}
 
 	player-progress > * {
@@ -213,9 +238,8 @@
 
 	player-progress progress-foreground {
 		z-index: 1;
-		mix-blend-mode: difference;
-		/* background-color: rgba(255, 255, 255, 0.25); */
-		background-color: #fff;
+		mix-blend-mode: hard-light;
+		background-color: var(--hi-color);
 		min-width: var(--song-time);
 		transition: min-width 100ms linear;
 	}

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import type { TagType } from '../../types/tag.type'
-	import { songIndex } from '../store/player.store'
+	import type { TagType } from '../types/tag.type'
+	import { playlist, playlistIndex, selectedAlbum } from '../store/player.store'
+	import { setNewPlaylist } from '../service/setNewPlaylist.fn'
 
 	export let song: TagType
 	export let index: number
-
-	onMount(() => {
-		// console.log(song)
-	})
+	export let albumID:string
 
 	function parseDuration(duration: number) {
 		if (duration >= 60 * 60) {
@@ -17,9 +15,17 @@
 			return new Date(duration * 1000).toISOString().substr(14, 5)
 		}
 	}
+
+	function songListItemDBLClickEventHandler() {
+
+
+		setNewPlaylist(albumID,index)
+	}
 </script>
 
-<song-list-item on:dblclick={() => ($songIndex = index)} class={$songIndex === index ? 'selected' : ''}>
+<song-list-item
+	on:dblclick={() => songListItemDBLClickEventHandler()}
+	class={$playlistIndex === index && $selectedAlbum['ID'] === $playlist?.['AlbumID'] ? 'selected' : ''}>
 	<song-number>{song['Track']}</song-number>
 	<song-title>{song['Title']}</song-title>
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>

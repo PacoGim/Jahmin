@@ -19,10 +19,15 @@ function setAlbumArray(newAlbumArray) {
                 Album: song['Album'],
                 RootDir: song['SourceFile'].split('/').slice(0, -1).join('/'),
                 AlbumArtist: song['AlbumArtist'],
-                DynamicAlbumArtist: getAllAlbumArtists(newAlbumArray, song['Album'])
+                DynamicAlbumArtist: getAllAlbumArtists(newAlbumArray, song['Album']),
+                Songs: [song]
             });
         }
+        else {
+            foundAlbum['Songs'].push(song);
+        }
     });
+    albumArray = newArray;
     // Sets the external promise resolve result.
     resolvePromise(newArray);
 }

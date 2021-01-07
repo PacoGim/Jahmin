@@ -4,8 +4,6 @@ let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', '
 
 export function getAlbumColors(albumImagePath: string) {
 	return new Promise((resolve, reject) => {
-		console.log('Get Album Colors', albumImagePath)
-
 		sharp(albumImagePath)
 			.resize(1, 1)
 			.raw()

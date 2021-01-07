@@ -57,9 +57,9 @@ function loadIPC() {
         // Waits for the filtering to be done then return the result.
         return yield albumFiltering_service_1.getNewPromiseAlbumArray();
     }));
-    electron_1.ipcMain.handle('get-album-song', (evt, albumName) => {
-        let albums = albumFiltering_service_1.getAlbumArray().filter((x) => x['Album'] === albumName);
-        return albums;
+    electron_1.ipcMain.handle('get-album', (evt, albumID) => {
+        let albums = albumFiltering_service_1.getAlbumArray().filter((x) => x['ID'] === albumID);
+        return albums[0];
     });
     electron_1.ipcMain.handle('get-cover', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
         return yield albumArt_service_1.getAlbumCover(rootDir);

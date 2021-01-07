@@ -57,9 +57,9 @@ export function loadIPC() {
 		return await getNewPromiseAlbumArray()
 	})
 
-	ipcMain.handle('get-album-song', (evt, albumName) => {
-		let albums = getAlbumArray().filter((x: any) => x['Album'] === albumName)
-		return albums
+	ipcMain.handle('get-album', (evt, albumID) => {
+		let albums = getAlbumArray().filter((x: any) => x['ID'] === albumID)
+		return albums[0]
 	})
 
 	ipcMain.handle('get-cover', async (evt, rootDir) => {

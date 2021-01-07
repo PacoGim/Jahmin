@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getAlbumColorsIPC, getAlbumSong, getCover } from '../service/ipc.service'
+	import { getAlbumColors } from '../service/getAlbumColors.fn'
+	import { getAlbumColorsIPC, getAlbumIPC, getCover } from '../service/ipc.service'
+	import { setNewPlaylist } from '../service/setNewPlaylist.fn'
 	import { songList } from '../store/index.store'
+	import { playlist, selectedAlbum, playlistIndex } from '../store/player.store'
+	import type { TagType } from '../types/tag.type'
 
 	export let album
 	export let index
@@ -38,32 +42,18 @@
 		).observe(document.querySelector(`art-grid-svlt > album:nth-child(${index + 1})`))
 	}
 
-	async function fetchAlbumSongList(albumName) {
-		let songs = await getAlbumSong(albumName)
-		songs = songs.sort((a, b) => a['Track'] - b['Track'])
-		$songList = songs
-	}
+	async function prepareAlbum(evt: MouseEvent) {
+		$selectedAlbum = album
 
-	async function getAlbumColors(id: string) {
-		let albumImagePath: string = document.querySelector(`#${id}`).querySelector('img').getAttribute('src')
-
-		if (albumImagePath) {
-			getAlbumColorsIPC(albumImagePath).then((colors) => {
-				document.documentElement.style.setProperty('--low-color', `#${colors['lowColor']}`)
-				document.documentElement.style.setProperty('--mid-color', `#${colors['midColor']}`)
-				document.documentElement.style.setProperty('--hi-color', `#${colors['hiColor']}`)
-			})
+		if (evt['type'] === 'dblclick') {
+			setNewPlaylist(album['ID'],0)
 		}
+
+		document.querySelector('song-list-svlt').scrollTop = 0
 	}
 </script>
 
-<album
-	id={album['ID']}
-	on:click={() => {
-		document.querySelector('song-list-svlt').scrollTop = 0
-		fetchAlbumSongList(album['Album'])
-		getAlbumColors(album['ID'])
-	}}>
+<album id={album['ID']} on:dblclick={(evt) => prepareAlbum(evt)} on:click={(evt) => prepareAlbum(evt)}>
 	{#if coverType === undefined}<img src="./img/audio.svg" class="loader" alt="" />{/if}
 	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
 	{#if coverType === 'image'}<img src={coverSrc} alt={album['Album']} />{/if}
@@ -92,6 +82,7 @@
 		justify-content: center;
 		align-items: center;
 		flex-direction: column;
+		cursor: pointer;
 	}
 
 	album-artist,

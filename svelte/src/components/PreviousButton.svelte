@@ -1,6 +1,24 @@
+<script lang="ts">
+	import { playlistIndex } from '../store/player.store'
+
+	export let player: HTMLAudioElement
+
+	function previousButtonEvent() {
+		if (player.currentTime < 1) {
+			if ($playlistIndex > 0) {
+				$playlistIndex = $playlistIndex - 1
+			}
+		} else {
+			let index = $playlistIndex
+			$playlistIndex = undefined
+			$playlistIndex = index
+		}
+	}
+</script>
 
 <svg
 	class="player-button"
+	on:click={() => previousButtonEvent()}
 	version="1.1"
 	id="Layer_1"
 	xmlns="http://www.w3.org/2000/svg"
