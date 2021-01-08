@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import type { TagType } from '../types/tag.type'
+	import type { SongType } from '../types/song.type'
 	import { playlist, playlistIndex, selectedAlbum } from '../store/player.store'
 	import { setNewPlaylist } from '../service/setNewPlaylist.fn'
 
-	export let song: TagType
+	export let song: SongType
 	export let index: number
-	export let albumID:string
+	export let albumID: string
 
 	function parseDuration(duration: number) {
 		if (duration >= 60 * 60) {
@@ -17,9 +17,7 @@
 	}
 
 	function songListItemDBLClickEventHandler() {
-
-
-		setNewPlaylist(albumID,index)
+		setNewPlaylist(albumID, index)
 	}
 </script>
 

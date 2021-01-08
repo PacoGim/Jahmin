@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getAlbumColors } from '../service/getAlbumColors.fn'
-	import { getAlbumColorsIPC, getAlbumIPC, getCover } from '../service/ipc.service'
+	import { getCover } from '../service/ipc.service'
 	import { setNewPlaylist } from '../service/setNewPlaylist.fn'
-	import { songList } from '../store/index.store'
-	import { playlist, selectedAlbum, playlistIndex } from '../store/player.store'
-	import type { TagType } from '../types/tag.type'
+	import { selectedAlbum } from '../store/player.store'
+	import type { AlbumType } from '../types/album.type'
 
-	export let album
+	export let album: AlbumType
 	export let index
 	let coverType = undefined
 	let coverSrc = undefined /* Image Source URL */
@@ -43,10 +41,11 @@
 	}
 
 	async function prepareAlbum(evt: MouseEvent) {
+		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		$selectedAlbum = album
 
 		if (evt['type'] === 'dblclick') {
-			setNewPlaylist(album['ID'],0)
+			setNewPlaylist(album['ID'], 0)
 		}
 
 		document.querySelector('song-list-svlt').scrollTop = 0

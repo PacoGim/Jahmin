@@ -1,6 +1,6 @@
 const { ipcRenderer } = require('electron')
 import { albums } from '../store/index.store'
-import type { TagType } from '../types/tag.type'
+import type { SongType } from '../types/song.type'
 
 export function getOrder(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
@@ -46,7 +46,7 @@ export function getCover(rootDir) {
 	})
 }
 
-export function getAlbumIPC(albumID): Promise<TagType[]> {
+export function getAlbumIPC(albumID): Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album', albumID).then((result) => {
 			resolve(result)

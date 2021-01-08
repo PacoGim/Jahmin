@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TagType } from '../types/tag.type'
+	import type { SongType } from '../types/song.type'
 
 	import { onMount } from 'svelte'
 
@@ -15,11 +15,24 @@
 	let progress: number = 0
 	let songArrayBuffer: ArrayBuffer
 
-	let currentSong: TagType = undefined
+	let currentSong: SongType = undefined
+	let nextSongPreloaded: { ID: number; SongBuffer: ArrayBuffer } = undefined
+
+	/*
+
+	{
+		ID:asdpokasd,
+		Buffer:<>
+	}
+
+	*/
 
 	let player: HTMLAudioElement = undefined
 
 	let drawWaveformDebounce: NodeJS.Timeout = undefined
+	let preLoadNextSongDebounce: NodeJS.Timeout = undefined
+	let pauseDebounce: NodeJS.Timeout = undefined
+	let playingInterval: NodeJS.Timeout = undefined
 
 	$: {
 		$playlistIndex
@@ -41,43 +54,6 @@
 		}
 	}
 
-	$: {
-		// console.log($songList)
-	}
-
-	function playSong() {
-		if ($playlist?.['SongList'] === undefined) {
-			return
-		}
-
-		// currentSong = $songList[index]
-		currentSong = $playlist['SongList'][$playlistIndex]
-
-		// console.log(currentSong)
-
-		fetch(currentSong['SourceFile'])
-			.then((data) => data.arrayBuffer())
-			.then((arrayBuffer) => {
-				songArrayBuffer = arrayBuffer
-				const blob = new Blob([songArrayBuffer])
-				const url = window.URL.createObjectURL(blob)
-				player.src = url
-				player.play()
-
-				$isDoneDrawing = false
-
-				getWaveformData(songArrayBuffer).then((waveformData) => {
-					clearTimeout(drawWaveformDebounce)
-
-					drawWaveformDebounce = setTimeout(() => {
-						drawWaveform(waveformData)
-					}, 1000)
-				})
-			})
-	}
-
-	function selectSong() {}
-
 	onMount(() => {
 		player = document.querySelector('audio')
 
@@ -91,22 +67,74 @@
 		player.volume = volume
 	})
 
+	async function playSong() {
+		if ($playlist?.['SongList'] === undefined) {
+			return
+		}
+
+		let songBuffer = undefined
+
+		currentSong = $playlist['SongList'][$playlistIndex]
+
+		if (currentSong['$loki'] !== nextSongPreloaded?.['ID']) {
+			console.log('Not Preloaded')
+			songBuffer = await fetchSong(currentSong['SourceFile'])
+		} else {
+			console.log('Preloaded')
+			songBuffer = nextSongPreloaded['SongBuffer']
+		}
+
+		const blob = new Blob([songBuffer])
+		const url = window.URL.createObjectURL(blob)
+		player.src = url
+		player.play()
+
+		$isDoneDrawing = false
+
+		getWaveformData(songBuffer).then((waveformData) => {
+			clearTimeout(drawWaveformDebounce)
+
+			drawWaveformDebounce = setTimeout(() => {
+				drawWaveform(waveformData)
+			}, 1000)
+		})
+
+		clearTimeout(preLoadNextSongDebounce)
+
+		preLoadNextSongDebounce = setTimeout(() => {
+			preLoadNextSong()
+		}, 2000)
+	}
+
+	async function preLoadNextSong() {
+		const nextSong: SongType = $playlist['SongList'][$playlistIndex + 1]
+
+		if (nextSong) {
+			let songBuffer = await fetchSong(nextSong['SourceFile'])
+			nextSongPreloaded = {
+				ID: nextSong['$loki'],
+				SongBuffer: songBuffer
+			}
+		}
+	}
+
+	function fetchSong(songPath: string): Promise<ArrayBuffer> {
+		return new Promise((resolve, reject) => {
+			fetch(songPath)
+				.then((data) => data.arrayBuffer())
+				.then((arrayBuffer) => {
+					resolve(arrayBuffer)
+				})
+		})
+	}
+
 	function saveVolumeChange() {
 		localStorage.setItem('volume', String(player.volume))
 	}
 
-	// function updateProgress() {
-	// 	progress = (100 / currentSong['Duration']) * player.currentTime
-	// 	document.documentElement.style.setProperty('--song-time', `${progress}%`)
-	// }
-
-	function updatePlayerDuration(evt) {
-		// console.log(document.querySelector('#foo').value)
-	}
-
-	let pauseDebounce
-
-	function changeDuration() {
+	function changeDuration(evt) {
+		console.log(evt['offsetX'])
+		console.log(evt['offsetY'])
 		player.pause()
 
 		//@ts-ignore
@@ -121,21 +149,9 @@
 		}, 200)
 	}
 
-	let playingInterval
-	let counter = 0
-	// counter = counter + 100
-
-	// if (counter === 200) {
-	// 	getWaveformData(songArrayBuffer).then((waveformData) => {
-	// 		drawWaveform(waveformData)
-	// 	})
-	// }
-
 	function startInterval() {
 		console.log('Start')
 		$isPlaying = true
-
-		// getWaveform(currentSong['SourceFile'])
 
 		clearInterval(playingInterval)
 
@@ -149,7 +165,6 @@
 		console.log('Stop')
 		$isPlaying = false
 		clearInterval(playingInterval)
-		counter = 0
 	}
 </script>
 
@@ -178,8 +193,8 @@
 			min="0"
 			max="100"
 			step="0.1"
-			on:mousedown={() => changeDuration()}
-			on:input={() => changeDuration()} />
+			on:mousedown={(evt) => changeDuration(evt)}
+			on:input={(evt) => changeDuration(evt)} />
 		<canvas id="progress-background" />
 		<progress-foreground />
 	</player-progress>

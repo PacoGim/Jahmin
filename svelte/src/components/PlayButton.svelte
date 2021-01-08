@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { isPlaying } from '../store/player.store'
 
-	export let player:HTMLAudioElement
+	export let player: HTMLAudioElement
 
-	function togglePlay(){
-
+	function togglePlay() {
 		if ($isPlaying) {
 			player.pause()
-		}else{
+		} else {
 			player.play()
 		}
-
 	}
 </script>
 
-<play-pause-button class={$isPlaying ? 'playing' : ''} on:click={()=>togglePlay()}>
+<play-pause-button class={$isPlaying ? '' : 'playing'} on:click={() => togglePlay()}>
 	<left-part />
 
 	<right-part />

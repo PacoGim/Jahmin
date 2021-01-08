@@ -1,6 +1,6 @@
-import type { TagType } from './tag.type'
+import type { SongType } from './song.type'
 
 export type PlaylistType = {
 	AlbumID: string
-	SongList: TagType[]
+	SongList: SongType[]
 }

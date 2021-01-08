@@ -1,5 +1,5 @@
 import { playlist, playlistIndex, selectedAlbum } from '../store/player.store'
-import type { TagType } from '../types/tag.type'
+import type { SongType } from '../types/song.type'
 import { getAlbumColors } from './getAlbumColors.fn'
 import { getAlbumIPC } from './ipc.service'
 
@@ -16,7 +16,7 @@ export async function setNewPlaylist(albumID: string, index: number) {
 	playlistIndex.set(index)
 }
 
-function fetchAlbum(albumID): Promise<TagType[]> {
+function fetchAlbum(albumID): Promise<SongType[]> {
 	return new Promise(async (resolve, reject) => {
 		let album = await getAlbumIPC(albumID)
 		selectedAlbum.set(album)
