@@ -49,7 +49,7 @@
 	}
 
 	song-list-item.selected {
-		font-variation-settings: 'wght' 156;
+		font-variation-settings: 'wght' 700, 'wdth' 80;
 		border-radius: 5px;
 		background-color: rgba(255, 255, 255, 0.25);
 	}

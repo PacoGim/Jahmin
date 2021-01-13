@@ -1,5 +1,7 @@
 import { customAlphabet } from 'nanoid'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
+import hasha from 'hasha'
+import stringHash from 'string-hash'
 
 let albumArray: object[] = []
 
@@ -12,15 +14,15 @@ export function setAlbumArray(newAlbumArray: any[]) {
 	let newArray: any[] = []
 
 	// Filter the array
-
 	newAlbumArray.forEach((song) => {
-		let foundAlbum = newArray.find((i) => i['Album'] === song['Album'])
+		let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/')
+		let foundAlbum = newArray.find((i) => i['RootDir'] === rootDir)
 
 		if (!foundAlbum) {
 			newArray.push({
-				ID: nanoid(),
-				Album: song['Album'],
-				RootDir: song['SourceFile'].split('/').slice(0, -1).join('/'),
+				ID: `l${stringHash(rootDir).toString(36)}`,
+				Name: song['Album'],
+				RootDir: rootDir,
 				AlbumArtist: song['AlbumArtist'],
 				DynamicAlbumArtist: getAllAlbumArtists(newAlbumArray, song['Album']),
 				Songs: [song]
@@ -31,6 +33,7 @@ export function setAlbumArray(newAlbumArray: any[]) {
 	})
 
 	albumArray = newArray
+
 	// Sets the external promise resolve result.
 	resolvePromise(newArray)
 }

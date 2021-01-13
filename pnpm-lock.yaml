@@ -5,6 +5,7 @@ dependencies:
   easydropdown: 4.2.0
   exiftool-vendored: 13.0.0
   hash-sum: 2.0.0
+  hasha: 5.2.2
   image-info: 0.0.2
   imagemin: 7.0.1
   imagemin-jpegtran: 7.0.0
@@ -1544,6 +1545,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-WdZTbAByD+pHfl/g9QSsBIIwy8IT+EsPiKDs0KNX+zSHhdDLFKdZu0BQHljvO+0QI/BasbMSUa8wYNCZTvhslg==
+  /hasha/5.2.2:
+    dependencies:
+      is-stream: 2.0.0
+      type-fest: 0.8.1
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-Hrp5vIK/xr5SkeN2onO32H0MgNZ0f17HRNH39WfL0SYUNOTZ5Lz1TJ8Pajo/87dYGEFlLMm7mIc/k/s6Bvz9HQ==
   /helpful-merge/0.2.0:
     dev: false
     resolution:
@@ -3378,6 +3388,12 @@ packages:
     optional: true
     resolution:
       integrity: sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==
+  /type-fest/0.8.1:
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
   /typedarray-to-buffer/3.1.5:
     dependencies:
       is-typedarray: 1.0.0
@@ -3590,6 +3606,7 @@ specifiers:
   electron-window-state: ^5.0.3
   exiftool-vendored: ^13.0.0
   hash-sum: ^2.0.0
+  hasha: ^5.2.2
   image-info: ^0.0.2
   imagemin: ^7.0.1
   imagemin-jpegtran: ^7.0.0

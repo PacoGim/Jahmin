@@ -39,6 +39,7 @@
 		"easydropdown": "^4.2.0",
 		"exiftool-vendored": "^13.0.0",
 		"hash-sum": "^2.0.0",
+		"hasha": "^5.2.2",
 		"image-info": "^0.0.2",
 		"imagemin": "^7.0.1",
 		"imagemin-jpegtran": "^7.0.0",

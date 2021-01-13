@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNewPromiseAlbumArray = exports.getAlbumArray = exports.setAlbumArray = void 0;
 const nanoid_1 = require("nanoid");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
+const string_hash_1 = __importDefault(require("string-hash"));
 let albumArray = [];
 // External resolve. When resolve result set, the promise will be resolved.
 let resolvePromise = null;
@@ -12,12 +16,13 @@ function setAlbumArray(newAlbumArray) {
     let newArray = [];
     // Filter the array
     newAlbumArray.forEach((song) => {
-        let foundAlbum = newArray.find((i) => i['Album'] === song['Album']);
+        let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/');
+        let foundAlbum = newArray.find((i) => i['RootDir'] === rootDir);
         if (!foundAlbum) {
             newArray.push({
-                ID: nanoid(),
-                Album: song['Album'],
-                RootDir: song['SourceFile'].split('/').slice(0, -1).join('/'),
+                ID: `l${string_hash_1.default(rootDir).toString(36)}`,
+                Name: song['Album'],
+                RootDir: rootDir,
                 AlbumArtist: song['AlbumArtist'],
                 DynamicAlbumArtist: getAllAlbumArtists(newAlbumArray, song['Album']),
                 Songs: [song]

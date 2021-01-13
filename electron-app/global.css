@@ -1,7 +1,8 @@
 @font-face {
-	font-family: Nunito;
-	src: url('./fonts/NunitoVFBeta.ttf');
+	font-family: SourceSans;
+	src: url('./fonts/SourceSans3VF-Roman.otf.woff2');
 }
+
 
 * {
 	box-sizing: border-box;
@@ -23,10 +24,14 @@ html {
 
 body {
 	color: #fff;
+	/* font-size: 18px; */
 	height: 100%;
 	display: block;
-	font-family: Nunito;
-	font-variation-settings: 'wght' 80;
+	font-family: SourceSans;
+	/* Weight: 300 - 900 */
+	/* Width: 70 - 110 */
+	letter-spacing: -0.5px;
+	font-variation-settings: 'wght' 500;
 }
 
 *::-webkit-scrollbar {

@@ -65,6 +65,8 @@
 		}
 
 		player.volume = volume
+
+		hookePlayerProgressEvents()
 	})
 
 	async function playSong() {
@@ -132,23 +134,6 @@
 		localStorage.setItem('volume', String(player.volume))
 	}
 
-	function changeDuration(evt) {
-		console.log(evt['offsetX'])
-		console.log(evt['offsetY'])
-		player.pause()
-
-		//@ts-ignore
-		let progressValue = document.querySelector('#inputProgress').value
-		document.documentElement.style.setProperty('--song-time', `${progressValue}%`)
-
-		clearInterval(pauseDebounce)
-
-		pauseDebounce = setTimeout(() => {
-			player.currentTime = currentSong['Duration'] / (100 / progressValue)
-			player.play()
-		}, 200)
-	}
-
 	function startInterval() {
 		console.log('Start')
 		$isPlaying = true
@@ -165,6 +150,48 @@
 		console.log('Stop')
 		$isPlaying = false
 		clearInterval(playingInterval)
+	}
+
+	let isMouseDown = false
+	let isMouseIn = false
+
+	function hookePlayerProgressEvents() {
+		let playerProgress = document.querySelector('player-progress')
+		let playerForeground: HTMLElement = document.querySelector('player-progress progress-foreground')
+
+		playerProgress.addEventListener('mouseenter', () => (isMouseIn = true))
+
+		playerProgress.addEventListener('mouseleave', () => (isMouseIn = false))
+
+		playerProgress.addEventListener('mousedown', () => (isMouseDown = true))
+
+		playerProgress.addEventListener('mouseup', () => (isMouseDown = false))
+
+		playerProgress.addEventListener('mousemove', (evt) => {
+			if (isMouseDown && isMouseIn) applyProgressChange(evt)
+		})
+
+		playerProgress.addEventListener('click', (evt) => applyProgressChange(evt))
+
+		function applyProgressChange(evt: Event) {
+			player.pause()
+
+			playerForeground.style.transition = 'min-width 0ms linear'
+
+			let playerWidth = playerProgress['scrollWidth']
+
+			let selectedPercent = (100 / playerWidth) * evt['offsetX']
+
+			document.documentElement.style.setProperty('--song-time', `${selectedPercent}%`)
+
+			clearTimeout(pauseDebounce)
+
+			pauseDebounce = setTimeout(() => {
+				player.currentTime = currentSong['Duration'] / (100 / selectedPercent)
+				playerForeground.style.transition = 'min-width 100ms linear'
+				player.play()
+			}, 500)
+		}
 	}
 </script>
 
@@ -187,16 +214,8 @@
 	<input type="range" min="0" max="1" step="0.01" bind:value={volume} />
 
 	<player-progress>
-		<input
-			id="inputProgress"
-			type="range"
-			min="0"
-			max="100"
-			step="0.1"
-			on:mousedown={(evt) => changeDuration(evt)}
-			on:input={(evt) => changeDuration(evt)} />
-		<canvas id="progress-background" />
 		<progress-foreground />
+		<canvas id="progress-background" />
 	</player-progress>
 </player-svlt>
 

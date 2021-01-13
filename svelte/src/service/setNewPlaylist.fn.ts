@@ -4,6 +4,8 @@ import { getAlbumColors } from './getAlbumColors.fn'
 import { getAlbumIPC } from './ipc.service'
 
 export async function setNewPlaylist(albumID: string, index: number) {
+	localStorage.setItem('LastAlbumPlayedID', albumID)
+
 	let songs = await fetchAlbum(albumID)
 	getAlbumColors(albumID)
 
