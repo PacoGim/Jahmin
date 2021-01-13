@@ -3,7 +3,6 @@
 	src: url('./fonts/SourceSans3VF-Roman.otf.woff2');
 }
 
-
 * {
 	box-sizing: border-box;
 	padding: 0;
@@ -14,6 +13,8 @@
 	--hi-color: #fff;
 	--mid-color: #808080;
 	--low-color: #000;
+
+	--volume-level: 0px;
 
 	--button-size: 1.25rem;
 }

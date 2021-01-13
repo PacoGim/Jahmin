@@ -7,7 +7,9 @@
 		if ($isPlaying) {
 			player.pause()
 		} else {
-			player.play()
+			if (player.src !== '') {
+				player.play()
+			}
 		}
 	}
 </script>
