@@ -1,6 +1,6 @@
 import type { SongType } from './song.type'
 
-export type PlaylistType = {
+export type PlaybackType = {
 	AlbumID: string
 	SongList: SongType[]
 }

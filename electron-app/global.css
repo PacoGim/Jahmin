@@ -17,6 +17,8 @@
 	--volume-level: 0px;
 
 	--button-size: 1.25rem;
+
+	--art-grid-gap:1rem;
 }
 
 html {
@@ -25,13 +27,10 @@ html {
 
 body {
 	color: #fff;
-	/* font-size: 18px; */
 	height: 100%;
 	display: block;
 	font-family: SourceSans;
-	/* Weight: 300 - 900 */
-	/* Width: 70 - 110 */
-	letter-spacing: -0.5px;
+	letter-spacing: -0.25px;
 	font-variation-settings: 'wght' 500;
 }
 

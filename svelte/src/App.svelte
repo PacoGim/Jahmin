@@ -7,7 +7,19 @@
 	import Details from './includes/Details.svelte'
 	import Controller from './controller/Controller.svelte'
 	import BackgroundArt from './includes/BackgroundArt.svelte'
+	import { appTitle } from './store/index.store'
+	import { onMount } from 'svelte'
+
+	onMount(() => {
+		window.onkeydown = function (e) {
+			return !(e.code == 'Space' && e.target == document.body)
+		}
+	})
 </script>
+
+<svelte:head>
+	<title>{$appTitle}</title>
+</svelte:head>
 
 <Controller />
 

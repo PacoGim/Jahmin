@@ -1,4 +1,5 @@
 import { Writable, writable } from 'svelte/store'
+import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
 type FilterType = {
@@ -11,7 +12,7 @@ export let versioning: Writable<number> = writable(Date.now())
 
 export let allSongFilters: Writable<FilterType[]> = writable([])
 
-export let albums: Writable<any> = writable([])
+export let albums: Writable<AlbumType[]> = writable([])
 
 // 'Genre', 'AlbumArtist', 'Album'
 export let valuesToGroup: Writable<string[]> = writable([])
@@ -24,3 +25,5 @@ export let storeConfig: Writable<any> = writable(undefined)
 export let songList: Writable<SongType[]> = writable(undefined)
 
 export let isDoneDrawing: Writable<boolean> = writable(false)
+
+export let appTitle: Writable<string> = writable('Jahmin')

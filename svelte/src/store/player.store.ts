@@ -1,9 +1,15 @@
 import { Writable, writable } from 'svelte/store'
 
-import type { PlaylistType } from "../types/playlist.type"
+import type { PlaybackType } from '../types/playback.type'
+import type { PlaybackIndexType } from '../types/playbackIndex.type'
 
-export let playlistIndex: Writable<number> = writable(undefined)
+export let playbackIndex: Writable<PlaybackIndexType> = writable({
+	indexToPlay: 0,
+	playNow: false
+})
+
 export let isPlaying: Writable<boolean> = writable(false)
-export let playlist: Writable<PlaylistType> = writable(undefined)
-export let selectedAlbum: Writable<any> = writable(undefined)
 
+export let playback: Writable<PlaybackType> = writable(undefined)
+
+export let selectedAlbum: Writable<any> = writable(undefined)

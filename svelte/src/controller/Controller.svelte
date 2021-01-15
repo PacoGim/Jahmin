@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 	import { getConfig, saveConfig } from '../service/ipc.service'
 	import { valuesToFilter, isValuesToFilterChanged, valuesToGroup, versioning, storeConfig } from '../store/index.store'
+	import { lastAlbumPlayed, lastSongIndexPlayed } from '../store/snapshot.store'
 
 	/*
 		index.store.ts -> Watch valuesToGroup and valuesToFilter changes from Order Components (Filtering)
@@ -17,6 +18,8 @@
 
 	onMount(() => {
 		loadConfig()
+
+		$lastSongIndexPlayed = 0
 	})
 
 	$: {

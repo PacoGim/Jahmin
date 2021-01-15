@@ -11,7 +11,7 @@ export function getOrder(index: number): Promise<string[]> {
 	})
 }
 
-export function getConfig() {
+export function getConfig():Promise<object> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-config').then((result) => {
 			resolve(result)

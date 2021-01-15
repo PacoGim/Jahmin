@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import type { SongType } from '../types/song.type'
-	import { playlist, playlistIndex, selectedAlbum } from '../store/player.store'
-	import { setNewPlaylist } from '../service/setNewPlaylist.fn'
+	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
+	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 
 	export let song: SongType
 	export let index: number
@@ -17,13 +17,17 @@
 	}
 
 	function songListItemDBLClickEventHandler() {
-		setNewPlaylist(albumID, index)
+		setNewPlayback(albumID, index)
 	}
+
+	//TODO Can't select alum properly. MUST be album selection issue
+	// && $selectedAlbum['ID'] === $playback?.['AlbumID']
 </script>
 
 <song-list-item
+	id={song['$loki']}
 	on:dblclick={() => songListItemDBLClickEventHandler()}
-	class={$playlistIndex === index && $selectedAlbum['ID'] === $playlist?.['AlbumID'] ? 'selected' : ''}>
+	class={$playbackIndex['indexToPlay'] === index  ? 'selected' : ''}>
 	<song-number>{song['Track']}</song-number>
 	<song-title>{song['Title']}</song-title>
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>

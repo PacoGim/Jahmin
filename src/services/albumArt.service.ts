@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-import hash from 'hash-sum'
 import sharp from 'sharp'
 
 //@ts-ignore
@@ -9,6 +8,7 @@ import imageInfo from 'image-info'
 import { appDataPath } from '..'
 import { mkdirSync } from 'original-fs'
 import { getConfig } from './config.service'
+import { hash } from '../functions/hashString.fn'
 
 const validVideoExtensions = ['gif', 'mp4']
 const validImageExtensions = ['jpg', 'jpeg', 'png', 'webp']
@@ -86,7 +86,7 @@ function getImageCompressed(filePath: string) {
 	}
 }
 
-function compressImage(filePath: string, artDirPath: string, compressedFilePath: string) {
+function compressImage(filePath: string, artDirPath: string, artPath: string) {
 	let config = getConfig()
 	let dimension = config?.['art']?.['dimension']
 
@@ -102,7 +102,7 @@ function compressImage(filePath: string, artDirPath: string, compressedFilePath:
 		.webp({
 			quality: 50
 		})
-		.toFile(compressedFilePath)
+		.toFile(artPath)
 }
 
 function getFileNameWithoutExtension(filePath: string) {

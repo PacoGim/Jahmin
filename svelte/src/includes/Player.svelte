@@ -3,15 +3,16 @@
 
 	import { onMount } from 'svelte'
 
-	import { isDoneDrawing, songList } from '../store/index.store'
-	import { playlistIndex, isPlaying, playlist } from '../store/player.store'
-	import { getWaveformData } from '../service/waveform.service'
-	import { drawWaveform } from '../service/draw.service'
 	import NextButton from '../components/NextButton.svelte'
 	import PreviousButton from '../components/PreviousButton.svelte'
 	import PlayButton from '../components/PlayButton.svelte'
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
+
+	import { isDoneDrawing, songList } from '../store/index.store'
+	import { playbackIndex, isPlaying, playback } from '../store/player.store'
+	import { getWaveformData } from '../service/waveform.service'
+	import { drawWaveform } from '../service/draw.service'
 
 	let progress: number = 0
 
@@ -24,7 +25,7 @@
 	let playingInterval: NodeJS.Timeout = undefined
 
 	$: {
-		$playlistIndex
+		$playbackIndex
 		playSong()
 	}
 
@@ -51,13 +52,16 @@
 	}
 
 	async function playSong() {
-		if ($playlist?.['SongList'] === undefined) {
+
+		//TODO When setting album and song from storage, the song list is empty
+
+		if ($playback?.['SongList'] === undefined) {
 			return
 		}
 
 		let songBuffer = undefined
 
-		currentSong = $playlist['SongList'][$playlistIndex]
+		currentSong = $playback['SongList'][$playbackIndex['indexToPlay']]
 
 		if (currentSong === undefined) {
 			return stopPlayer()
@@ -72,7 +76,15 @@
 		const blob = new Blob([songBuffer])
 		const url = window.URL.createObjectURL(blob)
 		player.src = url
-		player.play()
+
+		localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
+		localStorage.setItem('LastPlayedSongID', String(currentSong['$loki']))
+
+		if ($playbackIndex['playNow'] === false) {
+			player.pause()
+		} else {
+			player.play()
+		}
 
 		$isDoneDrawing = false
 
@@ -91,7 +103,7 @@
 
 	async function preLoadNextSong() {
 		console.time()
-		const nextSong: SongType = $playlist['SongList'][$playlistIndex + 1]
+		const nextSong: SongType = $playback['SongList'][$playbackIndex['indexToPlay'] + 1]
 
 		if (nextSong) {
 			let songBuffer = await fetchSong(nextSong['SourceFile'])
@@ -133,7 +145,11 @@
 </script>
 
 <player-svlt>
-	<audio controls={true} on:play={() => startInterval()} on:pause={() => stopInterval()} on:ended={() => $playlistIndex++}>
+	<audio
+		controls={true}
+		on:play={() => startInterval()}
+		on:pause={() => stopInterval()}
+		on:ended={() => $playbackIndex['indexToPlay']++}>
 		<track kind="captions" />
 	</audio>
 
@@ -159,6 +175,7 @@
 	}
 
 	audio {
+		display: none;
 		position: fixed;
 		top: 0;
 		left: 0;

@@ -1,7 +1,4 @@
-import { customAlphabet } from 'nanoid'
-const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
-import hasha from 'hasha'
-import stringHash from 'string-hash'
+import { hash } from '../functions/hashString.fn'
 
 let albumArray: object[] = []
 
@@ -20,7 +17,7 @@ export function setAlbumArray(newAlbumArray: any[]) {
 
 		if (!foundAlbum) {
 			newArray.push({
-				ID: `l${stringHash(rootDir).toString(36)}`,
+				ID: hash(rootDir),
 				Name: song['Album'],
 				RootDir: rootDir,
 				AlbumArtist: song['AlbumArtist'],

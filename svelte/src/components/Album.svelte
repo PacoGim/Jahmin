@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { getCover } from '../service/ipc.service'
-	import { setNewPlaylist } from '../service/setNewPlaylist.fn'
-	import { selectedAlbum } from '../store/player.store'
+	import { setNewPlayback } from '../functions/setNewPlayback.fn'
+	import { playbackIndex, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
 
 	export let album: AlbumType
@@ -10,12 +10,14 @@
 	let coverType = undefined
 	let coverSrc = undefined /* Image Source URL */
 
-	// var observer =body > main > art-grid-svlt > album:nth-child(32) > img
-	// body > main > art-grid-svlt > album:nth-child(1)
-	// observer.observe(document.querySelector('#main-container'))
-
 	onMount(() => {
 		addIntersectionObserver()
+
+		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID')
+
+		if (album['ID'] === lastPlayedAlbumID) {
+			prepareAlbum(undefined)
+		}
 	})
 
 	function fetchAlbumCover() {
@@ -40,15 +42,33 @@
 		).observe(document.querySelector(`art-grid-svlt > album:nth-child(${index + 1})`))
 	}
 
-	async function prepareAlbum(evt: MouseEvent) {
+	async function prepareAlbum(evt: MouseEvent | undefined) {
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		$selectedAlbum = album
 
-		if (evt['type'] === 'dblclick') {
-			setNewPlaylist(album['ID'], 0)
+		if (evt !== undefined && evt['type'] === 'dblclick') {
+			setNewPlayback(album['ID'], 0)
+		} else {
+			let lastPlayedSong = album['Songs'].find((i) => i['$loki'] === Number(localStorage.getItem('LastPlayedSongID')))
+
+			if (lastPlayedSong) {
+				let lastPlayedSongID = lastPlayedSong['$loki']
+
+				if (lastPlayedSongID) {
+					setTimeout(() => {
+						document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`).scrollIntoView({ behavior: 'smooth' })
+						$playbackIndex = {
+							indexToPlay: album['Songs'].findIndex((i) => i['$loki'] === lastPlayedSongID),
+							playNow: false
+						}
+
+						// console.log($playbackIndex)
+					}, 100)
+				}
+			}
 		}
 
-		document.querySelector('song-list-svlt').scrollTop = 0
+		// document.querySelector('song-list-svlt').scrollTop = 0
 	}
 </script>
 
@@ -84,10 +104,16 @@
 	album {
 		position: relative;
 		display: grid;
+
+		margin: 1rem;
 		/* justify-content: center;
 		align-items: center;
 		flex-direction: column; */
 		cursor: pointer;
+		height: var(--cover-dimension);
+		width: var(--cover-dimension);
+		max-width: var(--cover-dimension);
+		max-height: var(--cover-dimension);
 	}
 
 	album-details {

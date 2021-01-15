@@ -1,7 +1,7 @@
 import { getAlbumColorsIPC } from './ipc.service'
 
 export async function getAlbumColors(id: string) {
-	let albumImagePath: string = document.querySelector(`#${id}`).querySelector('img').getAttribute('src')
+	let albumImagePath: string = document.querySelector(`#${CSS.escape(id)}`).querySelector('img').getAttribute('src')
 
 	if (albumImagePath) {
 		getAlbumColorsIPC(albumImagePath).then((colors) => {

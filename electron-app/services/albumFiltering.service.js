@@ -1,12 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNewPromiseAlbumArray = exports.getAlbumArray = exports.setAlbumArray = void 0;
-const nanoid_1 = require("nanoid");
-const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
-const string_hash_1 = __importDefault(require("string-hash"));
+const hashString_fn_1 = require("../functions/hashString.fn");
 let albumArray = [];
 // External resolve. When resolve result set, the promise will be resolved.
 let resolvePromise = null;
@@ -20,7 +15,7 @@ function setAlbumArray(newAlbumArray) {
         let foundAlbum = newArray.find((i) => i['RootDir'] === rootDir);
         if (!foundAlbum) {
             newArray.push({
-                ID: `l${string_hash_1.default(rootDir).toString(36)}`,
+                ID: hashString_fn_1.hash(rootDir),
                 Name: song['Album'],
                 RootDir: rootDir,
                 AlbumArtist: song['AlbumArtist'],

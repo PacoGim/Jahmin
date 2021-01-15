@@ -1,8 +1,11 @@
 <script>
-	import { playlistIndex } from '../store/player.store'
+	import { playbackIndex } from '../store/player.store'
 
 	function addIndex() {
-		$playlistIndex = $playlistIndex + 1
+		$playbackIndex = {
+			indexToPlay: $playbackIndex['indexToPlay'] + 1,
+			playNow: true
+		}
 	}
 </script>
 

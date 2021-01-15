@@ -1,21 +1,23 @@
-import { playlist, playlistIndex, selectedAlbum } from '../store/player.store'
+import { getAlbumColors } from '../service/getAlbumColors.fn'
+import { getAlbumIPC } from '../service/ipc.service'
+import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
-import { getAlbumColors } from './getAlbumColors.fn'
-import { getAlbumIPC } from './ipc.service'
 
-export async function setNewPlaylist(albumID: string, index: number) {
-	localStorage.setItem('LastAlbumPlayedID', albumID)
-
+export async function setNewPlayback(albumID: string, index: number) {
 	let songs = await fetchAlbum(albumID)
+
 	getAlbumColors(albumID)
 
-	playlist.set({
+	playback.set({
 		AlbumID: albumID,
 		SongList: songs
 	})
 
-	playlistIndex.set(undefined)
-	playlistIndex.set(index)
+	playbackIndex.set(undefined)
+	playbackIndex.set({
+		indexToPlay: index,
+		playNow: true
+	})
 }
 
 function fetchAlbum(albumID): Promise<SongType[]> {

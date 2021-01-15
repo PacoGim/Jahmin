@@ -1,17 +1,23 @@
 <script lang="ts">
-	import { playlistIndex } from '../store/player.store'
+	import { playbackIndex } from '../store/player.store'
 
 	export let player: HTMLAudioElement
 
 	function previousButtonEvent() {
 		if (player.currentTime < 1) {
-			if ($playlistIndex > 0) {
-				$playlistIndex = $playlistIndex - 1
+			if ($playbackIndex['indexToPlay'] > 0) {
+				$playbackIndex = {
+					indexToPlay: $playbackIndex['indexToPlay'] - 1,
+					playNow: true
+				}
 			}
 		} else {
-			let index = $playlistIndex
-			$playlistIndex = undefined
-			$playlistIndex = index
+			let index = $playbackIndex['indexToPlay']
+			$playbackIndex = undefined
+			$playbackIndex = {
+				indexToPlay: index,
+				playNow: true
+			}
 		}
 	}
 </script>

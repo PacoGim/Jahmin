@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAlbumCover = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const hash_sum_1 = __importDefault(require("hash-sum"));
 const sharp_1 = __importDefault(require("sharp"));
 //@ts-ignore
 const image_info_1 = __importDefault(require("image-info"));
 const __1 = require("..");
 const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
+const hashString_fn_1 = require("../functions/hashString.fn");
 const validVideoExtensions = ['gif', 'mp4'];
 const validImageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 const validExtensions = [...validImageExtensions, ...validVideoExtensions];
@@ -30,7 +30,7 @@ function getAlbumCover(rootDir) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         var _a;
         let imagePathArray = [];
-        let rootDirHashed = hash_sum_1.default(rootDir);
+        let rootDirHashed = hashString_fn_1.hash(rootDir);
         let config = config_service_1.getConfig();
         let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
         let artDirPath = path_1.default.join(__1.appDataPath, 'art', String(dimension));
@@ -78,7 +78,7 @@ function getImageCompressed(filePath) {
     let config = config_service_1.getConfig();
     let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
     let artDirPath = path_1.default.join(__1.appDataPath, 'art', String(dimension));
-    let fileHash = `${hash_sum_1.default(filePath)}.webp`;
+    let fileHash = `${hashString_fn_1.hash(filePath)}.webp`;
     let compressedFilePath = path_1.default.join(artDirPath, fileHash);
     if (fs_1.default.existsSync(compressedFilePath)) {
         return compressedFilePath;
@@ -87,7 +87,7 @@ function getImageCompressed(filePath) {
         return undefined;
     }
 }
-function compressImage(filePath, artDirPath, compressedFilePath) {
+function compressImage(filePath, artDirPath, artPath) {
     var _a;
     let config = config_service_1.getConfig();
     let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
@@ -102,7 +102,7 @@ function compressImage(filePath, artDirPath, compressedFilePath) {
         .webp({
         quality: 50
     })
-        .toFile(compressedFilePath);
+        .toFile(artPath);
 }
 function getFileNameWithoutExtension(filePath) {
     let fileNameWithExt = filePath.split('/').pop();
