@@ -7,6 +7,7 @@
 	import Details from './includes/Details.svelte'
 	import Controller from './controller/Controller.svelte'
 	import BackgroundArt from './includes/BackgroundArt.svelte'
+	import SongListBackground from './includes/SongListBackground.svelte'
 	import { appTitle } from './store/index.store'
 	import { onMount } from 'svelte'
 
@@ -31,6 +32,7 @@
 	<SongList />
 	<Details />
 	<BackgroundArt />
+	<SongListBackground />
 </main>
 
 <style>

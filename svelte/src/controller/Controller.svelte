@@ -20,6 +20,8 @@
 		loadConfig()
 
 		$lastSongIndexPlayed = 0
+
+
 	})
 
 	$: {

@@ -12,7 +12,7 @@ function filterData(audioBuffer) {
 	const rawData = audioBuffer.getChannelData(0)
 	// console.log(rawData)
 	const samples = 65535/10
-	// const samples = 5000
+	// const samples = 500
 	const blockSize = Math.floor(rawData.length / samples)
 
 	const filteredData = []

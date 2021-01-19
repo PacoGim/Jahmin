@@ -76,8 +76,10 @@
 
 	player-progress progress-foreground {
 		z-index: 1;
-		mix-blend-mode: hard-light;
-		background-color: var(--hi-color);
+		mix-blend-mode: soft-light;
+		background-color: rgba(0,0,0,.5);
+		/* mix-blend-mode: hard-light;
+		background-color: var(--hi-color); */
 		min-width: var(--song-time);
 		transition: min-width 100ms linear;
 	}
@@ -86,5 +88,6 @@
 		z-index: 0;
 		transition: opacity 0.3s ease-in-out;
 		width: 100%;
+		opacity: 0;
 	}
 </style>

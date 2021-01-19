@@ -3,7 +3,7 @@ import { getAlbumIPC } from '../service/ipc.service'
 import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 
-export async function setNewPlayback(albumID: string, index: number) {
+export async function setNewPlayback(albumID: string, index: number,playNow:boolean) {
 	let songs = await fetchAlbum(albumID)
 
 	getAlbumColors(albumID)
@@ -14,16 +14,16 @@ export async function setNewPlayback(albumID: string, index: number) {
 	})
 
 	playbackIndex.set(undefined)
+
 	playbackIndex.set({
 		indexToPlay: index,
-		playNow: true
+		playNow
 	})
 }
 
 function fetchAlbum(albumID): Promise<SongType[]> {
 	return new Promise(async (resolve, reject) => {
 		let album = await getAlbumIPC(albumID)
-		selectedAlbum.set(album)
 		let songs = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		resolve(songs)
 	})

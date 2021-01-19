@@ -17,24 +17,24 @@
 	}
 
 	function songListItemDBLClickEventHandler() {
-		setNewPlayback(albumID, index)
+		setNewPlayback(albumID, index, true)
 	}
-
-	//TODO Can't select alum properly. MUST be album selection issue
-	// && $selectedAlbum['ID'] === $playback?.['AlbumID']
 </script>
 
 <song-list-item
 	id={song['$loki']}
 	on:dblclick={() => songListItemDBLClickEventHandler()}
-	class={$playbackIndex['indexToPlay'] === index  ? 'selected' : ''}>
+	class={$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID'] ? 'selected' : ''}>
 	<song-number>{song['Track']}</song-number>
 	<song-title>{song['Title']}</song-title>
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>
 </song-list-item>
 
 <style>
+
+
 	song-list-item {
+		position: relative;
 		cursor: pointer;
 
 		display: grid;

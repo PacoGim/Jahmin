@@ -14,6 +14,8 @@
 	import { getWaveformData } from '../service/waveform.service'
 	import { drawWaveform } from '../service/draw.service'
 
+	import { nextSong } from '../functions/nextSong.fn'
+
 	let progress: number = 0
 
 	let currentSong: SongType = undefined
@@ -33,7 +35,7 @@
 		let canvasElement = document.querySelector('canvas')
 
 		if (canvasElement) {
-			canvasElement.style.opacity = $isDoneDrawing ? '1' : '0'
+			canvasElement.style.opacity = $isDoneDrawing === true ? '1' : '0'
 		}
 	}
 
@@ -52,14 +54,13 @@
 	}
 
 	async function playSong() {
-
-		//TODO When setting album and song from storage, the song list is empty
-
 		if ($playback?.['SongList'] === undefined) {
 			return
 		}
 
 		let songBuffer = undefined
+
+		// console.log($playbackIndex)
 
 		currentSong = $playback['SongList'][$playbackIndex['indexToPlay']]
 
@@ -92,9 +93,11 @@
 			clearTimeout(drawWaveformDebounce)
 
 			drawWaveformDebounce = setTimeout(() => {
-				if ($isPlaying) {
-					drawWaveform(waveformData)
-				}
+				// if ($isPlaying) {
+				// console.log()
+				// console.log(keepIndex)
+				drawWaveform(waveformData)
+				// }
 			}, 1000)
 		})
 
@@ -127,6 +130,7 @@
 
 	function startInterval() {
 		console.log('Start')
+
 		$isPlaying = true
 
 		clearInterval(playingInterval)
@@ -145,11 +149,7 @@
 </script>
 
 <player-svlt>
-	<audio
-		controls={true}
-		on:play={() => startInterval()}
-		on:pause={() => stopInterval()}
-		on:ended={() => $playbackIndex['indexToPlay']++}>
+	<audio controls={true} on:play={() => startInterval()} on:pause={() => stopInterval()} on:ended={() => nextSong()}>
 		<track kind="captions" />
 	</audio>
 

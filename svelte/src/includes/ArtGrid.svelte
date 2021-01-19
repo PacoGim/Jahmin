@@ -41,7 +41,7 @@
 			let $album = document.querySelector(`#${CSS.escape(lastPlayedAlbumID)}`)
 
 			if ($album) {
-				$album.scrollIntoView({ behavior: 'smooth' })
+				$album.scrollIntoView()
 			}
 		}
 	}

@@ -1,17 +1,19 @@
 <script>
+import { nextSong } from '../functions/nextSong.fn';
+
 	import { playbackIndex } from '../store/player.store'
 
-	function addIndex() {
-		$playbackIndex = {
-			indexToPlay: $playbackIndex['indexToPlay'] + 1,
-			playNow: true
-		}
-	}
+	// function addIndex() {
+	// 	$playbackIndex = {
+	// 		indexToPlay: $playbackIndex['indexToPlay'] + 1,
+	// 		playNow: true
+	// 	}
+	// }
 </script>
 
 <svg
 	class="player-button"
-	on:click={() => addIndex()}
+	on:click={() => nextSong()}
 	version="1.1"
 	id="Layer_1"
 	xmlns="http://www.w3.org/2000/svg"

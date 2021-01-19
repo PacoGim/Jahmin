@@ -36,7 +36,7 @@
 
 		saveVolumeDebounce = setTimeout(() => {
 			localStorage.setItem('volume', String(volume))
-		}, 2000)
+		}, 1000)
 	}
 
 	function loadLocalStorageVolume() {
@@ -63,25 +63,26 @@
 		min="0"
 		max="100"
 		step={isShiftKeyDown ? '5' : '1'}
-		bind:value={volume} />
+		bind:value={volume}
+	/>
 	<background />
 	<volume-thumb>{Math.round(volume)}</volume-thumb>
 </volume-bar>
 
 <style>
 	volume-bar {
-		display: flex;
+		display: grid;
+		grid-template-columns: 100%;
+
 		justify-content: center;
-		width: 200px;
+		align-items: center;
 		height: 32px;
-		position: relative;
 	}
 
 	input {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
+		display: block;
+		grid-row: 1;
+		grid-column: 1;
 		height: 100%;
 		z-index: 1;
 		opacity: 0;
@@ -92,10 +93,9 @@
 	}
 
 	volume-thumb {
-		transform: scale(1.05);
-		position: absolute;
-		top: 0;
-		left: var(--volume-level);
+		grid-row: 1;
+		grid-column: 1;
+		transform: translateX(var(--volume-level)); /*  Volume Visual Control */
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -113,11 +113,11 @@
 	}
 
 	background {
-		position: absolute;
+		grid-row: 1;
+		grid-column: 1;
 		top: 0;
 		left: 0;
-		width: 100%;
-		height: 100%;
+		height: 16px;
 		background: linear-gradient(to right, var(--hi-color), var(--low-color));
 		border-radius: 25px;
 		box-shadow: inset 0 0 0 2px #fff, inset 0 0 5px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.2);

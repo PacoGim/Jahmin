@@ -38,7 +38,7 @@ export function getAlbums(): Promise<void> {
 	})
 }
 
-export function getCover(rootDir) {
+export function getCoverIPC(rootDir) {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-cover', rootDir).then((result) => {
 			resolve(result)

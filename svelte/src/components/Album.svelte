@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getCover } from '../service/ipc.service'
+	import { getCoverIPC } from '../service/ipc.service'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
-	import { playbackIndex, selectedAlbum } from '../store/player.store'
+	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
 
 	export let album: AlbumType
@@ -16,12 +16,45 @@
 		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID')
 
 		if (album['ID'] === lastPlayedAlbumID) {
-			prepareAlbum(undefined)
+			if ($playback === undefined) {
+				$playback = {
+					AlbumID: lastPlayedAlbumID,
+					SongList: []
+				}
+				selectLastPlayedSong()
+			}
 		}
 	})
 
+	function selectLastPlayedSong() {
+		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
+		$selectedAlbum = album
+
+		let lastPlayedSong = album['Songs'].find((i) => i['$loki'] === Number(localStorage.getItem('LastPlayedSongID')))
+
+		if (lastPlayedSong) {
+			let lastPlayedSongID = lastPlayedSong['$loki']
+
+			if (lastPlayedSongID) {
+				setTimeout(() => {
+					let $song = document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`)
+
+					if ($song) {
+						$song.scrollIntoView()
+					}
+
+					setNewPlayback(
+						album['ID'],
+						album['Songs'].findIndex((i) => i['$loki'] === lastPlayedSongID),
+						false
+					)
+				}, 100)
+			}
+		}
+	}
+
 	function fetchAlbumCover() {
-		getCover(album['RootDir']).then((result) => {
+		getCoverIPC(album['RootDir']).then((result) => {
 			if (result !== null) {
 				coverSrc = result['filePath']
 				coverType = result['fileType']
@@ -39,41 +72,31 @@
 				}
 			},
 			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
-		).observe(document.querySelector(`art-grid-svlt > album:nth-child(${index + 1})`))
+		).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['ID'])}`))
 	}
 
-	async function prepareAlbum(evt: MouseEvent | undefined) {
+	async function prepareAlbum(evt: MouseEvent) {
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		$selectedAlbum = album
 
-		if (evt !== undefined && evt['type'] === 'dblclick') {
-			setNewPlayback(album['ID'], 0)
-		} else {
-			let lastPlayedSong = album['Songs'].find((i) => i['$loki'] === Number(localStorage.getItem('LastPlayedSongID')))
+		// console.log(document.querySelector(`#${CSS.escape(album['ID'])}`).querySelector('img').getAttribute('src'))
 
-			if (lastPlayedSong) {
-				let lastPlayedSongID = lastPlayedSong['$loki']
-
-				if (lastPlayedSongID) {
-					setTimeout(() => {
-						document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`).scrollIntoView({ behavior: 'smooth' })
-						$playbackIndex = {
-							indexToPlay: album['Songs'].findIndex((i) => i['$loki'] === lastPlayedSongID),
-							playNow: false
-						}
-
-						// console.log($playbackIndex)
-					}, 100)
-				}
-			}
+		if (evt['type'] === 'dblclick') {
+			setNewPlayback(album['ID'], 0, true)
 		}
-
-		// document.querySelector('song-list-svlt').scrollTop = 0
 	}
 </script>
 
-<album id={album['ID']} on:dblclick={(evt) => prepareAlbum(evt)} on:click={(evt) => prepareAlbum(evt)}>
-	{#if coverType === undefined}<img src="./img/audio.svg" class="loader" alt="" />{/if}
+<album
+	class={$selectedAlbum?.['ID'] === album?.['ID'] ? 'selected' : ''}
+	id={album['ID']}
+	on:dblclick={(evt) => prepareAlbum(evt)}
+	on:click={(evt) => prepareAlbum(evt)}>
+
+	<!-- ▼▼▼ Cover Handle ▼▼▼ -->
+	{#if coverType === undefined}
+		<img src="./img/audio.svg" class="loader" alt="" />
+	{/if}
 	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
 	{#if coverType === 'image'}<img src={coverSrc} alt={album['Name']} />{/if}
 	{#if coverType === 'video'}
@@ -82,16 +105,19 @@
 			<source src={coverSrc} />
 		</video>
 	{/if}
+	<!-- ▲▲▲ Cover Handle ▲▲▲ -->
 
 	<img src="./img/gradient-overlay.svg" alt="" />
 
 	<album-details>
 		<album-name>{album['Name']}</album-name>
 
-		{#if album['AlbumArtist'] === undefined}
+		{#if album['AlbumArtist'] !== undefined}
 			<album-artist>{album['AlbumArtist']}</album-artist>
-		{:else}
+		{:else if album['DynamicAlbumArtist'] !== undefined}
 			<album-artist>{album['DynamicAlbumArtist']}</album-artist>
+		{:else}
+			<album-artist>Not Defined</album-artist>
 		{/if}
 	</album-details>
 </album>
@@ -99,6 +125,10 @@
 <style>
 	album:last-of-type {
 		/* padding-bottom: 20px; */
+	}
+
+	album.selected {
+		box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5), 0 0 0 7.5px rgba(255, 255, 255, 0.5);
 	}
 
 	album {
