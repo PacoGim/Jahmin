@@ -14,6 +14,6 @@ navigation-svlt.svelte-1yehk8b{grid-area:navigation-svlt}
 grouping-svlt.svelte-1kmhdcs{display:flex;height:100%;width:100%;grid-area:grouping-svlt;background-color:rgba(0,0,0,.25);flex-direction:row}
 player-svlt.svelte-13bim8k{grid-area:player-svlt;display:flex;align-items:center;background-color:var(--hi-color);transition:background-color 300ms ease-in-out}audio.svelte-13bim8k{display:none;position:fixed;top:0;left:0}player-buttons.svelte-13bim8k{height:var(--button-size);display:flex;flex-direction:row}player-buttons > *{cursor:pointer;margin:0 0.75rem}
 song-list-svlt.svelte-vpbxf{border:10px transparent solid;grid-area:song-list-svlt;overflow-y:auto;height:100%}
-song-list-background-svlt.svelte-dzn6ch{grid-area:song-list-svlt;position:relative;width:100%;height:100%;pointer-events:none;background-size:cover;z-index:-1}song-list-background-svlt.svelte-dzn6ch::before{content:'';display:block;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.25);backdrop-filter:blur(50px)}
+song-list-background-svlt.svelte-4li4jn{grid-area:song-list-svlt;position:relative;width:100%;height:100%;pointer-events:none;background-size:cover;z-index:-1;transition:background-image 300ms}song-list-background-svlt.svelte-4li4jn::before{content:'';display:block;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.25);backdrop-filter:blur(50px)}
 
 /*# sourceMappingURL=bundle.css.map */

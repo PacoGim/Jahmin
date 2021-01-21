@@ -2,34 +2,45 @@ import { app, BrowserWindow, ipcMain, protocol, screen, shell } from 'electron'
 import { getConfig, saveConfig } from './services/config.service'
 import path from 'path'
 
+import chokidar from 'chokidar'
+
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 
 import { scanFolders } from './services/indexer.service'
-import { createData, loadDb } from './services/loki.service'
+import { createData, getCollection, loadDb, updateData } from './services/loki.service'
+import stringHash from 'string-hash'
+import { getWatcher, watchFolders } from './services/folderWatcher.service'
+import { ConfigType } from './types/config.type'
 
 const collectionName = 'music'
 
 export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
 
+/*
+	New Files: Chokidar files -> If not in db, add them.
+	Updated Files: Chokidar files -> If in db and different, update them.
+
+	Deleted Files: DB files -> Check if on system, if not, remove from DB.
+*/
+
 async function createWindow() {
+	const config = getConfig()
+
 	await loadDb()
 
-	// scanFolders(['/Volumes/Maxtor/Music'])
-	// scanFolders(['/Volumes/Maxtor/Music/Electronic/Goldfrapp - Believer'])
-
 	// Create the browser window.
-	const window = new BrowserWindow(loadOptions())
+	const window = new BrowserWindow(loadOptions(config))
 
 	window.webContents.openDevTools()
 	window.loadFile('index.html')
 
+	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }
 
-function loadOptions() {
-	const config = getConfig()
-
+function loadOptions(config: ConfigType) {
 	const options = {
 		title: 'Jahmin',
 		x: 0,
@@ -75,6 +86,15 @@ app.on('window-all-closed', () => {
 		app.quit()
 	}
 })
+
+app.on('before-quit',()=>{
+	getWatcher().close()
+})
+
+
+// process.on('exit',()=>{
+
+// })
 
 app.on('activate', () => {
 	// console.log(app.getPath('appData'))

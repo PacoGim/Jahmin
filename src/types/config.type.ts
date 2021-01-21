@@ -1,5 +1,6 @@
 export type ConfigType = {
 	bounds?: BoundsType
+	rootDirectories?:string[]
 	order: OrderType
 	art: ArtType
 }

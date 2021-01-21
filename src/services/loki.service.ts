@@ -48,6 +48,7 @@ export function getCollection() {
 
 export function createData(newDoc: TagType) {
 	try {
+		console.log('New Doc: ',newDoc)
 		const collection = db.getCollection(collectionName)
 
 		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
@@ -109,6 +110,7 @@ export function updateData(query: any, newData: object) {
 }
 
 export function deleteData(query: any) {
+	console.log(query)
 	const collection = db.getCollection(collectionName)
 
 	if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)

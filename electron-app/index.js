@@ -19,22 +19,29 @@ const path_1 = __importDefault(require("path"));
 const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");
+const folderWatcher_service_1 = require("./services/folderWatcher.service");
 const collectionName = 'music';
 exports.appDataPath = path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
+/*
+    New Files: Chokidar files -> If not in db, add them.
+    Updated Files: Chokidar files -> If in db and different, update them.
+
+    Deleted Files: DB files -> Check if on system, if not, remove from DB.
+*/
 function createWindow() {
     return __awaiter(this, void 0, void 0, function* () {
+        const config = config_service_1.getConfig();
         yield loki_service_1.loadDb();
-        // scanFolders(['/Volumes/Maxtor/Music'])
-        // scanFolders(['/Volumes/Maxtor/Music/Electronic/Goldfrapp - Believer'])
         // Create the browser window.
-        const window = new electron_1.BrowserWindow(loadOptions());
+        const window = new electron_1.BrowserWindow(loadOptions(config));
         window.webContents.openDevTools();
         window.loadFile('index.html');
+        if (config === null || config === void 0 ? void 0 : config['rootDirectories'])
+            folderWatcher_service_1.watchFolders(config['rootDirectories']);
         window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window));
     });
 }
-function loadOptions() {
-    const config = config_service_1.getConfig();
+function loadOptions(config) {
     const options = {
         title: 'Jahmin',
         x: 0,
@@ -72,6 +79,11 @@ electron_1.app.on('window-all-closed', () => {
         electron_1.app.quit();
     }
 });
+electron_1.app.on('before-quit', () => {
+    folderWatcher_service_1.getWatcher().close();
+});
+// process.on('exit',()=>{
+// })
 electron_1.app.on('activate', () => {
     // console.log(app.getPath('appData'))
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {

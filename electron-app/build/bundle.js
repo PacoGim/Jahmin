@@ -101,9 +101,6 @@ var app = (function () {
     function set_input_value(input, value) {
         input.value = value == null ? '' : value;
     }
-    function set_style(node, key, value, important) {
-        node.style.setProperty(key, value, important ? 'important' : '');
-    }
     function custom_event(type, detail) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, false, false, detail);
@@ -4671,8 +4668,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
-    			set_style(song_list_background_svlt, "background-image", "url('/Users/fran/Library/Application Support/Jahmin/art/192/dn8dyp.webp')");
-    			set_custom_element_data(song_list_background_svlt, "class", "svelte-dzn6ch");
+    			set_custom_element_data(song_list_background_svlt, "class", "svelte-4li4jn");
     			add_location(song_list_background_svlt, file$f, 26, 0, 1108);
     		},
     		l: function claim(nodes) {

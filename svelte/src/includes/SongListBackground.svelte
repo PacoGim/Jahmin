@@ -18,10 +18,9 @@
 					let $el = document.querySelector('song-list-background-svlt')
 
 					if ($el) {
-            // console.log($el)
-            // console.log($el.style.backgroundImage)
-            $el.setAttribute('style',`background-image: url('${response['filePath']}');`)
-
+						// console.log($el)
+						// console.log($el.style.backgroundImage)
+						$el.setAttribute('style', `background-image: url('${response['filePath']}');`)
 					}
 					// $el.backgroundImage = coverSrc
 
@@ -33,7 +32,7 @@
 	}
 </script>
 
-<song-list-background-svlt style="background-image: url('/Users/fran/Library/Application Support/Jahmin/art/192/dn8dyp.webp');" />
+<song-list-background-svlt />
 
 <style>
 	song-list-background-svlt {
@@ -48,6 +47,8 @@
 		/* background-repeat: no-repeat; */
 		/* background-size: 100% 100%; */
 		z-index: -1;
+
+		transition: background-image 300ms;
 	}
 
 	song-list-background-svlt::before {
@@ -60,13 +61,4 @@
 		/* z-index: 1; */
 	}
 
-	/* song-list-background-svlt img{ */
-	/* display: inline; */
-	/* position: absolute; */
-	/* top: 0; */
-	/* left: 0; */
-	/* background-position: center; */
-	/* width: 100%; */
-	/* height: 100%; */
-	/* } */
 </style>

@@ -40,6 +40,7 @@ function getCollection() {
 exports.getCollection = getCollection;
 function createData(newDoc) {
     try {
+        console.log('New Doc: ', newDoc);
         const collection = db.getCollection(collectionName);
         if (!collection)
             throw new Error(`Collection ${collectionName} not created/available.`);
@@ -99,6 +100,7 @@ function updateData(query, newData) {
 }
 exports.updateData = updateData;
 function deleteData(query) {
+    console.log(query);
     const collection = db.getCollection(collectionName);
     if (!collection)
         throw new Error(`Collection ${collectionName} not created/available.`);
