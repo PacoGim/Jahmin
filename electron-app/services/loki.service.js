@@ -39,23 +39,25 @@ function getCollection() {
 }
 exports.getCollection = getCollection;
 function createData(newDoc) {
-    try {
-        console.log('New Doc: ', newDoc);
-        const collection = db.getCollection(collectionName);
-        if (!collection)
-            throw new Error(`Collection ${collectionName} not created/available.`);
-        let oldDoc = readData({ SourceFile: newDoc['SourceFile'] });
-        if (oldDoc) {
-            return updateData({ $loki: oldDoc['$loki'] }, newDoc);
+    return new Promise((resolve, reject) => {
+        try {
+            console.log('New Doc: ', newDoc);
+            const collection = db.getCollection(collectionName);
+            if (!collection)
+                throw new Error(`Collection ${collectionName} not created/available.`);
+            let oldDoc = readData({ SourceFile: newDoc['SourceFile'] });
+            if (oldDoc) {
+                resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc));
+            }
+            else {
+                resolve(collection.insert(newDoc));
+            }
         }
-        else {
-            return collection.insert(newDoc);
+        catch (error) {
+            handleErrors(error);
+            resolve(null);
         }
-    }
-    catch (error) {
-        handleErrors(error);
-        return null;
-    }
+    });
 }
 exports.createData = createData;
 function readDataById(id) {
@@ -100,12 +102,14 @@ function updateData(query, newData) {
 }
 exports.updateData = updateData;
 function deleteData(query) {
-    console.log(query);
-    const collection = db.getCollection(collectionName);
-    if (!collection)
-        throw new Error(`Collection ${collectionName} not created/available.`);
-    const doc = collection.find(query)[0];
-    return collection.remove(doc);
+    return new Promise((resolve, reject) => {
+        console.log(query);
+        const collection = db.getCollection(collectionName);
+        if (!collection)
+            throw new Error(`Collection ${collectionName} not created/available.`);
+        const doc = collection.find(query)[0];
+        resolve(collection.remove(doc));
+    });
 }
 exports.deleteData = deleteData;
 function handleErrors(error) {

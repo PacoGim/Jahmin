@@ -10,6 +10,8 @@
 	let selection = null
 	let isSelectionChanged = false
 
+	//TODO Try to make the selection come from local storage the first time the app runs and the value was set when playing song
+
 	$: if ($storeConfig !== undefined) {
 		setSelectionFromConfigStore()
 	}
@@ -32,7 +34,7 @@
 			}
 		}
 
-		console.log($valuesToFilter)
+		// console.log($valuesToFilter)
 		$isValuesToFilterChanged = true
 	}
 
@@ -43,7 +45,8 @@
 
 	// Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
 	$: {
-		console.log($versioning, ' Fetching songs')
+		$versioning
+		// console.log($versioning, ' Fetching songs')
 		fetchSongs()
 	}
 
@@ -70,7 +73,7 @@
 <style>
 	order {
 		/* --highlight-color: #333; */
-		--highlight-color: rgba(255,255,255,.25);
+		--highlight-color: rgba(255, 255, 255, 0.25);
 
 		display: flex;
 		flex-direction: column;

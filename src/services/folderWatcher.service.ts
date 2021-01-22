@@ -9,9 +9,9 @@ import { hash } from '../functions/hashString.fn'
 import stringHash from 'string-hash'
 import { createData, deleteData, getCollection, readData } from './loki.service'
 import { TagType } from '../types/tag.type'
-import { timeEnd } from 'console'
 import { getAlbumName } from '../functions/getAlbumName.fn'
 import { getTitle } from '../functions/getTitle.fn'
+import { observeArray } from '../functions/observeArray.fn'
 
 const allowedExtenstions = ['flac', 'm4a', 'mp3']
 
@@ -21,19 +21,56 @@ export function getWatcher() {
 	return watcher
 }
 
+// Array to contain to next song to process, controls excessive I/O
+let processQueue: { event: string; path: string }[] = []
+
+observeArray(processQueue, ['push'], () => applyFolderChanges())
+
+async function applyFolderChanges() {
+	let changeToApply = processQueue.shift()
+
+	if (changeToApply !== undefined) {
+		let { event, path } = changeToApply
+
+		if (['change', 'add'].includes(event)) {
+			let fileToUpdate = await processedFilePath(path)
+
+			if (fileToUpdate !== undefined) {
+				await createData(fileToUpdate)
+			}
+		} else if (['delete'].includes(event)) {
+			await deleteData({ SourceFile: path })
+		}
+	}
+}
+
 export function watchFolders(rootDirectories: string[]) {
 	let foundFiles: string[] = []
 
 	watcher = chokidar.watch(rootDirectories, {
-		ignoreInitial: false
+		awaitWriteFinish: true
 	})
 
 	watcher
 		.on('change', (path) => {
-			loopFiles([path])
+			let ext = path.split('.').slice(-1)[0].toLowerCase()
+
+			if (allowedExtenstions.includes(ext)) {
+				processQueue.push({
+					event: 'update',
+					path
+				})
+			}
 		})
 		.on('unlink', (path) => {
-			deleteData({ SourceFile: path })
+			let ext = path.split('.').slice(-1)[0].toLowerCase()
+
+			if (allowedExtenstions.includes(ext)) {
+				processQueue.push({
+					event: 'delete',
+					path
+				})
+			}
 		})
 		.on('add', (path) => {
 			let ext = path.split('.').slice(-1)[0].toLowerCase()
@@ -46,7 +83,14 @@ export function watchFolders(rootDirectories: string[]) {
 			loopFiles(foundFiles)
 
 			watcher.on('add', (path) => {
-				loopFiles([path])
+				let ext = path.split('.').slice(-1)[0].toLowerCase()
+
+				if (allowedExtenstions.includes(ext)) {
+					processQueue.push({
+						event: 'add',
+						path
+					})
+				}
 			})
 		})
 }
@@ -59,23 +103,10 @@ async function loopFiles(files: string[]) {
 		return
 	}
 
-	const id = stringHash(file)
-	const extension = file.split('.').pop() || ''
-	const fileStats = fs.statSync(file)
+	let fileToUpdate = await processedFilePath(file)
 
-	let isFileModified = false
-
-	let dbDoc = readData({ ID: id })
-
-	if (dbDoc) {
-		if (fileStats.mtimeMs !== dbDoc['LastModified']) {
-			isFileModified = true
-		}
-	}
-
-	if (dbDoc === undefined || isFileModified === true) {
-    let tags = await getFileMetatag(file, id, extension, fileStats)
-		createData(tags)
+	if (fileToUpdate !== undefined) {
+		await createData(fileToUpdate)
 	}
 
 	setTimeout(() => {
@@ -83,10 +114,34 @@ async function loopFiles(files: string[]) {
 	}, 1)
 }
 
+function processedFilePath(filePath: string): Promise<TagType | undefined> {
+	return new Promise(async (resolve, reject) => {
+		const id = stringHash(filePath)
+		const extension = filePath.split('.').pop() || ''
+		const fileStats = fs.statSync(filePath)
+
+		let isFileModified = false
+
+		let dbDoc = readData({ ID: id })
+
+		if (dbDoc) {
+			if (fileStats.mtimeMs !== dbDoc['LastModified']) {
+				isFileModified = true
+			}
+		}
+
+		if (dbDoc === undefined || isFileModified === true) {
+			resolve(await getFileMetatag(filePath, id, extension, fileStats))
+		} else {
+			resolve(undefined)
+		}
+	})
+}
+
 function removeDeadFiles() {
 	let collection = getCollection()
 
-	collection.forEach((song, index) => {
+	collection.forEach((song) => {
 		if (!fs.existsSync(song['SourceFile'])) {
 			console.log('Delete:', song['SourceFile'])
 			deleteData({ SourceFile: song['SourceFile'] })
@@ -103,9 +158,9 @@ function getFileMetatag(filePath: string, id: number, extension: string, fileSta
 				Extension: extension,
 				Size: fileStats.size,
 				Duration: metadata['format']['duration'] || 0,
-				Title: getTitle(metadata,extension),
+				Title: getTitle(metadata, extension),
 				Artist: metadata['common']['artist'] || undefined,
-				Album: getAlbumName(metadata,extension),
+				Album: getAlbumName(metadata, extension),
 				Genre: getGenre(metadata, extension),
 				Comment: getComment(metadata, extension),
 				Composer: getComposer(metadata),

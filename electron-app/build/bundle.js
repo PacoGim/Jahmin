@@ -770,7 +770,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/audio.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "loader svelte-1s2f4v4");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$1, 86, 2, 3511);
+    			add_location(img, file$1, 86, 2, 3530);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -802,7 +802,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/compact-disc.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "notFound svelte-1s2f4v4");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$1, 88, 32, 3602);
+    			add_location(img, file$1, 88, 32, 3621);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -835,7 +835,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = /*coverSrc*/ ctx[2])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", img_alt_value = /*album*/ ctx[0]["Name"]);
     			attr_dev(img, "class", "svelte-1s2f4v4");
-    			add_location(img, file$1, 89, 28, 3696);
+    			add_location(img, file$1, 89, 28, 3715);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -878,13 +878,13 @@ var app = (function () {
     			track = element("track");
     			source = element("source");
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$1, 92, 3, 3800);
+    			add_location(track, file$1, 92, 3, 3819);
     			if (source.src !== (source_src_value = /*coverSrc*/ ctx[2])) attr_dev(source, "src", source_src_value);
-    			add_location(source, file$1, 93, 3, 3829);
+    			add_location(source, file$1, 93, 3, 3848);
     			video.autoplay = true;
     			video.loop = true;
     			attr_dev(video, "class", "svelte-1s2f4v4");
-    			add_location(video, file$1, 91, 2, 3775);
+    			add_location(video, file$1, 91, 2, 3794);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, video, anchor);
@@ -921,7 +921,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			album_artist.textContent = "Not Defined";
     			set_custom_element_data(album_artist, "class", "svelte-1s2f4v4");
-    			add_location(album_artist, file$1, 108, 3, 4244);
+    			add_location(album_artist, file$1, 108, 3, 4263);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -954,7 +954,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			t = text(t_value);
     			set_custom_element_data(album_artist, "class", "svelte-1s2f4v4");
-    			add_location(album_artist, file$1, 106, 3, 4172);
+    			add_location(album_artist, file$1, 106, 3, 4191);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -990,7 +990,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			t = text(t_value);
     			set_custom_element_data(album_artist, "class", "svelte-1s2f4v4");
-    			add_location(album_artist, file$1, 104, 3, 4062);
+    			add_location(album_artist, file$1, 104, 3, 4081);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -1068,18 +1068,18 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/gradient-overlay.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-1s2f4v4");
-    			add_location(img, file$1, 98, 1, 3906);
+    			add_location(img, file$1, 98, 1, 3925);
     			set_custom_element_data(album_name, "class", "svelte-1s2f4v4");
-    			add_location(album_name, file$1, 101, 2, 3974);
+    			add_location(album_name, file$1, 101, 2, 3993);
     			set_custom_element_data(album_details, "class", "svelte-1s2f4v4");
-    			add_location(album_details, file$1, 100, 1, 3956);
+    			add_location(album_details, file$1, 100, 1, 3975);
 
     			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbum*/ ctx[3]?.["ID"] === /*album*/ ctx[0]?.["ID"]
     			? "selected"
     			: "") + " svelte-1s2f4v4"));
 
     			attr_dev(album_1, "id", album_1_id_value = /*album*/ ctx[0]["ID"]);
-    			add_location(album_1, file$1, 78, 0, 3271);
+    			add_location(album_1, file$1, 78, 0, 3290);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1287,7 +1287,7 @@ var app = (function () {
     						let $song = document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`);
 
     						if ($song) {
-    							$song.scrollIntoView();
+    							$song.scrollIntoView({ block: "center" });
     						}
 
     						setNewPlayback(album["ID"], album["Songs"].findIndex(i => i["$loki"] === lastPlayedSongID), false);
@@ -1530,7 +1530,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(art_grid_svlt, "class", "svelte-10w1ypy");
-    			add_location(art_grid_svlt, file$2, 54, 0, 2175);
+    			add_location(art_grid_svlt, file$2, 54, 0, 2194);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1597,7 +1597,7 @@ var app = (function () {
     		let $album = document.querySelector(`#${CSS.escape(lastPlayedAlbumID)}`);
 
     		if ($album) {
-    			$album.scrollIntoView();
+    			$album.scrollIntoView({ block: "center" });
     		}
     	}
     }
@@ -1717,8 +1717,6 @@ var app = (function () {
 
     /* src/components/Order.svelte generated by Svelte v3.31.0 */
 
-    const { console: console_1$1 } = globals;
-
     const file$3 = "src/components/Order.svelte";
 
     function get_each_context$1(ctx, list, i) {
@@ -1728,7 +1726,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (59:0) {#if orderedSongs}
+    // (61:0) {#if orderedSongs}
     function create_if_block$1(ctx) {
     	let order;
     	let item;
@@ -1781,16 +1779,16 @@ var app = (function () {
     			attr_dev(input, "id", input_id_value = "all" + /*group*/ ctx[0]);
     			input.__value = input_value_value = null;
     			input.value = input.__value;
-    			attr_dev(input, "class", "svelte-dupdmc");
+    			attr_dev(input, "class", "svelte-11oi134");
     			/*$$binding_groups*/ ctx[8][0].push(input);
-    			add_location(input, file$3, 61, 3, 2107);
+    			add_location(input, file$3, 63, 3, 2253);
     			attr_dev(label, "for", label_for_value = "all" + /*group*/ ctx[0]);
-    			attr_dev(label, "class", "svelte-dupdmc");
-    			add_location(label, file$3, 62, 3, 2185);
+    			attr_dev(label, "class", "svelte-11oi134");
+    			add_location(label, file$3, 64, 3, 2331);
     			attr_dev(item, "title", item_title_value = "All " + /*group*/ ctx[0]);
-    			add_location(item, file$3, 60, 2, 2077);
-    			attr_dev(order, "class", "svelte-dupdmc");
-    			add_location(order, file$3, 59, 1, 2067);
+    			add_location(item, file$3, 62, 2, 2223);
+    			attr_dev(order, "class", "svelte-11oi134");
+    			add_location(order, file$3, 61, 1, 2213);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, order, anchor);
@@ -1858,14 +1856,14 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(59:0) {#if orderedSongs}",
+    		source: "(61:0) {#if orderedSongs}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (65:2) {#each orderedSongs as item, index (item['id'])}
+    // (67:2) {#each orderedSongs as item, index (item['id'])}
     function create_each_block$1(key_1, ctx) {
     	let item;
     	let input;
@@ -1895,14 +1893,14 @@ var app = (function () {
     			attr_dev(input, "id", input_id_value = /*item*/ ctx[17]["id"]);
     			input.__value = input_value_value = /*item*/ ctx[17]["value"];
     			input.value = input.__value;
-    			attr_dev(input, "class", "svelte-dupdmc");
+    			attr_dev(input, "class", "svelte-11oi134");
     			/*$$binding_groups*/ ctx[8][0].push(input);
-    			add_location(input, file$3, 66, 4, 2348);
+    			add_location(input, file$3, 68, 4, 2494);
     			attr_dev(label, "for", label_for_value = /*item*/ ctx[17]["id"]);
-    			attr_dev(label, "class", "svelte-dupdmc");
-    			add_location(label, file$3, 67, 4, 2436);
+    			attr_dev(label, "class", "svelte-11oi134");
+    			add_location(label, file$3, 69, 4, 2582);
     			attr_dev(item, "title", item_title_value = /*item*/ ctx[17]["value"]);
-    			add_location(item, file$3, 65, 3, 2315);
+    			add_location(item, file$3, 67, 3, 2461);
     			this.first = item;
     		},
     		m: function mount(target, anchor) {
@@ -1955,7 +1953,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(65:2) {#each orderedSongs as item, index (item['id'])}",
+    		source: "(67:2) {#each orderedSongs as item, index (item['id'])}",
     		ctx
     	});
 
@@ -2081,7 +2079,7 @@ var app = (function () {
     			}
     		}
 
-    		console.log($valuesToFilter);
+    		// console.log($valuesToFilter)
     		set_store_value(isValuesToFilterChanged, $isValuesToFilterChanged = true, $isValuesToFilterChanged);
     	}
 
@@ -2099,7 +2097,7 @@ var app = (function () {
     	const writable_props = ["index", "group"];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Order> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Order> was created with unknown prop '${key}'`);
     	});
 
     	const $$binding_groups = [[]];
@@ -2159,6 +2157,7 @@ var app = (function () {
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$storeConfig*/ 32) {
+    			//TODO Try to make the selection come from local storage the first time the app runs and the value was set when playing song
     			 if ($storeConfig !== undefined) {
     				setSelectionFromConfigStore();
     			}
@@ -2178,7 +2177,8 @@ var app = (function () {
     		if ($$self.$$.dirty & /*$versioning*/ 64) {
     			// Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
     			 {
-    				console.log($versioning, " Fetching songs");
+
+    				// console.log($versioning, ' Fetching songs')
     				fetchSongs();
     			}
     		}
@@ -2214,11 +2214,11 @@ var app = (function () {
     		const props = options.props || {};
 
     		if (/*index*/ ctx[3] === undefined && !("index" in props)) {
-    			console_1$1.warn("<Order> was created without expected prop 'index'");
+    			console.warn("<Order> was created without expected prop 'index'");
     		}
 
     		if (/*group*/ ctx[0] === undefined && !("group" in props)) {
-    			console_1$1.warn("<Order> was created without expected prop 'group'");
+    			console.warn("<Order> was created without expected prop 'group'");
     		}
     	}
 
@@ -2249,7 +2249,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (9:1) {#each $valuesToGroup as group, index (index)}
+    // (7:1) {#each $valuesToGroup as group, index (index)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let order;
@@ -2301,7 +2301,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(9:1) {#each $valuesToGroup as group, index (index)}",
+    		source: "(7:1) {#each $valuesToGroup as group, index (index)}",
     		ctx
     	});
 
@@ -2332,8 +2332,8 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(grouping_svlt, "class", "svelte-1kmhdcs");
-    			add_location(grouping_svlt, file$4, 7, 0, 124);
+    			set_custom_element_data(grouping_svlt, "class", "svelte-8fexn0");
+    			add_location(grouping_svlt, file$4, 5, 0, 122);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3312,7 +3312,7 @@ var app = (function () {
 
     /* src/includes/Player.svelte generated by Svelte v3.31.0 */
 
-    const { console: console_1$2 } = globals;
+    const { console: console_1$1 } = globals;
     const file$a = "src/includes/Player.svelte";
 
     function create_fragment$a(ctx) {
@@ -3649,7 +3649,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<Player> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Player> was created with unknown prop '${key}'`);
     	});
 
     	const play_handler = () => startInterval();
@@ -4378,7 +4378,7 @@ var app = (function () {
 
     /* src/controller/Controller.svelte generated by Svelte v3.31.0 */
 
-    const { Object: Object_1, console: console_1$3 } = globals;
+    const { Object: Object_1, console: console_1$2 } = globals;
 
     function create_fragment$e(ctx) {
     	const block = {
@@ -4521,7 +4521,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object_1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$3.warn(`<Controller> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<Controller> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -4659,7 +4659,7 @@ var app = (function () {
 
     /* src/includes/SongListBackground.svelte generated by Svelte v3.31.0 */
 
-    const { console: console_1$4 } = globals;
+    const { console: console_1$3 } = globals;
     const file$f = "src/includes/SongListBackground.svelte";
 
     function create_fragment$g(ctx) {
@@ -4706,7 +4706,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$4.warn(`<SongListBackground> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$3.warn(`<SongListBackground> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({

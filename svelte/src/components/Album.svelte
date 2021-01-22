@@ -40,7 +40,7 @@
 					let $song = document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`)
 
 					if ($song) {
-						$song.scrollIntoView()
+						$song.scrollIntoView({block:'center'})
 					}
 
 					setNewPlayback(

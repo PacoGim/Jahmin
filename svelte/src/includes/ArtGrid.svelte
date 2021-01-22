@@ -41,7 +41,7 @@
 			let $album = document.querySelector(`#${CSS.escape(lastPlayedAlbumID)}`)
 
 			if ($album) {
-				$album.scrollIntoView()
+				$album.scrollIntoView({block:'center'})
 			}
 		}
 	}

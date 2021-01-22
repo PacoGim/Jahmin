@@ -47,23 +47,25 @@ export function getCollection() {
 }
 
 export function createData(newDoc: TagType) {
-	try {
-		console.log('New Doc: ',newDoc)
-		const collection = db.getCollection(collectionName)
+	return new Promise((resolve, reject) => {
+		try {
+			console.log('New Doc: ', newDoc)
+			const collection = db.getCollection(collectionName)
 
-		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+			if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
 
-		let oldDoc = readData({ SourceFile: newDoc['SourceFile'] })
+			let oldDoc = readData({ SourceFile: newDoc['SourceFile'] })
 
-		if (oldDoc) {
-			return updateData({ $loki: oldDoc['$loki'] }, newDoc)
-		} else {
-			return collection.insert(newDoc)
+			if (oldDoc) {
+				resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc))
+			} else {
+				resolve(collection.insert(newDoc))
+			}
+		} catch (error) {
+			handleErrors(error)
+			resolve(null)
 		}
-	} catch (error) {
-		handleErrors(error)
-		return null
-	}
+	})
 }
 
 export function readDataById(id: any) {
@@ -110,14 +112,17 @@ export function updateData(query: any, newData: object) {
 }
 
 export function deleteData(query: any) {
-	console.log(query)
-	const collection = db.getCollection(collectionName)
+	return new Promise((resolve, reject) => {
+		console.log(query)
 
-	if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+		const collection = db.getCollection(collectionName)
 
-	const doc = collection.find(query)[0]
+		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
 
-	return collection.remove(doc)
+		const doc = collection.find(query)[0]
+
+		resolve(collection.remove(doc))
+	})
 }
 
 function handleErrors(error: Error | string) {

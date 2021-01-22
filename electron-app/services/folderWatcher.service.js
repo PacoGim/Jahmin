@@ -24,23 +24,56 @@ const string_hash_1 = __importDefault(require("string-hash"));
 const loki_service_1 = require("./loki.service");
 const getAlbumName_fn_1 = require("../functions/getAlbumName.fn");
 const getTitle_fn_1 = require("../functions/getTitle.fn");
+const observeArray_fn_1 = require("../functions/observeArray.fn");
 const allowedExtenstions = ['flac', 'm4a', 'mp3'];
 let watcher;
 function getWatcher() {
     return watcher;
 }
 exports.getWatcher = getWatcher;
+// Array to contain to next song to process, controls excessive I/O
+let processQueue = [];
+observeArray_fn_1.observeArray(processQueue, ['push'], () => applyFolderChanges());
+function applyFolderChanges() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let changeToApply = processQueue.shift();
+        if (changeToApply !== undefined) {
+            let { event, path } = changeToApply;
+            if (['change', 'add'].includes(event)) {
+                let fileToUpdate = yield processedFilePath(path);
+                if (fileToUpdate !== undefined) {
+                    yield loki_service_1.createData(fileToUpdate);
+                }
+            }
+            else if (['delete'].includes(event)) {
+                yield loki_service_1.deleteData({ SourceFile: path });
+            }
+        }
+    });
+}
 function watchFolders(rootDirectories) {
     let foundFiles = [];
     watcher = chokidar_1.default.watch(rootDirectories, {
-        ignoreInitial: false
+        awaitWriteFinish: true
     });
     watcher
         .on('change', (path) => {
-        loopFiles([path]);
+        let ext = path.split('.').slice(-1)[0].toLowerCase();
+        if (allowedExtenstions.includes(ext)) {
+            processQueue.push({
+                event: 'update',
+                path
+            });
+        }
     })
         .on('unlink', (path) => {
-        loki_service_1.deleteData({ SourceFile: path });
+        let ext = path.split('.').slice(-1)[0].toLowerCase();
+        if (allowedExtenstions.includes(ext)) {
+            processQueue.push({
+                event: 'delete',
+                path
+            });
+        }
     })
         .on('add', (path) => {
         let ext = path.split('.').slice(-1)[0].toLowerCase();
@@ -51,7 +84,13 @@ function watchFolders(rootDirectories) {
         .on('ready', () => {
         loopFiles(foundFiles);
         watcher.on('add', (path) => {
-            loopFiles([path]);
+            let ext = path.split('.').slice(-1)[0].toLowerCase();
+            if (allowedExtenstions.includes(ext)) {
+                processQueue.push({
+                    event: 'add',
+                    path
+                });
+            }
         });
     });
 }
@@ -63,9 +102,20 @@ function loopFiles(files) {
             removeDeadFiles();
             return;
         }
-        const id = string_hash_1.default(file);
-        const extension = file.split('.').pop() || '';
-        const fileStats = fs_1.default.statSync(file);
+        let fileToUpdate = yield processedFilePath(file);
+        if (fileToUpdate !== undefined) {
+            yield loki_service_1.createData(fileToUpdate);
+        }
+        setTimeout(() => {
+            process.nextTick(() => loopFiles(files));
+        }, 1);
+    });
+}
+function processedFilePath(filePath) {
+    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        const id = string_hash_1.default(filePath);
+        const extension = filePath.split('.').pop() || '';
+        const fileStats = fs_1.default.statSync(filePath);
         let isFileModified = false;
         let dbDoc = loki_service_1.readData({ ID: id });
         if (dbDoc) {
@@ -74,17 +124,16 @@ function loopFiles(files) {
             }
         }
         if (dbDoc === undefined || isFileModified === true) {
-            let tags = yield getFileMetatag(file, id, extension, fileStats);
-            loki_service_1.createData(tags);
+            resolve(yield getFileMetatag(filePath, id, extension, fileStats));
         }
-        setTimeout(() => {
-            process.nextTick(() => loopFiles(files));
-        }, 1);
-    });
+        else {
+            resolve(undefined);
+        }
+    }));
 }
 function removeDeadFiles() {
     let collection = loki_service_1.getCollection();
-    collection.forEach((song, index) => {
+    collection.forEach((song) => {
         if (!fs_1.default.existsSync(song['SourceFile'])) {
             console.log('Delete:', song['SourceFile']);
             loki_service_1.deleteData({ SourceFile: song['SourceFile'] });
