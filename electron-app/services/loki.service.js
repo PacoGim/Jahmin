@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.loadDb = void 0;
+exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.loadDb = void 0;
 const lokijs_1 = __importDefault(require("lokijs"));
 //@ts-expect-error
 const loki_fs_structured_adapter_1 = __importDefault(require("lokijs/src/loki-fs-structured-adapter"));
@@ -13,6 +13,7 @@ const deepmerge_1 = __importDefault(require("deepmerge"));
 const index_1 = require("../index");
 const adapter = new loki_fs_structured_adapter_1.default();
 let db;
+let dbVersion = 0;
 const collectionName = 'music';
 function loadDb() {
     return new Promise((resolve) => {
@@ -33,6 +34,14 @@ function loadDb() {
     });
 }
 exports.loadDb = loadDb;
+function setDbVersion(newDbVersion) {
+    dbVersion = newDbVersion;
+}
+exports.setDbVersion = setDbVersion;
+function getDbVersion() {
+    return dbVersion;
+}
+exports.getDbVersion = getDbVersion;
 function getCollection() {
     const collection = db.getCollection(collectionName).find();
     return collection;
@@ -50,6 +59,7 @@ function createData(newDoc) {
                 resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc));
             }
             else {
+                dbVersion = new Date().getTime();
                 resolve(collection.insert(newDoc));
             }
         }
@@ -93,6 +103,7 @@ function updateData(query, newData) {
             throw new Error(`Collection ${collectionName} not created/available.`);
         let doc = collection.find(query)[0];
         doc = deepmerge_1.default(doc, newData);
+        dbVersion = new Date().getTime();
         return collection.update(doc);
     }
     catch (error) {
@@ -108,6 +119,7 @@ function deleteData(query) {
         if (!collection)
             throw new Error(`Collection ${collectionName} not created/available.`);
         const doc = collection.find(query)[0];
+        dbVersion = new Date().getTime();
         resolve(collection.remove(doc));
     });
 }

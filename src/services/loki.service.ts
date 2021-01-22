@@ -14,6 +14,8 @@ const adapter = new lfsa()
 
 let db: loki
 
+let dbVersion = 0
+
 const collectionName = 'music'
 
 export function loadDb(): Promise<void> {
@@ -41,6 +43,14 @@ export function loadDb(): Promise<void> {
 	})
 }
 
+export function setDbVersion(newDbVersion: number) {
+	dbVersion = newDbVersion
+}
+
+export function getDbVersion() {
+	return dbVersion
+}
+
 export function getCollection() {
 	const collection = db.getCollection(collectionName).find()
 	return collection
@@ -59,6 +69,7 @@ export function createData(newDoc: TagType) {
 			if (oldDoc) {
 				resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc))
 			} else {
+				dbVersion = new Date().getTime()
 				resolve(collection.insert(newDoc))
 			}
 		} catch (error) {
@@ -104,6 +115,7 @@ export function updateData(query: any, newData: object) {
 
 		doc = deepmerge(doc, newData)
 
+		dbVersion = new Date().getTime()
 		return collection.update(doc)
 	} catch (error) {
 		handleErrors(error)
@@ -121,6 +133,7 @@ export function deleteData(query: any) {
 
 		const doc = collection.find(query)[0]
 
+		dbVersion = new Date().getTime()
 		resolve(collection.remove(doc))
 	})
 }

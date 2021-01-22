@@ -33,13 +33,19 @@ function getWatcher() {
 exports.getWatcher = getWatcher;
 // Array to contain to next song to process, controls excessive I/O
 let processQueue = [];
-observeArray_fn_1.observeArray(processQueue, ['push'], () => applyFolderChanges());
+let isQueueRunning = false;
+observeArray_fn_1.observeArray(processQueue, ['push'], () => {
+    if (!isQueueRunning) {
+        isQueueRunning = true;
+        applyFolderChanges();
+    }
+});
 function applyFolderChanges() {
     return __awaiter(this, void 0, void 0, function* () {
         let changeToApply = processQueue.shift();
         if (changeToApply !== undefined) {
             let { event, path } = changeToApply;
-            if (['change', 'add'].includes(event)) {
+            if (['update', 'add'].includes(event)) {
                 let fileToUpdate = yield processedFilePath(path);
                 if (fileToUpdate !== undefined) {
                     yield loki_service_1.createData(fileToUpdate);
@@ -48,6 +54,10 @@ function applyFolderChanges() {
             else if (['delete'].includes(event)) {
                 yield loki_service_1.deleteData({ SourceFile: path });
             }
+            applyFolderChanges();
+        }
+        else {
+            isQueueRunning = false;
         }
     });
 }

@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
-import { getCollection } from './loki.service'
+import { getCollection, getDbVersion } from './loki.service'
 import { orderSongs } from './songFilter.service'
 // import { nanoid } from 'nanoid'
 import { getAlbumArray, getNewPromiseAlbumArray } from './albumFiltering.service'
@@ -68,5 +68,10 @@ export function loadIPC() {
 
 	ipcMain.handle('get-album-colors', async (evt, albumImagePath) => {
 		return await getAlbumColors(albumImagePath)
+	})
+
+	ipcMain.handle('get-database-version', async (evt) => {
+		let version = getDbVersion()
+		return version
 	})
 }

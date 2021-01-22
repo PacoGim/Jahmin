@@ -10,11 +10,14 @@
 	import SongListBackground from './includes/SongListBackground.svelte'
 	import { appTitle } from './store/index.store'
 	import { onMount } from 'svelte'
+	import { getDatabaseVersion } from './service/ipc.service'
 
 	onMount(() => {
 		window.onkeydown = function (e) {
 			return !(e.code == 'Space' && e.target == document.body)
 		}
+
+		getDatabaseVersion()
 	})
 </script>
 

@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron')
-import { albums } from '../store/index.store'
+import { albums, versioning } from '../store/index.store'
 import type { SongType } from '../types/song.type'
 
 export function getOrder(index: number): Promise<string[]> {
@@ -11,7 +11,7 @@ export function getOrder(index: number): Promise<string[]> {
 	})
 }
 
-export function getConfig():Promise<object> {
+export function getConfig(): Promise<object> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-config').then((result) => {
 			resolve(result)
@@ -57,6 +57,30 @@ export function getAlbumIPC(albumID): Promise<SongType[]> {
 export function getAlbumColorsIPC(albumImagePath) {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album-colors', albumImagePath).then((result) => {
+			resolve(result)
+		})
+	})
+}
+
+export function getDatabaseVersion() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-database-version').then((result) => {
+			setTimeout(() => {
+				getDatabaseVersion()
+			}, 10000)
+
+			let storeVersion
+
+			versioning.subscribe((value) => {
+				storeVersion = value
+			})()
+
+			if (result !== 0 && result !== storeVersion) {
+				console.log(storeVersion, result)
+				versioning.set(result)
+			}
+
+			console.log(result)
 			resolve(result)
 		})
 	})

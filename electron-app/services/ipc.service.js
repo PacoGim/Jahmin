@@ -67,5 +67,9 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-album-colors', (evt, albumImagePath) => __awaiter(this, void 0, void 0, function* () {
         return yield getAlbumColors_fn_1.getAlbumColors(albumImagePath);
     }));
+    electron_1.ipcMain.handle('get-database-version', (evt) => __awaiter(this, void 0, void 0, function* () {
+        let version = loki_service_1.getDbVersion();
+        return version;
+    }));
 }
 exports.loadIPC = loadIPC;

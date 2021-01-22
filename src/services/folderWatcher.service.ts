@@ -23,8 +23,14 @@ export function getWatcher() {
 
 // Array to contain to next song to process, controls excessive I/O
 let processQueue: { event: string; path: string }[] = []
+let isQueueRunning = false
 
-observeArray(processQueue, ['push'], () => applyFolderChanges())
+observeArray(processQueue, ['push'], () => {
+	if (!isQueueRunning) {
+		isQueueRunning = true
+		applyFolderChanges()
+	}
+})
 
 async function applyFolderChanges() {
 	let changeToApply = processQueue.shift()
@@ -32,7 +38,7 @@ async function applyFolderChanges() {
 	if (changeToApply !== undefined) {
 		let { event, path } = changeToApply
 
-		if (['change', 'add'].includes(event)) {
+		if (['update', 'add'].includes(event)) {
 			let fileToUpdate = await processedFilePath(path)
 
 			if (fileToUpdate !== undefined) {
@@ -41,6 +47,9 @@ async function applyFolderChanges() {
 		} else if (['delete'].includes(event)) {
 			await deleteData({ SourceFile: path })
 		}
+		applyFolderChanges()
+	} else {
+		isQueueRunning = false
 	}
 }
 

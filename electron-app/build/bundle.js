@@ -715,6 +715,25 @@ var app = (function () {
             });
         });
     }
+    function getDatabaseVersion() {
+        return new Promise((resolve, reject) => {
+            ipcRenderer.invoke('get-database-version').then((result) => {
+                setTimeout(() => {
+                    getDatabaseVersion();
+                }, 10000);
+                let storeVersion;
+                versioning.subscribe((value) => {
+                    storeVersion = value;
+                })();
+                if (result !== 0 && result !== storeVersion) {
+                    console.log(storeVersion, result);
+                    versioning.set(result);
+                }
+                console.log(result);
+                resolve(result);
+            });
+        });
+    }
 
     async function getAlbumColors(id) {
         let albumImagePath = document.querySelector(`#${CSS.escape(id)}`).querySelector('img').getAttribute('src');
@@ -4829,7 +4848,7 @@ var app = (function () {
     			t8 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-1i37lnr");
-    			add_location(main, file$g, 24, 0, 807);
+    			add_location(main, file$g, 26, 0, 893);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4924,6 +4943,8 @@ var app = (function () {
     		window.onkeydown = function (e) {
     			return !(e.code == "Space" && e.target == document.body);
     		};
+
+    		getDatabaseVersion();
     	});
 
     	const writable_props = [];
@@ -4944,6 +4965,7 @@ var app = (function () {
     		SongListBackground,
     		appTitle,
     		onMount,
+    		getDatabaseVersion,
     		$appTitle
     	});
 
