@@ -28,7 +28,22 @@
 
 	$: {
 		$playbackIndex
+
+		resetProgress()
+
 		playSong()
+	}
+
+	function resetProgress() {
+		let playerForeground: HTMLElement = document.querySelector('player-progress progress-foreground')
+
+		if (playerForeground) {
+			playerForeground.classList.add('not-smooth')
+			document.documentElement.style.setProperty('--song-time', `0%`)
+			setTimeout(() => {
+				playerForeground.classList.remove('not-smooth')
+			}, 1000)
+		}
 	}
 
 	$: {
@@ -60,8 +75,6 @@
 
 		let songBuffer = undefined
 
-		// console.log($playbackIndex)
-
 		currentSong = $playback['SongList'][$playbackIndex['indexToPlay']]
 
 		if (currentSong === undefined) {
@@ -76,6 +89,7 @@
 
 		const blob = new Blob([songBuffer])
 		const url = window.URL.createObjectURL(blob)
+
 		player.src = url
 
 		localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
@@ -93,12 +107,8 @@
 			clearTimeout(drawWaveformDebounce)
 
 			drawWaveformDebounce = setTimeout(() => {
-				// if ($isPlaying) {
-				// console.log()
-				// console.log(keepIndex)
 				drawWaveform(waveformData)
-				// }
-			}, 1000)
+			}, 250)
 		})
 
 		preLoadNextSong()
@@ -129,7 +139,7 @@
 	}
 
 	function startInterval() {
-		console.log('Start')
+		// console.log('Start')
 
 		$isPlaying = true
 
@@ -137,12 +147,13 @@
 
 		playingInterval = setInterval(() => {
 			progress = (100 / currentSong['Duration']) * player.currentTime
+
 			document.documentElement.style.setProperty('--song-time', `${progress}%`)
-		}, 100)
+		}, 1000)
 	}
 
 	function stopInterval() {
-		console.log('Stop')
+		// console.log('Stop')
 		$isPlaying = false
 		clearInterval(playingInterval)
 	}

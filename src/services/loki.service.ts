@@ -18,6 +18,17 @@ let dbVersion = 0
 
 const collectionName = 'music'
 
+// Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
+let dbVersionResolve: any = undefined
+
+export function getNewPromiseDbVersion(value: number): Promise<number> {
+	if (dbVersion > value) {
+		return new Promise((resolve) => resolve(dbVersion))
+	} else {
+		return new Promise((resolve) => (dbVersionResolve = resolve))
+	}
+}
+
 export function loadDb(): Promise<void> {
 	return new Promise((resolve) => {
 		const dbPath = path.join(appDataPath, '/db')
@@ -59,7 +70,7 @@ export function getCollection() {
 export function createData(newDoc: TagType) {
 	return new Promise((resolve, reject) => {
 		try {
-			console.log('New Doc: ', newDoc)
+			// console.log('New Doc: ', newDoc)
 			const collection = db.getCollection(collectionName)
 
 			if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
@@ -69,8 +80,8 @@ export function createData(newDoc: TagType) {
 			if (oldDoc) {
 				resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc))
 			} else {
-				dbVersion = new Date().getTime()
 				resolve(collection.insert(newDoc))
+				dbVersionResolve(++dbVersion)
 			}
 		} catch (error) {
 			handleErrors(error)
@@ -106,26 +117,28 @@ export function readData(query: any) {
 }
 
 export function updateData(query: any, newData: object) {
-	try {
-		const collection = db.getCollection(collectionName)
+	return new Promise((resolve, reject) => {
+		try {
+			const collection = db.getCollection(collectionName)
 
-		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+			if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
 
-		let doc = collection.find(query)[0]
+			let doc = collection.find(query)[0]
 
-		doc = deepmerge(doc, newData)
+			doc = deepmerge(doc, newData)
 
-		dbVersion = new Date().getTime()
-		return collection.update(doc)
-	} catch (error) {
-		handleErrors(error)
-		return null
-	}
+			resolve(collection.update(doc))
+			dbVersionResolve(++dbVersion)
+		} catch (error) {
+			handleErrors(error)
+			return null
+		}
+	})
 }
 
 export function deleteData(query: any) {
 	return new Promise((resolve, reject) => {
-		console.log(query)
+		// console.log(query)
 
 		const collection = db.getCollection(collectionName)
 
@@ -133,8 +146,8 @@ export function deleteData(query: any) {
 
 		const doc = collection.find(query)[0]
 
-		dbVersion = new Date().getTime()
 		resolve(collection.remove(doc))
+		dbVersionResolve(++dbVersion)
 	})
 }
 

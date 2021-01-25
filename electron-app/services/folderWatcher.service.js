@@ -25,6 +25,8 @@ const loki_service_1 = require("./loki.service");
 const getAlbumName_fn_1 = require("../functions/getAlbumName.fn");
 const getTitle_fn_1 = require("../functions/getTitle.fn");
 const observeArray_fn_1 = require("../functions/observeArray.fn");
+const getAlbumArtist_fn_1 = require("../functions/getAlbumArtist.fn");
+const getTrackNumber_fs_1 = require("../functions/getTrackNumber.fs");
 const allowedExtenstions = ['flac', 'm4a', 'mp3'];
 let watcher;
 function getWatcher() {
@@ -152,7 +154,8 @@ function removeDeadFiles() {
 }
 function getFileMetatag(filePath, id, extension, fileStats) {
     return new Promise((resolve, reject) => {
-        music_metadata_1.parseFile(filePath).then((metadata) => {
+        music_metadata_1.parseFile(filePath)
+            .then((metadata) => {
             let doc = {
                 SourceFile: filePath,
                 ID: id,
@@ -169,8 +172,9 @@ function getFileMetatag(filePath, id, extension, fileStats) {
                 LastModified: fileStats.mtimeMs || undefined,
                 Year: metadata['common']['year'] || undefined,
                 Date: metadata['common']['date'] || undefined,
-                Track: metadata['common']['track']['no'] || undefined,
-                AlbumArtist: metadata['common']['albumartist'] || undefined,
+                Track: getTrackNumber_fs_1.getTrackNumber(metadata, extension),
+                // Track: metadata['common']['track']['no'] || undefined,
+                AlbumArtist: getAlbumArtist_fn_1.getAlbumArtist(metadata, extension),
                 DiskNumber: metadata['common']['disk']['no'] || undefined,
                 BitRate: metadata['format']['bitrate'] || undefined,
                 BitDepth: metadata['format']['bitsPerSample'] || undefined,
@@ -182,6 +186,9 @@ function getFileMetatag(filePath, id, extension, fileStats) {
                 }
             }
             resolve(doc);
+        })
+            .catch((err) => {
+            console.log(err);
         });
     });
 }

@@ -51,13 +51,13 @@
 		let $artGridSvltWidth = document.querySelector('art-grid-svlt').getBoundingClientRect()['width']
 
 		if (configDimension) {
-			console.log('------------------')
+			// console.log('------------------')
 			// let gridGap = ($artGridSvltWidth % configDimension) / ($artGridSvltWidth / configDimension)
 
 			let amountToFit = Math.floor($artGridSvltWidth / configDimension)
 			let gridGap = $artGridSvltWidth / amountToFit - configDimension
 
-			console.log(gridGap)
+			// console.log(gridGap)
 
 			// if (gridGap < 16) gridGap = 16
 

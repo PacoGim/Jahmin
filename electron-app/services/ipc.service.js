@@ -71,5 +71,8 @@ function loadIPC() {
         let version = loki_service_1.getDbVersion();
         return version;
     }));
+    electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
+        return yield loki_service_1.getNewPromiseDbVersion(value);
+    }));
 }
 exports.loadIPC = loadIPC;

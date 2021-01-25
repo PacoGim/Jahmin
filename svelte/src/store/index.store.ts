@@ -8,7 +8,7 @@ type FilterType = {
 	data?: any[]
 }
 
-export let versioning: Writable<number> = writable(Date.now())
+export let dbVersion: Writable<number> = writable(0)
 
 export let allSongFilters: Writable<FilterType[]> = writable([])
 

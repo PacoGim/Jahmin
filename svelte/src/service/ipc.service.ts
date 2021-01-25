@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron')
-import { albums, versioning } from '../store/index.store'
+import { albums, dbVersion } from '../store/index.store'
 import type { SongType } from '../types/song.type'
 
 export function getOrder(index: number): Promise<string[]> {
@@ -27,9 +27,13 @@ export function saveConfig(newConfig: object) {
 	})
 }
 
+const sortBy = 'RootDir'
+
 export function getAlbums(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-albums').then((result) => {
+			result = result.sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])))
+
 			albums.set(result)
 			resolve()
 			// When the results arrive, recursive call to wait for the eventual new filtering.
@@ -71,17 +75,33 @@ export function getDatabaseVersion() {
 
 			let storeVersion
 
-			versioning.subscribe((value) => {
+			dbVersion.subscribe((value) => {
 				storeVersion = value
 			})()
 
 			if (result !== 0 && result !== storeVersion) {
-				console.log(storeVersion, result)
-				versioning.set(result)
+				dbVersion.set(result)
 			}
 
-			console.log(result)
 			resolve(result)
+		})
+	})
+}
+
+export function syncDbVersion() {
+	return new Promise((resolve) => {
+		let storeDbVersion = undefined
+
+		dbVersion.subscribe((value) => (storeDbVersion = value))()
+
+		ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
+			dbVersion.set(result)
+
+			resolve(result)
+
+			setTimeout(() => {
+				syncDbVersion()
+			}, 2000)
 		})
 	})
 }

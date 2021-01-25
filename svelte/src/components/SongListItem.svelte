@@ -16,14 +16,14 @@
 		}
 	}
 
-	function songListItemDBLClickEventHandler() {
+	function songListItemDbLClickEventHandler() {
 		setNewPlayback(albumID, index, true)
 	}
 </script>
 
 <song-list-item
 	id={song['$loki']}
-	on:dblclick={() => songListItemDBLClickEventHandler()}
+	on:dblclick={() => songListItemDbLClickEventHandler()}
 	class={$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID'] ? 'selected' : ''}>
 	<song-number>{song['Track']}</song-number>
 	<song-title>{song['Title']}</song-title>

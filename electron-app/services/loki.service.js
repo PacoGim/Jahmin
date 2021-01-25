@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.loadDb = void 0;
+exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.loadDb = exports.getNewPromiseDbVersion = void 0;
 const lokijs_1 = __importDefault(require("lokijs"));
 //@ts-expect-error
 const loki_fs_structured_adapter_1 = __importDefault(require("lokijs/src/loki-fs-structured-adapter"));
@@ -15,6 +15,17 @@ const adapter = new loki_fs_structured_adapter_1.default();
 let db;
 let dbVersion = 0;
 const collectionName = 'music';
+// Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
+let dbVersionResolve = undefined;
+function getNewPromiseDbVersion(value) {
+    if (dbVersion > value) {
+        return new Promise((resolve) => resolve(dbVersion));
+    }
+    else {
+        return new Promise((resolve) => (dbVersionResolve = resolve));
+    }
+}
+exports.getNewPromiseDbVersion = getNewPromiseDbVersion;
 function loadDb() {
     return new Promise((resolve) => {
         const dbPath = path_1.default.join(index_1.appDataPath, '/db');
@@ -50,7 +61,7 @@ exports.getCollection = getCollection;
 function createData(newDoc) {
     return new Promise((resolve, reject) => {
         try {
-            console.log('New Doc: ', newDoc);
+            // console.log('New Doc: ', newDoc)
             const collection = db.getCollection(collectionName);
             if (!collection)
                 throw new Error(`Collection ${collectionName} not created/available.`);
@@ -59,8 +70,8 @@ function createData(newDoc) {
                 resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc));
             }
             else {
-                dbVersion = new Date().getTime();
                 resolve(collection.insert(newDoc));
+                dbVersionResolve(++dbVersion);
             }
         }
         catch (error) {
@@ -97,30 +108,32 @@ function readData(query) {
 }
 exports.readData = readData;
 function updateData(query, newData) {
-    try {
-        const collection = db.getCollection(collectionName);
-        if (!collection)
-            throw new Error(`Collection ${collectionName} not created/available.`);
-        let doc = collection.find(query)[0];
-        doc = deepmerge_1.default(doc, newData);
-        dbVersion = new Date().getTime();
-        return collection.update(doc);
-    }
-    catch (error) {
-        handleErrors(error);
-        return null;
-    }
+    return new Promise((resolve, reject) => {
+        try {
+            const collection = db.getCollection(collectionName);
+            if (!collection)
+                throw new Error(`Collection ${collectionName} not created/available.`);
+            let doc = collection.find(query)[0];
+            doc = deepmerge_1.default(doc, newData);
+            resolve(collection.update(doc));
+            dbVersionResolve(++dbVersion);
+        }
+        catch (error) {
+            handleErrors(error);
+            return null;
+        }
+    });
 }
 exports.updateData = updateData;
 function deleteData(query) {
     return new Promise((resolve, reject) => {
-        console.log(query);
+        // console.log(query)
         const collection = db.getCollection(collectionName);
         if (!collection)
             throw new Error(`Collection ${collectionName} not created/available.`);
         const doc = collection.find(query)[0];
-        dbVersion = new Date().getTime();
         resolve(collection.remove(doc));
+        dbVersionResolve(++dbVersion);
     });
 }
 exports.deleteData = deleteData;

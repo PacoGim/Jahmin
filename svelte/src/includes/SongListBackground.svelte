@@ -6,7 +6,7 @@
 	let coverSrc = undefined
 
 	$: {
-		console.log($selectedAlbum)
+		// console.log($selectedAlbum)
 
 		if ($selectedAlbum?.['RootDir']) {
 			getCoverIPC($selectedAlbum['RootDir']).then((response) => {

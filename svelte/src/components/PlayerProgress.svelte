@@ -10,6 +10,10 @@
 	let isMouseDown = false
 	let isMouseIn = false
 
+	$: {
+		// progess
+	}
+
 	onMount(() => {
 		hookPlayerProgressEvents()
 	})
@@ -35,11 +39,11 @@
 		function applyProgressChange(evt: Event) {
 			player.pause()
 
-			playerForeground.style.transition = 'min-width 0ms linear'
+			playerForeground.classList.add('not-smooth')
 
 			let playerWidth = playerProgress['scrollWidth']
 
-			let selectedPercent = (100 / playerWidth) * evt['offsetX']
+			let selectedPercent = Math.ceil((100 / playerWidth) * evt['offsetX'])
 
 			document.documentElement.style.setProperty('--song-time', `${selectedPercent}%`)
 
@@ -47,7 +51,7 @@
 
 			pauseDebounce = setTimeout(() => {
 				player.currentTime = currentSong['Duration'] / (100 / selectedPercent)
-				playerForeground.style.transition = 'min-width 100ms linear'
+				playerForeground.classList.remove('not-smooth')
 				player.play()
 			}, 500)
 		}
@@ -77,11 +81,11 @@
 	player-progress progress-foreground {
 		z-index: 1;
 		mix-blend-mode: soft-light;
-		background-color: rgba(0,0,0,.5);
+		background-color: rgba(0, 0, 0, 0.5);
 		/* mix-blend-mode: hard-light;
 		background-color: var(--hi-color); */
 		min-width: var(--song-time);
-		transition: min-width 100ms linear;
+		transition: min-width 1000ms linear;
 	}
 
 	player-progress #progress-background {

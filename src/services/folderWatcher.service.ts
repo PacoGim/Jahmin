@@ -12,6 +12,8 @@ import { TagType } from '../types/tag.type'
 import { getAlbumName } from '../functions/getAlbumName.fn'
 import { getTitle } from '../functions/getTitle.fn'
 import { observeArray } from '../functions/observeArray.fn'
+import { getAlbumArtist } from '../functions/getAlbumArtist.fn'
+import { getTrackNumber } from '../functions/getTrackNumber.fs'
 
 const allowedExtenstions = ['flac', 'm4a', 'mp3']
 
@@ -160,38 +162,43 @@ function removeDeadFiles() {
 
 function getFileMetatag(filePath: string, id: number, extension: string, fileStats: fs.Stats): Promise<TagType> {
 	return new Promise((resolve, reject) => {
-		parseFile(filePath).then((metadata) => {
-			let doc: any = {
-				SourceFile: filePath,
-				ID: id,
-				Extension: extension,
-				Size: fileStats.size,
-				Duration: metadata['format']['duration'] || 0,
-				Title: getTitle(metadata, extension),
-				Artist: metadata['common']['artist'] || undefined,
-				Album: getAlbumName(metadata, extension),
-				Genre: getGenre(metadata, extension),
-				Comment: getComment(metadata, extension),
-				Composer: getComposer(metadata),
-				SampleRate: metadata['format']['sampleRate'] || undefined,
-				LastModified: fileStats.mtimeMs || undefined,
-				Year: metadata['common']['year'] || undefined,
-				Date: metadata['common']['date'] || undefined,
-				Track: metadata['common']['track']['no'] || undefined,
-				AlbumArtist: metadata['common']['albumartist'] || undefined,
-				DiskNumber: metadata['common']['disk']['no'] || undefined,
-				BitRate: metadata['format']['bitrate'] || undefined,
-				BitDepth: metadata['format']['bitsPerSample'] || undefined,
-				Rating: getRating(metadata, extension)
-			}
-
-			for (let i in doc) {
-				if (doc[i] === undefined) {
-					delete doc[i]
+		parseFile(filePath)
+			.then((metadata) => {
+				let doc: any = {
+					SourceFile: filePath,
+					ID: id,
+					Extension: extension,
+					Size: fileStats.size,
+					Duration: metadata['format']['duration'] || 0,
+					Title: getTitle(metadata, extension),
+					Artist: metadata['common']['artist'] || undefined,
+					Album: getAlbumName(metadata, extension),
+					Genre: getGenre(metadata, extension),
+					Comment: getComment(metadata, extension),
+					Composer: getComposer(metadata),
+					SampleRate: metadata['format']['sampleRate'] || undefined,
+					LastModified: fileStats.mtimeMs || undefined,
+					Year: metadata['common']['year'] || undefined,
+					Date: metadata['common']['date'] || undefined,
+					Track: getTrackNumber(metadata, extension),
+					// Track: metadata['common']['track']['no'] || undefined,
+					AlbumArtist: getAlbumArtist(metadata, extension),
+					DiskNumber: metadata['common']['disk']['no'] || undefined,
+					BitRate: metadata['format']['bitrate'] || undefined,
+					BitDepth: metadata['format']['bitsPerSample'] || undefined,
+					Rating: getRating(metadata, extension)
 				}
-			}
 
-			resolve(doc)
-		})
+				for (let i in doc) {
+					if (doc[i] === undefined) {
+						delete doc[i]
+					}
+				}
+
+				resolve(doc)
+			})
+			.catch((err) => {
+				console.log(err)
+			})
 	})
 }

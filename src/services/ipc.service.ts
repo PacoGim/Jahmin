@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
-import { getCollection, getDbVersion } from './loki.service'
+import { getCollection, getDbVersion, getNewPromiseDbVersion } from './loki.service'
 import { orderSongs } from './songFilter.service'
 // import { nanoid } from 'nanoid'
 import { getAlbumArray, getNewPromiseAlbumArray } from './albumFiltering.service'
@@ -73,5 +73,9 @@ export function loadIPC() {
 	ipcMain.handle('get-database-version', async (evt) => {
 		let version = getDbVersion()
 		return version
+	})
+
+	ipcMain.handle('sync-db-version', async (evt, value) => {
+		return await getNewPromiseDbVersion(value)
 	})
 }

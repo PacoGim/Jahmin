@@ -18,7 +18,7 @@
 
 	--button-size: 1.25rem;
 
-	--art-grid-gap:1rem;
+	--art-grid-gap: 1rem;
 }
 
 html {
@@ -47,6 +47,10 @@ body {
 	background-color: #fff; /* color of the scroll thumb */
 	/* border-radius: 200px; roundness of the scroll thumb */
 	/* border: 4px solid #fff; creates padding around scroll thumb */
+}
+
+player-progress progress-foreground.not-smooth {
+	transition: min-width 0ms linear !important;
 }
 
 svg.player-button {

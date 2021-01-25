@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 	import { cutWord } from '../service/index.service'
 	import { getOrder } from '../service/ipc.service'
-	import { versioning, valuesToFilter, valuesToGroup, isValuesToFilterChanged, storeConfig } from '../store/index.store'
+	import { dbVersion, valuesToFilter, valuesToGroup, isValuesToFilterChanged, storeConfig } from '../store/index.store'
 
 	export let index
 	export let group
@@ -43,10 +43,10 @@
 		$valuesToFilter[index] = selection
 	}
 
-	// Only if the versioning is changed (when a filter/group is changed (Controller)), fetch songs.
+	// Only if the dbVersion is changed (when a filter/group is changed (Controller)), fetch songs.
 	$: {
-		$versioning
-		// console.log($versioning, ' Fetching songs')
+		$dbVersion
+		// console.log($dbVersion, ' Fetching songs')
 		fetchSongs()
 	}
 
