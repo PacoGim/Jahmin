@@ -1,10 +1,17 @@
 import sharp from 'sharp'
+import path from 'path'
+
+import { appDataPath } from '..'
+import { getConfig } from './config.service'
 
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-export function getAlbumColors(albumImagePath: string) {
+export function getAlbumColors(imageId: string) {
 	return new Promise((resolve, reject) => {
-		sharp(albumImagePath)
+		let config = getConfig()
+		let imagePath = path.join(appDataPath, '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
+
+		sharp(imagePath)
 			.resize(1, 1)
 			.raw()
 			.toBuffer((err, buffer) => {

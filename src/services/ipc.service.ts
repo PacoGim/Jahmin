@@ -8,6 +8,7 @@ import { getAlbumCover } from './albumArt.service'
 import { getAlbumColors } from './getAlbumColors.fn'
 
 import { customAlphabet } from 'nanoid'
+import { getWaveform } from '../functions/getWaveform.fn'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -66,8 +67,8 @@ export function loadIPC() {
 		return await getAlbumCover(rootDir)
 	})
 
-	ipcMain.handle('get-album-colors', async (evt, albumImagePath) => {
-		return await getAlbumColors(albumImagePath)
+	ipcMain.handle('get-album-colors', async (evt, imageId) => {
+		return await getAlbumColors(imageId)
 	})
 
 	ipcMain.handle('get-database-version', async (evt) => {
@@ -77,5 +78,9 @@ export function loadIPC() {
 
 	ipcMain.handle('sync-db-version', async (evt, value) => {
 		return await getNewPromiseDbVersion(value)
+	})
+
+	ipcMain.handle('get-waveform', async (evt, path, color) => {
+		return await getWaveform(path, color)
 	})
 }

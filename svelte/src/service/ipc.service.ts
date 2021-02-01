@@ -58,9 +58,17 @@ export function getAlbumIPC(albumID): Promise<SongType[]> {
 	})
 }
 
-export function getAlbumColorsIPC(albumImagePath) {
+export function getAlbumColorsIPC(imageId) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-album-colors', albumImagePath).then((result) => {
+		ipcRenderer.invoke('get-album-colors', imageId).then((result) => {
+			resolve(result)
+		})
+	})
+}
+
+export function getWaveform(path):Promise<string> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-waveform',path, window.getComputedStyle(document.body).getPropertyValue('--low-color')).then((result) => {
 			resolve(result)
 		})
 	})

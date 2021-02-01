@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+
 	import type { SongType } from '../types/song.type'
 	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
+	import { selectedSongs } from '../store/index.store'
 
 	export let song: SongType
 	export let index: number
@@ -23,16 +25,20 @@
 
 <song-list-item
 	id={song['$loki']}
+	{index}
 	on:dblclick={() => songListItemDbLClickEventHandler()}
-	class={$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID'] ? 'selected' : ''}>
+	class="
+	{$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID']
+		? 'playing'
+		: ''}
+	{$selectedSongs.includes(index) && $selectedAlbum['ID'] === $playback?.['AlbumID'] ? 'selected' : ''}"
+>
 	<song-number>{song['Track']}</song-number>
 	<song-title>{song['Title']}</song-title>
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>
 </song-list-item>
 
 <style>
-
-
 	song-list-item {
 		position: relative;
 		cursor: pointer;
@@ -45,16 +51,23 @@
 		padding: 0.25rem 0.5rem;
 		user-select: none;
 
-		transition: font-variation-settings ease-in-out 0.3s;
+		border-radius: 5px;
+
+		transition-property: font-variation-settings, box-shadow ,background-color;
+		transition-duration: 250ms;
+		transition-timing-function: ease-in-out;
 	}
 
 	song-list-item > * {
 		padding: 0 0.5rem;
 	}
 
+	song-list-item.playing {
+		font-variation-settings: 'wght' 700;
+		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
+		background-color: rgba(255, 255, 255, 0.1);
+	}
 	song-list-item.selected {
-		font-variation-settings: 'wght' 700, 'wdth' 80;
-		border-radius: 5px;
-		background-color: rgba(255, 255, 255, 0.25);
+		background-color: rgba(255, 255, 255, 0.15);
 	}
 </style>

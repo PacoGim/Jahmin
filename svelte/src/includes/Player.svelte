@@ -15,6 +15,7 @@
 	import { drawWaveform } from '../service/draw.service'
 
 	import { nextSong } from '../functions/nextSong.fn'
+	import { getWaveform } from '../service/ipc.service'
 
 	let progress: number = 0
 
@@ -101,26 +102,30 @@
 			player.play()
 		}
 
-		$isDoneDrawing = false
+		$isDoneDrawing = true
+		// clearTimeout(drawWaveformDebounce)
+		// drawWaveformDebounce = setTimeout(() => {
 
-		getWaveformData(songBuffer).then((waveformData) => {
-			clearTimeout(drawWaveformDebounce)
+		document.querySelector('#progress-background').setAttribute('src', await getWaveform(currentSong['SourceFile']))
+		// }, 2000)
 
-			drawWaveformDebounce = setTimeout(() => {
-				drawWaveform(waveformData)
-			}, 250)
-		})
+		// getWaveformData(songBuffer).then((waveformData) => {
+		// clearTimeout(drawWaveformDebounce)
+
+		// drawWaveformDebounce = setTimeout(() => {
+		// drawWaveform(waveformData)
+
+		// }, 250)
+		// })
 
 		preLoadNextSong()
 	}
 
 	async function preLoadNextSong() {
-		console.time()
 		const nextSong: SongType = $playback['SongList'][$playbackIndex['indexToPlay'] + 1]
 
 		if (nextSong) {
 			let songBuffer = await fetchSong(nextSong['SourceFile'])
-			console.timeEnd()
 			nextSongPreloaded = {
 				ID: nextSong['$loki'],
 				SongBuffer: songBuffer
@@ -149,7 +154,7 @@
 			progress = (100 / currentSong['Duration']) * player.currentTime
 
 			document.documentElement.style.setProperty('--song-time', `${progress}%`)
-		}, 1000)
+		}, 100)
 	}
 
 	function stopInterval() {

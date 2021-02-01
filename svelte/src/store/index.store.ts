@@ -29,3 +29,5 @@ export let isDoneDrawing: Writable<boolean> = writable(false)
 export let appTitle: Writable<string> = writable('Jahmin')
 
 export let backgroundCover: Writable<any> = writable('')
+
+export let selectedSongs: Writable<number[]> = writable([])

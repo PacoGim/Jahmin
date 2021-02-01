@@ -60,7 +60,8 @@
 
 <player-progress>
 	<progress-foreground />
-	<canvas id="progress-background" />
+	<img id="progress-background" src="" alt=""/>
+	<!-- <canvas id="progress-background" /> -->
 </player-progress>
 
 <style>
@@ -85,13 +86,14 @@
 		/* mix-blend-mode: hard-light;
 		background-color: var(--hi-color); */
 		min-width: var(--song-time);
-		transition: min-width 1000ms linear;
+		transition: min-width 100ms linear;
 	}
 
 	player-progress #progress-background {
 		z-index: 0;
 		transition: opacity 0.3s ease-in-out;
 		width: 100%;
-		opacity: 0;
+		/* opacity: 0; */
+		opacity: 1;
 	}
 </style>

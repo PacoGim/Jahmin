@@ -19,6 +19,7 @@ const albumFiltering_service_1 = require("./albumFiltering.service");
 const albumArt_service_1 = require("./albumArt.service");
 const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
 const nanoid_1 = require("nanoid");
+const getWaveform_fn_1 = require("../functions/getWaveform.fn");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-songs', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
@@ -64,8 +65,8 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-cover', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
         return yield albumArt_service_1.getAlbumCover(rootDir);
     }));
-    electron_1.ipcMain.handle('get-album-colors', (evt, albumImagePath) => __awaiter(this, void 0, void 0, function* () {
-        return yield getAlbumColors_fn_1.getAlbumColors(albumImagePath);
+    electron_1.ipcMain.handle('get-album-colors', (evt, imageId) => __awaiter(this, void 0, void 0, function* () {
+        return yield getAlbumColors_fn_1.getAlbumColors(imageId);
     }));
     electron_1.ipcMain.handle('get-database-version', (evt) => __awaiter(this, void 0, void 0, function* () {
         let version = loki_service_1.getDbVersion();
@@ -73,6 +74,9 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
         return yield loki_service_1.getNewPromiseDbVersion(value);
+    }));
+    electron_1.ipcMain.handle('get-waveform', (evt, path, color) => __awaiter(this, void 0, void 0, function* () {
+        return yield getWaveform_fn_1.getWaveform(path, color);
     }));
 }
 exports.loadIPC = loadIPC;
