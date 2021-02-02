@@ -9,7 +9,7 @@
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
-	import { isDoneDrawing, songList } from '../store/index.store'
+	import { isDoneDrawing, songList, waveformUrl } from '../store/index.store'
 	import { playbackIndex, isPlaying, playback } from '../store/player.store'
 	import { getWaveformData } from '../service/waveform.service'
 	import { drawWaveform } from '../service/draw.service'
@@ -83,7 +83,7 @@
 		}
 
 		if (currentSong['$loki'] !== nextSongPreloaded?.['ID']) {
-			songBuffer = await fetchSong(currentSong['SourceFile'])
+			songBuffer = await fetchSong(escape(currentSong['SourceFile']))
 		} else {
 			songBuffer = nextSongPreloaded['SongBuffer']
 		}
@@ -102,12 +102,12 @@
 			player.play()
 		}
 
-		$isDoneDrawing = true
-		// clearTimeout(drawWaveformDebounce)
-		// drawWaveformDebounce = setTimeout(() => {
-
-		document.querySelector('#progress-background').setAttribute('src', await getWaveform(currentSong['SourceFile']))
-		// }, 2000)
+		// $isDoneDrawing = true
+		// $waveformUrl = ''
+		clearTimeout(drawWaveformDebounce)
+		drawWaveformDebounce = setTimeout(async () => {
+			$waveformUrl = await getWaveform(currentSong['SourceFile'])
+		}, 250)
 
 		// getWaveformData(songBuffer).then((waveformData) => {
 		// clearTimeout(drawWaveformDebounce)
@@ -125,7 +125,7 @@
 		const nextSong: SongType = $playback['SongList'][$playbackIndex['indexToPlay'] + 1]
 
 		if (nextSong) {
-			let songBuffer = await fetchSong(nextSong['SourceFile'])
+			let songBuffer = await fetchSong(escape(nextSong['SourceFile']))
 			nextSongPreloaded = {
 				ID: nextSong['$loki'],
 				SongBuffer: songBuffer

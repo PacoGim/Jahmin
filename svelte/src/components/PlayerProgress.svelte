@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { waveformUrl } from '../store/index.store'
 	import type { SongType } from '../types/song.type'
 
 	export let player: HTMLAudioElement
@@ -60,8 +61,7 @@
 
 <player-progress>
 	<progress-foreground />
-	<img id="progress-background" src="" alt=""/>
-	<!-- <canvas id="progress-background" /> -->
+	<img id="progress-background" src={$waveformUrl} alt="" />
 </player-progress>
 
 <style>

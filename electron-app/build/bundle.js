@@ -661,6 +661,7 @@ var app = (function () {
     let isDoneDrawing = writable(false);
     let appTitle = writable('Jahmin');
     let selectedSongs = writable([]);
+    let waveformUrl = writable('');
 
     const { ipcRenderer } = require('electron');
     function getOrder(index) {
@@ -2878,14 +2879,14 @@ var app = (function () {
     			t = space();
     			img = element("img");
     			set_custom_element_data(progress_foreground, "class", "svelte-d7ihiu");
-    			add_location(progress_foreground, file$8, 42, 1, 1632);
+    			add_location(progress_foreground, file$8, 43, 1, 1684);
     			attr_dev(img, "id", "progress-background");
-    			if (img.src !== (img_src_value = "")) attr_dev(img, "src", img_src_value);
+    			if (img.src !== (img_src_value = /*$waveformUrl*/ ctx[0])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-d7ihiu");
-    			add_location(img, file$8, 43, 1, 1657);
+    			add_location(img, file$8, 44, 1, 1709);
     			set_custom_element_data(player_progress, "class", "svelte-d7ihiu");
-    			add_location(player_progress, file$8, 41, 0, 1613);
+    			add_location(player_progress, file$8, 42, 0, 1665);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2896,7 +2897,11 @@ var app = (function () {
     			append_dev(player_progress, t);
     			append_dev(player_progress, img);
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*$waveformUrl*/ 1 && img.src !== (img_src_value = /*$waveformUrl*/ ctx[0])) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+    		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
@@ -2916,6 +2921,9 @@ var app = (function () {
     }
 
     function instance$8($$self, $$props, $$invalidate) {
+    	let $waveformUrl;
+    	validate_store(waveformUrl, "waveformUrl");
+    	component_subscribe($$self, waveformUrl, $$value => $$invalidate(0, $waveformUrl = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerProgress", slots, []);
     	
@@ -2953,7 +2961,7 @@ var app = (function () {
 
     			pauseDebounce = setTimeout(
     				() => {
-    					$$invalidate(0, player.currentTime = currentSong["Duration"] / (100 / selectedPercent), player);
+    					$$invalidate(1, player.currentTime = currentSong["Duration"] / (100 / selectedPercent), player);
     					playerForeground.classList.remove("not-smooth");
     					player.play();
     				},
@@ -2969,23 +2977,25 @@ var app = (function () {
     	});
 
     	$$self.$$set = $$props => {
-    		if ("player" in $$props) $$invalidate(0, player = $$props.player);
-    		if ("currentSong" in $$props) $$invalidate(1, currentSong = $$props.currentSong);
+    		if ("player" in $$props) $$invalidate(1, player = $$props.player);
+    		if ("currentSong" in $$props) $$invalidate(2, currentSong = $$props.currentSong);
     	};
 
     	$$self.$capture_state = () => ({
     		onMount,
+    		waveformUrl,
     		player,
     		currentSong,
     		pauseDebounce,
     		isMouseDown,
     		isMouseIn,
-    		hookPlayerProgressEvents
+    		hookPlayerProgressEvents,
+    		$waveformUrl
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("player" in $$props) $$invalidate(0, player = $$props.player);
-    		if ("currentSong" in $$props) $$invalidate(1, currentSong = $$props.currentSong);
+    		if ("player" in $$props) $$invalidate(1, player = $$props.player);
+    		if ("currentSong" in $$props) $$invalidate(2, currentSong = $$props.currentSong);
     		if ("pauseDebounce" in $$props) pauseDebounce = $$props.pauseDebounce;
     		if ("isMouseDown" in $$props) isMouseDown = $$props.isMouseDown;
     		if ("isMouseIn" in $$props) isMouseIn = $$props.isMouseIn;
@@ -2995,13 +3005,13 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [player, currentSong];
+    	return [$waveformUrl, player, currentSong];
     }
 
     class PlayerProgress extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { player: 0, currentSong: 1 });
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { player: 1, currentSong: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -3013,11 +3023,11 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*player*/ ctx[0] === undefined && !("player" in props)) {
+    		if (/*player*/ ctx[1] === undefined && !("player" in props)) {
     			console.warn("<PlayerProgress> was created without expected prop 'player'");
     		}
 
-    		if (/*currentSong*/ ctx[1] === undefined && !("currentSong" in props)) {
+    		if (/*currentSong*/ ctx[2] === undefined && !("currentSong" in props)) {
     			console.warn("<PlayerProgress> was created without expected prop 'currentSong'");
     		}
     	}
@@ -3415,14 +3425,14 @@ var app = (function () {
     			t4 = space();
     			create_component(playerprogress.$$.fragment);
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$a, 140, 2, 5402);
+    			add_location(track, file$a, 141, 2, 5451);
     			audio.controls = audio_controls_value = true;
     			attr_dev(audio, "class", "svelte-13bim8k");
-    			add_location(audio, file$a, 139, 1, 5284);
+    			add_location(audio, file$a, 140, 1, 5333);
     			set_custom_element_data(player_buttons, "class", "svelte-13bim8k");
-    			add_location(player_buttons, file$a, 143, 1, 5440);
+    			add_location(player_buttons, file$a, 144, 1, 5489);
     			set_custom_element_data(player_svlt, "class", "svelte-13bim8k");
-    			add_location(player_svlt, file$a, 138, 0, 5269);
+    			add_location(player_svlt, file$a, 139, 0, 5318);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3538,14 +3548,17 @@ var app = (function () {
     	let $isDoneDrawing;
     	let $isPlaying;
     	let $playback;
+    	let $waveformUrl;
     	validate_store(playbackIndex, "playbackIndex");
     	component_subscribe($$self, playbackIndex, $$value => $$invalidate(4, $playbackIndex = $$value));
     	validate_store(isDoneDrawing, "isDoneDrawing");
     	component_subscribe($$self, isDoneDrawing, $$value => $$invalidate(5, $isDoneDrawing = $$value));
     	validate_store(isPlaying, "isPlaying");
-    	component_subscribe($$self, isPlaying, $$value => $$invalidate(12, $isPlaying = $$value));
+    	component_subscribe($$self, isPlaying, $$value => $$invalidate(13, $isPlaying = $$value));
     	validate_store(playback, "playback");
-    	component_subscribe($$self, playback, $$value => $$invalidate(13, $playback = $$value));
+    	component_subscribe($$self, playback, $$value => $$invalidate(14, $playback = $$value));
+    	validate_store(waveformUrl, "waveformUrl");
+    	component_subscribe($$self, waveformUrl, $$value => $$invalidate(15, $waveformUrl = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Player", slots, []);
 
@@ -3624,7 +3637,7 @@ var app = (function () {
     			if (currentSong["$loki"] !== (nextSongPreloaded === null || nextSongPreloaded === void 0
     			? void 0
     			: nextSongPreloaded["ID"])) {
-    				songBuffer = yield fetchSong(currentSong["SourceFile"]);
+    				songBuffer = yield fetchSong(escape(currentSong["SourceFile"]));
     			} else {
     				songBuffer = nextSongPreloaded["SongBuffer"];
     			}
@@ -3641,13 +3654,17 @@ var app = (function () {
     				player.play();
     			}
 
-    			set_store_value(isDoneDrawing, $isDoneDrawing = true, $isDoneDrawing);
+    			// $isDoneDrawing = true
+    			// $waveformUrl = ''
+    			clearTimeout(drawWaveformDebounce);
 
-    			// clearTimeout(drawWaveformDebounce)
-    			// drawWaveformDebounce = setTimeout(() => {
-    			document.querySelector("#progress-background").setAttribute("src", yield getWaveform(currentSong["SourceFile"]));
+    			drawWaveformDebounce = setTimeout(
+    				() => __awaiter(this, void 0, void 0, function* () {
+    					set_store_value(waveformUrl, $waveformUrl = yield getWaveform(currentSong["SourceFile"]), $waveformUrl);
+    				}),
+    				250
+    			);
 
-    			// }, 2000)
     			// getWaveformData(songBuffer).then((waveformData) => {
     			// clearTimeout(drawWaveformDebounce)
     			// drawWaveformDebounce = setTimeout(() => {
@@ -3663,7 +3680,7 @@ var app = (function () {
     			const nextSong = $playback["SongList"][$playbackIndex["indexToPlay"] + 1];
 
     			if (nextSong) {
-    				let songBuffer = yield fetchSong(nextSong["SourceFile"]);
+    				let songBuffer = yield fetchSong(escape(nextSong["SourceFile"]));
 
     				nextSongPreloaded = {
     					ID: nextSong["$loki"],
@@ -3715,6 +3732,7 @@ var app = (function () {
     		PlayerVolumeBar,
     		isDoneDrawing,
     		songList,
+    		waveformUrl,
     		playbackIndex,
     		isPlaying,
     		playback,
@@ -3738,7 +3756,8 @@ var app = (function () {
     		$playbackIndex,
     		$isDoneDrawing,
     		$isPlaying,
-    		$playback
+    		$playback,
+    		$waveformUrl
     	});
 
     	$$self.$inject_state = $$props => {

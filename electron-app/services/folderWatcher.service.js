@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.watchFolders = exports.getWatcher = void 0;
+exports.watchFolders = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = __importDefault(require("chokidar"));
 const music_metadata_1 = require("music-metadata");
 const fs_1 = __importDefault(require("fs"));
@@ -29,10 +29,10 @@ const getAlbumArtist_fn_1 = require("../functions/getAlbumArtist.fn");
 const getTrackNumber_fs_1 = require("../functions/getTrackNumber.fs");
 const allowedExtenstions = ['flac', 'm4a', 'mp3'];
 let watcher;
-function getWatcher() {
+function getRootDirFolderWatcher() {
     return watcher;
 }
-exports.getWatcher = getWatcher;
+exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 // Array to contain to next song to process, controls excessive I/O
 let processQueue = [];
 let isQueueRunning = false;

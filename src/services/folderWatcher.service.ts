@@ -19,7 +19,7 @@ const allowedExtenstions = ['flac', 'm4a', 'mp3']
 
 let watcher: chokidar.FSWatcher
 
-export function getWatcher() {
+export function getRootDirFolderWatcher() {
 	return watcher
 }
 

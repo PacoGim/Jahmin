@@ -10,7 +10,7 @@ loadIPC()
 import { scanFolders } from './services/indexer.service'
 import { createData, getCollection, loadDb, updateData } from './services/loki.service'
 import stringHash from 'string-hash'
-import { getWatcher, watchFolders } from './services/folderWatcher.service'
+import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
 
 const collectionName = 'music'
@@ -87,10 +87,9 @@ app.on('window-all-closed', () => {
 	}
 })
 
-app.on('before-quit',()=>{
-	getWatcher().close()
+app.on('before-quit', () => {
+	getRootDirFolderWatcher().close()
 })
-
 
 // process.on('exit',()=>{
 

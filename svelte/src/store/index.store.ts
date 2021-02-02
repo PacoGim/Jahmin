@@ -31,3 +31,5 @@ export let appTitle: Writable<string> = writable('Jahmin')
 export let backgroundCover: Writable<any> = writable('')
 
 export let selectedSongs: Writable<number[]> = writable([])
+
+export let waveformUrl: Writable<string> = writable('')

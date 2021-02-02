@@ -80,7 +80,7 @@ electron_1.app.on('window-all-closed', () => {
     }
 });
 electron_1.app.on('before-quit', () => {
-    folderWatcher_service_1.getWatcher().close();
+    folderWatcher_service_1.getRootDirFolderWatcher().close();
 });
 // process.on('exit',()=>{
 // })
