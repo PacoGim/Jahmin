@@ -20,14 +20,9 @@ const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");
 const folderWatcher_service_1 = require("./services/folderWatcher.service");
+const getWaveform_fn_1 = require("./functions/getWaveform.fn");
 const collectionName = 'music';
 exports.appDataPath = path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
-/*
-    New Files: Chokidar files -> If not in db, add them.
-    Updated Files: Chokidar files -> If in db and different, update them.
-
-    Deleted Files: DB files -> Check if on system, if not, remove from DB.
-*/
 function createWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = config_service_1.getConfig();
@@ -80,7 +75,9 @@ electron_1.app.on('window-all-closed', () => {
     }
 });
 electron_1.app.on('before-quit', () => {
-    folderWatcher_service_1.getRootDirFolderWatcher().close();
+    var _a, _b;
+    (_a = folderWatcher_service_1.getRootDirFolderWatcher()) === null || _a === void 0 ? void 0 : _a.close();
+    (_b = getWaveform_fn_1.getWaveformsFolderWatcher()) === null || _b === void 0 ? void 0 : _b.close();
 });
 // process.on('exit',()=>{
 // })

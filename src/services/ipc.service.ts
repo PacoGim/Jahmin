@@ -9,11 +9,11 @@ import { getAlbumColors } from './getAlbumColors.fn'
 
 import { customAlphabet } from 'nanoid'
 import { getWaveform } from '../functions/getWaveform.fn'
+import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
 	ipcMain.handle('get-songs', async (evt, arg) => {
-		console.log('IPC Get Songs')
 		// let index = await createFilesIndex(collectionName)
 		// scanFolders(collectionName,['/Volumes/Maxtor/Music'])
 		// return index
@@ -24,7 +24,6 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {
-		console.log('IPC Get Order')
 		let config = getConfig()
 		let grouping = config['order']['grouping'] || []
 		let filtering = config['order']['filtering'] || []
@@ -80,7 +79,14 @@ export function loadIPC() {
 		return await getNewPromiseDbVersion(value)
 	})
 
-	ipcMain.handle('get-waveform', async (evt, path, color) => {
-		return await getWaveform(path, color)
+	ipcMain.handle('get-waveform', async (evt, path) => {
+		return await getWaveform(path)
+	})
+
+	ipcMain.handle('get-changes-progress', async (evt) => {
+		return {
+			total: getTotalChangesToProcess(),
+			current: getTotalProcessedChanged()
+		}
 	})
 }

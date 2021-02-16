@@ -12,17 +12,11 @@ import { createData, getCollection, loadDb, updateData } from './services/loki.s
 import stringHash from 'string-hash'
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
+import { getWaveformsFolderWatcher } from './functions/getWaveform.fn'
 
 const collectionName = 'music'
 
 export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
-
-/*
-	New Files: Chokidar files -> If not in db, add them.
-	Updated Files: Chokidar files -> If in db and different, update them.
-
-	Deleted Files: DB files -> Check if on system, if not, remove from DB.
-*/
 
 async function createWindow() {
 	const config = getConfig()
@@ -88,7 +82,8 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', () => {
-	getRootDirFolderWatcher().close()
+	getRootDirFolderWatcher()?.close()
+	getWaveformsFolderWatcher()?.close()
 })
 
 // process.on('exit',()=>{

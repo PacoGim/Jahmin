@@ -8,6 +8,9 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const __1 = require("..");
 const config_service_1 = require("./config.service");
+const color_type_1 = require("../types/color.type");
+//@ts-expect-error
+const hex_to_hsl_1 = __importDefault(require("hex-to-hsl"));
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 function getAlbumColors(imageId) {
     return new Promise((resolve, reject) => {
@@ -21,29 +24,26 @@ function getAlbumColors(imageId) {
             if (err) {
                 return;
             }
-            let difference = 2;
-            let midColor = buffer.toString('hex').substr(0, 6);
-            let hiColor = '';
-            let lowColor = '';
-            for (let value of midColor) {
-                let index = values.indexOf(value);
-                if (index + difference >= values.length) {
-                    hiColor += values[index + difference - values.length];
-                }
-                else {
-                    hiColor += values[index + difference];
-                }
+            let hexColor = buffer.toString('hex');
+            let hslColorObject = color_type_1.ColorTypeShell();
+            const difference = 15;
+            let hslColor = hex_to_hsl_1.default(hexColor);
+            hslColorObject.hue = hslColor[0];
+            hslColorObject.saturation = hslColor[1];
+            hslColorObject.lightnessBase = hslColor[2];
+            if (hslColorObject.lightnessBase + difference > 100) {
+                hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference - 100;
             }
-            for (let value of midColor) {
-                let index = values.indexOf(value);
-                if (index - difference < 0) {
-                    lowColor += values[values.length - difference + index];
-                }
-                else {
-                    lowColor += values[index - difference];
-                }
+            else {
+                hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference;
             }
-            resolve({ hiColor, midColor, lowColor });
+            if (hslColorObject.lightnessBase - difference < 0) {
+                hslColorObject.lightnessLow = 100 + hslColorObject.lightnessBase - difference;
+            }
+            else {
+                hslColorObject.lightnessLow = hslColorObject.lightnessBase - difference;
+            }
+            resolve(hslColorObject);
         });
     });
 }

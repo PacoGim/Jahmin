@@ -5,7 +5,6 @@ import { objectToFfmpegString } from '../functions/objectToFfmpegString.fn'
 import { FlacStreamTagType } from '../types/flacStreamTag.type'
 import { TagType } from '../types/tag.type'
 
-
 function writeMp3Tags(filePath: string) {
 	return new Promise((resolve, reject) => {
 		let ffmpegMetatagString = objectToFfmpegString({
@@ -33,18 +32,18 @@ function writeMp3Tags(filePath: string) {
 				}
 
 				if (stdout) {
-					console.log(stdout)
+					// console.log(stdout)
 				}
 
 				if (stderr) {
-					console.log(stderr)
+					// console.log(stderr)
 				}
 			}
 		)
 	})
 }
 
-function getMp3Tags(filePath: string) {
+export function getMp3Tags(filePath: string): Promise<TagType> {
 	return new Promise((resolve, reject) => {
 		exec(`./binaries/ffprobe -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
 			if (stdout) {
@@ -61,7 +60,7 @@ function getMp3Tags(filePath: string) {
 
 				tags['SourceFile'] = filePath
 				tags['SampleRate'] = Number(streamAudioData['sample_rate'])
-				tags['BitRate'] = Number(streamAudioData['bit_rate'])
+				tags['BitRate'] = streamAudioData['bit_rate']
 				tags['BitDepth'] = Number(streamAudioData['bits_per_raw_sample'])
 
 				data = data['format']
@@ -87,7 +86,7 @@ function getMp3Tags(filePath: string) {
 
 				tags['LastModified'] = fs.statSync(filePath).mtimeMs
 
-				console.log(tags)
+				resolve(tags)
 			}
 		})
 	})

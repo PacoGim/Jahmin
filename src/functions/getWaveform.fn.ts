@@ -1,15 +1,29 @@
-import { exec, execSync } from 'child_process'
+import { exec } from 'child_process'
 import path from 'path'
 import { hash } from './hashString.fn'
-import fs, { existsSync } from 'fs'
+import fs, { existsSync, FSWatcher } from 'fs'
 import chokidar from 'chokidar'
 import { appDataPath } from '..'
+import { getAlbumColors } from '../services/getAlbumColors.fn'
+
+import hslToHex from 'hsl-to-hex'
 
 const ffmpegPath = path.join(__dirname, '../binaries/mac', 'ffmpeg')
-// const waveformsDirPath = path.join(__dirname, '../waveforms')
+export let waveformsFolderWatcher: FSWatcher
 
-export function getWaveform(songPath: string, color: string) {
-	return new Promise((resolve, reject) => {
+export function getWaveformsFolderWatcher() {
+	return waveformsFolderWatcher
+}
+
+export function getWaveform(songPath: string) {
+	return new Promise(async (resolve, reject) => {
+		let id = hash(songPath.split('/').slice(0, -1).join('/'))
+
+		let colors = await getAlbumColors(id)
+
+		// let color = colors.hexColor
+		let color = hslToHex(colors.hue, colors.saturation, colors.lightnessLow).replace('#', '')
+
 		let waveformsDirPath = path.join(appDataPath, 'waveforms')
 
 		if (!existsSync(waveformsDirPath)) {
@@ -20,30 +34,21 @@ export function getWaveform(songPath: string, color: string) {
 		let fileName = `${color}-${hashedPath}.webp`
 		let waveformPath = path.join(waveformsDirPath, fileName)
 
-		let folderWatcher = chokidar.watch(waveformsDirPath, { ignoreInitial: true, awaitWriteFinish: true }).on('add', (path) => {
-			if (path === waveformPath) {
-				resolve(escape(waveformPath))
-				folderWatcher.close()
-			}
-		})
+		if (fs.existsSync(waveformPath)) {
+			return resolve(escape(waveformPath))
+		}
+
+		waveformsFolderWatcher = chokidar
+			.watch(waveformsDirPath, { ignoreInitial: true, awaitWriteFinish: true })
+			.on('add', (path) => {
+				if (path === waveformPath) {
+					resolve(escape(waveformPath))
+					waveformsFolderWatcher.close()
+				}
+			})
 
 		exec(
-			`'${ffmpegPath}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`,
-			(error, stdout, stderr) => {
-				if (error) {
-					console.log('<<<<<<<<<< ERROR >>>>>>>>>>')
-					console.log(error)
-				}
-
-				if (stdout) {
-					console.log('<<<<<<<<<< STDOUT >>>>>>>>>>')
-					console.log(stdout)
-				}
-
-				if (stderr) {
-					console.log('<<<<<<<<<< STDERR >>>>>>>>>>')
-				}
-			}
+			`'${ffmpegPath}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`
 		)
 	})
 }

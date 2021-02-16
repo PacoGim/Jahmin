@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.watchFolders = exports.getRootDirFolderWatcher = void 0;
+exports.watchFolders = exports.getTotalProcessedChanged = exports.getTotalChangesToProcess = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = __importDefault(require("chokidar"));
 const music_metadata_1 = require("music-metadata");
 const fs_1 = __importDefault(require("fs"));
@@ -27,7 +27,10 @@ const getTitle_fn_1 = require("../functions/getTitle.fn");
 const observeArray_fn_1 = require("../functions/observeArray.fn");
 const getAlbumArtist_fn_1 = require("../functions/getAlbumArtist.fn");
 const getTrackNumber_fs_1 = require("../functions/getTrackNumber.fs");
-const allowedExtenstions = ['flac', 'm4a', 'mp3'];
+const aac_format_1 = require("../formats/aac.format");
+const flac_format_1 = require("../formats/flac.format");
+// IMPORTANT: ADD AGAIN MP3
+const allowedExtenstions = ['flac', 'm4a'];
 let watcher;
 function getRootDirFolderWatcher() {
     return watcher;
@@ -36,7 +39,18 @@ exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 // Array to contain to next song to process, controls excessive I/O
 let processQueue = [];
 let isQueueRunning = false;
+let totalChangesToProcess = 0;
+let totalProcessedChanged = 0;
+function getTotalChangesToProcess() {
+    return totalChangesToProcess;
+}
+exports.getTotalChangesToProcess = getTotalChangesToProcess;
+function getTotalProcessedChanged() {
+    return totalProcessedChanged;
+}
+exports.getTotalProcessedChanged = getTotalProcessedChanged;
 observeArray_fn_1.observeArray(processQueue, ['push'], () => {
+    totalChangesToProcess++;
     if (!isQueueRunning) {
         isQueueRunning = true;
         applyFolderChanges();
@@ -56,13 +70,16 @@ function applyFolderChanges() {
             else if (['delete'].includes(event)) {
                 yield loki_service_1.deleteData({ SourceFile: path });
             }
-            applyFolderChanges();
+            totalProcessedChanged++;
+            setImmediate(() => applyFolderChanges());
         }
         else {
             isQueueRunning = false;
         }
     });
 }
+// Potential issue if a user adds a big folder to scan and then another folder.
+// Need to call to function but somehow cancel
 function watchFolders(rootDirectories) {
     let foundFiles = [];
     watcher = chokidar_1.default.watch(rootDirectories, {
@@ -70,8 +87,9 @@ function watchFolders(rootDirectories) {
     });
     watcher
         .on('change', (path) => {
-        let ext = path.split('.').slice(-1)[0].toLowerCase();
-        if (allowedExtenstions.includes(ext)) {
+        var _a;
+        let ext = (_a = path.split('.').pop()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        if (ext && allowedExtenstions.includes(ext)) {
             processQueue.push({
                 event: 'update',
                 path
@@ -79,8 +97,9 @@ function watchFolders(rootDirectories) {
         }
     })
         .on('unlink', (path) => {
-        let ext = path.split('.').slice(-1)[0].toLowerCase();
-        if (allowedExtenstions.includes(ext)) {
+        var _a;
+        let ext = (_a = path.split('.').pop()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        if (ext && allowedExtenstions.includes(ext)) {
             processQueue.push({
                 event: 'delete',
                 path
@@ -88,16 +107,19 @@ function watchFolders(rootDirectories) {
         }
     })
         .on('add', (path) => {
-        let ext = path.split('.').slice(-1)[0].toLowerCase();
-        if (allowedExtenstions.includes(ext)) {
+        var _a;
+        let ext = (_a = path.split('.').pop()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        if (ext && allowedExtenstions.includes(ext)) {
             foundFiles.push(path);
         }
     })
         .on('ready', () => {
-        loopFiles(foundFiles);
+        processFiles(foundFiles);
+        // Detects new added files after detecting every files.
         watcher.on('add', (path) => {
-            let ext = path.split('.').slice(-1)[0].toLowerCase();
-            if (allowedExtenstions.includes(ext)) {
+            var _a;
+            let ext = (_a = path.split('.').pop()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+            if (ext && allowedExtenstions.includes(ext)) {
                 processQueue.push({
                     event: 'add',
                     path
@@ -107,20 +129,28 @@ function watchFolders(rootDirectories) {
     });
 }
 exports.watchFolders = watchFolders;
-function loopFiles(files) {
+function processFiles(files) {
     return __awaiter(this, void 0, void 0, function* () {
+        // Gets first element of array.
         let file = files.shift();
+        // If no more files to process, then proceed to delete dead files.
         if (file === undefined) {
-            removeDeadFiles();
+            console.log('Removing Dead Files');
+            // removeDeadFiles()
             return;
         }
-        let fileToUpdate = yield processedFilePath(file);
-        if (fileToUpdate !== undefined) {
-            yield loki_service_1.createData(fileToUpdate);
-        }
-        setTimeout(() => {
-            process.nextTick(() => loopFiles(files));
-        }, 1);
+        processQueue.push({
+            event: 'add',
+            path: file
+        });
+        // Gets song metadata if song doesn't exist or was modified.
+        // let fileToUpdate = await processedFilePath(file)
+        // if (fileToUpdate !== undefined) {
+        // 	await createData(fileToUpdate)
+        // }
+        // setTimeout(() => {
+        process.nextTick(() => processFiles(files));
+        // }, 1)
     });
 }
 function processedFilePath(filePath) {
@@ -136,7 +166,17 @@ function processedFilePath(filePath) {
             }
         }
         if (dbDoc === undefined || isFileModified === true) {
-            resolve(yield getFileMetatag(filePath, id, extension, fileStats));
+            if (extension === 'm4a') {
+                resolve(yield aac_format_1.getAacTags(filePath));
+            }
+            if (extension === 'flac') {
+                resolve(yield flac_format_1.getFlacTags(filePath));
+            }
+            if (extension === 'mp3') {
+                // resolve(await getMp3Tags(filePath))
+                // resolve()
+            }
+            // resolve(await getFileMetatag(filePath, id, extension, fileStats))
         }
         else {
             resolve(undefined);

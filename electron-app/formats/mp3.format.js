@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getMp3Tags = void 0;
 const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const lowerCaseObjectKeys_fn_1 = require("../functions/lowerCaseObjectKeys.fn");
@@ -30,10 +31,10 @@ function writeMp3Tags(filePath) {
                 // console.log(error)
             }
             if (stdout) {
-                console.log(stdout);
+                // console.log(stdout)
             }
             if (stderr) {
-                console.log(stderr);
+                // console.log(stderr)
             }
         });
     });
@@ -50,7 +51,7 @@ function getMp3Tags(filePath) {
                 let streamAudioData = data['streams'].find((stream) => stream['codec_type'] === 'audio');
                 tags['SourceFile'] = filePath;
                 tags['SampleRate'] = Number(streamAudioData['sample_rate']);
-                tags['BitRate'] = Number(streamAudioData['bit_rate']);
+                tags['BitRate'] = streamAudioData['bit_rate'];
                 tags['BitDepth'] = Number(streamAudioData['bits_per_raw_sample']);
                 data = data['format'];
                 tags['Duration'] = Number(data['duration']);
@@ -70,8 +71,9 @@ function getMp3Tags(filePath) {
                 tags['Date'] = dataTags['date'];
                 tags['Track'] = dataTags['track'];
                 tags['LastModified'] = fs_1.default.statSync(filePath).mtimeMs;
-                console.log(tags);
+                resolve(tags);
             }
         });
     });
 }
+exports.getMp3Tags = getMp3Tags;

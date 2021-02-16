@@ -2,7 +2,7 @@ const { ipcRenderer } = require('electron')
 import { albums, dbVersion } from '../store/index.store'
 import type { SongType } from '../types/song.type'
 
-export function getOrder(index: number): Promise<string[]> {
+export function getOrderIPC(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-order', index).then((result) => {
 			//TODO Gets called too many times
@@ -11,7 +11,7 @@ export function getOrder(index: number): Promise<string[]> {
 	})
 }
 
-export function getConfig(): Promise<object> {
+export function getConfigIPC(): Promise<object> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-config').then((result) => {
 			resolve(result)
@@ -29,7 +29,7 @@ export function saveConfig(newConfig: object) {
 
 const sortBy = 'RootDir'
 
-export function getAlbums(): Promise<void> {
+export function getAlbumsIPC(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-albums').then((result) => {
 			result = result.sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])))
@@ -37,7 +37,7 @@ export function getAlbums(): Promise<void> {
 			albums.set(result)
 			resolve()
 			// When the results arrive, recursive call to wait for the eventual new filtering.
-			getAlbums()
+			getAlbumsIPC()
 		})
 	})
 }
@@ -66,37 +66,50 @@ export function getAlbumColorsIPC(imageId) {
 	})
 }
 
-export function getWaveform(path):Promise<string> {
+export function getChangesProgressIPC() {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-waveform',path, window.getComputedStyle(document.body).getPropertyValue('--low-color')).then((result) => {
+		ipcRenderer.invoke('get-changes-progress').then((result) => {
 			resolve(result)
 		})
 	})
 }
 
-export function getDatabaseVersion() {
+export function getWaveformIPC(path): Promise<string> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-database-version').then((result) => {
-			setTimeout(() => {
-				getDatabaseVersion()
-			}, 10000)
-
-			let storeVersion
-
-			dbVersion.subscribe((value) => {
-				storeVersion = value
-			})()
-
-			if (result !== 0 && result !== storeVersion) {
-				dbVersion.set(result)
-			}
-
-			resolve(result)
-		})
+		try {
+			ipcRenderer.invoke('get-waveform', path).then((result) => {
+				resolve(result)
+			})
+		} catch (error) {
+			console.log('Oops', error)
+		}
 	})
 }
 
-export function syncDbVersion() {
+// export function getDatabaseVersionIPC() {
+// 	return new Promise((resolve, reject) => {
+// 		ipcRenderer.invoke('get-database-version').then((result) => {
+// 			setTimeout(() => {
+// 				getDatabaseVersionIPC()
+// 			}, 10000)
+
+// 			let storeVersion
+
+// 			dbVersion.subscribe((value) => {
+// 				storeVersion = value
+// 			})()
+
+// 			if (result !== 0 && result !== storeVersion) {
+// 				console.log('New Version: ', result)
+// 				dbVersion.set(result)
+// 			}
+
+// 			resolve(result)
+// 		})
+// 	})
+// }
+
+export function syncDbVersionIPC() {
 	return new Promise((resolve) => {
 		let storeDbVersion = undefined
 
@@ -105,10 +118,12 @@ export function syncDbVersion() {
 		ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
 			dbVersion.set(result)
 
+			console.log('New Version: ', result)
+
 			resolve(result)
 
 			setTimeout(() => {
-				syncDbVersion()
+				syncDbVersionIPC()
 			}, 2000)
 		})
 	})

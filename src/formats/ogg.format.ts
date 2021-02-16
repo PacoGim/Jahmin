@@ -14,7 +14,7 @@ function getOggTags(filePath: string) {
 				}
 				let data = JSON.parse(stdout)
 
-				console.log(data)
+				// console.log(data)
 
 				let streamAudioData: FlacStreamTagType = data['streams'].find(
 					(stream: FlacStreamTagType) => stream['codec_type'] === 'video'
@@ -33,7 +33,7 @@ function getOggTags(filePath: string) {
 
 				let dataTags = lowerCaseObjectKeys(streamAudioData['tags'])
 
-				console.log(dataTags)
+				// console.log(dataTags)
 
 
 				tags['Rating'] = Number(dataTags['rating'])
@@ -89,7 +89,7 @@ function writeOggTags(filePath: string) {
 				}
 
 				if (stderr) {
-					console.log(stderr)
+					// console.log(stderr)
 					resolve('')
 				}
 			}

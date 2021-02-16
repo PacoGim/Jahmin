@@ -25,7 +25,7 @@ function writeFlacTags(filePath: string) {
 			disc: 9
 		})
 
-		console.log(ffmpegMetatagString)
+		// console.log(ffmpegMetatagString)
 
 		exec(
 			`./binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
@@ -37,18 +37,18 @@ function writeFlacTags(filePath: string) {
 				}
 
 				if (stdout) {
-					console.log(stdout)
+					// console.log(stdout)
 				}
 
 				if (stderr) {
-					console.log(stderr)
+					// console.log(stderr)
 				}
 			}
 		)
 	})
 }
 
-function getFlacTags(filePath: string) {
+export function getFlacTags(filePath: string):Promise<TagType> {
 	return new Promise((resolve, reject) => {
 		exec(`./binaries/ffprobe -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
 			if (stdout) {
@@ -63,7 +63,7 @@ function getFlacTags(filePath: string) {
 				tags['SourceFile'] = filePath
 				tags['SampleRate'] = Number(streamAudioData['sample_rate'])
 				tags['BitDepth'] = Number(streamAudioData['bits_per_raw_sample'])
-				tags['BitRate'] = Number(streamAudioData['bit_rate'])
+				tags['BitRate'] = streamAudioData['bit_rate']
 
 				data = data['format']
 
@@ -87,7 +87,7 @@ function getFlacTags(filePath: string) {
 
 				tags['LastModified'] = fs.statSync(filePath).mtimeMs
 
-				console.log(tags)
+				// console.log(tags)
 			}
 		})
 	})

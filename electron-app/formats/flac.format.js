@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getFlacTags = void 0;
 const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const lowerCaseObjectKeys_fn_1 = require("../functions/lowerCaseObjectKeys.fn");
@@ -24,7 +25,7 @@ function writeFlacTags(filePath) {
             comment: 'New Comment',
             disc: 9
         });
-        console.log(ffmpegMetatagString);
+        // console.log(ffmpegMetatagString)
         child_process_1.exec(`./binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
             .split('/')
             .pop()}"`, (error, stdout, stderr) => {
@@ -32,10 +33,10 @@ function writeFlacTags(filePath) {
                 // console.log(error)
             }
             if (stdout) {
-                console.log(stdout);
+                // console.log(stdout)
             }
             if (stderr) {
-                console.log(stderr);
+                // console.log(stderr)
             }
         });
     });
@@ -52,7 +53,7 @@ function getFlacTags(filePath) {
                 tags['SourceFile'] = filePath;
                 tags['SampleRate'] = Number(streamAudioData['sample_rate']);
                 tags['BitDepth'] = Number(streamAudioData['bits_per_raw_sample']);
-                tags['BitRate'] = Number(streamAudioData['bit_rate']);
+                tags['BitRate'] = streamAudioData['bit_rate'];
                 data = data['format'];
                 tags['Duration'] = Number(data['duration']);
                 tags['Size'] = Number(data['size']);
@@ -70,8 +71,9 @@ function getFlacTags(filePath) {
                 tags['Date'] = dataTags['date'];
                 tags['Track'] = dataTags['track'];
                 tags['LastModified'] = fs_1.default.statSync(filePath).mtimeMs;
-                console.log(tags);
+                // console.log(tags)
             }
         });
     });
 }
+exports.getFlacTags = getFlacTags;

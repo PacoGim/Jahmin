@@ -11,36 +11,38 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const deepmerge_1 = __importDefault(require("deepmerge"));
 const index_1 = require("../index");
-const adapter = new loki_fs_structured_adapter_1.default();
+const ADAPTER = new loki_fs_structured_adapter_1.default();
 let db;
 let dbVersion = 0;
-const collectionName = 'music';
+const COLLECTION_NAME = 'music';
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve = undefined;
-function getNewPromiseDbVersion(value) {
-    if (dbVersion > value) {
+function getNewPromiseDbVersion(rendererDbVersion) {
+    // If the db version changed while going back and forth Main <-> Renderer
+    if (dbVersion > rendererDbVersion) {
         return new Promise((resolve) => resolve(dbVersion));
     }
     else {
+        // If didn't change, when for a change to happen.
         return new Promise((resolve) => (dbVersionResolve = resolve));
     }
 }
 exports.getNewPromiseDbVersion = getNewPromiseDbVersion;
 function loadDb() {
     return new Promise((resolve) => {
-        const dbPath = path_1.default.join(index_1.appDataPath, '/db');
-        if (!fs_1.default.existsSync(dbPath)) {
-            fs_1.default.mkdirSync(dbPath, { recursive: true });
-            fs_1.default.writeFile(path_1.default.join(dbPath, 'DO_NOT_EDIT_FILES.txt'), 'If you did then delete this folder content and re-scan folders.', () => { });
+        const DB_PATH = path_1.default.join(index_1.appDataPath, '/db');
+        if (!fs_1.default.existsSync(DB_PATH)) {
+            fs_1.default.mkdirSync(DB_PATH, { recursive: true });
+            fs_1.default.writeFile(path_1.default.join(DB_PATH, 'DO_NOT_EDIT_FILES.txt'), 'If you did then delete this folder content and re-scan folders.', () => { });
         }
-        db = new lokijs_1.default(path_1.default.join(dbPath, 'jahmin.db'), {
-            adapter,
+        db = new lokijs_1.default(path_1.default.join(DB_PATH, 'jahmin.db'), {
+            adapter: ADAPTER,
             autoload: true,
             autoloadCallback: () => {
                 databaseInitialize().then(() => resolve());
             },
             autosave: true,
-            autosaveInterval: 2000
+            autosaveInterval: 10000
         });
     });
 }
@@ -54,23 +56,23 @@ function getDbVersion() {
 }
 exports.getDbVersion = getDbVersion;
 function getCollection() {
-    const collection = db.getCollection(collectionName).find();
-    return collection;
+    const COLLECTION = db.getCollection(COLLECTION_NAME).find();
+    return COLLECTION;
 }
 exports.getCollection = getCollection;
 function createData(newDoc) {
     return new Promise((resolve, reject) => {
         try {
             // console.log('New Doc: ', newDoc)
-            const collection = db.getCollection(collectionName);
-            if (!collection)
-                throw new Error(`Collection ${collectionName} not created/available.`);
+            const COLLECTION = db.getCollection(COLLECTION_NAME);
+            if (!COLLECTION)
+                throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
             let oldDoc = readData({ SourceFile: newDoc['SourceFile'] });
             if (oldDoc) {
                 resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc));
             }
             else {
-                resolve(collection.insert(newDoc));
+                resolve(COLLECTION.insert(newDoc));
                 dbVersionResolve(++dbVersion);
             }
         }
@@ -83,10 +85,10 @@ function createData(newDoc) {
 exports.createData = createData;
 function readDataById(id) {
     try {
-        const collection = db.getCollection(collectionName);
-        if (!collection)
-            throw new Error(`Collection ${collectionName} not created/available.`);
-        return collection.get(id);
+        const COLLECTION = db.getCollection(COLLECTION_NAME);
+        if (!COLLECTION)
+            throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+        return COLLECTION.get(id);
     }
     catch (error) {
         handleErrors(error);
@@ -96,10 +98,10 @@ function readDataById(id) {
 exports.readDataById = readDataById;
 function readData(query) {
     try {
-        const collection = db.getCollection(collectionName);
-        if (!collection)
-            throw new Error(`Collection ${collectionName} not created/available.`);
-        return collection.find(query)[0];
+        const COLLECTION = db.getCollection(COLLECTION_NAME);
+        if (!COLLECTION)
+            throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+        return COLLECTION.find(query)[0];
     }
     catch (error) {
         handleErrors(error);
@@ -110,12 +112,12 @@ exports.readData = readData;
 function updateData(query, newData) {
     return new Promise((resolve, reject) => {
         try {
-            const collection = db.getCollection(collectionName);
-            if (!collection)
-                throw new Error(`Collection ${collectionName} not created/available.`);
-            let doc = collection.find(query)[0];
+            const COLLECTION = db.getCollection(COLLECTION_NAME);
+            if (!COLLECTION)
+                throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+            let doc = COLLECTION.find(query)[0];
             doc = deepmerge_1.default(doc, newData);
-            resolve(collection.update(doc));
+            resolve(COLLECTION.update(doc));
             dbVersionResolve(++dbVersion);
         }
         catch (error) {
@@ -128,11 +130,11 @@ exports.updateData = updateData;
 function deleteData(query) {
     return new Promise((resolve, reject) => {
         // console.log(query)
-        const collection = db.getCollection(collectionName);
-        if (!collection)
-            throw new Error(`Collection ${collectionName} not created/available.`);
-        const doc = collection.find(query)[0];
-        resolve(collection.remove(doc));
+        const COLLECTION = db.getCollection(COLLECTION_NAME);
+        if (!COLLECTION)
+            throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+        const DOC = COLLECTION.find(query)[0];
+        resolve(COLLECTION.remove(DOC));
         dbVersionResolve(++dbVersion);
     });
 }
@@ -150,9 +152,9 @@ function databaseInitialize() {
     return new Promise((resolve) => {
         if (!db)
             return;
-        let collection = db.getCollection(collectionName);
+        let collection = db.getCollection(COLLECTION_NAME);
         if (!collection) {
-            db.addCollection(collectionName, {
+            db.addCollection(COLLECTION_NAME, {
                 unique: ['SourceFile']
             });
         }

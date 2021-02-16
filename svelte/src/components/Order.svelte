@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { cutWord } from '../service/index.service'
-	import { getOrder } from '../service/ipc.service'
+	import { getOrderIPC } from '../service/ipc.service'
 	import { dbVersion, valuesToFilter, valuesToGroup, isValuesToFilterChanged, storeConfig } from '../store/index.store'
 
 	export let index
@@ -51,7 +51,7 @@
 	}
 
 	async function fetchSongs() {
-		orderedSongs = await getOrder(index)
+		orderedSongs = await getOrderIPC(index)
 	}
 </script>
 

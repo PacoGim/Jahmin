@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getConfig, saveConfig } from '../service/ipc.service'
+	import { getConfigIPC, saveConfig } from '../service/ipc.service'
 	import { valuesToFilter, isValuesToFilterChanged, valuesToGroup, dbVersion, storeConfig } from '../store/index.store'
 	import { lastAlbumPlayed, lastSongIndexPlayed } from '../store/snapshot.store'
 
@@ -59,7 +59,7 @@
 	// function saveConfig() {}
 
 	async function loadConfig() {
-		let config = await getConfig()
+		let config = await getConfigIPC()
 
 		$storeConfig = { ...config }
 

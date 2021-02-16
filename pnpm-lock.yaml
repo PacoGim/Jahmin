@@ -4,9 +4,11 @@ dependencies:
   chokidar: 3.5.1
   deepmerge: 4.2.2
   easydropdown: 4.2.0
-  exiftool-vendored: 13.0.0
+  exiftool-vendored: 13.1.0
   hash-sum: 2.0.0
   hasha: 5.2.2
+  hex-to-hsl: 1.0.2
+  hsl-to-hex: 1.0.0
   image-info: 0.0.2
   imagemin: 7.0.1
   imagemin-jpegtran: 7.0.0
@@ -16,23 +18,26 @@ dependencies:
   jsonfile: 6.1.0
   lokijs: 1.5.11
   lowdb: 1.0.0
-  music-metadata: 7.5.1
+  luxon: 1.26.0
+  music-metadata: 7.7.0
   nanoid: 3.1.20
-  sharp: 0.26.3
+  sharp: 0.27.1
   string-hash: 1.1.3
   web-audio-api: 0.2.2
 devDependencies:
   '@types/hash-sum': 1.0.0
+  '@types/hsl-to-hex': 1.0.0
   '@types/imagemin': 7.0.0
   '@types/jsonfile': 6.0.0
+  '@types/luxon': 1.25.2
   '@types/nanoid': 2.1.0
-  '@types/node': 14.14.12
-  '@types/sharp': 0.26.1
+  '@types/node': 14.14.28
+  '@types/sharp': 0.27.1
   '@types/string-hash': 1.1.1
   concurrently: 5.3.0
   electron: 11.0.4
   electron-window-state: 5.0.3
-  typescript: 4.1.2
+  typescript: 4.1.5
 lockfileVersion: 5.2
 packages:
   /@electron/get/1.12.2:
@@ -115,6 +120,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-FdLBT93h3kcZ586Aee66HPCVJ6qvxVjBlDWNmxSGSbCZe9hTsjRKdSsl4y1T+3zfujxo9auykQMnFsfyHWD7wg==
+  /@types/hsl-to-hex/1.0.0:
+    dev: true
+    resolution:
+      integrity: sha512-QJOVWDdZF9Dytbt+HdzXKygmK7BNm8fAb7XrLOVChTXIz7DfRbv+w6Xax/GFWpPtze+V2WeGJJn3M8MOOPglTg==
   /@types/imagemin/7.0.0:
     dependencies:
       '@types/node': 14.14.14
@@ -131,6 +140,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-ssiP6F7rpDqlaOzo+0Y/0dkVH2JiAjc+o7n6M4pFnfAMscf+7FthqS0cobvGJEJvxmzp4PWfMOfe0q3VETtrgQ==
+  /@types/luxon/1.25.2:
+    dev: true
+    resolution:
+      integrity: sha512-lMc5+7ynC4+Pu3RR/FvKGx7WHakrPPTtFEZUy1cMXTbH5fQbso+LZjM/G1moOBpCR9XGNa39gXOQu89lpXTeiw==
   /@types/minimatch/3.0.3:
     dev: false
     resolution:
@@ -149,29 +162,29 @@ packages:
     dev: true
     resolution:
       integrity: sha512-jiE3QIxJ8JLNcb1Ps6rDbysDhN4xa8DJJvuC9prr6w+1tIh+QAbYyNF3tyiZNLDBIuBCf4KEcV2UvQm/V60xfA==
-  /@types/node/14.14.12:
-    resolution:
-      integrity: sha512-ASH8OPHMNlkdjrEdmoILmzFfsJICvhBsFfAum4aKZ/9U4B6M6tTmTPh+f3ttWdD74CEGV5XvXWkbyfSdXaTd7g==
   /@types/node/14.14.14:
     resolution:
       integrity: sha512-UHnOPWVWV1z+VV8k6L1HhG7UbGBgIdghqF3l9Ny9ApPghbjICXkUJSd/b9gOgQfjM1r+37cipdw/HJ3F6ICEnQ==
+  /@types/node/14.14.28:
+    resolution:
+      integrity: sha512-lg55ArB+ZiHHbBBttLpzD07akz0QPrZgUODNakeC09i62dnrywr9mFErHuaPlB6I7z+sEbK+IYmplahvplCj2g==
   /@types/node/14.14.7:
     dev: true
     resolution:
       integrity: sha512-Zw1vhUSQZYw+7u5dAwNbIA9TuTotpzY/OF7sJM9FqPOF3SPjKnxrjoTktXDZgUjybf4cWVBP7O8wvKdSaGHweg==
   /@types/readable-stream/2.3.9:
     dependencies:
-      '@types/node': 14.14.12
+      '@types/node': 14.14.28
       safe-buffer: 5.2.1
     dev: false
     resolution:
       integrity: sha512-sqsgQqFT7HmQz/V5jH1O0fvQQnXAJO46Gg9LRO/JPfjmVmGUlcx831TZZO3Y3HtWhIkzf3kTsNT0Z0kzIhIvZw==
-  /@types/sharp/0.26.1:
+  /@types/sharp/0.27.1:
     dependencies:
-      '@types/node': 14.14.14
+      '@types/node': 14.14.28
     dev: true
     resolution:
-      integrity: sha512-vOFcnP0+aQFDb+ToKVIj8ZV6xQ7pNYGGPeYweLHxyjoQUcIGj8iY9R3OVmJyRR5KUkb0Y4obBbMjoTrBXw6AQA==
+      integrity: sha512-RbYmyPjDUzi3lI9Qm68I+82I+DNOe/jW5w+EC1FvpT/f2TYXDG6mmPZQQohy98ufq+u6OB6pQkqpcNMDxzVclg==
   /@types/string-hash/1.1.1:
     dev: true
     resolution:
@@ -401,14 +414,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-pvcNpa0UU69UT341rO6AYy4FVAIkUHuZXRIWbq+zHnsVcRzDDjIAhGuuYoi0d//cwIwtt4pkpKycWEfjdV+vww==
-  /bl/4.0.3:
+  /bl/4.1.0:
     dependencies:
       buffer: 5.7.1
       inherits: 2.0.4
       readable-stream: 3.6.0
     dev: false
     resolution:
-      integrity: sha512-fs4G6/Hu4/EE+F75J8DuN/0IpQqNjAdC7aEQv7Qt8MHGUH7Ckv2MwTEEeN9QehD0pfIDkMI1bkHYkKy7xHyKIg==
+      integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==
   /boolean/3.0.2:
     dev: true
     optional: true
@@ -1105,31 +1118,32 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-8iA79xD3uAch729dUG8xaaBBFGaEa0wdD2VkYLFHwlqosEj/jT66AzcreRDSgV7ehnNLBW2WR5jIXwGKjVdTLg==
-  /exiftool-vendored.exe/12.12.0:
+  /exiftool-vendored.exe/12.14.0:
     dev: false
     optional: true
     os:
       - win32
     resolution:
-      integrity: sha512-XdY82N8K4LOe3TLI0Mg3MA1/gve3AevO5XjJpFwE2PSki72gUnsZwriI+0J8gaAY7L2O//43dtrZArC5mN9O7A==
-  /exiftool-vendored.pl/12.12.0:
+      integrity: sha512-x+Iawvkhv6c8C+AedJ8v8O+G3AgMjNbkb6O+aSA25dd70W9tHJpjp4wLa92HBKgZcpMVrJxlpeAjz2t26fJB9Q==
+  /exiftool-vendored.pl/12.14.0:
     dev: false
     optional: true
     os:
       - '!win32'
     resolution:
-      integrity: sha512-C9EJauh1aoK5DudZcP79BSjr4YyskHn9r0T3BPkgCGT6MxZTzJTxMsS2T09rhloyf4dWlAZbwGg7Y8re7RbEZA==
-  /exiftool-vendored/13.0.0:
+      integrity: sha512-oN+8gLUFdv7zweLJO3kQbu4SNFKmHCaX301DvQyoggYvMvsn1uKp5Ju8bY96OmvCL12jEEI6GhKfAWxXLUFBig==
+  /exiftool-vendored/13.1.0:
     dependencies:
       batch-cluster: 6.0.0
-      luxon: 1.25.0
+      he: 1.2.0
+      luxon: 1.26.0
       tz-lookup: 6.1.25
     dev: false
     optionalDependencies:
-      exiftool-vendored.exe: 12.12.0
-      exiftool-vendored.pl: 12.12.0
+      exiftool-vendored.exe: 12.14.0
+      exiftool-vendored.pl: 12.14.0
     resolution:
-      integrity: sha512-JL7+JdyGRmJRB25w4Ij0jIaW0bvBML8QrOnmdzbhdq2A+swi12ZPQsw8A4TrPPUyPG2+jJkWaKZX8Qc0BUF7Zw==
+      integrity: sha512-CuuifyF1Bil1zlI1bkzRSI2AMws6wNlB2kOhiI7ro6rVjzbf8BongtWdCZYS5ZcbD3wCytdmTX9eWG7ZWrdV4w==
   /expand-template/2.0.3:
     dev: false
     engines:
@@ -1202,17 +1216,17 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-UssQP5ZgIOKelfsaB5CuGAL+Y+q7EmONuiwF3N5HAH0t27rvrttgi6Ra9k/+DVaY9UF6+ybxu5pOXLUdA8N7Vg==
-  /file-type/16.0.1:
+  /file-type/16.2.0:
     dependencies:
-      readable-web-to-node-stream: 3.0.0
-      strtok3: 6.0.4
-      token-types: 2.0.0
+      readable-web-to-node-stream: 3.0.1
+      strtok3: 6.0.8
+      token-types: 2.1.1
       typedarray-to-buffer: 3.1.5
     dev: false
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-rwXqMZiizJd0uXZE52KN2DtPBAV99qz9cUTHHt8pSyaQzgVYrHJGR0qt2p4N/yzHEL/tGrlB/TgawQb4Fnxxyw==
+      integrity: sha512-1Wwww3mmZCMmLjBfslCluwt2mxH80GsAXYrvPnfQ42G1EGWag336kB1iyCgyn7UXiKY3cJrNykXPrCwA7xb5Ag==
   /file-type/3.9.0:
     dev: false
     engines:
@@ -1595,13 +1609,39 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-Hrp5vIK/xr5SkeN2onO32H0MgNZ0f17HRNH39WfL0SYUNOTZ5Lz1TJ8Pajo/87dYGEFlLMm7mIc/k/s6Bvz9HQ==
+  /he/1.2.0:
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
   /helpful-merge/0.2.0:
     dev: false
     resolution:
       integrity: sha512-lqbBl4TU15okBJ4C8hx7PBEcqtaxxsWLOypdhpsZbRvBTaibNqTXWpG6W59S0FTBeL7hx3K4MXdz8EJVcZ3CCQ==
+  /hex-to-hsl/1.0.2:
+    dependencies:
+      hex-to-rgb: 1.0.1
+      rgb-to-hsl: 0.0.2
+    dev: false
+    resolution:
+      integrity: sha1-1cWezgAXhEToIcj8WKQwr8CYMcI=
+  /hex-to-rgb/1.0.1:
+    dev: false
+    resolution:
+      integrity: sha1-EAud8SazLydirfhIa+aMZe+O0qQ=
   /hosted-git-info/2.8.8:
     resolution:
       integrity: sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
+  /hsl-to-hex/1.0.0:
+    dependencies:
+      hsl-to-rgb-for-reals: 1.1.1
+    dev: false
+    resolution:
+      integrity: sha1-xYyCbcbS8eCl/x2lp+y/A/qsE1I=
+  /hsl-to-rgb-for-reals/1.1.1:
+    dev: false
+    resolution:
+      integrity: sha512-LgOWAkrN0rFaQpfdWBQlv/VhkOxb5AsBjk6NQVx4yEzWS923T07X0M1Y0VNko2H52HeSpZrZNNMJ0aFqsdVzQg==
   /http-cache-semantics/3.8.1:
     dev: false
     resolution:
@@ -2044,10 +2084,10 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
-  /luxon/1.25.0:
+  /luxon/1.26.0:
     dev: false
     resolution:
-      integrity: sha512-hEgLurSH8kQRjY6i4YLey+mcKVAWXbDNlZRmM6AgWDJ1cY3atl8Ztf5wEY7VBReFbmGnwQPz7KYJblL8B2k0jQ==
+      integrity: sha512-+V5QIQ5f6CDXQpWNICELwjwuHdqeJM1UenlZWx5ujcRMc9venvluCjFb4t5NYLhb6IhkbMVOxzVuOqkgMxee2A==
   /make-dir/1.3.0:
     dependencies:
       pify: 3.0.0
@@ -2217,19 +2257,19 @@ packages:
     dev: false
     resolution:
       integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
-  /music-metadata/7.5.1:
+  /music-metadata/7.7.0:
     dependencies:
       content-type: 1.0.4
       debug: 4.3.1
-      file-type: 16.0.1
+      file-type: 16.2.0
       media-typer: 1.1.0
-      strtok3: 6.0.4
-      token-types: 2.0.0
+      strtok3: 6.0.8
+      token-types: 2.1.1
     dev: false
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-rkYf+LmlAaKMHSrXxxUbj53jQsCER+5MhoiqFDvsJ2aQ3jOyNbH0HqUoSc9ipYdSBCx27hAXaA/VCUfM+J8v/g==
+      integrity: sha512-t0r1hiN4oPC+QE/k6bevlQotELvLtZOb8VmunldyehxI+MxN64/Ku77fwKaBP8e1lEVES5oXboZiPW6vrWrSog==
   /nan/2.14.2:
     dev: false
     resolution:
@@ -2628,12 +2668,12 @@ packages:
       node: '>=0.10'
     resolution:
       integrity: sha1-y4O0mf4lCMD2wYM4AD/OI54VCTE=
-  /peek-readable/3.1.0:
+  /peek-readable/3.1.3:
     dev: false
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-KGuODSTV6hcgdZvDrIDBUkN0utcAVj1LL7FfGbM0viKTtCHmtZcuEJ+lGqsp0fTFkGqesdtemV2yUSMeyy3ddA==
+      integrity: sha512-mpAcysyRJxmICBcBa5IXH7SZPvWkcghm6Fk8RekoS3v+BpbSzlZzuWbMx+GXrlUwESi9qHar4nVEZNMKylIHvg==
   /pend/1.2.0:
     resolution:
       integrity: sha1-elfrVQpng/kRUzH89GY9XI4AelA=
@@ -2687,7 +2727,7 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-oXWAS9MQ9iiDAJRdAZ9KO1mC5UwhzKkJsmetiu0iqIjJuW7JsuLhmc4JdRm7uJkIWRzIAou/Vq2VcjfJwz30Ow==
-  /prebuild-install/6.0.0:
+  /prebuild-install/6.0.1:
     dependencies:
       detect-libc: 1.0.3
       expand-template: 2.0.3
@@ -2709,7 +2749,7 @@ packages:
       node: '>=6'
     hasBin: true
     resolution:
-      integrity: sha512-h2ZJ1PXHKWZpp1caLw0oX9sagVpL2YTk+ZwInQbQ3QqNd4J03O6MpFNmMTJlkfgPENWqe5kP0WjQLqz5OjLfsw==
+      integrity: sha512-7GOJrLuow8yeiyv75rmvZyeMGzl8mdEX5gY69d6a6bHWmiPevwqFw+tQavhK0EYMaSg3/KD24cWqeQv1EWsqDQ==
   /prepend-http/1.0.4:
     dev: false
     engines:
@@ -2813,7 +2853,7 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
-  /readable-web-to-node-stream/3.0.0:
+  /readable-web-to-node-stream/3.0.1:
     dependencies:
       '@types/readable-stream': 2.3.9
       readable-stream: 3.6.0
@@ -2821,7 +2861,7 @@ packages:
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-HNmLb3n0SteGAs8HQlErYPGeO+y7cvL/mVUKtXeUkl0iCZ/2GIgKGrCFHyS7UXFnO8uc9U+0y3pYIzAPsjFfvA==
+      integrity: sha512-4zDC6CvjUyusN7V0QLsXVB7pJCD9+vtrM9bYDRv6uBQ+SKfx36rp5AFNPRgh9auKRul/a1iFZJYXcCbwRL+SaA==
   /readdirp/3.5.0:
     dependencies:
       picomatch: 2.2.2
@@ -2880,6 +2920,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==
+  /rgb-to-hsl/0.0.2:
+    dev: false
+    resolution:
+      integrity: sha1-Nvn8KGN2uQrMRX5pkAW0y0LTUOw=
   /rimraf/2.7.1:
     dependencies:
       glob: 7.1.6
@@ -2989,14 +3033,14 @@ packages:
   /set-blocking/2.0.0:
     resolution:
       integrity: sha1-BF+XgtARrppoA93TgrJDkrPYkPc=
-  /sharp/0.26.3:
+  /sharp/0.27.1:
     dependencies:
       array-flatten: 3.0.0
       color: 3.1.3
       detect-libc: 1.0.3
       node-addon-api: 3.1.0
       npmlog: 4.1.2
-      prebuild-install: 6.0.0
+      prebuild-install: 6.0.1
       semver: 7.3.4
       simple-get: 4.0.0
       tar-fs: 2.1.1
@@ -3006,7 +3050,7 @@ packages:
       node: '>=10'
     requiresBuild: true
     resolution:
-      integrity: sha512-NdEJ9S6AMr8Px0zgtFo1TJjMK/ROMU92MkDtYn2BBrDjIx3YfH9TUyGdzPC+I/L619GeYQc690Vbaxc5FPCCWg==
+      integrity: sha512-IQNXWdspb4nZcJemXa6cfgz+JvKONsuqP8Mwi1Oti23Uo7+J+UF2jihJDf6I1BQbrmhcZ0lagH/1WYG+ReAzyQ==
   /shebang-command/1.2.0:
     dependencies:
       shebang-regex: 1.0.0
@@ -3255,16 +3299,16 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-k55yxKHwaXnpYGsOzg4Vl8+tDrWylxDEpknGjhTiZB8dFRU5rTo9CAzeycivxV3s+zlTKwrs6WxMxR95n26kwg==
-  /strtok3/6.0.4:
+  /strtok3/6.0.8:
     dependencies:
       '@tokenizer/token': 0.1.1
       '@types/debug': 4.1.5
-      peek-readable: 3.1.0
+      peek-readable: 3.1.3
     dev: false
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-rqWMKwsbN9APU47bQTMEYTPcwdpKDtmf1jVhHzNW2cL1WqAxaM9iBb9t5P2fj+RV2YsErUWgQzHD5JwV0uCTEQ==
+      integrity: sha512-QLgv+oiXwXgCgp2PdPPa+Jpp4D9imK9e/0BsyfeFMr6QL6wMVqoVn9+OXQ9I7MZbmUzN6lmitTJ09uwS2OmGcw==
   /sumchecker/3.0.1:
     dependencies:
       debug: 4.3.1
@@ -3300,7 +3344,7 @@ packages:
       chownr: 1.1.4
       mkdirp-classic: 0.5.3
       pump: 3.0.0
-      tar-stream: 2.1.4
+      tar-stream: 2.2.0
     dev: false
     resolution:
       integrity: sha512-V0r2Y9scmbDRLCNex/+hYzvp/zyYjvFbHPNgVTKfQvVrb6guiE/fxP+XblDNR011utopbkex2nM4dHNV6GDsng==
@@ -3318,9 +3362,9 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-rzS0heiNf8Xn7/mpdSVVSMAWAoy9bfb1WOTYC78Z0UQKeKa/CWS8FOq0lKGNa8DWKAn9gxjCvMLYc5PGXYlK2A==
-  /tar-stream/2.1.4:
+  /tar-stream/2.2.0:
     dependencies:
-      bl: 4.0.3
+      bl: 4.1.0
       end-of-stream: 1.4.4
       fs-constants: 1.0.0
       inherits: 2.0.4
@@ -3329,7 +3373,7 @@ packages:
     engines:
       node: '>=6'
     resolution:
-      integrity: sha512-o3pS2zlG4gxr67GmFYBLlq+dM8gyRGUOvsrHclSkvtVtQbjV0s/+ZE8OpICbaj8clrX3tjeHngYGP7rweaBnuw==
+      integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==
   /tar/4.4.13:
     dependencies:
       chownr: 1.1.4
@@ -3387,7 +3431,7 @@ packages:
       node: '>=8.0'
     resolution:
       integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
-  /token-types/2.0.0:
+  /token-types/2.1.1:
     dependencies:
       '@tokenizer/token': 0.1.1
       ieee754: 1.2.1
@@ -3395,7 +3439,7 @@ packages:
     engines:
       node: '>=0.1.98'
     resolution:
-      integrity: sha512-WWvu8sGK8/ZmGusekZJJ5NM6rRVTTDO7/bahz4NGiSDb/XsmdYBn6a1N/bymUHuWYTWeuLUg98wUzvE4jPdCZw==
+      integrity: sha512-wnQcqlreS6VjthyHO3Y/kpK/emflxDBNhlNUPfh7wE39KnuDdOituXomIbyI79vBtF0Ninpkh72mcuRHo+RG3Q==
   /tree-kill/1.2.2:
     dev: true
     hasBin: true
@@ -3467,13 +3511,13 @@ packages:
     dev: true
     resolution:
       integrity: sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
-  /typescript/4.1.2:
+  /typescript/4.1.5:
     dev: true
     engines:
       node: '>=4.2.0'
     hasBin: true
     resolution:
-      integrity: sha512-thGloWsGH3SOxv1SoY7QojKi0tc+8FnOmiarEGMbd/lar7QOEd3hvlx3Fp5y6FlDUGl9L+pd4n2e+oToGMmhRQ==
+      integrity: sha512-6OSu9PTIzmn9TCDiovULTnET6BgXtDYL4Gg4szY+cGsc3JP1dQL8qvE8kShTRx1NIw4Q9IBHlwODjkjWEtMUyA==
   /tz-lookup/6.1.25:
     dev: false
     resolution:
@@ -3654,12 +3698,14 @@ packages:
       integrity: sha1-x+sXyT4RLLEIb6bY5R+wZnt5pfk=
 specifiers:
   '@types/hash-sum': ^1.0.0
+  '@types/hsl-to-hex': ^1.0.0
   '@types/imagemin': ^7.0.0
   '@types/jsonfile': ^6.0.0
   '@types/lokijs': ^1.5.3
+  '@types/luxon': ^1.25.2
   '@types/nanoid': ^2.1.0
-  '@types/node': ^14.14.12
-  '@types/sharp': ^0.26.1
+  '@types/node': ^14.14.28
+  '@types/sharp': ^0.27.1
   '@types/string-hash': ^1.1.1
   canvas: ^2.6.1
   chokidar: ^3.5.1
@@ -3668,9 +3714,11 @@ specifiers:
   easydropdown: ^4.2.0
   electron: ^11.0.4
   electron-window-state: ^5.0.3
-  exiftool-vendored: ^13.0.0
+  exiftool-vendored: ^13.1.0
   hash-sum: ^2.0.0
   hasha: ^5.2.2
+  hex-to-hsl: ^1.0.2
+  hsl-to-hex: ^1.0.0
   image-info: ^0.0.2
   imagemin: ^7.0.1
   imagemin-jpegtran: ^7.0.0
@@ -3680,9 +3728,10 @@ specifiers:
   jsonfile: ^6.1.0
   lokijs: ^1.5.11
   lowdb: ^1.0.0
-  music-metadata: ^7.5.1
+  luxon: ^1.26.0
+  music-metadata: ^7.7.0
   nanoid: ^3.1.20
-  sharp: ^0.26.3
+  sharp: ^0.27.1
   string-hash: ^1.1.3
-  typescript: ^4.1.2
+  typescript: ^4.1.5
   web-audio-api: ^0.2.2

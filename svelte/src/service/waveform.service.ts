@@ -1,4 +1,4 @@
-export function getWaveformData(arrayBuffer: ArrayBuffer) {
+export function getWaveformIPCData(arrayBuffer: ArrayBuffer) {
 	return new Promise(async (resolve, reject) => {
 		let ctx = new window.AudioContext()
 		let audioBuffer = await ctx.decodeAudioData(arrayBuffer)

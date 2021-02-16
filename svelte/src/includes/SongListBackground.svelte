@@ -43,9 +43,9 @@
 		pointer-events: none;
 
 		/* background-image: url('/Users/fran/Library/Application Support/Jahmin/art/192/dn8dyp.webp'); */
-		background-size: cover;
-		/* background-repeat: no-repeat; */
-		/* background-size: 100% 100%; */
+		/* background-size: cover; */
+		background-repeat: no-repeat;
+		background-size: 100% 100%;
 		z-index: -1;
 
 		transition: background-image 300ms;
@@ -56,8 +56,8 @@
 		display: block;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0, 0, 0, 0.25);
-		backdrop-filter: blur(50px);
+		background-color: rgba(0, 0, 0, 0.33);
+		backdrop-filter: blur(200px);
 		/* z-index: 1; */
 	}
 

@@ -15,7 +15,12 @@ import { observeArray } from '../functions/observeArray.fn'
 import { getAlbumArtist } from '../functions/getAlbumArtist.fn'
 import { getTrackNumber } from '../functions/getTrackNumber.fs'
 
-const allowedExtenstions = ['flac', 'm4a', 'mp3']
+import { getAacTags } from '../formats/aac.format'
+import { getFlacTags } from '../formats/flac.format'
+import { getMp3Tags } from '../formats/mp3.format'
+
+// IMPORTANT: ADD AGAIN MP3
+const allowedExtenstions = ['flac', 'm4a']
 
 let watcher: chokidar.FSWatcher
 
@@ -27,7 +32,20 @@ export function getRootDirFolderWatcher() {
 let processQueue: { event: string; path: string }[] = []
 let isQueueRunning = false
 
+let totalChangesToProcess: number = 0
+let totalProcessedChanged: number = 0
+
+export function getTotalChangesToProcess() {
+	return totalChangesToProcess
+}
+
+export function getTotalProcessedChanged() {
+	return totalProcessedChanged
+}
+
 observeArray(processQueue, ['push'], () => {
+	totalChangesToProcess++
+
 	if (!isQueueRunning) {
 		isQueueRunning = true
 		applyFolderChanges()
@@ -49,11 +67,17 @@ async function applyFolderChanges() {
 		} else if (['delete'].includes(event)) {
 			await deleteData({ SourceFile: path })
 		}
-		applyFolderChanges()
+
+		totalProcessedChanged++
+
+		setImmediate(() => applyFolderChanges())
 	} else {
 		isQueueRunning = false
 	}
 }
+
+// Potential issue if a user adds a big folder to scan and then another folder.
+// Need to call to function but somehow cancel
 
 export function watchFolders(rootDirectories: string[]) {
 	let foundFiles: string[] = []
@@ -64,9 +88,9 @@ export function watchFolders(rootDirectories: string[]) {
 
 	watcher
 		.on('change', (path) => {
-			let ext = path.split('.').slice(-1)[0].toLowerCase()
+			let ext = path.split('.').pop()?.toLowerCase()
 
-			if (allowedExtenstions.includes(ext)) {
+			if (ext && allowedExtenstions.includes(ext)) {
 				processQueue.push({
 					event: 'update',
 					path
@@ -74,9 +98,9 @@ export function watchFolders(rootDirectories: string[]) {
 			}
 		})
 		.on('unlink', (path) => {
-			let ext = path.split('.').slice(-1)[0].toLowerCase()
+			let ext = path.split('.').pop()?.toLowerCase()
 
-			if (allowedExtenstions.includes(ext)) {
+			if (ext && allowedExtenstions.includes(ext)) {
 				processQueue.push({
 					event: 'delete',
 					path
@@ -84,19 +108,20 @@ export function watchFolders(rootDirectories: string[]) {
 			}
 		})
 		.on('add', (path) => {
-			let ext = path.split('.').slice(-1)[0].toLowerCase()
+			let ext = path.split('.').pop()?.toLowerCase()
 
-			if (allowedExtenstions.includes(ext)) {
+			if (ext && allowedExtenstions.includes(ext)) {
 				foundFiles.push(path)
 			}
 		})
 		.on('ready', () => {
-			loopFiles(foundFiles)
+			processFiles(foundFiles)
 
+			// Detects new added files after detecting every files.
 			watcher.on('add', (path) => {
-				let ext = path.split('.').slice(-1)[0].toLowerCase()
+				let ext = path.split('.').pop()?.toLowerCase()
 
-				if (allowedExtenstions.includes(ext)) {
+				if (ext && allowedExtenstions.includes(ext)) {
 					processQueue.push({
 						event: 'add',
 						path
@@ -106,23 +131,32 @@ export function watchFolders(rootDirectories: string[]) {
 		})
 }
 
-async function loopFiles(files: string[]) {
+async function processFiles(files: string[]) {
+	// Gets first element of array.
 	let file = files.shift()
 
+	// If no more files to process, then proceed to delete dead files.
 	if (file === undefined) {
-		removeDeadFiles()
+		console.log('Removing Dead Files')
+		// removeDeadFiles()
 		return
 	}
 
-	let fileToUpdate = await processedFilePath(file)
+	processQueue.push({
+		event: 'add',
+		path: file
+	})
 
-	if (fileToUpdate !== undefined) {
-		await createData(fileToUpdate)
-	}
+	// Gets song metadata if song doesn't exist or was modified.
+	// let fileToUpdate = await processedFilePath(file)
 
-	setTimeout(() => {
-		process.nextTick(() => loopFiles(files))
-	}, 1)
+	// if (fileToUpdate !== undefined) {
+	// 	await createData(fileToUpdate)
+	// }
+
+	// setTimeout(() => {
+		process.nextTick(() => processFiles(files))
+	// }, 1)
 }
 
 function processedFilePath(filePath: string): Promise<TagType | undefined> {
@@ -142,7 +176,17 @@ function processedFilePath(filePath: string): Promise<TagType | undefined> {
 		}
 
 		if (dbDoc === undefined || isFileModified === true) {
-			resolve(await getFileMetatag(filePath, id, extension, fileStats))
+			if (extension === 'm4a') {
+				resolve(await getAacTags(filePath))
+			}
+			if (extension === 'flac') {
+				resolve(await getFlacTags(filePath))
+			}
+			if (extension === 'mp3') {
+				// resolve(await getMp3Tags(filePath))
+				// resolve()
+			}
+			// resolve(await getFileMetatag(filePath, id, extension, fileStats))
 		} else {
 			resolve(undefined)
 		}

@@ -18,6 +18,6 @@ export type TagType = {
 	Duration?: number
 	SampleRate?: number
 	LastModified?: number
-	BitRate?: number
+	BitRate?: string
 	BitDepth?: number
 }

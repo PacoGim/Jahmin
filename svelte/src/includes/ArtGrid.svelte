@@ -3,7 +3,7 @@
 
 	import Album from '../components/Album.svelte'
 
-	import { getAlbums } from '../service/ipc.service'
+	import { getAlbumsIPC } from '../service/ipc.service'
 
 	import { albums, isValuesToFilterChanged, storeConfig } from '../store/index.store'
 
@@ -21,7 +21,7 @@
 	//TODO Change gradient
 	onMount(() => {
 		// Calls the IPC once to wait for the filtering to be done.
-		getAlbums().then(() => {
+		getAlbumsIPC().then(() => {
 			scrollToLastAlbumPlayed()
 			// calculateGridGap()
 		})

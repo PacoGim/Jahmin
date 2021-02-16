@@ -10,46 +10,48 @@ import deepmerge from 'deepmerge'
 
 import { appDataPath } from '../index'
 
-const adapter = new lfsa()
+const ADAPTER = new lfsa()
 
 let db: loki
 
 let dbVersion = 0
 
-const collectionName = 'music'
+const COLLECTION_NAME = 'music'
 
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve: any = undefined
 
-export function getNewPromiseDbVersion(value: number): Promise<number> {
-	if (dbVersion > value) {
+export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<number> {
+	// If the db version changed while going back and forth Main <-> Renderer
+	if (dbVersion > rendererDbVersion) {
 		return new Promise((resolve) => resolve(dbVersion))
 	} else {
+		// If didn't change, when for a change to happen.
 		return new Promise((resolve) => (dbVersionResolve = resolve))
 	}
 }
 
 export function loadDb(): Promise<void> {
 	return new Promise((resolve) => {
-		const dbPath = path.join(appDataPath, '/db')
+		const DB_PATH = path.join(appDataPath, '/db')
 
-		if (!fs.existsSync(dbPath)) {
-			fs.mkdirSync(dbPath, { recursive: true })
+		if (!fs.existsSync(DB_PATH)) {
+			fs.mkdirSync(DB_PATH, { recursive: true })
 			fs.writeFile(
-				path.join(dbPath, 'DO_NOT_EDIT_FILES.txt'),
+				path.join(DB_PATH, 'DO_NOT_EDIT_FILES.txt'),
 				'If you did then delete this folder content and re-scan folders.',
 				() => {}
 			)
 		}
 
-		db = new loki(path.join(dbPath, 'jahmin.db'), {
-			adapter,
+		db = new loki(path.join(DB_PATH, 'jahmin.db'), {
+			adapter: ADAPTER,
 			autoload: true,
 			autoloadCallback: () => {
 				databaseInitialize().then(() => resolve())
 			},
 			autosave: true,
-			autosaveInterval: 2000
+			autosaveInterval: 10000
 		})
 	})
 }
@@ -63,24 +65,24 @@ export function getDbVersion() {
 }
 
 export function getCollection() {
-	const collection = db.getCollection(collectionName).find()
-	return collection
+	const COLLECTION = db.getCollection(COLLECTION_NAME).find()
+	return COLLECTION
 }
 
 export function createData(newDoc: TagType) {
 	return new Promise((resolve, reject) => {
 		try {
 			// console.log('New Doc: ', newDoc)
-			const collection = db.getCollection(collectionName)
+			const COLLECTION = db.getCollection(COLLECTION_NAME)
 
-			if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+			if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
 
 			let oldDoc = readData({ SourceFile: newDoc['SourceFile'] })
 
 			if (oldDoc) {
 				resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc))
 			} else {
-				resolve(collection.insert(newDoc))
+				resolve(COLLECTION.insert(newDoc))
 				dbVersionResolve(++dbVersion)
 			}
 		} catch (error) {
@@ -92,11 +94,11 @@ export function createData(newDoc: TagType) {
 
 export function readDataById(id: any) {
 	try {
-		const collection = db.getCollection(collectionName)
+		const COLLECTION = db.getCollection(COLLECTION_NAME)
 
-		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+		if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
 
-		return collection.get(id)
+		return COLLECTION.get(id)
 	} catch (error) {
 		handleErrors(error)
 		return null
@@ -105,11 +107,11 @@ export function readDataById(id: any) {
 
 export function readData(query: any) {
 	try {
-		const collection: Collection<TagType> = db.getCollection(collectionName)
+		const COLLECTION: Collection<TagType> = db.getCollection(COLLECTION_NAME)
 
-		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+		if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
 
-		return collection.find(query)[0]
+		return COLLECTION.find(query)[0]
 	} catch (error) {
 		handleErrors(error)
 		return null
@@ -119,15 +121,15 @@ export function readData(query: any) {
 export function updateData(query: any, newData: object) {
 	return new Promise((resolve, reject) => {
 		try {
-			const collection = db.getCollection(collectionName)
+			const COLLECTION = db.getCollection(COLLECTION_NAME)
 
-			if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+			if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
 
-			let doc = collection.find(query)[0]
+			let doc = COLLECTION.find(query)[0]
 
 			doc = deepmerge(doc, newData)
 
-			resolve(collection.update(doc))
+			resolve(COLLECTION.update(doc))
 			dbVersionResolve(++dbVersion)
 		} catch (error) {
 			handleErrors(error)
@@ -140,13 +142,13 @@ export function deleteData(query: any) {
 	return new Promise((resolve, reject) => {
 		// console.log(query)
 
-		const collection = db.getCollection(collectionName)
+		const COLLECTION = db.getCollection(COLLECTION_NAME)
 
-		if (!collection) throw new Error(`Collection ${collectionName} not created/available.`)
+		if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
 
-		const doc = collection.find(query)[0]
+		const DOC = COLLECTION.find(query)[0]
 
-		resolve(collection.remove(doc))
+		resolve(COLLECTION.remove(DOC))
 		dbVersionResolve(++dbVersion)
 	})
 }
@@ -164,10 +166,10 @@ function databaseInitialize(): Promise<void> {
 	return new Promise((resolve) => {
 		if (!db) return
 
-		let collection = db.getCollection(collectionName)
+		let collection = db.getCollection(COLLECTION_NAME)
 
 		if (!collection) {
-			db.addCollection(collectionName, {
+			db.addCollection(COLLECTION_NAME, {
 				unique: ['SourceFile']
 			})
 		}

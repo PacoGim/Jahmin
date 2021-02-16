@@ -118,7 +118,7 @@
 		top: 0;
 		left: 0;
 		height: 16px;
-		background: linear-gradient(to right, var(--hi-color), var(--low-color));
+		background: linear-gradient(to right, var(--high-color), var(--low-color));
 		border-radius: 25px;
 		box-shadow: inset 0 0 0 2px #fff, inset 0 0 5px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.2);
 	}

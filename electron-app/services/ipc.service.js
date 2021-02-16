@@ -20,10 +20,10 @@ const albumArt_service_1 = require("./albumArt.service");
 const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
 const nanoid_1 = require("nanoid");
 const getWaveform_fn_1 = require("../functions/getWaveform.fn");
+const folderWatcher_service_1 = require("./folderWatcher.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-songs', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
-        console.log('IPC Get Songs');
         // let index = await createFilesIndex(collectionName)
         // scanFolders(collectionName,['/Volumes/Maxtor/Music'])
         // return index
@@ -31,7 +31,6 @@ function loadIPC() {
         return docs;
     }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
-        console.log('IPC Get Order');
         let config = config_service_1.getConfig();
         let grouping = config['order']['grouping'] || [];
         let filtering = config['order']['filtering'] || [];
@@ -75,8 +74,14 @@ function loadIPC() {
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
         return yield loki_service_1.getNewPromiseDbVersion(value);
     }));
-    electron_1.ipcMain.handle('get-waveform', (evt, path, color) => __awaiter(this, void 0, void 0, function* () {
-        return yield getWaveform_fn_1.getWaveform(path, color);
+    electron_1.ipcMain.handle('get-waveform', (evt, path) => __awaiter(this, void 0, void 0, function* () {
+        return yield getWaveform_fn_1.getWaveform(path);
+    }));
+    electron_1.ipcMain.handle('get-changes-progress', (evt) => __awaiter(this, void 0, void 0, function* () {
+        return {
+            total: folderWatcher_service_1.getTotalChangesToProcess(),
+            current: folderWatcher_service_1.getTotalProcessedChanged()
+        };
     }));
 }
 exports.loadIPC = loadIPC;

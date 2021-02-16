@@ -8,18 +8,42 @@
 	import Controller from './controller/Controller.svelte'
 	import BackgroundArt from './includes/BackgroundArt.svelte'
 	import SongListBackground from './includes/SongListBackground.svelte'
-	import { appTitle } from './store/index.store'
+	import { appTitle, selectedSongs } from './store/index.store'
 	import { onMount } from 'svelte'
-	import { getDatabaseVersion, syncDbVersion } from './service/ipc.service'
+	import { getChangesProgressIPC, syncDbVersionIPC } from './service/ipc.service'
 
 	onMount(() => {
+		syncDbVersionIPC()
+		getNewDbChangesProgress()
+
 		window.onkeydown = function (e) {
 			return !(e.code == 'Space' && e.target == document.body)
 		}
 
-		// getDatabaseVersion()
-		syncDbVersion()
+		window.onclick = (evt: MouseEvent) => {
+			let songListSvelteFound = false
+
+			evt['path'].forEach((element: HTMLElement) => {
+				if (element.tagName === 'SONG-LIST-SVLT') {
+					songListSvelteFound = true
+				}
+			})
+
+			if (songListSvelteFound === false) {
+				$selectedSongs = []
+				songListSvelteFound = false
+			}
+		}
 	})
+
+	function getNewDbChangesProgress() {
+		getChangesProgressIPC().then((result) => {
+			console.log((100 / result['total']) * result['current'], '% Total:', result['total'], ' Current:', result['current'])
+			setTimeout(() => {
+				getNewDbChangesProgress()
+			}, 2000)
+		})
+	}
 </script>
 
 <svelte:head>

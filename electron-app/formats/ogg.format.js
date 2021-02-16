@@ -15,7 +15,7 @@ function getOggTags(filePath) {
                     Extension: 'ogg'
                 };
                 let data = JSON.parse(stdout);
-                console.log(data);
+                // console.log(data)
                 let streamAudioData = data['streams'].find((stream) => stream['codec_type'] === 'video');
                 tags['SourceFile'] = filePath;
                 tags['SampleRate'] = Number(streamAudioData['sample_rate']);
@@ -25,7 +25,7 @@ function getOggTags(filePath) {
                 tags['Duration'] = Number(data['duration']);
                 tags['Size'] = Number(data['size']);
                 let dataTags = lowerCaseObjectKeys_fn_1.lowerCaseObjectKeys(streamAudioData['tags']);
-                console.log(dataTags);
+                // console.log(dataTags)
                 tags['Rating'] = Number(dataTags['rating']);
                 // tags['Rating'] = dataTags['rating']
                 tags['Title'] = dataTags['title'];
@@ -71,7 +71,7 @@ function writeOggTags(filePath) {
                 // console.log(stdout)
             }
             if (stderr) {
-                console.log(stderr);
+                // console.log(stderr)
                 resolve('');
             }
         });

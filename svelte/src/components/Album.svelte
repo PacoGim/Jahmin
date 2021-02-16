@@ -4,6 +4,7 @@
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
+import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn';
 
 	export let album: AlbumType
 	export let index
@@ -76,10 +77,10 @@
 	}
 
 	async function prepareAlbum(evt: MouseEvent) {
+		scrollSongListToTop()
+
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		$selectedAlbum = album
-
-		// console.log(document.querySelector(`#${CSS.escape(album['ID'])}`).querySelector('img').getAttribute('src'))
 
 		if (evt['type'] === 'dblclick') {
 			setNewPlayback(album['ID'], 0, true)

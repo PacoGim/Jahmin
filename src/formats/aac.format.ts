@@ -1,7 +1,9 @@
 import { ExifTool } from 'exiftool-vendored'
 const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import { DateTime } from 'luxon'
-
+import fs from 'fs'
+import stringHash from 'string-hash'
+import { TagType } from '../types/tag.type'
 
 function writeAacTags(filePath: string, newTags: any) {
 	exiftool.write(filePath, {
@@ -20,10 +22,13 @@ function writeAacTags(filePath: string, newTags: any) {
 	// let time = DateTime.fromISO('1999-01-01T01:01').toFormat('yyyy:mm:dd HH:MM:ss')
 }
 
-function getAacTags(filePath: string) {
+export function getAacTags(filePath: string): Promise<TagType> {
 	return new Promise((resolve, reject) => {
 		exiftool.read(filePath).then((tags) => {
+			// console.log(tags)
+			let fileStats = fs.statSync(filePath)
 			resolve({
+				ID: stringHash(filePath),
 				//@ts-expect-error
 				Album: tags['Album'],
 				//@ts-expect-error
@@ -32,28 +37,50 @@ function getAacTags(filePath: string) {
 				//@ts-expect-error
 				Composer: tags['Composer'],
 				//@ts-expect-error
-				Date: tags['ContentCreateDate']['rawValue'],
+				Date: tags['ContentCreateDate'],
 				//@ts-expect-error
 				Genre: tags['Genre'],
 				//@ts-expect-error
 				DiskNumber: tags['DiskNumber'],
 				Title: tags['Title'],
 				//@ts-expect-error
-				Track: tags['TrackNumber'],
+				Track: getTrack(tags['TrackNumber'], tags['Track']),
 				Rating: tags['RatingPercent'],
 				//@ts-expect-error
-				Year: DateTime.fromISO(tags['ContentCreateDate']['rawValue']).toFormat('YYYY'),
+				// Year: DateTime.fromISO(tags['ContentCreateDate']['rawValue']).toFormat('YYYY'),
+				Year: tags['ContentCreateDate'],
 				Comment: tags['Comment'],
 				SourceFile: tags['SourceFile'],
 				Extension: tags['FileTypeExtension'],
-				Size: tags['MediaDataSize'],
+				Size: fileStats.size,
 				Duration: tags['Duration'],
 				SampleRate: tags['AudioSampleRate'],
-				//@ts-expect-error
-				LastModified: tags['LastModified'],
+				LastModified: fileStats.mtimeMs,
 				BitRate: tags['AvgBitrate'],
 				BitDepth: tags['AudioBitsPerSample']
 			})
 		})
 	})
+}
+
+function getDate(){
+
+}
+
+function getTrack(...trackValues: [string | number]) {
+	let numberedTrackFound = trackValues.find((i) => typeof i === 'number')
+
+	if (numberedTrackFound) {
+		return numberedTrackFound
+	}
+
+	for (let value of trackValues) {
+		if (typeof value === 'string') {
+			let splitTrack = Number(value.split(' ')[0])
+
+			if (!isNaN(splitTrack)) {
+				return splitTrack
+			}
+		}
+	}
 }

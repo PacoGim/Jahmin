@@ -11,11 +11,12 @@
 
 	import { isDoneDrawing, songList, waveformUrl } from '../store/index.store'
 	import { playbackIndex, isPlaying, playback } from '../store/player.store'
-	import { getWaveformData } from '../service/waveform.service'
+	import { getWaveformIPCData } from '../service/waveform.service'
 	import { drawWaveform } from '../service/draw.service'
 
 	import { nextSong } from '../functions/nextSong.fn'
-	import { getWaveform } from '../service/ipc.service'
+	import { getWaveformIPC } from '../service/ipc.service'
+	import { escapeString } from '../functions/escapeString.fn'
 
 	let progress: number = 0
 
@@ -83,7 +84,7 @@
 		}
 
 		if (currentSong['$loki'] !== nextSongPreloaded?.['ID']) {
-			songBuffer = await fetchSong(escape(currentSong['SourceFile']))
+			songBuffer = await fetchSong(escapeString(currentSong['SourceFile']))
 		} else {
 			songBuffer = nextSongPreloaded['SongBuffer']
 		}
@@ -102,22 +103,6 @@
 			player.play()
 		}
 
-		// $isDoneDrawing = true
-		// $waveformUrl = ''
-		clearTimeout(drawWaveformDebounce)
-		drawWaveformDebounce = setTimeout(async () => {
-			$waveformUrl = await getWaveform(currentSong['SourceFile'])
-		}, 250)
-
-		// getWaveformData(songBuffer).then((waveformData) => {
-		// clearTimeout(drawWaveformDebounce)
-
-		// drawWaveformDebounce = setTimeout(() => {
-		// drawWaveform(waveformData)
-
-		// }, 250)
-		// })
-
 		preLoadNextSong()
 	}
 
@@ -125,7 +110,7 @@
 		const nextSong: SongType = $playback['SongList'][$playbackIndex['indexToPlay'] + 1]
 
 		if (nextSong) {
-			let songBuffer = await fetchSong(escape(nextSong['SourceFile']))
+			let songBuffer = await fetchSong(escapeString(nextSong['SourceFile']))
 			nextSongPreloaded = {
 				ID: nextSong['$loki'],
 				SongBuffer: songBuffer
@@ -177,7 +162,7 @@
 
 	<PlayerVolumeBar {player} />
 
-	<PlayerProgress {player} {currentSong} />
+	<PlayerProgress {player} song={currentSong} />
 </player-svlt>
 
 <style>
@@ -185,7 +170,7 @@
 		grid-area: player-svlt;
 		display: flex;
 		align-items: center;
-		background-color: var(--hi-color);
+		background-color: var(--high-color);
 
 		transition: background-color 300ms ease-in-out;
 	}

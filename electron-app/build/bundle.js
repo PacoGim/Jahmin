@@ -660,11 +660,17 @@ var app = (function () {
     let songList = writable(undefined);
     let isDoneDrawing = writable(false);
     let appTitle = writable('Jahmin');
+    /*
+        selectedSongs used in:
+            App.svelte
+            SongList.svelte
+            SongListItem.svelte
+    */
     let selectedSongs = writable([]);
     let waveformUrl = writable('');
 
     const { ipcRenderer } = require('electron');
-    function getOrder(index) {
+    function getOrderIPC(index) {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('get-order', index).then((result) => {
                 //TODO Gets called too many times
@@ -672,7 +678,7 @@ var app = (function () {
             });
         });
     }
-    function getConfig() {
+    function getConfigIPC() {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('get-config').then((result) => {
                 resolve(result);
@@ -687,14 +693,14 @@ var app = (function () {
         });
     }
     const sortBy = 'RootDir';
-    function getAlbums() {
+    function getAlbumsIPC() {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('get-albums').then((result) => {
                 result = result.sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])));
                 albums.set(result);
                 resolve();
                 // When the results arrive, recursive call to wait for the eventual new filtering.
-                getAlbums();
+                getAlbumsIPC();
             });
         });
     }
@@ -719,39 +725,53 @@ var app = (function () {
             });
         });
     }
-    function getWaveform(path) {
+    function getChangesProgressIPC() {
         return new Promise((resolve, reject) => {
-            ipcRenderer.invoke('get-waveform', path, window.getComputedStyle(document.body).getPropertyValue('--low-color')).then((result) => {
+            ipcRenderer.invoke('get-changes-progress').then((result) => {
                 resolve(result);
             });
         });
     }
-    function getDatabaseVersion() {
+    function getWaveformIPC(path) {
         return new Promise((resolve, reject) => {
-            ipcRenderer.invoke('get-database-version').then((result) => {
-                setTimeout(() => {
-                    getDatabaseVersion();
-                }, 10000);
-                let storeVersion;
-                dbVersion.subscribe((value) => {
-                    storeVersion = value;
-                })();
-                if (result !== 0 && result !== storeVersion) {
-                    dbVersion.set(result);
-                }
-                resolve(result);
-            });
+            try {
+                ipcRenderer.invoke('get-waveform', path).then((result) => {
+                    resolve(result);
+                });
+            }
+            catch (error) {
+                console.log('Oops', error);
+            }
         });
     }
-    function syncDbVersion() {
+    // export function getDatabaseVersionIPC() {
+    // 	return new Promise((resolve, reject) => {
+    // 		ipcRenderer.invoke('get-database-version').then((result) => {
+    // 			setTimeout(() => {
+    // 				getDatabaseVersionIPC()
+    // 			}, 10000)
+    // 			let storeVersion
+    // 			dbVersion.subscribe((value) => {
+    // 				storeVersion = value
+    // 			})()
+    // 			if (result !== 0 && result !== storeVersion) {
+    // 				console.log('New Version: ', result)
+    // 				dbVersion.set(result)
+    // 			}
+    // 			resolve(result)
+    // 		})
+    // 	})
+    // }
+    function syncDbVersionIPC() {
         return new Promise((resolve) => {
             let storeDbVersion = undefined;
             dbVersion.subscribe((value) => (storeDbVersion = value))();
             ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
                 dbVersion.set(result);
+                console.log('New Version: ', result);
                 resolve(result);
                 setTimeout(() => {
-                    syncDbVersion();
+                    syncDbVersionIPC();
                 }, 2000);
             });
         });
@@ -760,10 +780,11 @@ var app = (function () {
     async function getAlbumColors(id) {
         // let albumImagePath: string = document.querySelector(`#${CSS.escape(id)}`).querySelector('img').getAttribute('src')
         // if (albumImagePath) {
-        getAlbumColorsIPC(id).then((colors) => {
-            document.documentElement.style.setProperty('--low-color', `#${colors['lowColor']}`);
-            document.documentElement.style.setProperty('--mid-color', `#${colors['midColor']}`);
-            document.documentElement.style.setProperty('--hi-color', `#${colors['hiColor']}`);
+        getAlbumColorsIPC(id).then((color) => {
+            console.log(color);
+            document.documentElement.style.setProperty('--low-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`);
+            document.documentElement.style.setProperty('--base-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessBase}%)`);
+            document.documentElement.style.setProperty('--high-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessHigh}%)`);
         });
         // }
     }
@@ -797,10 +818,14 @@ var app = (function () {
         });
     }
 
+    function scrollSongListToTop() {
+        document.querySelector('song-list-svlt').scrollTop = 0;
+    }
+
     /* src/components/Album.svelte generated by Svelte v3.31.0 */
     const file$1 = "src/components/Album.svelte";
 
-    // (86:1) {#if coverType === undefined}
+    // (87:1) {#if coverType === undefined}
     function create_if_block_5(ctx) {
     	let img;
     	let img_src_value;
@@ -811,7 +836,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/audio.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "loader svelte-1s2f4v4");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$1, 86, 2, 3530);
+    			add_location(img, file$1, 87, 2, 3517);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -825,14 +850,14 @@ var app = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(86:1) {#if coverType === undefined}",
+    		source: "(87:1) {#if coverType === undefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (89:1) {#if coverType === 'not found'}
+    // (90:1) {#if coverType === 'not found'}
     function create_if_block_4(ctx) {
     	let img;
     	let img_src_value;
@@ -843,7 +868,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/compact-disc.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "notFound svelte-1s2f4v4");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$1, 88, 32, 3621);
+    			add_location(img, file$1, 89, 32, 3608);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -857,14 +882,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(89:1) {#if coverType === 'not found'}",
+    		source: "(90:1) {#if coverType === 'not found'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (90:1) {#if coverType === 'image'}
+    // (91:1) {#if coverType === 'image'}
     function create_if_block_3(ctx) {
     	let img;
     	let img_src_value;
@@ -876,7 +901,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = /*coverSrc*/ ctx[2])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", img_alt_value = /*album*/ ctx[0]["Name"]);
     			attr_dev(img, "class", "svelte-1s2f4v4");
-    			add_location(img, file$1, 89, 28, 3715);
+    			add_location(img, file$1, 90, 28, 3702);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -899,14 +924,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(90:1) {#if coverType === 'image'}",
+    		source: "(91:1) {#if coverType === 'image'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (91:1) {#if coverType === 'video'}
+    // (92:1) {#if coverType === 'video'}
     function create_if_block_2(ctx) {
     	let video;
     	let track;
@@ -919,13 +944,13 @@ var app = (function () {
     			track = element("track");
     			source = element("source");
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$1, 92, 3, 3819);
+    			add_location(track, file$1, 93, 3, 3806);
     			if (source.src !== (source_src_value = /*coverSrc*/ ctx[2])) attr_dev(source, "src", source_src_value);
-    			add_location(source, file$1, 93, 3, 3848);
+    			add_location(source, file$1, 94, 3, 3835);
     			video.autoplay = true;
     			video.loop = true;
     			attr_dev(video, "class", "svelte-1s2f4v4");
-    			add_location(video, file$1, 91, 2, 3794);
+    			add_location(video, file$1, 92, 2, 3781);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, video, anchor);
@@ -946,14 +971,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(91:1) {#if coverType === 'video'}",
+    		source: "(92:1) {#if coverType === 'video'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (108:2) {:else}
+    // (109:2) {:else}
     function create_else_block(ctx) {
     	let album_artist;
 
@@ -962,7 +987,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			album_artist.textContent = "Not Defined";
     			set_custom_element_data(album_artist, "class", "svelte-1s2f4v4");
-    			add_location(album_artist, file$1, 108, 3, 4263);
+    			add_location(album_artist, file$1, 109, 3, 4250);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -977,14 +1002,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(108:2) {:else}",
+    		source: "(109:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (106:54) 
+    // (107:54) 
     function create_if_block_1(ctx) {
     	let album_artist;
     	let t_value = /*album*/ ctx[0]["DynamicAlbumArtist"] + "";
@@ -995,7 +1020,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			t = text(t_value);
     			set_custom_element_data(album_artist, "class", "svelte-1s2f4v4");
-    			add_location(album_artist, file$1, 106, 3, 4191);
+    			add_location(album_artist, file$1, 107, 3, 4178);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -1013,14 +1038,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(106:54) ",
+    		source: "(107:54) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (104:2) {#if album['AlbumArtist'] !== undefined}
+    // (105:2) {#if album['AlbumArtist'] !== undefined}
     function create_if_block(ctx) {
     	let album_artist;
     	let t_value = /*album*/ ctx[0]["AlbumArtist"] + "";
@@ -1031,7 +1056,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			t = text(t_value);
     			set_custom_element_data(album_artist, "class", "svelte-1s2f4v4");
-    			add_location(album_artist, file$1, 104, 3, 4081);
+    			add_location(album_artist, file$1, 105, 3, 4068);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -1049,7 +1074,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(104:2) {#if album['AlbumArtist'] !== undefined}",
+    		source: "(105:2) {#if album['AlbumArtist'] !== undefined}",
     		ctx
     	});
 
@@ -1109,18 +1134,18 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/gradient-overlay.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-1s2f4v4");
-    			add_location(img, file$1, 98, 1, 3925);
+    			add_location(img, file$1, 99, 1, 3912);
     			set_custom_element_data(album_name, "class", "svelte-1s2f4v4");
-    			add_location(album_name, file$1, 101, 2, 3993);
+    			add_location(album_name, file$1, 102, 2, 3980);
     			set_custom_element_data(album_details, "class", "svelte-1s2f4v4");
-    			add_location(album_details, file$1, 100, 1, 3975);
+    			add_location(album_details, file$1, 101, 1, 3962);
 
     			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbum*/ ctx[3]?.["ID"] === /*album*/ ctx[0]?.["ID"]
     			? "selected"
     			: "") + " svelte-1s2f4v4"));
 
     			attr_dev(album_1, "id", album_1_id_value = /*album*/ ctx[0]["ID"]);
-    			add_location(album_1, file$1, 78, 0, 3290);
+    			add_location(album_1, file$1, 79, 0, 3277);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1365,10 +1390,10 @@ var app = (function () {
 
     	function prepareAlbum(evt) {
     		return __awaiter(this, void 0, void 0, function* () {
+    			scrollSongListToTop();
     			$$invalidate(0, album["Songs"] = album["Songs"].sort((a, b) => a["Track"] - b["Track"]), album);
     			set_store_value(selectedAlbum, $selectedAlbum = album, $selectedAlbum);
 
-    			// console.log(document.querySelector(`#${CSS.escape(album['ID'])}`).querySelector('img').getAttribute('src'))
     			if (evt["type"] === "dblclick") {
     				setNewPlayback(album["ID"], 0, true);
     			}
@@ -1397,6 +1422,7 @@ var app = (function () {
     		playback,
     		playbackIndex,
     		selectedAlbum,
+    		scrollSongListToTop,
     		album,
     		index,
     		coverType,
@@ -1569,7 +1595,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(art_grid_svlt, "class", "svelte-10w1ypy");
-    			add_location(art_grid_svlt, file$2, 54, 0, 2198);
+    			add_location(art_grid_svlt, file$2, 54, 0, 2204);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1653,7 +1679,7 @@ var app = (function () {
 
     	onMount(() => {
     		// Calls the IPC once to wait for the filtering to be done.
-    		getAlbums().then(() => {
+    		getAlbumsIPC().then(() => {
     			scrollToLastAlbumPlayed();
     		}); // calculateGridGap()
 
@@ -1696,7 +1722,7 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		onMount,
     		Album,
-    		getAlbums,
+    		getAlbumsIPC,
     		albums,
     		isValuesToFilterChanged,
     		storeConfig,
@@ -1819,14 +1845,14 @@ var app = (function () {
     			input.value = input.__value;
     			attr_dev(input, "class", "svelte-11oi134");
     			/*$$binding_groups*/ ctx[8][0].push(input);
-    			add_location(input, file$3, 63, 3, 2249);
+    			add_location(input, file$3, 63, 3, 2255);
     			attr_dev(label, "for", label_for_value = "all" + /*group*/ ctx[0]);
     			attr_dev(label, "class", "svelte-11oi134");
-    			add_location(label, file$3, 64, 3, 2327);
+    			add_location(label, file$3, 64, 3, 2333);
     			attr_dev(item, "title", item_title_value = "All " + /*group*/ ctx[0]);
-    			add_location(item, file$3, 62, 2, 2219);
+    			add_location(item, file$3, 62, 2, 2225);
     			attr_dev(order, "class", "svelte-11oi134");
-    			add_location(order, file$3, 61, 1, 2209);
+    			add_location(order, file$3, 61, 1, 2215);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, order, anchor);
@@ -1933,12 +1959,12 @@ var app = (function () {
     			input.value = input.__value;
     			attr_dev(input, "class", "svelte-11oi134");
     			/*$$binding_groups*/ ctx[8][0].push(input);
-    			add_location(input, file$3, 68, 4, 2490);
+    			add_location(input, file$3, 68, 4, 2496);
     			attr_dev(label, "for", label_for_value = /*item*/ ctx[17]["id"]);
     			attr_dev(label, "class", "svelte-11oi134");
-    			add_location(label, file$3, 69, 4, 2578);
+    			add_location(label, file$3, 69, 4, 2584);
     			attr_dev(item, "title", item_title_value = /*item*/ ctx[17]["value"]);
-    			add_location(item, file$3, 67, 3, 2457);
+    			add_location(item, file$3, 67, 3, 2463);
     			this.first = item;
     		},
     		m: function mount(target, anchor) {
@@ -2128,7 +2154,7 @@ var app = (function () {
 
     	function fetchSongs() {
     		return __awaiter(this, void 0, void 0, function* () {
-    			$$invalidate(2, orderedSongs = yield getOrder(index));
+    			$$invalidate(2, orderedSongs = yield getOrderIPC(index));
     		});
     	}
 
@@ -2159,7 +2185,7 @@ var app = (function () {
     		__awaiter,
     		onMount,
     		cutWord,
-    		getOrder,
+    		getOrderIPC,
     		dbVersion,
     		valuesToFilter,
     		valuesToGroup,
@@ -2878,15 +2904,15 @@ var app = (function () {
     			progress_foreground = element("progress-foreground");
     			t = space();
     			img = element("img");
-    			set_custom_element_data(progress_foreground, "class", "svelte-d7ihiu");
-    			add_location(progress_foreground, file$8, 43, 1, 1684);
+    			set_custom_element_data(progress_foreground, "class", "svelte-1e5epd0");
+    			add_location(progress_foreground, file$8, 79, 1, 3776);
     			attr_dev(img, "id", "progress-background");
-    			if (img.src !== (img_src_value = /*$waveformUrl*/ ctx[0])) attr_dev(img, "src", img_src_value);
+    			if (img.src !== (img_src_value = "")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			attr_dev(img, "class", "svelte-d7ihiu");
-    			add_location(img, file$8, 44, 1, 1709);
-    			set_custom_element_data(player_progress, "class", "svelte-d7ihiu");
-    			add_location(player_progress, file$8, 42, 0, 1665);
+    			attr_dev(img, "class", "svelte-1e5epd0");
+    			add_location(img, file$8, 80, 1, 3801);
+    			set_custom_element_data(player_progress, "class", "svelte-1e5epd0");
+    			add_location(player_progress, file$8, 78, 0, 3757);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2897,11 +2923,7 @@ var app = (function () {
     			append_dev(player_progress, t);
     			append_dev(player_progress, img);
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*$waveformUrl*/ 1 && img.src !== (img_src_value = /*$waveformUrl*/ ctx[0])) {
-    				attr_dev(img, "src", img_src_value);
-    			}
-    		},
+    		p: noop,
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
@@ -2921,20 +2943,94 @@ var app = (function () {
     }
 
     function instance$8($$self, $$props, $$invalidate) {
-    	let $waveformUrl;
-    	validate_store(waveformUrl, "waveformUrl");
-    	component_subscribe($$self, waveformUrl, $$value => $$invalidate(0, $waveformUrl = $$value));
+    	let $playbackIndex;
+    	let $playback;
+    	validate_store(playbackIndex, "playbackIndex");
+    	component_subscribe($$self, playbackIndex, $$value => $$invalidate(2, $playbackIndex = $$value));
+    	validate_store(playback, "playback");
+    	component_subscribe($$self, playback, $$value => $$invalidate(7, $playback = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerProgress", slots, []);
+
+    	var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    		function adopt(value) {
+    			return value instanceof P
+    			? value
+    			: new P(function (resolve) {
+    						resolve(value);
+    					});
+    		}
+
+    		return new (P || (P = Promise))(function (resolve, reject) {
+    				function fulfilled(value) {
+    					try {
+    						step(generator.next(value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function rejected(value) {
+    					try {
+    						step(generator["throw"](value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function step(result) {
+    					result.done
+    					? resolve(result.value)
+    					: adopt(result.value).then(fulfilled, rejected);
+    				}
+
+    				step((generator = generator.apply(thisArg, _arguments || [])).next());
+    			});
+    	};
+
     	
     	let { player } = $$props;
-    	let { currentSong } = $$props;
+    	let { song } = $$props;
     	let pauseDebounce = undefined;
     	let isMouseDown = false;
     	let isMouseIn = false;
+    	let progressBackgroundEl = undefined;
+
+    	function fetchWave() {
+    		return __awaiter(this, void 0, void 0, function* () {
+    			if (($playback === null || $playback === void 0
+    			? void 0
+    			: $playback.SongList.length) > 0) {
+    				// Keeps track of the song the getWaveformIPC fn was called for
+    				let tempSong = $playback["SongList"][$playbackIndex["indexToPlay"]];
+
+    				progressBackgroundEl.style.opacity = "0";
+
+    				getWaveformIPC(tempSong["SourceFile"]).then(waveformUrl => {
+    					setTimeout(
+    						() => {
+    							// Gets the actual song playing
+    							let currentSongPlaying = $playback["SongList"][$playbackIndex["indexToPlay"]];
+
+    							/*
+    If the temporary song and the actual playing song match, it shows the waveform
+    Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
+    */
+    							if (tempSong["$loki"] === currentSongPlaying["$loki"]) {
+    								progressBackgroundEl.src = waveformUrl;
+    								progressBackgroundEl.style.opacity = "1";
+    							}
+    						},
+    						250
+    					);
+    				});
+    			}
+    		});
+    	}
 
     	onMount(() => {
     		hookPlayerProgressEvents();
+    		progressBackgroundEl = document.querySelector("img#progress-background");
     	});
 
     	function hookPlayerProgressEvents() {
@@ -2961,7 +3057,7 @@ var app = (function () {
 
     			pauseDebounce = setTimeout(
     				() => {
-    					$$invalidate(1, player.currentTime = currentSong["Duration"] / (100 / selectedPercent), player);
+    					$$invalidate(0, player.currentTime = song["Duration"] / (100 / selectedPercent), player);
     					playerForeground.classList.remove("not-smooth");
     					player.play();
     				},
@@ -2970,48 +3066,64 @@ var app = (function () {
     		}
     	}
 
-    	const writable_props = ["player", "currentSong"];
+    	const writable_props = ["player", "song"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<PlayerProgress> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
-    		if ("player" in $$props) $$invalidate(1, player = $$props.player);
-    		if ("currentSong" in $$props) $$invalidate(2, currentSong = $$props.currentSong);
+    		if ("player" in $$props) $$invalidate(0, player = $$props.player);
+    		if ("song" in $$props) $$invalidate(1, song = $$props.song);
     	};
 
     	$$self.$capture_state = () => ({
+    		__awaiter,
     		onMount,
-    		waveformUrl,
+    		getWaveformIPC,
+    		playback,
+    		playbackIndex,
     		player,
-    		currentSong,
+    		song,
     		pauseDebounce,
     		isMouseDown,
     		isMouseIn,
+    		progressBackgroundEl,
+    		fetchWave,
     		hookPlayerProgressEvents,
-    		$waveformUrl
+    		$playbackIndex,
+    		$playback
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("player" in $$props) $$invalidate(1, player = $$props.player);
-    		if ("currentSong" in $$props) $$invalidate(2, currentSong = $$props.currentSong);
+    		if ("__awaiter" in $$props) __awaiter = $$props.__awaiter;
+    		if ("player" in $$props) $$invalidate(0, player = $$props.player);
+    		if ("song" in $$props) $$invalidate(1, song = $$props.song);
     		if ("pauseDebounce" in $$props) pauseDebounce = $$props.pauseDebounce;
     		if ("isMouseDown" in $$props) isMouseDown = $$props.isMouseDown;
     		if ("isMouseIn" in $$props) isMouseIn = $$props.isMouseIn;
+    		if ("progressBackgroundEl" in $$props) progressBackgroundEl = $$props.progressBackgroundEl;
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [$waveformUrl, player, currentSong];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$playbackIndex*/ 4) {
+    			 {
+    				fetchWave();
+    			}
+    		}
+    	};
+
+    	return [player, song, $playbackIndex];
     }
 
     class PlayerProgress extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { player: 1, currentSong: 2 });
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { player: 0, song: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -3023,12 +3135,12 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*player*/ ctx[1] === undefined && !("player" in props)) {
+    		if (/*player*/ ctx[0] === undefined && !("player" in props)) {
     			console.warn("<PlayerProgress> was created without expected prop 'player'");
     		}
 
-    		if (/*currentSong*/ ctx[2] === undefined && !("currentSong" in props)) {
-    			console.warn("<PlayerProgress> was created without expected prop 'currentSong'");
+    		if (/*song*/ ctx[1] === undefined && !("song" in props)) {
+    			console.warn("<PlayerProgress> was created without expected prop 'song'");
     		}
     	}
 
@@ -3040,11 +3152,11 @@ var app = (function () {
     		throw new Error("<PlayerProgress>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	get currentSong() {
+    	get song() {
     		throw new Error("<PlayerProgress>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set currentSong(value) {
+    	set song(value) {
     		throw new Error("<PlayerProgress>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -3078,13 +3190,13 @@ var app = (function () {
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "100");
     			attr_dev(input, "step", input_step_value = /*isShiftKeyDown*/ ctx[1] ? "5" : "1");
-    			attr_dev(input, "class", "svelte-9enhtm");
+    			attr_dev(input, "class", "svelte-5qs2j5");
     			add_location(input, file$9, 41, 1, 1238);
-    			attr_dev(background, "class", "svelte-9enhtm");
+    			attr_dev(background, "class", "svelte-5qs2j5");
     			add_location(background, file$9, 52, 1, 1472);
-    			set_custom_element_data(volume_thumb, "class", "svelte-9enhtm");
+    			set_custom_element_data(volume_thumb, "class", "svelte-5qs2j5");
     			add_location(volume_thumb, file$9, 53, 1, 1488);
-    			set_custom_element_data(volume_bar, "class", "svelte-9enhtm");
+    			set_custom_element_data(volume_bar, "class", "svelte-5qs2j5");
     			add_location(volume_bar, file$9, 40, 0, 1224);
     		},
     		l: function claim(nodes) {
@@ -3286,7 +3398,7 @@ var app = (function () {
     	}
     }
 
-    function getWaveformData(arrayBuffer) {
+    function getWaveformIPCData(arrayBuffer) {
         return new Promise(async (resolve, reject) => {
             let ctx = new window.AudioContext();
             let audioBuffer = await ctx.decodeAudioData(arrayBuffer);
@@ -3360,6 +3472,11 @@ var app = (function () {
         });
     }
 
+    function escapeString(data) {
+        data = data.replace('#', escape('#'));
+        return data;
+    }
+
     /* src/includes/Player.svelte generated by Svelte v3.31.0 */
     const file$a = "src/includes/Player.svelte";
 
@@ -3403,7 +3520,7 @@ var app = (function () {
     	playerprogress = new PlayerProgress({
     			props: {
     				player: /*player*/ ctx[1],
-    				currentSong: /*currentSong*/ ctx[0]
+    				song: /*currentSong*/ ctx[0]
     			},
     			$$inline: true
     		});
@@ -3425,14 +3542,14 @@ var app = (function () {
     			t4 = space();
     			create_component(playerprogress.$$.fragment);
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$a, 141, 2, 5451);
+    			add_location(track, file$a, 130, 2, 5004);
     			audio.controls = audio_controls_value = true;
-    			attr_dev(audio, "class", "svelte-13bim8k");
-    			add_location(audio, file$a, 140, 1, 5333);
-    			set_custom_element_data(player_buttons, "class", "svelte-13bim8k");
-    			add_location(player_buttons, file$a, 144, 1, 5489);
-    			set_custom_element_data(player_svlt, "class", "svelte-13bim8k");
-    			add_location(player_svlt, file$a, 139, 0, 5318);
+    			attr_dev(audio, "class", "svelte-g8dn23");
+    			add_location(audio, file$a, 129, 1, 4886);
+    			set_custom_element_data(player_buttons, "class", "svelte-g8dn23");
+    			add_location(player_buttons, file$a, 133, 1, 5042);
+    			set_custom_element_data(player_svlt, "class", "svelte-g8dn23");
+    			add_location(player_svlt, file$a, 128, 0, 4871);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3476,7 +3593,7 @@ var app = (function () {
     			playervolumebar.$set(playervolumebar_changes);
     			const playerprogress_changes = {};
     			if (dirty & /*player*/ 2) playerprogress_changes.player = /*player*/ ctx[1];
-    			if (dirty & /*currentSong*/ 1) playerprogress_changes.currentSong = /*currentSong*/ ctx[0];
+    			if (dirty & /*currentSong*/ 1) playerprogress_changes.song = /*currentSong*/ ctx[0];
     			playerprogress.$set(playerprogress_changes);
     		},
     		i: function intro(local) {
@@ -3548,17 +3665,14 @@ var app = (function () {
     	let $isDoneDrawing;
     	let $isPlaying;
     	let $playback;
-    	let $waveformUrl;
     	validate_store(playbackIndex, "playbackIndex");
     	component_subscribe($$self, playbackIndex, $$value => $$invalidate(4, $playbackIndex = $$value));
     	validate_store(isDoneDrawing, "isDoneDrawing");
     	component_subscribe($$self, isDoneDrawing, $$value => $$invalidate(5, $isDoneDrawing = $$value));
     	validate_store(isPlaying, "isPlaying");
-    	component_subscribe($$self, isPlaying, $$value => $$invalidate(13, $isPlaying = $$value));
+    	component_subscribe($$self, isPlaying, $$value => $$invalidate(12, $isPlaying = $$value));
     	validate_store(playback, "playback");
-    	component_subscribe($$self, playback, $$value => $$invalidate(14, $playback = $$value));
-    	validate_store(waveformUrl, "waveformUrl");
-    	component_subscribe($$self, waveformUrl, $$value => $$invalidate(15, $waveformUrl = $$value));
+    	component_subscribe($$self, playback, $$value => $$invalidate(13, $playback = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Player", slots, []);
 
@@ -3637,7 +3751,7 @@ var app = (function () {
     			if (currentSong["$loki"] !== (nextSongPreloaded === null || nextSongPreloaded === void 0
     			? void 0
     			: nextSongPreloaded["ID"])) {
-    				songBuffer = yield fetchSong(escape(currentSong["SourceFile"]));
+    				songBuffer = yield fetchSong(escapeString(currentSong["SourceFile"]));
     			} else {
     				songBuffer = nextSongPreloaded["SongBuffer"];
     			}
@@ -3654,23 +3768,6 @@ var app = (function () {
     				player.play();
     			}
 
-    			// $isDoneDrawing = true
-    			// $waveformUrl = ''
-    			clearTimeout(drawWaveformDebounce);
-
-    			drawWaveformDebounce = setTimeout(
-    				() => __awaiter(this, void 0, void 0, function* () {
-    					set_store_value(waveformUrl, $waveformUrl = yield getWaveform(currentSong["SourceFile"]), $waveformUrl);
-    				}),
-    				250
-    			);
-
-    			// getWaveformData(songBuffer).then((waveformData) => {
-    			// clearTimeout(drawWaveformDebounce)
-    			// drawWaveformDebounce = setTimeout(() => {
-    			// drawWaveform(waveformData)
-    			// }, 250)
-    			// })
     			preLoadNextSong();
     		});
     	}
@@ -3680,7 +3777,7 @@ var app = (function () {
     			const nextSong = $playback["SongList"][$playbackIndex["indexToPlay"] + 1];
 
     			if (nextSong) {
-    				let songBuffer = yield fetchSong(escape(nextSong["SourceFile"]));
+    				let songBuffer = yield fetchSong(escapeString(nextSong["SourceFile"]));
 
     				nextSongPreloaded = {
     					ID: nextSong["$loki"],
@@ -3736,10 +3833,11 @@ var app = (function () {
     		playbackIndex,
     		isPlaying,
     		playback,
-    		getWaveformData,
+    		getWaveformIPCData,
     		drawWaveform,
     		nextSong,
-    		getWaveform,
+    		getWaveformIPC,
+    		escapeString,
     		progress,
     		currentSong,
     		nextSongPreloaded,
@@ -3756,8 +3854,7 @@ var app = (function () {
     		$playbackIndex,
     		$isDoneDrawing,
     		$isPlaying,
-    		$playback,
-    		$waveformUrl
+    		$playback
     	});
 
     	$$self.$inject_state = $$props => {
@@ -4651,7 +4748,7 @@ var app = (function () {
     		var _a;
 
     		return __awaiter(this, void 0, void 0, function* () {
-    			let config = yield getConfig();
+    			let config = yield getConfigIPC();
     			set_store_value(storeConfig, $storeConfig = Object.assign({}, config), $storeConfig);
 
     			if ((_a = config === null || config === void 0
@@ -4673,7 +4770,7 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		__awaiter,
     		onMount,
-    		getConfig,
+    		getConfigIPC,
     		saveConfig,
     		valuesToFilter,
     		isValuesToFilterChanged,
@@ -4812,7 +4909,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
-    			set_custom_element_data(song_list_background_svlt, "class", "svelte-4li4jn");
+    			set_custom_element_data(song_list_background_svlt, "class", "svelte-qn5cfb");
     			add_location(song_list_background_svlt, file$f, 26, 0, 1110);
     		},
     		l: function claim(nodes) {
@@ -4914,7 +5011,7 @@ var app = (function () {
 
     /* src/App.svelte generated by Svelte v3.31.0 */
 
-    const { document: document_1 } = globals;
+    const { console: console_1, document: document_1 } = globals;
     const file$g = "src/App.svelte";
 
     function create_fragment$h(ctx) {
@@ -4972,7 +5069,7 @@ var app = (function () {
     			t8 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-1i37lnr");
-    			add_location(main, file$g, 27, 0, 931);
+    			add_location(main, file$g, 47, 0, 1641);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5057,25 +5154,56 @@ var app = (function () {
     }
 
     function instance$h($$self, $$props, $$invalidate) {
+    	let $selectedSongs;
     	let $appTitle;
+    	validate_store(selectedSongs, "selectedSongs");
+    	component_subscribe($$self, selectedSongs, $$value => $$invalidate(1, $selectedSongs = $$value));
     	validate_store(appTitle, "appTitle");
     	component_subscribe($$self, appTitle, $$value => $$invalidate(0, $appTitle = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("App", slots, []);
 
     	onMount(() => {
+    		syncDbVersionIPC();
+    		getNewDbChangesProgress();
+
     		window.onkeydown = function (e) {
     			return !(e.code == "Space" && e.target == document.body);
     		};
 
-    		// getDatabaseVersion()
-    		syncDbVersion();
+    		window.onclick = evt => {
+    			let songListSvelteFound = false;
+
+    			evt["path"].forEach(element => {
+    				if (element.tagName === "SONG-LIST-SVLT") {
+    					songListSvelteFound = true;
+    				}
+    			});
+
+    			if (songListSvelteFound === false) {
+    				set_store_value(selectedSongs, $selectedSongs = [], $selectedSongs);
+    				songListSvelteFound = false;
+    			}
+    		};
     	});
+
+    	function getNewDbChangesProgress() {
+    		getChangesProgressIPC().then(result => {
+    			console.log(100 / result["total"] * result["current"], "% Total:", result["total"], " Current:", result["current"]);
+
+    			setTimeout(
+    				() => {
+    					getNewDbChangesProgress();
+    				},
+    				2000
+    			);
+    		});
+    	}
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -5089,9 +5217,12 @@ var app = (function () {
     		BackgroundArt,
     		SongListBackground,
     		appTitle,
+    		selectedSongs,
     		onMount,
-    		getDatabaseVersion,
-    		syncDbVersion,
+    		getChangesProgressIPC,
+    		syncDbVersionIPC,
+    		getNewDbChangesProgress,
+    		$selectedSongs,
     		$appTitle
     	});
 

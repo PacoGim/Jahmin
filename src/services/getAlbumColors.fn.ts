@@ -3,10 +3,14 @@ import path from 'path'
 
 import { appDataPath } from '..'
 import { getConfig } from './config.service'
+import { ColorType, ColorTypeShell } from '../types/color.type'
+
+//@ts-expect-error
+import hexToHsl from 'hex-to-hsl'
 
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-export function getAlbumColors(imageId: string) {
+export function getAlbumColors(imageId: string): Promise<ColorType> {
 	return new Promise((resolve, reject) => {
 		let config = getConfig()
 		let imagePath = path.join(appDataPath, '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
@@ -19,33 +23,31 @@ export function getAlbumColors(imageId: string) {
 					return
 				}
 
-				let difference = 2
-				let midColor = buffer.toString('hex').substr(0, 6)
+				let hexColor = buffer.toString('hex')
 
-				let hiColor = ''
-				let lowColor = ''
+				let hslColorObject: ColorType = ColorTypeShell()
 
-				for (let value of midColor) {
-					let index = values.indexOf(value)
+				const difference = 15
 
-					if (index + difference >= values.length) {
-						hiColor += values[index + difference - values.length]
-					} else {
-						hiColor += values[index + difference]
-					}
+				let hslColor = hexToHsl(hexColor)
+
+				hslColorObject.hue = hslColor[0]
+				hslColorObject.saturation = hslColor[1]
+				hslColorObject.lightnessBase = hslColor[2]
+
+				if (hslColorObject.lightnessBase + difference > 100) {
+					hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference - 100
+				} else {
+					hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference
 				}
 
-				for (let value of midColor) {
-					let index = values.indexOf(value)
-
-					if (index - difference < 0) {
-						lowColor += values[values.length - difference + index]
-					} else {
-						lowColor += values[index - difference]
-					}
+				if (hslColorObject.lightnessBase - difference < 0) {
+					hslColorObject.lightnessLow = 100 + hslColorObject.lightnessBase - difference
+				} else {
+					hslColorObject.lightnessLow = hslColorObject.lightnessBase - difference
 				}
 
-				resolve({ hiColor, midColor, lowColor })
+				resolve(hslColorObject)
 			})
 	})
 }
