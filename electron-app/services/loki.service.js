@@ -5,13 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.loadDb = exports.getNewPromiseDbVersion = void 0;
 const lokijs_1 = __importDefault(require("lokijs"));
-//@ts-expect-error
-const loki_fs_structured_adapter_1 = __importDefault(require("lokijs/src/loki-fs-structured-adapter"));
+const lokijs_2 = require("lokijs");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const deepmerge_1 = __importDefault(require("deepmerge"));
 const index_1 = require("../index");
-const ADAPTER = new loki_fs_structured_adapter_1.default();
+const ADAPTER = new lokijs_2.LokiPartitioningAdapter(new lokijs_2.LokiFsAdapter(), { paging: true, pageSize: 1 * 1024 * 1024 });
 let db;
 let dbVersion = 0;
 const COLLECTION_NAME = 'music';
@@ -42,7 +41,7 @@ function loadDb() {
                 databaseInitialize().then(() => resolve());
             },
             autosave: true,
-            autosaveInterval: 10000
+            autosaveInterval: 1000
         });
     });
 }

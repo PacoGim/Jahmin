@@ -104,7 +104,7 @@
 		width: 32px;
 		background-color: #fff;
 		border-radius: 25px;
-		mix-blend-mode: luminosity;
+		mix-blend-mode: hard-light;
 
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 		color: #767676;

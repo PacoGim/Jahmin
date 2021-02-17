@@ -32,13 +32,15 @@ function getAlbumColors(imageId) {
             hslColorObject.saturation = hslColor[1];
             hslColorObject.lightnessBase = hslColor[2];
             if (hslColorObject.lightnessBase + difference > 100) {
-                hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference - 100;
+                // hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference - 100
+                hslColorObject.lightnessHigh = 100 - difference * 3;
             }
             else {
                 hslColorObject.lightnessHigh = hslColorObject.lightnessBase + difference;
             }
             if (hslColorObject.lightnessBase - difference < 0) {
-                hslColorObject.lightnessLow = 100 + hslColorObject.lightnessBase - difference;
+                // hslColorObject.lightnessLow = 100 + hslColorObject.lightnessBase - difference
+                hslColorObject.lightnessLow = 0 + difference * 3;
             }
             else {
                 hslColorObject.lightnessLow = hslColorObject.lightnessBase - difference;

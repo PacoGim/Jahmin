@@ -2,15 +2,14 @@ import loki from 'lokijs'
 
 import { TagType } from '../types/tag.type'
 
-//@ts-expect-error
-import lfsa from 'lokijs/src/loki-fs-structured-adapter'
+import { LokiFsAdapter, LokiPartitioningAdapter } from 'lokijs'
 import path from 'path'
 import fs from 'fs'
 import deepmerge from 'deepmerge'
 
 import { appDataPath } from '../index'
 
-const ADAPTER = new lfsa()
+const ADAPTER = new LokiPartitioningAdapter(new LokiFsAdapter(), { paging: true, pageSize: 1 * 1024 * 1024 })
 
 let db: loki
 
@@ -51,7 +50,7 @@ export function loadDb(): Promise<void> {
 				databaseInitialize().then(() => resolve())
 			},
 			autosave: true,
-			autosaveInterval: 10000
+			autosaveInterval: 1000
 		})
 	})
 }

@@ -41,7 +41,7 @@
 			console.log((100 / result['total']) * result['current'], '% Total:', result['total'], ' Current:', result['current'])
 			setTimeout(() => {
 				getNewDbChangesProgress()
-			}, 2000)
+			}, 10000)
 		})
 	}
 </script>

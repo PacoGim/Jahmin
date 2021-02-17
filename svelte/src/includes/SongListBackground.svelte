@@ -57,7 +57,7 @@
 		width: 100%;
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.33);
-		backdrop-filter: blur(200px);
+		backdrop-filter: blur(100px);
 		/* z-index: 1; */
 	}
 

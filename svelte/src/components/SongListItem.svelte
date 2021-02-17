@@ -31,7 +31,7 @@
 	{$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID']
 		? 'playing'
 		: ''}
-	{$selectedSongs.includes(index) && $selectedAlbum['ID'] === $playback?.['AlbumID'] ? 'selected' : ''}"
+	{$selectedSongs.includes(index) ? 'selected' : ''}"
 >
 	<song-number>{song['Track']}</song-number>
 	<song-title>{song['Title']}</song-title>
@@ -53,7 +53,7 @@
 
 		border-radius: 5px;
 
-		transition-property: font-variation-settings, box-shadow ,background-color;
+		transition-property: font-variation-settings, box-shadow, background-color;
 		transition-duration: 250ms;
 		transition-timing-function: ease-in-out;
 	}

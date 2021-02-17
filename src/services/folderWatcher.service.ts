@@ -138,7 +138,7 @@ async function processFiles(files: string[]) {
 	// If no more files to process, then proceed to delete dead files.
 	if (file === undefined) {
 		console.log('Removing Dead Files')
-		// removeDeadFiles()
+		removeDeadFiles()
 		return
 	}
 
