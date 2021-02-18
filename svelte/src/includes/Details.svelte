@@ -7,6 +7,8 @@
 		checkSongs()
 	}
 
+	let previousSongList = undefined
+
 	function checkSongs() {
 		if (!$selectedAlbum?.Songs) return
 
@@ -19,6 +21,14 @@
 		if (songs.length === 0) {
 			songs = $selectedAlbum.Songs
 		}
+
+		if (JSON.stringify(previousSongList) === JSON.stringify(songs)) {
+			return
+		} else {
+			previousSongList = [...songs]
+		}
+
+		console.log(songs)
 	}
 </script>
 

@@ -4,7 +4,8 @@
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
-import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn';
+	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
+	import { selectedSongs } from '../store/index.store'
 
 	export let album: AlbumType
 	export let index
@@ -41,7 +42,7 @@ import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn';
 					let $song = document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`)
 
 					if ($song) {
-						$song.scrollIntoView({block:'center'})
+						$song.scrollIntoView({ block: 'center' })
 					}
 
 					setNewPlayback(
@@ -76,9 +77,11 @@ import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn';
 		).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['ID'])}`))
 	}
 
+	// On Album Click/Double Click
 	async function prepareAlbum(evt: MouseEvent) {
 		scrollSongListToTop()
 
+		// Song Sorting
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		$selectedAlbum = album
 
@@ -92,8 +95,8 @@ import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn';
 	class={$selectedAlbum?.['ID'] === album?.['ID'] ? 'selected' : ''}
 	id={album['ID']}
 	on:dblclick={(evt) => prepareAlbum(evt)}
-	on:click={(evt) => prepareAlbum(evt)}>
-
+	on:click={(evt) => prepareAlbum(evt)}
+>
 	<!-- ▼▼▼ Cover Handle ▼▼▼ -->
 	{#if coverType === undefined}
 		<img src="./img/audio.svg" class="loader" alt="" />

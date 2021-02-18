@@ -94,15 +94,14 @@
 
 		player.src = url
 
-		localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
-		localStorage.setItem('LastPlayedSongID', String(currentSong['$loki']))
-
 		if ($playbackIndex['playNow'] === false) {
 			player.pause()
 		} else {
-			player.play()
+			player.play().catch(() => {})
 		}
 
+		localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
+		localStorage.setItem('LastPlayedSongID', String(currentSong['$loki']))
 		preLoadNextSong()
 	}
 

@@ -45,7 +45,7 @@ body {
 
 *::-webkit-scrollbar-thumb {
 	background-color: #fff; /* color of the scroll thumb */
-	/* border-radius: 200px; roundness of the scroll thumb */
+	border-radius: 200px;
 	/* border: 4px solid #fff; creates padding around scroll thumb */
 }
 

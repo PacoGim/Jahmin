@@ -56,6 +56,7 @@
 		grid-area: song-list-svlt;
 		overflow-y: auto;
 		height: 100%;
+		padding-right: 10px;
 		/* background-color: rgba(255,255,255,.20); */
 	}
 </style>

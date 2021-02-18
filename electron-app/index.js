@@ -31,8 +31,7 @@ function createWindow() {
         const window = new electron_1.BrowserWindow(loadOptions(config));
         window.webContents.openDevTools();
         window.loadFile('index.html');
-        if (config === null || config === void 0 ? void 0 : config['rootDirectories'])
-            folderWatcher_service_1.watchFolders(config['rootDirectories']);
+        // if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
         window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window));
     });
 }
