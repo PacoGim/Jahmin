@@ -20,20 +20,20 @@
 			return !(e.code == 'Space' && e.target == document.body)
 		}
 
-		window.onclick = (evt: MouseEvent) => {
-			let songListSvelteFound = false
+		// window.onclick = (evt: MouseEvent) => {
+		// 	let songListSvelteFound = false
 
-			evt['path'].forEach((element: HTMLElement) => {
-				if (element.tagName === 'SONG-LIST-SVLT') {
-					songListSvelteFound = true
-				}
-			})
+		// 	evt['path'].forEach((element: HTMLElement) => {
+		// 		if (element.tagName === 'SONG-LIST-SVLT') {
+		// 			songListSvelteFound = true
+		// 		}
+		// 	})
 
-			if (songListSvelteFound === false) {
-				$selectedSongs = []
-				songListSvelteFound = false
-			}
-		}
+		// 	if (songListSvelteFound === false) {
+		// 		$selectedSongs = []
+		// 		songListSvelteFound = false
+		// 	}
+		// }
 	})
 
 	function getNewDbChangesProgress() {

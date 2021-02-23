@@ -1,6 +1,11 @@
 @font-face {
-	font-family: SourceSans;
-	src: url('./fonts/SourceSans3VF-Roman.otf.woff2');
+	font-family: Jakarta;
+	src: url('./fonts/PlusJakartaSans[wght].ttf');
+}
+
+@font-face {
+	font-family: Golos;
+	src: url('./fonts/Golos UI_VF.woff2');
 }
 
 * {
@@ -29,9 +34,8 @@ body {
 	color: #fff;
 	height: 100%;
 	display: block;
-	font-family: SourceSans;
-	letter-spacing: -0.25px;
-	font-variation-settings: 'wght' 500;
+	font-family: Golos;
+	font-variation-settings: 'wght' 400;
 }
 
 *::-webkit-scrollbar {

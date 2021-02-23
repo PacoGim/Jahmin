@@ -11,29 +11,32 @@
 
 		e['path'].forEach((element: HTMLElement) => {
 			if (element.tagName === 'SONG-LIST-ITEM') {
-				let index = Number(element.getAttribute('index'))
+				let id = Number(element.getAttribute('id'))
+				let currentSelectedSong = Number(element.getAttribute('index'))
 
 				if (ctrlKey === false && metaKey === false && shiftKey === false) {
-					$selectedSongs = [index]
+					$selectedSongs = [id]
 				}
 
-				if (ctrlKey === true || metaKey === true) {
-					let foundSong = $selectedSongs.find((i) => i === index)
-
-					if (!foundSong) {
-						$selectedSongs.push(index)
+				if (shiftKey === false && (ctrlKey === true || metaKey === true)) {
+					if (!$selectedSongs.includes(id)) {
+						$selectedSongs.push(id)
 					} else {
-						$selectedSongs.splice($selectedSongs.indexOf(index), 1)
+						$selectedSongs.splice($selectedSongs.indexOf(id), 1)
 					}
 				}
 
 				if (shiftKey === true && ctrlKey === false && metaKey === false) {
-					for (let i = index; i !== lastSelectedSong; index < lastSelectedSong ? i++ : i--) {
-						$selectedSongs.push(i)
+					for (let i = currentSelectedSong; i !== lastSelectedSong; currentSelectedSong < lastSelectedSong ? i++ : i--) {
+						let currentID = $selectedAlbum['Songs'][i]['ID']
+
+						if (!$selectedSongs.find((i) => i === currentID)) {
+							$selectedSongs.push(currentID)
+						}
 					}
 				}
 
-				lastSelectedSong = index
+				lastSelectedSong = currentSelectedSong
 				$selectedSongs = $selectedSongs
 			}
 		})

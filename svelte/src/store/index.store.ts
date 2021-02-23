@@ -1,5 +1,6 @@
 import { Writable, writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
+import type { ConfigType } from '../types/config.type'
 import type { SongType } from '../types/song.type'
 
 type FilterType = {
@@ -20,7 +21,7 @@ export let valuesToGroup: Writable<string[]> = writable([])
 // Value choosen by the user to filter out the specified tag from the song index.
 export let valuesToFilter: Writable<string[]> = writable([])
 export let isValuesToFilterChanged: Writable<boolean> = writable(false)
-export let storeConfig: Writable<any> = writable(undefined)
+export let storeConfig: Writable<ConfigType> = writable(undefined)
 
 export let songList: Writable<SongType[]> = writable(undefined)
 

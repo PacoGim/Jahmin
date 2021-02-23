@@ -1,13 +1,24 @@
 <script>
 	import Order from '../components/Order.svelte'
-	import { valuesToGroup } from '../store/index.store'
+	import { storeConfig, valuesToGroup } from '../store/index.store'
+
+	let doRenderOrder = false
+
+	$: {
+		let groupOnlyByFolder = $storeConfig?.userOptions?.groupOnlyByFolder
+		if (groupOnlyByFolder !== undefined) {
+			doRenderOrder = !groupOnlyByFolder
+		}
+	}
 </script>
 
-<grouping-svlt>
-	{#each $valuesToGroup as group, index (index)}
-		<Order {index} {group} />
-	{/each}
-</grouping-svlt>
+{#if doRenderOrder}
+	<grouping-svlt>
+		{#each $valuesToGroup as group, index (index)}
+			<Order {index} {group} />
+		{/each}
+	</grouping-svlt>
+{/if}
 
 <style>
 	grouping-svlt {

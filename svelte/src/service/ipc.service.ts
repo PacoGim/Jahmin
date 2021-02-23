@@ -29,6 +29,10 @@ export function saveConfig(newConfig: object) {
 
 const sortBy = 'RootDir'
 
+/*
+	Show Songs ONLY by folders (For tagging by folder purpose) after selecting options, reload app.
+*/
+
 export function getAlbumsIPC(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-albums').then((result) => {
@@ -41,6 +45,20 @@ export function getAlbumsIPC(): Promise<void> {
 		})
 	})
 }
+
+export function getAllAlbumsIPC(): Promise<void> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-all-albums').then((result) => {
+			result = result.sort((a, b) => String(a['FolderName']).localeCompare(String(b['FolderName'])))
+			console.log(result)
+
+			albums.set(result)
+			resolve()
+		})
+	})
+}
+
+
 
 export function getCoverIPC(rootDir) {
 	return new Promise((resolve, reject) => {

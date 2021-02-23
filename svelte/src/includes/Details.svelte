@@ -3,8 +3,9 @@
 	import { selectedAlbum } from '../store/player.store'
 
 	$: {
-		$selectedSongs
-		checkSongs()
+		console.log($selectedSongs)
+		// $selectedSongs
+		// checkSongs()
 	}
 
 	let previousSongList = undefined

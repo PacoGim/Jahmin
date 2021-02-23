@@ -101,7 +101,7 @@
 		}
 
 		localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
-		localStorage.setItem('LastPlayedSongID', String(currentSong['$loki']))
+		localStorage.setItem('LastPlayedSongID', String(currentSong['ID']))
 		preLoadNextSong()
 	}
 

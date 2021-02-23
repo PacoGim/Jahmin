@@ -32,10 +32,10 @@
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		$selectedAlbum = album
 
-		let lastPlayedSong = album['Songs'].find((i) => i['$loki'] === Number(localStorage.getItem('LastPlayedSongID')))
+		let lastPlayedSong = album['Songs'].find((i) => i['ID'] === Number(localStorage.getItem('LastPlayedSongID')))
 
 		if (lastPlayedSong) {
-			let lastPlayedSongID = lastPlayedSong['$loki']
+			let lastPlayedSongID = lastPlayedSong['ID']
 
 			if (lastPlayedSongID) {
 				setTimeout(() => {
@@ -47,7 +47,7 @@
 
 					setNewPlayback(
 						album['ID'],
-						album['Songs'].findIndex((i) => i['$loki'] === lastPlayedSongID),
+						album['Songs'].findIndex((i) => i['ID'] === lastPlayedSongID),
 						false
 					)
 				}, 100)
@@ -121,7 +121,7 @@
 		{:else if album['DynamicAlbumArtist'] !== undefined}
 			<album-artist>{album['DynamicAlbumArtist']}</album-artist>
 		{:else}
-			<album-artist>Not Defined</album-artist>
+			<album-artist></album-artist>
 		{/if}
 	</album-details>
 </album>
@@ -171,7 +171,7 @@
 	}
 
 	album-name {
-		font-variation-settings: 'wght' 700;
+		font-variation-settings: 'wght' 600;
 		white-space: normal;
 	}
 

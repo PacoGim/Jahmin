@@ -24,16 +24,18 @@
 </script>
 
 <song-list-item
-	id={song['$loki']}
+	id={song['ID']}
 	{index}
 	on:dblclick={() => songListItemDbLClickEventHandler()}
 	class="
 	{$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID']
 		? 'playing'
 		: ''}
-	{$selectedSongs.includes(index) ? 'selected' : ''}"
+	{$selectedSongs.includes(song['ID']) ? 'selected' : ''}"
 >
-	<song-number>{song['Track']}</song-number>
+	<song-number>{index}</song-number>
+	<!-- <song-number>{song['Track']}</song-number> -->
+	<song-number>{song['ID']}</song-number>
 	<song-title>{song['Title']}</song-title>
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>
 </song-list-item>
@@ -44,7 +46,7 @@
 		cursor: pointer;
 
 		display: grid;
-		grid-template-columns: max-content auto max-content;
+		grid-template-columns: max-content max-content auto max-content;
 		grid-template-rows: auto;
 
 		margin: 0.25rem 0;
@@ -63,7 +65,7 @@
 	}
 
 	song-list-item.playing {
-		font-variation-settings: 'wght' 700;
+		font-variation-settings: 'wght' 600;
 		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
 		background-color: rgba(255, 255, 255, 0.1);
 	}

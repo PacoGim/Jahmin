@@ -3,7 +3,7 @@
 
 	import Album from '../components/Album.svelte'
 
-	import { getAlbumsIPC } from '../service/ipc.service'
+	import { getAlbumsIPC, getAllAlbumsIPC } from '../service/ipc.service'
 
 	import { albums, isValuesToFilterChanged, storeConfig } from '../store/index.store'
 
@@ -18,21 +18,33 @@
 		}
 	}
 
-	//TODO Change gradient
-	onMount(() => {
-		// Calls the IPC once to wait for the filtering to be done.
-		getAlbumsIPC().then(() => {
-			scrollToLastAlbumPlayed()
-			// calculateGridGap()
-		})
+	$: {
+		let groupOnlyByFolder = $storeConfig?.userOptions?.groupOnlyByFolder
+		if (groupOnlyByFolder!==undefined) {
+			fetchSongs(groupOnlyByFolder)
+		}
+	}
 
-		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined
+	// IMPORTANT: Create symlinks between config types and create somehow a script to create them.
+
+	onMount(() => {
+		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
 		isValuesToFilterChanged.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
 		})
-
-		// window.addEventListener('resize', () => calculateGridGap())
 	})
+
+	function fetchSongs(groupOnlyByFolder) {
+		console.log(groupOnlyByFolder)
+		if (!groupOnlyByFolder) {
+			// Calls the IPC once to wait for the filtering to be done.
+			getAlbumsIPC().then(() => {
+				scrollToLastAlbumPlayed()
+			})
+		} else {
+			getAllAlbumsIPC()
+		}
+	}
 
 	function scrollToLastAlbumPlayed() {
 		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID') || undefined
@@ -41,27 +53,8 @@
 			let $album = document.querySelector(`#${CSS.escape(lastPlayedAlbumID)}`)
 
 			if ($album) {
-				$album.scrollIntoView({block:'center'})
+				$album.scrollIntoView({ block: 'center' })
 			}
-		}
-	}
-
-	function calculateGridGap() {
-		const configDimension = $storeConfig?.['art']?.['dimension']
-		let $artGridSvltWidth = document.querySelector('art-grid-svlt').getBoundingClientRect()['width']
-
-		if (configDimension) {
-			// console.log('------------------')
-			// let gridGap = ($artGridSvltWidth % configDimension) / ($artGridSvltWidth / configDimension)
-
-			let amountToFit = Math.floor($artGridSvltWidth / configDimension)
-			let gridGap = $artGridSvltWidth / amountToFit - configDimension
-
-			// console.log(gridGap)
-
-			// if (gridGap < 16) gridGap = 16
-
-			document.documentElement.style.setProperty('--art-grid-gap', `${gridGap}px`)
 		}
 	}
 </script>

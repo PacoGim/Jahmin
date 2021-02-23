@@ -10,11 +10,15 @@
 	let selection = null
 	let isSelectionChanged = false
 
+
+
 	//TODO Try to make the selection come from local storage the first time the app runs and the value was set when playing song
 
 	$: if ($storeConfig !== undefined) {
 		setSelectionFromConfigStore()
 	}
+
+
 
 	$: {
 		selection

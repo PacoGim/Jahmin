@@ -21,14 +21,30 @@ const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
 const nanoid_1 = require("nanoid");
 const getWaveform_fn_1 = require("../functions/getWaveform.fn");
 const folderWatcher_service_1 = require("./folderWatcher.service");
+const hashString_fn_1 = require("../functions/hashString.fn");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
-    electron_1.ipcMain.handle('get-songs', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
-        // let index = await createFilesIndex(collectionName)
-        // scanFolders(collectionName,['/Volumes/Maxtor/Music'])
-        // return index
+    electron_1.ipcMain.handle('get-all-albums', () => __awaiter(this, void 0, void 0, function* () {
         let docs = loki_service_1.getCollection();
-        return docs;
+        let groupedSongs = [];
+        docs.forEach((doc) => {
+            let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/');
+            let folderName = rootDir.split('/').slice(-1)[0];
+            let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
+            if (!foundAlbum) {
+                groupedSongs.push({
+                    Name: folderName,
+                    ID: hashString_fn_1.hash(rootDir),
+                    RootDir: rootDir,
+                    FolderName: folderName,
+                    Songs: [doc]
+                });
+            }
+            else {
+                foundAlbum['Songs'].push(doc);
+            }
+        });
+        return groupedSongs;
     }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();

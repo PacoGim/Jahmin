@@ -1,6 +1,7 @@
 export type SongType = {
 	[index: string]: string | number
-	$loki:number
+	ID: number
+	$loki: number
 	Album: string
 	AlbumArtist: string
 	Artist: string

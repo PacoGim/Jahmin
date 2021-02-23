@@ -10,17 +10,35 @@ import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 import { getWaveform } from '../functions/getWaveform.fn'
 import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
+import { hash } from '../functions/hashString.fn'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
-	ipcMain.handle('get-songs', async (evt, arg) => {
-		// let index = await createFilesIndex(collectionName)
-		// scanFolders(collectionName,['/Volumes/Maxtor/Music'])
-		// return index
-
+	ipcMain.handle('get-all-albums', async () => {
 		let docs = getCollection()
 
-		return docs
+		let groupedSongs: any[] = []
+
+		docs.forEach((doc) => {
+			let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/')
+			let folderName = rootDir.split('/').slice(-1)[0]
+
+			let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
+
+			if (!foundAlbum) {
+				groupedSongs.push({
+					Name: folderName,
+					ID: hash(rootDir),
+					RootDir: rootDir,
+					FolderName:folderName,
+					Songs: [doc]
+				})
+			} else {
+				foundAlbum['Songs'].push(doc)
+			}
+		})
+
+		return groupedSongs
 	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {

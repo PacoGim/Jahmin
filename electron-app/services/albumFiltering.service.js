@@ -9,7 +9,7 @@ function setAlbumArray(newAlbumArray) {
     // Saves the new album array for future use.
     albumArray = newAlbumArray;
     let newArray = [];
-    // Filter the array
+    // Group Songs by root folder
     newAlbumArray.forEach((song) => {
         let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/');
         let foundAlbum = newArray.find((i) => i['RootDir'] === rootDir);
@@ -32,6 +32,7 @@ function setAlbumArray(newAlbumArray) {
     resolvePromise(newArray);
 }
 exports.setAlbumArray = setAlbumArray;
+// Iterates through every song of an album to get every single artist, then sorts them by the amount of songs done by artist, the more an artist has songs the firstest it will be in the array.
 function getAllAlbumArtists(songArray, album) {
     let artistsCount = [];
     let artistsConcat = [];
@@ -39,7 +40,12 @@ function getAllAlbumArtists(songArray, album) {
     songArray.forEach((song) => {
         if (song['Album'] === album) {
             let artists = splitArtists(song['Artist']);
-            artistsConcat.push(...artists);
+            if (artists.length > 0) {
+                artistsConcat.push(...artists);
+            }
+            else {
+                artistsConcat = artists;
+            }
         }
     });
     artistsConcat.forEach((artist) => {
@@ -60,8 +66,11 @@ function getAllAlbumArtists(songArray, album) {
 }
 function splitArtists(artists) {
     if (artists) {
-        let artistSplit = artists.split(', ');
-        artistSplit = artists.split(',');
+        let artistSplit = [];
+        if (typeof artists === 'string') {
+            artistSplit = artists.split(', ');
+            artistSplit = artists.split(',');
+        }
         return artistSplit;
     }
     return [];

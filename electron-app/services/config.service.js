@@ -57,14 +57,9 @@ function getDefaultConfigFile() {
         },
         art: {
             dimension: 128
+        },
+        userOptions: {
+            groupOnlyByFolder: false
         }
     };
 }
-// function getDefaultConfigFile() {
-// 	return {
-// 		order: {
-// 			grouping: ['Genre'],
-// 			filtering: []
-// 		}
-// 	}
-// }
