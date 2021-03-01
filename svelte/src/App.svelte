@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Navigation from './includes/Navigation.svelte'
 	import ArtGrid from './includes/ArtGrid.svelte'
-	import Grouping from './includes/Ordering.svelte'
+	import Grouping from './includes/Grouping.svelte'
 	import Player from './includes/Player.svelte'
 	import SongList from './includes/SongList.svelte'
 	import Details from './includes/Details.svelte'
-	import Controller from './controller/Controller.svelte'
+	import Controller from './controllers/MainController.svelte'
 	import BackgroundArt from './includes/BackgroundArt.svelte'
 	import SongListBackground from './includes/SongListBackground.svelte'
 	import { appTitle, selectedSongs } from './store/index.store'

@@ -11,6 +11,14 @@ export function getOrderIPC(index: number): Promise<string[]> {
 	})
 }
 
+export function getGroupingIPC(valueToGroupBy:string): Promise<string[]> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-grouping', valueToGroupBy).then((result) => {
+			resolve(result)
+		})
+	})
+}
+
 export function getConfigIPC(): Promise<object> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-config').then((result) => {

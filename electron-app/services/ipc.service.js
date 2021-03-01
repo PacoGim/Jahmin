@@ -22,6 +22,7 @@ const nanoid_1 = require("nanoid");
 const getWaveform_fn_1 = require("../functions/getWaveform.fn");
 const folderWatcher_service_1 = require("./folderWatcher.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
+const groupSong_fn_1 = require("../functions/groupSong.fn");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-all-albums', () => __awaiter(this, void 0, void 0, function* () {
@@ -60,6 +61,9 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-config', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();
         return config;
+    }));
+    electron_1.ipcMain.handle('get-grouping', (evt, valueToGroupBy) => __awaiter(this, void 0, void 0, function* () {
+        return groupSong_fn_1.groupSongs(valueToGroupBy);
     }));
     electron_1.ipcMain.handle('save-config', (evt, newConfig) => {
         return config_service_1.saveConfig(newConfig);

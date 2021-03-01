@@ -11,6 +11,7 @@ import { customAlphabet } from 'nanoid'
 import { getWaveform } from '../functions/getWaveform.fn'
 import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
+import { groupSongs } from '../functions/groupSong.fn'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -30,7 +31,7 @@ export function loadIPC() {
 					Name: folderName,
 					ID: hash(rootDir),
 					RootDir: rootDir,
-					FolderName:folderName,
+					FolderName: folderName,
 					Songs: [doc]
 				})
 			} else {
@@ -58,6 +59,10 @@ export function loadIPC() {
 	ipcMain.handle('get-config', async (evt, arg) => {
 		let config = getConfig()
 		return config
+	})
+
+	ipcMain.handle('get-grouping', async (evt, valueToGroupBy) => {
+		return groupSongs(valueToGroupBy)
 	})
 
 	ipcMain.handle('save-config', (evt, newConfig) => {
