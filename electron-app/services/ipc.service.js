@@ -73,9 +73,27 @@ function loadIPC() {
         // shell.showItemInFolder(configFilePath)
         return;
     });
-    electron_1.ipcMain.handle('get-albums', () => __awaiter(this, void 0, void 0, function* () {
-        // Waits for the filtering to be done then return the result.
-        return yield albumFiltering_service_1.getNewPromiseAlbumArray();
+    electron_1.ipcMain.handle('get-albums', (evt, groupBy, groupByValue) => __awaiter(this, void 0, void 0, function* () {
+        let docs = loki_service_1.getCollection();
+        let groupedSongs = [];
+        docs.forEach((doc) => {
+            if (doc[groupBy] === groupByValue) {
+                let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/');
+                let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
+                if (!foundAlbum) {
+                    groupedSongs.push({
+                        ID: hashString_fn_1.hash(rootDir),
+                        RootDir: rootDir,
+                        AlbumName: doc.Album,
+                        Songs: [doc.ID]
+                    });
+                }
+                else {
+                    foundAlbum['Songs'].push(doc.ID);
+                }
+            }
+        });
+        return groupedSongs;
     }));
     electron_1.ipcMain.handle('get-album', (evt, albumID) => {
         let albums = albumFiltering_service_1.getAlbumArray().filter((x) => x['ID'] === albumID);

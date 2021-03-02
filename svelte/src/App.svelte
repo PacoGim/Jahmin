@@ -5,7 +5,11 @@
 	import Player from './includes/Player.svelte'
 	import SongList from './includes/SongList.svelte'
 	import Details from './includes/Details.svelte'
+
 	import Controller from './controllers/MainController.svelte'
+	import ConfigController from './controllers/ConfigController.svelte'
+	import PlayerController from './controllers/PlayerController.svelte'
+
 	import BackgroundArt from './includes/BackgroundArt.svelte'
 	import SongListBackground from './includes/SongListBackground.svelte'
 	import { appTitle, selectedSongs } from './store/index.store'
@@ -51,6 +55,8 @@
 </svelte:head>
 
 <Controller />
+<PlayerController />
+<ConfigController />
 
 <main>
 	<Navigation />

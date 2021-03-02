@@ -1,13 +1,35 @@
 <script lang="ts">
 	import { getGroupingIPC } from '../service/ipc.service'
+	import { selectedGroupByStore, selectedGroupByValueStore } from '../store/final.store'
 
 	let selectedGroupBy = localStorage.getItem('GroupBy')
+	let selectedGroupByValue = localStorage.getItem('GroupByValue')
+
+	// let selection = selectedGroupByValue
 	let groups = []
-  let selection
 
 	let firstSelectedGroupByAssign = true
+	let firstSelectedGroupByValueAssign = true
 
-  $:console.log(selection)
+	$: {
+		selectedGroupByValue
+
+		if (firstSelectedGroupByValueAssign === true) {
+			firstSelectedGroupByValueAssign = false
+
+			// Get Art Grid Albums as soon as the variable is set.
+			$selectedGroupByValueStore = selectedGroupByValue
+		} else {
+			if (selectedGroupByValue !== localStorage.getItem('GroupByValue')) {
+				// Get Art Grid Albums if grouping value is changed.
+				$selectedGroupByValueStore = selectedGroupByValue
+
+				localStorage.setItem('GroupByValue', selectedGroupByValue)
+
+				//TODO Save to config file
+			}
+		}
+	}
 
 	$: {
 		selectedGroupBy
@@ -17,10 +39,12 @@
 
 			// Get Grouping as soon as the variable is set.
 			getGrouping()
+			$selectedGroupByStore = selectedGroupBy
 		} else {
 			if (selectedGroupBy !== localStorage.getItem('GroupBy')) {
 				// Get Grouping if grouping is changed.
 				getGrouping()
+				$selectedGroupByStore = selectedGroupBy
 				localStorage.setItem('GroupBy', selectedGroupBy)
 
 				//TODO Save to config file
@@ -51,25 +75,36 @@
 		<option value="none">None</option>
 		<option value="Genre">Genre</option>
 		<option value="AlbumArtist">Album Artist</option>
+		<option value="Album">Album</option>
+		<option value="Composer">Composer</option>
 	</select>
 
-	<grouping>
-		{#each groups as group, index (index)}
+	<total-groups>Total {selectedGroupBy}: {groups.length}</total-groups>
+
+	<groups>
+		{#each groups as group (group.id)}
 			<group>
-				<input id={group.id} type="radio" value={group.name} bind:group={selection} />
-				<label for={group.id}>{cutText(group.name)}</label>
+				<input id={group.id} type="radio" value={group.name} bind:group={selectedGroupByValue} />
+				<label for={group.id}>{group.name}</label>
 			</group>
 		{/each}
-	</grouping>
+	</groups>
 </grouping-svlt>
 
 <style>
 	grouping-svlt {
 		--highlight-color: rgba(255, 255, 255, 0.25);
-		/* height: calc(100vh - 64px); */
+
+		grid-area: grouping-svlt;
+
+		display: flex;
+		flex-direction: column;
+
+		height: 100%;
 	}
 
-	select {
+	grouping-svlt select {
+		display: block;
 		padding: 0.5rem 1rem;
 		font-size: 1rem;
 		font-family: inherit;
@@ -78,57 +113,68 @@
 		border: none;
 		outline: none;
 		cursor: pointer;
+		width: 100%;
 	}
 
-	grouping {
+	grouping-svlt total-groups {
+		text-align: center;
+		padding: 0.5rem;
+		margin: 0.5rem;
+		border-radius: 5px;
+		font-size: 0.85rem;
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+
+	groups {
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
 		height: 100%;
-		/* border-right: 1px rgba(255, 255, 255, 0.75) solid; */
-		padding: 0 .5rem;
-		font-size: 0.8rem;
-	}
-
-	grouping group label {
-		border-radius: 5px;
-		margin: 0.25rem 0;
 		padding: 0 0.5rem;
-		text-align: center;
-		cursor: pointer;
+		font-size: 0.85rem;
 	}
 
-	grouping group:hover label {
+	groups group {
+		width: 192px;
+		margin: 0.25rem 0;
+	}
+
+	groups group label {
+		padding: 0.5rem;
+		border-radius: 5px;
+		cursor: pointer;
+		display: block;
+
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+
+	groups group:hover label {
 		background-color: var(--highlight-color);
 	}
 
-	grouping group label {
+	groups group label {
 		user-select: none;
-		display: flex;
-		align-items: center;
 	}
 
-	grouping item label {
-		cursor: pointer;
-	}
-
-	grouping group input[type='radio'] {
+	groups group input[type='radio'] {
 		display: none;
 	}
 
-	grouping group input[type='radio'] + label::before {
+	groups group input[type='radio'] + label::before {
 		content: '●';
-		font-size: 1.25rem;
-		margin-right: 2px;
+		margin-right: 10px;
 		opacity: 0;
+
+		transition: opacity 300ms ease-in-out;
 	}
-	grouping group input[type='radio']:checked + label {
+	groups group input[type='radio']:checked + label {
 		background-color: var(--highlight-color);
 	}
 
-	grouping group input[type='radio']:checked + label::before {
+	groups group input[type='radio']:checked + label::before {
 		content: '●';
 		opacity: 1;
-		margin-right: 2px;
 	}
 </style>

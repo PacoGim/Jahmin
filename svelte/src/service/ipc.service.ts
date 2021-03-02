@@ -11,7 +11,7 @@ export function getOrderIPC(index: number): Promise<string[]> {
 	})
 }
 
-export function getGroupingIPC(valueToGroupBy:string): Promise<string[]> {
+export function getGroupingIPC(valueToGroupBy: string): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-grouping', valueToGroupBy).then((result) => {
 			resolve(result)
@@ -37,10 +37,19 @@ export function saveConfig(newConfig: object) {
 
 const sortBy = 'RootDir'
 
+export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-albums', groupBy, groupByValue).then((result) => {
+			result = result.sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])))
+			resolve(result)
+		})
+	})
+}
+
 /*
 	Show Songs ONLY by folders (For tagging by folder purpose) after selecting options, reload app.
 */
-
+/*
 export function getAlbumsIPC(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-albums').then((result) => {
@@ -66,7 +75,7 @@ export function getAllAlbumsIPC(): Promise<void> {
 	})
 }
 
-
+*/
 
 export function getCoverIPC(rootDir) {
 	return new Promise((resolve, reject) => {

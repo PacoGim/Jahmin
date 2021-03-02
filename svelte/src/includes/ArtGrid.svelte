@@ -2,38 +2,43 @@
 	import { onMount } from 'svelte'
 
 	import Album from '../components/Album.svelte'
+	import { albumArtSizeConfig } from '../store/config.store'
+	import { albumListStore } from '../store/final.store'
 
-	import { getAlbumsIPC, getAllAlbumsIPC } from '../service/ipc.service'
+	$: if ($albumArtSizeConfig) document.documentElement.style.setProperty('--cover-dimension', `${$albumArtSizeConfig}px`)
 
-	import { albums, isValuesToFilterChanged, storeConfig } from '../store/index.store'
+	// import { getAlbumsIPC } from '../service/ipc.service'
 
-	$: if ($storeConfig !== undefined) {
-		let dimension
-		try {
-			dimension = $storeConfig['art']['dimension']
-		} catch (error) {
-			dimension = 128
-		} finally {
-			document.documentElement.style.setProperty('--cover-dimension', `${dimension}px`)
-		}
-	}
+	// import {  } from '../store/index.store'
 
-	$: {
-		let groupOnlyByFolder = $storeConfig?.userOptions?.groupOnlyByFolder
-		if (groupOnlyByFolder!==undefined) {
-			fetchSongs(groupOnlyByFolder)
-		}
-	}
+	// $: if ($storeConfig !== undefined) {
+	// 	let dimension
+	// 	try {
+	// 		dimension = $storeConfig['art']['dimension']
+	// 	} catch (error) {
+	// 		dimension = 128
+	// 	} finally {
+	// 		document.documentElement.style.setProperty('--cover-dimension', `${dimension}px`)
+	// 	}
+	// }
+
+	// $: {
+	// 	let groupOnlyByFolder = $storeConfig?.userOptions?.groupOnlyByFolder
+	// 	if (groupOnlyByFolder!==undefined) {
+	// 		fetchSongs(groupOnlyByFolder)
+	// 	}
+	// }
 
 	// IMPORTANT: Create symlinks between config types and create somehow a script to create them.
 
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
-		isValuesToFilterChanged.subscribe(() => {
-			document.querySelector('art-grid-svlt').scrollTop = 0
-		})
+		// isValuesToFilterChanged.subscribe(() => {
+		// 	document.querySelector('art-grid-svlt').scrollTop = 0
+		// })
 	})
 
+	/*
 	function fetchSongs(groupOnlyByFolder) {
 		console.log(groupOnlyByFolder)
 		if (!groupOnlyByFolder) {
@@ -45,7 +50,7 @@
 			getAllAlbumsIPC()
 		}
 	}
-
+*/
 	function scrollToLastAlbumPlayed() {
 		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID') || undefined
 
@@ -60,7 +65,7 @@
 </script>
 
 <art-grid-svlt>
-	{#each $albums as album, index (album['ID'])}
+	{#each $albumListStore as album, index (album['ID'])}
 		<Album {album} {index} />
 	{/each}
 </art-grid-svlt>

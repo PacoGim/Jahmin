@@ -75,9 +75,31 @@ export function loadIPC() {
 		return
 	})
 
-	ipcMain.handle('get-albums', async () => {
-		// Waits for the filtering to be done then return the result.
-		return await getNewPromiseAlbumArray()
+	ipcMain.handle('get-albums', async (evt, groupBy, groupByValue) => {
+		let docs = getCollection()
+
+		let groupedSongs: any[] = []
+
+		docs.forEach((doc) => {
+			if (doc[groupBy] === groupByValue) {
+				let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/')
+
+				let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
+
+				if (!foundAlbum) {
+					groupedSongs.push({
+						ID: hash(rootDir),
+						RootDir: rootDir,
+						AlbumName:doc.Album,
+						Songs: [doc.ID]
+					})
+				} else {
+					foundAlbum['Songs'].push(doc.ID)
+				}
+			}
+		})
+
+		return groupedSongs
 	})
 
 	ipcMain.handle('get-album', (evt, albumID) => {
