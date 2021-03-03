@@ -1,5 +1,5 @@
 "use strict";
-// import { TagType } from '../types/tag.type'
+// import { SongType } from '../types/tag.type'
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -252,8 +252,8 @@ function getStars(value, maxValue) {
 // 		if (file === undefined || isDiffTime === true) {
 // 			exiftool
 // 				.read(filePath)
-// 				.then(async (tags: TagType) => {
-// 					let fileTags: TagType = {
+// 				.then(async (tags: SongType) => {
+// 					let fileTags: SongType = {
 // 						ID: nanoid(),
 // 						SourceFile: tags['SourceFile'] || '',
 // 						FileType: tags['FileType'] || '',

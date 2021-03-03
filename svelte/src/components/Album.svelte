@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 	import { getCoverIPC } from '../service/ipc.service'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
-	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
+	import { playback, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
 	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
 	import { selectedSongs } from '../store/index.store'
@@ -89,14 +89,14 @@
 			setNewPlayback(album['ID'], 0, true)
 		}
 	}
-</script>
 
-<album
-	class={$selectedAlbum?.['ID'] === album?.['ID'] ? 'selected' : ''}
-	id={album['ID']}
+	/*
 	on:dblclick={(evt) => prepareAlbum(evt)}
 	on:click={(evt) => prepareAlbum(evt)}
->
+*/
+</script>
+
+<album class={$selectedAlbum?.['ID'] === album?.['ID'] ? 'selected' : ''} id={album['ID']}>
 	<!-- ▼▼▼ Cover Handle ▼▼▼ -->
 	{#if coverType === undefined}
 		<img src="./img/audio.svg" class="loader" alt="" />
@@ -121,7 +121,7 @@
 		{:else if album['DynamicAlbumArtist'] !== undefined}
 			<album-artist>{album['DynamicAlbumArtist']}</album-artist>
 		{:else}
-			<album-artist></album-artist>
+			<album-artist />
 		{/if}
 	</album-details>
 </album>

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { getWaveformIPC } from '../service/ipc.service'
-	import { playback, playbackIndex } from '../store/player.store'
+import { playbackCursor } from '../store/final.store';
+	import { playback } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
 
 	export let player: HTMLAudioElement
@@ -15,21 +16,21 @@
 	let progressBackgroundEl: HTMLImageElement = undefined
 
 	$: {
-		$playbackIndex
+		$playbackCursor
 		fetchWave()
 	}
 
 	async function fetchWave() {
 		if ($playback?.SongList.length > 0) {
 			// Keeps track of the song the getWaveformIPC fn was called for
-			let tempSong = $playback['SongList'][$playbackIndex['indexToPlay']]
+			let tempSong = $playback['SongList'][$playbackCursor['indexToPlay']]
 
 			progressBackgroundEl.style.opacity = '0'
 
 			getWaveformIPC(tempSong['SourceFile']).then((waveformUrl) => {
 				setTimeout(() => {
 					// Gets the actual song playing
-					let currentSongPlaying = $playback['SongList'][$playbackIndex['indexToPlay']]
+					let currentSongPlaying = $playback['SongList'][$playbackCursor['indexToPlay']]
 
 					/*
 					If the temporary song and the actual playing song match, it shows the waveform

@@ -1,4 +1,4 @@
-// import { TagType } from '../types/tag.type'
+// import { SongType } from '../types/tag.type'
 
 import fs from 'fs'
 import path from 'path'
@@ -259,8 +259,8 @@ function getStars(value: number, maxValue: number) {
 // 		if (file === undefined || isDiffTime === true) {
 // 			exiftool
 // 				.read(filePath)
-// 				.then(async (tags: TagType) => {
-// 					let fileTags: TagType = {
+// 				.then(async (tags: SongType) => {
+// 					let fileTags: SongType = {
 // 						ID: nanoid(),
 // 						SourceFile: tags['SourceFile'] || '',
 // 						FileType: tags['FileType'] || '',

@@ -1,5 +1,6 @@
 const { ipcRenderer } = require('electron')
 import { albums, dbVersion } from '../store/index.store'
+import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
 export function getOrderIPC(index: number): Promise<string[]> {
@@ -85,7 +86,7 @@ export function getCoverIPC(rootDir) {
 	})
 }
 
-export function getAlbumIPC(albumID): Promise<SongType[]> {
+export function getAlbumIPC(albumID:string): Promise<AlbumType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album', albumID).then((result) => {
 			resolve(result)

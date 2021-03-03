@@ -1,25 +1,26 @@
 <script lang="ts">
-	import { playbackIndex } from '../store/player.store'
+	// import { playbackCursor } from '../store/player.store'
 
 	export let player: HTMLAudioElement
-
+/*
 	function previousButtonEvent() {
 		if (player.currentTime < 1) {
-			if ($playbackIndex['indexToPlay'] > 0) {
-				$playbackIndex = {
-					indexToPlay: $playbackIndex['indexToPlay'] - 1,
+			if ($playbackCursor['indexToPlay'] > 0) {
+				$playbackCursor = {
+					indexToPlay: $playbackCursor['indexToPlay'] - 1,
 					playNow: true
 				}
 			}
 		} else {
-			let index = $playbackIndex['indexToPlay']
-			$playbackIndex = undefined
-			$playbackIndex = {
+			let index = $playbackCursor['indexToPlay']
+			$playbackCursor = undefined
+			$playbackCursor = {
 				indexToPlay: index,
 				playNow: true
 			}
 		}
 	}
+	*/
 </script>
 
 <svg

@@ -1,14 +1,5 @@
 <script>
-import { nextSong } from '../functions/nextSong.fn';
-
-	import { playbackIndex } from '../store/player.store'
-
-	// function addIndex() {
-	// 	$playbackIndex = {
-	// 		indexToPlay: $playbackIndex['indexToPlay'] + 1,
-	// 		playNow: true
-	// 	}
-	// }
+	import { nextSong } from '../functions/nextSong.fn'
 </script>
 
 <svg
@@ -21,7 +12,8 @@ import { nextSong } from '../functions/nextSong.fn';
 	x="0px"
 	y="0px"
 	viewBox="0 0 100 100"
-	xml:space="preserve">
+	xml:space="preserve"
+>
 	<polygon points="87,48.25 0,4.75 0,91.75 " />
 	<rect x="90" y="5" width="10" height="87" />
 </svg>

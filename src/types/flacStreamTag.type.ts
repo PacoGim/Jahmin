@@ -1,4 +1,4 @@
-export type FlacStreamTagType = {
+export type FlacStreamSongType = {
 	[index: string]: string
 	codec_type: string
 	sample_rate: string

@@ -2,9 +2,10 @@
 	import { onMount } from 'svelte'
 
 	import type { SongType } from '../types/song.type'
-	import { playback, playbackIndex, selectedAlbum } from '../store/player.store'
+	import { playback, selectedAlbum } from '../store/player.store'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { selectedSongs } from '../store/index.store'
+import { playbackCursor } from '../store/final.store';
 
 	export let song: SongType
 	export let index: number
@@ -28,7 +29,7 @@
 	{index}
 	on:dblclick={() => songListItemDbLClickEventHandler()}
 	class="
-	{$playbackIndex['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID']
+	{$playbackCursor['indexToPlay'] === index && $selectedAlbum['ID'] === $playback?.['AlbumID']
 		? 'playing'
 		: ''}
 	{$selectedSongs.includes(song['ID']) ? 'selected' : ''}"

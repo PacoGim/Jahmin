@@ -4,6 +4,8 @@ exports.groupSongs = void 0;
 const loki_service_1 = require("../services/loki.service");
 const nanoid_1 = require("nanoid");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
+// Gets the value to group by avery song with.
+// For Example, Genre, Group every song with the same Genre.
 function groupSongs(valueToGroupBy) {
     let songs = loki_service_1.getCollection();
     let groups = [];

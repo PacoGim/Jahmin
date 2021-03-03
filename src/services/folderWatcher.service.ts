@@ -8,7 +8,7 @@ import { getRating } from '../functions/getRating.fn'
 import { hash } from '../functions/hashString.fn'
 import stringHash from 'string-hash'
 import { createData, deleteData, getCollection, readData } from './loki.service'
-import { TagType } from '../types/tag.type'
+import { SongType } from '../types/song.type'
 import { getAlbumName } from '../functions/getAlbumName.fn'
 import { getTitle } from '../functions/getTitle.fn'
 import { observeArray } from '../functions/observeArray.fn'
@@ -159,7 +159,7 @@ async function processFiles(files: string[]) {
 	// }, 1)
 }
 
-function processedFilePath(filePath: string): Promise<TagType | undefined> {
+function processedFilePath(filePath: string): Promise<SongType | undefined> {
 	return new Promise(async (resolve, reject) => {
 		const id = stringHash(filePath)
 		const extension = filePath.split('.').pop() || ''
@@ -204,7 +204,7 @@ function removeDeadFiles() {
 	})
 }
 
-function getFileMetatag(filePath: string, id: number, extension: string, fileStats: fs.Stats): Promise<TagType> {
+function getFileMetatag(filePath: string, id: number, extension: string, fileStats: fs.Stats): Promise<SongType> {
 	return new Promise((resolve, reject) => {
 		parseFile(filePath)
 			.then((metadata) => {

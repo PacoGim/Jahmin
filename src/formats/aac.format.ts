@@ -3,7 +3,7 @@ const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import { DateTime } from 'luxon'
 import fs from 'fs'
 import stringHash from 'string-hash'
-import { TagType } from '../types/tag.type'
+import { SongType } from '../types/song.type'
 
 function writeAacTags(filePath: string, newTags: any) {
 	exiftool.write(filePath, {
@@ -22,7 +22,7 @@ function writeAacTags(filePath: string, newTags: any) {
 	// let time = DateTime.fromISO('1999-01-01T01:01').toFormat('yyyy:mm:dd HH:MM:ss')
 }
 
-export function getAacTags(filePath: string): Promise<TagType> {
+export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise((resolve, reject) => {
 		exiftool.read(filePath).then((tags) => {
 			// console.log(tags)

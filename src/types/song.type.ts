@@ -1,4 +1,4 @@
-export type TagType = {
+export type SongType = {
 	[index: string]: string | number | undefined
 	Album?: string // Modifiable
 	AlbumArtist?: string // Modifiable

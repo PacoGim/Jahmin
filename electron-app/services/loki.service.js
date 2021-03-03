@@ -3,17 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.loadDb = exports.getNewPromiseDbVersion = void 0;
+exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.getCollectionMap = exports.loadDb = exports.getNewPromiseDbVersion = void 0;
 const lokijs_1 = __importDefault(require("lokijs"));
 const lokijs_2 = require("lokijs");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const deepmerge_1 = __importDefault(require("deepmerge"));
 const index_1 = require("../index");
+const hashString_fn_1 = require("../functions/hashString.fn");
 const ADAPTER = new lokijs_2.LokiPartitioningAdapter(new lokijs_2.LokiFsAdapter(), { paging: true, pageSize: 1 * 1024 * 1024 });
 let db;
 let dbVersion = 0;
-const COLLECTION_NAME = 'music';
+let songMap = new Map();
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve = undefined;
 function getNewPromiseDbVersion(rendererDbVersion) {
@@ -38,14 +39,47 @@ function loadDb() {
             adapter: ADAPTER,
             autoload: true,
             autoloadCallback: () => {
-                databaseInitialize().then(() => resolve());
+                databaseInitialize().then(() => {
+                    resolve();
+                    mapCollection();
+                });
             },
             autosave: true,
-            autosaveInterval: 1000
+            autosaveInterval: 1000,
+            autosaveCallback: () => {
+                mapCollection();
+            }
         });
     });
 }
 exports.loadDb = loadDb;
+function getCollectionMap() {
+    return songMap;
+}
+exports.getCollectionMap = getCollectionMap;
+function mapCollection() {
+    const COLLECTION = db.getCollection('music').find();
+    let map = getCollectionMap();
+    COLLECTION.forEach((song) => {
+        let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/');
+        let rootId = hashString_fn_1.hash(rootDir);
+        let data = map.get(rootId);
+        if (data) {
+            if (!data.Songs.find((i) => i.ID === song.ID)) {
+                data.Songs.push(song);
+                map.set(rootId, data);
+            }
+        }
+        else {
+            map.set(rootId, {
+                ID: rootId,
+                RootDir: rootDir,
+                Name: song.Album,
+                Songs: [song]
+            });
+        }
+    });
+}
 function setDbVersion(newDbVersion) {
     dbVersion = newDbVersion;
 }
@@ -55,7 +89,7 @@ function getDbVersion() {
 }
 exports.getDbVersion = getDbVersion;
 function getCollection() {
-    const COLLECTION = db.getCollection(COLLECTION_NAME).find();
+    const COLLECTION = db.getCollection('music').find();
     return COLLECTION;
 }
 exports.getCollection = getCollection;
@@ -63,9 +97,9 @@ function createData(newDoc) {
     return new Promise((resolve, reject) => {
         try {
             // console.log('New Doc: ', newDoc)
-            const COLLECTION = db.getCollection(COLLECTION_NAME);
+            const COLLECTION = db.getCollection('music');
             if (!COLLECTION)
-                throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+                throw new Error(`Collection music not created/available.`);
             let oldDoc = readData({ SourceFile: newDoc['SourceFile'] });
             if (oldDoc) {
                 resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc));
@@ -84,9 +118,9 @@ function createData(newDoc) {
 exports.createData = createData;
 function readDataById(id) {
     try {
-        const COLLECTION = db.getCollection(COLLECTION_NAME);
+        const COLLECTION = db.getCollection('music');
         if (!COLLECTION)
-            throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+            throw new Error(`Collection ${'music'} not created/available.`);
         return COLLECTION.get(id);
     }
     catch (error) {
@@ -97,9 +131,9 @@ function readDataById(id) {
 exports.readDataById = readDataById;
 function readData(query) {
     try {
-        const COLLECTION = db.getCollection(COLLECTION_NAME);
+        const COLLECTION = db.getCollection('music');
         if (!COLLECTION)
-            throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+            throw new Error(`Collection ${'music'} not created/available.`);
         return COLLECTION.find(query)[0];
     }
     catch (error) {
@@ -111,9 +145,9 @@ exports.readData = readData;
 function updateData(query, newData) {
     return new Promise((resolve, reject) => {
         try {
-            const COLLECTION = db.getCollection(COLLECTION_NAME);
+            const COLLECTION = db.getCollection('music');
             if (!COLLECTION)
-                throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+                throw new Error(`Collection ${'music'} not created/available.`);
             let doc = COLLECTION.find(query)[0];
             doc = deepmerge_1.default(doc, newData);
             resolve(COLLECTION.update(doc));
@@ -129,9 +163,9 @@ exports.updateData = updateData;
 function deleteData(query) {
     return new Promise((resolve, reject) => {
         // console.log(query)
-        const COLLECTION = db.getCollection(COLLECTION_NAME);
+        const COLLECTION = db.getCollection('music');
         if (!COLLECTION)
-            throw new Error(`Collection ${COLLECTION_NAME} not created/available.`);
+            throw new Error(`Collection ${'music'} not created/available.`);
         const DOC = COLLECTION.find(query)[0];
         resolve(COLLECTION.remove(DOC));
         dbVersionResolve(++dbVersion);
@@ -151,9 +185,9 @@ function databaseInitialize() {
     return new Promise((resolve) => {
         if (!db)
             return;
-        let collection = db.getCollection(COLLECTION_NAME);
+        let collection = db.getCollection('music');
         if (!collection) {
-            db.addCollection(COLLECTION_NAME, {
+            db.addCollection('music', {
                 unique: ['SourceFile']
             });
         }

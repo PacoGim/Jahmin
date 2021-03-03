@@ -1,14 +1,24 @@
-import { playbackIndex } from '../store/player.store'
+// import { playbackCursor } from '../store/player.store'
+
+import { playbackCursor } from '../store/final.store'
 
 export function nextSong() {
-  let playback = undefined
+	let playbackCursorIndex = undefined
 
-	playbackIndex.subscribe((playbackStore) => {
-		playback = playbackStore
+	playbackCursor.subscribe((playbackCursorStore) => {
+		playbackCursorIndex = playbackCursorStore[0]
 	})()
 
-	playbackIndex.set({
-		indexToPlay: playback['indexToPlay'] + 1,
-		playNow: true
-	})
+	playbackCursor.set([playbackCursorIndex + 1, true])
+
+	// let playback = undefined
+
+	// playbackCursor.subscribe((playbackStore) => {
+	// 	playback = playbackStore
+	// })()
+
+	// playbackCursor.set({
+	// 	indexToPlay: playback['indexToPlay'] + 1,
+	// 	playNow: true
+	// })
 }

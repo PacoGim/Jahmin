@@ -2,6 +2,8 @@ import { getCollection } from '../services/loki.service'
 import { customAlphabet } from 'nanoid'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8)
 
+// Gets the value to group by avery song with.
+// For Example, Genre, Group every song with the same Genre.
 export function groupSongs(valueToGroupBy: string) {
 	let songs = getCollection()
 

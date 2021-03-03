@@ -2,8 +2,8 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import { lowerCaseObjectKeys } from '../functions/lowerCaseObjectKeys.fn'
 import { objectToFfmpegString } from '../functions/objectToFfmpegString.fn'
-import { FlacStreamTagType } from '../types/flacStreamTag.type'
-import { TagType } from '../types/tag.type'
+import { FlacStreamSongType } from '../types/flacStreamTag.type'
+import { SongType } from '../types/song.type'
 
 
 function writeFlacTags(filePath: string) {
@@ -48,16 +48,16 @@ function writeFlacTags(filePath: string) {
 	})
 }
 
-export function getFlacTags(filePath: string):Promise<TagType> {
+export function getFlacTags(filePath: string):Promise<SongType> {
 	return new Promise((resolve, reject) => {
 		exec(`./binaries/ffprobe -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
 			if (stdout) {
-				let tags: TagType = {
+				let tags: SongType = {
 					Extension: 'flac'
 				}
 				let data = JSON.parse(stdout)
-				let streamAudioData: FlacStreamTagType = data['streams'].find(
-					(stream: FlacStreamTagType) => stream['codec_type'] === 'audio'
+				let streamAudioData: FlacStreamSongType = data['streams'].find(
+					(stream: FlacStreamSongType) => stream['codec_type'] === 'audio'
 				)
 
 				tags['SourceFile'] = filePath

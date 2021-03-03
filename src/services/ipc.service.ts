@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
-import { getCollection, getDbVersion, getNewPromiseDbVersion } from './loki.service'
+import { getCollection, getCollectionMap, getDbVersion, getNewPromiseDbVersion } from './loki.service'
 import { orderSongs } from './songFilter.service'
 // import { nanoid } from 'nanoid'
 import { getAlbumArray, getNewPromiseAlbumArray } from './albumFiltering.service'
@@ -16,30 +16,34 @@ const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuv
 
 export function loadIPC() {
 	ipcMain.handle('get-all-albums', async () => {
-		let docs = getCollection()
+		let mapCollection = getCollectionMap()
 
-		let groupedSongs: any[] = []
+		return mapCollection
 
-		docs.forEach((doc) => {
-			let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/')
-			let folderName = rootDir.split('/').slice(-1)[0]
+		// let docs = getCollection()
 
-			let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
+		// let groupedSongs: any[] = []
 
-			if (!foundAlbum) {
-				groupedSongs.push({
-					Name: folderName,
-					ID: hash(rootDir),
-					RootDir: rootDir,
-					FolderName: folderName,
-					Songs: [doc]
-				})
-			} else {
-				foundAlbum['Songs'].push(doc)
-			}
-		})
+		// docs.forEach((doc) => {
+		// 	let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/')
+		// 	let folderName = rootDir.split('/').slice(-1)[0]
 
-		return groupedSongs
+		// 	let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
+
+		// 	if (!foundAlbum) {
+		// 		groupedSongs.push({
+		// 			Name: folderName,
+		// 			ID: hash(rootDir),
+		// 			RootDir: rootDir,
+		// 			FolderName: folderName,
+		// 			Songs: [doc]
+		// 		})
+		// 	} else {
+		// 		foundAlbum['Songs'].push(doc)
+		// 	}
+		// })
+
+		// return groupedSongs
 	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {
@@ -90,11 +94,9 @@ export function loadIPC() {
 					groupedSongs.push({
 						ID: hash(rootDir),
 						RootDir: rootDir,
-						AlbumName:doc.Album,
-						Songs: [doc.ID]
+						AlbumArtist: doc.AlbumArtist,
+						Name: doc.Album
 					})
-				} else {
-					foundAlbum['Songs'].push(doc.ID)
 				}
 			}
 		})
@@ -103,8 +105,7 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('get-album', (evt, albumID) => {
-		let albums = getAlbumArray().filter((x: any) => x['ID'] === albumID)
-		return albums[0]
+		return getCollectionMap().get(albumID)
 	})
 
 	ipcMain.handle('get-cover', async (evt, rootDir) => {

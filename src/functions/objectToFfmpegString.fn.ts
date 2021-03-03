@@ -1,6 +1,6 @@
-import { TagType } from "../types/tag.type"
+import { SongType } from "../types/song.type"
 
-export function objectToFfmpegString(tags: TagType) {
+export function objectToFfmpegString(tags: SongType) {
 	let finalString = ''
 
 	for (let key in tags) {

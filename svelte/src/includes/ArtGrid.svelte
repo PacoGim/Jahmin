@@ -5,7 +5,10 @@
 	import { albumArtSizeConfig } from '../store/config.store'
 	import { albumListStore } from '../store/final.store'
 
+	// If the album art size has been set in the store.
 	$: if ($albumArtSizeConfig) document.documentElement.style.setProperty('--cover-dimension', `${$albumArtSizeConfig}px`)
+
+	// $:console.log($albumListStore)
 
 	// import { getAlbumsIPC } from '../service/ipc.service'
 

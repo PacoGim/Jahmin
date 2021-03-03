@@ -1,6 +1,6 @@
 import loki from 'lokijs'
 
-import { TagType } from '../types/tag.type'
+import { SongType } from '../types/song.type'
 
 import { LokiFsAdapter, LokiPartitioningAdapter } from 'lokijs'
 import path from 'path'
@@ -8,6 +8,8 @@ import fs from 'fs'
 import deepmerge from 'deepmerge'
 
 import { appDataPath } from '../index'
+import { hash } from '../functions/hashString.fn'
+import { AlbumType } from '../types/album.type'
 
 const ADAPTER = new LokiPartitioningAdapter(new LokiFsAdapter(), { paging: true, pageSize: 1 * 1024 * 1024 })
 
@@ -15,7 +17,7 @@ let db: loki
 
 let dbVersion = 0
 
-const COLLECTION_NAME = 'music'
+let songMap: Map<String, AlbumType> = new Map<String, AlbumType>()
 
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve: any = undefined
@@ -47,11 +49,48 @@ export function loadDb(): Promise<void> {
 			adapter: ADAPTER,
 			autoload: true,
 			autoloadCallback: () => {
-				databaseInitialize().then(() => resolve())
+				databaseInitialize().then(() => {
+					resolve()
+					mapCollection()
+				})
 			},
 			autosave: true,
-			autosaveInterval: 1000
+			autosaveInterval: 1000,
+			autosaveCallback: () => {
+				mapCollection()
+			}
 		})
+	})
+}
+
+export function getCollectionMap(): Map<String, AlbumType> {
+	return songMap
+}
+
+function mapCollection() {
+	const COLLECTION = db.getCollection('music').find()
+	let map = getCollectionMap()
+
+	COLLECTION.forEach((song) => {
+		let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/')
+		let rootId = hash(rootDir)
+
+		let data = map.get(rootId)
+
+		if (data) {
+			if (!data.Songs.find((i) => i.ID === song.ID)) {
+				data.Songs.push(song)
+
+				map.set(rootId, data)
+			}
+		} else {
+			map.set(rootId, {
+				ID: rootId,
+				RootDir: rootDir,
+				Name: song.Album,
+				Songs: [song]
+			})
+		}
 	})
 }
 
@@ -64,17 +103,17 @@ export function getDbVersion() {
 }
 
 export function getCollection() {
-	const COLLECTION = db.getCollection(COLLECTION_NAME).find()
+	const COLLECTION = db.getCollection('music').find()
 	return COLLECTION
 }
 
-export function createData(newDoc: TagType) {
+export function createData(newDoc: SongType) {
 	return new Promise((resolve, reject) => {
 		try {
 			// console.log('New Doc: ', newDoc)
-			const COLLECTION = db.getCollection(COLLECTION_NAME)
+			const COLLECTION = db.getCollection('music')
 
-			if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
+			if (!COLLECTION) throw new Error(`Collection music not created/available.`)
 
 			let oldDoc = readData({ SourceFile: newDoc['SourceFile'] })
 
@@ -93,9 +132,9 @@ export function createData(newDoc: TagType) {
 
 export function readDataById(id: any) {
 	try {
-		const COLLECTION = db.getCollection(COLLECTION_NAME)
+		const COLLECTION = db.getCollection('music')
 
-		if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
+		if (!COLLECTION) throw new Error(`Collection ${'music'} not created/available.`)
 
 		return COLLECTION.get(id)
 	} catch (error) {
@@ -106,9 +145,9 @@ export function readDataById(id: any) {
 
 export function readData(query: any) {
 	try {
-		const COLLECTION: Collection<TagType> = db.getCollection(COLLECTION_NAME)
+		const COLLECTION: Collection<SongType> = db.getCollection('music')
 
-		if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
+		if (!COLLECTION) throw new Error(`Collection ${'music'} not created/available.`)
 
 		return COLLECTION.find(query)[0]
 	} catch (error) {
@@ -120,9 +159,9 @@ export function readData(query: any) {
 export function updateData(query: any, newData: object) {
 	return new Promise((resolve, reject) => {
 		try {
-			const COLLECTION = db.getCollection(COLLECTION_NAME)
+			const COLLECTION = db.getCollection('music')
 
-			if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
+			if (!COLLECTION) throw new Error(`Collection ${'music'} not created/available.`)
 
 			let doc = COLLECTION.find(query)[0]
 
@@ -141,9 +180,9 @@ export function deleteData(query: any) {
 	return new Promise((resolve, reject) => {
 		// console.log(query)
 
-		const COLLECTION = db.getCollection(COLLECTION_NAME)
+		const COLLECTION = db.getCollection('music')
 
-		if (!COLLECTION) throw new Error(`Collection ${COLLECTION_NAME} not created/available.`)
+		if (!COLLECTION) throw new Error(`Collection ${'music'} not created/available.`)
 
 		const DOC = COLLECTION.find(query)[0]
 
@@ -165,10 +204,10 @@ function databaseInitialize(): Promise<void> {
 	return new Promise((resolve) => {
 		if (!db) return
 
-		let collection = db.getCollection(COLLECTION_NAME)
+		let collection = db.getCollection('music')
 
 		if (!collection) {
-			db.addCollection(COLLECTION_NAME, {
+			db.addCollection('music', {
 				unique: ['SourceFile']
 			})
 		}
