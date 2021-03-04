@@ -10,14 +10,14 @@
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
 	import { isDoneDrawing, songList, waveformUrl } from '../store/index.store'
-	import { isPlaying, playback } from '../store/player.store'
+	import { isPlaying } from '../store/final.store'
 	import { getWaveformIPCData } from '../service/waveform.service'
 	import { drawWaveform } from '../service/draw.service'
 
 	import { nextSong } from '../functions/nextSong.fn'
 	import { getWaveformIPC } from '../service/ipc.service'
 	import { escapeString } from '../functions/escapeString.fn'
-	import { playbackCursor, playbackStore } from '../store/final.store'
+	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/final.store'
 
 	let progress: number = 0
 
@@ -70,6 +70,9 @@
 			player
 				.play()
 				.then(() => {
+					localStorage.setItem('LastPlayedAlbumID', $albumPlayingIdStore)
+					localStorage.setItem('LastPlayedSongID', String(songToPlay.ID))
+
 					clearTimeout(preLoadNextSongDebounce)
 
 					preLoadNextSongDebounce = setTimeout(() => {
@@ -126,53 +129,6 @@
 
 		return
 	}
-	/*
-	async function playSong() {
-		if ($playback?.['SongList'] === undefined) {
-			return
-		}
-
-		let songBuffer = undefined
-
-		currentSong = $playback['SongList'][$playbackCursor['indexToPlay']]
-
-		if (currentSong === undefined) {
-			return stopPlayer()
-		}
-
-		if (currentSong['$loki'] !== nextSongPreloaded?.['ID']) {
-			songBuffer = await fetchSong(escapeString(currentSong['SourceFile']))
-		} else {
-			songBuffer = nextSongPreloaded['SongBuffer']
-		}
-
-		const blob = new Blob([songBuffer])
-		const url = window.URL.createObjectURL(blob)
-
-		player.src = url
-
-		if ($playbackCursor['playNow'] === false) {
-			player.pause()
-		} else {
-			player.play().catch(() => {})
-		}
-
-		localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
-		localStorage.setItem('LastPlayedSongID', String(currentSong['ID']))
-		preLoadNextSong()
-	}
-*/
-	// async function preLoadNextSong() {
-	// 	const nextSong: SongType = $playback['SongList'][$playbackCursor['indexToPlay'] + 1]
-
-	// 	if (nextSong) {
-	// 		let songBuffer = await fetchSong(escapeString(nextSong['SourceFile']))
-	// 		nextSongPreloaded = {
-	// 			ID: nextSong['$loki'],
-	// 			SongBuffer: songBuffer
-	// 		}
-	// 	}
-	// }
 
 	function fetchSong(songPath: string): Promise<ArrayBuffer> {
 		return new Promise((resolve, reject) => {
@@ -180,6 +136,9 @@
 				.then((data) => data.arrayBuffer())
 				.then((arrayBuffer) => {
 					resolve(arrayBuffer)
+				}).catch(err=>{
+					//TODO Alert user that song is not found and offer a way to remove from DB.
+					console.log('OOPS',err)
 				})
 		})
 	}

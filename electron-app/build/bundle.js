@@ -836,22 +836,20 @@ var app = (function () {
     // Number = index of the playbackStore to play
     // Boolean = Start playing right away or not.
     let playbackCursor = writable([0, false]);
-
-    // export let playbackCursor: Writable<playbackCursorType> = writable({
-    // 	indexToPlay: 0,
-    // 	playNow: false
-    // })
+    // ID of the current album playing.
+    let albumPlayingIdStore = writable(undefined);
+    // Allows to share with the rest of the app whether the player is playing or not.
     let isPlaying = writable(false);
-    let playback = writable(undefined);
-    let selectedAlbum = writable(undefined);
+    let selectedAlbumId = writable(undefined);
+    let selectedSongsStore = writable([]);
 
     async function setNewPlayback(albumID, index, playNow) {
         let songs = await fetchAlbum(albumID);
         getAlbumColors(albumID);
-        playback.set({
-            AlbumID: albumID,
-            SongList: songs
-        });
+        // playback.set({
+        // 	AlbumID: albumID,
+        // 	SongList: songs
+        // })
         playbackCursor.set(undefined);
         playbackCursor.set([index, true]);
     }
@@ -879,9 +877,9 @@ var app = (function () {
     		c: function create() {
     			img = element("img");
     			if (img.src !== (img_src_value = "./img/audio.svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "class", "loader svelte-1fnukjt");
+    			attr_dev(img, "class", "loader svelte-bx9v26");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$1, 89, 2, 3603);
+    			add_location(img, file$1, 89, 2, 3602);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -911,9 +909,9 @@ var app = (function () {
     		c: function create() {
     			img = element("img");
     			if (img.src !== (img_src_value = "./img/compact-disc.svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "class", "notFound svelte-1fnukjt");
+    			attr_dev(img, "class", "notFound svelte-bx9v26");
     			attr_dev(img, "alt", "");
-    			add_location(img, file$1, 91, 32, 3694);
+    			add_location(img, file$1, 91, 32, 3693);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -945,8 +943,8 @@ var app = (function () {
     			img = element("img");
     			if (img.src !== (img_src_value = /*coverSrc*/ ctx[2])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", img_alt_value = /*album*/ ctx[0]["Name"]);
-    			attr_dev(img, "class", "svelte-1fnukjt");
-    			add_location(img, file$1, 92, 28, 3788);
+    			attr_dev(img, "class", "svelte-bx9v26");
+    			add_location(img, file$1, 92, 28, 3787);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -989,13 +987,13 @@ var app = (function () {
     			track = element("track");
     			source = element("source");
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$1, 95, 3, 3892);
+    			add_location(track, file$1, 95, 3, 3891);
     			if (source.src !== (source_src_value = /*coverSrc*/ ctx[2])) attr_dev(source, "src", source_src_value);
-    			add_location(source, file$1, 96, 3, 3921);
+    			add_location(source, file$1, 96, 3, 3920);
     			video.autoplay = true;
     			video.loop = true;
-    			attr_dev(video, "class", "svelte-1fnukjt");
-    			add_location(video, file$1, 94, 2, 3867);
+    			attr_dev(video, "class", "svelte-bx9v26");
+    			add_location(video, file$1, 94, 2, 3866);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, video, anchor);
@@ -1030,8 +1028,8 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			album_artist = element("album-artist");
-    			set_custom_element_data(album_artist, "class", "svelte-1fnukjt");
-    			add_location(album_artist, file$1, 111, 3, 4336);
+    			set_custom_element_data(album_artist, "class", "svelte-bx9v26");
+    			add_location(album_artist, file$1, 111, 3, 4308);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -1063,8 +1061,8 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-1fnukjt");
-    			add_location(album_artist, file$1, 109, 3, 4264);
+    			set_custom_element_data(album_artist, "class", "svelte-bx9v26");
+    			add_location(album_artist, file$1, 109, 3, 4236);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -1099,8 +1097,8 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-1fnukjt");
-    			add_location(album_artist, file$1, 107, 3, 4154);
+    			set_custom_element_data(album_artist, "class", "svelte-bx9v26");
+    			add_location(album_artist, file$1, 107, 3, 4126);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -1131,8 +1129,7 @@ var app = (function () {
     	let t1;
     	let t2;
     	let t3;
-    	let img;
-    	let img_src_value;
+    	let overlay_gradient;
     	let t4;
     	let album_details;
     	let album_name;
@@ -1166,28 +1163,26 @@ var app = (function () {
     			t2 = space();
     			if (if_block3) if_block3.c();
     			t3 = space();
-    			img = element("img");
+    			overlay_gradient = element("overlay-gradient");
     			t4 = space();
     			album_details = element("album-details");
     			album_name = element("album-name");
     			t5 = text(t5_value);
     			t6 = space();
     			if_block4.c();
-    			if (img.src !== (img_src_value = "./img/gradient-overlay.svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "");
-    			attr_dev(img, "class", "svelte-1fnukjt");
-    			add_location(img, file$1, 101, 1, 3998);
-    			set_custom_element_data(album_name, "class", "svelte-1fnukjt");
-    			add_location(album_name, file$1, 104, 2, 4066);
-    			set_custom_element_data(album_details, "class", "svelte-1fnukjt");
-    			add_location(album_details, file$1, 103, 1, 4048);
+    			set_custom_element_data(overlay_gradient, "class", "svelte-bx9v26");
+    			add_location(overlay_gradient, file$1, 101, 1, 3997);
+    			set_custom_element_data(album_name, "class", "svelte-bx9v26");
+    			add_location(album_name, file$1, 104, 2, 4038);
+    			set_custom_element_data(album_details, "class", "svelte-bx9v26");
+    			add_location(album_details, file$1, 103, 1, 4020);
 
-    			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbum*/ ctx[3]?.["ID"] === /*album*/ ctx[0]?.["ID"]
+    			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$albumPlayingIdStore*/ ctx[3] === /*album*/ ctx[0]?.["ID"]
     			? "selected"
-    			: "") + " svelte-1fnukjt"));
+    			: "") + " svelte-bx9v26"));
 
     			attr_dev(album_1, "id", album_1_id_value = /*album*/ ctx[0]["ID"]);
-    			add_location(album_1, file$1, 86, 0, 3447);
+    			add_location(album_1, file$1, 86, 0, 3448);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1202,7 +1197,7 @@ var app = (function () {
     			append_dev(album_1, t2);
     			if (if_block3) if_block3.m(album_1, null);
     			append_dev(album_1, t3);
-    			append_dev(album_1, img);
+    			append_dev(album_1, overlay_gradient);
     			append_dev(album_1, t4);
     			append_dev(album_1, album_details);
     			append_dev(album_details, album_name);
@@ -1273,9 +1268,9 @@ var app = (function () {
     				}
     			}
 
-    			if (dirty & /*$selectedAlbum, album*/ 9 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty(/*$selectedAlbum*/ ctx[3]?.["ID"] === /*album*/ ctx[0]?.["ID"]
+    			if (dirty & /*$albumPlayingIdStore, album*/ 9 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty(/*$albumPlayingIdStore*/ ctx[3] === /*album*/ ctx[0]?.["ID"]
     			? "selected"
-    			: "") + " svelte-1fnukjt"))) {
+    			: "") + " svelte-bx9v26"))) {
     				attr_dev(album_1, "class", album_1_class_value);
     			}
 
@@ -1307,12 +1302,9 @@ var app = (function () {
     }
 
     function instance$1($$self, $$props, $$invalidate) {
-    	let $playback;
-    	let $selectedAlbum;
-    	validate_store(playback, "playback");
-    	component_subscribe($$self, playback, $$value => $$invalidate(5, $playback = $$value));
-    	validate_store(selectedAlbum, "selectedAlbum");
-    	component_subscribe($$self, selectedAlbum, $$value => $$invalidate(3, $selectedAlbum = $$value));
+    	let $albumPlayingIdStore;
+    	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
+    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(3, $albumPlayingIdStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Album", slots, []);
 
@@ -1362,17 +1354,18 @@ var app = (function () {
     		addIntersectionObserver();
     		let lastPlayedAlbumID = localStorage.getItem("LastPlayedAlbumID");
 
-    		if (album["ID"] === lastPlayedAlbumID) {
-    			if ($playback === undefined) {
-    				set_store_value(playback, $playback = { AlbumID: lastPlayedAlbumID, SongList: [] }, $playback);
-    				selectLastPlayedSong();
-    			}
-    		}
-    	});
+    		if (album["ID"] === lastPlayedAlbumID) ; // if ($playback === undefined) {
+    		// 	$playback = {
+    	}); // 		AlbumID: lastPlayedAlbumID,
+    	// 		SongList: []
+    	// 	}
+    	// 	selectLastPlayedSong()
 
+    	// }
     	function selectLastPlayedSong() {
     		$$invalidate(0, album["Songs"] = album["Songs"].sort((a, b) => a["Track"] - b["Track"]), album);
-    		set_store_value(selectedAlbum, $selectedAlbum = album, $selectedAlbum);
+
+    		// $selectedAlbumId = album
     		let lastPlayedSong = album["Songs"].find(i => i["ID"] === Number(localStorage.getItem("LastPlayedSongID")));
 
     		if (lastPlayedSong) {
@@ -1427,8 +1420,7 @@ var app = (function () {
     			// Song Sorting
     			$$invalidate(0, album["Songs"] = album["Songs"].sort((a, b) => a["Track"] - b["Track"]), album);
 
-    			set_store_value(selectedAlbum, $selectedAlbum = album, $selectedAlbum);
-
+    			// $selectedAlbumId = album
     			if (evt["type"] === "dblclick") {
     				setNewPlayback(album["ID"], 0);
     			}
@@ -1451,10 +1443,9 @@ var app = (function () {
     		onMount,
     		getCoverIPC,
     		setNewPlayback,
-    		playback,
-    		selectedAlbum,
     		scrollSongListToTop,
     		selectedSongs,
+    		albumPlayingIdStore,
     		album,
     		index,
     		coverType,
@@ -1463,8 +1454,7 @@ var app = (function () {
     		fetchAlbumCover,
     		addIntersectionObserver,
     		prepareAlbum,
-    		$playback,
-    		$selectedAlbum
+    		$albumPlayingIdStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -1479,7 +1469,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [album, coverType, coverSrc, $selectedAlbum, index];
+    	return [album, coverType, coverSrc, $albumPlayingIdStore, index];
     }
 
     class Album extends SvelteComponentDev {
@@ -2419,11 +2409,11 @@ var app = (function () {
     			t = space();
     			right_part = element("right-part");
     			set_custom_element_data(left_part, "class", "svelte-1lvzyl3");
-    			add_location(left_part, file$6, 15, 1, 351);
+    			add_location(left_part, file$6, 15, 1, 350);
     			set_custom_element_data(right_part, "class", "svelte-1lvzyl3");
-    			add_location(right_part, file$6, 17, 1, 367);
+    			add_location(right_part, file$6, 17, 1, 366);
     			set_custom_element_data(play_pause_button, "class", play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[0] ? "" : "playing") + " svelte-1lvzyl3"));
-    			add_location(play_pause_button, file$6, 14, 0, 264);
+    			add_location(play_pause_button, file$6, 14, 0, 263);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2558,14 +2548,14 @@ var app = (function () {
     			t = space();
     			img = element("img");
     			set_custom_element_data(progress_foreground, "class", "svelte-1e5epd0");
-    			add_location(progress_foreground, file$7, 80, 1, 3819);
+    			add_location(progress_foreground, file$7, 68, 1, 2775);
     			attr_dev(img, "id", "progress-background");
     			if (img.src !== (img_src_value = "")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-1e5epd0");
-    			add_location(img, file$7, 81, 1, 3844);
+    			add_location(img, file$7, 69, 1, 2800);
     			set_custom_element_data(player_progress, "class", "svelte-1e5epd0");
-    			add_location(player_progress, file$7, 79, 0, 3800);
+    			add_location(player_progress, file$7, 67, 0, 2756);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2597,50 +2587,10 @@ var app = (function () {
 
     function instance$7($$self, $$props, $$invalidate) {
     	let $playbackCursor;
-    	let $playback;
     	validate_store(playbackCursor, "playbackCursor");
     	component_subscribe($$self, playbackCursor, $$value => $$invalidate(2, $playbackCursor = $$value));
-    	validate_store(playback, "playback");
-    	component_subscribe($$self, playback, $$value => $$invalidate(7, $playback = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerProgress", slots, []);
-
-    	var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
-    		function adopt(value) {
-    			return value instanceof P
-    			? value
-    			: new P(function (resolve) {
-    						resolve(value);
-    					});
-    		}
-
-    		return new (P || (P = Promise))(function (resolve, reject) {
-    				function fulfilled(value) {
-    					try {
-    						step(generator.next(value));
-    					} catch(e) {
-    						reject(e);
-    					}
-    				}
-
-    				function rejected(value) {
-    					try {
-    						step(generator["throw"](value));
-    					} catch(e) {
-    						reject(e);
-    					}
-    				}
-
-    				function step(result) {
-    					result.done
-    					? resolve(result.value)
-    					: adopt(result.value).then(fulfilled, rejected);
-    				}
-
-    				step((generator = generator.apply(thisArg, _arguments || [])).next());
-    			});
-    	};
-
     	
     	let { player } = $$props;
     	let { song } = $$props;
@@ -2649,38 +2599,27 @@ var app = (function () {
     	let isMouseIn = false;
     	let progressBackgroundEl = undefined;
 
-    	function fetchWave() {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			if (($playback === null || $playback === void 0
-    			? void 0
-    			: $playback.SongList.length) > 0) {
-    				// Keeps track of the song the getWaveformIPC fn was called for
-    				let tempSong = $playback["SongList"][$playbackCursor["indexToPlay"]];
-
-    				progressBackgroundEl.style.opacity = "0";
-
-    				getWaveformIPC(tempSong["SourceFile"]).then(waveformUrl => {
-    					setTimeout(
-    						() => {
-    							// Gets the actual song playing
-    							let currentSongPlaying = $playback["SongList"][$playbackCursor["indexToPlay"]];
-
-    							/*
-    If the temporary song and the actual playing song match, it shows the waveform
-    Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
-    */
-    							if (tempSong["$loki"] === currentSongPlaying["$loki"]) {
-    								progressBackgroundEl.src = waveformUrl;
-    								progressBackgroundEl.style.opacity = "1";
-    							}
-    						},
-    						250
-    					);
-    				});
-    			}
-    		});
-    	}
-
+    	// async function fetchWave() {
+    	// 	if ($playback?.SongList.length > 0) {
+    	// 		// Keeps track of the song the getWaveformIPC fn was called for
+    	// 		let tempSong = $playback['SongList'][$playbackCursor['indexToPlay']]
+    	// 		progressBackgroundEl.style.opacity = '0'
+    	// 		getWaveformIPC(tempSong['SourceFile']).then((waveformUrl) => {
+    	// 			setTimeout(() => {
+    	// 				// Gets the actual song playing
+    	// 				let currentSongPlaying = $playback['SongList'][$playbackCursor['indexToPlay']]
+    	// 				/*
+    	// 				If the temporary song and the actual playing song match, it shows the waveform
+    	// 				Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
+    	// 				*/
+    	// 				if (tempSong['$loki'] === currentSongPlaying['$loki']) {
+    	// 					progressBackgroundEl.src = waveformUrl
+    	// 					progressBackgroundEl.style.opacity = '1'
+    	// 				}
+    	// 			}, 250)
+    	// 		})
+    	// 	}
+    	// }
     	onMount(() => {
     		hookPlayerProgressEvents();
     		progressBackgroundEl = document.querySelector("img#progress-background");
@@ -2731,25 +2670,20 @@ var app = (function () {
     	};
 
     	$$self.$capture_state = () => ({
-    		__awaiter,
     		onMount,
     		getWaveformIPC,
     		playbackCursor,
-    		playback,
     		player,
     		song,
     		pauseDebounce,
     		isMouseDown,
     		isMouseIn,
     		progressBackgroundEl,
-    		fetchWave,
     		hookPlayerProgressEvents,
-    		$playbackCursor,
-    		$playback
+    		$playbackCursor
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("__awaiter" in $$props) __awaiter = $$props.__awaiter;
     		if ("player" in $$props) $$invalidate(0, player = $$props.player);
     		if ("song" in $$props) $$invalidate(1, song = $$props.song);
     		if ("pauseDebounce" in $$props) pauseDebounce = $$props.pauseDebounce;
@@ -2763,11 +2697,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$playbackCursor*/ 4) {
-    			 {
-    				fetchWave();
-    			}
-    		}
+    		if ($$self.$$.dirty & /*$playbackCursor*/ 4) ;
     	};
 
     	return [player, song, $playbackCursor];
@@ -3131,6 +3061,9 @@ var app = (function () {
     }
 
     /* src/includes/Player.svelte generated by Svelte v3.31.0 */
+
+    const { console: console_1 } = globals;
+
     const file$9 = "src/includes/Player.svelte";
 
     function create_fragment$9(ctx) {
@@ -3195,14 +3128,14 @@ var app = (function () {
     			t4 = space();
     			create_component(playerprogress.$$.fragment);
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$9, 189, 2, 6623);
+    			add_location(track, file$9, 148, 2, 5721);
     			audio.controls = audio_controls_value = true;
     			attr_dev(audio, "class", "svelte-g8dn23");
-    			add_location(audio, file$9, 188, 1, 6505);
+    			add_location(audio, file$9, 147, 1, 5603);
     			set_custom_element_data(player_buttons, "class", "svelte-g8dn23");
-    			add_location(player_buttons, file$9, 192, 1, 6661);
+    			add_location(player_buttons, file$9, 151, 1, 5759);
     			set_custom_element_data(player_svlt, "class", "svelte-g8dn23");
-    			add_location(player_svlt, file$9, 187, 0, 6490);
+    			add_location(player_svlt, file$9, 146, 0, 5588);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3309,56 +3242,13 @@ var app = (function () {
     	}
     }
 
-    /*
-    async function playSong() {
-        if ($playback?.['SongList'] === undefined) {
-            return
-        }
-
-        let songBuffer = undefined
-
-        currentSong = $playback['SongList'][$playbackCursor['indexToPlay']]
-
-        if (currentSong === undefined) {
-            return stopPlayer()
-        }
-
-        if (currentSong['$loki'] !== nextSongPreloaded?.['ID']) {
-            songBuffer = await fetchSong(escapeString(currentSong['SourceFile']))
-        } else {
-            songBuffer = nextSongPreloaded['SongBuffer']
-        }
-
-        const blob = new Blob([songBuffer])
-        const url = window.URL.createObjectURL(blob)
-
-        player.src = url
-
-        if ($playbackCursor['playNow'] === false) {
-            player.pause()
-        } else {
-            player.play().catch(() => {})
-        }
-
-        localStorage.setItem('LastPlayedAlbumID', $playback['AlbumID'])
-        localStorage.setItem('LastPlayedSongID', String(currentSong['ID']))
-        preLoadNextSong()
-    }
-    */
-    // async function preLoadNextSong() {
-    // 	const nextSong: SongType = $playback['SongList'][$playbackCursor['indexToPlay'] + 1]
-    // 	if (nextSong) {
-    // 		let songBuffer = await fetchSong(escapeString(nextSong['SourceFile']))
-    // 		nextSongPreloaded = {
-    // 			ID: nextSong['$loki'],
-    // 			SongBuffer: songBuffer
-    // 		}
-    // 	}
-    // }
     function fetchSong(songPath) {
     	return new Promise((resolve, reject) => {
     			fetch(songPath).then(data => data.arrayBuffer()).then(arrayBuffer => {
     				resolve(arrayBuffer);
+    			}).catch(err => {
+    				//TODO Alert user that song is not found and offer a way to remove from DB.
+    				console.log("OOPS", err);
     			});
     		});
     }
@@ -3367,12 +3257,15 @@ var app = (function () {
     	let $playbackCursor;
     	let $playbackStore;
     	let $isPlaying;
+    	let $albumPlayingIdStore;
     	validate_store(playbackCursor, "playbackCursor");
     	component_subscribe($$self, playbackCursor, $$value => $$invalidate(5, $playbackCursor = $$value));
     	validate_store(playbackStore, "playbackStore");
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(13, $playbackStore = $$value));
     	validate_store(isPlaying, "isPlaying");
     	component_subscribe($$self, isPlaying, $$value => $$invalidate(14, $isPlaying = $$value));
+    	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
+    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(15, $albumPlayingIdStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Player", slots, []);
 
@@ -3453,6 +3346,8 @@ var app = (function () {
 
     			if (doPlayNow === true) {
     				player.play().then(() => {
+    					localStorage.setItem("LastPlayedAlbumID", $albumPlayingIdStore);
+    					localStorage.setItem("LastPlayedSongID", String(songToPlay.ID));
     					clearTimeout(preLoadNextSongDebounce);
 
     					preLoadNextSongDebounce = setTimeout(
@@ -3523,7 +3418,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Player> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1.warn(`<Player> was created with unknown prop '${key}'`);
     	});
 
     	const play_handler = () => startInterval();
@@ -3542,12 +3437,12 @@ var app = (function () {
     		songList,
     		waveformUrl,
     		isPlaying,
-    		playback,
     		getWaveformIPCData,
     		drawWaveform,
     		nextSong,
     		getWaveformIPC,
     		escapeString,
+    		albumPlayingIdStore,
     		playbackCursor,
     		playbackStore,
     		progress,
@@ -3568,7 +3463,8 @@ var app = (function () {
     		stopInterval,
     		$playbackCursor,
     		$playbackStore,
-    		$isPlaying
+    		$isPlaying,
+    		$albumPlayingIdStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -3628,6 +3524,7 @@ var app = (function () {
     }
 
     /* src/components/SongListItem.svelte generated by Svelte v3.31.0 */
+
     const file$a = "src/components/SongListItem.svelte";
 
     function create_fragment$a(ctx) {
@@ -3648,8 +3545,6 @@ var app = (function () {
     	let t6;
     	let song_list_item_id_value;
     	let song_list_item_class_value;
-    	let mounted;
-    	let dispose;
 
     	const block = {
     		c: function create() {
@@ -3666,23 +3561,23 @@ var app = (function () {
     			song_duration = element("song-duration");
     			t6 = text(t6_value);
     			set_custom_element_data(song_number0, "class", "svelte-14gcql6");
-    			add_location(song_number0, file$a, 32, 1, 964);
+    			add_location(song_number0, file$a, 30, 1, 892);
     			set_custom_element_data(song_number1, "class", "svelte-14gcql6");
-    			add_location(song_number1, file$a, 34, 1, 1053);
+    			add_location(song_number1, file$a, 32, 1, 981);
     			set_custom_element_data(song_title, "class", "svelte-14gcql6");
-    			add_location(song_title, file$a, 35, 1, 1094);
+    			add_location(song_title, file$a, 33, 1, 1022);
     			set_custom_element_data(song_duration, "class", "svelte-14gcql6");
-    			add_location(song_duration, file$a, 36, 1, 1136);
+    			add_location(song_duration, file$a, 34, 1, 1064);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0]["ID"]);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
 
-    			set_custom_element_data(song_list_item, "class", song_list_item_class_value = "\n\t" + (/*$playbackCursor*/ ctx[2]["indexToPlay"] === /*index*/ ctx[1] && /*$selectedAlbum*/ ctx[3]["ID"] === /*$playback*/ ctx[4]?.["AlbumID"]
+    			set_custom_element_data(song_list_item, "class", song_list_item_class_value = "\n\t" + (/*$playbackCursor*/ ctx[2][0] === /*index*/ ctx[1] && /*$selectedAlbumId*/ ctx[3] === /*$albumPlayingIdStore*/ ctx[4]
     			? "playing"
-    			: "") + "\n\t" + (/*$selectedSongs*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
+    			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
     			? "selected"
     			: "") + " svelte-14gcql6");
 
-    			add_location(song_list_item, file$a, 22, 0, 680);
+    			add_location(song_list_item, file$a, 21, 0, 677);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3700,11 +3595,6 @@ var app = (function () {
     			append_dev(song_list_item, t5);
     			append_dev(song_list_item, song_duration);
     			append_dev(song_duration, t6);
-
-    			if (!mounted) {
-    				dispose = listen_dev(song_list_item, "dblclick", /*dblclick_handler*/ ctx[8], false, false, false);
-    				mounted = true;
-    			}
     		},
     		p: function update(ctx, [dirty]) {
     			if (dirty & /*index*/ 2) set_data_dev(t0, /*index*/ ctx[1]);
@@ -3720,9 +3610,9 @@ var app = (function () {
     				set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
     			}
 
-    			if (dirty & /*$playbackCursor, index, $selectedAlbum, $playback, $selectedSongs, song*/ 63 && song_list_item_class_value !== (song_list_item_class_value = "\n\t" + (/*$playbackCursor*/ ctx[2]["indexToPlay"] === /*index*/ ctx[1] && /*$selectedAlbum*/ ctx[3]["ID"] === /*$playback*/ ctx[4]?.["AlbumID"]
+    			if (dirty & /*$playbackCursor, index, $selectedAlbumId, $albumPlayingIdStore, $selectedSongsStore, song*/ 63 && song_list_item_class_value !== (song_list_item_class_value = "\n\t" + (/*$playbackCursor*/ ctx[2][0] === /*index*/ ctx[1] && /*$selectedAlbumId*/ ctx[3] === /*$albumPlayingIdStore*/ ctx[4]
     			? "playing"
-    			: "") + "\n\t" + (/*$selectedSongs*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
+    			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
     			? "selected"
     			: "") + " svelte-14gcql6")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
@@ -3732,8 +3622,6 @@ var app = (function () {
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(song_list_item);
-    			mounted = false;
-    			dispose();
     		}
     	};
 
@@ -3758,17 +3646,17 @@ var app = (function () {
 
     function instance$a($$self, $$props, $$invalidate) {
     	let $playbackCursor;
-    	let $selectedAlbum;
-    	let $playback;
-    	let $selectedSongs;
+    	let $selectedAlbumId;
+    	let $albumPlayingIdStore;
+    	let $selectedSongsStore;
     	validate_store(playbackCursor, "playbackCursor");
     	component_subscribe($$self, playbackCursor, $$value => $$invalidate(2, $playbackCursor = $$value));
-    	validate_store(selectedAlbum, "selectedAlbum");
-    	component_subscribe($$self, selectedAlbum, $$value => $$invalidate(3, $selectedAlbum = $$value));
-    	validate_store(playback, "playback");
-    	component_subscribe($$self, playback, $$value => $$invalidate(4, $playback = $$value));
-    	validate_store(selectedSongs, "selectedSongs");
-    	component_subscribe($$self, selectedSongs, $$value => $$invalidate(5, $selectedSongs = $$value));
+    	validate_store(selectedAlbumId, "selectedAlbumId");
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(3, $selectedAlbumId = $$value));
+    	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
+    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(4, $albumPlayingIdStore = $$value));
+    	validate_store(selectedSongsStore, "selectedSongsStore");
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(5, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongListItem", slots, []);
     	
@@ -3786,36 +3674,34 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<SongListItem> was created with unknown prop '${key}'`);
     	});
 
-    	const dblclick_handler = () => songListItemDbLClickEventHandler();
-
     	$$self.$$set = $$props => {
     		if ("song" in $$props) $$invalidate(0, song = $$props.song);
     		if ("index" in $$props) $$invalidate(1, index = $$props.index);
-    		if ("albumID" in $$props) $$invalidate(7, albumID = $$props.albumID);
+    		if ("albumID" in $$props) $$invalidate(6, albumID = $$props.albumID);
     	};
 
     	$$self.$capture_state = () => ({
     		onMount,
-    		playback,
-    		selectedAlbum,
     		setNewPlayback,
-    		selectedSongs,
+    		albumPlayingIdStore,
     		playbackCursor,
+    		selectedAlbumId,
+    		selectedSongsStore,
     		song,
     		index,
     		albumID,
     		parseDuration,
     		songListItemDbLClickEventHandler,
     		$playbackCursor,
-    		$selectedAlbum,
-    		$playback,
-    		$selectedSongs
+    		$selectedAlbumId,
+    		$albumPlayingIdStore,
+    		$selectedSongsStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ("song" in $$props) $$invalidate(0, song = $$props.song);
     		if ("index" in $$props) $$invalidate(1, index = $$props.index);
-    		if ("albumID" in $$props) $$invalidate(7, albumID = $$props.albumID);
+    		if ("albumID" in $$props) $$invalidate(6, albumID = $$props.albumID);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -3826,19 +3712,17 @@ var app = (function () {
     		song,
     		index,
     		$playbackCursor,
-    		$selectedAlbum,
-    		$playback,
-    		$selectedSongs,
-    		songListItemDbLClickEventHandler,
-    		albumID,
-    		dblclick_handler
+    		$selectedAlbumId,
+    		$albumPlayingIdStore,
+    		$selectedSongsStore,
+    		albumID
     	];
     }
 
     class SongListItem extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { song: 0, index: 1, albumID: 7 });
+    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { song: 0, index: 1, albumID: 6 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -3858,7 +3742,7 @@ var app = (function () {
     			console.warn("<SongListItem> was created without expected prop 'index'");
     		}
 
-    		if (/*albumID*/ ctx[7] === undefined && !("albumID" in props)) {
+    		if (/*albumID*/ ctx[6] === undefined && !("albumID" in props)) {
     			console.warn("<SongListItem> was created without expected prop 'albumID'");
     		}
     	}
@@ -3893,86 +3777,20 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[5] = list[i];
-    	child_ctx[7] = i;
+    	child_ctx[2] = list[i];
+    	child_ctx[4] = i;
     	return child_ctx;
     }
 
-    // (38:1) {#if $selectedAlbum !== undefined}
+    // (47:1) {#if $songListStore !== undefined}
     function create_if_block$1(ctx) {
-    	let if_block_anchor;
-    	let current;
-    	let if_block = /*$selectedAlbum*/ ctx[0]["Songs"] !== undefined && create_if_block_1$1(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			if (/*$selectedAlbum*/ ctx[0]["Songs"] !== undefined) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-
-    					if (dirty & /*$selectedAlbum*/ 1) {
-    						transition_in(if_block, 1);
-    					}
-    				} else {
-    					if_block = create_if_block_1$1(ctx);
-    					if_block.c();
-    					transition_in(if_block, 1);
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				group_outros();
-
-    				transition_out(if_block, 1, 1, () => {
-    					if_block = null;
-    				});
-
-    				check_outros();
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$1.name,
-    		type: "if",
-    		source: "(38:1) {#if $selectedAlbum !== undefined}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (39:2) {#if $selectedAlbum['Songs'] !== undefined}
-    function create_if_block_1$1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
     	let current;
-    	let each_value = /*$selectedAlbum*/ ctx[0]["Songs"];
+    	let each_value = /*$songListStore*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[7];
+    	const get_key = ctx => /*index*/ ctx[4];
     	validate_each_keys(ctx, each_value, get_each_context$2, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -3998,8 +3816,8 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*$selectedAlbum*/ 1) {
-    				const each_value = /*$selectedAlbum*/ ctx[0]["Songs"];
+    			if (dirty & /*undefined, $songListStore*/ 1) {
+    				const each_value = /*$songListStore*/ ctx[0];
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context$2, get_key);
@@ -4034,16 +3852,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block$1.name,
     		type: "if",
-    		source: "(39:2) {#if $selectedAlbum['Songs'] !== undefined}",
+    		source: "(47:1) {#if $songListStore !== undefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (40:3) {#each $selectedAlbum['Songs'] as song, index (index)}
+    // (48:2) {#each $songListStore as song, index (index)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -4051,9 +3869,9 @@ var app = (function () {
 
     	songlistitem = new SongListItem({
     			props: {
-    				albumID: /*$selectedAlbum*/ ctx[0]["ID"],
-    				song: /*song*/ ctx[5],
-    				index: /*index*/ ctx[7]
+    				albumID: undefined,
+    				song: /*song*/ ctx[2],
+    				index: /*index*/ ctx[4]
     			},
     			$$inline: true
     		});
@@ -4073,9 +3891,8 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const songlistitem_changes = {};
-    			if (dirty & /*$selectedAlbum*/ 1) songlistitem_changes.albumID = /*$selectedAlbum*/ ctx[0]["ID"];
-    			if (dirty & /*$selectedAlbum*/ 1) songlistitem_changes.song = /*song*/ ctx[5];
-    			if (dirty & /*$selectedAlbum*/ 1) songlistitem_changes.index = /*index*/ ctx[7];
+    			if (dirty & /*$songListStore*/ 1) songlistitem_changes.song = /*song*/ ctx[2];
+    			if (dirty & /*$songListStore*/ 1) songlistitem_changes.index = /*index*/ ctx[4];
     			songlistitem.$set(songlistitem_changes);
     		},
     		i: function intro(local) {
@@ -4097,7 +3914,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(40:3) {#each $selectedAlbum['Songs'] as song, index (index)}",
+    		source: "(48:2) {#each $songListStore as song, index (index)}",
     		ctx
     	});
 
@@ -4107,16 +3924,14 @@ var app = (function () {
     function create_fragment$b(ctx) {
     	let song_list_svlt;
     	let current;
-    	let mounted;
-    	let dispose;
-    	let if_block = /*$selectedAlbum*/ ctx[0] !== undefined && create_if_block$1(ctx);
+    	let if_block = /*$songListStore*/ ctx[0] !== undefined && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
     			song_list_svlt = element("song-list-svlt");
     			if (if_block) if_block.c();
     			set_custom_element_data(song_list_svlt, "class", "svelte-1pk1mov");
-    			add_location(song_list_svlt, file$b, 36, 0, 1552);
+    			add_location(song_list_svlt, file$b, 45, 0, 1673);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4125,18 +3940,13 @@ var app = (function () {
     			insert_dev(target, song_list_svlt, anchor);
     			if (if_block) if_block.m(song_list_svlt, null);
     			current = true;
-
-    			if (!mounted) {
-    				dispose = listen_dev(song_list_svlt, "click", /*click_handler*/ ctx[2], false, false, false);
-    				mounted = true;
-    			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*$selectedAlbum*/ ctx[0] !== undefined) {
+    			if (/*$songListStore*/ ctx[0] !== undefined) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
-    					if (dirty & /*$selectedAlbum*/ 1) {
+    					if (dirty & /*$songListStore*/ 1) {
     						transition_in(if_block, 1);
     					}
     				} else {
@@ -4167,8 +3977,6 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(song_list_svlt);
     			if (if_block) if_block.d();
-    			mounted = false;
-    			dispose();
     		}
     	};
 
@@ -4184,68 +3992,24 @@ var app = (function () {
     }
 
     function instance$b($$self, $$props, $$invalidate) {
-    	let $selectedSongs;
-    	let $selectedAlbum;
-    	validate_store(selectedSongs, "selectedSongs");
-    	component_subscribe($$self, selectedSongs, $$value => $$invalidate(4, $selectedSongs = $$value));
-    	validate_store(selectedAlbum, "selectedAlbum");
-    	component_subscribe($$self, selectedAlbum, $$value => $$invalidate(0, $selectedAlbum = $$value));
+    	let $songListStore;
+    	validate_store(songListStore, "songListStore");
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(0, $songListStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongList", slots, []);
     	let lastSelectedSong = 0;
-
-    	function selectSongs(e) {
-    		let { ctrlKey, metaKey, shiftKey } = e;
-
-    		e["path"].forEach(element => {
-    			if (element.tagName === "SONG-LIST-ITEM") {
-    				let id = Number(element.getAttribute("id"));
-    				let currentSelectedSong = Number(element.getAttribute("index"));
-
-    				if (ctrlKey === false && metaKey === false && shiftKey === false) {
-    					set_store_value(selectedSongs, $selectedSongs = [id], $selectedSongs);
-    				}
-
-    				if (shiftKey === false && (ctrlKey === true || metaKey === true)) {
-    					if (!$selectedSongs.includes(id)) {
-    						$selectedSongs.push(id);
-    					} else {
-    						$selectedSongs.splice($selectedSongs.indexOf(id), 1);
-    					}
-    				}
-
-    				if (shiftKey === true && ctrlKey === false && metaKey === false) {
-    					for (let i = currentSelectedSong; i !== lastSelectedSong; currentSelectedSong < lastSelectedSong ? i++ : i--) {
-    						let currentID = $selectedAlbum["Songs"][i]["ID"];
-
-    						if (!$selectedSongs.find(i => i === currentID)) {
-    							$selectedSongs.push(currentID);
-    						}
-    					}
-    				}
-
-    				lastSelectedSong = currentSelectedSong;
-    				selectedSongs.set($selectedSongs);
-    			}
-    		});
-    	}
-
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<SongList> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = e => selectSongs(e);
-
     	$$self.$capture_state = () => ({
     		SongListItem,
+    		songListStore,
     		selectedSongs,
-    		selectedAlbum,
     		lastSelectedSong,
-    		selectSongs,
-    		$selectedSongs,
-    		$selectedAlbum
+    		$songListStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -4256,7 +4020,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [$selectedAlbum, selectSongs, click_handler];
+    	return [$songListStore];
     }
 
     class SongList extends SvelteComponentDev {
@@ -4275,7 +4039,7 @@ var app = (function () {
 
     /* src/includes/Details.svelte generated by Svelte v3.31.0 */
 
-    const { console: console_1 } = globals;
+    const { console: console_1$1 } = globals;
     const file$c = "src/includes/Details.svelte";
 
     function create_fragment$c(ctx) {
@@ -4285,7 +4049,7 @@ var app = (function () {
     		c: function create() {
     			details_svlt = element("details-svlt");
     			set_custom_element_data(details_svlt, "class", "svelte-fxqmax");
-    			add_location(details_svlt, file$c, 28, 0, 756);
+    			add_location(details_svlt, file$c, 33, 0, 758);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4314,52 +4078,21 @@ var app = (function () {
 
     function instance$c($$self, $$props, $$invalidate) {
     	let $selectedSongs;
-    	let $selectedAlbum;
     	validate_store(selectedSongs, "selectedSongs");
     	component_subscribe($$self, selectedSongs, $$value => $$invalidate(0, $selectedSongs = $$value));
-    	validate_store(selectedAlbum, "selectedAlbum");
-    	component_subscribe($$self, selectedAlbum, $$value => $$invalidate(2, $selectedAlbum = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Details", slots, []);
     	let previousSongList = undefined;
-
-    	function checkSongs() {
-    		if (!($selectedAlbum === null || $selectedAlbum === void 0
-    		? void 0
-    		: $selectedAlbum.Songs)) return;
-
-    		let songs = [];
-
-    		$selectedSongs.forEach(index => {
-    			songs.push($selectedAlbum.Songs[index]);
-    		});
-
-    		if (songs.length === 0) {
-    			songs = $selectedAlbum.Songs;
-    		}
-
-    		if (JSON.stringify(previousSongList) === JSON.stringify(songs)) {
-    			return;
-    		} else {
-    			previousSongList = [...songs];
-    		}
-
-    		console.log(songs);
-    	}
-
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1.warn(`<Details> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<Details> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
     		selectedSongs,
-    		selectedAlbum,
     		previousSongList,
-    		checkSongs,
-    		$selectedSongs,
-    		$selectedAlbum
+    		$selectedSongs
     	});
 
     	$$self.$inject_state = $$props => {
@@ -4372,6 +4105,7 @@ var app = (function () {
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$selectedSongs*/ 1) {
+    			// import { selectedAlbum } from '../store/player.store'
     			 {
     				console.log($selectedSongs);
     			} // $selectedSongs
@@ -4735,21 +4469,30 @@ var app = (function () {
     	let $selectedGroupByStore;
     	let $selectedGroupByValueStore;
     	let $albumListStore;
+    	let $albumPlayingIdStore;
     	let $playbackStore;
     	let $playbackCursor;
+    	let $selectedAlbumId;
     	let $songListStore;
+    	let $selectedSongsStore;
     	validate_store(selectedGroupByStore, "selectedGroupByStore");
     	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(1, $selectedGroupByStore = $$value));
     	validate_store(selectedGroupByValueStore, "selectedGroupByValueStore");
     	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(2, $selectedGroupByValueStore = $$value));
     	validate_store(albumListStore, "albumListStore");
     	component_subscribe($$self, albumListStore, $$value => $$invalidate(3, $albumListStore = $$value));
+    	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
+    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(4, $albumPlayingIdStore = $$value));
     	validate_store(playbackStore, "playbackStore");
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(4, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(5, $playbackStore = $$value));
     	validate_store(playbackCursor, "playbackCursor");
-    	component_subscribe($$self, playbackCursor, $$value => $$invalidate(5, $playbackCursor = $$value));
+    	component_subscribe($$self, playbackCursor, $$value => $$invalidate(6, $playbackCursor = $$value));
+    	validate_store(selectedAlbumId, "selectedAlbumId");
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(7, $selectedAlbumId = $$value));
     	validate_store(songListStore, "songListStore");
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(6, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(8, $songListStore = $$value));
+    	validate_store(selectedSongsStore, "selectedSongsStore");
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(9, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerController", slots, []);
     	let firstGroupByAssignments = true;
@@ -4764,18 +4507,45 @@ var app = (function () {
     	});
 
     	function handleClickEvent(evt) {
-    		//@ts-ignore
-    		let albumElement = evt.path.find(path => path.tagName === "ALBUM");
+    		let elementMap = new Map();
 
-    		if (albumElement) {
-    			getAlbumIPC(albumElement.getAttribute("id")).then(result => {
+    		evt.composedPath().forEach(element => {
+    			elementMap.set(element.tagName, element);
+    		});
+
+    		const ALBUM_ELEMENT = elementMap.get("ALBUM");
+    		const SONG_LIST_ITEM_ELEMENT = elementMap.get("SONG-LIST-ITEM");
+
+    		if (ALBUM_ELEMENT) {
+    			const ALBUM_ID = ALBUM_ELEMENT.getAttribute("id");
+
+    			getAlbumIPC(ALBUM_ID).then(result => {
     				if (evt.type === "dblclick") {
+    					set_store_value(albumPlayingIdStore, $albumPlayingIdStore = ALBUM_ID, $albumPlayingIdStore);
     					set_store_value(playbackStore, $playbackStore = result.Songs, $playbackStore);
     					set_store_value(playbackCursor, $playbackCursor = [0, true], $playbackCursor);
     				} else if (evt.type === "click") {
+    					set_store_value(selectedAlbumId, $selectedAlbumId = ALBUM_ID, $selectedAlbumId);
     					set_store_value(songListStore, $songListStore = result.Songs, $songListStore);
     				}
     			});
+    		}
+
+    		if (SONG_LIST_ITEM_ELEMENT) {
+    			const SONG_INDEX = Number(SONG_LIST_ITEM_ELEMENT.getAttribute("index"));
+    			const SONG_ID = Number(SONG_LIST_ITEM_ELEMENT.getAttribute("id"));
+
+    			if (evt.type === "dblclick") {
+    				getAlbumIPC($selectedAlbumId).then(result => {
+    					set_store_value(albumPlayingIdStore, $albumPlayingIdStore = $selectedAlbumId, $albumPlayingIdStore);
+    					set_store_value(playbackStore, $playbackStore = result.Songs, $playbackStore);
+    					set_store_value(playbackCursor, $playbackCursor = [SONG_INDEX, true], $playbackCursor);
+    				});
+    			}
+
+    			if (evt.type === "click") {
+    				set_store_value(selectedSongsStore, $selectedSongsStore = [SONG_ID], $selectedSongsStore);
+    			}
     		}
     	}
 
@@ -4790,10 +4560,13 @@ var app = (function () {
     		getAlbumIPC,
     		getAlbumsIPC,
     		albumListStore,
+    		albumPlayingIdStore,
     		playbackCursor,
     		playbackStore,
+    		selectedAlbumId,
     		selectedGroupByStore,
     		selectedGroupByValueStore,
+    		selectedSongsStore,
     		songListStore,
     		firstGroupByAssignments,
     		getAlbums,
@@ -4801,9 +4574,12 @@ var app = (function () {
     		$selectedGroupByStore,
     		$selectedGroupByValueStore,
     		$albumListStore,
+    		$albumPlayingIdStore,
     		$playbackStore,
     		$playbackCursor,
-    		$songListStore
+    		$selectedAlbumId,
+    		$songListStore,
+    		$selectedSongsStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -4920,7 +4696,7 @@ var app = (function () {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
     			set_custom_element_data(song_list_background_svlt, "class", "svelte-bwgf44");
-    			add_location(song_list_background_svlt, file$e, 26, 0, 1110);
+    			add_location(song_list_background_svlt, file$e, 31, 0, 1234);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4948,9 +4724,6 @@ var app = (function () {
     }
 
     function instance$h($$self, $$props, $$invalidate) {
-    	let $selectedAlbum;
-    	validate_store(selectedAlbum, "selectedAlbum");
-    	component_subscribe($$self, selectedAlbum, $$value => $$invalidate(0, $selectedAlbum = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongListBackground", slots, []);
     	let coverSrc = undefined;
@@ -4960,12 +4733,7 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<SongListBackground> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({
-    		getCoverIPC,
-    		selectedAlbum,
-    		coverSrc,
-    		$selectedAlbum
-    	});
+    	$$self.$capture_state = () => ({ getCoverIPC, coverSrc });
 
     	$$self.$inject_state = $$props => {
     		if ("coverSrc" in $$props) coverSrc = $$props.coverSrc;
@@ -4974,35 +4742,31 @@ var app = (function () {
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
+    	/*
+            if ($selectedAlbumId?.['RootDir']) {
+                getCoverIPC($selectedAlbumId['RootDir']).then((response) => {
+                    if (response['fileType'] === 'image') {
+                        // coverSrc = `url(${response['filePath']})`
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedAlbum*/ 1) {
-    			 {
-    				// console.log($selectedAlbum)
-    				if ($selectedAlbum === null || $selectedAlbum === void 0
-    				? void 0
-    				: $selectedAlbum["RootDir"]) {
-    					getCoverIPC($selectedAlbum["RootDir"]).then(response => {
-    						if (response["fileType"] === "image") {
-    							// coverSrc = `url(${response['filePath']})`
-    							// console.log(coverSrc)
-    							// document.documentElement.style.setProperty('--song-list-background-image', coverSrc)
-    							let $el = document.querySelector("song-list-background-svlt");
+                        // console.log(coverSrc)
+                        // document.documentElement.style.setProperty('--song-list-background-image', coverSrc)
+                        let $el = document.querySelector('song-list-background-svlt')
 
-    							if ($el) {
-    								// console.log($el)
-    								// console.log($el.style.backgroundImage)
-    								$el.setAttribute("style", `background-image: url('${response["filePath"]}');`);
-    							}
-    						} // $el.backgroundImage = coverSrc
-    						// console.log()
-    					}); // console.log($el)
-    				}
-    			}
-    		}
-    	};
+                        if ($el) {
+                            // console.log($el)
+                            // console.log($el.style.backgroundImage)
+                            $el.setAttribute('style', `background-image: url('${response['filePath']}');`)
+                        }
+                        // $el.backgroundImage = coverSrc
 
-    	return [$selectedAlbum];
+                        // console.log()
+                        // console.log($el)
+                    }
+                })
+            }
+            */
+
+    	return [];
     }
 
     class SongListBackground extends SvelteComponentDev {
@@ -5021,7 +4785,7 @@ var app = (function () {
 
     /* src/App.svelte generated by Svelte v3.31.0 */
 
-    const { console: console_1$1, document: document_1 } = globals;
+    const { console: console_1$2, document: document_1 } = globals;
     const file$f = "src/App.svelte";
 
     function create_fragment$i(ctx) {
@@ -5228,7 +4992,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({

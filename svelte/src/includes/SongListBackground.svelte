@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { getCoverIPC } from '../service/ipc.service'
 
-	import { selectedAlbum } from '../store/player.store'
+	// import { selectedAlbum } from '../store/player.store'
 
 	let coverSrc = undefined
 
 	$: {
-		// console.log($selectedAlbum)
-
-		if ($selectedAlbum?.['RootDir']) {
-			getCoverIPC($selectedAlbum['RootDir']).then((response) => {
+		// console.log($selectedAlbumId)
+/*
+		if ($selectedAlbumId?.['RootDir']) {
+			getCoverIPC($selectedAlbumId['RootDir']).then((response) => {
 				if (response['fileType'] === 'image') {
 					// coverSrc = `url(${response['filePath']})`
 
@@ -29,6 +29,7 @@
 				}
 			})
 		}
+		*/
 	}
 </script>
 

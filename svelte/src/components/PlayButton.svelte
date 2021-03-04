@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isPlaying } from '../store/player.store'
+	import { isPlaying } from '../store/final.store'
 
 	export let player: HTMLAudioElement
 

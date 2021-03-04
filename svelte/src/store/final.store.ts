@@ -16,3 +16,13 @@ export let playbackStore: Writable<SongType[]> = writable([])
 // Number = index of the playbackStore to play
 // Boolean = Start playing right away or not.
 export let playbackCursor: Writable<[number, boolean]> = writable([0, false])
+
+// ID of the current album playing.
+export let albumPlayingIdStore: Writable<string> = writable(undefined)
+
+// Allows to share with the rest of the app whether the player is playing or not.
+export let isPlaying: Writable<boolean> = writable(false)
+
+export let selectedAlbumId: Writable<any> = writable(undefined)
+
+export let selectedSongsStore: Writable<number[]> = writable([])

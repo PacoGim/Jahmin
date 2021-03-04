@@ -2,10 +2,11 @@
 	import { onMount } from 'svelte'
 	import { getCoverIPC } from '../service/ipc.service'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
-	import { playback, selectedAlbum } from '../store/player.store'
+	// import { playback, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
 	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
 	import { selectedSongs } from '../store/index.store'
+	import { albumPlayingIdStore } from '../store/final.store'
 
 	export let album: AlbumType
 	export let index
@@ -18,19 +19,19 @@
 		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID')
 
 		if (album['ID'] === lastPlayedAlbumID) {
-			if ($playback === undefined) {
-				$playback = {
-					AlbumID: lastPlayedAlbumID,
-					SongList: []
-				}
-				selectLastPlayedSong()
-			}
+			// if ($playback === undefined) {
+			// 	$playback = {
+			// 		AlbumID: lastPlayedAlbumID,
+			// 		SongList: []
+			// 	}
+			// 	selectLastPlayedSong()
+			// }
 		}
 	})
 
 	function selectLastPlayedSong() {
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
-		$selectedAlbum = album
+		// $selectedAlbumId = album
 
 		let lastPlayedSong = album['Songs'].find((i) => i['ID'] === Number(localStorage.getItem('LastPlayedSongID')))
 
@@ -83,7 +84,7 @@
 
 		// Song Sorting
 		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
-		$selectedAlbum = album
+		// $selectedAlbumId = album
 
 		if (evt['type'] === 'dblclick') {
 			setNewPlayback(album['ID'], 0, true)
@@ -96,7 +97,7 @@
 */
 </script>
 
-<album class={$selectedAlbum?.['ID'] === album?.['ID'] ? 'selected' : ''} id={album['ID']}>
+<album class={$albumPlayingIdStore === album?.['ID'] ? 'selected' : ''} id={album['ID']}>
 	<!-- ▼▼▼ Cover Handle ▼▼▼ -->
 	{#if coverType === undefined}
 		<img src="./img/audio.svg" class="loader" alt="" />
@@ -111,7 +112,7 @@
 	{/if}
 	<!-- ▲▲▲ Cover Handle ▲▲▲ -->
 
-	<img src="./img/gradient-overlay.svg" alt="" />
+	<overlay-gradient />
 
 	<album-details>
 		<album-name>{album['Name']}</album-name>
@@ -150,6 +151,12 @@
 		max-height: var(--cover-dimension);
 	}
 
+	overlay-gradient {
+		background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.5) 25%, rgba(0, 0, 0, 0) 50%);
+		height: inherit;
+		width: inherit;
+	}
+
 	album-details {
 		padding: 0.5rem 1rem;
 		display: flex;
@@ -176,13 +183,13 @@
 	}
 
 	video {
-		height: var(--cover-dimension);
-		width: var(--cover-dimension);
+		height: inherit;
+		width: inherit;
 	}
 
 	img {
-		height: var(--cover-dimension);
-		width: var(--cover-dimension);
+		height: inherit;
+		width: inherit;
 	}
 
 	img.loader {

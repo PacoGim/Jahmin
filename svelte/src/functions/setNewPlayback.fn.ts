@@ -1,7 +1,7 @@
 import { getAlbumColors } from '../service/getAlbumColors.fn'
 import { getAlbumIPC } from '../service/ipc.service'
 import { playbackCursor } from '../store/final.store'
-import { playback, selectedAlbum } from '../store/player.store'
+// import { playback, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 
 export async function setNewPlayback(albumID: string, index: number, playNow: boolean) {
@@ -9,10 +9,10 @@ export async function setNewPlayback(albumID: string, index: number, playNow: bo
 
 	getAlbumColors(albumID)
 
-	playback.set({
-		AlbumID: albumID,
-		SongList: songs
-	})
+	// playback.set({
+	// 	AlbumID: albumID,
+	// 	SongList: songs
+	// })
 
 	playbackCursor.set(undefined)
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { selectedSongs } from '../store/index.store'
-	import { selectedAlbum } from '../store/player.store'
+	// import { selectedAlbum } from '../store/player.store'
 
 	$: {
 		console.log($selectedSongs)
@@ -9,18 +9,18 @@
 	}
 
 	let previousSongList = undefined
-
+/*
 	function checkSongs() {
-		if (!$selectedAlbum?.Songs) return
+		if (!$selectedAlbumId?.Songs) return
 
 		let songs = []
 
 		$selectedSongs.forEach((index) => {
-			songs.push($selectedAlbum.Songs[index])
+			songs.push($selectedAlbumId.Songs[index])
 		})
 
 		if (songs.length === 0) {
-			songs = $selectedAlbum.Songs
+			songs = $selectedAlbumId.Songs
 		}
 
 		if (JSON.stringify(previousSongList) === JSON.stringify(songs)) {
@@ -31,6 +31,7 @@
 
 		console.log(songs)
 	}
+	*/
 </script>
 
 <details-svlt />

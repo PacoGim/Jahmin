@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { getWaveformIPC } from '../service/ipc.service'
-import { playbackCursor } from '../store/final.store';
-	import { playback } from '../store/player.store'
+	import { playbackCursor } from '../store/final.store'
+	// import { playback } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
 
 	export let player: HTMLAudioElement
@@ -17,33 +17,33 @@ import { playbackCursor } from '../store/final.store';
 
 	$: {
 		$playbackCursor
-		fetchWave()
+		// fetchWave()
 	}
 
-	async function fetchWave() {
-		if ($playback?.SongList.length > 0) {
-			// Keeps track of the song the getWaveformIPC fn was called for
-			let tempSong = $playback['SongList'][$playbackCursor['indexToPlay']]
+	// async function fetchWave() {
+	// 	if ($playback?.SongList.length > 0) {
+	// 		// Keeps track of the song the getWaveformIPC fn was called for
+	// 		let tempSong = $playback['SongList'][$playbackCursor['indexToPlay']]
 
-			progressBackgroundEl.style.opacity = '0'
+	// 		progressBackgroundEl.style.opacity = '0'
 
-			getWaveformIPC(tempSong['SourceFile']).then((waveformUrl) => {
-				setTimeout(() => {
-					// Gets the actual song playing
-					let currentSongPlaying = $playback['SongList'][$playbackCursor['indexToPlay']]
+	// 		getWaveformIPC(tempSong['SourceFile']).then((waveformUrl) => {
+	// 			setTimeout(() => {
+	// 				// Gets the actual song playing
+	// 				let currentSongPlaying = $playback['SongList'][$playbackCursor['indexToPlay']]
 
-					/*
-					If the temporary song and the actual playing song match, it shows the waveform
-					Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
-					*/
-					if (tempSong['$loki'] === currentSongPlaying['$loki']) {
-						progressBackgroundEl.src = waveformUrl
-						progressBackgroundEl.style.opacity = '1'
-					}
-				}, 250)
-			})
-		}
-	}
+	// 				/*
+	// 				If the temporary song and the actual playing song match, it shows the waveform
+	// 				Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
+	// 				*/
+	// 				if (tempSong['$loki'] === currentSongPlaying['$loki']) {
+	// 					progressBackgroundEl.src = waveformUrl
+	// 					progressBackgroundEl.style.opacity = '1'
+	// 				}
+	// 			}, 250)
+	// 		})
+	// 	}
+	// }
 
 	onMount(() => {
 		hookPlayerProgressEvents()

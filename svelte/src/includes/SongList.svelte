@@ -1,11 +1,12 @@
 <script lang="ts">
 	import SongListItem from '../components/SongListItem.svelte'
+	import { songListStore } from '../store/final.store'
 	import { selectedSongs } from '../store/index.store'
 
-	import { selectedAlbum } from '../store/player.store'
+	// import { selectedAlbum } from '../store/player.store'
 
 	let lastSelectedSong = 0
-
+	/*
 	function selectSongs(e: MouseEvent) {
 		let { ctrlKey, metaKey, shiftKey } = e
 
@@ -28,7 +29,7 @@
 
 				if (shiftKey === true && ctrlKey === false && metaKey === false) {
 					for (let i = currentSelectedSong; i !== lastSelectedSong; currentSelectedSong < lastSelectedSong ? i++ : i--) {
-						let currentID = $selectedAlbum['Songs'][i]['ID']
+						let currentID = $selectedAlbumId['Songs'][i]['ID']
 
 						if (!$selectedSongs.find((i) => i === currentID)) {
 							$selectedSongs.push(currentID)
@@ -41,15 +42,15 @@
 			}
 		})
 	}
+	*/
+	// <song-list-svlt on:click={(e) => selectSongs(e)}>
 </script>
 
-<song-list-svlt on:click={(e) => selectSongs(e)}>
-	{#if $selectedAlbum !== undefined}
-		{#if $selectedAlbum['Songs'] !== undefined}
-			{#each $selectedAlbum['Songs'] as song, index (index)}
-				<SongListItem albumID={$selectedAlbum['ID']} {song} {index} />
-			{/each}
-		{/if}
+<song-list-svlt>
+	{#if $songListStore !== undefined}
+		{#each $songListStore as song, index (index)}
+			<SongListItem albumID={undefined} {song} {index} />
+		{/each}
 	{/if}
 </song-list-svlt>
 
