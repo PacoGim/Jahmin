@@ -136,9 +136,10 @@
 				.then((data) => data.arrayBuffer())
 				.then((arrayBuffer) => {
 					resolve(arrayBuffer)
-				}).catch(err=>{
+				})
+				.catch((err) => {
 					//TODO Alert user that song is not found and offer a way to remove from DB.
-					console.log('OOPS',err)
+					console.log('OOPS', err)
 				})
 		})
 	}

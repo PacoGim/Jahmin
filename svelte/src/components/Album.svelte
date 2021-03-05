@@ -7,6 +7,7 @@
 	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
 	import { selectedSongs } from '../store/index.store'
 	import { albumPlayingIdStore } from '../store/final.store'
+	import CoverArt from './CoverArt.svelte'
 
 	export let album: AlbumType
 	export let index
@@ -14,7 +15,7 @@
 	let coverSrc = undefined /* Image Source URL */
 
 	onMount(() => {
-		addIntersectionObserver()
+		// addIntersectionObserver()
 
 		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID')
 
@@ -56,27 +57,27 @@
 		}
 	}
 
-	function fetchAlbumCover() {
-		getCoverIPC(album['RootDir']).then((result) => {
-			if (result !== null) {
-				coverSrc = result['filePath']
-				coverType = result['fileType']
-			} else {
-				coverType = 'not found'
-			}
-		})
-	}
+	// function fetchAlbumCover() {
+	// 	getCoverIPC(album['RootDir']).then((result) => {
+	// 		if (result !== null) {
+	// 			coverSrc = result['filePath']
+	// 			coverType = result['fileType']
+	// 		} else {
+	// 			coverType = 'not found'
+	// 		}
+	// 	})
+	// }
 
-	function addIntersectionObserver() {
-		new IntersectionObserver(
-			(entries) => {
-				if (entries[0].isIntersecting === true && coverSrc === undefined) {
-					fetchAlbumCover()
-				}
-			},
-			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
-		).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['ID'])}`))
-	}
+	// function addIntersectionObserver() {
+	// 	new IntersectionObserver(
+	// 		(entries) => {
+	// 			if (entries[0].isIntersecting === true && coverSrc === undefined) {
+	// 				fetchAlbumCover()
+	// 			}
+	// 		},
+	// 		{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
+	// 	).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['ID'])}`))
+	// }
 
 	// On Album Click/Double Click
 	async function prepareAlbum(evt: MouseEvent) {
@@ -97,20 +98,8 @@
 */
 </script>
 
-<album class={$albumPlayingIdStore === album?.['ID'] ? 'selected' : ''} id={album['ID']}>
-	<!-- ▼▼▼ Cover Handle ▼▼▼ -->
-	{#if coverType === undefined}
-		<img src="./img/audio.svg" class="loader" alt="" />
-	{/if}
-	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
-	{#if coverType === 'image'}<img src={coverSrc} alt={album['Name']} />{/if}
-	{#if coverType === 'video'}
-		<video autoplay loop>
-			<track kind="captions" />
-			<source src={coverSrc} />
-		</video>
-	{/if}
-	<!-- ▲▲▲ Cover Handle ▲▲▲ -->
+<album id={album.ID} class={$albumPlayingIdStore === album?.ID ? 'selected' : ''}>
+	<CoverArt rootDir={album.RootDir} albumId={album.ID} />
 
 	<overlay-gradient />
 
@@ -128,10 +117,6 @@
 </album>
 
 <style>
-	album:last-of-type {
-		/* padding-bottom: 20px; */
-	}
-
 	album.selected {
 		box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5), 0 0 0 7.5px rgba(255, 255, 255, 0.5);
 	}
@@ -141,9 +126,6 @@
 		display: grid;
 
 		margin: 1rem;
-		/* justify-content: center;
-		align-items: center;
-		flex-direction: column; */
 		cursor: pointer;
 		height: var(--cover-dimension);
 		width: var(--cover-dimension);
@@ -180,28 +162,5 @@
 	album-name {
 		font-variation-settings: 'wght' 600;
 		white-space: normal;
-	}
-
-	video {
-		height: inherit;
-		width: inherit;
-	}
-
-	img {
-		height: inherit;
-		width: inherit;
-	}
-
-	img.loader {
-		padding: 5rem;
-		/* height: 32px;
-		width: 32px; */
-	}
-
-	img.notFound {
-		border-width: 10px;
-		border-color: #fff #ccc #ccc #fff;
-		border-style: solid;
-		padding: 2rem;
 	}
 </style>

@@ -109,6 +109,7 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('get-cover', async (evt, rootDir) => {
+		console.log(rootDir)
 		return await getAlbumCover(rootDir)
 	})
 
