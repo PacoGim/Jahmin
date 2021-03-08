@@ -816,14 +816,11 @@ var app = (function () {
     }
 
     async function getAlbumColors(id) {
-        // let albumImagePath: string = document.querySelector(`#${CSS.escape(id)}`).querySelector('img').getAttribute('src')
-        // if (albumImagePath) {
         getAlbumColorsIPC(id).then((color) => {
             document.documentElement.style.setProperty('--low-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`);
             document.documentElement.style.setProperty('--base-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessBase}%)`);
             document.documentElement.style.setProperty('--high-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessHigh}%)`);
         });
-        // }
     }
 
     let selectedGroupByStore = writable('');
@@ -844,22 +841,11 @@ var app = (function () {
     let selectedSongsStore = writable([]);
     let albumCoverArtMapStore = writable(new Map());
 
-    async function setNewPlayback(albumID, index, playNow) {
-        let songs = await fetchAlbum(albumID);
+    async function setNewPlayback(albumID, playbackSongs, indexToPlay, playNow) {
+        albumPlayingIdStore.set(albumID);
+        playbackStore.set(playbackSongs);
+        playbackCursor.set([indexToPlay, playNow]);
         getAlbumColors(albumID);
-        // playback.set({
-        // 	AlbumID: albumID,
-        // 	SongList: songs
-        // })
-        playbackCursor.set(undefined);
-        playbackCursor.set([index, true]);
-    }
-    function fetchAlbum(albumID) {
-        return new Promise(async (resolve, reject) => {
-            let album = await getAlbumIPC(albumID);
-            let songs = album['Songs'].sort((a, b) => a['Track'] - b['Track']);
-            resolve(songs);
-        });
     }
 
     function scrollSongListToTop() {
@@ -1607,7 +1593,7 @@ var app = (function () {
     							$song.scrollIntoView({ block: "center" });
     						}
 
-    						setNewPlayback(album["ID"], album["Songs"].findIndex(i => i["ID"] === lastPlayedSongID));
+    						setNewPlayback(album["ID"], album["Songs"].findIndex(i => i["ID"] === lastPlayedSongID), false);
     					},
     					100
     				);
@@ -1645,7 +1631,7 @@ var app = (function () {
 
     			// $selectedAlbumId = album
     			if (evt["type"] === "dblclick") {
-    				setNewPlayback(album["ID"], 0);
+    				setNewPlayback(album["ID"], 0, true);
     			}
     		});
     	}
@@ -2769,15 +2755,15 @@ var app = (function () {
     			progress_foreground = element("progress-foreground");
     			t = space();
     			img = element("img");
-    			set_custom_element_data(progress_foreground, "class", "svelte-1e5epd0");
-    			add_location(progress_foreground, file$8, 68, 1, 2775);
-    			attr_dev(img, "id", "progress-background");
+    			set_custom_element_data(progress_foreground, "class", "svelte-13v4vxv");
+    			add_location(progress_foreground, file$8, 81, 1, 3730);
+    			attr_dev(img, "id", "waveform-image");
     			if (img.src !== (img_src_value = "")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			attr_dev(img, "class", "svelte-1e5epd0");
-    			add_location(img, file$8, 69, 1, 2800);
-    			set_custom_element_data(player_progress, "class", "svelte-1e5epd0");
-    			add_location(player_progress, file$8, 67, 0, 2756);
+    			attr_dev(img, "class", "svelte-13v4vxv");
+    			add_location(img, file$8, 82, 1, 3755);
+    			set_custom_element_data(player_progress, "class", "svelte-13v4vxv");
+    			add_location(player_progress, file$8, 80, 0, 3711);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2809,10 +2795,50 @@ var app = (function () {
 
     function instance$8($$self, $$props, $$invalidate) {
     	let $playbackCursor;
+    	let $playbackStore;
     	validate_store(playbackCursor, "playbackCursor");
-    	component_subscribe($$self, playbackCursor, $$value => $$invalidate(2, $playbackCursor = $$value));
+    	component_subscribe($$self, playbackCursor, $$value => $$invalidate(3, $playbackCursor = $$value));
+    	validate_store(playbackStore, "playbackStore");
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(8, $playbackStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerProgress", slots, []);
+
+    	var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    		function adopt(value) {
+    			return value instanceof P
+    			? value
+    			: new P(function (resolve) {
+    						resolve(value);
+    					});
+    		}
+
+    		return new (P || (P = Promise))(function (resolve, reject) {
+    				function fulfilled(value) {
+    					try {
+    						step(generator.next(value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function rejected(value) {
+    					try {
+    						step(generator["throw"](value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function step(result) {
+    					result.done
+    					? resolve(result.value)
+    					: adopt(result.value).then(fulfilled, rejected);
+    				}
+
+    				step((generator = generator.apply(thisArg, _arguments || [])).next());
+    			});
+    	};
+
     	
     	let { player } = $$props;
     	let { song } = $$props;
@@ -2820,31 +2846,39 @@ var app = (function () {
     	let isMouseDown = false;
     	let isMouseIn = false;
     	let progressBackgroundEl = undefined;
+    	let isPlaybackCursorFirstAssignment = true;
 
-    	// async function fetchWave() {
-    	// 	if ($playback?.SongList.length > 0) {
-    	// 		// Keeps track of the song the getWaveformIPC fn was called for
-    	// 		let tempSong = $playback['SongList'][$playbackCursor['indexToPlay']]
-    	// 		progressBackgroundEl.style.opacity = '0'
-    	// 		getWaveformIPC(tempSong['SourceFile']).then((waveformUrl) => {
-    	// 			setTimeout(() => {
-    	// 				// Gets the actual song playing
-    	// 				let currentSongPlaying = $playback['SongList'][$playbackCursor['indexToPlay']]
-    	// 				/*
-    	// 				If the temporary song and the actual playing song match, it shows the waveform
-    	// 				Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
-    	// 				*/
-    	// 				if (tempSong['$loki'] === currentSongPlaying['$loki']) {
-    	// 					progressBackgroundEl.src = waveformUrl
-    	// 					progressBackgroundEl.style.opacity = '1'
-    	// 				}
-    	// 			}, 250)
-    	// 		})
-    	// 	}
-    	// }
+    	function getWaveformImage(index) {
+    		return __awaiter(this, void 0, void 0, function* () {
+    			let song = $playbackStore === null || $playbackStore === void 0
+    			? void 0
+    			: $playbackStore[index];
+
+    			// Fade Out
+    			progressBackgroundEl.style.opacity = "0";
+
+    			getWaveformIPC(song.SourceFile).then(waveformUrl => {
+    				let currentSongPlaying = $playbackStore[$playbackCursor[0]];
+
+    				/* If the song and the actual playing song ID match, it shows the waveform.
+        Prevents multiple waveforms to be shown back to back and makes sure the proper waveform is for the proper playing song.*/
+    				if (currentSongPlaying.ID === song.ID) {
+    					// Timeout used to Fade In AFTER the css Fade Out
+    					setTimeout(
+    						() => {
+    							progressBackgroundEl.src = waveformUrl;
+    							progressBackgroundEl.style.opacity = "1";
+    						},
+    						250
+    					);
+    				}
+    			});
+    		});
+    	}
+
     	onMount(() => {
     		hookPlayerProgressEvents();
-    		progressBackgroundEl = document.querySelector("img#progress-background");
+    		progressBackgroundEl = document.querySelector("img#waveform-image");
     	});
 
     	function hookPlayerProgressEvents() {
@@ -2892,26 +2926,33 @@ var app = (function () {
     	};
 
     	$$self.$capture_state = () => ({
+    		__awaiter,
     		onMount,
     		getWaveformIPC,
     		playbackCursor,
+    		playbackStore,
     		player,
     		song,
     		pauseDebounce,
     		isMouseDown,
     		isMouseIn,
     		progressBackgroundEl,
+    		isPlaybackCursorFirstAssignment,
+    		getWaveformImage,
     		hookPlayerProgressEvents,
-    		$playbackCursor
+    		$playbackCursor,
+    		$playbackStore
     	});
 
     	$$self.$inject_state = $$props => {
+    		if ("__awaiter" in $$props) __awaiter = $$props.__awaiter;
     		if ("player" in $$props) $$invalidate(0, player = $$props.player);
     		if ("song" in $$props) $$invalidate(1, song = $$props.song);
     		if ("pauseDebounce" in $$props) pauseDebounce = $$props.pauseDebounce;
     		if ("isMouseDown" in $$props) isMouseDown = $$props.isMouseDown;
     		if ("isMouseIn" in $$props) isMouseIn = $$props.isMouseIn;
     		if ("progressBackgroundEl" in $$props) progressBackgroundEl = $$props.progressBackgroundEl;
+    		if ("isPlaybackCursorFirstAssignment" in $$props) $$invalidate(2, isPlaybackCursorFirstAssignment = $$props.isPlaybackCursorFirstAssignment);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -2919,10 +2960,18 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$playbackCursor*/ 4) ;
+    		if ($$self.$$.dirty & /*isPlaybackCursorFirstAssignment, $playbackCursor*/ 12) {
+    			 {
+    				if (isPlaybackCursorFirstAssignment === true) {
+    					$$invalidate(2, isPlaybackCursorFirstAssignment = false);
+    				} else {
+    					getWaveformImage($playbackCursor[0]);
+    				}
+    			}
+    		}
     	};
 
-    	return [player, song, $playbackCursor];
+    	return [player, song, isPlaybackCursorFirstAssignment, $playbackCursor];
     }
 
     class PlayerProgress extends SvelteComponentDev {
@@ -3350,14 +3399,14 @@ var app = (function () {
     			t4 = space();
     			create_component(playerprogress.$$.fragment);
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$a, 149, 2, 5736);
+    			add_location(track, file$a, 149, 2, 5784);
     			audio.controls = audio_controls_value = true;
     			attr_dev(audio, "class", "svelte-g8dn23");
-    			add_location(audio, file$a, 148, 1, 5618);
+    			add_location(audio, file$a, 148, 1, 5666);
     			set_custom_element_data(player_buttons, "class", "svelte-g8dn23");
-    			add_location(player_buttons, file$a, 152, 1, 5774);
+    			add_location(player_buttons, file$a, 152, 1, 5822);
     			set_custom_element_data(player_svlt, "class", "svelte-g8dn23");
-    			add_location(player_svlt, file$a, 147, 0, 5603);
+    			add_location(player_svlt, file$a, 147, 0, 5651);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3616,14 +3665,14 @@ var app = (function () {
     	}
 
     	function startInterval() {
-    		// console.log('Start')
     		set_store_value(isPlaying, $isPlaying = true, $isPlaying);
-
     		clearInterval(playingInterval);
 
     		playingInterval = setInterval(
     			() => {
-    				progress = 100 / currentSong["Duration"] * player.currentTime;
+    				// Rounds to 2 decimals.
+    				progress = Math.round((100 / currentSong["Duration"] * player.currentTime + Number.EPSILON) * 100) / 100;
+
     				document.documentElement.style.setProperty("--song-time", `${progress}%`);
     			},
     			100
@@ -3887,7 +3936,7 @@ var app = (function () {
     	let { albumID } = $$props;
 
     	function songListItemDbLClickEventHandler() {
-    		setNewPlayback(albumID, index);
+    		setNewPlayback(albumID, index, true);
     	}
 
     	const writable_props = ["song", "index", "albumID"];
@@ -4271,7 +4320,7 @@ var app = (function () {
     		c: function create() {
     			details_svlt = element("details-svlt");
     			set_custom_element_data(details_svlt, "class", "svelte-fxqmax");
-    			add_location(details_svlt, file$d, 33, 0, 758);
+    			add_location(details_svlt, file$d, 39, 0, 867);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4301,9 +4350,10 @@ var app = (function () {
     function instance$d($$self, $$props, $$invalidate) {
     	let $selectedSongs;
     	validate_store(selectedSongs, "selectedSongs");
-    	component_subscribe($$self, selectedSongs, $$value => $$invalidate(0, $selectedSongs = $$value));
+    	component_subscribe($$self, selectedSongs, $$value => $$invalidate(1, $selectedSongs = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Details", slots, []);
+    	let isSelectedSongsFirstAssignment = true;
     	let previousSongList = undefined;
     	const writable_props = [];
 
@@ -4313,11 +4363,13 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		selectedSongs,
+    		isSelectedSongsFirstAssignment,
     		previousSongList,
     		$selectedSongs
     	});
 
     	$$self.$inject_state = $$props => {
+    		if ("isSelectedSongsFirstAssignment" in $$props) $$invalidate(0, isSelectedSongsFirstAssignment = $$props.isSelectedSongsFirstAssignment);
     		if ("previousSongList" in $$props) previousSongList = $$props.previousSongList;
     	};
 
@@ -4326,16 +4378,19 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedSongs*/ 1) {
-    			// import { selectedAlbum } from '../store/player.store'
+    		if ($$self.$$.dirty & /*isSelectedSongsFirstAssignment, $selectedSongs*/ 3) {
     			 {
-    				console.log($selectedSongs);
-    			} // $selectedSongs
-    			// checkSongs()
+    				if (isSelectedSongsFirstAssignment === true) {
+    					$$invalidate(0, isSelectedSongsFirstAssignment = false);
+    				} else {
+    					console.log($selectedSongs);
+    				} // $selectedSongs
+    				// checkSongs()
+    			}
     		}
     	};
 
-    	return [$selectedSongs];
+    	return [isSelectedSongsFirstAssignment, $selectedSongs];
     }
 
     class Details extends SvelteComponentDev {
@@ -4691,9 +4746,6 @@ var app = (function () {
     	let $selectedGroupByStore;
     	let $selectedGroupByValueStore;
     	let $albumListStore;
-    	let $albumPlayingIdStore;
-    	let $playbackStore;
-    	let $playbackCursor;
     	let $selectedAlbumId;
     	let $songListStore;
     	let $selectedSongsStore;
@@ -4703,18 +4755,12 @@ var app = (function () {
     	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(2, $selectedGroupByValueStore = $$value));
     	validate_store(albumListStore, "albumListStore");
     	component_subscribe($$self, albumListStore, $$value => $$invalidate(3, $albumListStore = $$value));
-    	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
-    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(4, $albumPlayingIdStore = $$value));
-    	validate_store(playbackStore, "playbackStore");
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(5, $playbackStore = $$value));
-    	validate_store(playbackCursor, "playbackCursor");
-    	component_subscribe($$self, playbackCursor, $$value => $$invalidate(6, $playbackCursor = $$value));
     	validate_store(selectedAlbumId, "selectedAlbumId");
-    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(7, $selectedAlbumId = $$value));
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(4, $selectedAlbumId = $$value));
     	validate_store(songListStore, "songListStore");
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(8, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(5, $songListStore = $$value));
     	validate_store(selectedSongsStore, "selectedSongsStore");
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(9, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(6, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerController", slots, []);
     	let firstGroupByAssignments = true;
@@ -4743,9 +4789,7 @@ var app = (function () {
 
     			getAlbumIPC(ALBUM_ID).then(result => {
     				if (evt.type === "dblclick") {
-    					set_store_value(albumPlayingIdStore, $albumPlayingIdStore = ALBUM_ID, $albumPlayingIdStore);
-    					set_store_value(playbackStore, $playbackStore = result.Songs, $playbackStore);
-    					set_store_value(playbackCursor, $playbackCursor = [0, true], $playbackCursor);
+    					setNewPlayback(ALBUM_ID, result.Songs, 0, true);
     				} else if (evt.type === "click") {
     					set_store_value(selectedAlbumId, $selectedAlbumId = ALBUM_ID, $selectedAlbumId);
     					set_store_value(songListStore, $songListStore = result.Songs, $songListStore);
@@ -4759,9 +4803,7 @@ var app = (function () {
 
     			if (evt.type === "dblclick") {
     				getAlbumIPC($selectedAlbumId).then(result => {
-    					set_store_value(albumPlayingIdStore, $albumPlayingIdStore = $selectedAlbumId, $albumPlayingIdStore);
-    					set_store_value(playbackStore, $playbackStore = result.Songs, $playbackStore);
-    					set_store_value(playbackCursor, $playbackCursor = [SONG_INDEX, true], $playbackCursor);
+    					setNewPlayback($selectedAlbumId, result.Songs, SONG_INDEX, true);
     				});
     			}
 
@@ -4779,6 +4821,8 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		onMount,
+    		setNewPlayback,
+    		getAlbumColors,
     		getAlbumIPC,
     		getAlbumsIPC,
     		albumListStore,
@@ -4796,9 +4840,6 @@ var app = (function () {
     		$selectedGroupByStore,
     		$selectedGroupByValueStore,
     		$albumListStore,
-    		$albumPlayingIdStore,
-    		$playbackStore,
-    		$playbackCursor,
     		$selectedAlbumId,
     		$songListStore,
     		$selectedSongsStore

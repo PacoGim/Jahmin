@@ -95,7 +95,6 @@ function loadIPC() {
         return loki_service_1.getCollectionMap().get(albumID);
     });
     electron_1.ipcMain.handle('get-cover', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
-        console.log(rootDir);
         return yield albumArt_service_1.getAlbumCover(rootDir);
     }));
     electron_1.ipcMain.handle('get-album-colors', (evt, imageId) => __awaiter(this, void 0, void 0, function* () {

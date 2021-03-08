@@ -145,14 +145,14 @@
 	}
 
 	function startInterval() {
-		// console.log('Start')
-
 		$isPlaying = true
 
 		clearInterval(playingInterval)
 
 		playingInterval = setInterval(() => {
-			progress = (100 / currentSong['Duration']) * player.currentTime
+
+			// Rounds to 2 decimals.
+			progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
 
 			document.documentElement.style.setProperty('--song-time', `${progress}%`)
 		}, 100)

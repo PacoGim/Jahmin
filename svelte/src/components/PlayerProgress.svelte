@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { getWaveformIPC } from '../service/ipc.service'
-	import { playbackCursor } from '../store/final.store'
-	// import { playback } from '../store/player.store'
+	import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 
 	export let player: HTMLAudioElement
@@ -15,39 +14,42 @@
 
 	let progressBackgroundEl: HTMLImageElement = undefined
 
+	let isPlaybackCursorFirstAssignment = true
+
 	$: {
-		$playbackCursor
-		// fetchWave()
+		if (isPlaybackCursorFirstAssignment === true) {
+			isPlaybackCursorFirstAssignment = false
+		} else {
+			$playbackCursor
+			getWaveformImage($playbackCursor[0])
+		}
 	}
 
-	// async function fetchWave() {
-	// 	if ($playback?.SongList.length > 0) {
-	// 		// Keeps track of the song the getWaveformIPC fn was called for
-	// 		let tempSong = $playback['SongList'][$playbackCursor['indexToPlay']]
+	async function getWaveformImage(index: number) {
+		let song = $playbackStore?.[index]
 
-	// 		progressBackgroundEl.style.opacity = '0'
+		// Fade Out
+		progressBackgroundEl.style.opacity = '0'
 
-	// 		getWaveformIPC(tempSong['SourceFile']).then((waveformUrl) => {
-	// 			setTimeout(() => {
-	// 				// Gets the actual song playing
-	// 				let currentSongPlaying = $playback['SongList'][$playbackCursor['indexToPlay']]
+		getWaveformIPC(song.SourceFile).then((waveformUrl) => {
+			let currentSongPlaying = $playbackStore[$playbackCursor[0]]
 
-	// 				/*
-	// 				If the temporary song and the actual playing song match, it shows the waveform
-	// 				Prevents the multiple waveform show back to back and makes sure the proper waveform is for the proper song.
-	// 				*/
-	// 				if (tempSong['$loki'] === currentSongPlaying['$loki']) {
-	// 					progressBackgroundEl.src = waveformUrl
-	// 					progressBackgroundEl.style.opacity = '1'
-	// 				}
-	// 			}, 250)
-	// 		})
-	// 	}
-	// }
+			/* If the song and the actual playing song ID match, it shows the waveform.
+				Prevents multiple waveforms to be shown back to back and makes sure the proper waveform is for the proper playing song.*/
+
+			if (currentSongPlaying.ID === song.ID) {
+				// Timeout used to Fade In AFTER the css Fade Out
+				setTimeout(() => {
+					progressBackgroundEl.src = waveformUrl
+					progressBackgroundEl.style.opacity = '1'
+				}, 250)
+			}
+		})
+	}
 
 	onMount(() => {
 		hookPlayerProgressEvents()
-		progressBackgroundEl = document.querySelector('img#progress-background')
+		progressBackgroundEl = document.querySelector('img#waveform-image')
 	})
 
 	function hookPlayerProgressEvents() {
@@ -92,7 +94,7 @@
 
 <player-progress>
 	<progress-foreground />
-	<img id="progress-background" src="" alt="" />
+	<img id="waveform-image" src="" alt="" />
 </player-progress>
 
 <style>
@@ -120,7 +122,7 @@
 		transition: min-width 100ms linear;
 	}
 
-	player-progress #progress-background {
+	player-progress #waveform-image {
 		z-index: 0;
 		width: 100%;
 		opacity: 0;

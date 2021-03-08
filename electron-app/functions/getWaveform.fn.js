@@ -36,7 +36,6 @@ const child_process_1 = require("child_process");
 const path_1 = __importDefault(require("path"));
 const hashString_fn_1 = require("./hashString.fn");
 const fs_1 = __importStar(require("fs"));
-const chokidar_1 = __importDefault(require("chokidar"));
 const __1 = require("..");
 const getAlbumColors_fn_1 = require("../services/getAlbumColors.fn");
 const hsl_to_hex_1 = __importDefault(require("hsl-to-hex"));
@@ -49,7 +48,6 @@ function getWaveform(songPath) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         let id = hashString_fn_1.hash(songPath.split('/').slice(0, -1).join('/'));
         let colors = yield getAlbumColors_fn_1.getAlbumColors(id);
-        // let color = colors.hexColor
         let color = hsl_to_hex_1.default(colors.hue, colors.saturation, colors.lightnessLow).replace('#', '');
         let waveformsDirPath = path_1.default.join(__1.appDataPath, 'waveforms');
         if (!fs_1.existsSync(waveformsDirPath)) {
@@ -61,15 +59,9 @@ function getWaveform(songPath) {
         if (fs_1.default.existsSync(waveformPath)) {
             return resolve(escape(waveformPath));
         }
-        exports.waveformsFolderWatcher = chokidar_1.default
-            .watch(waveformsDirPath, { ignoreInitial: true, awaitWriteFinish: true })
-            .on('add', (path) => {
-            if (path === waveformPath) {
-                resolve(escape(waveformPath));
-                exports.waveformsFolderWatcher.close();
-            }
+        child_process_1.exec(`'${ffmpegPath}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`).on('close', () => {
+            resolve(escape(waveformPath));
         });
-        child_process_1.exec(`'${ffmpegPath}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`);
     }));
 }
 exports.getWaveform = getWaveform;

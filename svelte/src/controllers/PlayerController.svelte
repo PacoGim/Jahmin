@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { setNewPlayback } from '../functions/setNewPlayback.fn'
+	import { getAlbumColors } from '../service/getAlbumColors.fn'
 
 	import { getAlbumIPC, getAlbumsIPC } from '../service/ipc.service'
 
@@ -49,9 +51,7 @@
 
 			getAlbumIPC(ALBUM_ID).then((result) => {
 				if (evt.type === 'dblclick') {
-					$albumPlayingIdStore = ALBUM_ID
-					$playbackStore = result.Songs
-					$playbackCursor = [0, true]
+					setNewPlayback(ALBUM_ID, result.Songs, 0, true)
 				} else if (evt.type === 'click') {
 					$selectedAlbumId = ALBUM_ID
 					$songListStore = result.Songs
@@ -65,9 +65,7 @@
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then((result) => {
-					$albumPlayingIdStore = $selectedAlbumId
-					$playbackStore = result.Songs
-					$playbackCursor = [SONG_INDEX, true]
+					setNewPlayback($selectedAlbumId, result.Songs, SONG_INDEX, true)
 				})
 			}
 

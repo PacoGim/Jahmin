@@ -2,14 +2,20 @@
 	import { selectedSongs } from '../store/index.store'
 	// import { selectedAlbum } from '../store/player.store'
 
+	let isSelectedSongsFirstAssignment = true
+
 	$: {
-		console.log($selectedSongs)
-		// $selectedSongs
-		// checkSongs()
+		if (isSelectedSongsFirstAssignment === true) {
+			isSelectedSongsFirstAssignment = false
+		} else {
+			console.log($selectedSongs)
+			// $selectedSongs
+			// checkSongs()
+		}
 	}
 
 	let previousSongList = undefined
-/*
+	/*
 	function checkSongs() {
 		if (!$selectedAlbumId?.Songs) return
 
