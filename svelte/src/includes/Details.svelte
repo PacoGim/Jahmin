@@ -2,11 +2,11 @@
 	import { selectedSongs } from '../store/index.store'
 	// import { selectedAlbum } from '../store/player.store'
 
-	let isSelectedSongsFirstAssignment = true
+	let isSelectedSongsFirstAssign = true
 
 	$: {
-		if (isSelectedSongsFirstAssignment === true) {
-			isSelectedSongsFirstAssignment = false
+		if (isSelectedSongsFirstAssign === true) {
+			isSelectedSongsFirstAssign = false
 		} else {
 			console.log($selectedSongs)
 			// $selectedSongs

@@ -6,7 +6,7 @@
 	import type { AlbumType } from '../types/album.type'
 	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
 	import { selectedSongs } from '../store/index.store'
-	import { albumPlayingIdStore } from '../store/final.store'
+	import { albumPlayingIdStore, selectedAlbumId } from '../store/final.store'
 	import CoverArt from './CoverArt.svelte'
 
 	export let album: AlbumType
@@ -15,18 +15,13 @@
 	let coverSrc = undefined /* Image Source URL */
 
 	onMount(() => {
-		// addIntersectionObserver()
-
 		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID')
 
-		if (album['ID'] === lastPlayedAlbumID) {
-			// if ($playback === undefined) {
-			// 	$playback = {
-			// 		AlbumID: lastPlayedAlbumID,
-			// 		SongList: []
-			// 	}
-			// 	selectLastPlayedSong()
-			// }
+		if (album.ID === lastPlayedAlbumID) {
+			let albumEl = document.querySelector(`#${CSS.escape(album.ID)}`)
+			if (albumEl) {
+				albumEl.scrollIntoView({ block: 'center' })
+			}
 		}
 	})
 
@@ -46,12 +41,6 @@
 					if ($song) {
 						$song.scrollIntoView({ block: 'center' })
 					}
-
-					setNewPlayback(
-						album['ID'],
-						album['Songs'].findIndex((i) => i['ID'] === lastPlayedSongID),
-						false
-					)
 				}, 100)
 			}
 		}
@@ -88,7 +77,7 @@
 		// $selectedAlbumId = album
 
 		if (evt['type'] === 'dblclick') {
-			setNewPlayback(album['ID'], 0, true)
+			// setNewPlayback(album['ID'], 0, true)
 		}
 	}
 
@@ -98,7 +87,7 @@
 */
 </script>
 
-<album id={album.ID} class={$albumPlayingIdStore === album?.ID ? 'selected' : ''}>
+<album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
 	<CoverArt rootDir={album.RootDir} albumId={album.ID} />
 
 	<overlay-gradient />

@@ -26,14 +26,13 @@
 
 	let player: HTMLAudioElement = undefined
 
-	let drawWaveformDebounce: NodeJS.Timeout = undefined
 	let playingInterval: NodeJS.Timeout = undefined
 
-	let firstplaybackCursorAssignment = true
+	let firstPlaybackCursorAssign = true
 
 	$: {
-		if (firstplaybackCursorAssignment === true) {
-			firstplaybackCursorAssignment = false
+		if (firstPlaybackCursorAssign === true) {
+			firstPlaybackCursorAssign = false
 		} else {
 			// resetProgress()
 
@@ -72,6 +71,7 @@
 				.then(() => {
 					localStorage.setItem('LastPlayedAlbumID', $albumPlayingIdStore)
 					localStorage.setItem('LastPlayedSongID', String(songToPlay.ID))
+					localStorage.setItem('LastPlayedSongIndex', String(indexToPlay))
 
 					clearTimeout(preLoadNextSongDebounce)
 
@@ -150,7 +150,6 @@
 		clearInterval(playingInterval)
 
 		playingInterval = setInterval(() => {
-
 			// Rounds to 2 decimals.
 			progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
 

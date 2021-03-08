@@ -1,9 +1,21 @@
 <script lang="ts">
 	import SongListItem from '../components/SongListItem.svelte'
-	import { songListStore } from '../store/final.store'
+	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
+	import { selectedAlbumId, songListStore } from '../store/final.store'
 	import { selectedSongs } from '../store/index.store'
 
 	// import { selectedAlbum } from '../store/player.store'
+
+	let isSelectedAlbumIdFirstAssign = true
+
+	$: {
+		$selectedAlbumId
+		if (isSelectedAlbumIdFirstAssign) {
+			isSelectedAlbumIdFirstAssign = false
+		} else {
+			scrollSongListToTop()
+		}
+	}
 
 	let lastSelectedSong = 0
 	/*

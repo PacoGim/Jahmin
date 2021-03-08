@@ -14,11 +14,11 @@
 
 	let progressBackgroundEl: HTMLImageElement = undefined
 
-	let isPlaybackCursorFirstAssignment = true
+	let isPlaybackCursorFirstAssign = true
 
 	$: {
-		if (isPlaybackCursorFirstAssignment === true) {
-			isPlaybackCursorFirstAssignment = false
+		if (isPlaybackCursorFirstAssign === true) {
+			isPlaybackCursorFirstAssign = false
 		} else {
 			$playbackCursor
 			getWaveformImage($playbackCursor[0])

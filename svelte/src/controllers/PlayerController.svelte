@@ -7,9 +7,6 @@
 
 	import {
 		albumListStore,
-		albumPlayingIdStore,
-		playbackCursor,
-		playbackStore,
 		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
@@ -17,11 +14,11 @@
 		songListStore
 	} from '../store/final.store'
 
-	let firstGroupByAssignments = true
+	let firstGroupByAssigns = true
 
 	$: {
-		if (firstGroupByAssignments === true) {
-			firstGroupByAssignments = false
+		if (firstGroupByAssigns === true) {
+			firstGroupByAssigns = false
 		} else {
 			getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
 		}
@@ -34,7 +31,25 @@
 	onMount(() => {
 		document.addEventListener('click', (evt: MouseEvent) => handleClickEvent(evt))
 		document.addEventListener('dblclick', (evt: MouseEvent) => handleClickEvent(evt))
+
+		loadPreviousState()
 	})
+
+	function loadPreviousState() {
+		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumID')
+		// let lastPlayedSongId = localStorage.getItem('LastPlayedSongID')
+		let lastPlayedSongIndex = Number(localStorage.getItem('LastPlayedSongIndex'))
+
+		getAlbumColors(lastPlayedAlbumId)
+
+		$selectedAlbumId = lastPlayedAlbumId
+
+		getAlbumIPC(lastPlayedAlbumId).then((result) => {
+			$songListStore = result.Songs
+
+			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongIndex, false)
+		})
+	}
 
 	function handleClickEvent(evt: MouseEvent) {
 		let elementMap = new Map<string, HTMLElement>()
@@ -53,8 +68,12 @@
 				if (evt.type === 'dblclick') {
 					setNewPlayback(ALBUM_ID, result.Songs, 0, true)
 				} else if (evt.type === 'click') {
-					$selectedAlbumId = ALBUM_ID
-					$songListStore = result.Songs
+					// Prevents resetting array if album unchanged.
+
+					if ($selectedAlbumId !== ALBUM_ID) {
+						$selectedAlbumId = ALBUM_ID
+						$songListStore = result.Songs
+					}
 				}
 			})
 		}

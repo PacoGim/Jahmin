@@ -2,8 +2,6 @@
 	import { onMount } from 'svelte'
 
 	import type { SongType } from '../types/song.type'
-	// import { playback, selectedAlbum } from '../store/player.store'
-	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { albumPlayingIdStore, playbackCursor, selectedAlbumId, selectedSongsStore } from '../store/final.store'
 
 	export let song: SongType
@@ -18,10 +16,16 @@
 		}
 	}
 
-	function songListItemDbLClickEventHandler() {
-		setNewPlayback(albumID, index, true)
-	}
-	// on:dblclick={() => songListItemDbLClickEventHandler()}
+	onMount(() => {
+		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))
+
+		if (lastPlayedSongId === song.ID) {
+			let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
+			if (songEl) {
+				songEl.scrollIntoView({ block: 'center' })
+			}
+		}
+	})
 </script>
 
 <song-list-item
