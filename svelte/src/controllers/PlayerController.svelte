@@ -60,6 +60,7 @@
 
 		const ALBUM_ELEMENT = elementMap.get('ALBUM')
 		const SONG_LIST_ITEM_ELEMENT = elementMap.get('SONG-LIST-ITEM')
+		const SONG_LIST_SVLT = elementMap.get('SONG-LIST-SVLT')
 
 		if (ALBUM_ELEMENT) {
 			const ALBUM_ID = ALBUM_ELEMENT.getAttribute('id')
@@ -80,17 +81,17 @@
 
 		if (SONG_LIST_ITEM_ELEMENT) {
 			const SONG_INDEX = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('index'))
-			const SONG_ID = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then((result) => {
 					setNewPlayback($selectedAlbumId, result.Songs, SONG_INDEX, true)
 				})
 			}
+		}
 
-			if (evt.type === 'click') {
-				$selectedSongsStore = [SONG_ID]
-			}
+		if (SONG_LIST_SVLT) {
+		} else {
+			$selectedSongsStore = []
 		}
 	}
 </script>

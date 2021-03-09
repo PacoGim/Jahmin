@@ -4,17 +4,16 @@
 	import Grouping from './includes/Grouping.svelte'
 	import Player from './includes/Player.svelte'
 	import SongList from './includes/SongList.svelte'
-	import Details from './includes/Details.svelte'
+	import TagEdit from './includes/TagEdit.svelte'
 
-	import Controller from './controllers/MainController.svelte'
 	import ConfigController from './controllers/ConfigController.svelte'
 	import PlayerController from './controllers/PlayerController.svelte'
 
 	import BackgroundArt from './includes/BackgroundArt.svelte'
 	import SongListBackground from './includes/SongListBackground.svelte'
-	import { appTitle, selectedSongs } from './store/index.store'
 	import { onMount } from 'svelte'
 	import { getChangesProgressIPC, syncDbVersionIPC } from './service/ipc.service'
+	import { appTitle } from './store/final.store'
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -54,7 +53,6 @@
 	<title>{$appTitle}</title>
 </svelte:head>
 
-<Controller />
 <PlayerController />
 <ConfigController />
 
@@ -64,7 +62,7 @@
 	<Grouping />
 	<Player />
 	<SongList />
-	<Details />
+	<TagEdit />
 	<BackgroundArt />
 	<SongListBackground />
 </main>
@@ -77,8 +75,8 @@
 		grid-template-columns: 64px auto 8fr 256px;
 		grid-template-rows: 2fr 1fr 64px;
 		grid-template-areas:
-			'navigation-svlt grouping-svlt art-grid-svlt details-svlt'
-			'navigation-svlt grouping-svlt song-list-svlt details-svlt'
-			'navigation-svlt grouping-svlt player-svlt details-svlt';
+			'navigation-svlt grouping-svlt art-grid-svlt tag-edit-svlt'
+			'navigation-svlt grouping-svlt song-list-svlt tag-edit-svlt'
+			'navigation-svlt grouping-svlt player-svlt tag-edit-svlt';
 	}
 </style>

@@ -9,13 +9,10 @@
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
-	import { isDoneDrawing, songList, waveformUrl } from '../store/index.store'
 	import { isPlaying } from '../store/final.store'
 	import { getWaveformIPCData } from '../service/waveform.service'
-	import { drawWaveform } from '../service/draw.service'
 
 	import { nextSong } from '../functions/nextSong.fn'
-	import { getWaveformIPC } from '../service/ipc.service'
 	import { escapeString } from '../functions/escapeString.fn'
 	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/final.store'
 
@@ -123,7 +120,6 @@
 	function stopPlayer() {
 		player.removeAttribute('src')
 		player.pause()
-		drawWaveform([0])
 		document.documentElement.style.setProperty('--song-time', `0%`)
 		$isPlaying = false
 

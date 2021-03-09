@@ -2,6 +2,7 @@ import { writable, Writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
 import type { CoverArtType } from '../types/coverArt.type'
 import type { SongType } from '../types/song.type'
+import type { TagDetailType } from '../types/tagDetails.type'
 
 export let selectedGroupByStore: Writable<string> = writable('')
 export let selectedGroupByValueStore: Writable<string> = writable('')
@@ -29,3 +30,7 @@ export let selectedAlbumId: Writable<any> = writable(undefined)
 export let selectedSongsStore: Writable<number[]> = writable([])
 
 export let albumCoverArtMapStore: Writable<Map<string, CoverArtType>> = writable(new Map<string, CoverArtType>())
+
+export let appTitle: Writable<string> = writable('Jahmin')
+
+export let dbVersion: Writable<number> = writable(0)

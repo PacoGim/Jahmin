@@ -12,7 +12,6 @@
 
 	// import { getAlbumsIPC } from '../service/ipc.service'
 
-	// import {  } from '../store/index.store'
 
 	// $: if ($storeConfig !== undefined) {
 	// 	let dimension

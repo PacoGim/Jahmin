@@ -1,10 +1,7 @@
 <script lang="ts">
 	import SongListItem from '../components/SongListItem.svelte'
 	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
-	import { selectedAlbumId, songListStore } from '../store/final.store'
-	import { selectedSongs } from '../store/index.store'
-
-	// import { selectedAlbum } from '../store/player.store'
+	import { selectedAlbumId, songListStore, selectedSongsStore } from '../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 
@@ -18,7 +15,7 @@
 	}
 
 	let lastSelectedSong = 0
-	/*
+
 	function selectSongs(e: MouseEvent) {
 		let { ctrlKey, metaKey, shiftKey } = e
 
@@ -28,37 +25,35 @@
 				let currentSelectedSong = Number(element.getAttribute('index'))
 
 				if (ctrlKey === false && metaKey === false && shiftKey === false) {
-					$selectedSongs = [id]
+					$selectedSongsStore = [id]
 				}
 
 				if (shiftKey === false && (ctrlKey === true || metaKey === true)) {
-					if (!$selectedSongs.includes(id)) {
-						$selectedSongs.push(id)
+					if (!$selectedSongsStore.includes(id)) {
+						$selectedSongsStore.push(id)
 					} else {
-						$selectedSongs.splice($selectedSongs.indexOf(id), 1)
+						$selectedSongsStore.splice($selectedSongsStore.indexOf(id), 1)
 					}
 				}
 
 				if (shiftKey === true && ctrlKey === false && metaKey === false) {
 					for (let i = currentSelectedSong; i !== lastSelectedSong; currentSelectedSong < lastSelectedSong ? i++ : i--) {
-						let currentID = $selectedAlbumId['Songs'][i]['ID']
+						let currentID = $songListStore[i].ID
 
-						if (!$selectedSongs.find((i) => i === currentID)) {
-							$selectedSongs.push(currentID)
+						if (!$selectedSongsStore.find((i) => i === currentID)) {
+							$selectedSongsStore.push(currentID)
 						}
 					}
 				}
 
 				lastSelectedSong = currentSelectedSong
-				$selectedSongs = $selectedSongs
+				$selectedSongsStore = $selectedSongsStore
 			}
 		})
 	}
-	*/
-	// <song-list-svlt on:click={(e) => selectSongs(e)}>
 </script>
 
-<song-list-svlt>
+<song-list-svlt on:click={(e) => selectSongs(e)}>
 	{#if $songListStore !== undefined}
 		{#each $songListStore as song, index (index)}
 			<SongListItem albumID={undefined} {song} {index} />

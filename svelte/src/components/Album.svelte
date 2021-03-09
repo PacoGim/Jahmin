@@ -5,7 +5,6 @@
 	// import { playback, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
 	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
-	import { selectedSongs } from '../store/index.store'
 	import { albumPlayingIdStore, selectedAlbumId } from '../store/final.store'
 	import CoverArt from './CoverArt.svelte'
 
