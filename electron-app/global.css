@@ -1,6 +1,6 @@
 @font-face {
-	font-family: Jakarta;
-	src: url('./fonts/PlusJakartaSans[wght].ttf');
+	font-family: SourceSans;
+	src: url('./fonts/SourceSans.woff2');
 }
 
 @font-face {
@@ -35,6 +35,7 @@ body {
 	height: 100%;
 	display: block;
 	font-family: Golos;
+	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' 400;
 }
 

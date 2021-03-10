@@ -148,7 +148,7 @@
 	}
 
 	album-name {
-		font-variation-settings: 'wght' 600;
+		font-variation-settings: 'wght' 500;
 		white-space: normal;
 	}
 </style>

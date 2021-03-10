@@ -61,6 +61,7 @@
 		const ALBUM_ELEMENT = elementMap.get('ALBUM')
 		const SONG_LIST_ITEM_ELEMENT = elementMap.get('SONG-LIST-ITEM')
 		const SONG_LIST_SVLT = elementMap.get('SONG-LIST-SVLT')
+		const TAG_EDIT_SVLT = elementMap.get('TAG-EDIT-SVLT')
 
 		if (ALBUM_ELEMENT) {
 			const ALBUM_ID = ALBUM_ELEMENT.getAttribute('id')
@@ -89,8 +90,7 @@
 			}
 		}
 
-		if (SONG_LIST_SVLT) {
-		} else {
+		if (!(SONG_LIST_SVLT || TAG_EDIT_SVLT)) {
 			$selectedSongsStore = []
 		}
 	}

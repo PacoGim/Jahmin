@@ -5,12 +5,32 @@
 	import { selectedAlbumId, selectedSongsStore } from '../store/final.store'
 
 	import { getAlbumIPC } from '../service/ipc.service'
+	import { title } from 'process'
 
 	let isSelectedSongsFirstAssign = true
 
 	let songList: SongType[] = []
 
 	let tagGroupDetail: TagDetailType = undefined
+
+	let newTags: TagDetailType = {
+		Album: undefined,
+		AlbumArtist: undefined,
+		Artist: undefined,
+		Comment: undefined,
+		Composer: undefined,
+		Date: undefined,
+		Genre: undefined,
+		Rating: undefined,
+		Title: undefined,
+		Track: undefined,
+		Year: undefined
+	}
+
+	$: {
+		newTags
+		cleanObject()
+	}
 
 	$: {
 		$selectedAlbumId
@@ -21,6 +41,18 @@
 		} else {
 			checkSongs()
 		}
+	}
+
+	function cleanObject() {
+		let tagsToUpdate = {}
+
+		for (let tag in tagGroupDetail) {
+			if (tagGroupDetail[tag] !== newTags[tag]) {
+				tagsToUpdate[tag] = newTags[tag]
+			}
+		}
+
+		console.log(tagsToUpdate)
 	}
 
 	let previousSongList: SongType[] = undefined
@@ -77,7 +109,8 @@
 			}
 		}
 
-		tagGroupDetail = tagGroup
+		tagGroupDetail = Object.assign({}, tagGroup)
+		newTags = Object.assign({}, tagGroupDetail)
 	}
 </script>
 
@@ -86,38 +119,38 @@
 
 	<tag-edit>
 		<tag-name>Title</tag-name>
-		<input type="text" value={tagGroupDetail?.Title} />
+		<input type="text" bind:value={newTags.Title} />
 	</tag-edit>
 
 	<tag-edit>
 		<tag-name>Album</tag-name>
-		<input type="text" value={tagGroupDetail?.Album} />
+		<input type="text" bind:value={newTags.Album} />
 	</tag-edit>
 
 	<tag-edit>
 		<tag-name>Artist</tag-name>
-		<input type="" value={tagGroupDetail?.Artist} />
-		<!-- <textarea value={tagGroupDetail?.Artist}></textarea> -->
+		<input type="" bind:value={newTags.Artist} />
+		<!-- <textarea bind:value={newTags.Artist}></textarea> -->
 	</tag-edit>
 
 	<tag-edit>
 		<tag-name>Album Artist</tag-name>
-		<input type="text" value={tagGroupDetail?.AlbumArtist} />
+		<input type="text" bind:value={newTags.AlbumArtist} />
 	</tag-edit>
 
 	<tag-edit>
 		<tag-name>Genre</tag-name>
-		<input type="text" value={tagGroupDetail?.Genre} />
+		<input type="text" bind:value={newTags.Genre} />
 	</tag-edit>
 
 	<tag-edit>
 		<tag-name>Composer</tag-name>
-		<input type="text" value={tagGroupDetail?.Composer} />
+		<input type="text" bind:value={newTags.Composer} />
 	</tag-edit>
 
 	<tag-edit>
 		<tag-name>Comment</tag-name>
-		<input type="text" value={tagGroupDetail?.Comment} />
+		<input type="text" bind:value={newTags.Comment} />
 	</tag-edit>
 </tag-edit-svlt>
 
@@ -135,7 +168,11 @@
 		display: flex;
 		align-items: center;
 		flex-direction: column;
-		margin-bottom: 1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	tag-edit tag-name {
+		font-size: 0.9rem;
 	}
 
 	tag-edit input,
@@ -146,17 +183,19 @@
 
 		outline: none;
 
-		margin: 1rem 0;
+		margin: 0.5rem 0;
+
+		font-family: SourceSans;
+		font-variation-settings: 'wght' 450;
 
 		background-color: rgba(255, 255, 255, 0.15);
-		padding: 0.5rem;
+		padding: 0.25rem;
 		border-radius: 5px;
 		border: none;
-		font-family: Golos;
 		font-size: 0.9rem;
 	}
 
-	tag-edit textarea{
+	tag-edit textarea {
 		resize: vertical;
 	}
 
@@ -173,5 +212,10 @@
 	}
 
 	component-name {
+		text-align: center;
+		padding: 0.5rem;
+		background-color: rgba(255, 255, 255, 0.05);
+		margin-bottom: 0.5rem;
+		/* font-size: .9rem; */
 	}
 </style>
