@@ -4,10 +4,16 @@ export type TagDetailType = {
 	Artist: string
 	Comment: string
 	Composer: string
-	Date: string
+	Date: DateType
 	Genre: string
 	Rating: number
 	Title: string
 	Track: number
 	Year: number
+}
+
+type DateType = {
+	year: number
+	month: number
+	day: number
 }

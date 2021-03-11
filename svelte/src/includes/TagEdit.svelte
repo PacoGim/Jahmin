@@ -1,11 +1,13 @@
 <script lang="ts">
+	import TagEditEditor from '../components/TagEdit-Editor.svelte'
+	import TagEditSeparator from '../components/TagEdit-Separator.svelte'
+
 	import type { SongType } from '../types/song.type'
 	import type { TagDetailType } from '../types/tagDetails.type'
 
 	import { selectedAlbumId, selectedSongsStore } from '../store/final.store'
 
 	import { getAlbumIPC } from '../service/ipc.service'
-	import { title } from 'process'
 
 	let isSelectedSongsFirstAssign = true
 
@@ -19,7 +21,11 @@
 		Artist: undefined,
 		Comment: undefined,
 		Composer: undefined,
-		Date: undefined,
+		Date: {
+			year: undefined,
+			month: undefined,
+			day: undefined
+		},
 		Genre: undefined,
 		Rating: undefined,
 		Title: undefined,
@@ -60,6 +66,7 @@
 	// Check either Selected Songs (if any selected) or Selected Album (if no songs selected). Then, calls group songs
 	function checkSongs() {
 		getAlbumIPC($selectedAlbumId).then((result) => {
+			console.log(result)
 			// If songs selected
 			if ($selectedSongsStore.length > 0) {
 				songList = result.Songs.filter((song) => $selectedSongsStore.includes(song.ID))
@@ -88,7 +95,11 @@
 			Artist: undefined,
 			Comment: undefined,
 			Composer: undefined,
-			Date: undefined,
+			Date: {
+				year: undefined,
+				month: undefined,
+				day: undefined
+			},
 			Genre: undefined,
 			Rating: undefined,
 			Title: undefined,
@@ -99,7 +110,11 @@
 		// Goes through every song and checks every tag from tag group.
 		for (let song of songList) {
 			for (let tag in tagGroup) {
+
+				console.log(tagGroup[tag],song[tag],tagGroup[tag] !== song[tag])
+
 				if (tagGroup[tag] === undefined) {
+
 					tagGroup[tag] = song[tag]
 
 					// If does not match previously set value.
@@ -109,6 +124,8 @@
 			}
 		}
 
+		console.log(tagGroup)
+
 		tagGroupDetail = Object.assign({}, tagGroup)
 		newTags = Object.assign({}, tagGroupDetail)
 	}
@@ -117,41 +134,35 @@
 <tag-edit-svlt>
 	<component-name>Tag Edit</component-name>
 
-	<tag-edit>
-		<tag-name>Title</tag-name>
-		<input type="text" bind:value={newTags.Title} />
-	</tag-edit>
+	<TagEditEditor tagName="Title" type="input" bind:value={newTags.Title} />
+	<TagEditEditor tagName="Album" type="input" bind:value={newTags.Album} />
+	<TagEditEditor tagName="Artist" type="textarea" bind:value={newTags.Artist} />
+	<TagEditEditor tagName="Album Artist" type="textarea" bind:value={newTags.AlbumArtist} />
+	<TagEditEditor tagName="Genre" type="input" bind:value={newTags.Genre} />
+	<TagEditEditor tagName="Composer" type="input" bind:value={newTags.Composer} />
+	<TagEditEditor tagName="Comment" type="textarea" bind:value={newTags.Comment} />
 
-	<tag-edit>
-		<tag-name>Album</tag-name>
-		<input type="text" bind:value={newTags.Album} />
-	</tag-edit>
+	<tag-edit-date>
+		<edit-group>
+			<input type="number" bind:value={newTags.Date.year} />
+			<span>Year (4 Digits)</span>
+		</edit-group>
 
-	<tag-edit>
-		<tag-name>Artist</tag-name>
-		<input type="" bind:value={newTags.Artist} />
-		<!-- <textarea bind:value={newTags.Artist}></textarea> -->
-	</tag-edit>
+		<edit-group>
+			<input type="number" bind:value={newTags.Date.month} />
+			<span>Month (2 Digits)</span>
+		</edit-group>
 
-	<tag-edit>
-		<tag-name>Album Artist</tag-name>
-		<input type="text" bind:value={newTags.AlbumArtist} />
-	</tag-edit>
+		<edit-group>
+			<input type="number" bind:value={newTags.Date.day} />
+			<span>Day (2 Digits)</span>
+		</edit-group>
 
-	<tag-edit>
-		<tag-name>Genre</tag-name>
-		<input type="text" bind:value={newTags.Genre} />
-	</tag-edit>
-
-	<tag-edit>
-		<tag-name>Composer</tag-name>
-		<input type="text" bind:value={newTags.Composer} />
-	</tag-edit>
-
-	<tag-edit>
-		<tag-name>Comment</tag-name>
-		<input type="text" bind:value={newTags.Comment} />
-	</tag-edit>
+		<edit-group>
+			<input type="number" disabled />
+			<span>Year</span>
+		</edit-group>
+	</tag-edit-date>
 </tag-edit-svlt>
 
 <style>
@@ -164,51 +175,14 @@
 		background-color: rgba(0, 0, 0, 0.25);
 	}
 
-	tag-edit {
-		display: flex;
-		align-items: center;
-		flex-direction: column;
-		margin-bottom: 0.5rem;
+	tag-edit-date {
+		width: 100%;
+		display: grid;
+		grid-template-columns: 4fr 1fr 1fr 3fr;
 	}
 
-	tag-edit tag-name {
-		font-size: 0.9rem;
-	}
-
-	tag-edit input,
-	tag-edit textarea {
-		text-align: center;
-		width: calc(100% - 2rem);
-		color: #fff;
-
-		outline: none;
-
-		margin: 0.5rem 0;
-
-		font-family: SourceSans;
-		font-variation-settings: 'wght' 450;
-
-		background-color: rgba(255, 255, 255, 0.15);
-		padding: 0.25rem;
-		border-radius: 5px;
-		border: none;
-		font-size: 0.9rem;
-	}
-
-	tag-edit textarea {
-		resize: vertical;
-	}
-
-	tag-edit input::placeholder {
-		color: #aaa;
-	}
-	tag-edit::after {
-		content: '';
-		display: block;
-		background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(0, 0, 0, 0) 100%);
-		height: 3px;
-		width: calc(100% - 2rem);
-		/* margin: .5rem 0; */
+	tag-edit-date edit-group input {
+		width: 100%;
 	}
 
 	component-name {

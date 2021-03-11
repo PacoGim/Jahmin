@@ -54,6 +54,12 @@ body {
 	/* border: 4px solid #fff; creates padding around scroll thumb */
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
 player-progress progress-foreground.not-smooth {
 	transition: min-width 0ms linear !important;
 }
