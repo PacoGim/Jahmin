@@ -21,16 +21,13 @@
 		Artist: undefined,
 		Comment: undefined,
 		Composer: undefined,
-		Date: {
-			year: undefined,
-			month: undefined,
-			day: undefined
-		},
+		Date_Year: undefined,
+		Date_Month: undefined,
+		Date_Day: undefined,
 		Genre: undefined,
 		Rating: undefined,
 		Title: undefined,
-		Track: undefined,
-		Year: undefined
+		Track: undefined
 	}
 
 	$: {
@@ -58,7 +55,7 @@
 			}
 		}
 
-		console.log(tagsToUpdate)
+		// console.log(tagsToUpdate)
 	}
 
 	let previousSongList: SongType[] = undefined
@@ -66,7 +63,7 @@
 	// Check either Selected Songs (if any selected) or Selected Album (if no songs selected). Then, calls group songs
 	function checkSongs() {
 		getAlbumIPC($selectedAlbumId).then((result) => {
-			console.log(result)
+			// console.log(result)
 			// If songs selected
 			if ($selectedSongsStore.length > 0) {
 				songList = result.Songs.filter((song) => $selectedSongsStore.includes(song.ID))
@@ -95,26 +92,21 @@
 			Artist: undefined,
 			Comment: undefined,
 			Composer: undefined,
-			Date: {
-				year: undefined,
-				month: undefined,
-				day: undefined
-			},
 			Genre: undefined,
 			Rating: undefined,
 			Title: undefined,
 			Track: undefined,
-			Year: undefined
+			Date_Year: undefined,
+			Date_Month: undefined,
+			Date_Day: undefined
 		}
 
 		// Goes through every song and checks every tag from tag group.
 		for (let song of songList) {
 			for (let tag in tagGroup) {
-
-				console.log(tagGroup[tag],song[tag],tagGroup[tag] !== song[tag])
+				// console.log(tagGroup[tag], song[tag], tagGroup[tag] !== song[tag])
 
 				if (tagGroup[tag] === undefined) {
-
 					tagGroup[tag] = song[tag]
 
 					// If does not match previously set value.
@@ -124,7 +116,7 @@
 			}
 		}
 
-		console.log(tagGroup)
+		// console.log(tagGroup)
 
 		tagGroupDetail = Object.assign({}, tagGroup)
 		newTags = Object.assign({}, tagGroupDetail)
@@ -142,6 +134,7 @@
 	<TagEditEditor tagName="Composer" type="input" bind:value={newTags.Composer} />
 	<TagEditEditor tagName="Comment" type="textarea" bind:value={newTags.Comment} />
 
+<!--
 	<tag-edit-date>
 		<edit-group>
 			<input type="number" bind:value={newTags.Date.year} />
@@ -162,7 +155,7 @@
 			<input type="number" disabled />
 			<span>Year</span>
 		</edit-group>
-	</tag-edit-date>
+	</tag-edit-date> -->
 </tag-edit-svlt>
 
 <style>

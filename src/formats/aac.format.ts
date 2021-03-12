@@ -25,7 +25,6 @@ function writeAacTags(filePath: string, newTags: any) {
 export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise((resolve, reject) => {
 		exiftool.read(filePath).then((tags) => {
-			// console.log(tags)
 			let fileStats = fs.statSync(filePath)
 			resolve({
 				ID: stringHash(filePath),
@@ -36,8 +35,7 @@ export function getAacTags(filePath: string): Promise<SongType> {
 				Artist: tags['Artist'],
 				//@ts-expect-error
 				Composer: tags['Composer'],
-				//@ts-expect-error
-				Date: tags['ContentCreateDate'],
+				// Date: tags['ContentCreateDate'],
 				//@ts-expect-error
 				Genre: tags['Genre'],
 				//@ts-expect-error
@@ -47,8 +45,11 @@ export function getAacTags(filePath: string): Promise<SongType> {
 				Track: getTrack(tags['TrackNumber'], tags['Track']),
 				Rating: tags['RatingPercent'],
 				//@ts-expect-error
-				// Year: DateTime.fromISO(tags['ContentCreateDate']['rawValue']).toFormat('YYYY'),
-				Year: tags['ContentCreateDate'],
+				Date_Year: tags.ContentCreateDate?.year | tags?.ContentCreateDate,
+				//@ts-expect-error
+				Date_Month: tags.ContentCreateDate?.month,
+				//@ts-expect-error
+				Date_Day: tags.ContentCreateDate?.day,
 				Comment: tags['Comment'],
 				SourceFile: tags['SourceFile'],
 				Extension: tags['FileTypeExtension'],
@@ -63,9 +64,7 @@ export function getAacTags(filePath: string): Promise<SongType> {
 	})
 }
 
-function getDate(){
-
-}
+function getDate() {}
 
 function getTrack(...trackValues: [string | number]) {
 	let numberedTrackFound = trackValues.find((i) => typeof i === 'number')

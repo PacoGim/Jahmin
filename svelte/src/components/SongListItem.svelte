@@ -2,7 +2,10 @@
 	import { onMount } from 'svelte'
 
 	import type { SongType } from '../types/song.type'
+
 	import { albumPlayingIdStore, playbackCursor, selectedAlbumId, selectedSongsStore } from '../store/final.store'
+
+	import Star from './Star.svelte'
 
 	export let song: SongType
 	export let index: number
@@ -41,6 +44,7 @@
 	<!-- <song-number>{song['Track']}</song-number> -->
 	<song-number>{song['ID']}</song-number>
 	<song-title>{song['Title']}</song-title>
+	<Star />
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>
 </song-list-item>
 
@@ -49,8 +53,10 @@
 		position: relative;
 		cursor: pointer;
 
+		align-items: center;
+
 		display: grid;
-		grid-template-columns: max-content max-content auto max-content;
+		grid-template-columns: max-content max-content auto max-content max-content;
 		grid-template-rows: auto;
 
 		margin: 0.25rem 0;

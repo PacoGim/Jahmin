@@ -4,14 +4,15 @@ export type SongType = {
 	AlbumArtist?: string // Modifiable
 	Artist?: string // Modifiable
 	Composer?: string // Modifiable
-	Date?: string // Modifiable
 	Genre?: string // Modifiable
 	Title?: string // Modifiable
 	Track?: string // Modifiable
 	Rating?: number // Modifiable
-	Year?: number // Modifiable
 	Comment?: string // Modifiable
 	DiscNumber?: number // Modifiable
+	Date_Year: number | undefined // Modifiable
+	Date_Month: number | undefined // Modifiable
+	Date_Day: number | undefined // Modifiable
 	SourceFile?: string
 	Extension?: string
 	Size?: number

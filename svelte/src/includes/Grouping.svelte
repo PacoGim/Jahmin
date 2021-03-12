@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getGroupingIPC } from '../service/ipc.service'
-	import { selectedGroupByStore, selectedGroupByValueStore } from '../store/final.store'
+	import { dbVersion, selectedGroupByStore, selectedGroupByValueStore } from '../store/final.store'
 
 	let selectedGroupBy = localStorage.getItem('GroupBy')
 	let selectedGroupByValue = localStorage.getItem('GroupByValue')
@@ -10,6 +10,16 @@
 
 	let firstSelectedGroupByAssign = true
 	let firstSelectedGroupByValueAssign = true
+	let firstDbVersionAssign = true
+
+	$: {
+		$dbVersion
+		if (firstDbVersionAssign === true) {
+			firstDbVersionAssign = false
+		} else {
+			getGrouping()
+		}
+	}
 
 	$: {
 		selectedGroupByValue

@@ -154,10 +154,11 @@ export function syncDbVersionIPC() {
 
 		dbVersion.subscribe((value) => (storeDbVersion = value))()
 
+		// Waits for the version to change in main.
 		ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
 			dbVersion.set(result)
 
-			console.log('New Version: ', result)
+			// console.log('New Version: ', result)
 
 			resolve(result)
 

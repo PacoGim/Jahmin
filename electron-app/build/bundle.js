@@ -811,9 +811,10 @@ var app = (function () {
         return new Promise((resolve) => {
             let storeDbVersion = undefined;
             dbVersion.subscribe((value) => (storeDbVersion = value))();
+            // Waits for the version to change in main.
             ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
                 dbVersion.set(result);
-                console.log('New Version: ', result);
+                // console.log('New Version: ', result)
                 resolve(result);
                 setTimeout(() => {
                     syncDbVersionIPC();
@@ -1931,11 +1932,11 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[11] = list[i];
+    	child_ctx[13] = list[i];
     	return child_ctx;
     }
 
-    // (74:2) {#each groups as group (group.id)}
+    // (84:2) {#each groups as group (group.id)}
     function create_each_block$1(key_1, ctx) {
     	let group;
     	let input;
@@ -1943,7 +1944,7 @@ var app = (function () {
     	let input_value_value;
     	let t0;
     	let label;
-    	let t1_value = /*group*/ ctx[11].name + "";
+    	let t1_value = /*group*/ ctx[13].name + "";
     	let t1;
     	let label_for_value;
     	let t2;
@@ -1960,18 +1961,18 @@ var app = (function () {
     			label = element("label");
     			t1 = text(t1_value);
     			t2 = space();
-    			attr_dev(input, "id", input_id_value = /*group*/ ctx[11].id);
+    			attr_dev(input, "id", input_id_value = /*group*/ ctx[13].id);
     			attr_dev(input, "type", "radio");
-    			input.__value = input_value_value = /*group*/ ctx[11].name;
+    			input.__value = input_value_value = /*group*/ ctx[13].name;
     			input.value = input.__value;
     			attr_dev(input, "class", "svelte-z201rr");
-    			/*$$binding_groups*/ ctx[7][0].push(input);
-    			add_location(input, file$4, 75, 4, 2420);
-    			attr_dev(label, "for", label_for_value = /*group*/ ctx[11].id);
+    			/*$$binding_groups*/ ctx[9][0].push(input);
+    			add_location(input, file$4, 85, 4, 2612);
+    			attr_dev(label, "for", label_for_value = /*group*/ ctx[13].id);
     			attr_dev(label, "class", "svelte-z201rr");
-    			add_location(label, file$4, 76, 4, 2514);
+    			add_location(label, file$4, 86, 4, 2706);
     			attr_dev(group, "class", "svelte-z201rr");
-    			add_location(group, file$4, 74, 3, 2408);
+    			add_location(group, file$4, 84, 3, 2600);
     			this.first = group;
     		},
     		m: function mount(target, anchor) {
@@ -1984,16 +1985,16 @@ var app = (function () {
     			append_dev(group, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[6]);
+    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[8]);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*groups*/ 4 && input_id_value !== (input_id_value = /*group*/ ctx[11].id)) {
+    			if (dirty & /*groups*/ 4 && input_id_value !== (input_id_value = /*group*/ ctx[13].id)) {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*groups*/ 4 && input_value_value !== (input_value_value = /*group*/ ctx[11].name)) {
+    			if (dirty & /*groups*/ 4 && input_value_value !== (input_value_value = /*group*/ ctx[13].name)) {
     				prop_dev(input, "__value", input_value_value);
     				input.value = input.__value;
     			}
@@ -2002,15 +2003,15 @@ var app = (function () {
     				input.checked = input.__value === /*selectedGroupByValue*/ ctx[1];
     			}
 
-    			if (dirty & /*groups*/ 4 && t1_value !== (t1_value = /*group*/ ctx[11].name + "")) set_data_dev(t1, t1_value);
+    			if (dirty & /*groups*/ 4 && t1_value !== (t1_value = /*group*/ ctx[13].name + "")) set_data_dev(t1, t1_value);
 
-    			if (dirty & /*groups*/ 4 && label_for_value !== (label_for_value = /*group*/ ctx[11].id)) {
+    			if (dirty & /*groups*/ 4 && label_for_value !== (label_for_value = /*group*/ ctx[13].id)) {
     				attr_dev(label, "for", label_for_value);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(group);
-    			/*$$binding_groups*/ ctx[7][0].splice(/*$$binding_groups*/ ctx[7][0].indexOf(input), 1);
+    			/*$$binding_groups*/ ctx[9][0].splice(/*$$binding_groups*/ ctx[9][0].indexOf(input), 1);
     			mounted = false;
     			dispose();
     		}
@@ -2020,7 +2021,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(74:2) {#each groups as group (group.id)}",
+    		source: "(84:2) {#each groups as group (group.id)}",
     		ctx
     	});
 
@@ -2051,7 +2052,7 @@ var app = (function () {
     	let dispose;
     	let each_value = /*groups*/ ctx[2];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*group*/ ctx[11].id;
+    	const get_key = ctx => /*group*/ ctx[13].id;
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -2093,31 +2094,31 @@ var app = (function () {
     			option0.value = option0.__value;
     			option0.disabled = true;
     			option0.selected = true;
-    			add_location(option0, file$4, 62, 2, 2002);
+    			add_location(option0, file$4, 72, 2, 2194);
     			option1.__value = "none";
     			option1.value = option1.__value;
-    			add_location(option1, file$4, 63, 2, 2064);
+    			add_location(option1, file$4, 73, 2, 2256);
     			option2.__value = "Genre";
     			option2.value = option2.__value;
-    			add_location(option2, file$4, 64, 2, 2101);
+    			add_location(option2, file$4, 74, 2, 2293);
     			option3.__value = "AlbumArtist";
     			option3.value = option3.__value;
-    			add_location(option3, file$4, 65, 2, 2140);
+    			add_location(option3, file$4, 75, 2, 2332);
     			option4.__value = "Album";
     			option4.value = option4.__value;
-    			add_location(option4, file$4, 66, 2, 2192);
+    			add_location(option4, file$4, 76, 2, 2384);
     			option5.__value = "Composer";
     			option5.value = option5.__value;
-    			add_location(option5, file$4, 67, 2, 2231);
+    			add_location(option5, file$4, 77, 2, 2423);
     			attr_dev(select, "class", "svelte-z201rr");
-    			if (/*selectedGroupBy*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[5].call(select));
-    			add_location(select, file$4, 61, 1, 1962);
+    			if (/*selectedGroupBy*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[7].call(select));
+    			add_location(select, file$4, 71, 1, 2154);
     			set_custom_element_data(total_groups, "class", "svelte-z201rr");
-    			add_location(total_groups, file$4, 70, 1, 2287);
+    			add_location(total_groups, file$4, 80, 1, 2479);
     			attr_dev(groups_1, "class", "svelte-z201rr");
-    			add_location(groups_1, file$4, 72, 1, 2359);
+    			add_location(groups_1, file$4, 82, 1, 2551);
     			set_custom_element_data(grouping_svlt, "class", "svelte-z201rr");
-    			add_location(grouping_svlt, file$4, 60, 0, 1945);
+    			add_location(grouping_svlt, file$4, 70, 0, 2137);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2146,7 +2147,7 @@ var app = (function () {
     			}
 
     			if (!mounted) {
-    				dispose = listen_dev(select, "change", /*select_change_handler*/ ctx[5]);
+    				dispose = listen_dev(select, "change", /*select_change_handler*/ ctx[7]);
     				mounted = true;
     			}
     		},
@@ -2203,12 +2204,15 @@ var app = (function () {
     }
 
     function instance$4($$self, $$props, $$invalidate) {
+    	let $dbVersion;
     	let $selectedGroupByValueStore;
     	let $selectedGroupByStore;
+    	validate_store(dbVersion, "dbVersion");
+    	component_subscribe($$self, dbVersion, $$value => $$invalidate(6, $dbVersion = $$value));
     	validate_store(selectedGroupByValueStore, "selectedGroupByValueStore");
-    	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(8, $selectedGroupByValueStore = $$value));
+    	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(10, $selectedGroupByValueStore = $$value));
     	validate_store(selectedGroupByStore, "selectedGroupByStore");
-    	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(9, $selectedGroupByStore = $$value));
+    	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(11, $selectedGroupByStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Grouping", slots, []);
     	let selectedGroupBy = localStorage.getItem("GroupBy");
@@ -2219,6 +2223,7 @@ var app = (function () {
 
     	let firstSelectedGroupByAssign = true;
     	let firstSelectedGroupByValueAssign = true;
+    	let firstDbVersionAssign = true;
 
     	function getGrouping() {
     		getGroupingIPC(selectedGroupBy).then(result => $$invalidate(2, groups = result));
@@ -2244,6 +2249,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		getGroupingIPC,
+    		dbVersion,
     		selectedGroupByStore,
     		selectedGroupByValueStore,
     		selectedGroupBy,
@@ -2251,8 +2257,10 @@ var app = (function () {
     		groups,
     		firstSelectedGroupByAssign,
     		firstSelectedGroupByValueAssign,
+    		firstDbVersionAssign,
     		getGrouping,
     		cutText,
+    		$dbVersion,
     		$selectedGroupByValueStore,
     		$selectedGroupByStore
     	});
@@ -2263,6 +2271,7 @@ var app = (function () {
     		if ("groups" in $$props) $$invalidate(2, groups = $$props.groups);
     		if ("firstSelectedGroupByAssign" in $$props) $$invalidate(3, firstSelectedGroupByAssign = $$props.firstSelectedGroupByAssign);
     		if ("firstSelectedGroupByValueAssign" in $$props) $$invalidate(4, firstSelectedGroupByValueAssign = $$props.firstSelectedGroupByValueAssign);
+    		if ("firstDbVersionAssign" in $$props) $$invalidate(5, firstDbVersionAssign = $$props.firstDbVersionAssign);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -2270,6 +2279,17 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$dbVersion, firstDbVersionAssign*/ 96) {
+    			 {
+
+    				if (firstDbVersionAssign === true) {
+    					$$invalidate(5, firstDbVersionAssign = false);
+    				} else {
+    					getGrouping();
+    				}
+    			}
+    		}
+
     		if ($$self.$$.dirty & /*selectedGroupByValue, firstSelectedGroupByValueAssign*/ 18) {
     			 {
 
@@ -2318,6 +2338,8 @@ var app = (function () {
     		groups,
     		firstSelectedGroupByAssign,
     		firstSelectedGroupByValueAssign,
+    		firstDbVersionAssign,
+    		$dbVersion,
     		select_change_handler,
     		input_change_handler,
     		$$binding_groups
@@ -3724,11 +3746,149 @@ var app = (function () {
     	}
     }
 
-    /* src/components/SongListItem.svelte generated by Svelte v3.31.0 */
+    /* src/components/Star.svelte generated by Svelte v3.31.0 */
 
-    const file$b = "src/components/SongListItem.svelte";
+    const file$b = "src/components/Star.svelte";
 
     function create_fragment$b(ctx) {
+    	let img;
+    	let img_src_value;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			img = element("img");
+    			attr_dev(img, "class", "star svelte-10r4psf");
+    			if (img.src !== (img_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "");
+    			add_location(img, file$b, 23, 0, 550);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, img, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(img, "mouseleave", /*mouseleave_handler*/ ctx[3], false, false, false),
+    					listen_dev(img, "click", /*click_handler*/ ctx[4], false, false, false),
+    					listen_dev(img, "mousemove", /*mousemove_handler*/ ctx[5], false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*starLevel*/ 1 && img.src !== (img_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(img);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$b.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$b($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("Star", slots, []);
+    	let starLevel = 0;
+    	let starLevelTemp = starLevel;
+    	let starElementWidth = undefined;
+
+    	function foo(e) {
+    		if (!starElementWidth) {
+    			starElementWidth = document.querySelector("img.star").scrollWidth;
+    		}
+
+    		let foobar = Math.trunc(100 / starElementWidth * e.offsetX / (100 / 12));
+
+    		if (foobar === 0) {
+    			foobar = 1;
+    		}
+
+    		if (foobar > 11) {
+    			foobar = 11;
+    		}
+
+    		if (foobar === 0 || foobar === 1) {
+    			$$invalidate(0, starLevel = "delete");
+    		} else {
+    			$$invalidate(0, starLevel = foobar - 1);
+    		}
+    	}
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Star> was created with unknown prop '${key}'`);
+    	});
+
+    	const mouseleave_handler = () => $$invalidate(0, starLevel = starLevelTemp);
+    	const click_handler = () => $$invalidate(1, starLevelTemp = starLevel);
+    	const mousemove_handler = e => foo(e);
+
+    	$$self.$capture_state = () => ({
+    		starLevel,
+    		starLevelTemp,
+    		starElementWidth,
+    		foo
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("starLevel" in $$props) $$invalidate(0, starLevel = $$props.starLevel);
+    		if ("starLevelTemp" in $$props) $$invalidate(1, starLevelTemp = $$props.starLevelTemp);
+    		if ("starElementWidth" in $$props) starElementWidth = $$props.starElementWidth;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [
+    		starLevel,
+    		starLevelTemp,
+    		foo,
+    		mouseleave_handler,
+    		click_handler,
+    		mousemove_handler
+    	];
+    }
+
+    class Star extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Star",
+    			options,
+    			id: create_fragment$b.name
+    		});
+    	}
+    }
+
+    /* src/components/SongListItem.svelte generated by Svelte v3.31.0 */
+    const file$c = "src/components/SongListItem.svelte";
+
+    function create_fragment$c(ctx) {
     	let song_list_item;
     	let song_number0;
     	let t0;
@@ -3741,11 +3901,15 @@ var app = (function () {
     	let t4_value = /*song*/ ctx[0]["Title"] + "";
     	let t4;
     	let t5;
-    	let song_duration;
-    	let t6_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "";
+    	let star;
     	let t6;
+    	let song_duration;
+    	let t7_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "";
+    	let t7;
     	let song_list_item_id_value;
     	let song_list_item_class_value;
+    	let current;
+    	star = new Star({ $$inline: true });
 
     	const block = {
     		c: function create() {
@@ -3759,16 +3923,18 @@ var app = (function () {
     			song_title = element("song-title");
     			t4 = text(t4_value);
     			t5 = space();
+    			create_component(star.$$.fragment);
+    			t6 = space();
     			song_duration = element("song-duration");
-    			t6 = text(t6_value);
-    			set_custom_element_data(song_number0, "class", "svelte-14gcql6");
-    			add_location(song_number0, file$b, 34, 1, 999);
-    			set_custom_element_data(song_number1, "class", "svelte-14gcql6");
-    			add_location(song_number1, file$b, 36, 1, 1088);
-    			set_custom_element_data(song_title, "class", "svelte-14gcql6");
-    			add_location(song_title, file$b, 37, 1, 1129);
-    			set_custom_element_data(song_duration, "class", "svelte-14gcql6");
-    			add_location(song_duration, file$b, 38, 1, 1171);
+    			t7 = text(t7_value);
+    			set_custom_element_data(song_number0, "class", "svelte-gz3yvq");
+    			add_location(song_number0, file$c, 35, 1, 1033);
+    			set_custom_element_data(song_number1, "class", "svelte-gz3yvq");
+    			add_location(song_number1, file$c, 37, 1, 1122);
+    			set_custom_element_data(song_title, "class", "svelte-gz3yvq");
+    			add_location(song_title, file$c, 38, 1, 1163);
+    			set_custom_element_data(song_duration, "class", "svelte-gz3yvq");
+    			add_location(song_duration, file$c, 40, 1, 1215);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0]["ID"]);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
 
@@ -3776,9 +3942,9 @@ var app = (function () {
     			? "playing"
     			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
     			? "selected"
-    			: "") + " svelte-14gcql6");
+    			: "") + " svelte-gz3yvq");
 
-    			add_location(song_list_item, file$b, 25, 0, 784);
+    			add_location(song_list_item, file$c, 26, 0, 818);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3794,41 +3960,52 @@ var app = (function () {
     			append_dev(song_list_item, song_title);
     			append_dev(song_title, t4);
     			append_dev(song_list_item, t5);
+    			mount_component(star, song_list_item, null);
+    			append_dev(song_list_item, t6);
     			append_dev(song_list_item, song_duration);
-    			append_dev(song_duration, t6);
+    			append_dev(song_duration, t7);
+    			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*index*/ 2) set_data_dev(t0, /*index*/ ctx[1]);
-    			if (dirty & /*song*/ 1 && t2_value !== (t2_value = /*song*/ ctx[0]["ID"] + "")) set_data_dev(t2, t2_value);
-    			if (dirty & /*song*/ 1 && t4_value !== (t4_value = /*song*/ ctx[0]["Title"] + "")) set_data_dev(t4, t4_value);
-    			if (dirty & /*song*/ 1 && t6_value !== (t6_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "")) set_data_dev(t6, t6_value);
+    			if (!current || dirty & /*index*/ 2) set_data_dev(t0, /*index*/ ctx[1]);
+    			if ((!current || dirty & /*song*/ 1) && t2_value !== (t2_value = /*song*/ ctx[0]["ID"] + "")) set_data_dev(t2, t2_value);
+    			if ((!current || dirty & /*song*/ 1) && t4_value !== (t4_value = /*song*/ ctx[0]["Title"] + "")) set_data_dev(t4, t4_value);
+    			if ((!current || dirty & /*song*/ 1) && t7_value !== (t7_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "")) set_data_dev(t7, t7_value);
 
-    			if (dirty & /*song*/ 1 && song_list_item_id_value !== (song_list_item_id_value = /*song*/ ctx[0]["ID"])) {
+    			if (!current || dirty & /*song*/ 1 && song_list_item_id_value !== (song_list_item_id_value = /*song*/ ctx[0]["ID"])) {
     				set_custom_element_data(song_list_item, "id", song_list_item_id_value);
     			}
 
-    			if (dirty & /*index*/ 2) {
+    			if (!current || dirty & /*index*/ 2) {
     				set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
     			}
 
-    			if (dirty & /*$playbackCursor, index, $selectedAlbumId, $albumPlayingIdStore, $selectedSongsStore, song*/ 63 && song_list_item_class_value !== (song_list_item_class_value = "\n\t" + (/*$playbackCursor*/ ctx[2][0] === /*index*/ ctx[1] && /*$selectedAlbumId*/ ctx[3] === /*$albumPlayingIdStore*/ ctx[4]
+    			if (!current || dirty & /*$playbackCursor, index, $selectedAlbumId, $albumPlayingIdStore, $selectedSongsStore, song*/ 63 && song_list_item_class_value !== (song_list_item_class_value = "\n\t" + (/*$playbackCursor*/ ctx[2][0] === /*index*/ ctx[1] && /*$selectedAlbumId*/ ctx[3] === /*$albumPlayingIdStore*/ ctx[4]
     			? "playing"
     			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
     			? "selected"
-    			: "") + " svelte-14gcql6")) {
+    			: "") + " svelte-gz3yvq")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(star.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(star.$$.fragment, local);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(song_list_item);
+    			destroy_component(star);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$b.name,
+    		id: create_fragment$c.name,
     		type: "component",
     		source: "",
     		ctx
@@ -3845,7 +4022,7 @@ var app = (function () {
     	}
     }
 
-    function instance$b($$self, $$props, $$invalidate) {
+    function instance$c($$self, $$props, $$invalidate) {
     	let $playbackCursor;
     	let $selectedAlbumId;
     	let $albumPlayingIdStore;
@@ -3895,6 +4072,7 @@ var app = (function () {
     		playbackCursor,
     		selectedAlbumId,
     		selectedSongsStore,
+    		Star,
     		song,
     		index,
     		albumID,
@@ -3929,13 +4107,13 @@ var app = (function () {
     class SongListItem extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$b, create_fragment$b, safe_not_equal, { song: 0, index: 1, albumID: 6 });
+    		init(this, options, instance$c, create_fragment$c, safe_not_equal, { song: 0, index: 1, albumID: 6 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListItem",
     			options,
-    			id: create_fragment$b.name
+    			id: create_fragment$c.name
     		});
 
     		const { ctx } = this.$$;
@@ -3981,7 +4159,7 @@ var app = (function () {
 
     /* src/includes/SongList.svelte generated by Svelte v3.31.0 */
 
-    const file$c = "src/includes/SongList.svelte";
+    const file$d = "src/includes/SongList.svelte";
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -4129,7 +4307,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$c(ctx) {
+    function create_fragment$d(ctx) {
     	let song_list_svlt;
     	let current;
     	let mounted;
@@ -4141,7 +4319,7 @@ var app = (function () {
     			song_list_svlt = element("song-list-svlt");
     			if (if_block) if_block.c();
     			set_custom_element_data(song_list_svlt, "class", "svelte-1pk1mov");
-    			add_location(song_list_svlt, file$c, 46, 0, 1852);
+    			add_location(song_list_svlt, file$d, 46, 0, 1852);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4199,7 +4377,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$c.name,
+    		id: create_fragment$d.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4208,7 +4386,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$c($$self, $$props, $$invalidate) {
+    function instance$d($$self, $$props, $$invalidate) {
     	let $selectedAlbumId;
     	let $selectedSongsStore;
     	let $songListStore;
@@ -4315,13 +4493,13 @@ var app = (function () {
     class SongList extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$c, create_fragment$c, safe_not_equal, {});
+    		init(this, options, instance$d, create_fragment$d, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongList",
     			options,
-    			id: create_fragment$c.name
+    			id: create_fragment$d.name
     		});
     	}
     }
@@ -4386,16 +4564,16 @@ var app = (function () {
 
     /* src/components/TagEdit-Separator.svelte generated by Svelte v3.31.0 */
 
-    const file$d = "src/components/TagEdit-Separator.svelte";
+    const file$e = "src/components/TagEdit-Separator.svelte";
 
-    function create_fragment$d(ctx) {
+    function create_fragment$e(ctx) {
     	let tag_edit_separator;
 
     	const block = {
     		c: function create() {
     			tag_edit_separator = element("tag-edit-separator");
     			set_custom_element_data(tag_edit_separator, "class", "svelte-igry7v");
-    			add_location(tag_edit_separator, file$d, 0, 0, 0);
+    			add_location(tag_edit_separator, file$e, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4413,7 +4591,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$d.name,
+    		id: create_fragment$e.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4422,7 +4600,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$d($$self, $$props) {
+    function instance$e($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TagEdit_Separator", slots, []);
     	const writable_props = [];
@@ -4437,19 +4615,19 @@ var app = (function () {
     class TagEdit_Separator extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$d, create_fragment$d, safe_not_equal, {});
+    		init(this, options, instance$e, create_fragment$e, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit_Separator",
     			options,
-    			id: create_fragment$d.name
+    			id: create_fragment$e.name
     		});
     	}
     }
 
     /* src/components/TagEdit-Editor.svelte generated by Svelte v3.31.0 */
-    const file$e = "src/components/TagEdit-Editor.svelte";
+    const file$f = "src/components/TagEdit-Editor.svelte";
 
     // (24:31) 
     function create_if_block_1$2(ctx) {
@@ -4462,7 +4640,7 @@ var app = (function () {
     			textarea = element("textarea");
     			attr_dev(textarea, "rows", "1");
     			attr_dev(textarea, "class", "svelte-717113");
-    			add_location(textarea, file$e, 24, 2, 751);
+    			add_location(textarea, file$f, 24, 2, 751);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
@@ -4513,7 +4691,7 @@ var app = (function () {
     			input = element("input");
     			attr_dev(input, "type", "text");
     			attr_dev(input, "class", "svelte-717113");
-    			add_location(input, file$e, 22, 2, 684);
+    			add_location(input, file$f, 22, 2, 684);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -4547,7 +4725,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$e(ctx) {
+    function create_fragment$f(ctx) {
     	let tag_edit;
     	let tag_name;
     	let t0;
@@ -4575,10 +4753,10 @@ var app = (function () {
     			t2 = space();
     			create_component(tageditseparator.$$.fragment);
     			set_custom_element_data(tag_name, "class", "svelte-717113");
-    			add_location(tag_name, file$e, 20, 1, 627);
+    			add_location(tag_name, file$f, 20, 1, 627);
     			set_custom_element_data(tag_edit, "id", /*id*/ ctx[3]);
     			set_custom_element_data(tag_edit, "class", "svelte-717113");
-    			add_location(tag_edit, file$e, 19, 0, 610);
+    			add_location(tag_edit, file$f, 19, 0, 610);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4630,7 +4808,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$e.name,
+    		id: create_fragment$f.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4651,7 +4829,7 @@ var app = (function () {
     	}
     }
 
-    function instance$e($$self, $$props, $$invalidate) {
+    function instance$f($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TagEdit_Editor", slots, []);
     	let { value = "" } = $$props;
@@ -4729,13 +4907,13 @@ var app = (function () {
     class TagEdit_Editor extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$e, create_fragment$e, safe_not_equal, { value: 0, type: 1, tagName: 2 });
+    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { value: 0, type: 1, tagName: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit_Editor",
     			options,
-    			id: create_fragment$e.name
+    			id: create_fragment$f.name
     		});
 
     		const { ctx } = this.$$;
@@ -4773,10 +4951,10 @@ var app = (function () {
 
     /* src/includes/TagEdit.svelte generated by Svelte v3.31.0 */
 
-    const { Object: Object_1, console: console_1$1 } = globals;
-    const file$f = "src/includes/TagEdit.svelte";
+    const { Object: Object_1 } = globals;
+    const file$g = "src/includes/TagEdit.svelte";
 
-    function create_fragment$f(ctx) {
+    function create_fragment$g(ctx) {
     	let tag_edit_svlt;
     	let component_name;
     	let t1;
@@ -4800,30 +4978,7 @@ var app = (function () {
     	let t7;
     	let tagediteditor6;
     	let updating_value_6;
-    	let t8;
-    	let tag_edit_date;
-    	let edit_group0;
-    	let input0;
-    	let t9;
-    	let span0;
-    	let t11;
-    	let edit_group1;
-    	let input1;
-    	let t12;
-    	let span1;
-    	let t14;
-    	let edit_group2;
-    	let input2;
-    	let t15;
-    	let span2;
-    	let t17;
-    	let edit_group3;
-    	let input3;
-    	let t18;
-    	let span3;
     	let current;
-    	let mounted;
-    	let dispose;
 
     	function tagediteditor0_value_binding(value) {
     		/*tagediteditor0_value_binding*/ ctx[4].call(null, value);
@@ -4966,58 +5121,10 @@ var app = (function () {
     			create_component(tagediteditor5.$$.fragment);
     			t7 = space();
     			create_component(tagediteditor6.$$.fragment);
-    			t8 = space();
-    			tag_edit_date = element("tag-edit-date");
-    			edit_group0 = element("edit-group");
-    			input0 = element("input");
-    			t9 = space();
-    			span0 = element("span");
-    			span0.textContent = "Year (4 Digits)";
-    			t11 = space();
-    			edit_group1 = element("edit-group");
-    			input1 = element("input");
-    			t12 = space();
-    			span1 = element("span");
-    			span1.textContent = "Month (2 Digits)";
-    			t14 = space();
-    			edit_group2 = element("edit-group");
-    			input2 = element("input");
-    			t15 = space();
-    			span2 = element("span");
-    			span2.textContent = "Day (2 Digits)";
-    			t17 = space();
-    			edit_group3 = element("edit-group");
-    			input3 = element("input");
-    			t18 = space();
-    			span3 = element("span");
-    			span3.textContent = "Year";
     			set_custom_element_data(component_name, "class", "svelte-1sgkhim");
-    			add_location(component_name, file$f, 111, 1, 3235);
-    			attr_dev(input0, "type", "number");
-    			attr_dev(input0, "class", "svelte-1sgkhim");
-    			add_location(input0, file$f, 123, 3, 3873);
-    			add_location(span0, file$f, 124, 3, 3931);
-    			add_location(edit_group0, file$f, 122, 2, 3857);
-    			attr_dev(input1, "type", "number");
-    			attr_dev(input1, "class", "svelte-1sgkhim");
-    			add_location(input1, file$f, 128, 3, 3995);
-    			add_location(span1, file$f, 129, 3, 4054);
-    			add_location(edit_group1, file$f, 127, 2, 3979);
-    			attr_dev(input2, "type", "number");
-    			attr_dev(input2, "class", "svelte-1sgkhim");
-    			add_location(input2, file$f, 133, 3, 4119);
-    			add_location(span2, file$f, 134, 3, 4176);
-    			add_location(edit_group2, file$f, 132, 2, 4103);
-    			attr_dev(input3, "type", "number");
-    			input3.disabled = true;
-    			attr_dev(input3, "class", "svelte-1sgkhim");
-    			add_location(input3, file$f, 138, 3, 4239);
-    			add_location(span3, file$f, 139, 3, 4275);
-    			add_location(edit_group3, file$f, 137, 2, 4223);
-    			set_custom_element_data(tag_edit_date, "class", "svelte-1sgkhim");
-    			add_location(tag_edit_date, file$f, 121, 1, 3839);
+    			add_location(component_name, file$g, 105, 1, 3159);
     			set_custom_element_data(tag_edit_svlt, "class", "svelte-1sgkhim");
-    			add_location(tag_edit_svlt, file$f, 110, 0, 3218);
+    			add_location(tag_edit_svlt, file$g, 104, 0, 3142);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5039,41 +5146,7 @@ var app = (function () {
     			mount_component(tagediteditor5, tag_edit_svlt, null);
     			append_dev(tag_edit_svlt, t7);
     			mount_component(tagediteditor6, tag_edit_svlt, null);
-    			append_dev(tag_edit_svlt, t8);
-    			append_dev(tag_edit_svlt, tag_edit_date);
-    			append_dev(tag_edit_date, edit_group0);
-    			append_dev(edit_group0, input0);
-    			set_input_value(input0, /*newTags*/ ctx[0].Date.year);
-    			append_dev(edit_group0, t9);
-    			append_dev(edit_group0, span0);
-    			append_dev(tag_edit_date, t11);
-    			append_dev(tag_edit_date, edit_group1);
-    			append_dev(edit_group1, input1);
-    			set_input_value(input1, /*newTags*/ ctx[0].Date.month);
-    			append_dev(edit_group1, t12);
-    			append_dev(edit_group1, span1);
-    			append_dev(tag_edit_date, t14);
-    			append_dev(tag_edit_date, edit_group2);
-    			append_dev(edit_group2, input2);
-    			set_input_value(input2, /*newTags*/ ctx[0].Date.day);
-    			append_dev(edit_group2, t15);
-    			append_dev(edit_group2, span2);
-    			append_dev(tag_edit_date, t17);
-    			append_dev(tag_edit_date, edit_group3);
-    			append_dev(edit_group3, input3);
-    			append_dev(edit_group3, t18);
-    			append_dev(edit_group3, span3);
     			current = true;
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[11]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[12]),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[13])
-    				];
-
-    				mounted = true;
-    			}
     		},
     		p: function update(ctx, [dirty]) {
     			const tagediteditor0_changes = {};
@@ -5139,18 +5212,6 @@ var app = (function () {
     			}
 
     			tagediteditor6.$set(tagediteditor6_changes);
-
-    			if (dirty & /*newTags*/ 1 && to_number(input0.value) !== /*newTags*/ ctx[0].Date.year) {
-    				set_input_value(input0, /*newTags*/ ctx[0].Date.year);
-    			}
-
-    			if (dirty & /*newTags*/ 1 && to_number(input1.value) !== /*newTags*/ ctx[0].Date.month) {
-    				set_input_value(input1, /*newTags*/ ctx[0].Date.month);
-    			}
-
-    			if (dirty & /*newTags*/ 1 && to_number(input2.value) !== /*newTags*/ ctx[0].Date.day) {
-    				set_input_value(input2, /*newTags*/ ctx[0].Date.day);
-    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -5182,14 +5243,12 @@ var app = (function () {
     			destroy_component(tagediteditor4);
     			destroy_component(tagediteditor5);
     			destroy_component(tagediteditor6);
-    			mounted = false;
-    			run_all(dispose);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$f.name,
+    		id: create_fragment$g.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5198,7 +5257,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$f($$self, $$props, $$invalidate) {
+    function instance$g($$self, $$props, $$invalidate) {
     	let $selectedAlbumId;
     	let $selectedSongsStore;
     	validate_store(selectedAlbumId, "selectedAlbumId");
@@ -5219,16 +5278,13 @@ var app = (function () {
     		Artist: undefined,
     		Comment: undefined,
     		Composer: undefined,
-    		Date: {
-    			year: undefined,
-    			month: undefined,
-    			day: undefined
-    		},
+    		Date_Year: undefined,
+    		Date_Month: undefined,
+    		Date_Day: undefined,
     		Genre: undefined,
     		Rating: undefined,
     		Title: undefined,
-    		Track: undefined,
-    		Year: undefined
+    		Track: undefined
     	};
 
     	function cleanObject() {
@@ -5239,17 +5295,14 @@ var app = (function () {
     				tagsToUpdate[tag] = newTags[tag];
     			}
     		}
-
-    		console.log(tagsToUpdate);
-    	}
+    	} // console.log(tagsToUpdate)
 
     	let previousSongList = undefined;
 
     	// Check either Selected Songs (if any selected) or Selected Album (if no songs selected). Then, calls group songs
     	function checkSongs() {
     		getAlbumIPC($selectedAlbumId).then(result => {
-    			console.log(result);
-
+    			// console.log(result)
     			// If songs selected
     			if ($selectedSongsStore.length > 0) {
     				songList = result.Songs.filter(song => $selectedSongsStore.includes(song.ID));
@@ -5278,23 +5331,19 @@ var app = (function () {
     			Artist: undefined,
     			Comment: undefined,
     			Composer: undefined,
-    			Date: {
-    				year: undefined,
-    				month: undefined,
-    				day: undefined
-    			},
     			Genre: undefined,
     			Rating: undefined,
     			Title: undefined,
     			Track: undefined,
-    			Year: undefined
+    			Date_Year: undefined,
+    			Date_Month: undefined,
+    			Date_Day: undefined
     		};
 
     		// Goes through every song and checks every tag from tag group.
     		for (let song of songList) {
     			for (let tag in tagGroup) {
-    				console.log(tagGroup[tag], song[tag], tagGroup[tag] !== song[tag]);
-
+    				// console.log(tagGroup[tag], song[tag], tagGroup[tag] !== song[tag])
     				if (tagGroup[tag] === undefined) {
     					tagGroup[tag] = song[tag];
     				} else if (tagGroup[tag] !== song[tag]) {
@@ -5303,15 +5352,16 @@ var app = (function () {
     			}
     		}
 
-    		console.log(tagGroup);
+    		// console.log(tagGroup)
     		tagGroupDetail = Object.assign({}, tagGroup);
+
     		$$invalidate(0, newTags = Object.assign({}, tagGroupDetail));
     	}
 
     	const writable_props = [];
 
     	Object_1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<TagEdit> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<TagEdit> was created with unknown prop '${key}'`);
     	});
 
     	function tagediteditor0_value_binding(value) {
@@ -5346,21 +5396,6 @@ var app = (function () {
 
     	function tagediteditor6_value_binding(value) {
     		newTags.Comment = value;
-    		$$invalidate(0, newTags);
-    	}
-
-    	function input0_input_handler() {
-    		newTags.Date.year = to_number(this.value);
-    		$$invalidate(0, newTags);
-    	}
-
-    	function input1_input_handler() {
-    		newTags.Date.month = to_number(this.value);
-    		$$invalidate(0, newTags);
-    	}
-
-    	function input2_input_handler() {
-    		newTags.Date.day = to_number(this.value);
     		$$invalidate(0, newTags);
     	}
 
@@ -5424,30 +5459,27 @@ var app = (function () {
     		tagediteditor3_value_binding,
     		tagediteditor4_value_binding,
     		tagediteditor5_value_binding,
-    		tagediteditor6_value_binding,
-    		input0_input_handler,
-    		input1_input_handler,
-    		input2_input_handler
+    		tagediteditor6_value_binding
     	];
     }
 
     class TagEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, {});
+    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit",
     			options,
-    			id: create_fragment$f.name
+    			id: create_fragment$g.name
     		});
     	}
     }
 
     /* src/controllers/ConfigController.svelte generated by Svelte v3.31.0 */
 
-    function create_fragment$g(ctx) {
+    function create_fragment$h(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -5462,7 +5494,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$g.name,
+    		id: create_fragment$h.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5471,7 +5503,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$g($$self, $$props, $$invalidate) {
+    function instance$h($$self, $$props, $$invalidate) {
     	let $albumArtSizeConfig;
     	validate_store(albumArtSizeConfig, "albumArtSizeConfig");
     	component_subscribe($$self, albumArtSizeConfig, $$value => $$invalidate(0, $albumArtSizeConfig = $$value));
@@ -5527,20 +5559,20 @@ var app = (function () {
     class ConfigController extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {});
+    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ConfigController",
     			options,
-    			id: create_fragment$g.name
+    			id: create_fragment$h.name
     		});
     	}
     }
 
     /* src/controllers/PlayerController.svelte generated by Svelte v3.31.0 */
 
-    function create_fragment$h(ctx) {
+    function create_fragment$i(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -5555,7 +5587,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$h.name,
+    		id: create_fragment$i.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5564,28 +5596,32 @@ var app = (function () {
     	return block;
     }
 
-    function instance$h($$self, $$props, $$invalidate) {
+    function instance$i($$self, $$props, $$invalidate) {
     	let $selectedGroupByStore;
     	let $selectedGroupByValueStore;
-    	let $albumListStore;
+    	let $dbVersion;
     	let $selectedAlbumId;
     	let $songListStore;
+    	let $albumListStore;
     	let $selectedSongsStore;
     	validate_store(selectedGroupByStore, "selectedGroupByStore");
-    	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(1, $selectedGroupByStore = $$value));
+    	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(2, $selectedGroupByStore = $$value));
     	validate_store(selectedGroupByValueStore, "selectedGroupByValueStore");
-    	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(2, $selectedGroupByValueStore = $$value));
-    	validate_store(albumListStore, "albumListStore");
-    	component_subscribe($$self, albumListStore, $$value => $$invalidate(3, $albumListStore = $$value));
+    	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(3, $selectedGroupByValueStore = $$value));
+    	validate_store(dbVersion, "dbVersion");
+    	component_subscribe($$self, dbVersion, $$value => $$invalidate(4, $dbVersion = $$value));
     	validate_store(selectedAlbumId, "selectedAlbumId");
-    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(4, $selectedAlbumId = $$value));
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(5, $selectedAlbumId = $$value));
     	validate_store(songListStore, "songListStore");
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(5, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(6, $songListStore = $$value));
+    	validate_store(albumListStore, "albumListStore");
+    	component_subscribe($$self, albumListStore, $$value => $$invalidate(7, $albumListStore = $$value));
     	validate_store(selectedSongsStore, "selectedSongsStore");
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(6, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(8, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerController", slots, []);
-    	let firstGroupByAssigns = true;
+    	let firstGroupByAssign = true;
+    	let firstDbVersionAssign = true;
 
     	function getAlbums(groupBy, groupByValue) {
     		getAlbumsIPC(groupBy, groupByValue).then(result => set_store_value(albumListStore, $albumListStore = result, $albumListStore));
@@ -5668,25 +5704,29 @@ var app = (function () {
     		getAlbumIPC,
     		getAlbumsIPC,
     		albumListStore,
+    		dbVersion,
     		selectedAlbumId,
     		selectedGroupByStore,
     		selectedGroupByValueStore,
     		selectedSongsStore,
     		songListStore,
-    		firstGroupByAssigns,
+    		firstGroupByAssign,
+    		firstDbVersionAssign,
     		getAlbums,
     		loadPreviousState,
     		handleClickEvent,
     		$selectedGroupByStore,
     		$selectedGroupByValueStore,
-    		$albumListStore,
+    		$dbVersion,
     		$selectedAlbumId,
     		$songListStore,
+    		$albumListStore,
     		$selectedSongsStore
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("firstGroupByAssigns" in $$props) $$invalidate(0, firstGroupByAssigns = $$props.firstGroupByAssigns);
+    		if ("firstGroupByAssign" in $$props) $$invalidate(0, firstGroupByAssign = $$props.firstGroupByAssign);
+    		if ("firstDbVersionAssign" in $$props) $$invalidate(1, firstDbVersionAssign = $$props.firstDbVersionAssign);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -5694,39 +5734,64 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*firstGroupByAssigns, $selectedGroupByStore, $selectedGroupByValueStore*/ 7) {
+    		if ($$self.$$.dirty & /*firstGroupByAssign, $selectedGroupByStore, $selectedGroupByValueStore*/ 13) {
     			 {
-    				if (firstGroupByAssigns === true) {
-    					$$invalidate(0, firstGroupByAssigns = false);
+    				if (firstGroupByAssign === true) {
+    					$$invalidate(0, firstGroupByAssign = false);
     				} else {
     					getAlbums($selectedGroupByStore, $selectedGroupByValueStore);
     				}
     			}
     		}
+
+    		if ($$self.$$.dirty & /*$dbVersion, firstDbVersionAssign, $selectedGroupByStore, $selectedGroupByValueStore, $selectedAlbumId*/ 62) {
+    			 {
+
+    				if (firstDbVersionAssign === true) {
+    					$$invalidate(1, firstDbVersionAssign = false);
+    				} else {
+    					if ($dbVersion !== 0) {
+    						getAlbums($selectedGroupByStore, $selectedGroupByValueStore);
+
+    						// Refills the current album selected songs to add them as they are found.
+    						getAlbumIPC($selectedAlbumId).then(result => {
+    							set_store_value(songListStore, $songListStore = result.Songs, $songListStore);
+    						});
+    					}
+    				}
+    			}
+    		}
     	};
 
-    	return [firstGroupByAssigns, $selectedGroupByStore, $selectedGroupByValueStore];
+    	return [
+    		firstGroupByAssign,
+    		firstDbVersionAssign,
+    		$selectedGroupByStore,
+    		$selectedGroupByValueStore,
+    		$dbVersion,
+    		$selectedAlbumId
+    	];
     }
 
     class PlayerController extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
+    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerController",
     			options,
-    			id: create_fragment$h.name
+    			id: create_fragment$i.name
     		});
     	}
     }
 
     /* src/includes/BackgroundArt.svelte generated by Svelte v3.31.0 */
 
-    const file$g = "src/includes/BackgroundArt.svelte";
+    const file$h = "src/includes/BackgroundArt.svelte";
 
-    function create_fragment$i(ctx) {
+    function create_fragment$j(ctx) {
     	let img;
     	let img_src_value;
 
@@ -5736,7 +5801,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/bg.jpg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-ufzy90");
-    			add_location(img, file$g, 0, 0, 0);
+    			add_location(img, file$h, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5754,7 +5819,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$i.name,
+    		id: create_fragment$j.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5763,7 +5828,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$i($$self, $$props) {
+    function instance$j($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("BackgroundArt", slots, []);
     	const writable_props = [];
@@ -5778,28 +5843,28 @@ var app = (function () {
     class BackgroundArt extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
+    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "BackgroundArt",
     			options,
-    			id: create_fragment$i.name
+    			id: create_fragment$j.name
     		});
     	}
     }
 
     /* src/includes/SongListBackground.svelte generated by Svelte v3.31.0 */
-    const file$h = "src/includes/SongListBackground.svelte";
+    const file$i = "src/includes/SongListBackground.svelte";
 
-    function create_fragment$j(ctx) {
+    function create_fragment$k(ctx) {
     	let song_list_background_svlt;
 
     	const block = {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
     			set_custom_element_data(song_list_background_svlt, "class", "svelte-bwgf44");
-    			add_location(song_list_background_svlt, file$h, 31, 0, 1234);
+    			add_location(song_list_background_svlt, file$i, 31, 0, 1234);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5817,7 +5882,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$j.name,
+    		id: create_fragment$k.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5826,7 +5891,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$j($$self, $$props, $$invalidate) {
+    function instance$k($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongListBackground", slots, []);
     	let coverSrc = undefined;
@@ -5875,23 +5940,23 @@ var app = (function () {
     class SongListBackground extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
+    		init(this, options, instance$k, create_fragment$k, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListBackground",
     			options,
-    			id: create_fragment$j.name
+    			id: create_fragment$k.name
     		});
     	}
     }
 
     /* src/App.svelte generated by Svelte v3.31.0 */
 
-    const { console: console_1$2, document: document_1 } = globals;
-    const file$i = "src/App.svelte";
+    const { console: console_1$1, document: document_1 } = globals;
+    const file$j = "src/App.svelte";
 
-    function create_fragment$k(ctx) {
+    function create_fragment$l(ctx) {
     	let title_value;
     	let t0;
     	let playercontroller;
@@ -5951,7 +6016,7 @@ var app = (function () {
     			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-qj5o4s");
-    			add_location(main, file$i, 49, 0, 1746);
+    			add_location(main, file$j, 49, 0, 1746);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6032,7 +6097,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$k.name,
+    		id: create_fragment$l.name,
     		type: "component",
     		source: "",
     		ctx
@@ -6041,7 +6106,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$k($$self, $$props, $$invalidate) {
+    function instance$l($$self, $$props, $$invalidate) {
     	let $appTitle;
     	validate_store(appTitle, "appTitle");
     	component_subscribe($$self, appTitle, $$value => $$invalidate(0, $appTitle = $$value));
@@ -6084,7 +6149,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -6112,13 +6177,13 @@ var app = (function () {
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$k, create_fragment$k, safe_not_equal, {});
+    		init(this, options, instance$l, create_fragment$l, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "App",
     			options,
-    			id: create_fragment$k.name
+    			id: create_fragment$l.name
     		});
     	}
     }

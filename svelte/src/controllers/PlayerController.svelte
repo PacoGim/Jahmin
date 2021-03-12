@@ -7,6 +7,7 @@
 
 	import {
 		albumListStore,
+		dbVersion,
 		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
@@ -14,13 +15,30 @@
 		songListStore
 	} from '../store/final.store'
 
-	let firstGroupByAssigns = true
+	let firstGroupByAssign = true
+	let firstDbVersionAssign = true
 
 	$: {
-		if (firstGroupByAssigns === true) {
-			firstGroupByAssigns = false
+		if (firstGroupByAssign === true) {
+			firstGroupByAssign = false
 		} else {
 			getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
+		}
+	}
+
+	$: {
+		$dbVersion
+		if (firstDbVersionAssign === true) {
+			firstDbVersionAssign = false
+		} else {
+			if ($dbVersion !== 0) {
+				getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
+
+				// Refills the current album selected songs to add them as they are found.
+				getAlbumIPC($selectedAlbumId).then((result) => {
+					$songListStore = result.Songs
+				})
+			}
 		}
 	}
 

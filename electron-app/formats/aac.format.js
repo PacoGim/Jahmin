@@ -27,7 +27,7 @@ function writeAacTags(filePath, newTags) {
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => {
         exiftool.read(filePath).then((tags) => {
-            // console.log(tags)
+            var _a, _b, _c;
             let fileStats = fs_1.default.statSync(filePath);
             resolve({
                 ID: string_hash_1.default(filePath),
@@ -38,8 +38,7 @@ function getAacTags(filePath) {
                 Artist: tags['Artist'],
                 //@ts-expect-error
                 Composer: tags['Composer'],
-                //@ts-expect-error
-                Date: tags['ContentCreateDate'],
+                // Date: tags['ContentCreateDate'],
                 //@ts-expect-error
                 Genre: tags['Genre'],
                 //@ts-expect-error
@@ -49,8 +48,11 @@ function getAacTags(filePath) {
                 Track: getTrack(tags['TrackNumber'], tags['Track']),
                 Rating: tags['RatingPercent'],
                 //@ts-expect-error
-                // Year: DateTime.fromISO(tags['ContentCreateDate']['rawValue']).toFormat('YYYY'),
-                Year: tags['ContentCreateDate'],
+                Date_Year: ((_a = tags.ContentCreateDate) === null || _a === void 0 ? void 0 : _a.year) | (tags === null || tags === void 0 ? void 0 : tags.ContentCreateDate),
+                //@ts-expect-error
+                Date_Month: (_b = tags.ContentCreateDate) === null || _b === void 0 ? void 0 : _b.month,
+                //@ts-expect-error
+                Date_Day: (_c = tags.ContentCreateDate) === null || _c === void 0 ? void 0 : _c.day,
                 Comment: tags['Comment'],
                 SourceFile: tags['SourceFile'],
                 Extension: tags['FileTypeExtension'],
@@ -65,8 +67,7 @@ function getAacTags(filePath) {
     });
 }
 exports.getAacTags = getAacTags;
-function getDate() {
-}
+function getDate() { }
 function getTrack(...trackValues) {
     let numberedTrackFound = trackValues.find((i) => typeof i === 'number');
     if (numberedTrackFound) {
