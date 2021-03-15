@@ -3751,44 +3751,60 @@ var app = (function () {
     const file$b = "src/components/Star.svelte";
 
     function create_fragment$b(ctx) {
-    	let img;
-    	let img_src_value;
+    	let stars;
+    	let img0;
+    	let img0_src_value;
+    	let t;
+    	let img1;
+    	let img1_src_value;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
-    			img = element("img");
-    			attr_dev(img, "class", "star svelte-10r4psf");
-    			if (img.src !== (img_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "");
-    			add_location(img, file$b, 23, 0, 550);
+    			stars = element("stars");
+    			img0 = element("img");
+    			t = space();
+    			img1 = element("img");
+    			attr_dev(img0, "class", "delete-star svelte-1nz8tei");
+    			if (img0.src !== (img0_src_value = "./img/star/star-delete.svg")) attr_dev(img0, "src", img0_src_value);
+    			attr_dev(img0, "alt", "");
+    			add_location(img0, file$b, 19, 1, 492);
+    			attr_dev(img1, "class", "star svelte-1nz8tei");
+    			if (img1.src !== (img1_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) attr_dev(img1, "src", img1_src_value);
+    			attr_dev(img1, "alt", "");
+    			add_location(img1, file$b, 20, 1, 561);
+    			attr_dev(stars, "class", "svelte-1nz8tei");
+    			add_location(stars, file$b, 18, 0, 483);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, img, anchor);
+    			insert_dev(target, stars, anchor);
+    			append_dev(stars, img0);
+    			append_dev(stars, t);
+    			append_dev(stars, img1);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(img, "mouseleave", /*mouseleave_handler*/ ctx[3], false, false, false),
-    					listen_dev(img, "click", /*click_handler*/ ctx[4], false, false, false),
-    					listen_dev(img, "mousemove", /*mousemove_handler*/ ctx[5], false, false, false)
+    					listen_dev(img1, "mouseleave", /*mouseleave_handler*/ ctx[3], false, false, false),
+    					listen_dev(img1, "click", /*click_handler*/ ctx[4], false, false, false),
+    					listen_dev(img1, "mousemove", /*mousemove_handler*/ ctx[5], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*starLevel*/ 1 && img.src !== (img_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) {
-    				attr_dev(img, "src", img_src_value);
+    			if (dirty & /*starLevel*/ 1 && img1.src !== (img1_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) {
+    				attr_dev(img1, "src", img1_src_value);
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(img);
+    			if (detaching) detach_dev(stars);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -3812,26 +3828,20 @@ var app = (function () {
     	let starLevelTemp = starLevel;
     	let starElementWidth = undefined;
 
-    	function foo(e) {
+    	function setStarLevel(e) {
     		if (!starElementWidth) {
     			starElementWidth = document.querySelector("img.star").scrollWidth;
     		}
 
-    		let foobar = Math.trunc(100 / starElementWidth * e.offsetX / (100 / 12));
+    		let starValue = Math.trunc(100 / starElementWidth * e.offsetX / (100 / 10)) + 1;
 
-    		if (foobar === 0) {
-    			foobar = 1;
+    		if (starValue < 1) {
+    			starValue = 1;
+    		} else if (starValue > 10) {
+    			starValue = 10;
     		}
 
-    		if (foobar > 11) {
-    			foobar = 11;
-    		}
-
-    		if (foobar === 0 || foobar === 1) {
-    			$$invalidate(0, starLevel = "delete");
-    		} else {
-    			$$invalidate(0, starLevel = foobar - 1);
-    		}
+    		$$invalidate(0, starLevel = starValue);
     	}
 
     	const writable_props = [];
@@ -3842,13 +3852,13 @@ var app = (function () {
 
     	const mouseleave_handler = () => $$invalidate(0, starLevel = starLevelTemp);
     	const click_handler = () => $$invalidate(1, starLevelTemp = starLevel);
-    	const mousemove_handler = e => foo(e);
+    	const mousemove_handler = e => setStarLevel(e);
 
     	$$self.$capture_state = () => ({
     		starLevel,
     		starLevelTemp,
     		starElementWidth,
-    		foo
+    		setStarLevel
     	});
 
     	$$self.$inject_state = $$props => {
@@ -3864,7 +3874,7 @@ var app = (function () {
     	return [
     		starLevel,
     		starLevelTemp,
-    		foo,
+    		setStarLevel,
     		mouseleave_handler,
     		click_handler,
     		mousemove_handler
@@ -3890,22 +3900,19 @@ var app = (function () {
 
     function create_fragment$c(ctx) {
     	let song_list_item;
-    	let song_number0;
+    	let song_number;
+    	let t0_value = /*song*/ ctx[0]["Track"] + "";
     	let t0;
     	let t1;
-    	let song_number1;
-    	let t2_value = /*song*/ ctx[0]["ID"] + "";
+    	let song_title;
+    	let t2_value = /*song*/ ctx[0]["Title"] + "";
     	let t2;
     	let t3;
-    	let song_title;
-    	let t4_value = /*song*/ ctx[0]["Title"] + "";
-    	let t4;
-    	let t5;
     	let star;
-    	let t6;
+    	let t4;
     	let song_duration;
-    	let t7_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "";
-    	let t7;
+    	let t5_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "";
+    	let t5;
     	let song_list_item_id_value;
     	let song_list_item_class_value;
     	let current;
@@ -3914,27 +3921,22 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			song_list_item = element("song-list-item");
-    			song_number0 = element("song-number");
-    			t0 = text(/*index*/ ctx[1]);
+    			song_number = element("song-number");
+    			t0 = text(t0_value);
     			t1 = space();
-    			song_number1 = element("song-number");
+    			song_title = element("song-title");
     			t2 = text(t2_value);
     			t3 = space();
-    			song_title = element("song-title");
-    			t4 = text(t4_value);
-    			t5 = space();
     			create_component(star.$$.fragment);
-    			t6 = space();
+    			t4 = space();
     			song_duration = element("song-duration");
-    			t7 = text(t7_value);
-    			set_custom_element_data(song_number0, "class", "svelte-gz3yvq");
-    			add_location(song_number0, file$c, 35, 1, 1033);
-    			set_custom_element_data(song_number1, "class", "svelte-gz3yvq");
-    			add_location(song_number1, file$c, 37, 1, 1122);
-    			set_custom_element_data(song_title, "class", "svelte-gz3yvq");
-    			add_location(song_title, file$c, 38, 1, 1163);
-    			set_custom_element_data(song_duration, "class", "svelte-gz3yvq");
-    			add_location(song_duration, file$c, 40, 1, 1215);
+    			t5 = text(t5_value);
+    			set_custom_element_data(song_number, "class", "svelte-6gpb2w");
+    			add_location(song_number, file$c, 36, 1, 1078);
+    			set_custom_element_data(song_title, "class", "svelte-6gpb2w");
+    			add_location(song_title, file$c, 38, 1, 1172);
+    			set_custom_element_data(song_duration, "class", "svelte-6gpb2w");
+    			add_location(song_duration, file$c, 40, 1, 1224);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0]["ID"]);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
 
@@ -3942,7 +3944,7 @@ var app = (function () {
     			? "playing"
     			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
     			? "selected"
-    			: "") + " svelte-gz3yvq");
+    			: "") + " svelte-6gpb2w");
 
     			add_location(song_list_item, file$c, 26, 0, 818);
     		},
@@ -3951,26 +3953,22 @@ var app = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, song_list_item, anchor);
-    			append_dev(song_list_item, song_number0);
-    			append_dev(song_number0, t0);
+    			append_dev(song_list_item, song_number);
+    			append_dev(song_number, t0);
     			append_dev(song_list_item, t1);
-    			append_dev(song_list_item, song_number1);
-    			append_dev(song_number1, t2);
-    			append_dev(song_list_item, t3);
     			append_dev(song_list_item, song_title);
-    			append_dev(song_title, t4);
-    			append_dev(song_list_item, t5);
+    			append_dev(song_title, t2);
+    			append_dev(song_list_item, t3);
     			mount_component(star, song_list_item, null);
-    			append_dev(song_list_item, t6);
+    			append_dev(song_list_item, t4);
     			append_dev(song_list_item, song_duration);
-    			append_dev(song_duration, t7);
+    			append_dev(song_duration, t5);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*index*/ 2) set_data_dev(t0, /*index*/ ctx[1]);
-    			if ((!current || dirty & /*song*/ 1) && t2_value !== (t2_value = /*song*/ ctx[0]["ID"] + "")) set_data_dev(t2, t2_value);
-    			if ((!current || dirty & /*song*/ 1) && t4_value !== (t4_value = /*song*/ ctx[0]["Title"] + "")) set_data_dev(t4, t4_value);
-    			if ((!current || dirty & /*song*/ 1) && t7_value !== (t7_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "")) set_data_dev(t7, t7_value);
+    			if ((!current || dirty & /*song*/ 1) && t0_value !== (t0_value = /*song*/ ctx[0]["Track"] + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty & /*song*/ 1) && t2_value !== (t2_value = /*song*/ ctx[0]["Title"] + "")) set_data_dev(t2, t2_value);
+    			if ((!current || dirty & /*song*/ 1) && t5_value !== (t5_value = parseDuration(/*song*/ ctx[0]["Duration"]) + "")) set_data_dev(t5, t5_value);
 
     			if (!current || dirty & /*song*/ 1 && song_list_item_id_value !== (song_list_item_id_value = /*song*/ ctx[0]["ID"])) {
     				set_custom_element_data(song_list_item, "id", song_list_item_id_value);
@@ -3984,7 +3982,7 @@ var app = (function () {
     			? "playing"
     			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0]["ID"])
     			? "selected"
-    			: "") + " svelte-gz3yvq")) {
+    			: "") + " svelte-6gpb2w")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},
@@ -5863,8 +5861,8 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
-    			set_custom_element_data(song_list_background_svlt, "class", "svelte-bwgf44");
-    			add_location(song_list_background_svlt, file$i, 31, 0, 1234);
+    			set_custom_element_data(song_list_background_svlt, "class", "svelte-1gvvzcg");
+    			add_location(song_list_background_svlt, file$i, 36, 0, 1382);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5891,50 +5889,87 @@ var app = (function () {
     	return block;
     }
 
+    function loadCover(coverArtPath) {
+    	if (coverArtPath) {
+    		let $el = document.querySelector("song-list-background-svlt");
+
+    		if ($el) {
+    			$el.setAttribute("style", `background-image: url('${coverArtPath}');`);
+    		}
+    	}
+    }
+
     function instance$k($$self, $$props, $$invalidate) {
+    	let $albumCoverArtMapStore;
+    	let $selectedAlbumId;
+    	validate_store(albumCoverArtMapStore, "albumCoverArtMapStore");
+    	component_subscribe($$self, albumCoverArtMapStore, $$value => $$invalidate(2, $albumCoverArtMapStore = $$value));
+    	validate_store(selectedAlbumId, "selectedAlbumId");
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(3, $selectedAlbumId = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongListBackground", slots, []);
-    	let coverSrc = undefined;
+    	let previousCoverArtVersion = undefined;
+    	let previousCoverArtID = undefined;
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<SongListBackground> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ getCoverIPC, coverSrc });
+    	$$self.$capture_state = () => ({
+    		albumCoverArtMapStore,
+    		selectedAlbumId,
+    		previousCoverArtVersion,
+    		previousCoverArtID,
+    		loadCover,
+    		$albumCoverArtMapStore,
+    		$selectedAlbumId
+    	});
 
     	$$self.$inject_state = $$props => {
-    		if ("coverSrc" in $$props) coverSrc = $$props.coverSrc;
+    		if ("previousCoverArtVersion" in $$props) $$invalidate(0, previousCoverArtVersion = $$props.previousCoverArtVersion);
+    		if ("previousCoverArtID" in $$props) $$invalidate(1, previousCoverArtID = $$props.previousCoverArtID);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
-    	/*
-            if ($selectedAlbumId?.['RootDir']) {
-                getCoverIPC($selectedAlbumId['RootDir']).then((response) => {
-                    if (response['fileType'] === 'image') {
-                        // coverSrc = `url(${response['filePath']})`
 
-                        // console.log(coverSrc)
-                        // document.documentElement.style.setProperty('--song-list-background-image', coverSrc)
-                        let $el = document.querySelector('song-list-background-svlt')
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$albumCoverArtMapStore, $selectedAlbumId, previousCoverArtID, previousCoverArtVersion*/ 15) {
+    			 {
+    				// Loads cover if Cover Art map (If image updated) or Selected Album changes.
+    				// Get Cover Art from Map.
+    				let coverArt = $albumCoverArtMapStore.get($selectedAlbumId);
 
-                        if ($el) {
-                            // console.log($el)
-                            // console.log($el.style.backgroundImage)
-                            $el.setAttribute('style', `background-image: url('${response['filePath']}');`)
-                        }
-                        // $el.backgroundImage = coverSrc
+    				// If Found
+    				if (coverArt) {
+    					// Checks if the previous id changed.
+    					if (previousCoverArtID !== $selectedAlbumId) {
+    						// If changed it updates both id and version.
+    						$$invalidate(1, previousCoverArtID = $selectedAlbumId);
 
-                        // console.log()
-                        // console.log($el)
-                    }
-                })
-            }
-            */
+    						$$invalidate(0, previousCoverArtVersion = coverArt.version);
 
-    	return [];
+    						// If a cover is available, load it.
+    						loadCover(coverArt.filePath);
+    					} else if (coverArt.version !== previousCoverArtVersion) {
+    						// Updates the cover version.
+    						$$invalidate(0, previousCoverArtVersion = coverArt.version); // Checks if a new version of the album cover is available
+
+    						loadCover(coverArt.filePath);
+    					}
+    				}
+    			}
+    		}
+    	};
+
+    	return [
+    		previousCoverArtVersion,
+    		previousCoverArtID,
+    		$albumCoverArtMapStore,
+    		$selectedAlbumId
+    	];
     }
 
     class SongListBackground extends SvelteComponentDev {

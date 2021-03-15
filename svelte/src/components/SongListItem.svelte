@@ -40,9 +40,9 @@
 		: ''}
 	{$selectedSongsStore.includes(song['ID']) ? 'selected' : ''}"
 >
-	<song-number>{index}</song-number>
-	<!-- <song-number>{song['Track']}</song-number> -->
-	<song-number>{song['ID']}</song-number>
+	<!-- <song-number>{index}</song-number> -->
+	<song-number>{song['Track']}</song-number>
+	<!-- <song-number>{song['ID']}</song-number> -->
 	<song-title>{song['Title']}</song-title>
 	<Star />
 	<song-duration>{parseDuration(song['Duration'])}</song-duration>
@@ -56,7 +56,7 @@
 		align-items: center;
 
 		display: grid;
-		grid-template-columns: max-content max-content auto max-content max-content;
+		grid-template-columns: max-content auto max-content max-content;
 		grid-template-rows: auto;
 
 		margin: 0.25rem 0;

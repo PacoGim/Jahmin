@@ -1,35 +1,46 @@
 <script lang="ts">
-	import { getCoverIPC } from '../service/ipc.service'
+	import { albumCoverArtMapStore, selectedAlbumId } from '../store/final.store'
 
-	// import { selectedAlbum } from '../store/player.store'
-
-	let coverSrc = undefined
+	let previousCoverArtVersion = undefined
+	let previousCoverArtID = undefined
 
 	$: {
-		// console.log($selectedAlbumId)
-/*
-		if ($selectedAlbumId?.['RootDir']) {
-			getCoverIPC($selectedAlbumId['RootDir']).then((response) => {
-				if (response['fileType'] === 'image') {
-					// coverSrc = `url(${response['filePath']})`
+		// Loads cover if Cover Art map (If image updated) or Selected Album changes.
 
-					// console.log(coverSrc)
-					// document.documentElement.style.setProperty('--song-list-background-image', coverSrc)
-					let $el = document.querySelector('song-list-background-svlt')
+		// Get Cover Art from Map.
+		let coverArt = $albumCoverArtMapStore.get($selectedAlbumId)
 
-					if ($el) {
-						// console.log($el)
-						// console.log($el.style.backgroundImage)
-						$el.setAttribute('style', `background-image: url('${response['filePath']}');`)
-					}
-					// $el.backgroundImage = coverSrc
+		// If Found
+		if (coverArt) {
+			// Checks if the previous id changed.
+			if (previousCoverArtID !== $selectedAlbumId) {
+				// If changed it updates both id and version.
+				previousCoverArtID = $selectedAlbumId
+				previousCoverArtVersion = coverArt.version
 
-					// console.log()
-					// console.log($el)
-				}
-			})
+				// If a cover is available, load it.
+
+				loadCover(coverArt.filePath)
+
+				// Checks if a new version of the album cover is available
+			} else if (coverArt.version !== previousCoverArtVersion) {
+				// Updates the cover version.
+				previousCoverArtVersion = coverArt.version
+
+				loadCover(coverArt.filePath)
+			}
 		}
-		*/
+	}
+
+	// Takes a file path and loads it to the bg image style property.
+	function loadCover(coverArtPath) {
+		if (coverArtPath) {
+			let $el = document.querySelector('song-list-background-svlt')
+
+			if ($el) {
+				$el.setAttribute('style', `background-image: url('${coverArtPath}');`)
+			}
+		}
 	}
 </script>
 
@@ -61,5 +72,4 @@
 		backdrop-filter: blur(100px);
 		/* z-index: 1; */
 	}
-
 </style>
