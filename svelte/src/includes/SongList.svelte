@@ -55,8 +55,8 @@
 
 <song-list-svlt on:click={(e) => selectSongs(e)}>
 	{#if $songListStore !== undefined}
-		{#each $songListStore as song, index (index)}
-			<SongListItem albumID={undefined} {song} {index} />
+		{#each $songListStore as song, index (song.ID)}
+			<SongListItem {song} {index} />
 		{/each}
 	{/if}
 </song-list-svlt>

@@ -134,31 +134,71 @@
 	<TagEditEditor tagName="Composer" type="input" bind:value={newTags.Composer} />
 	<TagEditEditor tagName="Comment" type="textarea" bind:value={newTags.Comment} />
 
-<!--
-	<tag-edit-date>
-		<edit-group>
-			<input type="number" bind:value={newTags.Date.year} />
-			<span>Year (4 Digits)</span>
-		</edit-group>
+	<span>Date</span>
+	<date-tag-editor>
+		<input type="number" bind:value={newTags.Date_Year} placeholder="Year" />
 
-		<edit-group>
-			<input type="number" bind:value={newTags.Date.month} />
-			<span>Month (2 Digits)</span>
-		</edit-group>
+		<select bind:value={newTags.Date_Month}>
+			<option value="(Multiple Values)">Month</option>
+			<option value={1}>Jan</option>
+			<option value={2}>Feb</option>
+			<option value={3}>Mar</option>
+			<option value={4}>Apr</option>
+			<option value={5}>May</option>
+			<option value={6}>Jun</option>
+			<option value={7}>Jul</option>
+			<option value={8}>Aug</option>
+			<option value={9}>Sep</option>
+			<option value={10}>Oct</option>
+			<option value={11}>Nov</option>
+			<option value={12}>Dec</option>
+		</select>
 
-		<edit-group>
-			<input type="number" bind:value={newTags.Date.day} />
-			<span>Day (2 Digits)</span>
-		</edit-group>
-
-		<edit-group>
-			<input type="number" disabled />
-			<span>Year</span>
-		</edit-group>
-	</tag-edit-date> -->
+		<input type="number" bind:value={newTags.Date_Day} placeholder="Day" />
+	</date-tag-editor>
 </tag-edit-svlt>
 
 <style>
+	date-tag-editor {
+		width: 100%;
+		display: grid;
+		grid-template-columns: 4fr 3fr 2fr;
+		width: calc(100% - 2rem);
+		margin: 0 auto;
+	}
+	date-tag-editor select{
+		cursor: pointer;
+	}
+
+	date-tag-editor input,
+	date-tag-editor select {
+		width: 100%;
+
+		text-align: center;
+		color: #fff;
+
+		outline: none;
+
+		/* margin: 0.5rem 0; */
+
+		font-family: SourceSans;
+		font-variation-settings: 'wght' 450;
+
+		background-color: rgba(255, 255, 255, 0.15);
+		padding: 0.25rem 0.3rem;
+		/* border-radius: 5px; */
+		border: none;
+		font-size: 0.9rem;
+	}
+
+	date-tag-editor input:first-of-type {
+		border-radius: 5px 0 0 5px;
+	}
+
+	date-tag-editor input:last-of-type {
+		border-radius: 0 5px 5px 0;
+	}
+
 	tag-edit-svlt {
 		grid-area: tag-edit-svlt;
 
@@ -166,16 +206,6 @@
 		flex-direction: column;
 
 		background-color: rgba(0, 0, 0, 0.25);
-	}
-
-	tag-edit-date {
-		width: 100%;
-		display: grid;
-		grid-template-columns: 4fr 1fr 1fr 3fr;
-	}
-
-	tag-edit-date edit-group input {
-		width: 100%;
 	}
 
 	component-name {

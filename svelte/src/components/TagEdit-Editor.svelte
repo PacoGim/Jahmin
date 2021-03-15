@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nanoid } from 'nanoid'
-import TagEditSeparator from './TagEdit-Separator.svelte';
-
+	import TagEditSeparator from './TagEdit-Separator.svelte'
 
 	export let value = ''
 	export let type: 'input' | 'textarea' = 'input'
@@ -41,7 +40,7 @@ import TagEditSeparator from './TagEdit-Separator.svelte';
 			}}
 		/>
 	{/if}
-  <TagEditSeparator/>
+	<TagEditSeparator />
 </tag-edit>
 
 <style>
@@ -87,7 +86,7 @@ import TagEditSeparator from './TagEdit-Separator.svelte';
 		color: #aaa;
 	}
 
-/* <	tag-edit::after {
+	/* <	tag-edit::after {
 		content: '';
 		display: block;
 		background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(0, 0, 0, 0) 100%);

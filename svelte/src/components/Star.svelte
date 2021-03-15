@@ -1,7 +1,12 @@
 <script lang="ts">
-	let starLevel = 0
-	let starLevelTemp = starLevel
+	import { createEventDispatcher } from 'svelte'
 
+	const dispatch = createEventDispatcher()
+
+	export let songRating = 0
+
+	let starLevel = songRating / 10
+	let starLevelTemp = starLevel
 	let starElementWidth: number = undefined
 
 	function setStarLevel(e: MouseEvent) {
@@ -21,8 +26,21 @@
 	}
 </script>
 
-<stars>
-	<img class="delete-star" src="./img/star/star-delete.svg" alt="" />
+<stars on:click={dispatch('starChange', { starLevel: starLevel * 10 })}>
+	<img
+		on:click={() => {
+			starLevel = 0
+			starLevelTemp = 0
+		}}
+		class="delete-star"
+		src="./img/star/star-delete.svg"
+		alt=""
+	/>
+	<!--
+		MouseMove -> As the user moves through the stars, sets the proper star level.
+		MouseClick -> If the user clicks a star level, saves it in a temporary star level.
+		MouseLeave -> When the user leaves, sets the star level with the value of the temporary star level.
+	 -->
 	<img
 		class="star"
 		on:mouseleave={() => (starLevel = starLevelTemp)}
@@ -39,23 +57,23 @@
 	}
 
 	stars:hover img.delete-star {
-		opacity: 1;
+		opacity: 0.5;
 	}
 
 	img.delete-star {
 		opacity: 0;
 		margin-right: 2.5px;
 
-		transition-property: opacity filter;
+		transition-property: opacity;
 		transition-duration: 300ms;
 		transition-timing-function: ease-in-out;
 	}
+
 	img.delete-star:hover {
-		filter: invert(22%) sepia(73%) saturate(4178%) hue-rotate(336deg) brightness(84%) contrast(105%);
+		opacity: 1 !important;
 	}
 
 	img {
-		/* display: inline-block; */
 		height: 1rem;
 		width: auto;
 	}

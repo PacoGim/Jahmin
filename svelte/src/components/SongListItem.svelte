@@ -9,7 +9,6 @@
 
 	export let song: SongType
 	export let index: number
-	export let albumID: string
 
 	function parseDuration(duration: number) {
 		if (duration >= 60 * 60) {
@@ -29,23 +28,29 @@
 			}
 		}
 	})
+
+	function setStar(starChangeEvent){
+
+		// TODO: Add updater
+		console.log(song.SourceFile,starChangeEvent.detail.starLevel)
+	}
 </script>
 
 <song-list-item
-	id={song['ID']}
+	id={song.ID}
 	{index}
 	class="
 	{$playbackCursor[0] === index && $selectedAlbumId === $albumPlayingIdStore
 		? 'playing'
 		: ''}
-	{$selectedSongsStore.includes(song['ID']) ? 'selected' : ''}"
+	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	<!-- <song-number>{index}</song-number> -->
-	<song-number>{song['Track']}</song-number>
+	<song-number>{song.Track}</song-number>
 	<!-- <song-number>{song['ID']}</song-number> -->
-	<song-title>{song['Title']}</song-title>
-	<Star />
-	<song-duration>{parseDuration(song['Duration'])}</song-duration>
+	<song-title>{song.Title}</song-title>
+	<Star on:starChange={setStar} songRating={song.Rating} />
+	<song-duration>{parseDuration(song.Duration)}</song-duration>
 </song-list-item>
 
 <style>

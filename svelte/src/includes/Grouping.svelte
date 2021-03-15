@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getGroupingIPC } from '../service/ipc.service'
-	import { dbVersion, selectedGroupByStore, selectedGroupByValueStore } from '../store/final.store'
+	import { albumPlayingIdStore, dbVersion, selectedGroupByStore, selectedGroupByValueStore } from '../store/final.store'
 
 	let selectedGroupBy = localStorage.getItem('GroupBy')
 	let selectedGroupByValue = localStorage.getItem('GroupByValue')
@@ -22,6 +22,11 @@
 	}
 
 	$: {
+		$albumPlayingIdStore
+		saveCurrentPlayingGroup()
+	}
+
+	$: {
 		selectedGroupByValue
 
 		if (firstSelectedGroupByValueAssign === true) {
@@ -34,7 +39,7 @@
 				// Get Art Grid Albums if grouping value is changed.
 				$selectedGroupByValueStore = selectedGroupByValue
 
-				localStorage.setItem('GroupByValue', selectedGroupByValue)
+				// localStorage.setItem('GroupByValue', selectedGroupByValue)
 
 				//TODO Save to config file
 			}
@@ -63,19 +68,24 @@
 	}
 
 	function getGrouping() {
-		getGroupingIPC(selectedGroupBy).then((result) => (groups = result))
+		getGroupingIPC(selectedGroupBy).then((result) => {
+			groups = result
+
+			setTimeout(() => {
+				try {
+					let inputRadioValue = document
+						.querySelector('grouping-svlt groups')
+						.querySelector("input[type='radio']:checked")
+						.getAttribute('value')
+
+					document.querySelector(`group[name=${inputRadioValue}]`).scrollIntoView({ block: 'center' })
+				} catch {}
+			}, 100)
+		})
 	}
 
-	function cutText(text: string) {
-		if (text) {
-			if (text.length > 20) {
-				return text.substr(0, 20) + '...'
-			} else {
-				return text
-			}
-		} else {
-			return text
-		}
+	function saveCurrentPlayingGroup() {
+		localStorage.setItem('GroupByValue', selectedGroupByValue)
 	}
 </script>
 
@@ -93,7 +103,7 @@
 
 	<groups>
 		{#each groups as group (group.id)}
-			<group>
+			<group name={group.name}>
 				<input id={group.id} type="radio" value={group.name} bind:group={selectedGroupByValue} />
 				<label for={group.id}>{group.name}</label>
 			</group>
