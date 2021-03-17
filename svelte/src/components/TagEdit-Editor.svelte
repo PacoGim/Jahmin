@@ -2,8 +2,9 @@
 	import { nanoid } from 'nanoid'
 	import TagEditSeparator from './TagEdit-Separator.svelte'
 
-	export let value = ''
-	export let type: 'input' | 'textarea' = 'input'
+	export let value: string | number = ''
+	export let type: 'input' | 'textarea' | 'number' = 'input'
+	export let placeholder = undefined
 	export let tagName
 
 	let id = nanoid(10)
@@ -24,7 +25,9 @@
 <tag-edit {id}>
 	<tag-name>{tagName}</tag-name>
 	{#if type === 'input'}
-		<input type="text" bind:value />
+		<input type="text" {placeholder} bind:value />
+	{:else if type === 'number'}
+		<input type="number" {placeholder} bind:value />
 	{:else if type === 'textarea'}
 		<textarea
 			rows="1"
@@ -55,26 +58,6 @@
 		font-size: 0.9rem;
 	}
 
-	tag-edit input,
-	tag-edit textarea {
-		text-align: center;
-		width: calc(100% - 2rem);
-		color: #fff;
-
-		outline: none;
-
-		margin: 0.5rem 0;
-
-		font-family: SourceSans;
-		font-variation-settings: 'wght' 450;
-
-		background-color: rgba(255, 255, 255, 0.15);
-		padding: 0.25rem 0.3rem;
-		border-radius: 5px;
-		border: none;
-		font-size: 0.9rem;
-	}
-
 	tag-edit textarea {
 		min-height: 0px;
 		overflow-y: hidden;
@@ -86,11 +69,11 @@
 		color: #aaa;
 	}
 
-	/* <	tag-edit::after {
+	/* tag-edit::after {
 		content: '';
 		display: block;
 		background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(0, 0, 0, 0) 100%);
 		height: 3px;
 		width: calc(100% - 2rem);
-	}> */
+	} */
 </style>

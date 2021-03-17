@@ -1950,7 +1950,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (90:2) {#each groups as group (group.id)}
+    // (79:2) {#each groups as group (group.id)}
     function create_each_block$1(key_1, ctx) {
     	let group;
     	let input;
@@ -1981,14 +1981,14 @@ var app = (function () {
     			input.__value = input_value_value = /*group*/ ctx[15].name;
     			input.value = input.__value;
     			attr_dev(input, "class", "svelte-z201rr");
-    			/*$$binding_groups*/ ctx[10][0].push(input);
-    			add_location(input, file$4, 91, 4, 3038);
+    			/*$$binding_groups*/ ctx[9][0].push(input);
+    			add_location(input, file$4, 80, 4, 2583);
     			attr_dev(label, "for", label_for_value = /*group*/ ctx[15].id);
     			attr_dev(label, "class", "svelte-z201rr");
-    			add_location(label, file$4, 92, 4, 3132);
+    			add_location(label, file$4, 81, 4, 2677);
     			attr_dev(group, "name", group_name_value = /*group*/ ctx[15].name);
     			attr_dev(group, "class", "svelte-z201rr");
-    			add_location(group, file$4, 90, 3, 3008);
+    			add_location(group, file$4, 79, 3, 2553);
     			this.first = group;
     		},
     		m: function mount(target, anchor) {
@@ -2001,7 +2001,7 @@ var app = (function () {
     			append_dev(group, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[9]);
+    				dispose = listen_dev(input, "change", /*input_change_handler*/ ctx[8]);
     				mounted = true;
     			}
     		},
@@ -2031,7 +2031,7 @@ var app = (function () {
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(group);
-    			/*$$binding_groups*/ ctx[10][0].splice(/*$$binding_groups*/ ctx[10][0].indexOf(input), 1);
+    			/*$$binding_groups*/ ctx[9][0].splice(/*$$binding_groups*/ ctx[9][0].indexOf(input), 1);
     			mounted = false;
     			dispose();
     		}
@@ -2041,7 +2041,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(90:2) {#each groups as group (group.id)}",
+    		source: "(79:2) {#each groups as group (group.id)}",
     		ctx
     	});
 
@@ -2114,31 +2114,31 @@ var app = (function () {
     			option0.value = option0.__value;
     			option0.disabled = true;
     			option0.selected = true;
-    			add_location(option0, file$4, 78, 2, 2602);
+    			add_location(option0, file$4, 67, 2, 2147);
     			option1.__value = "none";
     			option1.value = option1.__value;
-    			add_location(option1, file$4, 79, 2, 2664);
+    			add_location(option1, file$4, 68, 2, 2209);
     			option2.__value = "Genre";
     			option2.value = option2.__value;
-    			add_location(option2, file$4, 80, 2, 2701);
+    			add_location(option2, file$4, 69, 2, 2246);
     			option3.__value = "AlbumArtist";
     			option3.value = option3.__value;
-    			add_location(option3, file$4, 81, 2, 2740);
+    			add_location(option3, file$4, 70, 2, 2285);
     			option4.__value = "Album";
     			option4.value = option4.__value;
-    			add_location(option4, file$4, 82, 2, 2792);
+    			add_location(option4, file$4, 71, 2, 2337);
     			option5.__value = "Composer";
     			option5.value = option5.__value;
-    			add_location(option5, file$4, 83, 2, 2831);
+    			add_location(option5, file$4, 72, 2, 2376);
     			attr_dev(select, "class", "svelte-z201rr");
-    			if (/*selectedGroupBy*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[8].call(select));
-    			add_location(select, file$4, 77, 1, 2562);
+    			if (/*selectedGroupBy*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[7].call(select));
+    			add_location(select, file$4, 66, 1, 2107);
     			set_custom_element_data(total_groups, "class", "svelte-z201rr");
-    			add_location(total_groups, file$4, 86, 1, 2887);
+    			add_location(total_groups, file$4, 75, 1, 2432);
     			attr_dev(groups_1, "class", "svelte-z201rr");
-    			add_location(groups_1, file$4, 88, 1, 2959);
+    			add_location(groups_1, file$4, 77, 1, 2504);
     			set_custom_element_data(grouping_svlt, "class", "svelte-z201rr");
-    			add_location(grouping_svlt, file$4, 76, 0, 2545);
+    			add_location(grouping_svlt, file$4, 65, 0, 2090);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2167,7 +2167,7 @@ var app = (function () {
     			}
 
     			if (!mounted) {
-    				dispose = listen_dev(select, "change", /*select_change_handler*/ ctx[8]);
+    				dispose = listen_dev(select, "change", /*select_change_handler*/ ctx[7]);
     				mounted = true;
     			}
     		},
@@ -2217,13 +2217,13 @@ var app = (function () {
     	let $selectedGroupByValueStore;
     	let $selectedGroupByStore;
     	validate_store(dbVersion, "dbVersion");
-    	component_subscribe($$self, dbVersion, $$value => $$invalidate(6, $dbVersion = $$value));
+    	component_subscribe($$self, dbVersion, $$value => $$invalidate(5, $dbVersion = $$value));
     	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
-    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(7, $albumPlayingIdStore = $$value));
+    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(6, $albumPlayingIdStore = $$value));
     	validate_store(selectedGroupByValueStore, "selectedGroupByValueStore");
-    	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(11, $selectedGroupByValueStore = $$value));
+    	component_subscribe($$self, selectedGroupByValueStore, $$value => $$invalidate(10, $selectedGroupByValueStore = $$value));
     	validate_store(selectedGroupByStore, "selectedGroupByStore");
-    	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(12, $selectedGroupByStore = $$value));
+    	component_subscribe($$self, selectedGroupByStore, $$value => $$invalidate(11, $selectedGroupByStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Grouping", slots, []);
     	let selectedGroupBy = localStorage.getItem("GroupBy");
@@ -2301,8 +2301,8 @@ var app = (function () {
     		if ("selectedGroupByValue" in $$props) $$invalidate(1, selectedGroupByValue = $$props.selectedGroupByValue);
     		if ("groups" in $$props) $$invalidate(2, groups = $$props.groups);
     		if ("firstSelectedGroupByAssign" in $$props) $$invalidate(3, firstSelectedGroupByAssign = $$props.firstSelectedGroupByAssign);
-    		if ("firstSelectedGroupByValueAssign" in $$props) $$invalidate(4, firstSelectedGroupByValueAssign = $$props.firstSelectedGroupByValueAssign);
-    		if ("firstDbVersionAssign" in $$props) $$invalidate(5, firstDbVersionAssign = $$props.firstDbVersionAssign);
+    		if ("firstSelectedGroupByValueAssign" in $$props) firstSelectedGroupByValueAssign = $$props.firstSelectedGroupByValueAssign;
+    		if ("firstDbVersionAssign" in $$props) $$invalidate(4, firstDbVersionAssign = $$props.firstDbVersionAssign);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -2310,38 +2310,28 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$dbVersion, firstDbVersionAssign*/ 96) {
+    		if ($$self.$$.dirty & /*$dbVersion, firstDbVersionAssign*/ 48) {
     			 {
 
     				if (firstDbVersionAssign === true) {
-    					$$invalidate(5, firstDbVersionAssign = false);
+    					$$invalidate(4, firstDbVersionAssign = false);
     				} else {
     					getGrouping();
     				}
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$albumPlayingIdStore*/ 128) {
+    		if ($$self.$$.dirty & /*$albumPlayingIdStore*/ 64) {
     			 {
     				saveCurrentPlayingGroup();
     			}
     		}
 
-    		if ($$self.$$.dirty & /*selectedGroupByValue, firstSelectedGroupByValueAssign*/ 18) {
+    		if ($$self.$$.dirty & /*selectedGroupByValue*/ 2) {
     			 {
-
-    				if (firstSelectedGroupByValueAssign === true) {
-    					$$invalidate(4, firstSelectedGroupByValueAssign = false);
-
-    					// Get Art Grid Albums as soon as the variable is set.
-    					set_store_value(selectedGroupByValueStore, $selectedGroupByValueStore = selectedGroupByValue, $selectedGroupByValueStore);
-    				} else {
-    					if (selectedGroupByValue !== localStorage.getItem("GroupByValue")) {
-    						// Get Art Grid Albums if grouping value is changed.
-    						set_store_value(selectedGroupByValueStore, $selectedGroupByValueStore = selectedGroupByValue, $selectedGroupByValueStore);
-    					} // localStorage.setItem('GroupByValue', selectedGroupByValue)
-    					//TODO Save to config file
-    				}
+    				// Get Art Grid Albums as soon as the variable is set.
+    				//TODO Save to config file
+    				set_store_value(selectedGroupByValueStore, $selectedGroupByValueStore = selectedGroupByValue, $selectedGroupByValueStore);
     			}
     		}
 
@@ -2373,7 +2363,6 @@ var app = (function () {
     		selectedGroupByValue,
     		groups,
     		firstSelectedGroupByAssign,
-    		firstSelectedGroupByValueAssign,
     		firstDbVersionAssign,
     		$dbVersion,
     		$albumPlayingIdStore,
@@ -4702,8 +4691,8 @@ var app = (function () {
     /* src/components/TagEdit-Editor.svelte generated by Svelte v3.31.0 */
     const file$f = "src/components/TagEdit-Editor.svelte";
 
-    // (24:31) 
-    function create_if_block_1$2(ctx) {
+    // (27:31) 
+    function create_if_block_2$1(ctx) {
     	let textarea;
     	let mounted;
     	let dispose;
@@ -4712,8 +4701,8 @@ var app = (function () {
     		c: function create() {
     			textarea = element("textarea");
     			attr_dev(textarea, "rows", "1");
-    			attr_dev(textarea, "class", "svelte-8x2r1q");
-    			add_location(textarea, file$f, 24, 2, 751);
+    			attr_dev(textarea, "class", "svelte-1uvv94g");
+    			add_location(textarea, file$f, 27, 2, 882);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
@@ -4721,10 +4710,10 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[5]),
-    					listen_dev(textarea, "mouseleave", /*mouseleave_handler*/ ctx[6], false, false, false),
-    					listen_dev(textarea, "mouseover", /*mouseover_handler*/ ctx[7], false, false, false),
-    					listen_dev(textarea, "input", /*input_handler*/ ctx[8], false, false, false)
+    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[7]),
+    					listen_dev(textarea, "mouseleave", /*mouseleave_handler*/ ctx[8], false, false, false),
+    					listen_dev(textarea, "mouseover", /*mouseover_handler*/ ctx[9], false, false, false),
+    					listen_dev(textarea, "input", /*input_handler*/ ctx[10], false, false, false)
     				];
 
     				mounted = true;
@@ -4744,16 +4733,66 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(24:31) ",
+    		source: "(27:31) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (22:1) {#if type === 'input'}
+    // (25:29) 
+    function create_if_block_1$2(ctx) {
+    	let input;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			input = element("input");
+    			attr_dev(input, "type", "number");
+    			attr_dev(input, "placeholder", /*placeholder*/ ctx[2]);
+    			attr_dev(input, "class", "svelte-1uvv94g");
+    			add_location(input, file$f, 25, 2, 799);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, input, anchor);
+    			set_input_value(input, /*value*/ ctx[0]);
+
+    			if (!mounted) {
+    				dispose = listen_dev(input, "input", /*input_input_handler_1*/ ctx[6]);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*placeholder*/ 4) {
+    				attr_dev(input, "placeholder", /*placeholder*/ ctx[2]);
+    			}
+
+    			if (dirty & /*value*/ 1 && to_number(input.value) !== /*value*/ ctx[0]) {
+    				set_input_value(input, /*value*/ ctx[0]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(input);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(25:29) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (23:1) {#if type === 'input'}
     function create_if_block$3(ctx) {
     	let input;
     	let mounted;
@@ -4763,19 +4802,24 @@ var app = (function () {
     		c: function create() {
     			input = element("input");
     			attr_dev(input, "type", "text");
-    			attr_dev(input, "class", "svelte-8x2r1q");
-    			add_location(input, file$f, 22, 2, 684);
+    			attr_dev(input, "placeholder", /*placeholder*/ ctx[2]);
+    			attr_dev(input, "class", "svelte-1uvv94g");
+    			add_location(input, file$f, 23, 2, 720);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
     			set_input_value(input, /*value*/ ctx[0]);
 
     			if (!mounted) {
-    				dispose = listen_dev(input, "input", /*input_input_handler*/ ctx[4]);
+    				dispose = listen_dev(input, "input", /*input_input_handler*/ ctx[5]);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
+    			if (dirty & /*placeholder*/ 4) {
+    				attr_dev(input, "placeholder", /*placeholder*/ ctx[2]);
+    			}
+
     			if (dirty & /*value*/ 1 && input.value !== /*value*/ ctx[0]) {
     				set_input_value(input, /*value*/ ctx[0]);
     			}
@@ -4791,7 +4835,7 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(22:1) {#if type === 'input'}",
+    		source: "(23:1) {#if type === 'input'}",
     		ctx
     	});
 
@@ -4809,7 +4853,8 @@ var app = (function () {
 
     	function select_block_type(ctx, dirty) {
     		if (/*type*/ ctx[1] === "input") return create_if_block$3;
-    		if (/*type*/ ctx[1] === "textarea") return create_if_block_1$2;
+    		if (/*type*/ ctx[1] === "number") return create_if_block_1$2;
+    		if (/*type*/ ctx[1] === "textarea") return create_if_block_2$1;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -4820,16 +4865,16 @@ var app = (function () {
     		c: function create() {
     			tag_edit = element("tag-edit");
     			tag_name = element("tag-name");
-    			t0 = text(/*tagName*/ ctx[2]);
+    			t0 = text(/*tagName*/ ctx[3]);
     			t1 = space();
     			if (if_block) if_block.c();
     			t2 = space();
     			create_component(tageditseparator.$$.fragment);
-    			set_custom_element_data(tag_name, "class", "svelte-8x2r1q");
-    			add_location(tag_name, file$f, 20, 1, 627);
-    			set_custom_element_data(tag_edit, "id", /*id*/ ctx[3]);
-    			set_custom_element_data(tag_edit, "class", "svelte-8x2r1q");
-    			add_location(tag_edit, file$f, 19, 0, 610);
+    			set_custom_element_data(tag_name, "class", "svelte-1uvv94g");
+    			add_location(tag_name, file$f, 21, 1, 663);
+    			set_custom_element_data(tag_edit, "id", /*id*/ ctx[4]);
+    			set_custom_element_data(tag_edit, "class", "svelte-1uvv94g");
+    			add_location(tag_edit, file$f, 20, 0, 646);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4845,7 +4890,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*tagName*/ 4) set_data_dev(t0, /*tagName*/ ctx[2]);
+    			if (!current || dirty & /*tagName*/ 8) set_data_dev(t0, /*tagName*/ ctx[3]);
 
     			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
     				if_block.p(ctx, dirty);
@@ -4907,9 +4952,10 @@ var app = (function () {
     	validate_slots("TagEdit_Editor", slots, []);
     	let { value = "" } = $$props;
     	let { type = "input" } = $$props;
+    	let { placeholder = undefined } = $$props;
     	let { tagName } = $$props;
     	let id = nanoid(10);
-    	const writable_props = ["value", "type", "tagName"];
+    	const writable_props = ["value", "type", "placeholder", "tagName"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<TagEdit_Editor> was created with unknown prop '${key}'`);
@@ -4917,6 +4963,11 @@ var app = (function () {
 
     	function input_input_handler() {
     		value = this.value;
+    		$$invalidate(0, value);
+    	}
+
+    	function input_input_handler_1() {
+    		value = to_number(this.value);
     		$$invalidate(0, value);
     	}
 
@@ -4940,7 +4991,8 @@ var app = (function () {
     	$$self.$$set = $$props => {
     		if ("value" in $$props) $$invalidate(0, value = $$props.value);
     		if ("type" in $$props) $$invalidate(1, type = $$props.type);
-    		if ("tagName" in $$props) $$invalidate(2, tagName = $$props.tagName);
+    		if ("placeholder" in $$props) $$invalidate(2, placeholder = $$props.placeholder);
+    		if ("tagName" in $$props) $$invalidate(3, tagName = $$props.tagName);
     	};
 
     	$$self.$capture_state = () => ({
@@ -4948,6 +5000,7 @@ var app = (function () {
     		TagEditSeparator: TagEdit_Separator,
     		value,
     		type,
+    		placeholder,
     		tagName,
     		id,
     		resizeTextArea
@@ -4956,8 +5009,9 @@ var app = (function () {
     	$$self.$inject_state = $$props => {
     		if ("value" in $$props) $$invalidate(0, value = $$props.value);
     		if ("type" in $$props) $$invalidate(1, type = $$props.type);
-    		if ("tagName" in $$props) $$invalidate(2, tagName = $$props.tagName);
-    		if ("id" in $$props) $$invalidate(3, id = $$props.id);
+    		if ("placeholder" in $$props) $$invalidate(2, placeholder = $$props.placeholder);
+    		if ("tagName" in $$props) $$invalidate(3, tagName = $$props.tagName);
+    		if ("id" in $$props) $$invalidate(4, id = $$props.id);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -4967,9 +5021,11 @@ var app = (function () {
     	return [
     		value,
     		type,
+    		placeholder,
     		tagName,
     		id,
     		input_input_handler,
+    		input_input_handler_1,
     		textarea_input_handler,
     		mouseleave_handler,
     		mouseover_handler,
@@ -4980,7 +5036,13 @@ var app = (function () {
     class TagEdit_Editor extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { value: 0, type: 1, tagName: 2 });
+
+    		init(this, options, instance$f, create_fragment$f, safe_not_equal, {
+    			value: 0,
+    			type: 1,
+    			placeholder: 2,
+    			tagName: 3
+    		});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -4992,7 +5054,7 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*tagName*/ ctx[2] === undefined && !("tagName" in props)) {
+    		if (/*tagName*/ ctx[3] === undefined && !("tagName" in props)) {
     			console.warn("<TagEdit_Editor> was created without expected prop 'tagName'");
     		}
     	}
@@ -5010,6 +5072,14 @@ var app = (function () {
     	}
 
     	set type(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get placeholder() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set placeholder(value) {
     		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -5052,42 +5122,16 @@ var app = (function () {
     	let tagediteditor6;
     	let updating_value_6;
     	let t8;
-    	let span;
-    	let t10;
     	let date_tag_editor;
-    	let input0;
-    	let t11;
-    	let select;
-    	let option0;
-    	let option1;
-    	let option1_value_value;
-    	let option2;
-    	let option2_value_value;
-    	let option3;
-    	let option3_value_value;
-    	let option4;
-    	let option4_value_value;
-    	let option5;
-    	let option5_value_value;
-    	let option6;
-    	let option6_value_value;
-    	let option7;
-    	let option7_value_value;
-    	let option8;
-    	let option8_value_value;
-    	let option9;
-    	let option9_value_value;
-    	let option10;
-    	let option10_value_value;
-    	let option11;
-    	let option11_value_value;
-    	let option12;
-    	let option12_value_value;
-    	let t25;
-    	let input1;
+    	let tagediteditor7;
+    	let updating_value_7;
+    	let t9;
+    	let tagediteditor8;
+    	let updating_value_8;
+    	let t10;
+    	let tagediteditor9;
+    	let updating_value_9;
     	let current;
-    	let mounted;
-    	let dispose;
 
     	function tagediteditor0_value_binding(value) {
     		/*tagediteditor0_value_binding*/ ctx[4].call(null, value);
@@ -5211,6 +5255,57 @@ var app = (function () {
 
     	binding_callbacks.push(() => bind(tagediteditor6, "value", tagediteditor6_value_binding));
 
+    	function tagediteditor7_value_binding(value) {
+    		/*tagediteditor7_value_binding*/ ctx[11].call(null, value);
+    	}
+
+    	let tagediteditor7_props = { tagName: "Year", type: "number" };
+
+    	if (/*newTags*/ ctx[0].Date_Year !== void 0) {
+    		tagediteditor7_props.value = /*newTags*/ ctx[0].Date_Year;
+    	}
+
+    	tagediteditor7 = new TagEdit_Editor({
+    			props: tagediteditor7_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor7, "value", tagediteditor7_value_binding));
+
+    	function tagediteditor8_value_binding(value) {
+    		/*tagediteditor8_value_binding*/ ctx[12].call(null, value);
+    	}
+
+    	let tagediteditor8_props = { tagName: "Month", type: "number" };
+
+    	if (/*newTags*/ ctx[0].Date_Month !== void 0) {
+    		tagediteditor8_props.value = /*newTags*/ ctx[0].Date_Month;
+    	}
+
+    	tagediteditor8 = new TagEdit_Editor({
+    			props: tagediteditor8_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor8, "value", tagediteditor8_value_binding));
+
+    	function tagediteditor9_value_binding(value) {
+    		/*tagediteditor9_value_binding*/ ctx[13].call(null, value);
+    	}
+
+    	let tagediteditor9_props = { tagName: "Day", type: "number" };
+
+    	if (/*newTags*/ ctx[0].Date_Day !== void 0) {
+    		tagediteditor9_props.value = /*newTags*/ ctx[0].Date_Day;
+    	}
+
+    	tagediteditor9 = new TagEdit_Editor({
+    			props: tagediteditor9_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor9, "value", tagediteditor9_value_binding));
+
     	const block = {
     		c: function create() {
     			tag_edit_svlt = element("tag-edit-svlt");
@@ -5231,97 +5326,17 @@ var app = (function () {
     			t7 = space();
     			create_component(tagediteditor6.$$.fragment);
     			t8 = space();
-    			span = element("span");
-    			span.textContent = "Date";
-    			t10 = space();
     			date_tag_editor = element("date-tag-editor");
-    			input0 = element("input");
-    			t11 = space();
-    			select = element("select");
-    			option0 = element("option");
-    			option0.textContent = "Month";
-    			option1 = element("option");
-    			option1.textContent = "Jan";
-    			option2 = element("option");
-    			option2.textContent = "Feb";
-    			option3 = element("option");
-    			option3.textContent = "Mar";
-    			option4 = element("option");
-    			option4.textContent = "Apr";
-    			option5 = element("option");
-    			option5.textContent = "May";
-    			option6 = element("option");
-    			option6.textContent = "Jun";
-    			option7 = element("option");
-    			option7.textContent = "Jul";
-    			option8 = element("option");
-    			option8.textContent = "Aug";
-    			option9 = element("option");
-    			option9.textContent = "Sep";
-    			option10 = element("option");
-    			option10.textContent = "Oct";
-    			option11 = element("option");
-    			option11.textContent = "Nov";
-    			option12 = element("option");
-    			option12.textContent = "Dec";
-    			t25 = space();
-    			input1 = element("input");
-    			set_custom_element_data(component_name, "class", "svelte-o2jzoz");
+    			create_component(tagediteditor7.$$.fragment);
+    			t9 = space();
+    			create_component(tagediteditor8.$$.fragment);
+    			t10 = space();
+    			create_component(tagediteditor9.$$.fragment);
+    			set_custom_element_data(component_name, "class", "svelte-1x5scky");
     			add_location(component_name, file$g, 105, 1, 3159);
-    			add_location(span, file$g, 115, 1, 3763);
-    			attr_dev(input0, "type", "number");
-    			attr_dev(input0, "placeholder", "Year");
-    			attr_dev(input0, "class", "svelte-o2jzoz");
-    			add_location(input0, file$g, 117, 2, 3802);
-    			option0.__value = "(Multiple Values)";
-    			option0.value = option0.__value;
-    			add_location(option0, file$g, 120, 3, 3923);
-    			option1.__value = option1_value_value = 1;
-    			option1.value = option1.__value;
-    			add_location(option1, file$g, 121, 3, 3975);
-    			option2.__value = option2_value_value = 2;
-    			option2.value = option2.__value;
-    			add_location(option2, file$g, 122, 3, 4009);
-    			option3.__value = option3_value_value = 3;
-    			option3.value = option3.__value;
-    			add_location(option3, file$g, 123, 3, 4043);
-    			option4.__value = option4_value_value = 4;
-    			option4.value = option4.__value;
-    			add_location(option4, file$g, 124, 3, 4077);
-    			option5.__value = option5_value_value = 5;
-    			option5.value = option5.__value;
-    			add_location(option5, file$g, 125, 3, 4111);
-    			option6.__value = option6_value_value = 6;
-    			option6.value = option6.__value;
-    			add_location(option6, file$g, 126, 3, 4145);
-    			option7.__value = option7_value_value = 7;
-    			option7.value = option7.__value;
-    			add_location(option7, file$g, 127, 3, 4179);
-    			option8.__value = option8_value_value = 8;
-    			option8.value = option8.__value;
-    			add_location(option8, file$g, 128, 3, 4213);
-    			option9.__value = option9_value_value = 9;
-    			option9.value = option9.__value;
-    			add_location(option9, file$g, 129, 3, 4247);
-    			option10.__value = option10_value_value = 10;
-    			option10.value = option10.__value;
-    			add_location(option10, file$g, 130, 3, 4281);
-    			option11.__value = option11_value_value = 11;
-    			option11.value = option11.__value;
-    			add_location(option11, file$g, 131, 3, 4316);
-    			option12.__value = option12_value_value = 12;
-    			option12.value = option12.__value;
-    			add_location(option12, file$g, 132, 3, 4351);
-    			attr_dev(select, "class", "svelte-o2jzoz");
-    			if (/*newTags*/ ctx[0].Date_Month === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
-    			add_location(select, file$g, 119, 2, 3879);
-    			attr_dev(input1, "type", "number");
-    			attr_dev(input1, "placeholder", "Day");
-    			attr_dev(input1, "class", "svelte-o2jzoz");
-    			add_location(input1, file$g, 135, 2, 4398);
-    			set_custom_element_data(date_tag_editor, "class", "svelte-o2jzoz");
-    			add_location(date_tag_editor, file$g, 116, 1, 3782);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-o2jzoz");
+    			set_custom_element_data(date_tag_editor, "class", "svelte-1x5scky");
+    			add_location(date_tag_editor, file$g, 115, 1, 3763);
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1x5scky");
     			add_location(tag_edit_svlt, file$g, 104, 0, 3142);
     		},
     		l: function claim(nodes) {
@@ -5345,41 +5360,13 @@ var app = (function () {
     			append_dev(tag_edit_svlt, t7);
     			mount_component(tagediteditor6, tag_edit_svlt, null);
     			append_dev(tag_edit_svlt, t8);
-    			append_dev(tag_edit_svlt, span);
-    			append_dev(tag_edit_svlt, t10);
     			append_dev(tag_edit_svlt, date_tag_editor);
-    			append_dev(date_tag_editor, input0);
-    			set_input_value(input0, /*newTags*/ ctx[0].Date_Year);
-    			append_dev(date_tag_editor, t11);
-    			append_dev(date_tag_editor, select);
-    			append_dev(select, option0);
-    			append_dev(select, option1);
-    			append_dev(select, option2);
-    			append_dev(select, option3);
-    			append_dev(select, option4);
-    			append_dev(select, option5);
-    			append_dev(select, option6);
-    			append_dev(select, option7);
-    			append_dev(select, option8);
-    			append_dev(select, option9);
-    			append_dev(select, option10);
-    			append_dev(select, option11);
-    			append_dev(select, option12);
-    			select_option(select, /*newTags*/ ctx[0].Date_Month);
-    			append_dev(date_tag_editor, t25);
-    			append_dev(date_tag_editor, input1);
-    			set_input_value(input1, /*newTags*/ ctx[0].Date_Day);
+    			mount_component(tagediteditor7, date_tag_editor, null);
+    			append_dev(date_tag_editor, t9);
+    			mount_component(tagediteditor8, date_tag_editor, null);
+    			append_dev(date_tag_editor, t10);
+    			mount_component(tagediteditor9, date_tag_editor, null);
     			current = true;
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[11]),
-    					listen_dev(select, "change", /*select_change_handler*/ ctx[12]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[13])
-    				];
-
-    				mounted = true;
-    			}
     		},
     		p: function update(ctx, [dirty]) {
     			const tagediteditor0_changes = {};
@@ -5445,18 +5432,33 @@ var app = (function () {
     			}
 
     			tagediteditor6.$set(tagediteditor6_changes);
+    			const tagediteditor7_changes = {};
 
-    			if (dirty & /*newTags*/ 1 && to_number(input0.value) !== /*newTags*/ ctx[0].Date_Year) {
-    				set_input_value(input0, /*newTags*/ ctx[0].Date_Year);
+    			if (!updating_value_7 && dirty & /*newTags*/ 1) {
+    				updating_value_7 = true;
+    				tagediteditor7_changes.value = /*newTags*/ ctx[0].Date_Year;
+    				add_flush_callback(() => updating_value_7 = false);
     			}
 
-    			if (dirty & /*newTags*/ 1) {
-    				select_option(select, /*newTags*/ ctx[0].Date_Month);
+    			tagediteditor7.$set(tagediteditor7_changes);
+    			const tagediteditor8_changes = {};
+
+    			if (!updating_value_8 && dirty & /*newTags*/ 1) {
+    				updating_value_8 = true;
+    				tagediteditor8_changes.value = /*newTags*/ ctx[0].Date_Month;
+    				add_flush_callback(() => updating_value_8 = false);
     			}
 
-    			if (dirty & /*newTags*/ 1 && to_number(input1.value) !== /*newTags*/ ctx[0].Date_Day) {
-    				set_input_value(input1, /*newTags*/ ctx[0].Date_Day);
+    			tagediteditor8.$set(tagediteditor8_changes);
+    			const tagediteditor9_changes = {};
+
+    			if (!updating_value_9 && dirty & /*newTags*/ 1) {
+    				updating_value_9 = true;
+    				tagediteditor9_changes.value = /*newTags*/ ctx[0].Date_Day;
+    				add_flush_callback(() => updating_value_9 = false);
     			}
+
+    			tagediteditor9.$set(tagediteditor9_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -5467,6 +5469,9 @@ var app = (function () {
     			transition_in(tagediteditor4.$$.fragment, local);
     			transition_in(tagediteditor5.$$.fragment, local);
     			transition_in(tagediteditor6.$$.fragment, local);
+    			transition_in(tagediteditor7.$$.fragment, local);
+    			transition_in(tagediteditor8.$$.fragment, local);
+    			transition_in(tagediteditor9.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
@@ -5477,6 +5482,9 @@ var app = (function () {
     			transition_out(tagediteditor4.$$.fragment, local);
     			transition_out(tagediteditor5.$$.fragment, local);
     			transition_out(tagediteditor6.$$.fragment, local);
+    			transition_out(tagediteditor7.$$.fragment, local);
+    			transition_out(tagediteditor8.$$.fragment, local);
+    			transition_out(tagediteditor9.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -5488,8 +5496,9 @@ var app = (function () {
     			destroy_component(tagediteditor4);
     			destroy_component(tagediteditor5);
     			destroy_component(tagediteditor6);
-    			mounted = false;
-    			run_all(dispose);
+    			destroy_component(tagediteditor7);
+    			destroy_component(tagediteditor8);
+    			destroy_component(tagediteditor9);
     		}
     	};
 
@@ -5646,18 +5655,18 @@ var app = (function () {
     		$$invalidate(0, newTags);
     	}
 
-    	function input0_input_handler() {
-    		newTags.Date_Year = to_number(this.value);
+    	function tagediteditor7_value_binding(value) {
+    		newTags.Date_Year = value;
     		$$invalidate(0, newTags);
     	}
 
-    	function select_change_handler() {
-    		newTags.Date_Month = select_value(this);
+    	function tagediteditor8_value_binding(value) {
+    		newTags.Date_Month = value;
     		$$invalidate(0, newTags);
     	}
 
-    	function input1_input_handler() {
-    		newTags.Date_Day = to_number(this.value);
+    	function tagediteditor9_value_binding(value) {
+    		newTags.Date_Day = value;
     		$$invalidate(0, newTags);
     	}
 
@@ -5722,9 +5731,9 @@ var app = (function () {
     		tagediteditor4_value_binding,
     		tagediteditor5_value_binding,
     		tagediteditor6_value_binding,
-    		input0_input_handler,
-    		select_change_handler,
-    		input1_input_handler
+    		tagediteditor7_value_binding,
+    		tagediteditor8_value_binding,
+    		tagediteditor9_value_binding
     	];
     }
 

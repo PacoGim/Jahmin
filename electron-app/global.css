@@ -56,8 +56,8 @@ body {
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+	-webkit-appearance: none;
+	margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
 
 player-progress progress-foreground.not-smooth {
@@ -69,4 +69,27 @@ svg.player-button {
 	height: 100%;
 	width: auto;
 	fill: var(--low-color);
+}
+
+tag-edit input,
+tag-edit textarea,
+tag-edit select {
+	width: 100%;
+
+	text-align: center;
+	color: #fff;
+	width: calc(100% - 2rem);
+
+	outline: none;
+
+	margin: 0.5rem 0;
+
+	font-family: SourceSans;
+	font-variation-settings: 'wght' 450;
+
+	background-color: rgba(255, 255, 255, 0.15);
+	padding: 0.25rem 0.3rem;
+	border-radius: 5px;
+	border: none;
+	font-size: 0.9rem;
 }

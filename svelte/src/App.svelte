@@ -23,6 +23,7 @@
 			return !(e.code == 'Space' && e.target == document.body)
 		}
 
+
 		// window.onclick = (evt: MouseEvent) => {
 		// 	let songListSvelteFound = false
 

@@ -27,23 +27,9 @@
 	}
 
 	$: {
-		selectedGroupByValue
-
-		if (firstSelectedGroupByValueAssign === true) {
-			firstSelectedGroupByValueAssign = false
-
-			// Get Art Grid Albums as soon as the variable is set.
-			$selectedGroupByValueStore = selectedGroupByValue
-		} else {
-			if (selectedGroupByValue !== localStorage.getItem('GroupByValue')) {
-				// Get Art Grid Albums if grouping value is changed.
-				$selectedGroupByValueStore = selectedGroupByValue
-
-				// localStorage.setItem('GroupByValue', selectedGroupByValue)
-
-				//TODO Save to config file
-			}
-		}
+		// Get Art Grid Albums as soon as the variable is set.
+		//TODO Save to config file
+		$selectedGroupByValueStore = selectedGroupByValue
 	}
 
 	$: {

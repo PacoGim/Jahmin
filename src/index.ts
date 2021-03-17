@@ -73,6 +73,7 @@ function loadOptions(config: ConfigType) {
 	return options
 }
 
+
 app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
