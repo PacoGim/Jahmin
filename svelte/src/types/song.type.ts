@@ -10,7 +10,7 @@ export type SongType = {
 	Comment: string
 	Composer: string
 	Date: string
-	DiskNumber: number
+	DiscNumber: number
 	Duration: number
 	Extension: string
 	Genre: string

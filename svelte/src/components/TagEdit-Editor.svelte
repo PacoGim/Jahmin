@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { nanoid } from 'nanoid'
+	import { onMount } from 'svelte'
+
 	import TagEditSeparator from './TagEdit-Separator.svelte'
 
 	export let value: string | number = ''
 	export let type: 'input' | 'textarea' | 'number' = 'input'
 	export let placeholder = undefined
 	export let tagName
+	export let warningMessage = undefined
 
 	let id = nanoid(10)
 
@@ -23,7 +26,11 @@
 </script>
 
 <tag-edit {id}>
-	<tag-name>{tagName}</tag-name>
+	<tag-name>
+		{tagName}
+
+		<warning title={warningMessage} style={warningMessage === undefined ? 'display:none' : ''}>(❗)</warning>
+	</tag-name>
 	{#if type === 'input'}
 		<input type="text" {placeholder} bind:value />
 	{:else if type === 'number'}
@@ -56,6 +63,18 @@
 
 	tag-edit tag-name {
 		font-size: 0.9rem;
+
+		display: flex;
+
+		align-items: center;
+	}
+
+	tag-edit tag-name warning {
+		filter: grayscale(1) brightness(10);
+		transform: scale(0.9);
+		line-height: 0;
+		margin-left: 5px;
+		cursor: help;
 	}
 
 	tag-edit textarea {

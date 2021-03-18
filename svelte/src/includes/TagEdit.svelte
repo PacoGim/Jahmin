@@ -24,6 +24,7 @@
 		Date_Year: undefined,
 		Date_Month: undefined,
 		Date_Day: undefined,
+		DiscNumber: undefined,
 		Genre: undefined,
 		Rating: undefined,
 		Title: undefined,
@@ -55,7 +56,9 @@
 			}
 		}
 
-		// console.log(tagsToUpdate)
+		console.log(tagGroupDetail)
+
+		console.log(tagsToUpdate)
 	}
 
 	let previousSongList: SongType[] = undefined
@@ -92,6 +95,7 @@
 			Artist: undefined,
 			Comment: undefined,
 			Composer: undefined,
+			DiscNumber: undefined,
 			Genre: undefined,
 			Rating: undefined,
 			Title: undefined,
@@ -116,10 +120,11 @@
 			}
 		}
 
-		// console.log(tagGroup)
 
+		// console.log(tagGroup)
 		tagGroupDetail = Object.assign({}, tagGroup)
 		newTags = Object.assign({}, tagGroupDetail)
+
 	}
 </script>
 
@@ -128,6 +133,20 @@
 
 	<TagEditEditor tagName="Title" type="input" bind:value={newTags.Title} />
 	<TagEditEditor tagName="Album" type="input" bind:value={newTags.Album} />
+
+	<track-disc-tag-editor>
+		<TagEditEditor
+			tagName="Track #"
+			warningMessage={newTags.Track === '(Multiple Values)'
+				? 'It is not recommended to edit the track number of multiple songs at once.'
+				: undefined}
+			type="number"
+			placeholder="-"
+			bind:value={newTags.Track}
+		/>
+		<TagEditEditor tagName="Disc #" type="number" placeholder="-" bind:value={newTags.DiscNumber} />
+	</track-disc-tag-editor>
+
 	<TagEditEditor tagName="Artist" type="textarea" bind:value={newTags.Artist} />
 	<TagEditEditor tagName="Album Artist" type="textarea" bind:value={newTags.AlbumArtist} />
 	<TagEditEditor tagName="Genre" type="input" bind:value={newTags.Genre} />
@@ -144,7 +163,12 @@
 <style>
 	date-tag-editor {
 		display: grid;
-		grid-template-columns: repeat(3,1fr);
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	track-disc-tag-editor {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
 	}
 
 	tag-edit-svlt {
