@@ -111,7 +111,8 @@ export function watchFolders(rootDirectories: string[]) {
 			let ext = path.split('.').pop()?.toLowerCase()
 
 			if (ext && allowedExtenstions.includes(ext)) {
-				foundFiles.push(path)
+				// foundFiles.push(path)
+				foundFiles.unshift(path)
 			}
 		})
 		.on('ready', () => {
@@ -155,7 +156,7 @@ async function processFiles(files: string[]) {
 	// }
 
 	// setTimeout(() => {
-		process.nextTick(() => processFiles(files))
+	process.nextTick(() => processFiles(files))
 	// }, 1)
 }
 

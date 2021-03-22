@@ -29,7 +29,7 @@ async function createWindow() {
 	window.webContents.openDevTools()
 	window.loadFile('index.html')
 
-	// if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
 
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }

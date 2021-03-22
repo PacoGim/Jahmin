@@ -10,6 +10,12 @@
 	export let tagName
 	export let warningMessage = undefined
 
+	$: {
+		if (type === 'number' && value === null) {
+			value = ''
+		}
+	}
+
 	let id = nanoid(10)
 
 	function resizeTextArea(id: string, type: 'expand' | 'collapse') {

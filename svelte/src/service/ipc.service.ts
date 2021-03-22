@@ -89,10 +89,11 @@ export function getCoverIPC(rootDir) {
 export function getAlbumIPC(albumID: string): Promise<AlbumType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album', albumID).then((result: AlbumType) => {
-
-			// TODO Add custom sorting.
-			result.Songs = result.Songs.sort((a, b) => a.Track - b.Track)
-			resolve(result)
+			if (result) {
+				// TODO Add custom sorting.
+				result.Songs = result.Songs.sort((a, b) => a.Track - b.Track)
+				resolve(result)
+			}
 		})
 	})
 }

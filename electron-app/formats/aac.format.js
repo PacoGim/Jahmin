@@ -32,28 +32,28 @@ function getAacTags(filePath) {
             resolve({
                 ID: string_hash_1.default(filePath),
                 //@ts-expect-error
-                Album: tags['Album'],
+                Album: tags['Album'] || '',
                 //@ts-expect-error
-                AlbumArtist: tags['AlbumArtist'],
-                Artist: tags['Artist'],
+                AlbumArtist: tags['AlbumArtist'] || '',
+                Artist: tags['Artist'] || '',
                 //@ts-expect-error
-                Composer: tags['Composer'],
+                Composer: tags['Composer'] || '',
                 // Date: tags['ContentCreateDate'],
                 //@ts-expect-error
-                Genre: tags['Genre'],
+                Genre: tags['Genre'] || '',
                 //@ts-expect-error
-                DiskNumber: tags['DiskNumber'],
-                Title: tags['Title'],
+                DiscNumber: tags['DiskNumber'] || '',
+                Title: tags['Title'] || '',
                 //@ts-expect-error
                 Track: getTrack(tags['TrackNumber'], tags['Track']),
                 Rating: tags['RatingPercent'],
                 //@ts-expect-error
-                Date_Year: ((_a = tags.ContentCreateDate) === null || _a === void 0 ? void 0 : _a.year) | (tags === null || tags === void 0 ? void 0 : tags.ContentCreateDate),
+                Date_Year: ((_a = tags.ContentCreateDate) === null || _a === void 0 ? void 0 : _a.year) || (tags === null || tags === void 0 ? void 0 : tags.ContentCreateDate) || '',
                 //@ts-expect-error
-                Date_Month: (_b = tags.ContentCreateDate) === null || _b === void 0 ? void 0 : _b.month,
+                Date_Month: ((_b = tags.ContentCreateDate) === null || _b === void 0 ? void 0 : _b.month) || '',
                 //@ts-expect-error
-                Date_Day: (_c = tags.ContentCreateDate) === null || _c === void 0 ? void 0 : _c.day,
-                Comment: tags['Comment'],
+                Date_Day: ((_c = tags.ContentCreateDate) === null || _c === void 0 ? void 0 : _c.day) || '',
+                Comment: tags['Comment'] || '',
                 SourceFile: tags['SourceFile'],
                 Extension: tags['FileTypeExtension'],
                 Size: fileStats.size,

@@ -110,7 +110,8 @@ function watchFolders(rootDirectories) {
         var _a;
         let ext = (_a = path.split('.').pop()) === null || _a === void 0 ? void 0 : _a.toLowerCase();
         if (ext && allowedExtenstions.includes(ext)) {
-            foundFiles.push(path);
+            // foundFiles.push(path)
+            foundFiles.unshift(path);
         }
     })
         .on('ready', () => {

@@ -140,11 +140,11 @@ function parseAndSaveFile(filePath: string, extension: string, fileStats: fs.Sta
 					Rating: getRating(metadata, extension)
 				}
 
-				for (let i in doc) {
-					if (doc[i] === undefined) {
-						delete doc[i]
-					}
-				}
+				// for (let i in doc) {
+				// 	if (doc[i] === undefined) {
+				// 		delete doc[i]
+				// 	}
+				// }
 
 				setTimeout(() => createData(doc), 0)
 			})

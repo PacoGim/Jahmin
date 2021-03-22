@@ -1,25 +1,25 @@
 export type SongType = {
-	[index: string]: string | number
+	[index: string]: string | number | undefined
 	ID: number
-	$loki: number
-	Album: string
-	AlbumArtist: string
-	Artist: string
-	BitDepth: number
-	BitRate: number
-	Comment: string
-	Composer: string
-	Date: string
-	DiscNumber: number
-	Duration: number
-	Extension: string
-	Genre: string
-	LastModified: number
-	Rating: number
-	SampleRate: number
-	Size: number
-	SourceFile: string
-	Title: string
-	Track: number
-	Year: string
+	Album?: string // Modifiable
+	AlbumArtist?: string // Modifiable
+	Artist?: string // Modifiable
+	Composer?: string // Modifiable
+	Genre?: string // Modifiable
+	Title?: string // Modifiable
+	Track?: string // Modifiable
+	Rating?: number // Modifiable
+	Comment?: string // Modifiable
+	DiscNumber?: number // Modifiable
+	Date_Year: number | undefined // Modifiable
+	Date_Month: number | undefined // Modifiable
+	Date_Day: number | undefined // Modifiable
+	SourceFile?: string
+	Extension?: string
+	Size?: number
+	Duration?: number
+	SampleRate?: number
+	LastModified?: number
+	BitRate?: string
+	BitDepth?: number
 }

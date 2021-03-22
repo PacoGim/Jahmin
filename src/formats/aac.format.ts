@@ -29,28 +29,28 @@ export function getAacTags(filePath: string): Promise<SongType> {
 			resolve({
 				ID: stringHash(filePath),
 				//@ts-expect-error
-				Album: tags['Album'],
+				Album: tags['Album'] || '',
 				//@ts-expect-error
-				AlbumArtist: tags['AlbumArtist'],
-				Artist: tags['Artist'],
+				AlbumArtist: tags['AlbumArtist'] || '',
+				Artist: tags['Artist'] || '',
 				//@ts-expect-error
-				Composer: tags['Composer'],
+				Composer: tags['Composer'] || '',
 				// Date: tags['ContentCreateDate'],
 				//@ts-expect-error
-				Genre: tags['Genre'],
+				Genre: tags['Genre'] || '',
 				//@ts-expect-error
-				DiskNumber: tags['DiskNumber'],
-				Title: tags['Title'],
+				DiscNumber: tags['DiskNumber'] || '',
+				Title: tags['Title'] || '',
 				//@ts-expect-error
 				Track: getTrack(tags['TrackNumber'], tags['Track']),
 				Rating: tags['RatingPercent'],
 				//@ts-expect-error
-				Date_Year: tags.ContentCreateDate?.year | tags?.ContentCreateDate,
+				Date_Year: tags.ContentCreateDate?.year || tags?.ContentCreateDate || '',
 				//@ts-expect-error
-				Date_Month: tags.ContentCreateDate?.month,
+				Date_Month: tags.ContentCreateDate?.month || '',
 				//@ts-expect-error
-				Date_Day: tags.ContentCreateDate?.day,
-				Comment: tags['Comment'],
+				Date_Day: tags.ContentCreateDate?.day || '',
+				Comment: tags['Comment'] || '',
 				SourceFile: tags['SourceFile'],
 				Extension: tags['FileTypeExtension'],
 				Size: fileStats.size,

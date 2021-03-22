@@ -129,11 +129,11 @@ function parseAndSaveFile(filePath, extension, fileStats) {
                 BitDepth: metadata['format']['bitsPerSample'] || undefined,
                 Rating: getRating(metadata, extension)
             };
-            for (let i in doc) {
-                if (doc[i] === undefined) {
-                    delete doc[i];
-                }
-            }
+            // for (let i in doc) {
+            // 	if (doc[i] === undefined) {
+            // 		delete doc[i]
+            // 	}
+            // }
             setTimeout(() => loki_service_1.createData(doc), 0);
         })
             .catch((err) => {
