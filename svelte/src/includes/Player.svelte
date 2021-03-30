@@ -9,8 +9,7 @@
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
-	import { isPlaying } from '../store/final.store'
-	import { getWaveformIPCData } from '../service/waveform.service'
+	import { isPlaying, songPlayingIDStore } from '../store/final.store'
 
 	import { nextSong } from '../functions/nextSong.fn'
 	import { escapeString } from '../functions/escapeString.fn'
@@ -66,6 +65,8 @@
 			player
 				.play()
 				.then(() => {
+					$songPlayingIDStore = songToPlay.ID
+
 					localStorage.setItem('LastPlayedAlbumID', $albumPlayingIdStore)
 					localStorage.setItem('LastPlayedSongID', String(songToPlay.ID))
 					localStorage.setItem('LastPlayedSongIndex', String(indexToPlay))

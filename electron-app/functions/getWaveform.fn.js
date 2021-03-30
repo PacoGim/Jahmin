@@ -39,7 +39,10 @@ const fs_1 = __importStar(require("fs"));
 const __1 = require("..");
 const getAlbumColors_fn_1 = require("../services/getAlbumColors.fn");
 const hsl_to_hex_1 = __importDefault(require("hsl-to-hex"));
-const ffmpegPath = path_1.default.join(__dirname, '../binaries/mac', 'ffmpeg');
+// const ffmpegPath = path.join(__dirname, '../binaries/mac', 'ffmpeg')
+let ffmpegPath = () => {
+    return path_1.default.join(__dirname, '../binaries', 'ffmpeg');
+};
 function getWaveformsFolderWatcher() {
     return exports.waveformsFolderWatcher;
 }
@@ -59,7 +62,7 @@ function getWaveform(songPath) {
         if (fs_1.default.existsSync(waveformPath)) {
             return resolve(escape(waveformPath));
         }
-        child_process_1.exec(`'${ffmpegPath}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`).on('close', () => {
+        child_process_1.exec(`'${ffmpegPath()}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`).on('close', () => {
             resolve(escape(waveformPath));
         });
     }));

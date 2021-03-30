@@ -8,7 +8,10 @@ import { getAlbumColors } from '../services/getAlbumColors.fn'
 
 import hslToHex from 'hsl-to-hex'
 
-const ffmpegPath = path.join(__dirname, '../binaries/mac', 'ffmpeg')
+// const ffmpegPath = path.join(__dirname, '../binaries/mac', 'ffmpeg')
+let ffmpegPath = () => {
+	return path.join(__dirname, '../binaries', 'ffmpeg')
+}
 
 export let waveformsFolderWatcher: FSWatcher
 
@@ -39,7 +42,7 @@ export function getWaveform(songPath: string) {
 		}
 
 		exec(
-			`'${ffmpegPath}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`
+			`'${ffmpegPath()}' -i "${songPath}" -lavfi showwavespic=split_channels=0:s=4000x64:colors=${color}:filter=peak:scale=lin:draw=full '${waveformPath}'`
 		).on('close', () => {
 			resolve(escape(waveformPath))
 		})

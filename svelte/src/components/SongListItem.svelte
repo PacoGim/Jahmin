@@ -3,7 +3,7 @@
 
 	import type { SongType } from '../types/song.type'
 
-	import { albumPlayingIdStore, playbackCursor, selectedAlbumId, selectedSongsStore } from '../store/final.store'
+	import { albumPlayingIdStore, selectedAlbumId, selectedSongsStore, songPlayingIDStore } from '../store/final.store'
 
 	import Star from './Star.svelte'
 
@@ -21,6 +21,8 @@
 	onMount(() => {
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))
 
+		$songPlayingIDStore = lastPlayedSongId
+
 		if (lastPlayedSongId === song.ID) {
 			let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
 			if (songEl) {
@@ -29,10 +31,9 @@
 		}
 	})
 
-	function setStar(starChangeEvent){
-
+	function setStar(starChangeEvent) {
 		// TODO: Add updater
-		console.log(song.SourceFile,starChangeEvent.detail.starLevel)
+		console.log(song.SourceFile, starChangeEvent.detail.starLevel)
 	}
 </script>
 
@@ -40,20 +41,22 @@
 	id={song.ID}
 	{index}
 	class="
-	{$playbackCursor[0] === index && $selectedAlbumId === $albumPlayingIdStore
+	{$songPlayingIDStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
 		? 'playing'
 		: ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
-	<!-- <song-number>{index}</song-number> -->
 	<song-number>{song.Track}</song-number>
-	<!-- <song-number>{song['ID']}</song-number> -->
 	<song-title>{song.Title}</song-title>
 	<Star on:starChange={setStar} songRating={song.Rating} />
 	<song-duration>{parseDuration(song.Duration)}</song-duration>
 </song-list-item>
 
 <style>
+	song-list-item.playing song-title::before {
+		content: '▶ ';
+		font-size: 0.75rem;
+	}
 	song-list-item {
 		position: relative;
 		cursor: pointer;

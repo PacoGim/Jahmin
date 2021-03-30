@@ -126,7 +126,7 @@
 		z-index: 0;
 		width: 100%;
 		opacity: 0;
-		/* opacity: 1; */
+		backdrop-filter: blur(0px);
 		transition: opacity 250ms linear;
 	}
 </style>

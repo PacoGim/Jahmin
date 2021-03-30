@@ -26,6 +26,10 @@ export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise((resolve, reject) => {
 		exiftool.read(filePath).then((tags) => {
 			let fileStats = fs.statSync(filePath)
+
+			//@ts-expect-error
+			let dateParsed = getDate(String(tags.ContentCreateDate))
+
 			resolve({
 				ID: stringHash(filePath),
 				//@ts-expect-error
@@ -44,12 +48,9 @@ export function getAacTags(filePath: string): Promise<SongType> {
 				//@ts-expect-error
 				Track: getTrack(tags['TrackNumber'], tags['Track']),
 				Rating: tags['RatingPercent'],
-				//@ts-expect-error
-				Date_Year: tags.ContentCreateDate?.year || tags?.ContentCreateDate || '',
-				//@ts-expect-error
-				Date_Month: tags.ContentCreateDate?.month || '',
-				//@ts-expect-error
-				Date_Day: tags.ContentCreateDate?.day || '',
+				Date_Year: dateParsed['year'],
+				Date_Month: dateParsed['month'],
+				Date_Day: dateParsed['day'],
 				Comment: tags['Comment'] || '',
 				SourceFile: tags['SourceFile'],
 				Extension: tags['FileTypeExtension'],
@@ -57,14 +58,58 @@ export function getAacTags(filePath: string): Promise<SongType> {
 				Duration: tags['Duration'],
 				SampleRate: tags['AudioSampleRate'],
 				LastModified: fileStats.mtimeMs,
-				BitRate: tags['AvgBitrate'],
+				BitRate: getBitRate(tags['AvgBitrate']),
 				BitDepth: tags['AudioBitsPerSample']
 			})
 		})
 	})
 }
 
-function getDate() {}
+function getBitRate(bitRate: string | undefined) {
+	if (bitRate) {
+		return Number(bitRate.replace(/\D/g, ''))
+	} else {
+		return undefined
+	}
+}
+
+function getDate(dateString: string): DateType {
+	let splitDate: any = []
+
+	// For - Separator
+	if (dateString.includes('-')) {
+		splitDate = dateString.split('-')
+		// For / Separator
+	} else if (dateString.includes('/')) {
+		splitDate = dateString.split('/')
+		// For *space* Separator
+	} else if (dateString.includes(' ')) {
+		splitDate = dateString.split(' ')
+		// For . Separator
+	} else if (dateString.includes('.')) {
+		splitDate = dateString.split('.')
+	}
+
+	if (splitDate.length > 1) {
+		return {
+			year: Number(splitDate[0]),
+			month: Number(splitDate[1]) || undefined,
+			day: Number(splitDate[2]) || undefined
+		}
+	} else {
+		return {
+			year: Number(dateString),
+			month: undefined,
+			day: undefined
+		}
+	}
+}
+
+type DateType = {
+	year: number
+	month: number | undefined
+	day: number | undefined
+}
 
 function getTrack(...trackValues: [string | number]) {
 	let numberedTrackFound = trackValues.find((i) => typeof i === 'number')

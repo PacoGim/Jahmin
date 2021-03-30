@@ -29,6 +29,7 @@ const getAlbumArtist_fn_1 = require("../functions/getAlbumArtist.fn");
 const getTrackNumber_fs_1 = require("../functions/getTrackNumber.fs");
 const aac_format_1 = require("../formats/aac.format");
 const flac_format_1 = require("../formats/flac.format");
+const mp3_format_1 = require("../formats/mp3.format");
 // IMPORTANT: ADD AGAIN MP3
 const allowedExtenstions = ['flac', 'm4a'];
 let watcher;
@@ -174,8 +175,7 @@ function processedFilePath(filePath) {
                 resolve(yield flac_format_1.getFlacTags(filePath));
             }
             if (extension === 'mp3') {
-                // resolve(await getMp3Tags(filePath))
-                // resolve()
+                resolve(yield mp3_format_1.getMp3Tags(filePath));
             }
             // resolve(await getFileMetatag(filePath, id, extension, fileStats))
         }

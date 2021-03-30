@@ -1,26 +1,22 @@
 <script lang="ts">
-	// import { playbackCursor } from '../store/player.store'
+	import { playbackCursor, playbackStore } from '../store/final.store'
 
 	export let player: HTMLAudioElement
-/*
+
 	function previousButtonEvent() {
-		if (player.currentTime < 1) {
-			if ($playbackCursor['indexToPlay'] > 0) {
-				$playbackCursor = {
-					indexToPlay: $playbackCursor['indexToPlay'] - 1,
-					playNow: true
-				}
+		if (player.currentTime <= 2) {
+			let playbackCursorIndex = $playbackCursor[0]
+			let previousPlaybackCursorIndex = playbackCursorIndex - 1
+
+			let previousSong = $playbackStore[previousPlaybackCursorIndex]
+
+			if (previousSong) {
+				$playbackCursor = [previousPlaybackCursorIndex, true]
 			}
 		} else {
-			let index = $playbackCursor['indexToPlay']
-			$playbackCursor = undefined
-			$playbackCursor = {
-				indexToPlay: index,
-				playNow: true
-			}
+			player.currentTime = 0
 		}
 	}
-	*/
 </script>
 
 <svg
@@ -33,7 +29,8 @@
 	x="0px"
 	y="0px"
 	viewBox="0 0 100 100"
-	xml:space="preserve">
+	xml:space="preserve"
+>
 	<polygon points="13,48.5 100,92 100,5 " />
 	<rect x="0" y="4.75" transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 10 96.5001)" width="10" height="87" />
 </svg>

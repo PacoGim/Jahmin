@@ -1,77 +1,68 @@
 import { exec } from 'child_process'
 import fs from 'fs'
-import { lowerCaseObjectKeys } from '../functions/lowerCaseObjectKeys.fn'
-import { objectToFfmpegString } from '../functions/objectToFfmpegString.fn'
-import { FlacStreamSongType } from '../types/flacStreamTag.type'
-import { SongType } from '../types/song.type'
+import path from "path";
 
-function writeMp3Tags(filePath: string) {
+import stringHash from 'string-hash'
+import { SongType } from '../types/song.type'
+import { StreamSongType } from '../types/streamTag.type'
+import { TagType } from '../types/tag.type'
+import { TagModType } from '../types/tagMod.type'
+
+let ffprobePath = () => {
+	return path.join(__dirname, '../binaries', 'ffprobe')
+}
+
+export function writeMp3Tags(filePath: string, newTags: TagModType) {
 	return new Promise((resolve, reject) => {
-		let ffmpegMetatagString = objectToFfmpegString({
-			title: 'New Title',
-			rating: 90,
-			track: 301,
-			album: 'New Album',
-			artist: 'New Artist',
-			album_artist: 'New Album Artist',
-			composer: 'New Composer',
-			genre: 'New Genre',
-			year: 2002,
-			date: '2008',
-			comment: 'New Comment',
-			disc: 9
-		})
+		let ffmpegMetatagString = objectToFfmpegString(newTags)
 
 		exec(
-			`./binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
+			`../binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
 				.split('/')
 				.pop()}"`,
 			(error, stdout, stderr) => {
-				if (error) {
-					// console.log(error)
-				}
-
-				if (stdout) {
-					// console.log(stdout)
-				}
-
-				if (stderr) {
-					// console.log(stderr)
-				}
+				// if (error) {
+				// 	console.log(error)
+				// }
+				// if (stdout) {
+				// 	console.log(stdout)
+				// }
+				// if (stderr) {
+				// 	console.log(stderr)
+				// 	resolve(undefined)
+				// }
 			}
-		)
+		).on('close', () => {
+			resolve('Done')
+		})
 	})
 }
 
 export function getMp3Tags(filePath: string): Promise<SongType> {
 	return new Promise((resolve, reject) => {
-		exec(`./binaries/ffprobe -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
+		exec(`"${ffprobePath()}" -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
 			if (stdout) {
 				let tags: SongType = {
 					Extension: 'mp3'
 				}
 				let data = JSON.parse(stdout)
 
-				// console.log(data)
-
-				let streamAudioData: FlacStreamSongType = data['streams'].find(
-					(stream: FlacStreamSongType) => stream['codec_type'] === 'audio'
-				)
+				let streamAudioData: StreamSongType = data['streams'].find((stream: StreamSongType) => stream['codec_type'] === 'audio')
 
 				tags['SourceFile'] = filePath
 				tags['SampleRate'] = Number(streamAudioData['sample_rate'])
-				tags['BitRate'] = streamAudioData['bit_rate']
-				tags['BitDepth'] = Number(streamAudioData['bits_per_raw_sample'])
 
 				data = data['format']
 
+				tags['BitRate'] = Number(data['bit_rate'])
 				tags['Duration'] = Number(data['duration'])
 				tags['Size'] = Number(data['size'])
 
 				let dataTags = lowerCaseObjectKeys(data['tags'])
 
+				let dateParsed = getDate(dataTags['date'] || dataTags['tyer'])
+
 				tags['Rating'] = Number(dataTags['rating'])
-				tags['Rating'] = dataTags['rating']
 				tags['Title'] = dataTags['title']
 				tags['Artist'] = dataTags['artist']
 				tags['Album'] = dataTags['album']
@@ -79,15 +70,76 @@ export function getMp3Tags(filePath: string): Promise<SongType> {
 				tags['Comment'] = dataTags['comment']
 				tags['AlbumArtist'] = dataTags['album_artist']
 				tags['Composer'] = dataTags['composer']
-				tags['DiscNumber'] = dataTags['disc']
-				tags['Year'] = Number(dataTags['date'])
-				tags['Date'] = dataTags['date']
-				tags['Track'] = dataTags['track']
+				tags['DiscNumber'] = dataTags['disc'] !== undefined ? Number(dataTags['disc']) : undefined
+				tags['Date_Year'] = dateParsed['year']
+				tags['Date_Month'] = dateParsed['month']
+				tags['Date_Day'] = dateParsed['day']
+				tags['Track'] = Number(dataTags['track'])
 
 				tags['LastModified'] = fs.statSync(filePath).mtimeMs
+
+				tags['ID'] = stringHash(filePath)
 
 				resolve(tags)
 			}
 		})
 	})
+}
+
+function getDate(dateString: string): DateType {
+	let splitDate: any = []
+
+	// For - Separator
+	if (dateString.includes('-')) {
+		splitDate = dateString.split('-')
+		// For / Separator
+	} else if (dateString.includes('/')) {
+		splitDate = dateString.split('/')
+		// For *space* Separator
+	} else if (dateString.includes(' ')) {
+		splitDate = dateString.split(' ')
+		// For . Separator
+	} else if (dateString.includes('.')) {
+		splitDate = dateString.split('.')
+	}
+
+	if (splitDate.length > 1) {
+		return {
+			year: Number(splitDate[0]),
+			month: Number(splitDate[1]) || undefined,
+			day: Number(splitDate[2]) || undefined
+		}
+	} else {
+		return {
+			year: Number(dateString),
+			month: undefined,
+			day: undefined
+		}
+	}
+}
+
+type DateType = {
+	year: number
+	month: number | undefined
+	day: number | undefined
+}
+
+function objectToFfmpegString(tags: TagModType) {
+	let finalString = ''
+
+	for (let key in tags) {
+		finalString += ` -metadata "${key}=${tags[key]}" `
+	}
+
+	return finalString
+}
+
+function lowerCaseObjectKeys(objectToProcess: any) {
+	let newObject: any = {}
+
+	for (let key in objectToProcess) {
+		newObject[key.toLowerCase()] = objectToProcess[key]
+	}
+
+	return newObject
 }

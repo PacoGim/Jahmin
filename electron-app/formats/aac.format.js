@@ -27,8 +27,9 @@ function writeAacTags(filePath, newTags) {
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => {
         exiftool.read(filePath).then((tags) => {
-            var _a, _b, _c;
             let fileStats = fs_1.default.statSync(filePath);
+            //@ts-expect-error
+            let dateParsed = getDate(String(tags.ContentCreateDate));
             resolve({
                 ID: string_hash_1.default(filePath),
                 //@ts-expect-error
@@ -47,12 +48,9 @@ function getAacTags(filePath) {
                 //@ts-expect-error
                 Track: getTrack(tags['TrackNumber'], tags['Track']),
                 Rating: tags['RatingPercent'],
-                //@ts-expect-error
-                Date_Year: ((_a = tags.ContentCreateDate) === null || _a === void 0 ? void 0 : _a.year) || (tags === null || tags === void 0 ? void 0 : tags.ContentCreateDate) || '',
-                //@ts-expect-error
-                Date_Month: ((_b = tags.ContentCreateDate) === null || _b === void 0 ? void 0 : _b.month) || '',
-                //@ts-expect-error
-                Date_Day: ((_c = tags.ContentCreateDate) === null || _c === void 0 ? void 0 : _c.day) || '',
+                Date_Year: dateParsed['year'],
+                Date_Month: dateParsed['month'],
+                Date_Day: dateParsed['day'],
                 Comment: tags['Comment'] || '',
                 SourceFile: tags['SourceFile'],
                 Extension: tags['FileTypeExtension'],
@@ -60,14 +58,54 @@ function getAacTags(filePath) {
                 Duration: tags['Duration'],
                 SampleRate: tags['AudioSampleRate'],
                 LastModified: fileStats.mtimeMs,
-                BitRate: tags['AvgBitrate'],
+                BitRate: getBitRate(tags['AvgBitrate']),
                 BitDepth: tags['AudioBitsPerSample']
             });
         });
     });
 }
 exports.getAacTags = getAacTags;
-function getDate() { }
+function getBitRate(bitRate) {
+    if (bitRate) {
+        return Number(bitRate.replace(/\D/g, ''));
+    }
+    else {
+        return undefined;
+    }
+}
+function getDate(dateString) {
+    let splitDate = [];
+    // For - Separator
+    if (dateString.includes('-')) {
+        splitDate = dateString.split('-');
+        // For / Separator
+    }
+    else if (dateString.includes('/')) {
+        splitDate = dateString.split('/');
+        // For *space* Separator
+    }
+    else if (dateString.includes(' ')) {
+        splitDate = dateString.split(' ');
+        // For . Separator
+    }
+    else if (dateString.includes('.')) {
+        splitDate = dateString.split('.');
+    }
+    if (splitDate.length > 1) {
+        return {
+            year: Number(splitDate[0]),
+            month: Number(splitDate[1]) || undefined,
+            day: Number(splitDate[2]) || undefined
+        };
+    }
+    else {
+        return {
+            year: Number(dateString),
+            month: undefined,
+            day: undefined
+        };
+    }
+}
 function getTrack(...trackValues) {
     let numberedTrackFound = trackValues.find((i) => typeof i === 'number');
     if (numberedTrackFound) {

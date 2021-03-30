@@ -184,8 +184,7 @@ function processedFilePath(filePath: string): Promise<SongType | undefined> {
 				resolve(await getFlacTags(filePath))
 			}
 			if (extension === 'mp3') {
-				// resolve(await getMp3Tags(filePath))
-				// resolve()
+				resolve(await getMp3Tags(filePath))
 			}
 			// resolve(await getFileMetatag(filePath, id, extension, fileStats))
 		} else {
