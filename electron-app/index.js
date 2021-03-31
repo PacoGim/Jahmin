@@ -31,8 +31,7 @@ function createWindow() {
         const window = new electron_1.BrowserWindow(loadOptions(config));
         window.webContents.openDevTools();
         window.loadFile('index.html');
-        if (config === null || config === void 0 ? void 0 : config['rootDirectories'])
-            folderWatcher_service_1.watchFolders(config['rootDirectories']);
+        // if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
         window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window));
     });
 }
@@ -45,7 +44,9 @@ function loadOptions(config) {
         height: 800,
         webPreferences: {
             nodeIntegration: true,
-            worldSafeExecuteJavaScript: true
+            worldSafeExecuteJavaScript: true,
+            contextIsolation: false,
+            enableRemoteModule: true
         }
     };
     if (config['bounds'] !== undefined) {
@@ -68,6 +69,24 @@ function loadOptions(config) {
     }
     return options;
 }
+electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
+    let template = [];
+    parameters = JSON.parse(parameters);
+    if (menuToOpen === 'AlbumContextMenu') {
+        let album = loki_service_1.getCollectionMap().get(parameters.albumID);
+        template = [
+            {
+                label: `Open ${(album === null || album === void 0 ? void 0 : album.Name) || ''} Folder`,
+                click: () => {
+                    electron_1.shell.showItemInFolder((album === null || album === void 0 ? void 0 : album.RootDir) || '');
+                }
+            }
+        ];
+    }
+    const menu = electron_1.Menu.buildFromTemplate(template);
+    //@ts-expect-error
+    menu.popup(electron_1.BrowserWindow.fromWebContents(event.sender));
+});
 electron_1.app.whenReady().then(createWindow);
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

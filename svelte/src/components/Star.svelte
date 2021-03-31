@@ -5,6 +5,14 @@
 
 	export let songRating = 0
 
+	$: {
+		if (songRating) {
+			starLevel = songRating / 10
+		} else {
+			starLevel = 0
+		}
+	}
+
 	let starLevel = songRating / 10
 	let starLevelTemp = starLevel
 	let starElementWidth: number = undefined

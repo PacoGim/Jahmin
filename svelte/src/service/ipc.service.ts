@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron')
+
 import { dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
@@ -124,6 +125,10 @@ export function getWaveformIPC(path): Promise<string> {
 			console.log('Oops', error)
 		}
 	})
+}
+
+export function showContextMenuIPC(menuToOpen, parameters) {
+	ipcRenderer.send('show-context-menu', menuToOpen, parameters)
 }
 
 // export function getDatabaseVersionIPC() {

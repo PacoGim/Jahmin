@@ -12,8 +12,8 @@
 	import BackgroundArt from './includes/BackgroundArt.svelte'
 	import SongListBackground from './includes/SongListBackground.svelte'
 	import { onMount } from 'svelte'
-	import { getChangesProgressIPC, syncDbVersionIPC } from './service/ipc.service'
-	import { appTitle } from './store/final.store'
+	import { getChangesProgressIPC, showContextMenuIPC, syncDbVersionIPC } from './service/ipc.service'
+	import { albumListStore, appTitle } from './store/final.store'
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -23,6 +23,24 @@
 			return !(e.code == 'Space' && e.target == document.body)
 		}
 
+		window.addEventListener('contextmenu', (e: MouseEvent) => {
+			e.preventDefault()
+
+			const pathsName = e.composedPath().map((path: HTMLElement) => path.tagName)
+
+			if (pathsName.includes('ALBUM')) {
+				let albumElement: HTMLElement = e.composedPath().find((path: HTMLElement) => path.tagName === 'ALBUM') as HTMLElement
+
+				let albumID = albumElement.getAttribute('id')
+
+				showContextMenuIPC(
+					'AlbumContextMenu',
+					JSON.stringify({
+						albumID
+					})
+				)
+			}
+		})
 
 		// window.onclick = (evt: MouseEvent) => {
 		// 	let songListSvelteFound = false

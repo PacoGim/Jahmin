@@ -93,3 +93,7 @@ tag-edit select {
 	border: none;
 	font-size: 0.9rem;
 }
+
+button:focus {
+	outline: 0;
+}

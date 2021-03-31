@@ -806,6 +806,9 @@ var app = (function () {
             }
         });
     }
+    function showContextMenuIPC(menuToOpen, parameters) {
+        ipcRenderer.send('show-context-menu', menuToOpen, parameters);
+    }
     // export function getDatabaseVersionIPC() {
     // 	return new Promise((resolve, reject) => {
     // 		ipcRenderer.invoke('get-database-version').then((result) => {
@@ -3796,13 +3799,13 @@ var app = (function () {
     			attr_dev(img0, "class", "delete-star svelte-1vgxguc");
     			if (img0.src !== (img0_src_value = "./img/star/star-delete.svg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$b, 22, 1, 688);
+    			add_location(img0, file$b, 30, 1, 800);
     			attr_dev(img1, "class", "star svelte-1vgxguc");
     			if (img1.src !== (img1_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$b, 36, 1, 1106);
+    			add_location(img1, file$b, 44, 1, 1218);
     			attr_dev(stars, "class", "svelte-1vgxguc");
-    			add_location(stars, file$b, 21, 0, 614);
+    			add_location(stars, file$b, 29, 0, 726);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3925,6 +3928,18 @@ var app = (function () {
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*songRating*/ 16) {
+    			 {
+    				if (songRating) {
+    					$$invalidate(0, starLevel = songRating / 10);
+    				} else {
+    					$$invalidate(0, starLevel = 0);
+    				}
+    			}
+    		}
+    	};
 
     	return [
     		starLevel,
@@ -4582,8 +4597,7 @@ var app = (function () {
           'React Native does not have a built-in secure random generator. ' +
             'If you don’t need unpredictable IDs use `nanoid/non-secure`. ' +
             'For secure IDs, import `react-native-get-random-values` ' +
-            'before Nano ID. If you use Expo, install `expo-random` ' +
-            'and use `nanoid/async`.'
+            'before Nano ID.'
         )
       }
       if (typeof msCrypto !== 'undefined' && typeof crypto === 'undefined') {
@@ -5194,10 +5208,17 @@ var app = (function () {
     	let t12;
     	let tagediteditor11;
     	let updating_value_11;
+    	let t13;
+    	let star;
+    	let t14;
+    	let button_group;
+    	let button0;
+    	let t16;
+    	let button1;
     	let current;
 
     	function tagediteditor0_value_binding(value) {
-    		/*tagediteditor0_value_binding*/ ctx[15].call(null, value);
+    		/*tagediteditor0_value_binding*/ ctx[17].call(null, value);
     	}
 
     	let tagediteditor0_props = { tagName: "Title", type: "input" };
@@ -5214,7 +5235,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor0, "value", tagediteditor0_value_binding));
 
     	function tagediteditor1_value_binding(value) {
-    		/*tagediteditor1_value_binding*/ ctx[16].call(null, value);
+    		/*tagediteditor1_value_binding*/ ctx[18].call(null, value);
     	}
 
     	let tagediteditor1_props = { tagName: "Album", type: "input" };
@@ -5231,7 +5252,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor1, "value", tagediteditor1_value_binding));
 
     	function tagediteditor2_value_binding(value) {
-    		/*tagediteditor2_value_binding*/ ctx[17].call(null, value);
+    		/*tagediteditor2_value_binding*/ ctx[19].call(null, value);
     	}
 
     	let tagediteditor2_props = {
@@ -5255,7 +5276,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor2, "value", tagediteditor2_value_binding));
 
     	function tagediteditor3_value_binding(value) {
-    		/*tagediteditor3_value_binding*/ ctx[18].call(null, value);
+    		/*tagediteditor3_value_binding*/ ctx[20].call(null, value);
     	}
 
     	let tagediteditor3_props = {
@@ -5276,7 +5297,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor3, "value", tagediteditor3_value_binding));
 
     	function tagediteditor4_value_binding(value) {
-    		/*tagediteditor4_value_binding*/ ctx[19].call(null, value);
+    		/*tagediteditor4_value_binding*/ ctx[21].call(null, value);
     	}
 
     	let tagediteditor4_props = { tagName: "Artist", type: "textarea" };
@@ -5293,7 +5314,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor4, "value", tagediteditor4_value_binding));
 
     	function tagediteditor5_value_binding(value) {
-    		/*tagediteditor5_value_binding*/ ctx[20].call(null, value);
+    		/*tagediteditor5_value_binding*/ ctx[22].call(null, value);
     	}
 
     	let tagediteditor5_props = {
@@ -5313,7 +5334,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor5, "value", tagediteditor5_value_binding));
 
     	function tagediteditor6_value_binding(value) {
-    		/*tagediteditor6_value_binding*/ ctx[21].call(null, value);
+    		/*tagediteditor6_value_binding*/ ctx[23].call(null, value);
     	}
 
     	let tagediteditor6_props = { tagName: "Genre", type: "input" };
@@ -5330,7 +5351,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor6, "value", tagediteditor6_value_binding));
 
     	function tagediteditor7_value_binding(value) {
-    		/*tagediteditor7_value_binding*/ ctx[22].call(null, value);
+    		/*tagediteditor7_value_binding*/ ctx[24].call(null, value);
     	}
 
     	let tagediteditor7_props = { tagName: "Composer", type: "input" };
@@ -5347,7 +5368,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor7, "value", tagediteditor7_value_binding));
 
     	function tagediteditor8_value_binding(value) {
-    		/*tagediteditor8_value_binding*/ ctx[23].call(null, value);
+    		/*tagediteditor8_value_binding*/ ctx[25].call(null, value);
     	}
 
     	let tagediteditor8_props = { tagName: "Comment", type: "textarea" };
@@ -5364,7 +5385,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor8, "value", tagediteditor8_value_binding));
 
     	function tagediteditor9_value_binding(value) {
-    		/*tagediteditor9_value_binding*/ ctx[24].call(null, value);
+    		/*tagediteditor9_value_binding*/ ctx[26].call(null, value);
     	}
 
     	let tagediteditor9_props = {
@@ -5385,7 +5406,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor9, "value", tagediteditor9_value_binding));
 
     	function tagediteditor10_value_binding(value) {
-    		/*tagediteditor10_value_binding*/ ctx[25].call(null, value);
+    		/*tagediteditor10_value_binding*/ ctx[27].call(null, value);
     	}
 
     	let tagediteditor10_props = {
@@ -5406,7 +5427,7 @@ var app = (function () {
     	binding_callbacks.push(() => bind(tagediteditor10, "value", tagediteditor10_value_binding));
 
     	function tagediteditor11_value_binding(value) {
-    		/*tagediteditor11_value_binding*/ ctx[26].call(null, value);
+    		/*tagediteditor11_value_binding*/ ctx[28].call(null, value);
     	}
 
     	let tagediteditor11_props = {
@@ -5425,6 +5446,15 @@ var app = (function () {
     		});
 
     	binding_callbacks.push(() => bind(tagediteditor11, "value", tagediteditor11_value_binding));
+
+    	star = new Star({
+    			props: {
+    				songRating: Number(/*ratingTag*/ ctx[12].bind)
+    			},
+    			$$inline: true
+    		});
+
+    	star.$on("starChange", /*setStar*/ ctx[13]);
 
     	const block = {
     		c: function create() {
@@ -5457,14 +5487,29 @@ var app = (function () {
     			create_component(tagediteditor10.$$.fragment);
     			t12 = space();
     			create_component(tagediteditor11.$$.fragment);
-    			set_custom_element_data(component_name, "class", "svelte-1tatulc");
-    			add_location(component_name, file$g, 315, 1, 9223);
-    			set_custom_element_data(track_disc_tag_editor, "class", "svelte-1tatulc");
-    			add_location(track_disc_tag_editor, file$g, 320, 1, 9418);
-    			set_custom_element_data(date_tag_editor, "class", "svelte-1tatulc");
-    			add_location(date_tag_editor, file$g, 339, 1, 10245);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1tatulc");
-    			add_location(tag_edit_svlt, file$g, 314, 0, 9206);
+    			t13 = space();
+    			create_component(star.$$.fragment);
+    			t14 = space();
+    			button_group = element("button-group");
+    			button0 = element("button");
+    			button0.textContent = "Update";
+    			t16 = space();
+    			button1 = element("button");
+    			button1.textContent = "Cancel";
+    			set_custom_element_data(component_name, "class", "svelte-1qow5dk");
+    			add_location(component_name, file$g, 325, 1, 9721);
+    			set_custom_element_data(track_disc_tag_editor, "class", "svelte-1qow5dk");
+    			add_location(track_disc_tag_editor, file$g, 330, 1, 9916);
+    			set_custom_element_data(date_tag_editor, "class", "svelte-1qow5dk");
+    			add_location(date_tag_editor, file$g, 349, 1, 10743);
+    			attr_dev(button0, "class", "svelte-1qow5dk");
+    			add_location(button0, file$g, 358, 2, 11156);
+    			attr_dev(button1, "class", "svelte-1qow5dk");
+    			add_location(button1, file$g, 360, 2, 11183);
+    			set_custom_element_data(button_group, "class", "svelte-1qow5dk");
+    			add_location(button_group, file$g, 357, 1, 11139);
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1qow5dk");
+    			add_location(tag_edit_svlt, file$g, 324, 0, 9704);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5498,6 +5543,13 @@ var app = (function () {
     			mount_component(tagediteditor10, date_tag_editor, null);
     			append_dev(date_tag_editor, t12);
     			mount_component(tagediteditor11, date_tag_editor, null);
+    			append_dev(tag_edit_svlt, t13);
+    			mount_component(star, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t14);
+    			append_dev(tag_edit_svlt, button_group);
+    			append_dev(button_group, button0);
+    			append_dev(button_group, t16);
+    			append_dev(button_group, button1);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
@@ -5613,6 +5665,9 @@ var app = (function () {
     			}
 
     			tagediteditor11.$set(tagediteditor11_changes);
+    			const star_changes = {};
+    			if (dirty[0] & /*ratingTag*/ 4096) star_changes.songRating = Number(/*ratingTag*/ ctx[12].bind);
+    			star.$set(star_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -5628,6 +5683,7 @@ var app = (function () {
     			transition_in(tagediteditor9.$$.fragment, local);
     			transition_in(tagediteditor10.$$.fragment, local);
     			transition_in(tagediteditor11.$$.fragment, local);
+    			transition_in(star.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
@@ -5643,6 +5699,7 @@ var app = (function () {
     			transition_out(tagediteditor9.$$.fragment, local);
     			transition_out(tagediteditor10.$$.fragment, local);
     			transition_out(tagediteditor11.$$.fragment, local);
+    			transition_out(star.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -5659,6 +5716,7 @@ var app = (function () {
     			destroy_component(tagediteditor9);
     			destroy_component(tagediteditor10);
     			destroy_component(tagediteditor11);
+    			destroy_component(star);
     		}
     	};
 
@@ -5679,9 +5737,9 @@ var app = (function () {
     	let $selectedAlbumId;
     	let $selectedSongsStore;
     	validate_store(selectedAlbumId, "selectedAlbumId");
-    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(13, $selectedAlbumId = $$value));
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(15, $selectedAlbumId = $$value));
     	validate_store(selectedSongsStore, "selectedSongsStore");
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(14, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(16, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TagEdit", slots, []);
     	
@@ -5700,25 +5758,11 @@ var app = (function () {
     	let dateYearTag = { value: NOT_DEFINED, bind: null };
     	let dateMonthTag = { value: NOT_DEFINED, bind: null };
     	let dateDayTag = { value: NOT_DEFINED, bind: null };
-
-    	// let newTags: TagDetailType = {
-    	// 	Album: undefined,
-    	// 	AlbumArtist: undefined,
-    	// 	Artist: undefined,
-    	// 	Comment: undefined,
-    	// 	Composer: undefined,
-    	// 	Date_Year: undefined,
-    	// 	Date_Month: undefined,
-    	// 	Date_Day: undefined,
-    	// 	DiscNumber: undefined,
-    	// 	Genre: undefined,
-    	// 	Rating: undefined,
-    	// 	Title: undefined,
-    	// 	Track: undefined
-    	// }
+    	let ratingTag = { value: NOT_DEFINED, bind: 0 };
     	let previousSongList = undefined;
 
-    	function foo() {
+    	// Check what fields are changed and creates an object with the changes.
+    	function checkChanges() {
     		let updateObject = {};
 
     		if (titleTag.value !== titleTag.bind) {
@@ -5769,6 +5813,10 @@ var app = (function () {
     			updateObject.Date_Day = dateDayTag.bind;
     		}
 
+    		if (ratingTag.value !== ratingTag.bind) {
+    			updateObject.Rating = ratingTag.bind;
+    		}
+
     		console.log(updateObject);
     	}
 
@@ -5809,12 +5857,14 @@ var app = (function () {
     		$$invalidate(9, dateYearTag = { value: NOT_DEFINED, bind: null });
     		$$invalidate(10, dateMonthTag = { value: NOT_DEFINED, bind: null });
     		$$invalidate(9, dateYearTag = { value: NOT_DEFINED, bind: null });
+    		$$invalidate(12, ratingTag = { value: NOT_DEFINED, bind: 0 });
     	}
 
     	function groupSongs() {
     		resetFields();
 
-    		// Goes through every song and checks every tag.
+    		// Goes through every song and checks every tag. If the same tag changes value across songs, it will be set as "Multiple Values"
+    		// It also sets the proper values to be used on this component.
     		for (let song of songList) {
     			if (albumTag.value === NOT_DEFINED) {
     				$$invalidate(0, albumTag.value = song.Album, albumTag);
@@ -5911,7 +5961,19 @@ var app = (function () {
     				$$invalidate(11, dateDayTag.value = "", dateDayTag);
     				$$invalidate(11, dateDayTag.bind = "", dateDayTag);
     			}
+
+    			if (ratingTag.value === NOT_DEFINED) {
+    				$$invalidate(12, ratingTag.value = song.Rating, ratingTag);
+    				$$invalidate(12, ratingTag.bind = song.Rating, ratingTag);
+    			} else if (ratingTag.value !== NOT_DEFINED && song.Rating !== ratingTag.value) {
+    				$$invalidate(12, ratingTag.value = "", ratingTag);
+    				$$invalidate(12, ratingTag.bind = "", ratingTag);
+    			}
     		}
+    	}
+
+    	function setStar(starChangeEvent) {
+    		$$invalidate(12, ratingTag.bind = starChangeEvent.detail.starLevel, ratingTag);
     	}
 
     	const writable_props = [];
@@ -5982,7 +6044,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		TagEditEditor: TagEdit_Editor,
-    		TagEditSeparator: TagEdit_Separator,
+    		Star,
     		selectedAlbumId,
     		selectedSongsStore,
     		getAlbumIPC,
@@ -6001,17 +6063,19 @@ var app = (function () {
     		dateYearTag,
     		dateMonthTag,
     		dateDayTag,
+    		ratingTag,
     		previousSongList,
-    		foo,
+    		checkChanges,
     		checkSongs,
     		resetFields,
     		groupSongs,
+    		setStar,
     		$selectedAlbumId,
     		$selectedSongsStore
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("isSelectedSongsFirstAssign" in $$props) $$invalidate(12, isSelectedSongsFirstAssign = $$props.isSelectedSongsFirstAssign);
+    		if ("isSelectedSongsFirstAssign" in $$props) $$invalidate(14, isSelectedSongsFirstAssign = $$props.isSelectedSongsFirstAssign);
     		if ("songList" in $$props) songList = $$props.songList;
     		if ("albumTag" in $$props) $$invalidate(0, albumTag = $$props.albumTag);
     		if ("titleTag" in $$props) $$invalidate(1, titleTag = $$props.titleTag);
@@ -6025,6 +6089,7 @@ var app = (function () {
     		if ("dateYearTag" in $$props) $$invalidate(9, dateYearTag = $$props.dateYearTag);
     		if ("dateMonthTag" in $$props) $$invalidate(10, dateMonthTag = $$props.dateMonthTag);
     		if ("dateDayTag" in $$props) $$invalidate(11, dateDayTag = $$props.dateDayTag);
+    		if ("ratingTag" in $$props) $$invalidate(12, ratingTag = $$props.ratingTag);
     		if ("previousSongList" in $$props) previousSongList = $$props.previousSongList;
     	};
 
@@ -6033,17 +6098,17 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty[0] & /*albumTag, titleTag, commentTag, trackTag, discNumberTag, composerTag, genreTag, artistTag, albumArtistTag, dateYearTag, dateMonthTag, dateDayTag*/ 4095) {
+    		if ($$self.$$.dirty[0] & /*albumTag, titleTag, commentTag, trackTag, discNumberTag, composerTag, genreTag, artistTag, albumArtistTag, dateYearTag, dateMonthTag, dateDayTag, ratingTag*/ 8191) {
     			 {
-    				foo();
+    				checkChanges();
     			}
     		}
 
-    		if ($$self.$$.dirty[0] & /*$selectedAlbumId, $selectedSongsStore, isSelectedSongsFirstAssign*/ 28672) {
+    		if ($$self.$$.dirty[0] & /*$selectedAlbumId, $selectedSongsStore, isSelectedSongsFirstAssign*/ 114688) {
     			 {
 
     				if (isSelectedSongsFirstAssign === true) {
-    					$$invalidate(12, isSelectedSongsFirstAssign = false);
+    					$$invalidate(14, isSelectedSongsFirstAssign = false);
     				} else {
     					checkSongs();
     				}
@@ -6064,6 +6129,8 @@ var app = (function () {
     		dateYearTag,
     		dateMonthTag,
     		dateDayTag,
+    		ratingTag,
+    		setStar,
     		isSelectedSongsFirstAssign,
     		$selectedAlbumId,
     		$selectedSongsStore,
@@ -6672,7 +6739,7 @@ var app = (function () {
     			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-qj5o4s");
-    			add_location(main, file$j, 49, 0, 1746);
+    			add_location(main, file$j, 60, 0, 2253);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6776,6 +6843,17 @@ var app = (function () {
     		window.onkeydown = function (e) {
     			return !(e.code == "Space" && e.target == document.body);
     		};
+
+    		window.addEventListener("contextmenu", e => {
+    			e.preventDefault();
+    			const pathsName = e.composedPath().map(path => path.tagName);
+
+    			if (pathsName.includes("ALBUM")) {
+    				let albumElement = e.composedPath().find(path => path.tagName === "ALBUM");
+    				let albumID = albumElement.getAttribute("id");
+    				showContextMenuIPC("AlbumContextMenu", JSON.stringify({ albumID }));
+    			}
+    		});
     	}); // window.onclick = (evt: MouseEvent) => {
     	// 	let songListSvelteFound = false
     	// 	evt['path'].forEach((element: HTMLElement) => {
@@ -6821,7 +6899,9 @@ var app = (function () {
     		SongListBackground,
     		onMount,
     		getChangesProgressIPC,
+    		showContextMenuIPC,
     		syncDbVersionIPC,
+    		albumListStore,
     		appTitle,
     		getNewDbChangesProgress,
     		$appTitle

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TagEditEditor from '../components/TagEdit-Editor.svelte'
-	import TagEditSeparator from '../components/TagEdit-Separator.svelte'
+	import Star from '../components/Star.svelte'
 
 	import type { SongType } from '../types/song.type'
 	import type { TagDetailType } from '../types/tagDetails.type'
@@ -75,21 +75,10 @@
 		bind: null
 	}
 
-	// let newTags: TagDetailType = {
-	// 	Album: undefined,
-	// 	AlbumArtist: undefined,
-	// 	Artist: undefined,
-	// 	Comment: undefined,
-	// 	Composer: undefined,
-	// 	Date_Year: undefined,
-	// 	Date_Month: undefined,
-	// 	Date_Day: undefined,
-	// 	DiscNumber: undefined,
-	// 	Genre: undefined,
-	// 	Rating: undefined,
-	// 	Title: undefined,
-	// 	Track: undefined
-	// }
+	let ratingTag: TagDetailType = {
+		value: NOT_DEFINED,
+		bind: 0
+	}
 
 	let previousSongList: SongType[] = undefined
 
@@ -106,8 +95,9 @@
 		dateYearTag
 		dateMonthTag
 		dateDayTag
+		ratingTag
 
-		foo()
+		checkChanges()
 	}
 
 	$: {
@@ -121,7 +111,8 @@
 		}
 	}
 
-	function foo() {
+	// Check what fields are changed and creates an object with the changes.
+	function checkChanges() {
 		let updateObject: {
 			Album?: string
 			AlbumArtist?: string
@@ -133,7 +124,7 @@
 			Date_Day?: number
 			DiscNumber?: number
 			Genre?: string
-			Rating?: string
+			Rating?: number
 			Title?: string
 			Track?: number
 		} = {}
@@ -184,6 +175,10 @@
 
 		if (dateDayTag.value !== dateDayTag.bind) {
 			updateObject.Date_Day = dateDayTag.bind as number
+		}
+
+		if (ratingTag.value !== ratingTag.bind) {
+			updateObject.Rating = ratingTag.bind as number
 		}
 
 		console.log(updateObject)
@@ -273,12 +268,18 @@
 			value: NOT_DEFINED,
 			bind: null
 		}
+
+		ratingTag = {
+			value: NOT_DEFINED,
+			bind: 0
+		}
 	}
 
 	function groupSongs() {
 		resetFields()
 
-		// Goes through every song and checks every tag.
+		// Goes through every song and checks every tag. If the same tag changes value across songs, it will be set as "Multiple Values"
+		// It also sets the proper values to be used on this component.
 		for (let song of songList) {
 			if (albumTag.value === NOT_DEFINED) {
 				albumTag.value = song.Album
@@ -375,7 +376,19 @@
 				dateDayTag.value = ''
 				dateDayTag.bind = ''
 			}
+
+			if (ratingTag.value === NOT_DEFINED) {
+				ratingTag.value = song.Rating
+				ratingTag.bind = song.Rating
+			} else if (ratingTag.value !== NOT_DEFINED && song.Rating !== ratingTag.value) {
+				ratingTag.value = ''
+				ratingTag.bind = ''
+			}
 		}
+	}
+
+	function setStar(starChangeEvent) {
+		ratingTag.bind = starChangeEvent.detail.starLevel
 	}
 </script>
 
@@ -409,9 +422,29 @@
 		<TagEditEditor tagName="Month" type="number" placeholder="-" bind:value={dateMonthTag.bind} />
 		<TagEditEditor tagName="Day" type="number" placeholder="-" bind:value={dateDayTag.bind} />
 	</date-tag-editor>
+
+	<Star on:starChange={setStar} songRating={Number(ratingTag.bind)} />
+
+	<button-group>
+		<button>Update</button>
+
+		<button>Cancel</button>
+	</button-group>
 </tag-edit-svlt>
 
 <style>
+	button-group {
+		display: flex;
+		justify-content: space-evenly;
+	}
+
+	button-group button {
+		cursor: pointer;
+		padding: 0.25rem 0.5rem;
+		border-radius: 4px;
+		border: none;
+	}
+
 	date-tag-editor {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);

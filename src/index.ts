@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, screen, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, protocol, screen, shell } from 'electron'
 import { getConfig, saveConfig } from './services/config.service'
 import path from 'path'
 
@@ -8,7 +8,7 @@ import { loadIPC } from './services/ipc.service'
 loadIPC()
 
 import { scanFolders } from './services/indexer.service'
-import { createData, getCollection, loadDb, updateData } from './services/loki.service'
+import { createData, getCollection, getCollectionMap, loadDb, updateData } from './services/loki.service'
 import stringHash from 'string-hash'
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
@@ -29,7 +29,7 @@ async function createWindow() {
 	window.webContents.openDevTools()
 	window.loadFile('index.html')
 
-	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+	// if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
 
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }
@@ -43,7 +43,9 @@ function loadOptions(config: ConfigType) {
 		height: 800,
 		webPreferences: {
 			nodeIntegration: true,
-			worldSafeExecuteJavaScript: true
+			worldSafeExecuteJavaScript: true,
+			contextIsolation: false,
+			enableRemoteModule: true
 		}
 	}
 
@@ -73,6 +75,28 @@ function loadOptions(config: ConfigType) {
 	return options
 }
 
+ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
+	let template: any = []
+
+	parameters = JSON.parse(parameters)
+
+	if (menuToOpen === 'AlbumContextMenu') {
+		let album = getCollectionMap().get(parameters.albumID)
+
+		template = [
+			{
+				label: `Open ${album?.Name || ''} Folder`,
+				click: () => {
+					shell.showItemInFolder(album?.RootDir || '')
+				}
+			}
+		]
+	}
+
+	const menu = Menu.buildFromTemplate(template)
+	//@ts-expect-error
+	menu.popup(BrowserWindow.fromWebContents(event.sender))
+})
 
 app.whenReady().then(createWindow)
 

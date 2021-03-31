@@ -27,7 +27,7 @@ export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<numbe
 	if (dbVersion > rendererDbVersion) {
 		return new Promise((resolve) => resolve(dbVersion))
 	} else {
-		// If didn't change, when for a change to happen.
+		// If didn't change, wait for a change to happen.
 		return new Promise((resolve) => (dbVersionResolve = resolve))
 	}
 }
@@ -121,7 +121,9 @@ export function createData(newDoc: SongType) {
 				resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc))
 			} else {
 				resolve(COLLECTION.insert(newDoc))
-				dbVersionResolve(++dbVersion)
+				if (dbVersionResolve) {
+					dbVersionResolve(++dbVersion)
+				}
 			}
 		} catch (error) {
 			handleErrors(error)
@@ -168,7 +170,9 @@ export function updateData(query: any, newData: object) {
 			doc = deepmerge(doc, newData)
 
 			resolve(COLLECTION.update(doc))
-			dbVersionResolve(++dbVersion)
+			if (dbVersionResolve) {
+				dbVersionResolve(++dbVersion)
+			}
 		} catch (error) {
 			handleErrors(error)
 			return null
@@ -187,7 +191,9 @@ export function deleteData(query: any) {
 		const DOC = COLLECTION.find(query)[0]
 
 		resolve(COLLECTION.remove(DOC))
-		dbVersionResolve(++dbVersion)
+		if (dbVersionResolve) {
+			dbVersionResolve(++dbVersion)
+		}
 	})
 }
 

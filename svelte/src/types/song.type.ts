@@ -7,7 +7,7 @@ export type SongType = {
 	Composer?: string // Modifiable
 	Genre?: string // Modifiable
 	Title?: string // Modifiable
-	Track?: string // Modifiable
+	Track?: number // Modifiable
 	Rating?: number // Modifiable
 	Comment?: string // Modifiable
 	DiscNumber?: number // Modifiable

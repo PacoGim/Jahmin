@@ -23,7 +23,7 @@ function getNewPromiseDbVersion(rendererDbVersion) {
         return new Promise((resolve) => resolve(dbVersion));
     }
     else {
-        // If didn't change, when for a change to happen.
+        // If didn't change, wait for a change to happen.
         return new Promise((resolve) => (dbVersionResolve = resolve));
     }
 }
@@ -106,7 +106,9 @@ function createData(newDoc) {
             }
             else {
                 resolve(COLLECTION.insert(newDoc));
-                dbVersionResolve(++dbVersion);
+                if (dbVersionResolve) {
+                    dbVersionResolve(++dbVersion);
+                }
             }
         }
         catch (error) {
@@ -151,7 +153,9 @@ function updateData(query, newData) {
             let doc = COLLECTION.find(query)[0];
             doc = deepmerge_1.default(doc, newData);
             resolve(COLLECTION.update(doc));
-            dbVersionResolve(++dbVersion);
+            if (dbVersionResolve) {
+                dbVersionResolve(++dbVersion);
+            }
         }
         catch (error) {
             handleErrors(error);
@@ -168,7 +172,9 @@ function deleteData(query) {
             throw new Error(`Collection ${'music'} not created/available.`);
         const DOC = COLLECTION.find(query)[0];
         resolve(COLLECTION.remove(DOC));
-        dbVersionResolve(++dbVersion);
+        if (dbVersionResolve) {
+            dbVersionResolve(++dbVersion);
+        }
     });
 }
 exports.deleteData = deleteData;
