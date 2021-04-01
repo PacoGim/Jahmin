@@ -1,6 +1,6 @@
 import { exec } from 'child_process'
 import fs from 'fs'
-import path from "path";
+import path from 'path'
 
 import stringHash from 'string-hash'
 import { SongType } from '../types/song.type'
@@ -45,6 +45,7 @@ export function getMp3Tags(filePath: string): Promise<SongType> {
 				let tags: SongType = {
 					Extension: 'mp3'
 				}
+
 				let data = JSON.parse(stdout)
 
 				let streamAudioData: StreamSongType = data['streams'].find((stream: StreamSongType) => stream['codec_type'] === 'audio')
@@ -89,6 +90,14 @@ export function getMp3Tags(filePath: string): Promise<SongType> {
 function getDate(dateString: string): DateType {
 	let splitDate: any = []
 
+	if (!dateString) {
+		return {
+			year: undefined,
+			month: undefined,
+			day: undefined
+		}
+	}
+
 	// For - Separator
 	if (dateString.includes('-')) {
 		splitDate = dateString.split('-')
@@ -119,7 +128,7 @@ function getDate(dateString: string): DateType {
 }
 
 type DateType = {
-	year: number
+	year: number | undefined
 	month: number | undefined
 	day: number | undefined
 }

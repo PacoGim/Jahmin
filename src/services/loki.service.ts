@@ -110,7 +110,6 @@ export function getCollection() {
 export function createData(newDoc: SongType) {
 	return new Promise((resolve, reject) => {
 		try {
-			// console.log('New Doc: ', newDoc)
 			const COLLECTION = db.getCollection('music')
 
 			if (!COLLECTION) throw new Error(`Collection music not created/available.`)

@@ -1,22 +1,17 @@
 import { app, BrowserWindow, ipcMain, Menu, protocol, screen, shell } from 'electron'
-import { getConfig, saveConfig } from './services/config.service'
 import path from 'path'
 
-import chokidar from 'chokidar'
+export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
+
+import { getConfig, saveConfig } from './services/config.service'
 
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 
-import { scanFolders } from './services/indexer.service'
-import { createData, getCollection, getCollectionMap, loadDb, updateData } from './services/loki.service'
-import stringHash from 'string-hash'
+import { getCollectionMap, loadDb } from './services/loki.service'
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
 import { getWaveformsFolderWatcher } from './functions/getWaveform.fn'
-
-const collectionName = 'music'
-
-export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
 
 async function createWindow() {
 	const config = getConfig()
@@ -29,7 +24,7 @@ async function createWindow() {
 	window.webContents.openDevTools()
 	window.loadFile('index.html')
 
-	// if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
 
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }

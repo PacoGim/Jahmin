@@ -76,6 +76,14 @@ function getBitRate(bitRate: string | undefined) {
 function getDate(dateString: string): DateType {
 	let splitDate: any = []
 
+	if (!dateString) {
+		return {
+			year: undefined,
+			month: undefined,
+			day: undefined
+		}
+	}
+
 	// For - Separator
 	if (dateString.includes('-')) {
 		splitDate = dateString.split('-')
@@ -106,7 +114,7 @@ function getDate(dateString: string): DateType {
 }
 
 type DateType = {
-	year: number
+	year: number | undefined
 	month: number | undefined
 	day: number | undefined
 }

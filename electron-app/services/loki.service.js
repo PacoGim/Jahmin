@@ -96,7 +96,6 @@ exports.getCollection = getCollection;
 function createData(newDoc) {
     return new Promise((resolve, reject) => {
         try {
-            // console.log('New Doc: ', newDoc)
             const COLLECTION = db.getCollection('music');
             if (!COLLECTION)
                 throw new Error(`Collection music not created/available.`);

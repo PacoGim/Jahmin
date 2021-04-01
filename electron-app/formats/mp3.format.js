@@ -73,6 +73,13 @@ function getMp3Tags(filePath) {
 exports.getMp3Tags = getMp3Tags;
 function getDate(dateString) {
     let splitDate = [];
+    if (!dateString) {
+        return {
+            year: undefined,
+            month: undefined,
+            day: undefined
+        };
+    }
     // For - Separator
     if (dateString.includes('-')) {
         splitDate = dateString.split('-');

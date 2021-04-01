@@ -9,7 +9,7 @@ import { getAlbumColors } from './getAlbumColors.fn'
 
 import { customAlphabet } from 'nanoid'
 import { getWaveform } from '../functions/getWaveform.fn'
-import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
+// import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
 import { groupSongs } from '../functions/groupSong.fn'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
@@ -131,8 +131,8 @@ export function loadIPC() {
 
 	ipcMain.handle('get-changes-progress', async (evt) => {
 		return {
-			total: getTotalChangesToProcess(),
-			current: getTotalProcessedChanged()
+			// total: getTotalChangesToProcess(),
+			// current: getTotalProcessedChanged()
 		}
 	})
 }

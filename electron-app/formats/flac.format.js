@@ -77,6 +77,13 @@ function getFlacTags(filePath) {
 exports.getFlacTags = getFlacTags;
 function getDate(dateString) {
     let splitDate = [];
+    if (!dateString) {
+        return {
+            year: undefined,
+            month: undefined,
+            day: undefined
+        };
+    }
     // For - Separator
     if (dateString.includes('-')) {
         splitDate = dateString.split('-');

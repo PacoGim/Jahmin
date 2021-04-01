@@ -14,15 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.appDataPath = void 0;
 const electron_1 = require("electron");
-const config_service_1 = require("./services/config.service");
 const path_1 = __importDefault(require("path"));
+exports.appDataPath = path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
+const config_service_1 = require("./services/config.service");
 const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");
 const folderWatcher_service_1 = require("./services/folderWatcher.service");
 const getWaveform_fn_1 = require("./functions/getWaveform.fn");
-const collectionName = 'music';
-exports.appDataPath = path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
 function createWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = config_service_1.getConfig();
@@ -31,7 +30,8 @@ function createWindow() {
         const window = new electron_1.BrowserWindow(loadOptions(config));
         window.webContents.openDevTools();
         window.loadFile('index.html');
-        // if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+        if (config === null || config === void 0 ? void 0 : config['rootDirectories'])
+            folderWatcher_service_1.watchFolders(config['rootDirectories']);
         window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window));
     });
 }

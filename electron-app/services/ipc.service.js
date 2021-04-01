@@ -18,7 +18,7 @@ const albumArt_service_1 = require("./albumArt.service");
 const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
 const nanoid_1 = require("nanoid");
 const getWaveform_fn_1 = require("../functions/getWaveform.fn");
-const folderWatcher_service_1 = require("./folderWatcher.service");
+// import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 const hashString_fn_1 = require("../functions/hashString.fn");
 const groupSong_fn_1 = require("../functions/groupSong.fn");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
@@ -112,8 +112,8 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('get-changes-progress', (evt) => __awaiter(this, void 0, void 0, function* () {
         return {
-            total: folderWatcher_service_1.getTotalChangesToProcess(),
-            current: folderWatcher_service_1.getTotalProcessedChanged()
+        // total: getTotalChangesToProcess(),
+        // current: getTotalProcessedChanged()
         };
     }));
 }
