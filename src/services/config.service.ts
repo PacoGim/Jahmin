@@ -8,10 +8,10 @@ import { appDataPath } from '..'
 
 const getConfigPathFile = () => {
 	const configFileName = 'config.json'
-	const configFilePath = path.join(appDataPath, configFileName)
+	const configFilePath = path.join(appDataPath(), configFileName)
 
-	if (!fs.existsSync(appDataPath)) {
-		fs.mkdirSync(appDataPath)
+	if (!fs.existsSync(appDataPath())) {
+		fs.mkdirSync(appDataPath())
 	}
 
 	return configFilePath
@@ -38,7 +38,6 @@ export function getConfig(): ConfigType {
 }
 
 export function saveConfig(newConfig: any) {
-	// console.log(newConfig)
 	let config = getConfig()
 
 	config = deepmerge(config, newConfig, { arrayMerge: (destinationArray: any[], sourceArray: any[]) => sourceArray })

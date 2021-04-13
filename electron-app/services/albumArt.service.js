@@ -33,7 +33,7 @@ function getAlbumCover(rootDir) {
         let rootDirHashed = hashString_fn_1.hash(rootDir);
         let config = config_service_1.getConfig();
         let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
-        let artDirPath = path_1.default.join(__1.appDataPath, 'art', String(dimension));
+        let artDirPath = path_1.default.join(__1.appDataPath(), 'art', String(dimension));
         let artPath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
         if (fs_1.default.existsSync(artPath)) {
             return resolve({ fileType: 'image', filePath: artPath });
@@ -77,7 +77,7 @@ function getImageCompressed(filePath) {
     var _a;
     let config = config_service_1.getConfig();
     let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
-    let artDirPath = path_1.default.join(__1.appDataPath, 'art', String(dimension));
+    let artDirPath = path_1.default.join(__1.appDataPath(), 'art', String(dimension));
     let fileHash = `${hashString_fn_1.hash(filePath)}.webp`;
     let compressedFilePath = path_1.default.join(artDirPath, fileHash);
     if (fs_1.default.existsSync(compressedFilePath)) {

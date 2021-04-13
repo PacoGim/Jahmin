@@ -30,7 +30,7 @@ function getNewPromiseDbVersion(rendererDbVersion) {
 exports.getNewPromiseDbVersion = getNewPromiseDbVersion;
 function loadDb() {
     return new Promise((resolve) => {
-        const DB_PATH = path_1.default.join(index_1.appDataPath, '/db');
+        const DB_PATH = path_1.default.join(index_1.appDataPath(), '/db');
         if (!fs_1.default.existsSync(DB_PATH)) {
             fs_1.default.mkdirSync(DB_PATH, { recursive: true });
             fs_1.default.writeFile(path_1.default.join(DB_PATH, 'DO_NOT_EDIT_FILES.txt'), 'If you did then delete this folder content and re-scan folders.', () => { });
@@ -45,7 +45,7 @@ function loadDb() {
                 });
             },
             autosave: true,
-            autosaveInterval: 1000,
+            autosaveInterval: 10000,
             autosaveCallback: () => {
                 mapCollection();
             }

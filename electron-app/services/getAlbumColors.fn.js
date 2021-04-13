@@ -16,7 +16,7 @@ function getAlbumColors(imageId) {
     return new Promise((resolve, reject) => {
         var _a;
         let config = config_service_1.getConfig();
-        let imagePath = path_1.default.join(__1.appDataPath, '/art', String((_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension']), `${imageId}.webp`);
+        let imagePath = path_1.default.join(__1.appDataPath(), '/art', String((_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension']), `${imageId}.webp`);
         sharp_1.default(imagePath)
             .resize(1, 1)
             .raw()

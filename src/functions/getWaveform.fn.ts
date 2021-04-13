@@ -27,7 +27,7 @@ export function getWaveform(songPath: string) {
 
 		let color = hslToHex(colors.hue, colors.saturation, colors.lightnessLow).replace('#', '')
 
-		let waveformsDirPath = path.join(appDataPath, 'waveforms')
+		let waveformsDirPath = path.join(appDataPath(), 'waveforms')
 
 		if (!existsSync(waveformsDirPath)) {
 			fs.mkdirSync(waveformsDirPath, { recursive: true })

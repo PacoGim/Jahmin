@@ -834,11 +834,10 @@ var app = (function () {
             // Waits for the version to change in main.
             ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
                 dbVersion.set(result);
-                // console.log('New Version: ', result)
                 resolve(result);
                 setTimeout(() => {
                     syncDbVersionIPC();
-                }, 2000);
+                }, 10000);
             });
         });
     }
@@ -6739,7 +6738,7 @@ var app = (function () {
     			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-qj5o4s");
-    			add_location(main, file$j, 60, 0, 2253);
+    			add_location(main, file$j, 62, 0, 2266);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6837,9 +6836,15 @@ var app = (function () {
     	validate_slots("App", slots, []);
 
     	onMount(() => {
-    		syncDbVersionIPC();
+    		setTimeout(
+    			() => {
+    				syncDbVersionIPC();
+    			},
+    			10000
+    		);
 
-    		// getNewDbChangesProgress()
+    		getNewDbChangesProgress();
+
     		window.onkeydown = function (e) {
     			return !(e.code == "Space" && e.target == document.body);
     		};
@@ -6869,7 +6874,7 @@ var app = (function () {
     	// }
     	function getNewDbChangesProgress() {
     		getChangesProgressIPC().then(result => {
-    			console.log(100 / result["total"] * result["current"], "% Total:", result["total"], " Current:", result["current"]);
+    			console.log(result.total, result.current, 100 / result.total * result.current || 0, "%");
 
     			setTimeout(
     				() => {

@@ -21,7 +21,7 @@ export function getAlbumCover(rootDir: /* Root Directory */ string) {
 		let rootDirHashed = hash(rootDir)
 		let config = getConfig()
 		let dimension = config?.['art']?.['dimension']
-		let artDirPath = path.join(appDataPath, 'art', String(dimension))
+		let artDirPath = path.join(appDataPath(), 'art', String(dimension))
 		let artPath = path.join(artDirPath, rootDirHashed) + '.webp'
 
 		if (fs.existsSync(artPath)) {
@@ -75,7 +75,7 @@ export function getAlbumCover(rootDir: /* Root Directory */ string) {
 function getImageCompressed(filePath: string) {
 	let config = getConfig()
 	let dimension = config?.['art']?.['dimension']
-	let artDirPath = path.join(appDataPath, 'art', String(dimension))
+	let artDirPath = path.join(appDataPath(), 'art', String(dimension))
 	let fileHash = `${hash(filePath)}.webp`
 	let compressedFilePath = path.join(artDirPath, fileHash)
 

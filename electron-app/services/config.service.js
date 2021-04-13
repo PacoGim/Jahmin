@@ -10,9 +10,9 @@ const deepmerge_1 = __importDefault(require("deepmerge"));
 const __1 = require("..");
 const getConfigPathFile = () => {
     const configFileName = 'config.json';
-    const configFilePath = path_1.default.join(__1.appDataPath, configFileName);
-    if (!fs_1.default.existsSync(__1.appDataPath)) {
-        fs_1.default.mkdirSync(__1.appDataPath);
+    const configFilePath = path_1.default.join(__1.appDataPath(), configFileName);
+    if (!fs_1.default.existsSync(__1.appDataPath())) {
+        fs_1.default.mkdirSync(__1.appDataPath());
     }
     return configFilePath;
 };
@@ -37,7 +37,6 @@ function getConfig() {
 }
 exports.getConfig = getConfig;
 function saveConfig(newConfig) {
-    // console.log(newConfig)
     let config = getConfig();
     config = deepmerge_1.default(config, newConfig, { arrayMerge: (destinationArray, sourceArray) => sourceArray });
     try {

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu, protocol, screen, shell } from 'electron'
 import path from 'path'
 
-export const appDataPath = path.join(app.getPath('appData'), 'Jahmin')
+export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
 
 import { getConfig, saveConfig } from './services/config.service'
 

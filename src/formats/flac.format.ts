@@ -2,14 +2,13 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
+import { FlacTagType } from '../types/flacTagType'
 import { SongType } from '../types/song.type'
 import { StreamSongType } from '../types/streamTag.type'
 import { TagType } from '../types/tag.type'
 import { TagModType } from '../types/tagMod.type'
 
-let ffprobePath = () => {
-	return path.join(__dirname, '../binaries', 'ffprobe')
-}
+const mm = require('music-metadata')
 
 export function writeFlacTags(filePath: string, newTags: TagModType) {
 	return new Promise((resolve, reject) => {
@@ -37,57 +36,56 @@ export function writeFlacTags(filePath: string, newTags: TagModType) {
 	})
 }
 
-export function getFlacTags(filePath: string): Promise<SongType> {
-	return new Promise((resolve, reject) => {
-		exec(`"${ffprobePath()}" -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
-			if (stdout) {
-				let tags: SongType = {
-					Extension: 'flac'
-				}
-				let data = JSON.parse(stdout)
+export async function getFlacTags(filePath: string): Promise<SongType> {
+	return new Promise(async (resolve, reject) => {
+		let tags: SongType = {
+			Extension: 'flac'
+		}
 
-				tags['ID'] = stringHash(filePath)
+		const STATS = fs.statSync(filePath)
+		const METADATA = await mm.parseFile(filePath)
+		let nativeTags: FlacTagType = mergeNatives(METADATA.native)
 
-				let streamAudioData: StreamSongType = data['streams'].find((stream: StreamSongType) => stream['codec_type'] === 'audio')
+		let dateParsed = getDate(String(nativeTags.DATE))
 
-				tags['SourceFile'] = filePath
-				tags['SampleRate'] = Number(streamAudioData['sample_rate'])
-				tags['BitDepth'] = Number(streamAudioData['bits_per_raw_sample'])
+		tags.LastModified = STATS.mtimeMs
+		tags.Size = STATS.size
+		tags.SourceFile = filePath
+		tags.SampleRate = METADATA.format.sampleRate
+		tags.BitRate = METADATA.format.bitrate / 1000
+		tags.Duration = Math.trunc(METADATA.format.duration)
 
-				data = data['format']
+		tags.Album = nativeTags?.ALBUM
+		tags.Artist = nativeTags?.ARTIST
+		tags.AlbumArtist = nativeTags?.ALBUMARTIST
+		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT
+		tags.Composer = nativeTags?.COMPOSER
+		tags.Date_Year = dateParsed.year
+		tags.Date_Month = dateParsed.month
+		tags.Date_Day = dateParsed.day
+		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || undefined
+		tags.Track = Number(nativeTags?.TRACKNUMBER)
+		tags.Title = nativeTags?.TITLE
+		tags.Genre = nativeTags?.GENRE
+		tags.Rating = Number(nativeTags?.RATING) || undefined
+		tags.ID = stringHash(filePath)
 
-				tags['BitRate'] = Number(data['bit_rate'])
-				tags['Duration'] = Number(data['duration'])
-				tags['Size'] = Number(data['size'])
+		// console.log(tags)
 
-				let dataTags = lowerCaseObjectKeys(data['tags'])
-
-				let dateParsed = getDate(dataTags['date'])
-
-				tags['Rating'] = Number(dataTags['rating'])
-				tags['Title'] = dataTags['title']
-				tags['Artist'] = dataTags['artist']
-				tags['Album'] = dataTags['album']
-				tags['Genre'] = dataTags['genre']
-				tags['Comment'] = dataTags['comment']
-				tags['AlbumArtist'] = dataTags['album_artist']
-				tags['Composer'] = dataTags['composer']
-				tags['DiscNumber'] = dataTags['disc'] !== undefined ? Number(dataTags['disc']) : undefined
-				tags['Date_Year'] = dateParsed['year']
-				tags['Date_Month'] = dateParsed['month']
-				tags['Date_Day'] = dateParsed['day']
-				tags['Track'] = Number(dataTags['track'])
-
-				tags['LastModified'] = fs.statSync(filePath).mtimeMs
-
-				resolve(tags)
-			}
-
-			if (err) {
-				console.log(err)
-			}
-		})
+		resolve(tags)
 	})
+}
+
+function mergeNatives(native: any) {
+	let finalObject: any = {}
+
+	for (let key in native) {
+		for (let value in native[key]) {
+			finalObject[native[key][value]['id']] = native[key][value]['value']
+		}
+	}
+
+	return finalObject
 }
 
 function getDate(dateString: string): DateType {

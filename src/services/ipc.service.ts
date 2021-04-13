@@ -12,6 +12,7 @@ import { getWaveform } from '../functions/getWaveform.fn'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
 import { groupSongs } from '../functions/groupSong.fn'
+import { getMaxTaskQueueLength, getTaskQueueLength } from './folderWatcher.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -131,9 +132,8 @@ export function loadIPC() {
 
 	ipcMain.handle('get-changes-progress', async (evt) => {
 		return {
-			// total: getTotalChangesToProcess(),
-			// current: getTotalProcessedChanged()
+			total: getMaxTaskQueueLength(),
+			current: getTaskQueueLength()
 		}
 	})
 }
-

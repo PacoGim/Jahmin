@@ -34,7 +34,7 @@ export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<numbe
 
 export function loadDb(): Promise<void> {
 	return new Promise((resolve) => {
-		const DB_PATH = path.join(appDataPath, '/db')
+		const DB_PATH = path.join(appDataPath(), '/db')
 
 		if (!fs.existsSync(DB_PATH)) {
 			fs.mkdirSync(DB_PATH, { recursive: true })
@@ -55,7 +55,7 @@ export function loadDb(): Promise<void> {
 				})
 			},
 			autosave: true,
-			autosaveInterval: 1000,
+			autosaveInterval: 10000,
 			autosaveCallback: () => {
 				mapCollection()
 			}
@@ -110,6 +110,7 @@ export function getCollection() {
 export function createData(newDoc: SongType) {
 	return new Promise((resolve, reject) => {
 		try {
+
 			const COLLECTION = db.getCollection('music')
 
 			if (!COLLECTION) throw new Error(`Collection music not created/available.`)
@@ -131,7 +132,7 @@ export function createData(newDoc: SongType) {
 	})
 }
 
-export function readDataById(id: any) {
+export function readDataById(id: any): SongType | null {
 	try {
 		const COLLECTION = db.getCollection('music')
 

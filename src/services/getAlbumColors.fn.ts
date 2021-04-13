@@ -13,7 +13,7 @@ let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', '
 export function getAlbumColors(imageId: string): Promise<ColorType> {
 	return new Promise((resolve, reject) => {
 		let config = getConfig()
-		let imagePath = path.join(appDataPath, '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
+		let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
 
 		sharp(imagePath)
 			.resize(1, 1)

@@ -27,39 +27,41 @@ function writeAacTags(filePath, newTags) {
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => {
         exiftool.read(filePath).then((tags) => {
-            let fileStats = fs_1.default.statSync(filePath);
-            //@ts-expect-error
-            let dateParsed = getDate(String(tags.ContentCreateDate));
-            resolve({
-                ID: string_hash_1.default(filePath),
+            fs_1.default.stat(filePath, (err, fileStats) => {
+                // let fileStats = fs.statSync(filePath)
                 //@ts-expect-error
-                Album: tags['Album'] || '',
-                //@ts-expect-error
-                AlbumArtist: tags['AlbumArtist'] || '',
-                Artist: tags['Artist'] || '',
-                //@ts-expect-error
-                Composer: tags['Composer'] || '',
-                // Date: tags['ContentCreateDate'],
-                //@ts-expect-error
-                Genre: tags['Genre'] || '',
-                //@ts-expect-error
-                DiscNumber: tags['DiskNumber'] || '',
-                Title: tags['Title'] || '',
-                //@ts-expect-error
-                Track: getTrack(tags['TrackNumber'], tags['Track']),
-                Rating: tags['RatingPercent'],
-                Date_Year: dateParsed['year'],
-                Date_Month: dateParsed['month'],
-                Date_Day: dateParsed['day'],
-                Comment: tags['Comment'] || '',
-                SourceFile: tags['SourceFile'],
-                Extension: tags['FileTypeExtension'],
-                Size: fileStats.size,
-                Duration: tags['Duration'],
-                SampleRate: tags['AudioSampleRate'],
-                LastModified: fileStats.mtimeMs,
-                BitRate: getBitRate(tags['AvgBitrate']),
-                BitDepth: tags['AudioBitsPerSample']
+                let dateParsed = getDate(String(tags.ContentCreateDate));
+                resolve({
+                    ID: string_hash_1.default(filePath),
+                    //@ts-expect-error
+                    Album: tags['Album'] || '',
+                    //@ts-expect-error
+                    AlbumArtist: tags['AlbumArtist'] || '',
+                    Artist: tags['Artist'] || '',
+                    //@ts-expect-error
+                    Composer: tags['Composer'] || '',
+                    // Date: tags['ContentCreateDate'],
+                    //@ts-expect-error
+                    Genre: tags['Genre'] || '',
+                    //@ts-expect-error
+                    DiscNumber: tags['DiskNumber'] || '',
+                    Title: tags['Title'] || '',
+                    //@ts-expect-error
+                    Track: getTrack(tags['TrackNumber'], tags['Track']),
+                    Rating: tags['RatingPercent'],
+                    Date_Year: dateParsed['year'],
+                    Date_Month: dateParsed['month'],
+                    Date_Day: dateParsed['day'],
+                    Comment: tags['Comment'] || '',
+                    SourceFile: tags['SourceFile'],
+                    Extension: tags['FileTypeExtension'],
+                    Size: fileStats.size,
+                    Duration: tags['Duration'],
+                    SampleRate: tags['AudioSampleRate'],
+                    LastModified: fileStats.mtimeMs,
+                    BitRate: getBitRate(tags['AvgBitrate']),
+                    BitDepth: tags['AudioBitsPerSample']
+                });
             });
         });
     });

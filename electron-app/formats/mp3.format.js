@@ -1,76 +1,161 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMp3Tags = exports.writeMp3Tags = void 0;
-const child_process_1 = require("child_process");
+exports.getMp3Tags = void 0;
 const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
-let ffprobePath = () => {
-    return path_1.default.join(__dirname, '../binaries', 'ffprobe');
-};
-function writeMp3Tags(filePath, newTags) {
+const node_id3_1 = __importDefault(require("node-id3"));
+const mm = require('music-metadata');
+/*
+writeMp3Tags(
+    {
+        TIT2: 'New Title',
+        TRCK: 4,
+        TALB: 'New Album',
+        TPE2: 'New Album Artist',
+        TPE1: 'New Artist',
+        comment: {
+            language: 'eng',
+            text: 'this is a comment'
+        },
+        TCOM: 'New Composer',
+        TDRC: '1998-12-12',
+        TPOS: 3,
+        TCON: 'New Genre',
+        popularimeter: {
+            email: 'foo@bar.baz',
+            rating: 100,
+            counter: 0
+        }
+    },
+    '/Users/fran/MEGA/Projects/Temp Project/ffmpeg-tag-read-write/input.mp3'
+).then(() => getMp3Tags('/Users/fran/MEGA/Projects/Temp Project/ffmpeg-tag-read-write/input.mp3'))
+*/
+function writeMp3Tags(newTags, filePath) {
     return new Promise((resolve, reject) => {
-        let ffmpegMetatagString = objectToFfmpegString(newTags);
-        child_process_1.exec(`../binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
-            .split('/')
-            .pop()}"`, (error, stdout, stderr) => {
-            // if (error) {
-            // 	console.log(error)
-            // }
-            // if (stdout) {
-            // 	console.log(stdout)
-            // }
-            // if (stderr) {
-            // 	console.log(stderr)
-            // 	resolve(undefined)
-            // }
-        }).on('close', () => {
-            resolve('Done');
-        });
-    });
-}
-exports.writeMp3Tags = writeMp3Tags;
-function getMp3Tags(filePath) {
-    return new Promise((resolve, reject) => {
-        child_process_1.exec(`"${ffprobePath()}" -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
-            if (stdout) {
-                let tags = {
-                    Extension: 'mp3'
-                };
-                let data = JSON.parse(stdout);
-                let streamAudioData = data['streams'].find((stream) => stream['codec_type'] === 'audio');
-                tags['SourceFile'] = filePath;
-                tags['SampleRate'] = Number(streamAudioData['sample_rate']);
-                data = data['format'];
-                tags['BitRate'] = Number(data['bit_rate']);
-                tags['Duration'] = Number(data['duration']);
-                tags['Size'] = Number(data['size']);
-                let dataTags = lowerCaseObjectKeys(data['tags']);
-                let dateParsed = getDate(dataTags['date'] || dataTags['tyer']);
-                tags['Rating'] = Number(dataTags['rating']);
-                tags['Title'] = dataTags['title'];
-                tags['Artist'] = dataTags['artist'];
-                tags['Album'] = dataTags['album'];
-                tags['Genre'] = dataTags['genre'];
-                tags['Comment'] = dataTags['comment'];
-                tags['AlbumArtist'] = dataTags['album_artist'];
-                tags['Composer'] = dataTags['composer'];
-                tags['DiscNumber'] = dataTags['disc'] !== undefined ? Number(dataTags['disc']) : undefined;
-                tags['Date_Year'] = dateParsed['year'];
-                tags['Date_Month'] = dateParsed['month'];
-                tags['Date_Day'] = dateParsed['day'];
-                tags['Track'] = Number(dataTags['track']);
-                tags['LastModified'] = fs_1.default.statSync(filePath).mtimeMs;
-                tags['ID'] = string_hash_1.default(filePath);
-                resolve(tags);
+        node_id3_1.default.write(newTags, filePath, (err) => {
+            if (err) {
+                console.log(err);
+                reject();
+            }
+            else {
+                resolve();
             }
         });
     });
 }
+function getMp3Tags(filePath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            let tags = {
+                Extension: 'mp3'
+            };
+            const STATS = fs_1.default.statSync(filePath);
+            const METADATA = yield mm.parseFile(filePath);
+            let nativeTags = mergeNatives(METADATA.native);
+            let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER));
+            tags.LastModified = STATS.mtimeMs;
+            tags.Size = STATS.size;
+            tags.SourceFile = filePath;
+            tags.SampleRate = METADATA.format.sampleRate;
+            tags.BitRate = METADATA.format.bitrate / 1000;
+            tags.Duration = Math.trunc(METADATA.format.duration);
+            tags.Album = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TALB;
+            tags.Artist = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE1;
+            tags.AlbumArtist = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE2;
+            tags.Comment = (_a = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMM) === null || _a === void 0 ? void 0 : _a.text;
+            tags.Composer = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCOM;
+            tags.Date_Year = dateParsed.year;
+            tags.Date_Month = dateParsed.month;
+            tags.Date_Day = dateParsed.day;
+            tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPOS) || undefined;
+            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || undefined;
+            tags.Title = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2;
+            tags.Genre = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCON;
+            tags.Rating = convertRating('Jahmin', (_b = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.POPM) === null || _b === void 0 ? void 0 : _b.rating);
+            tags.ID = string_hash_1.default(filePath);
+            resolve(tags);
+        }));
+    });
+}
 exports.getMp3Tags = getMp3Tags;
+/**
+ * @param {('Mp3' | 'Jahmin')} to - Mp3: Converts from (0 - 100) to (0 - 255) to save rating tag in file from renderer
+ * @param {('Mp3' | 'Jahmin')} to - Jahmin: Converts from (0 - 255) to (0 - 100) for the renderer
+ * @param {number} rating
+ * @returns {*}  number | undefined
+ */
+function convertRating(to, rating) {
+    if (!isNaN(rating)) {
+        if (to === 'Mp3') {
+            return Math.round((255 / 100) * rating); // Converts 100 Rating to 255
+        }
+        if (to === 'Jahmin') {
+            return Math.round((100 / 255) * rating); // Converts 255 Rating to 100
+        }
+    }
+    else {
+        return undefined;
+    }
+}
+function mergeNatives(native) {
+    let finalObject = {};
+    for (let key in native) {
+        for (let value in native[key]) {
+            finalObject[native[key][value]['id']] = native[key][value]['value'];
+        }
+    }
+    return finalObject;
+}
+// export function getMp3Tags(filePath: string): Promise<SongType> {
+// 	return new Promise((resolve, reject) => {
+// 		exec(`"${ffprobePath()}" -v error -of json -show_streams -show_format -i "${filePath}"`, (err, stdout, stderr) => {
+// 			if (stdout) {
+// 				let tags: SongType = {
+// 					Extension: 'mp3'
+// 				}
+// 				let data = JSON.parse(stdout)
+// 				let streamAudioData: StreamSongType = data['streams'].find((stream: StreamSongType) => stream['codec_type'] === 'audio')
+// 				tags['SourceFile'] = filePath
+// 				tags['SampleRate'] = Number(streamAudioData['sample_rate'])
+// 				data = data['format']
+// 				tags['BitRate'] = Number(data['bit_rate'])
+// 				tags['Duration'] = Number(data['duration'])
+// 				tags['Size'] = Number(data['size'])
+// 				let dataTags = lowerCaseObjectKeys(data['tags'])
+// 				let dateParsed = getDate(dataTags['date'] || dataTags['tyer'])
+// 				tags['Rating'] = Number(dataTags['rating'])
+// 				tags['Title'] = dataTags['title']
+// 				tags['Artist'] = dataTags['artist']
+// 				tags['Album'] = dataTags['album']
+// 				tags['Genre'] = dataTags['genre']
+// 				tags['Comment'] = dataTags['comment']
+// 				tags['AlbumArtist'] = dataTags['album_artist']
+// 				tags['Composer'] = dataTags['composer']
+// 				tags['DiscNumber'] = dataTags['disc'] !== undefined ? Number(dataTags['disc']) : undefined
+// 				tags['Date_Year'] = dateParsed['year']
+// 				tags['Date_Month'] = dateParsed['month']
+// 				tags['Date_Day'] = dateParsed['day']
+// 				tags['Track'] = Number(dataTags['track'])
+// 				tags['LastModified'] = fs.statSync(filePath).mtimeMs
+// 				tags['ID'] = stringHash(filePath)
+// 				resolve(tags)
+// 			}
+// 		})
+// 	})
+// }
 function getDate(dateString) {
     let splitDate = [];
     if (!dateString) {

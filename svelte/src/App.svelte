@@ -16,8 +16,12 @@
 	import { albumListStore, appTitle } from './store/final.store'
 
 	onMount(() => {
-		syncDbVersionIPC()
-		// getNewDbChangesProgress()
+		setTimeout(() => {
+
+			syncDbVersionIPC()
+		}, 10000);
+
+		getNewDbChangesProgress()
 
 		window.onkeydown = function (e) {
 			return !(e.code == 'Space' && e.target == document.body)
@@ -60,7 +64,8 @@
 
 	function getNewDbChangesProgress() {
 		getChangesProgressIPC().then((result) => {
-			console.log((100 / result['total']) * result['current'], '% Total:', result['total'], ' Current:', result['current'])
+			console.log(result.total, result.current, (100 / result.total) * result.current || 0, '%')
+
 			setTimeout(() => {
 				getNewDbChangesProgress()
 			}, 10000)

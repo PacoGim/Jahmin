@@ -164,13 +164,11 @@ export function syncDbVersionIPC() {
 		ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
 			dbVersion.set(result)
 
-			// console.log('New Version: ', result)
-
 			resolve(result)
 
 			setTimeout(() => {
 				syncDbVersionIPC()
-			}, 2000)
+			}, 10000)
 		})
 	})
 }

@@ -52,7 +52,7 @@ function getWaveform(songPath) {
         let id = hashString_fn_1.hash(songPath.split('/').slice(0, -1).join('/'));
         let colors = yield getAlbumColors_fn_1.getAlbumColors(id);
         let color = hsl_to_hex_1.default(colors.hue, colors.saturation, colors.lightnessLow).replace('#', '');
-        let waveformsDirPath = path_1.default.join(__1.appDataPath, 'waveforms');
+        let waveformsDirPath = path_1.default.join(__1.appDataPath(), 'waveforms');
         if (!fs_1.existsSync(waveformsDirPath)) {
             fs_1.default.mkdirSync(waveformsDirPath, { recursive: true });
         }
