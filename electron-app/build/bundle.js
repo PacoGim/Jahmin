@@ -837,7 +837,7 @@ var app = (function () {
                 resolve(result);
                 setTimeout(() => {
                     syncDbVersionIPC();
-                }, 10000);
+                }, 1000);
             });
         });
     }
@@ -6738,7 +6738,7 @@ var app = (function () {
     			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-qj5o4s");
-    			add_location(main, file$j, 62, 0, 2266);
+    			add_location(main, file$j, 60, 0, 2224);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6836,13 +6836,7 @@ var app = (function () {
     	validate_slots("App", slots, []);
 
     	onMount(() => {
-    		setTimeout(
-    			() => {
-    				syncDbVersionIPC();
-    			},
-    			10000
-    		);
-
+    		syncDbVersionIPC();
     		getNewDbChangesProgress();
 
     		window.onkeydown = function (e) {

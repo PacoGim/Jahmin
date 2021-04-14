@@ -18,6 +18,8 @@ const path_1 = __importDefault(require("path"));
 const appDataPath = () => path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
 exports.appDataPath = appDataPath;
 const config_service_1 = require("./services/config.service");
+const worker_service_1 = require("./services/worker.service");
+worker_service_1.initWorkers();
 const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");

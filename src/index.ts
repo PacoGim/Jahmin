@@ -5,6 +5,9 @@ export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
 
 import { getConfig, saveConfig } from './services/config.service'
 
+import { initWorkers } from './services/worker.service'
+initWorkers()
+
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 

@@ -168,7 +168,7 @@ export function syncDbVersionIPC() {
 
 			setTimeout(() => {
 				syncDbVersionIPC()
-			}, 10000)
+			}, 1000)
 		})
 	})
 }

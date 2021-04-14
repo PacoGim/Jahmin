@@ -4,10 +4,20 @@ const worker_threads_1 = require("worker_threads");
 const aac_format_1 = require("../formats/aac.format");
 const flac_format_1 = require("../formats/flac.format");
 const mp3_format_1 = require("../formats/mp3.format");
-worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (path) => {
-    getSongTags(path).then((data) => {
-        worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage(data);
-    });
+worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (options) => {
+    if (options.task === 'Get Song Data') {
+        getSongTags(options.data.path).then((data) => {
+            worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
+                task: options.task,
+                data
+            });
+        });
+    }
+    if (options.task === 'Not Tasks Left') {
+        worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
+            task: options.task
+        });
+    }
 });
 function getSongTags(path) {
     return new Promise((resolve, reject) => {

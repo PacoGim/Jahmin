@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.taskQueue = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = require("chokidar");
 const loki_service_1 = require("./loki.service");
-const worker_threads_1 = require("worker_threads");
+const worker_service_1 = require("./worker.service");
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3'];
 function getRootDirFolderWatcher() {
@@ -13,29 +13,7 @@ exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 exports.taskQueue = [];
 let filesFound = [];
 exports.maxTaskQueueLength = 0;
-let watchTaskQueueInterval;
-const worker = new worker_threads_1.Worker('./electron-app/workers/folderScan.worker.js');
-worker.on('message', (songData) => {
-    loki_service_1.createData(songData).then(() => processTaskQueue());
-});
-function processTaskQueue() {
-    let task = exports.taskQueue.shift();
-    // console.log(maxTaskQueueLength, taskQueue.length, (100 / maxTaskQueueLength) * taskQueue.length)
-    if (task) {
-        clearInterval(watchTaskQueueInterval);
-        if (exports.taskQueue.length > exports.maxTaskQueueLength) {
-            exports.maxTaskQueueLength = exports.taskQueue.length;
-        }
-        let { type, path } = task;
-        if (type === 'add') {
-            worker.postMessage(path);
-        }
-    }
-    else {
-        clearInterval(watchTaskQueueInterval);
-        watchTaskQueueInterval = setInterval(() => processTaskQueue(), 2000);
-    }
-}
+let workerSongData = worker_service_1.getWorkers().filter((worker) => worker.type === 'SongData');
 function getMaxTaskQueueLength() {
     return exports.maxTaskQueueLength;
 }
@@ -44,18 +22,6 @@ function getTaskQueueLength() {
     return exports.taskQueue.length;
 }
 exports.getTaskQueueLength = getTaskQueueLength;
-// function getSongTags(path: string): Promise<SongType> {
-// 	return new Promise((resolve, reject) => {
-// 		let extension = path.split('.').pop() || undefined
-// 		if (extension === 'm4a') {
-// 			getAacTags(path).then((data) => resolve(data))
-// 		} else if (extension === 'flac') {
-// 			getFlacTags(path).then((data) => resolve(data))
-// 		} else if (extension === 'mp3') {
-// 			getMp3Tags(path).then((data) => resolve(data))
-// 		}
-// 	})
-// }
 function watchFolders(rootDirectories) {
     watcher = chokidar_1.watch(rootDirectories, {
         awaitWriteFinish: true
@@ -64,24 +30,60 @@ function watchFolders(rootDirectories) {
     watcher.on('ready', () => {
         watcher.on('add', (path) => addToTaskQueue(path, 'add'));
         checkNewSongs();
-        watchTaskQueueInterval = setInterval(() => processTaskQueue(), 2000);
+        startWorkers();
         console.log('ready');
     });
 }
 exports.watchFolders = watchFolders;
+function startWorkers() {
+    workerSongData.forEach((worker) => {
+        worker.worker.on('message', (options) => {
+            if (options.task === 'Not Tasks Left') {
+                setTimeout(() => {
+                    processQueue(worker.worker);
+                }, 2000);
+            }
+            else if (options.task === 'Get Song Data') {
+                loki_service_1.createData(options.data).then(() => processQueue(worker.worker));
+            }
+        });
+        processQueue(worker.worker);
+    });
+}
+function processQueue(worker) {
+    let task = exports.taskQueue.shift();
+    if (task) {
+        if (exports.taskQueue.length > exports.maxTaskQueueLength) {
+            exports.maxTaskQueueLength = exports.taskQueue.length;
+        }
+        let { type, path } = task;
+        if (type === 'add') {
+            worker.postMessage({
+                task: 'Get Song Data',
+                data: {
+                    path
+                }
+            });
+        }
+    }
+    else {
+        worker.postMessage({
+            task: 'Not Tasks Left'
+        });
+    }
+}
 function checkNewSongs() {
     let collection = loki_service_1.getCollection().map((song) => song.SourceFile);
     filterOutOldSongs(collection);
 }
 function filterOutOldSongs(collection) {
+    //TODO Add worker myah
     let file = filesFound.shift();
     if (file) {
         if (collection.indexOf(file) === -1) {
             addToTaskQueue(file, 'add');
         }
         process.nextTick(() => filterOutOldSongs(collection));
-        // setTimeout(() => {
-        // }, 1)
     }
 }
 function addToTaskQueue(path, type) {

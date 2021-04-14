@@ -16,10 +16,7 @@
 	import { albumListStore, appTitle } from './store/final.store'
 
 	onMount(() => {
-		setTimeout(() => {
-
-			syncDbVersionIPC()
-		}, 10000);
+		syncDbVersionIPC()
 
 		getNewDbChangesProgress()
 

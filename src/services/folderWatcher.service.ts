@@ -2,11 +2,8 @@ import { FSWatcher, watch } from 'chokidar'
 import { createData, getCollection } from './loki.service'
 
 import { Worker } from 'worker_threads'
-
-import { getAacTags } from '../formats/aac.format'
-import { getFlacTags } from '../formats/flac.format'
-import { getMp3Tags } from '../formats/mp3.format'
-import { SongType } from '../types/song.type'
+import { getWorkers } from './worker.service'
+import { OptionsType } from '../types/options.type'
 
 let watcher: FSWatcher
 
@@ -22,36 +19,7 @@ let filesFound: string[] = []
 
 export let maxTaskQueueLength: number = 0
 
-let watchTaskQueueInterval: NodeJS.Timeout
-
-const worker = new Worker('./electron-app/workers/folderScan.worker.js')
-
-worker.on('message', (songData) => {
-	createData(songData).then(() => processTaskQueue())
-})
-
-function processTaskQueue() {
-	let task = taskQueue.shift()
-
-	// console.log(maxTaskQueueLength, taskQueue.length, (100 / maxTaskQueueLength) * taskQueue.length)
-
-	if (task) {
-		clearInterval(watchTaskQueueInterval)
-		if (taskQueue.length > maxTaskQueueLength) {
-			maxTaskQueueLength = taskQueue.length
-		}
-
-		let { type, path } = task
-
-		if (type === 'add') {
-			worker.postMessage(path)
-		}
-	} else {
-		clearInterval(watchTaskQueueInterval)
-
-		watchTaskQueueInterval = setInterval(() => processTaskQueue(), 2000)
-	}
-}
+let workerSongData = getWorkers().filter((worker) => worker.type === 'SongData')
 
 export function getMaxTaskQueueLength() {
 	return maxTaskQueueLength
@@ -60,20 +28,6 @@ export function getMaxTaskQueueLength() {
 export function getTaskQueueLength() {
 	return taskQueue.length
 }
-
-// function getSongTags(path: string): Promise<SongType> {
-// 	return new Promise((resolve, reject) => {
-// 		let extension = path.split('.').pop() || undefined
-
-// 		if (extension === 'm4a') {
-// 			getAacTags(path).then((data) => resolve(data))
-// 		} else if (extension === 'flac') {
-// 			getFlacTags(path).then((data) => resolve(data))
-// 		} else if (extension === 'mp3') {
-// 			getMp3Tags(path).then((data) => resolve(data))
-// 		}
-// 	})
-// }
 
 export function watchFolders(rootDirectories: string[]) {
 	watcher = watch(rootDirectories, {
@@ -87,9 +41,51 @@ export function watchFolders(rootDirectories: string[]) {
 
 		checkNewSongs()
 
-		watchTaskQueueInterval = setInterval(() => processTaskQueue(), 2000)
+		startWorkers()
+
 		console.log('ready')
 	})
+}
+
+function startWorkers() {
+	workerSongData.forEach((worker) => {
+		worker.worker.on('message', (options: OptionsType) => {
+			if (options.task === 'Not Tasks Left') {
+				setTimeout(() => {
+					processQueue(worker.worker)
+				}, 2000)
+			} else if (options.task === 'Get Song Data') {
+				createData(options.data).then(() => processQueue(worker.worker))
+			}
+		})
+
+		processQueue(worker.worker)
+	})
+}
+
+function processQueue(worker: Worker) {
+	let task = taskQueue.shift()
+
+	if (task) {
+		if (taskQueue.length > maxTaskQueueLength) {
+			maxTaskQueueLength = taskQueue.length
+		}
+
+		let { type, path } = task
+
+		if (type === 'add') {
+			worker.postMessage({
+				task: 'Get Song Data',
+				data: {
+					path
+				}
+			})
+		}
+	} else {
+		worker.postMessage({
+			task: 'Not Tasks Left'
+		})
+	}
 }
 
 function checkNewSongs() {
@@ -99,6 +95,7 @@ function checkNewSongs() {
 }
 
 function filterOutOldSongs(collection: any[]) {
+	//TODO Add worker myah
 	let file = filesFound.shift()
 
 	if (file) {
@@ -107,9 +104,6 @@ function filterOutOldSongs(collection: any[]) {
 		}
 
 		process.nextTick(() => filterOutOldSongs(collection))
-		// setTimeout(() => {
-
-		// }, 1)
 	}
 }
 
