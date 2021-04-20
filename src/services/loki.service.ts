@@ -13,19 +13,31 @@ import { AlbumType } from '../types/album.type'
 
 const ADAPTER = new LokiPartitioningAdapter(new LokiFsAdapter(), { paging: true, pageSize: 1 * 1024 * 1024 })
 
-let db: loki
+const DB_PATH = path.join(appDataPath(), '/db')
 
-let dbVersion = 0
+let db: loki
 
 let songMap: Map<String, AlbumType> = new Map<String, AlbumType>()
 
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve: any = undefined
 
+function getDBFileTimeStamp() {
+	let filePath = path.join(DB_PATH, 'jahmin.db')
+
+	if (fs.existsSync(filePath)) {
+		return fs.statSync(filePath).mtimeMs
+	} else {
+		return 0
+	}
+}
+
 export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<number> {
+	let dbFileTimeStamp = getDBFileTimeStamp()
+
 	// If the db version changed while going back and forth Main <-> Renderer
-	if (dbVersion > rendererDbVersion) {
-		return new Promise((resolve) => resolve(dbVersion))
+	if (dbFileTimeStamp > rendererDbVersion) {
+		return new Promise((resolve) => resolve(dbFileTimeStamp))
 	} else {
 		// If didn't change, wait for a change to happen.
 		return new Promise((resolve) => (dbVersionResolve = resolve))
@@ -34,8 +46,6 @@ export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<numbe
 
 export function loadDb(): Promise<void> {
 	return new Promise((resolve) => {
-		const DB_PATH = path.join(appDataPath(), '/db')
-
 		if (!fs.existsSync(DB_PATH)) {
 			fs.mkdirSync(DB_PATH, { recursive: true })
 			fs.writeFile(
@@ -55,9 +65,10 @@ export function loadDb(): Promise<void> {
 				})
 			},
 			autosave: true,
-			autosaveInterval: 10000,
+			autosaveInterval: 60000,
 			autosaveCallback: () => {
 				mapCollection()
+				dbVersionResolve(getDBFileTimeStamp())
 			}
 		})
 	})
@@ -94,14 +105,6 @@ function mapCollection() {
 	})
 }
 
-export function setDbVersion(newDbVersion: number) {
-	dbVersion = newDbVersion
-}
-
-export function getDbVersion() {
-	return dbVersion
-}
-
 export function getCollection() {
 	const COLLECTION = db.getCollection('music').find()
 	return COLLECTION
@@ -110,7 +113,6 @@ export function getCollection() {
 export function createData(newDoc: SongType) {
 	return new Promise((resolve, reject) => {
 		try {
-
 			const COLLECTION = db.getCollection('music')
 
 			if (!COLLECTION) throw new Error(`Collection music not created/available.`)
@@ -121,9 +123,6 @@ export function createData(newDoc: SongType) {
 				resolve(updateData({ $loki: oldDoc['$loki'] }, newDoc))
 			} else {
 				resolve(COLLECTION.insert(newDoc))
-				if (dbVersionResolve) {
-					dbVersionResolve(++dbVersion)
-				}
 			}
 		} catch (error) {
 			handleErrors(error)
@@ -170,9 +169,6 @@ export function updateData(query: any, newData: object) {
 			doc = deepmerge(doc, newData)
 
 			resolve(COLLECTION.update(doc))
-			if (dbVersionResolve) {
-				dbVersionResolve(++dbVersion)
-			}
 		} catch (error) {
 			handleErrors(error)
 			return null
@@ -191,9 +187,6 @@ export function deleteData(query: any) {
 		const DOC = COLLECTION.find(query)[0]
 
 		resolve(COLLECTION.remove(DOC))
-		if (dbVersionResolve) {
-			dbVersionResolve(++dbVersion)
-		}
 	})
 }
 

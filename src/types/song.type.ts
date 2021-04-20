@@ -13,7 +13,7 @@ export type SongType = {
 	Date_Year?: number | undefined // Modifiable
 	Date_Month?: number | undefined // Modifiable
 	Date_Day?: number | undefined // Modifiable
-	SourceFile?: string
+	SourceFile: string
 	Extension?: string
 	Size?: number
 	Duration?: number

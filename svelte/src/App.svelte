@@ -18,7 +18,7 @@
 	onMount(() => {
 		syncDbVersionIPC()
 
-		getNewDbChangesProgress()
+		// getNewDbChangesProgress()
 
 		window.onkeydown = function (e) {
 			return !(e.code == 'Space' && e.target == document.body)

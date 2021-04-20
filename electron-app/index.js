@@ -25,7 +25,7 @@ ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");
 const folderWatcher_service_1 = require("./services/folderWatcher.service");
 const getWaveform_fn_1 = require("./functions/getWaveform.fn");
-function createWindow() {
+function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = config_service_1.getConfig();
         yield loki_service_1.loadDb();
@@ -90,7 +90,7 @@ electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) 
     //@ts-expect-error
     menu.popup(electron_1.BrowserWindow.fromWebContents(event.sender));
 });
-electron_1.app.whenReady().then(createWindow);
+electron_1.app.whenReady().then(createMainWindow);
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();
@@ -98,6 +98,7 @@ electron_1.app.on('window-all-closed', () => {
 });
 electron_1.app.on('before-quit', () => {
     var _a, _b;
+    worker_service_1.killAllWorkers();
     (_a = folderWatcher_service_1.getRootDirFolderWatcher()) === null || _a === void 0 ? void 0 : _a.close();
     (_b = getWaveform_fn_1.getWaveformsFolderWatcher()) === null || _b === void 0 ? void 0 : _b.close();
 });
@@ -106,7 +107,7 @@ electron_1.app.on('before-quit', () => {
 electron_1.app.on('activate', () => {
     // console.log(app.getPath('appData'))
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        createMainWindow();
     }
 });
 let saveConfigDebounce;

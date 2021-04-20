@@ -3,6 +3,7 @@
 	import { getWaveformIPC } from '../service/ipc.service'
 	import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
+	import { createWaveFormElement, setWaveSource } from '../service/waveform.service'
 
 	export let player: HTMLAudioElement
 	export let song: SongType
@@ -29,25 +30,21 @@
 		let song = $playbackStore?.[index]
 
 		// Fade Out
-		progressBackgroundEl.style.opacity = '0'
+		document.documentElement.style.setProperty('--waveform-opacity', '0')
 
-		getWaveformIPC(song.SourceFile).then((waveformUrl) => {
+		setWaveSource(song.SourceFile).then(() => {
 			let currentSongPlaying = $playbackStore[$playbackCursor[0]]
 
-			/* If the song and the actual playing song ID match, it shows the waveform.
-				Prevents multiple waveforms to be shown back to back and makes sure the proper waveform is for the proper playing song.*/
-
-			if (currentSongPlaying.ID === song.ID) {
-				// Timeout used to Fade In AFTER the css Fade Out
-				setTimeout(() => {
-					progressBackgroundEl.src = waveformUrl
-					progressBackgroundEl.style.opacity = '1'
-				}, 250)
-			}
+			setTimeout(() => {
+				if (currentSongPlaying.ID === song.ID) {
+					document.documentElement.style.setProperty('--waveform-opacity', '1')
+				}
+			}, 250)
 		})
 	}
 
 	onMount(() => {
+		createWaveFormElement('#waveform-image')
 		hookPlayerProgressEvents()
 		progressBackgroundEl = document.querySelector('img#waveform-image')
 	})
@@ -94,7 +91,8 @@
 
 <player-progress>
 	<progress-foreground />
-	<img id="waveform-image" src="" alt="" />
+	<div id="waveform-image" />
+	<!-- <img id="waveform-image" src="" alt="" /> -->
 </player-progress>
 
 <style>
@@ -125,8 +123,8 @@
 	player-progress #waveform-image {
 		z-index: 0;
 		width: 100%;
-		opacity: 0;
-		backdrop-filter: blur(0px);
+		opacity: var(--waveform-opacity);
+		/* backdrop-filter: blur(0px); */
 		transition: opacity 250ms linear;
 	}
 </style>

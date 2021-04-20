@@ -1,6 +1,5 @@
 import { ExifTool } from 'exiftool-vendored'
 const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
-import { DateTime } from 'luxon'
 import fs from 'fs'
 import stringHash from 'string-hash'
 import { SongType } from '../types/song.type'
@@ -23,6 +22,7 @@ function writeAacTags(filePath: string, newTags: any) {
 }
 
 export function getAacTags(filePath: string): Promise<SongType> {
+
 	return new Promise((resolve, reject) => {
 		exiftool.read(filePath).then((tags) => {
 			fs.stat(filePath, (err, fileStats) => {

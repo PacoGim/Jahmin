@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getDbVersion = exports.setDbVersion = exports.getCollectionMap = exports.loadDb = exports.getNewPromiseDbVersion = void 0;
+exports.deleteData = exports.updateData = exports.readData = exports.readDataById = exports.createData = exports.getCollection = exports.getCollectionMap = exports.loadDb = exports.getNewPromiseDbVersion = void 0;
 const lokijs_1 = __importDefault(require("lokijs"));
 const lokijs_2 = require("lokijs");
 const path_1 = __importDefault(require("path"));
@@ -12,15 +12,25 @@ const deepmerge_1 = __importDefault(require("deepmerge"));
 const index_1 = require("../index");
 const hashString_fn_1 = require("../functions/hashString.fn");
 const ADAPTER = new lokijs_2.LokiPartitioningAdapter(new lokijs_2.LokiFsAdapter(), { paging: true, pageSize: 1 * 1024 * 1024 });
+const DB_PATH = path_1.default.join(index_1.appDataPath(), '/db');
 let db;
-let dbVersion = 0;
 let songMap = new Map();
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve = undefined;
+function getDBFileTimeStamp() {
+    let filePath = path_1.default.join(DB_PATH, 'jahmin.db');
+    if (fs_1.default.existsSync(filePath)) {
+        return fs_1.default.statSync(filePath).mtimeMs;
+    }
+    else {
+        return 0;
+    }
+}
 function getNewPromiseDbVersion(rendererDbVersion) {
+    let dbFileTimeStamp = getDBFileTimeStamp();
     // If the db version changed while going back and forth Main <-> Renderer
-    if (dbVersion > rendererDbVersion) {
-        return new Promise((resolve) => resolve(dbVersion));
+    if (dbFileTimeStamp > rendererDbVersion) {
+        return new Promise((resolve) => resolve(dbFileTimeStamp));
     }
     else {
         // If didn't change, wait for a change to happen.
@@ -30,7 +40,6 @@ function getNewPromiseDbVersion(rendererDbVersion) {
 exports.getNewPromiseDbVersion = getNewPromiseDbVersion;
 function loadDb() {
     return new Promise((resolve) => {
-        const DB_PATH = path_1.default.join(index_1.appDataPath(), '/db');
         if (!fs_1.default.existsSync(DB_PATH)) {
             fs_1.default.mkdirSync(DB_PATH, { recursive: true });
             fs_1.default.writeFile(path_1.default.join(DB_PATH, 'DO_NOT_EDIT_FILES.txt'), 'If you did then delete this folder content and re-scan folders.', () => { });
@@ -45,9 +54,10 @@ function loadDb() {
                 });
             },
             autosave: true,
-            autosaveInterval: 10000,
+            autosaveInterval: 60000,
             autosaveCallback: () => {
                 mapCollection();
+                dbVersionResolve(getDBFileTimeStamp());
             }
         });
     });
@@ -80,14 +90,6 @@ function mapCollection() {
         }
     });
 }
-function setDbVersion(newDbVersion) {
-    dbVersion = newDbVersion;
-}
-exports.setDbVersion = setDbVersion;
-function getDbVersion() {
-    return dbVersion;
-}
-exports.getDbVersion = getDbVersion;
 function getCollection() {
     const COLLECTION = db.getCollection('music').find();
     return COLLECTION;
@@ -105,9 +107,6 @@ function createData(newDoc) {
             }
             else {
                 resolve(COLLECTION.insert(newDoc));
-                if (dbVersionResolve) {
-                    dbVersionResolve(++dbVersion);
-                }
             }
         }
         catch (error) {
@@ -152,9 +151,6 @@ function updateData(query, newData) {
             let doc = COLLECTION.find(query)[0];
             doc = deepmerge_1.default(doc, newData);
             resolve(COLLECTION.update(doc));
-            if (dbVersionResolve) {
-                dbVersionResolve(++dbVersion);
-            }
         }
         catch (error) {
             handleErrors(error);
@@ -171,9 +167,6 @@ function deleteData(query) {
             throw new Error(`Collection ${'music'} not created/available.`);
         const DOC = COLLECTION.find(query)[0];
         resolve(COLLECTION.remove(DOC));
-        if (dbVersionResolve) {
-            dbVersionResolve(++dbVersion);
-        }
     });
 }
 exports.deleteData = deleteData;

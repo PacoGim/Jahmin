@@ -7,7 +7,13 @@ import { SongType } from '../types/song.type'
 
 parentPort?.on('message', (options: OptionsType) => {
 	if (options.task === 'Get Song Data') {
+
+		// console.time(options.data.path)
+
 		getSongTags(options.data.path).then((data) => {
+
+			// console.timeEnd(options.data.path)
+
 			parentPort?.postMessage({
 				task: options.task,
 				data

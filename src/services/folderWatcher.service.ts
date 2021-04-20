@@ -2,7 +2,7 @@ import { FSWatcher, watch } from 'chokidar'
 import { createData, getCollection } from './loki.service'
 
 import { Worker } from 'worker_threads'
-import { getWorkers } from './worker.service'
+import { getSongDataWorkers, getSongFilterWorker } from './worker.service'
 import { OptionsType } from '../types/options.type'
 
 let watcher: FSWatcher
@@ -19,7 +19,7 @@ let filesFound: string[] = []
 
 export let maxTaskQueueLength: number = 0
 
-let workerSongData = getWorkers().filter((worker) => worker.type === 'SongData')
+let workerSongData = getSongDataWorkers()
 
 export function getMaxTaskQueueLength() {
 	return maxTaskQueueLength
@@ -48,18 +48,24 @@ export function watchFolders(rootDirectories: string[]) {
 }
 
 function startWorkers() {
-	workerSongData.forEach((worker) => {
-		worker.worker.on('message', (options: OptionsType) => {
-			if (options.task === 'Not Tasks Left') {
-				setTimeout(() => {
-					processQueue(worker.worker)
-				}, 2000)
-			} else if (options.task === 'Get Song Data') {
-				createData(options.data).then(() => processQueue(worker.worker))
-			}
-		})
+	workerSongData.forEach((worker, index) => {
+		setTimeout(() => {
+			console.log(index, 10000 * index)
 
-		processQueue(worker.worker)
+			worker.on('message', (options: OptionsType) => {
+				if (options.task === 'Not Tasks Left') {
+					setTimeout(() => {
+						processQueue(worker)
+					}, 2000)
+				} else if (options.task === 'Get Song Data') {
+					createData(options.data).then(() => {
+						processQueue(worker)
+					})
+				}
+			})
+
+			processQueue(worker)
+		}, 10000 * index)
 	})
 }
 
@@ -91,20 +97,16 @@ function processQueue(worker: Worker) {
 function checkNewSongs() {
 	let collection = getCollection().map((song) => song.SourceFile)
 
-	filterOutOldSongs(collection)
-}
+	let worker = getSongFilterWorker()
 
-function filterOutOldSongs(collection: any[]) {
-	//TODO Add worker myah
-	let file = filesFound.shift()
+	worker.on('message', (data: string[]) => {
+		data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'add')))
+	})
 
-	if (file) {
-		if (collection.indexOf(file) === -1) {
-			addToTaskQueue(file, 'add')
-		}
-
-		process.nextTick(() => filterOutOldSongs(collection))
-	}
+	worker.postMessage({
+		dbSongs: collection,
+		foundSongs: filesFound
+	})
 }
 
 function addToTaskQueue(path: string, type: string) {

@@ -24,29 +24,6 @@ const groupSong_fn_1 = require("../functions/groupSong.fn");
 const folderWatcher_service_1 = require("./folderWatcher.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
-    electron_1.ipcMain.handle('get-all-albums', () => __awaiter(this, void 0, void 0, function* () {
-        let mapCollection = loki_service_1.getCollectionMap();
-        return mapCollection;
-        // let docs = getCollection()
-        // let groupedSongs: any[] = []
-        // docs.forEach((doc) => {
-        // 	let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/')
-        // 	let folderName = rootDir.split('/').slice(-1)[0]
-        // 	let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
-        // 	if (!foundAlbum) {
-        // 		groupedSongs.push({
-        // 			Name: folderName,
-        // 			ID: hash(rootDir),
-        // 			RootDir: rootDir,
-        // 			FolderName: folderName,
-        // 			Songs: [doc]
-        // 		})
-        // 	} else {
-        // 		foundAlbum['Songs'].push(doc)
-        // 	}
-        // })
-        // return groupedSongs
-    }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();
         let grouping = config['order']['grouping'] || [];
@@ -74,21 +51,23 @@ function loadIPC() {
         return;
     });
     electron_1.ipcMain.handle('get-albums', (evt, groupBy, groupByValue) => __awaiter(this, void 0, void 0, function* () {
-        let docs = loki_service_1.getCollection();
+        let docs = loki_service_1.getCollectionMap();
         let groupedSongs = [];
         docs.forEach((doc) => {
-            if (doc[groupBy] === groupByValue) {
-                let rootDir = doc['SourceFile'].split('/').slice(0, -1).join('/');
-                let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
-                if (!foundAlbum) {
-                    groupedSongs.push({
-                        ID: hashString_fn_1.hash(rootDir),
-                        RootDir: rootDir,
-                        AlbumArtist: doc.AlbumArtist,
-                        Name: doc.Album
-                    });
+            doc.Songs.forEach((song) => {
+                if (song[groupBy] === groupByValue) {
+                    let rootDir = song.SourceFile.split('/').slice(0, -1).join('/');
+                    let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
+                    if (!foundAlbum) {
+                        groupedSongs.push({
+                            ID: hashString_fn_1.hash(rootDir),
+                            RootDir: rootDir,
+                            AlbumArtist: song.AlbumArtist,
+                            Name: song.Album
+                        });
+                    }
                 }
-            }
+            });
         });
         return groupedSongs;
     }));
@@ -100,10 +79,6 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('get-album-colors', (evt, imageId) => __awaiter(this, void 0, void 0, function* () {
         return yield getAlbumColors_fn_1.getAlbumColors(imageId);
-    }));
-    electron_1.ipcMain.handle('get-database-version', (evt) => __awaiter(this, void 0, void 0, function* () {
-        let version = loki_service_1.getDbVersion();
-        return version;
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
         return yield loki_service_1.getNewPromiseDbVersion(value);

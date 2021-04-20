@@ -155,20 +155,16 @@ export function showContextMenuIPC(menuToOpen, parameters) {
 // }
 
 export function syncDbVersionIPC() {
-	return new Promise((resolve) => {
-		let storeDbVersion = undefined
+	let storeDbVersion = undefined
 
-		dbVersion.subscribe((value) => (storeDbVersion = value))()
+	dbVersion.subscribe((value) => (storeDbVersion = value))()
 
-		// Waits for the version to change in main.
-		ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
-			dbVersion.set(result)
+	// Waits for the version to change in main.
+	ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
+		dbVersion.set(result)
 
-			resolve(result)
+		console.log(result)
 
-			setTimeout(() => {
-				syncDbVersionIPC()
-			}, 1000)
-		})
+		syncDbVersionIPC()
 	})
 }

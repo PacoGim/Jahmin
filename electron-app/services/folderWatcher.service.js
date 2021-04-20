@@ -13,7 +13,7 @@ exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 exports.taskQueue = [];
 let filesFound = [];
 exports.maxTaskQueueLength = 0;
-let workerSongData = worker_service_1.getWorkers().filter((worker) => worker.type === 'SongData');
+let workerSongData = worker_service_1.getSongDataWorkers();
 function getMaxTaskQueueLength() {
     return exports.maxTaskQueueLength;
 }
@@ -36,18 +36,23 @@ function watchFolders(rootDirectories) {
 }
 exports.watchFolders = watchFolders;
 function startWorkers() {
-    workerSongData.forEach((worker) => {
-        worker.worker.on('message', (options) => {
-            if (options.task === 'Not Tasks Left') {
-                setTimeout(() => {
-                    processQueue(worker.worker);
-                }, 2000);
-            }
-            else if (options.task === 'Get Song Data') {
-                loki_service_1.createData(options.data).then(() => processQueue(worker.worker));
-            }
-        });
-        processQueue(worker.worker);
+    workerSongData.forEach((worker, index) => {
+        setTimeout(() => {
+            console.log(index, 10000 * index);
+            worker.on('message', (options) => {
+                if (options.task === 'Not Tasks Left') {
+                    setTimeout(() => {
+                        processQueue(worker);
+                    }, 2000);
+                }
+                else if (options.task === 'Get Song Data') {
+                    loki_service_1.createData(options.data).then(() => {
+                        processQueue(worker);
+                    });
+                }
+            });
+            processQueue(worker);
+        }, 10000 * index);
     });
 }
 function processQueue(worker) {
@@ -74,17 +79,14 @@ function processQueue(worker) {
 }
 function checkNewSongs() {
     let collection = loki_service_1.getCollection().map((song) => song.SourceFile);
-    filterOutOldSongs(collection);
-}
-function filterOutOldSongs(collection) {
-    //TODO Add worker myah
-    let file = filesFound.shift();
-    if (file) {
-        if (collection.indexOf(file) === -1) {
-            addToTaskQueue(file, 'add');
-        }
-        process.nextTick(() => filterOutOldSongs(collection));
-    }
+    let worker = worker_service_1.getSongFilterWorker();
+    worker.on('message', (data) => {
+        data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'add')));
+    });
+    worker.postMessage({
+        dbSongs: collection,
+        foundSongs: filesFound
+    });
 }
 function addToTaskQueue(path, type) {
     exports.taskQueue.push({

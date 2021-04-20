@@ -24,6 +24,8 @@
 	--button-size: 1.25rem;
 
 	--art-grid-gap: 1rem;
+
+	--waveform-opacity: 0;
 }
 
 html {
@@ -38,6 +40,10 @@ body {
 	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' 400;
 }
+
+/* wave{
+	height: 64px !important;
+} */
 
 *::-webkit-scrollbar {
 	width: 6px; /* width of the entire scrollbar */

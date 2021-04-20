@@ -5,7 +5,7 @@ export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
 
 import { getConfig, saveConfig } from './services/config.service'
 
-import { initWorkers } from './services/worker.service'
+import { initWorkers, killAllWorkers } from './services/worker.service'
 initWorkers()
 
 import { loadIPC } from './services/ipc.service'
@@ -16,7 +16,7 @@ import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.
 import { ConfigType } from './types/config.type'
 import { getWaveformsFolderWatcher } from './functions/getWaveform.fn'
 
-async function createWindow() {
+async function createMainWindow() {
 	const config = getConfig()
 
 	await loadDb()
@@ -96,7 +96,7 @@ ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
 	menu.popup(BrowserWindow.fromWebContents(event.sender))
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(createMainWindow)
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
@@ -105,6 +105,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', () => {
+	killAllWorkers()
 	getRootDirFolderWatcher()?.close()
 	getWaveformsFolderWatcher()?.close()
 })
@@ -116,7 +117,7 @@ app.on('before-quit', () => {
 app.on('activate', () => {
 	// console.log(app.getPath('appData'))
 	if (BrowserWindow.getAllWindows().length === 0) {
-		createWindow()
+		createMainWindow()
 	}
 })
 
