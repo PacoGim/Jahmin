@@ -26,6 +26,8 @@
 	--art-grid-gap: 1rem;
 
 	--waveform-opacity: 0;
+
+	--progress-bar-fill: 50%;
 }
 
 html {
