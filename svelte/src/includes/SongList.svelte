@@ -29,11 +29,9 @@
 	}
 
 	function trimSongsArray() {
-		if ($songListStore.length - (scrollTime + 1) < SONG_AMOUNT) {
-			songsTrimmed = $songListStore.slice($songListStore.length - SONG_AMOUNT)
-		} else if (scrollTime >= 0) {
-			songsTrimmed = $songListStore.slice(scrollTime, -1).slice(0, SONG_AMOUNT)
-		}
+		// 1º Slice: Slice array from scrollTime to end. Cuts from array songs already scrolled.
+		// 2º Slice: Keep songs from 0 to the set amount.
+		songsTrimmed = $songListStore.slice(scrollTime).slice(0, SONG_AMOUNT)
 
 		setProgress()
 	}
@@ -79,15 +77,16 @@
 	function scrollContainer(e: WheelEvent) {
 		scrollTime = scrollTime + Math.sign(e.deltaY)
 
-		if (scrollTime >= $songListStore.length) {
-			scrollTime = $songListStore.length
+		// Stops scrolling beyond arrays end and always keeps one element visible.
+		if (scrollTime >= $songListStore.length - 1) {
+			scrollTime = $songListStore.length - 1
 		} else if (scrollTime < 0) {
 			scrollTime = 0
 		}
 	}
 
 	function setProgress() {
-		progressValue = ((100 / $songListStore.length) * scrollTime) | 0
+		progressValue = ((100 / ($songListStore.length - 1)) * scrollTime) | 0
 		document.documentElement.style.setProperty('--progress-bar-fill', `${progressValue}%`)
 	}
 
@@ -95,11 +94,50 @@
 		console.log(e)
 	}
 
-	onMount(() => {
-		let songListProgressBar = document.querySelector('song-list-progress-bar')
+	let isMouseDown = false
+	let isMouseIn = false
 
-		//TODO Add Event listeners MouseOver + MouseDown
+	onMount(() => {
+		let songListProgressBar: HTMLDivElement = document.querySelector('song-list-progress-bar')
+
+		/*
+		document.addEventListener('mousemove', (evt: MouseEvent) => {
+			if (isMouseDown) {
+
+				console.log(evt.clientY)
+			}
+		})
+		*/
+
+		songListProgressBar.addEventListener('mouseenter', () => (isMouseIn = true))
+
+		songListProgressBar.addEventListener('mouseleave', () => {
+			isMouseIn = false
+
+			// Resets also mouse down if the user leaves the area while holding the mouse down then comes back with mouse up the event would still trigger.
+			isMouseDown = false
+		})
+
+		songListProgressBar.addEventListener('mousedown', () => (isMouseDown = true))
+
+		songListProgressBar.addEventListener('mouseup', () => (isMouseDown = false))
+
+		songListProgressBar.addEventListener('mousemove', (evt) => {
+			if (isMouseDown && isMouseIn) setScrollTime(songListProgressBar, evt)
+		})
+
+		songListProgressBar.addEventListener('click', (evt) => setScrollTime(songListProgressBar, evt))
+
+		//TODO Song Playback by ID not index
+		//TODO Waveform poping and also add pcm saving
 	})
+
+	function setScrollTime(songListProgressBar: HTMLDivElement, e: MouseEvent) {
+		console.log(e.clientX)
+
+		let percentClick = (100 / songListProgressBar.clientHeight) * e.offsetY
+		scrollTime = ($songListStore.length / 100) * percentClick
+	}
 </script>
 
 <song-list-svlt on:mousewheel={(e) => scrollContainer(e)} on:click={(e) => selectSongs(e)}>
@@ -125,14 +163,14 @@
 	song-list {
 		display: flex;
 		flex-direction: column;
-		justify-content: space-evenly;
+		/* justify-content: space-evenly; */
 		padding: 0.5rem;
 	}
 
 	song-list-progress-bar {
 		cursor: pointer;
 		display: block;
-		width: 10px;
+		width: 1rem;
 		background-color: rgba(255, 255, 255, 0.15);
 	}
 

@@ -46,7 +46,8 @@
 		: ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
-	<song-number>{song.Track}</song-number>
+	<!-- <song-number>{song.Track}</song-number> -->
+	<song-number>{index} - {song.Track}</song-number>
 	<song-title>{song.Title}</song-title>
 	<Star on:starChange={setStar} songRating={song.Rating} />
 	<song-duration>{parseDuration(song.Duration)}</song-duration>

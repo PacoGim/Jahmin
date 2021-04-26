@@ -7,7 +7,13 @@ export function createWaveFormElement(hook: string) {
 		container: '#waveform-image',
 		waveColor: 'transparent',
 		cursorColor: 'transparent',
-    progressColor:'transparent'
+		progressColor: 'transparent',
+		normalize: true,
+		responsive:true,
+		hideScrollbar:true,
+		barWidth:1,
+		barGap:0,
+		barMinHeight:1
 	})
 
 	waveSurfer.setHeight(64)
@@ -15,9 +21,12 @@ export function createWaveFormElement(hook: string) {
 
 export function setWaveSource(source: string) {
 	return new Promise((resolve, reject) => {
+		console.time(source)
+
 		waveSurfer.load(source)
 
 		waveSurfer.on('ready', () => {
+			console.timeEnd(source)
 			resolve('')
 
 			waveSurfer.unAll()

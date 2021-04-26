@@ -2083,7 +2083,7 @@ var app = (function () {
             var peakIndexScale = hasMinVals ? 2 : 1;
             var length = peaks.length / peakIndexScale;
             var bar = _this4.params.barWidth * _this4.params.pixelRatio;
-            var gap = _this4.params.barGap === null ? Math.max(_this4.params.pixelRatio, ~~(bar / 2)) : Math.max(_this4.params.pixelRatio, _this4.params.barGap * _this4.params.pixelRatio);
+            var gap = 0;
             var step = bar + gap;
             var scale = length / _this4.width;
             var first = start;
@@ -6744,8 +6744,8 @@ var app = (function () {
      * Returns a function, that, as long as it continues to be invoked, will not
      * be triggered. The function will be called after it stops being called for
      * N milliseconds. If `immediate` is passed, trigger the function on the
-     * leading edge, instead of the trailing. The function also has a property 'clear' 
-     * that is a function which will clear the timer to prevent previously scheduled executions. 
+     * leading edge, instead of the trailing. The function also has a property 'clear'
+     * that is a function which will clear the timer to prevent previously scheduled executions.
      *
      * @source underscore.js
      * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
@@ -6791,12 +6791,12 @@ var app = (function () {
           timeout = null;
         }
       };
-      
+
       debounced.flush = function() {
         if (timeout) {
           result = func.apply(context, args);
           context = args = null;
-          
+
           clearTimeout(timeout);
           timeout = null;
         }
@@ -6816,7 +6816,7 @@ var app = (function () {
     /************************************************************************/
     /******/ 	// The module cache
     /******/ 	var __webpack_module_cache__ = {};
-    /******/ 	
+    /******/
     /******/ 	// The require function
     /******/ 	function __webpack_require__(moduleId) {
     /******/ 		// Check if module is in cache
@@ -6829,21 +6829,21 @@ var app = (function () {
     /******/ 			// no module.loaded needed
     /******/ 			exports: {}
     /******/ 		};
-    /******/ 	
+    /******/
     /******/ 		// Execute the module function
     /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-    /******/ 	
+    /******/
     /******/ 		// Return the exports of the module
     /******/ 		return module.exports;
     /******/ 	}
-    /******/ 	
+    /******/
     /************************************************************************/
-    /******/ 	
+    /******/
     /******/ 	// startup
     /******/ 	// Load entry module and return exports
     /******/ 	// This entry module is referenced by other modules so it can't be inlined
     /******/ 	var __webpack_exports__ = __webpack_require__("./src/wavesurfer.js");
-    /******/ 	
+    /******/
     /******/ 	return __webpack_exports__;
     /******/ })()
     ;
@@ -6857,14 +6857,22 @@ var app = (function () {
             container: '#waveform-image',
             waveColor: 'transparent',
             cursorColor: 'transparent',
-            progressColor: 'transparent'
+            progressColor: 'transparent',
+            normalize: true,
+            responsive: true,
+            hideScrollbar: true,
+            barWidth: 1,
+            barGap: 0,
+            barMinHeight: 1
         });
         waveSurfer.setHeight(64);
     }
     function setWaveSource(source) {
         return new Promise((resolve, reject) => {
+            console.time(source);
             waveSurfer.load(source);
             waveSurfer.on('ready', () => {
+                console.timeEnd(source);
                 resolve('');
                 waveSurfer.unAll();
             });
@@ -8847,12 +8855,12 @@ var app = (function () {
     			t = space();
     			div = element("div");
     			set_custom_element_data(progress_foreground, "class", "svelte-wg5vcx");
-    			add_location(progress_foreground, file$8, 79, 1, 3542);
+    			add_location(progress_foreground, file$8, 83, 1, 3738);
     			attr_dev(div, "id", "waveform-image");
     			attr_dev(div, "class", "svelte-wg5vcx");
-    			add_location(div, file$8, 80, 1, 3567);
+    			add_location(div, file$8, 84, 1, 3763);
     			set_custom_element_data(player_progress, "class", "svelte-wg5vcx");
-    			add_location(player_progress, file$8, 78, 0, 3523);
+    			add_location(player_progress, file$8, 82, 0, 3719);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8971,7 +8979,14 @@ var app = (function () {
     		let playerProgress = document.querySelector("player-progress");
     		let playerForeground = document.querySelector("player-progress progress-foreground");
     		playerProgress.addEventListener("mouseenter", () => isMouseIn = true);
-    		playerProgress.addEventListener("mouseleave", () => isMouseIn = false);
+
+    		playerProgress.addEventListener("mouseleave", () => {
+    			isMouseIn = false;
+
+    			// Resets also mouse down if the user leaves the area while holding the mouse down then comes back with mouse up the event would still trigger.
+    			isMouseDown = false;
+    		});
+
     		playerProgress.addEventListener("mousedown", () => isMouseDown = true);
     		playerProgress.addEventListener("mouseup", () => isMouseDown = false);
 
@@ -10012,18 +10027,20 @@ var app = (function () {
     function create_fragment$c(ctx) {
     	let song_list_item;
     	let song_number;
-    	let t0_value = /*song*/ ctx[0].Track + "";
     	let t0;
     	let t1;
-    	let song_title;
-    	let t2_value = /*song*/ ctx[0].Title + "";
+    	let t2_value = /*song*/ ctx[0].Track + "";
     	let t2;
     	let t3;
-    	let star;
+    	let song_title;
+    	let t4_value = /*song*/ ctx[0].Title + "";
     	let t4;
-    	let song_duration;
-    	let t5_value = parseDuration(/*song*/ ctx[0].Duration) + "";
     	let t5;
+    	let star;
+    	let t6;
+    	let song_duration;
+    	let t7_value = parseDuration(/*song*/ ctx[0].Duration) + "";
+    	let t7;
     	let song_list_item_id_value;
     	let song_list_item_class_value;
     	let current;
@@ -10039,21 +10056,23 @@ var app = (function () {
     		c: function create() {
     			song_list_item = element("song-list-item");
     			song_number = element("song-number");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			song_title = element("song-title");
+    			t0 = text(/*index*/ ctx[1]);
+    			t1 = text(" - ");
     			t2 = text(t2_value);
     			t3 = space();
+    			song_title = element("song-title");
+    			t4 = text(t4_value);
+    			t5 = space();
     			create_component(star.$$.fragment);
-    			t4 = space();
+    			t6 = space();
     			song_duration = element("song-duration");
-    			t5 = text(t5_value);
+    			t7 = text(t7_value);
     			set_custom_element_data(song_number, "class", "svelte-1fz4wap");
-    			add_location(song_number, file$c, 39, 1, 1189);
+    			add_location(song_number, file$c, 40, 1, 1239);
     			set_custom_element_data(song_title, "class", "svelte-1fz4wap");
-    			add_location(song_title, file$c, 40, 1, 1230);
+    			add_location(song_title, file$c, 41, 1, 1290);
     			set_custom_element_data(song_duration, "class", "svelte-1fz4wap");
-    			add_location(song_duration, file$c, 42, 1, 1328);
+    			add_location(song_duration, file$c, 43, 1, 1388);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0].ID);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
 
@@ -10072,23 +10091,26 @@ var app = (function () {
     			insert_dev(target, song_list_item, anchor);
     			append_dev(song_list_item, song_number);
     			append_dev(song_number, t0);
-    			append_dev(song_list_item, t1);
-    			append_dev(song_list_item, song_title);
-    			append_dev(song_title, t2);
+    			append_dev(song_number, t1);
+    			append_dev(song_number, t2);
     			append_dev(song_list_item, t3);
+    			append_dev(song_list_item, song_title);
+    			append_dev(song_title, t4);
+    			append_dev(song_list_item, t5);
     			mount_component(star, song_list_item, null);
-    			append_dev(song_list_item, t4);
+    			append_dev(song_list_item, t6);
     			append_dev(song_list_item, song_duration);
-    			append_dev(song_duration, t5);
+    			append_dev(song_duration, t7);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if ((!current || dirty & /*song*/ 1) && t0_value !== (t0_value = /*song*/ ctx[0].Track + "")) set_data_dev(t0, t0_value);
-    			if ((!current || dirty & /*song*/ 1) && t2_value !== (t2_value = /*song*/ ctx[0].Title + "")) set_data_dev(t2, t2_value);
+    			if (!current || dirty & /*index*/ 2) set_data_dev(t0, /*index*/ ctx[1]);
+    			if ((!current || dirty & /*song*/ 1) && t2_value !== (t2_value = /*song*/ ctx[0].Track + "")) set_data_dev(t2, t2_value);
+    			if ((!current || dirty & /*song*/ 1) && t4_value !== (t4_value = /*song*/ ctx[0].Title + "")) set_data_dev(t4, t4_value);
     			const star_changes = {};
     			if (dirty & /*song*/ 1) star_changes.songRating = /*song*/ ctx[0].Rating;
     			star.$set(star_changes);
-    			if ((!current || dirty & /*song*/ 1) && t5_value !== (t5_value = parseDuration(/*song*/ ctx[0].Duration) + "")) set_data_dev(t5, t5_value);
+    			if ((!current || dirty & /*song*/ 1) && t7_value !== (t7_value = parseDuration(/*song*/ ctx[0].Duration) + "")) set_data_dev(t7, t7_value);
 
     			if (!current || dirty & /*song*/ 1 && song_list_item_id_value !== (song_list_item_id_value = /*song*/ ctx[0].ID)) {
     				set_custom_element_data(song_list_item, "id", song_list_item_id_value);
@@ -10274,12 +10296,12 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[14] = list[i];
-    	child_ctx[16] = i;
+    	child_ctx[17] = list[i];
+    	child_ctx[19] = i;
     	return child_ctx;
     }
 
-    // (89:2) {#if $songListStore !== undefined}
+    // (116:2) {#if $songListStore !== undefined}
     function create_if_block$2(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -10287,7 +10309,7 @@ var app = (function () {
     	let current;
     	let each_value = /*songsTrimmed*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*song*/ ctx[14].ID;
+    	const get_key = ctx => /*song*/ ctx[17].ID;
     	validate_each_keys(ctx, each_value, get_each_context$2, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -10351,14 +10373,14 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(89:2) {#if $songListStore !== undefined}",
+    		source: "(116:2) {#if $songListStore !== undefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (90:3) {#each songsTrimmed as song, index (song.ID)}
+    // (117:3) {#each songsTrimmed as song, index (song.ID)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -10366,8 +10388,8 @@ var app = (function () {
 
     	songlistitem = new SongListItem({
     			props: {
-    				song: /*song*/ ctx[14],
-    				index: /*index*/ ctx[16]
+    				song: /*song*/ ctx[17],
+    				index: /*index*/ ctx[19]
     			},
     			$$inline: true
     		});
@@ -10387,8 +10409,8 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const songlistitem_changes = {};
-    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.song = /*song*/ ctx[14];
-    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.index = /*index*/ ctx[16];
+    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.song = /*song*/ ctx[17];
+    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.index = /*index*/ ctx[19];
     			songlistitem.$set(songlistitem_changes);
     		},
     		i: function intro(local) {
@@ -10410,7 +10432,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(90:3) {#each songsTrimmed as song, index (song.ID)}",
+    		source: "(117:3) {#each songsTrimmed as song, index (song.ID)}",
     		ctx
     	});
 
@@ -10436,14 +10458,14 @@ var app = (function () {
     			t = space();
     			song_list_progress_bar = element("song-list-progress-bar");
     			progress_fill = element("progress-fill");
-    			set_custom_element_data(song_list, "class", "svelte-12n4a92");
-    			add_location(song_list, file$d, 87, 1, 3121);
-    			set_custom_element_data(progress_fill, "class", "svelte-12n4a92");
-    			add_location(progress_fill, file$d, 95, 2, 3316);
-    			set_custom_element_data(song_list_progress_bar, "class", "svelte-12n4a92");
-    			add_location(song_list_progress_bar, file$d, 94, 1, 3289);
-    			set_custom_element_data(song_list_svlt, "class", "svelte-12n4a92");
-    			add_location(song_list_svlt, file$d, 86, 0, 3028);
+    			set_custom_element_data(song_list, "class", "svelte-3uczk6");
+    			add_location(song_list, file$d, 114, 1, 4420);
+    			set_custom_element_data(progress_fill, "class", "svelte-3uczk6");
+    			add_location(progress_fill, file$d, 122, 2, 4615);
+    			set_custom_element_data(song_list_progress_bar, "class", "svelte-3uczk6");
+    			add_location(song_list_progress_bar, file$d, 121, 1, 4588);
+    			set_custom_element_data(song_list_svlt, "class", "svelte-3uczk6");
+    			add_location(song_list_svlt, file$d, 113, 0, 4327);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10533,7 +10555,7 @@ var app = (function () {
     	validate_store(songListStore, "songListStore");
     	component_subscribe($$self, songListStore, $$value => $$invalidate(0, $songListStore = $$value));
     	validate_store(selectedSongsStore, "selectedSongsStore");
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(11, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(13, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongList", slots, []);
     	let isSelectedAlbumIdFirstAssign = true;
@@ -10542,11 +10564,9 @@ var app = (function () {
     	let progressValue = 0;
 
     	function trimSongsArray() {
-    		if ($songListStore.length - (scrollTime + 1) < SONG_AMOUNT) {
-    			$$invalidate(1, songsTrimmed = $songListStore.slice($songListStore.length - SONG_AMOUNT));
-    		} else if (scrollTime >= 0) {
-    			$$invalidate(1, songsTrimmed = $songListStore.slice(scrollTime, -1).slice(0, SONG_AMOUNT));
-    		}
+    		// 1º Slice: Slice array from scrollTime to end. Cuts from array songs already scrolled.
+    		// 2º Slice: Keep songs from 0 to the set amount.
+    		$$invalidate(1, songsTrimmed = $songListStore.slice(scrollTime).slice(0, SONG_AMOUNT));
 
     		setProgress();
     	}
@@ -10592,21 +10612,58 @@ var app = (function () {
     	function scrollContainer(e) {
     		$$invalidate(5, scrollTime = scrollTime + Math.sign(e.deltaY));
 
-    		if (scrollTime >= $songListStore.length) {
-    			$$invalidate(5, scrollTime = $songListStore.length);
+    		// Stops scrolling beyond arrays end and always keeps one element visible.
+    		if (scrollTime >= $songListStore.length - 1) {
+    			$$invalidate(5, scrollTime = $songListStore.length - 1);
     		} else if (scrollTime < 0) {
     			$$invalidate(5, scrollTime = 0);
     		}
     	}
 
     	function setProgress() {
-    		progressValue = 100 / $songListStore.length * scrollTime | 0;
+    		progressValue = 100 / ($songListStore.length - 1) * scrollTime | 0;
     		document.documentElement.style.setProperty("--progress-bar-fill", `${progressValue}%`);
     	}
 
+    	let isMouseDown = false;
+    	let isMouseIn = false;
+
     	onMount(() => {
     		let songListProgressBar = document.querySelector("song-list-progress-bar");
-    	}); //TODO Add Event listeners MouseOver + MouseDown
+
+    		/*
+    document.addEventListener('mousemove', (evt: MouseEvent) => {
+        if (isMouseDown) {
+
+            console.log(evt.clientY)
+        }
+    })
+    */
+    		songListProgressBar.addEventListener("mouseenter", () => isMouseIn = true);
+
+    		songListProgressBar.addEventListener("mouseleave", () => {
+    			isMouseIn = false;
+
+    			// Resets also mouse down if the user leaves the area while holding the mouse down then comes back with mouse up the event would still trigger.
+    			isMouseDown = false;
+    		});
+
+    		songListProgressBar.addEventListener("mousedown", () => isMouseDown = true);
+    		songListProgressBar.addEventListener("mouseup", () => isMouseDown = false);
+
+    		songListProgressBar.addEventListener("mousemove", evt => {
+    			if (isMouseDown && isMouseIn) setScrollTime(songListProgressBar, evt);
+    		});
+
+    		songListProgressBar.addEventListener("click", evt => setScrollTime(songListProgressBar, evt));
+    	}); //TODO Song Playback by ID not index
+    	//TODO Waveform poping and also add pcm saving
+
+    	function setScrollTime(songListProgressBar, e) {
+    		console.log(e.clientX);
+    		let percentClick = 100 / songListProgressBar.clientHeight * e.offsetY;
+    		$$invalidate(5, scrollTime = $songListStore.length / 100 * percentClick);
+    	}
 
     	const writable_props = [];
 
@@ -10635,6 +10692,9 @@ var app = (function () {
     		scrollContainer,
     		setProgress,
     		handleScrollBarEvent,
+    		isMouseDown,
+    		isMouseIn,
+    		setScrollTime,
     		$selectedAlbumId,
     		$songListStore,
     		$selectedSongsStore
@@ -10646,6 +10706,8 @@ var app = (function () {
     		if ("scrollTime" in $$props) $$invalidate(5, scrollTime = $$props.scrollTime);
     		if ("progressValue" in $$props) progressValue = $$props.progressValue;
     		if ("lastSelectedSong" in $$props) lastSelectedSong = $$props.lastSelectedSong;
+    		if ("isMouseDown" in $$props) isMouseDown = $$props.isMouseDown;
+    		if ("isMouseIn" in $$props) isMouseIn = $$props.isMouseIn;
     	};
 
     	if ($$props && "$$inject" in $$props) {

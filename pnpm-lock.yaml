@@ -41,6 +41,8 @@ specifiers:
   sharp: ^0.28.0
   string-hash: ^1.1.3
   typescript: ^4.1.5
+  wavesurfer-channel-selecter-plugin: ^1.0.5
+  wavesurfer-sum-to-mono-plugin: ^1.0.1
   wavesurfer.js: ^4.6.0
   web-audio-api: ^0.2.2
 
@@ -71,6 +73,8 @@ dependencies:
   node-id3: 0.2.2
   sharp: 0.28.0
   string-hash: 1.1.3
+  wavesurfer-channel-selecter-plugin: 1.0.5
+  wavesurfer-sum-to-mono-plugin: 1.0.1
   wavesurfer.js: 4.6.0
   web-audio-api: 0.2.2
 
@@ -362,6 +366,29 @@ packages:
     resolution: {integrity: sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=}
     dev: false
 
+  /audio-buffer-remix/1.0.3:
+    resolution: {integrity: sha1-cIQwDPyZJjd3mgrwY5S0uQ2uEOY=}
+    dependencies:
+      audio-buffer: 3.2.1
+      is-audio-buffer: 1.1.0
+      is-plain-obj: 1.1.0
+    dev: false
+
+  /audio-buffer/3.2.1:
+    resolution: {integrity: sha1-y/8sFXf7CvxckjKQLVQ7L5bdQz0=}
+    dependencies:
+      audio-context: 1.0.3
+      buffer-to-arraybuffer: 0.0.6
+      is-audio-buffer: 1.1.0
+      is-browser: 2.1.0
+      is-buffer: 1.1.6
+      is-plain-obj: 1.1.0
+    dev: false
+
+  /audio-context/1.0.3:
+    resolution: {integrity: sha512-RH3/rM74f2ITlohhjgC7oYZVS97wtv/SEjXLCzEinnrIPIDxc39m2aFc6wmdkM0NYRKo1DMleYPMAIbnTRW0eA==}
+    dev: false
+
   /audiobuffer/0.2.0:
     resolution: {integrity: sha1-fPLfMHAarBhDM+r56O47AYMMhho=}
     engines: {node: '>=0.10'}
@@ -505,6 +532,10 @@ packages:
   /buffer-from/1.1.1:
     resolution: {integrity: sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==}
     dev: true
+
+  /buffer-to-arraybuffer/0.0.6:
+    resolution: {integrity: sha512-i/ndmmCF5QC1D75QCO1EPwYRPIVRVs2yLwkl2bc8R5P1ORHGZZAbTwmYM/vpXt7KzCe+Y57E8YPGTJywgWBNRw==}
+    dev: false
 
   /buffer/5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
@@ -1792,11 +1823,23 @@ packages:
     resolution: {integrity: sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==}
     dev: false
 
+  /is-audio-buffer/1.1.0:
+    resolution: {integrity: sha512-fmPC/dizJmP4ITCsW5oTQGMJ9wZVE+A/zAe6FQo3XwgERxmXHmm3ON5XkWDAxmyxvsrDmWx3NArpSgamp/59AA==}
+    dev: false
+
   /is-binary-path/2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
     engines: {node: '>=8'}
     dependencies:
       binary-extensions: 2.2.0
+    dev: false
+
+  /is-browser/2.1.0:
+    resolution: {integrity: sha512-F5rTJxDQ2sW81fcfOR1GnCXT6sVJC104fCyfj+mjpwNEwaPYSn5fte5jiHmBg3DHsIoL/l8Kvw5VN5SsTRcRFQ==}
+    dev: false
+
+  /is-buffer/1.1.6:
+    resolution: {integrity: sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==}
     dev: false
 
   /is-core-module/2.2.0:
@@ -3465,6 +3508,16 @@ packages:
     dependencies:
       spdx-correct: 3.1.1
       spdx-expression-parse: 3.0.1
+
+  /wavesurfer-channel-selecter-plugin/1.0.5:
+    resolution: {integrity: sha512-DM+z+NPSGA+8oSA5cd37NB+p5nEqXkWieZ9Pp5cyw52KYP5k0YPf8cUiSpOmT5r5JLbIjn4pUbt5ohZsShTDdQ==}
+    dev: false
+
+  /wavesurfer-sum-to-mono-plugin/1.0.1:
+    resolution: {integrity: sha512-V1CFn4V7sgeH+qZHvRvWKkaAjC6BtGgTxtiTrmgTwSJl1owF8LjGORvsnjD4Bj6UKN1z91453xCiTgJagW3vdg==}
+    dependencies:
+      audio-buffer-remix: 1.0.3
+    dev: false
 
   /wavesurfer.js/4.6.0:
     resolution: {integrity: sha512-+nn6VD86pTtRu9leVNXoIGOCMJyaTNsKNy9v+SfUsYo+SxLCQvEzrZZ/eKMImqspsk+BX1V1xlY4FRkHswu3fA==}

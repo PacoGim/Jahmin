@@ -55,7 +55,12 @@
 
 		playerProgress.addEventListener('mouseenter', () => (isMouseIn = true))
 
-		playerProgress.addEventListener('mouseleave', () => (isMouseIn = false))
+		playerProgress.addEventListener('mouseleave', () => {
+			isMouseIn = false
+
+			// Resets also mouse down if the user leaves the area while holding the mouse down then comes back with mouse up the event would still trigger.
+			isMouseDown = false
+		})
 
 		playerProgress.addEventListener('mousedown', () => (isMouseDown = true))
 

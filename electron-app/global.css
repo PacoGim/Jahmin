@@ -12,6 +12,7 @@
 	box-sizing: border-box;
 	padding: 0;
 	margin: 0;
+	user-select: none;
 }
 
 :root {
@@ -42,10 +43,6 @@ body {
 	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' 400;
 }
-
-/* wave{
-	height: 64px !important;
-} */
 
 *::-webkit-scrollbar {
 	width: 6px; /* width of the entire scrollbar */
