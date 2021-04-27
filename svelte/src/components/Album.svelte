@@ -4,7 +4,6 @@
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	// import { playback, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
-	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
 	import { albumPlayingIdStore, selectedAlbumId } from '../store/final.store'
 	import CoverArt from './CoverArt.svelte'
 
@@ -24,26 +23,6 @@
 		}
 	})
 
-	function selectLastPlayedSong() {
-		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
-		// $selectedAlbumId = album
-
-		let lastPlayedSong = album['Songs'].find((i) => i['ID'] === Number(localStorage.getItem('LastPlayedSongID')))
-
-		if (lastPlayedSong) {
-			let lastPlayedSongID = lastPlayedSong['ID']
-
-			if (lastPlayedSongID) {
-				setTimeout(() => {
-					let $song = document.querySelector(`#${CSS.escape(String(lastPlayedSongID))}`)
-
-					if ($song) {
-						$song.scrollIntoView({ block: 'center' })
-					}
-				}, 100)
-			}
-		}
-	}
 
 	// function fetchAlbumCover() {
 	// 	getCoverIPC(album['RootDir']).then((result) => {
@@ -66,19 +45,6 @@
 	// 		{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
 	// 	).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['ID'])}`))
 	// }
-
-	// On Album Click/Double Click
-	async function prepareAlbum(evt: MouseEvent) {
-		scrollSongListToTop()
-
-		// Song Sorting
-		album['Songs'] = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
-		// $selectedAlbumId = album
-
-		if (evt['type'] === 'dblclick') {
-			// setNewPlayback(album['ID'], 0, true)
-		}
-	}
 
 	/*
 	on:dblclick={(evt) => prepareAlbum(evt)}

@@ -4,7 +4,20 @@ import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/fin
 // import { playback, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 
-export async function setNewPlayback(albumID: string, playbackSongs: SongType[], indexToPlay: number, playNow: boolean) {
+export async function setNewPlayback(
+	albumID: string,
+	playbackSongs: SongType[],
+	SONG_ID_TO_PLAY: number | undefined,
+	playNow: boolean
+) {
+	let indexToPlay = playbackSongs.findIndex((song) => song.ID === SONG_ID_TO_PLAY)
+
+	if (indexToPlay === -1) {
+		indexToPlay = 0
+	}
+
+	//TODO Sorting
+
 	albumPlayingIdStore.set(albumID)
 	playbackStore.set(playbackSongs)
 	playbackCursor.set([indexToPlay, playNow])

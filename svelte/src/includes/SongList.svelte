@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte'
 
 	import SongListItem from '../components/SongListItem.svelte'
-	import { scrollSongListToTop } from '../functions/scrollSongListToTop.fn'
 	import { selectedAlbumId, songListStore, selectedSongsStore } from '../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
@@ -10,14 +9,13 @@
 	let scrollTime = 0
 	let progressValue = 0
 
-	const SONG_AMOUNT = 8
+	const SONG_AMOUNT = 7
 
 	$: {
 		$selectedAlbumId
 		if (isSelectedAlbumIdFirstAssign) {
 			isSelectedAlbumIdFirstAssign = false
 		} else {
-			scrollSongListToTop()
 			scrollTime = 0
 		}
 	}
@@ -90,53 +88,89 @@
 		document.documentElement.style.setProperty('--progress-bar-fill', `${progressValue}%`)
 	}
 
-	function handleScrollBarEvent(e) {
-		console.log(e)
-	}
-
-	let isMouseDown = false
-	let isMouseIn = false
+	let isMouseDownInScroll = false
 
 	onMount(() => {
-		let songListProgressBar: HTMLDivElement = document.querySelector('song-list-progress-bar')
+		scrollBarHandler()
 
-		/*
-		document.addEventListener('mousemove', (evt: MouseEvent) => {
-			if (isMouseDown) {
+		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))
 
-				console.log(evt.clientY)
-			}
-		})
-		*/
-
-		songListProgressBar.addEventListener('mouseenter', () => (isMouseIn = true))
-
-		songListProgressBar.addEventListener('mouseleave', () => {
-			isMouseIn = false
-
-			// Resets also mouse down if the user leaves the area while holding the mouse down then comes back with mouse up the event would still trigger.
-			isMouseDown = false
-		})
-
-		songListProgressBar.addEventListener('mousedown', () => (isMouseDown = true))
-
-		songListProgressBar.addEventListener('mouseup', () => (isMouseDown = false))
-
-		songListProgressBar.addEventListener('mousemove', (evt) => {
-			if (isMouseDown && isMouseIn) setScrollTime(songListProgressBar, evt)
-		})
-
-		songListProgressBar.addEventListener('click', (evt) => setScrollTime(songListProgressBar, evt))
-
-		//TODO Song Playback by ID not index
-		//TODO Waveform poping and also add pcm saving
+		setTimeout(() => {
+			setScrollTimeFromSong(lastPlayedSongId)
+		}, 250)
 	})
 
-	function setScrollTime(songListProgressBar: HTMLDivElement, e: MouseEvent) {
-		console.log(e.clientX)
+	function setScrollTimeFromSong(lastPlayedSongId) {
+		let songIndex = $songListStore.findIndex((song) => song.ID === lastPlayedSongId)
+		let differenceAmount = Math.floor(SONG_AMOUNT / 2)
 
+		if (songIndex !== -1) {
+			if (songIndex < differenceAmount) {
+				scrollTime = 0
+			} else {
+				scrollTime = songIndex - differenceAmount
+			}
+		}
+	}
+
+	// Sets the proper scrollTime based of the percentage (in distance) of the bar clicked. 0% = top and 100% = bottom.
+	function setScrollTime(songListProgressBar: HTMLDivElement, e: MouseEvent) {
 		let percentClick = (100 / songListProgressBar.clientHeight) * e.offsetY
 		scrollTime = ($songListStore.length / 100) * percentClick
+	}
+
+	function isValidPath(event: Event, validPaths: string[]) {
+		return event
+			.composedPath() // Return back an array of all elements clicked.
+			.map((path: HTMLElement) => path.tagName) // Gives only the tag name of the elements.
+			.find((tag) => validPaths.includes(tag)) // If the tag name matches the array of valid values.
+	}
+
+	function scrollBarHandler() {
+		let songListProgressBar: HTMLDivElement = document.querySelector('song-list-progress-bar')
+
+		// Handles moving the cursor over the "scrollbar" then moving out of it so the "scrolling" does not stop abruptly.
+		document.addEventListener('mousemove', (e: MouseEvent) => {
+			// Checks if the other event triggered a mouse down on the "scrollbar".
+			if (isMouseDownInScroll) {
+				// Returns the position (top and height) on screen of the "scrollbar".
+				let { top, height } = songListProgressBar.getBoundingClientRect()
+
+				// Calculates the difference between the current cursor position on screen relative to the "scrollbar".
+				let difference = e.clientY - top
+
+				// Calculates the percentage of scroll.
+				// 0% and lower would mean that the cursor is at the top and beyond the scrollbar.
+				// 100% and above would mean that the cursor is at the bottom and beyond the scrollbar.
+				let percentage = (100 / height) * difference
+
+				// If the percent is higher than 100% block the percent to 100%.
+				if (percentage >= 100) {
+					percentage = 100
+					// If the percent is lower than 0% block the percent to 0%.
+				} else if (percentage <= 0) {
+					percentage = 0
+				}
+
+				// Sets the scrollTime value with the newly calculated one.
+				scrollTime = (($songListStore.length - 1) / 100) * percentage
+			}
+		})
+
+		// If the user clicks on either the scroll bar or the progress fill, set isMouseDownInScroll to true.
+		document.addEventListener('mousedown', (e) => {
+			if (isValidPath(e, ['SONG-LIST-PROGRESS-BAR', 'PROGRESS-FILL'])) {
+				isMouseDownInScroll = true
+			}
+		})
+
+		// Anywhere the user releases the mouse button, set isMouseDownInScroll to false.
+		document.addEventListener('mouseup', () => {
+			isMouseDownInScroll = false
+		})
+
+		// If the user click on the scrollbar, calls setScrollTime.
+		songListProgressBar.addEventListener('click', (evt) => setScrollTime(songListProgressBar, evt))
 	}
 </script>
 

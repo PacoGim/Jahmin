@@ -55,8 +55,7 @@
 
 	function loadPreviousState() {
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumID')
-		// let lastPlayedSongId = localStorage.getItem('LastPlayedSongID')
-		let lastPlayedSongIndex = Number(localStorage.getItem('LastPlayedSongIndex'))
+		let lastPlayedSongID = Number(localStorage.getItem('LastPlayedSongID'))
 
 		getAlbumColors(lastPlayedAlbumId)
 
@@ -65,7 +64,7 @@
 		getAlbumIPC(lastPlayedAlbumId).then((result) => {
 			$songListStore = result.Songs
 
-			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongIndex, false)
+			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongID, false)
 		})
 	}
 
@@ -86,7 +85,7 @@
 
 			getAlbumIPC(ALBUM_ID).then((result) => {
 				if (evt.type === 'dblclick') {
-					setNewPlayback(ALBUM_ID, result.Songs, 0, true)
+					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
 				} else if (evt.type === 'click') {
 					// Prevents resetting array if album unchanged.
 
@@ -99,11 +98,11 @@
 		}
 
 		if (SONG_LIST_ITEM_ELEMENT) {
-			const SONG_INDEX = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('index'))
+			const SONG_ID_TO_PLAY = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then((result) => {
-					setNewPlayback($selectedAlbumId, result.Songs, SONG_INDEX, true)
+					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID_TO_PLAY, true)
 				})
 			}
 		}
