@@ -72,12 +72,16 @@
 
 <style>
 	album.selected {
-		box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5), 0 0 0 7.5px rgba(255, 255, 255, 0.5);
+		box-shadow: 0 0 10px 5px #ffffff, 0 0 0 5px rgba(255, 255, 255, 0.5);
 	}
 
 	album {
 		position: relative;
 		display: grid;
+
+		box-shadow: none;
+
+		transition: box-shadow 300ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
 
 		margin: 1rem;
 		cursor: pointer;

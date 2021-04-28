@@ -7340,7 +7340,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			album_artist = element("album-artist");
-    			set_custom_element_data(album_artist, "class", "svelte-1jsw531");
+    			set_custom_element_data(album_artist, "class", "svelte-oc8a79");
     			add_location(album_artist, file$2, 58, 3, 1896);
     		},
     		m: function mount(target, anchor) {
@@ -7373,7 +7373,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-1jsw531");
+    			set_custom_element_data(album_artist, "class", "svelte-oc8a79");
     			add_location(album_artist, file$2, 56, 3, 1824);
     		},
     		m: function mount(target, anchor) {
@@ -7409,7 +7409,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-1jsw531");
+    			set_custom_element_data(album_artist, "class", "svelte-oc8a79");
     			add_location(album_artist, file$2, 54, 3, 1714);
     		},
     		m: function mount(target, anchor) {
@@ -7479,17 +7479,17 @@ var app = (function () {
     			t2 = text(t2_value);
     			t3 = space();
     			if_block.c();
-    			set_custom_element_data(overlay_gradient, "class", "svelte-1jsw531");
+    			set_custom_element_data(overlay_gradient, "class", "svelte-oc8a79");
     			add_location(overlay_gradient, file$2, 48, 1, 1585);
-    			set_custom_element_data(album_name, "class", "svelte-1jsw531");
+    			set_custom_element_data(album_name, "class", "svelte-oc8a79");
     			add_location(album_name, file$2, 51, 2, 1626);
-    			set_custom_element_data(album_details, "class", "svelte-1jsw531");
+    			set_custom_element_data(album_details, "class", "svelte-oc8a79");
     			add_location(album_details, file$2, 50, 1, 1608);
     			attr_dev(album_1, "id", album_1_id_value = /*album*/ ctx[0].ID);
 
     			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbumId*/ ctx[1] === /*album*/ ctx[0]?.ID
     			? "selected"
-    			: "") + " svelte-1jsw531"));
+    			: "") + " svelte-oc8a79"));
 
     			add_location(album_1, file$2, 45, 0, 1447);
     		},
@@ -7534,7 +7534,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$selectedAlbumId, album*/ 3 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty(/*$selectedAlbumId*/ ctx[1] === /*album*/ ctx[0]?.ID
     			? "selected"
-    			: "") + " svelte-1jsw531"))) {
+    			: "") + " svelte-oc8a79"))) {
     				attr_dev(album_1, "class", album_1_class_value);
     			}
     		},
@@ -7765,7 +7765,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(art_grid_svlt, "class", "svelte-ueqdm");
+    			set_custom_element_data(art_grid_svlt, "class", "svelte-1hg2le5");
     			add_location(art_grid_svlt, file$3, 37, 0, 1470);
     		},
     		l: function claim(nodes) {
@@ -9332,11 +9332,11 @@ var app = (function () {
     			attr_dev(track, "kind", "captions");
     			add_location(track, file$a, 145, 2, 5610);
     			audio.controls = audio_controls_value = true;
-    			attr_dev(audio, "class", "svelte-g8dn23");
+    			attr_dev(audio, "class", "svelte-ho3z84");
     			add_location(audio, file$a, 144, 1, 5492);
-    			set_custom_element_data(player_buttons, "class", "svelte-g8dn23");
+    			set_custom_element_data(player_buttons, "class", "svelte-ho3z84");
     			add_location(player_buttons, file$a, 148, 1, 5648);
-    			set_custom_element_data(player_svlt, "class", "svelte-g8dn23");
+    			set_custom_element_data(player_svlt, "class", "svelte-ho3z84");
     			add_location(player_svlt, file$a, 143, 0, 5477);
     		},
     		l: function claim(nodes) {
@@ -9969,11 +9969,11 @@ var app = (function () {
     			t6 = space();
     			song_duration = element("song-duration");
     			t7 = text(t7_value);
-    			set_custom_element_data(song_number, "class", "svelte-1fz4wap");
+    			set_custom_element_data(song_number, "class", "svelte-r9k04x");
     			add_location(song_number, file$c, 40, 1, 1239);
-    			set_custom_element_data(song_title, "class", "svelte-1fz4wap");
+    			set_custom_element_data(song_title, "class", "svelte-r9k04x");
     			add_location(song_title, file$c, 41, 1, 1290);
-    			set_custom_element_data(song_duration, "class", "svelte-1fz4wap");
+    			set_custom_element_data(song_duration, "class", "svelte-r9k04x");
     			add_location(song_duration, file$c, 43, 1, 1388);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0].ID);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
@@ -9982,7 +9982,7 @@ var app = (function () {
     			? "playing"
     			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0].ID)
     			? "selected"
-    			: "") + " svelte-1fz4wap");
+    			: "") + " svelte-r9k04x");
 
     			add_location(song_list_item, file$c, 30, 0, 977);
     		},
@@ -10026,7 +10026,7 @@ var app = (function () {
     			? "playing"
     			: "") + "\n\t" + (/*$selectedSongsStore*/ ctx[5].includes(/*song*/ ctx[0].ID)
     			? "selected"
-    			: "") + " svelte-1fz4wap")) {
+    			: "") + " svelte-r9k04x")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},
@@ -10196,12 +10196,12 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[18] = list[i];
-    	child_ctx[20] = i;
+    	child_ctx[19] = list[i];
+    	child_ctx[21] = i;
     	return child_ctx;
     }
 
-    // (148:2) {#if $songListStore !== undefined}
+    // (170:2) {#if $songListStore !== undefined}
     function create_if_block$2(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -10209,7 +10209,7 @@ var app = (function () {
     	let current;
     	let each_value = /*songsTrimmed*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*song*/ ctx[18].ID;
+    	const get_key = ctx => /*song*/ ctx[19].ID;
     	validate_each_keys(ctx, each_value, get_each_context$2, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -10273,14 +10273,14 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(148:2) {#if $songListStore !== undefined}",
+    		source: "(170:2) {#if $songListStore !== undefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (149:3) {#each songsTrimmed as song, index (song.ID)}
+    // (171:3) {#each songsTrimmed as song, index (song.ID)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -10288,8 +10288,8 @@ var app = (function () {
 
     	songlistitem = new SongListItem({
     			props: {
-    				song: /*song*/ ctx[18],
-    				index: /*index*/ ctx[20]
+    				song: /*song*/ ctx[19],
+    				index: /*index*/ ctx[21]
     			},
     			$$inline: true
     		});
@@ -10309,8 +10309,8 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const songlistitem_changes = {};
-    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.song = /*song*/ ctx[18];
-    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.index = /*index*/ ctx[20];
+    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.song = /*song*/ ctx[19];
+    			if (dirty & /*songsTrimmed*/ 2) songlistitem_changes.index = /*index*/ ctx[21];
     			songlistitem.$set(songlistitem_changes);
     		},
     		i: function intro(local) {
@@ -10332,7 +10332,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(149:3) {#each songsTrimmed as song, index (song.ID)}",
+    		source: "(171:3) {#each songsTrimmed as song, index (song.ID)}",
     		ctx
     	});
 
@@ -10358,14 +10358,14 @@ var app = (function () {
     			t = space();
     			song_list_progress_bar = element("song-list-progress-bar");
     			progress_fill = element("progress-fill");
-    			set_custom_element_data(song_list, "class", "svelte-3uczk6");
-    			add_location(song_list, file$d, 146, 1, 6253);
-    			set_custom_element_data(progress_fill, "class", "svelte-3uczk6");
-    			add_location(progress_fill, file$d, 154, 2, 6448);
-    			set_custom_element_data(song_list_progress_bar, "class", "svelte-3uczk6");
-    			add_location(song_list_progress_bar, file$d, 153, 1, 6421);
-    			set_custom_element_data(song_list_svlt, "class", "svelte-3uczk6");
-    			add_location(song_list_svlt, file$d, 145, 0, 6160);
+    			set_custom_element_data(song_list, "class", "svelte-10da8o5");
+    			add_location(song_list, file$d, 168, 1, 7376);
+    			set_custom_element_data(progress_fill, "class", "svelte-10da8o5");
+    			add_location(progress_fill, file$d, 176, 2, 7571);
+    			set_custom_element_data(song_list_progress_bar, "class", "svelte-10da8o5");
+    			add_location(song_list_progress_bar, file$d, 175, 1, 7544);
+    			set_custom_element_data(song_list_svlt, "class", "svelte-10da8o5");
+    			add_location(song_list_svlt, file$d, 167, 0, 7283);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10381,8 +10381,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(song_list_svlt, "mousewheel", /*mousewheel_handler*/ ctx[7], false, false, false),
-    					listen_dev(song_list_svlt, "click", /*click_handler*/ ctx[8], false, false, false)
+    					listen_dev(song_list_svlt, "mousewheel", /*mousewheel_handler*/ ctx[8], false, false, false),
+    					listen_dev(song_list_svlt, "click", /*click_handler*/ ctx[9], false, false, false)
     				];
 
     				mounted = true;
@@ -10449,21 +10449,24 @@ var app = (function () {
     }
 
     function instance$d($$self, $$props, $$invalidate) {
-    	let $selectedAlbumId;
     	let $songListStore;
+    	let $selectedAlbumId;
     	let $selectedSongsStore;
-    	validate_store(selectedAlbumId, "selectedAlbumId");
-    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(6, $selectedAlbumId = $$value));
     	validate_store(songListStore, "songListStore");
     	component_subscribe($$self, songListStore, $$value => $$invalidate(0, $songListStore = $$value));
+    	validate_store(selectedAlbumId, "selectedAlbumId");
+    	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(7, $selectedAlbumId = $$value));
     	validate_store(selectedSongsStore, "selectedSongsStore");
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(12, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(13, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("SongList", slots, []);
     	let isSelectedAlbumIdFirstAssign = true;
     	let songsTrimmed = [];
     	let scrollTime = 0;
     	let progressValue = 0;
+
+    	// Keeps track of the max size of the song list element.
+    	let maxSongListHeight = 0;
 
     	function trimSongsArray() {
     		// 1º Slice: Slice array from scrollTime to end. Cuts from array songs already scrolled.
@@ -10530,6 +10533,9 @@ var app = (function () {
     	let isMouseDownInScroll = false;
 
     	onMount(() => {
+    		// Set an approximate value on how high would the song list container be to prevent
+    		document.documentElement.style.setProperty("--song-list-svlt-height", `${SONG_AMOUNT * 30}px`);
+
     		scrollBarHandler();
     		let lastPlayedSongId = Number(localStorage.getItem("LastPlayedSongID"));
 
@@ -10626,6 +10632,7 @@ var app = (function () {
     		scrollTime,
     		progressValue,
     		SONG_AMOUNT,
+    		maxSongListHeight,
     		trimSongsArray,
     		lastSelectedSong,
     		selectSongs,
@@ -10636,8 +10643,8 @@ var app = (function () {
     		setScrollTime,
     		isValidPath,
     		scrollBarHandler,
-    		$selectedAlbumId,
     		$songListStore,
+    		$selectedAlbumId,
     		$selectedSongsStore
     	});
 
@@ -10646,6 +10653,7 @@ var app = (function () {
     		if ("songsTrimmed" in $$props) $$invalidate(1, songsTrimmed = $$props.songsTrimmed);
     		if ("scrollTime" in $$props) $$invalidate(5, scrollTime = $$props.scrollTime);
     		if ("progressValue" in $$props) progressValue = $$props.progressValue;
+    		if ("maxSongListHeight" in $$props) $$invalidate(6, maxSongListHeight = $$props.maxSongListHeight);
     		if ("lastSelectedSong" in $$props) lastSelectedSong = $$props.lastSelectedSong;
     		if ("isMouseDownInScroll" in $$props) isMouseDownInScroll = $$props.isMouseDownInScroll;
     	};
@@ -10655,13 +10663,26 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedAlbumId, isSelectedAlbumIdFirstAssign*/ 80) {
+    		if ($$self.$$.dirty & /*$selectedAlbumId, isSelectedAlbumIdFirstAssign*/ 144) {
     			 {
 
     				if (isSelectedAlbumIdFirstAssign) {
     					$$invalidate(4, isSelectedAlbumIdFirstAssign = false);
     				} else {
     					$$invalidate(5, scrollTime = 0);
+    				}
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*scrollTime, $songListStore, maxSongListHeight*/ 97) {
+    			 {
+    				let songList = document.querySelector("song-list");
+
+    				if (songList) {
+    					if (songList.clientHeight > maxSongListHeight) {
+    						$$invalidate(6, maxSongListHeight = songList.clientHeight);
+    						document.documentElement.style.setProperty("--song-list-svlt-height", `${songList.clientHeight}px`);
+    					}
     				}
     			}
     		}
@@ -10680,6 +10701,7 @@ var app = (function () {
     		scrollContainer,
     		isSelectedAlbumIdFirstAssign,
     		scrollTime,
+    		maxSongListHeight,
     		$selectedAlbumId,
     		mousewheel_handler,
     		click_handler
@@ -12851,7 +12873,7 @@ var app = (function () {
     			create_component(backgroundart.$$.fragment);
     			t9 = space();
     			create_component(songlistbackground.$$.fragment);
-    			attr_dev(main, "class", "svelte-qj5o4s");
+    			attr_dev(main, "class", "svelte-1fro297");
     			add_location(main, file$j, 60, 0, 2226);
     		},
     		l: function claim(nodes) {

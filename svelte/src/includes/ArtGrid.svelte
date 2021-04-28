@@ -66,11 +66,12 @@
 		grid-area: art-grid-svlt;
 		background-color: rgba(0, 0, 0, 0.3);
 		border-right: 10px transparent solid;
+		/* grid-template-columns: repeat(auto-fit, var(--cover-dimension)); */
+		/* grid-template-rows: repeat(auto-fit, var(--cover-dimension));	 */
 		/* display: grid;
-		grid-template-columns: repeat(auto-fit, var(--cover-dimension));
-		grid-template-rows: repeat(auto-fit, var(--cover-dimension));
 		gap: var(--art-grid-gap); */
 		display: flex;
 		flex-wrap: wrap;
+		align-content: flex-start;
 	}
 </style>

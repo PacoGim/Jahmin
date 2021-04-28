@@ -179,6 +179,7 @@
 
 <style>
 	player-svlt {
+		z-index: 1;
 		grid-area: player-svlt;
 		display: flex;
 		align-items: center;

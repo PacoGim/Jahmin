@@ -8,8 +8,33 @@
 	let songsTrimmed = []
 	let scrollTime = 0
 	let progressValue = 0
-
 	const SONG_AMOUNT = 7
+
+	// Keeps track of the max size of the song list element.
+	let maxSongListHeight = 0
+
+	$: {
+		// This allows, based on the SONG_AMOUNT set buy user or the default value, to dynamically keep the biggest auto sizing of the element allowing to have song lists with very few songs to fit properly on the same element with a lot of songs. It prevents jumps if the list of songs is too small after a big list of songs.
+
+		/*
+				| Song 1 |		->			| Song 1 |
+				| Song 2 |		->			| Song 2 |
+				| Song 3 |		->			| 			 |
+				| Song 4 |		->			| 			 |
+		*/
+
+		scrollTime
+		$songListStore
+
+		let songList = document.querySelector('song-list')
+
+		if (songList) {
+			if (songList.clientHeight > maxSongListHeight) {
+				maxSongListHeight = songList.clientHeight
+				document.documentElement.style.setProperty('--song-list-svlt-height', `${songList.clientHeight}px`)
+			}
+		}
+	}
 
 	$: {
 		$selectedAlbumId
@@ -91,6 +116,10 @@
 	let isMouseDownInScroll = false
 
 	onMount(() => {
+
+		// Set an approximate value on how high would the song list container be to prevent
+		document.documentElement.style.setProperty('--song-list-svlt-height', `${SONG_AMOUNT * 30}px`)
+
 		scrollBarHandler()
 
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))
@@ -192,13 +221,19 @@
 		grid-area: song-list-svlt;
 		display: grid;
 		grid-template-columns: auto max-content;
+
+		/* transition: all 1000ms ease-in-out; */
 	}
 
 	song-list {
-		display: flex;
-		flex-direction: column;
+		/* display: flex; */
+		/* flex-direction: column; */
 		/* justify-content: space-evenly; */
-		padding: 0.5rem;
+		padding: 8px;
+
+		/* min-height: auto; */
+
+		/* transition: all 1000ms ease-in-out; */
 	}
 
 	song-list-progress-bar {

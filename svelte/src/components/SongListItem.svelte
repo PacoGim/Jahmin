@@ -64,6 +64,8 @@
 
 		align-items: center;
 
+		min-height: 30px;
+
 		display: grid;
 		grid-template-columns: max-content auto max-content max-content;
 		grid-template-rows: auto;
