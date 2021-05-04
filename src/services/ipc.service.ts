@@ -35,6 +35,11 @@ export function loadIPC() {
 		return config
 	})
 
+	ipcMain.handle('save-waveform', async (evt, arg) => {
+		console.log(arg)
+		return ''
+	})
+
 	ipcMain.handle('get-grouping', async (evt, valueToGroupBy) => {
 		return groupSongs(valueToGroupBy)
 	})

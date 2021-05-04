@@ -39,6 +39,10 @@ function loadIPC() {
         let config = config_service_1.getConfig();
         return config;
     }));
+    electron_1.ipcMain.handle('save-waveform', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
+        console.log(arg);
+        return '';
+    }));
     electron_1.ipcMain.handle('get-grouping', (evt, valueToGroupBy) => __awaiter(this, void 0, void 0, function* () {
         return groupSong_fn_1.groupSongs(valueToGroupBy);
     }));

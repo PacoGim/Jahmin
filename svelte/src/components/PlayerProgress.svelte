@@ -13,14 +13,13 @@
 	let isMouseDown = false
 	let isMouseIn = false
 
-	let progressBackgroundEl: HTMLImageElement = undefined
-
 	let isPlaybackCursorFirstAssign = true
 
+	let playingSongID = undefined
+
 	$: {
-		if (isPlaybackCursorFirstAssign === true) {
-			isPlaybackCursorFirstAssign = false
-		} else {
+		if (isPlaybackCursorFirstAssign === true) isPlaybackCursorFirstAssign = false
+		else {
 			$playbackCursor
 			getWaveformImage($playbackCursor[0])
 		}
@@ -29,13 +28,17 @@
 	async function getWaveformImage(index: number) {
 		let song = $playbackStore?.[index]
 
+		if (song.ID === playingSongID) return
+
+		playingSongID = song.ID
+
 		// Fade Out
 		document.documentElement.style.setProperty('--waveform-opacity', '0')
 
-		setWaveSource(song.SourceFile).then(() => {
-			let currentSongPlaying = $playbackStore[$playbackCursor[0]]
-
+		setWaveSource(song.SourceFile, song.Duration).then(() => {
 			setTimeout(() => {
+				let currentSongPlaying = $playbackStore[$playbackCursor[0]]
+
 				if (currentSongPlaying.ID === song.ID) {
 					document.documentElement.style.setProperty('--waveform-opacity', '1')
 				}
@@ -44,9 +47,8 @@
 	}
 
 	onMount(() => {
-		createWaveFormElement('#waveform-image')
+		createWaveFormElement('#waveform-data')
 		hookPlayerProgressEvents()
-		progressBackgroundEl = document.querySelector('img#waveform-image')
 	})
 
 	function hookPlayerProgressEvents() {
@@ -96,8 +98,7 @@
 
 <player-progress>
 	<progress-foreground />
-	<div id="waveform-image" />
-	<!-- <img id="waveform-image" src="" alt="" /> -->
+	<div id="waveform-data" />
 </player-progress>
 
 <style>
@@ -125,7 +126,7 @@
 		transition: min-width 100ms linear;
 	}
 
-	player-progress #waveform-image {
+	player-progress #waveform-data {
 		z-index: 0;
 		width: 100%;
 		opacity: var(--waveform-opacity);

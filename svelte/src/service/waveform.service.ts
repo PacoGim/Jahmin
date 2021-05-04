@@ -1,39 +1,51 @@
-import WaveSurfer from 'wavesurfer.js'
+import WaveSurfer from '../service/wavesurfer/wavesurfer.js'
+import { saveWaveformIPC } from './ipc.service.js'
 
 let waveSurfer: WaveSurfer
 
 export function createWaveFormElement(hook: string) {
 	waveSurfer = WaveSurfer.create({
-		container: '#waveform-image',
+		container: hook,
 		waveColor: 'transparent',
 		cursorColor: 'transparent',
 		progressColor: 'transparent',
 		normalize: true,
-		responsive:true,
-		hideScrollbar:true,
-		barWidth:1,
-		barGap:0,
-		barMinHeight:1
+		responsive: true,
+		hideScrollbar: true,
+		barWidth: 1,
+		barGap: null,
+		barMinHeight: 1
 	})
 
 	waveSurfer.setHeight(64)
 }
 
-export function setWaveSource(source: string) {
+export function setWaveSource(source: string, duration: number) {
 	return new Promise((resolve, reject) => {
-		console.time(source)
+		let pcm = JSON.parse(localStorage.getItem(source)) || undefined
 
-		waveSurfer.load(source)
+		waveSurfer.load(source, pcm, undefined, duration)
 
-		waveSurfer.on('ready', () => {
-			console.timeEnd(source)
+		waveSurfer.on('redraw', () => {
 			resolve('')
-
 			waveSurfer.unAll()
+		})
+
+		waveSurfer.on('peaks-ready', (peaks: number[]) => {
+			// TODO Save peaks to pc
+			// console.log('peaks-ready', source)
+			// localStorage.setItem(source, JSON.stringify(peaks))
+			// resolve('')
+			// waveSurfer.unAll()
 		})
 	})
 }
 
+let currentWaveColor = ''
+
 export function setWaveColor(hslColorString: string) {
-	waveSurfer.setWaveColor(hslColorString)
+	if (currentWaveColor !== hslColorString) {
+		currentWaveColor = hslColorString
+		waveSurfer.setWaveColor(hslColorString)
+	}
 }

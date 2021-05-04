@@ -723,6 +723,7 @@ var app = (function () {
             });
         });
     }
+    // TODO Dynamic
     const sortBy = 'RootDir';
     function getAlbumsIPC(groupBy, groupByValue) {
         return new Promise((resolve, reject) => {
@@ -856,7 +857,7 @@ var app = (function () {
 
     var wavesurfer = createCommonjsModule(function (module, exports) {
     /*!
-     * wavesurfer.js 4.6.0 (2021-03-05)
+     * wavesurfer.js 5.0.0 (2021-05-04)
      * https://wavesurfer-js.org
      * @license BSD-3-Clause
      */
@@ -1042,6 +1043,24 @@ var app = (function () {
 
           if (this.hasProgressCanvas) {
             this.progressCtx.fillStyle = progressColor;
+          }
+        }
+        /**
+         * Set the canvas transforms for wave and progress
+         *
+         * @param {boolean} vertical Whether to render vertically
+         */
+
+      }, {
+        key: "applyCanvasTransforms",
+        value: function applyCanvasTransforms(vertical) {
+          if (vertical) {
+            // Reflect the waveform across the line y = -x
+            this.waveCtx.setTransform(0, 1, 1, 0, 0, 0);
+
+            if (this.hasProgressCanvas) {
+              this.progressCtx.setTransform(0, 1, 1, 0, 0, 0);
+            }
           }
         }
         /**
@@ -1272,9 +1291,9 @@ var app = (function () {
 
     var util = _interopRequireWildcard(__webpack_require__(/*! ./util */ "./src/util/index.js"));
 
-    function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-    function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
     function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1316,7 +1335,7 @@ var app = (function () {
         _classCallCheck(this, Drawer);
 
         _this = _super.call(this);
-        _this.container = container;
+        _this.container = util.withOrientation(container, params.vertical);
         /**
          * @type {WavesurferParams}
          */
@@ -1365,7 +1384,7 @@ var app = (function () {
       }, {
         key: "createWrapper",
         value: function createWrapper() {
-          this.wrapper = this.container.appendChild(document.createElement('wave'));
+          this.wrapper = util.withOrientation(this.container.appendChild(document.createElement('wave')), this.params.vertical);
           this.style(this.wrapper, {
             display: 'block',
             position: 'relative',
@@ -1396,19 +1415,29 @@ var app = (function () {
         key: "handleEvent",
         value: function handleEvent(e, noPrevent) {
           !noPrevent && e.preventDefault();
-          var clientX = e.targetTouches ? e.targetTouches[0].clientX : e.clientX;
+          var clientX = util.withOrientation(e.targetTouches ? e.targetTouches[0] : e, this.params.vertical).clientX;
           var bbox = this.wrapper.getBoundingClientRect();
           var nominalWidth = this.width;
           var parentWidth = this.getWidth();
+          var progressPixels = this.getProgressPixels(bbox, clientX);
           var progress;
 
           if (!this.params.fillParent && nominalWidth < parentWidth) {
-            progress = (this.params.rtl ? bbox.right - clientX : clientX - bbox.left) * (this.params.pixelRatio / nominalWidth) || 0;
+            progress = progressPixels * (this.params.pixelRatio / nominalWidth) || 0;
           } else {
-            progress = ((this.params.rtl ? bbox.right - clientX : clientX - bbox.left) + this.wrapper.scrollLeft) / this.wrapper.scrollWidth || 0;
+            progress = (progressPixels + this.wrapper.scrollLeft) / this.wrapper.scrollWidth || 0;
           }
 
           return util.clamp(progress, 0, 1);
+        }
+      }, {
+        key: "getProgressPixels",
+        value: function getProgressPixels(wrapperBbox, clientX) {
+          if (this.params.rtl) {
+            return wrapperBbox.right - clientX;
+          } else {
+            return clientX - wrapperBbox.left;
+          }
         }
       }, {
         key: "setupWrapperEvents",
@@ -1416,13 +1445,14 @@ var app = (function () {
           var _this2 = this;
 
           this.wrapper.addEventListener('click', function (e) {
+            var orientedEvent = util.withOrientation(e, _this2.params.vertical);
             var scrollbarHeight = _this2.wrapper.offsetHeight - _this2.wrapper.clientHeight;
 
             if (scrollbarHeight !== 0) {
               // scrollbar is visible.  Check if click was on it
               var bbox = _this2.wrapper.getBoundingClientRect();
 
-              if (e.clientY >= bbox.bottom - scrollbarHeight) {
+              if (orientedEvent.clientY >= bbox.bottom - scrollbarHeight) {
                 // ignore mousedown as it was on the scrollbar
                 return;
               }
@@ -1584,8 +1614,9 @@ var app = (function () {
               width: ''
             });
           } else {
+            var newWidth = ~~(this.width / this.params.pixelRatio) + 'px';
             this.style(this.wrapper, {
-              width: ~~(this.width / this.params.pixelRatio) + 'px'
+              width: newWidth
             });
           }
 
@@ -1647,7 +1678,7 @@ var app = (function () {
 
           if (this.wrapper) {
             if (this.wrapper.parentNode == this.container) {
-              this.container.removeChild(this.wrapper);
+              this.container.removeChild(this.wrapper.domElement);
             }
 
             this.wrapper = null;
@@ -1756,9 +1787,9 @@ var app = (function () {
 
     var _drawer2 = _interopRequireDefault(__webpack_require__(/*! ./drawer.canvasentry */ "./src/drawer.canvasentry.js"));
 
-    function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-    function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
     function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1868,6 +1899,13 @@ var app = (function () {
          */
 
         _this.barRadius = params.barRadius || 0;
+        /**
+         * Whether to render the waveform vertically. Defaults to false.
+         *
+         * @type {boolean}
+         */
+
+        _this.vertical = params.vertical;
         return _this;
       }
       /**
@@ -1889,7 +1927,8 @@ var app = (function () {
       }, {
         key: "createElements",
         value: function createElements() {
-          this.progressWave = this.wrapper.appendChild(this.style(document.createElement('wave'), {
+          this.progressWave = util.withOrientation(this.wrapper.appendChild(document.createElement('wave')), this.params.vertical);
+          this.style(this.progressWave, {
             position: 'absolute',
             zIndex: 3,
             left: 0,
@@ -1901,7 +1940,7 @@ var app = (function () {
             boxSizing: 'border-box',
             borderRightStyle: 'solid',
             pointerEvents: 'none'
-          }));
+          });
           this.addCanvas();
           this.updateCursor();
         }
@@ -1964,7 +2003,8 @@ var app = (function () {
           entry.halfPixel = this.halfPixel;
           var leftOffset = this.maxCanvasElementWidth * this.canvases.length; // wave
 
-          entry.initWave(this.wrapper.appendChild(this.style(document.createElement('canvas'), {
+          var wave = util.withOrientation(this.wrapper.appendChild(document.createElement('canvas')), this.params.vertical);
+          this.style(wave, {
             position: 'absolute',
             zIndex: 2,
             left: leftOffset + 'px',
@@ -1972,16 +2012,19 @@ var app = (function () {
             bottom: 0,
             height: '100%',
             pointerEvents: 'none'
-          }))); // progress
+          });
+          entry.initWave(wave); // progress
 
           if (this.hasProgressCanvas) {
-            entry.initProgress(this.progressWave.appendChild(this.style(document.createElement('canvas'), {
+            var progress = util.withOrientation(this.progressWave.appendChild(document.createElement('canvas')), this.params.vertical);
+            this.style(progress, {
               position: 'absolute',
               left: leftOffset + 'px',
               top: 0,
               bottom: 0,
               height: '100%'
-            })));
+            });
+            entry.initProgress(progress);
           }
 
           this.canvases.push(entry);
@@ -1996,10 +2039,10 @@ var app = (function () {
         value: function removeCanvas() {
           var lastEntry = this.canvases[this.canvases.length - 1]; // wave
 
-          lastEntry.wave.parentElement.removeChild(lastEntry.wave); // progress
+          lastEntry.wave.parentElement.removeChild(lastEntry.wave.domElement); // progress
 
           if (this.hasProgressCanvas) {
-            lastEntry.progress.parentElement.removeChild(lastEntry.progress);
+            lastEntry.progress.parentElement.removeChild(lastEntry.progress.domElement);
           } // cleanup
 
 
@@ -2083,7 +2126,7 @@ var app = (function () {
             var peakIndexScale = hasMinVals ? 2 : 1;
             var length = peaks.length / peakIndexScale;
             var bar = _this4.params.barWidth * _this4.params.pixelRatio;
-            var gap = 0;
+            var gap = _this4.params.barGap === null ? 0 : Math.max(_this4.params.pixelRatio, _this4.params.barGap * _this4.params.pixelRatio);
             var step = bar + gap;
             var scale = length / _this4.width;
             var first = start;
@@ -2096,7 +2139,9 @@ var app = (function () {
               /* in case of silences, allow the user to specify that we
                * always draw *something* (normally a 1px high bar) */
 
-              if (h == 0 && _this4.params.barMinHeight) h = _this4.params.barMinHeight;
+              if (h == 0 && _this4.params.barMinHeight) {
+                h = _this4.params.barMinHeight;
+              }
 
               _this4.fillRect(i + _this4.halfPixel, halfH - h + offsetY, bar + _this4.halfPixel, h * 2, _this4.barRadius, ch);
             }
@@ -2179,6 +2224,8 @@ var app = (function () {
           this.canvases.forEach(function (entry, i) {
             _this6.setFillStyles(entry, waveColor, progressColor);
 
+            _this6.applyCanvasTransforms(entry, _this6.params.vertical);
+
             entry.drawLines(peaks, absmax, halfH, offsetY, start, end);
           });
         }
@@ -2216,6 +2263,7 @@ var app = (function () {
                   progressColor = _ref4.progressColor;
 
               this.setFillStyles(entry, waveColor, progressColor);
+              this.applyCanvasTransforms(entry, this.params.vertical);
               entry.fillRects(intersection.x1 - leftOffset, intersection.y1, intersection.x2 - intersection.x1, intersection.y2 - intersection.y1, radius);
             }
           }
@@ -2338,6 +2386,19 @@ var app = (function () {
           var waveColor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.params.waveColor;
           var progressColor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.params.progressColor;
           entry.setFillStyles(waveColor, progressColor);
+        }
+        /**
+         * Set the canvas transforms for a certain entry (wave and progress)
+         *
+         * @param {CanvasEntry} entry Target entry
+         * @param {boolean} vertical Whether to render the waveform vertically
+         */
+
+      }, {
+        key: "applyCanvasTransforms",
+        value: function applyCanvasTransforms(entry) {
+          var vertical = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+          entry.applyCanvasTransforms(vertical);
         }
         /**
          * Return image data of the multi-canvas
@@ -2556,9 +2617,9 @@ var app = (function () {
 
     var util = _interopRequireWildcard(__webpack_require__(/*! ./util */ "./src/util/index.js"));
 
-    function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-    function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
     function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3744,6 +3805,12 @@ var app = (function () {
         return _clamp.default;
       }
     }));
+    Object.defineProperty(exports, "withOrientation", ({
+      enumerable: true,
+      get: function get() {
+        return _orientation.default;
+      }
+    }));
 
     var _getId = _interopRequireDefault(__webpack_require__(/*! ./get-id */ "./src/util/get-id.js"));
 
@@ -3768,6 +3835,8 @@ var app = (function () {
     var _fetch = _interopRequireDefault(__webpack_require__(/*! ./fetch */ "./src/util/fetch.js"));
 
     var _clamp = _interopRequireDefault(__webpack_require__(/*! ./clamp */ "./src/util/clamp.js"));
+
+    var _orientation = _interopRequireDefault(__webpack_require__(/*! ./orientation */ "./src/util/orientation.js"));
 
     function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -4044,6 +4113,111 @@ var app = (function () {
 
     /***/ }),
 
+    /***/ "./src/util/orientation.js":
+    /*!*********************************!*\
+      !*** ./src/util/orientation.js ***!
+      \*********************************/
+    /***/ ((module, exports) => {
+
+
+    Object.defineProperty(exports, "__esModule", ({
+      value: true
+    }));
+    exports.default = withOrientation;
+    var verticalPropMap = {
+      width: 'height',
+      height: 'width',
+      overflowX: 'overflowY',
+      overflowY: 'overflowX',
+      clientWidth: 'clientHeight',
+      clientHeight: 'clientWidth',
+      clientX: 'clientY',
+      clientY: 'clientX',
+      scrollWidth: 'scrollHeight',
+      scrollLeft: 'scrollTop',
+      offsetLeft: 'offsetTop',
+      offsetTop: 'offsetLeft',
+      offsetHeight: 'offsetWidth',
+      offsetWidth: 'offsetHeight',
+      left: 'top',
+      right: 'bottom',
+      top: 'left',
+      bottom: 'right',
+      borderRightStyle: 'borderBottomStyle',
+      borderRightWidth: 'borderBottomWidth',
+      borderRightColor: 'borderBottomColor'
+    };
+    /**
+     * Convert a horizontally-oriented property name to a vertical one.
+     *
+     * @param {string} prop A property name
+     * @param {bool} vertical Whether the element is oriented vertically
+     * @returns {string} prop, converted appropriately
+     */
+
+    function mapProp(prop, vertical) {
+      if (Object.prototype.hasOwnProperty.call(verticalPropMap, prop)) {
+        return vertical ? verticalPropMap[prop] : prop;
+      } else {
+        return prop;
+      }
+    }
+
+    var isProxy = Symbol("isProxy");
+    /**
+     * Returns an appropriately oriented object based on vertical.
+     * If vertical is true, attribute getting and setting will be mapped through
+     * verticalPropMap, so that e.g. getting the object's .width will give its
+     * .height instead.
+     * Certain methods of an oriented object will return oriented objects as well.
+     * Oriented objects can't be added to the DOM directly since they are Proxy objects
+     * and thus fail typechecks. Use domElement to get the actual element for this.
+     *
+     * @param {object} target The object to be wrapped and oriented
+     * @param {bool} vertical Whether the element is oriented vertically
+     * @returns {Proxy} An oriented object with attr translation via verticalAttrMap
+     * @since 5.0.0
+     */
+
+    function withOrientation(target, vertical) {
+      if (target[isProxy]) {
+        return target;
+      } else {
+        return new Proxy(target, {
+          get: function get(obj, prop, receiver) {
+            if (prop === isProxy) {
+              return true;
+            } else if (prop === 'domElement') {
+              return obj;
+            } else if (prop === 'style') {
+              return withOrientation(obj.style, vertical);
+            } else if (prop === 'canvas') {
+              return withOrientation(obj.canvas, vertical);
+            } else if (prop === 'getBoundingClientRect') {
+              return function () {
+                return withOrientation(obj.getBoundingClientRect.apply(obj, arguments), vertical);
+              };
+            } else if (prop === 'getContext') {
+              return function () {
+                return withOrientation(obj.getContext.apply(obj, arguments), vertical);
+              };
+            } else {
+              var value = obj[mapProp(prop, vertical)];
+              return typeof value == 'function' ? value.bind(obj) : value;
+            }
+          },
+          set: function set(obj, prop, value) {
+            obj[mapProp(prop, vertical)] = value;
+            return true;
+          }
+        });
+      }
+    }
+
+    module.exports = exports.default;
+
+    /***/ }),
+
     /***/ "./src/util/prevent-click.js":
     /*!***********************************!*\
       !*** ./src/util/prevent-click.js ***!
@@ -4171,9 +4345,9 @@ var app = (function () {
 
     function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-    function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-    function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
     function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -4294,6 +4468,7 @@ var app = (function () {
             filterChannels: [],
             relativeNormalization: false
           },
+          vertical: false,
           waveColor: '#999',
           xhr: {}
         };
@@ -4335,9 +4510,15 @@ var app = (function () {
         }
 
         if (_this.params.rtl === true) {
-          util.style(_this.container, {
-            transform: 'rotateY(180deg)'
-          });
+          if (_this.params.vertical === true) {
+            util.style(_this.container, {
+              transform: 'rotateX(180deg)'
+            });
+          } else {
+            util.style(_this.container, {
+              transform: 'rotateY(180deg)'
+            });
+          }
         }
 
         if (_this.params.backgroundColor) {
@@ -5302,10 +5483,18 @@ var app = (function () {
             }
           } else {
             peaks = this.backend.getPeaks(width, start, end);
-            this.drawer.drawPeaks(peaks, width, start, end);
+
+            if (peaks.length > 0) {
+              this.empty();
+              this.drawer.drawPeaks(peaks, width, start, end);
+            }
+
+            this.fireEvent('peaks-ready', peaks);
           }
 
-          this.fireEvent('redraw', peaks, width);
+          if (peaks.length > 0) {
+            this.fireEvent('redraw', peaks, width);
+          }
         }
         /**
          * Horizontally zooms the waveform in and out. It also changes the parameter
@@ -5427,9 +5616,8 @@ var app = (function () {
         value: function load(url, peaks, preload, duration) {
           if (!url) {
             throw new Error('url parameter cannot be empty');
-          }
+          } // this.empty()
 
-          this.empty();
 
           if (preload) {
             // check whether the preload attribute will be usable and if not log
@@ -5650,7 +5838,8 @@ var app = (function () {
           this.fireEvent('loading', Math.round(percentComplete * 100), e.target);
         }
         /**
-         * Exports PCM data into a JSON array and opens in a new window.
+         * Exports PCM data into a JSON array and optionally opens in a new window
+         * as valid JSON Blob instance.
          *
          * @param {number} length=1024 The scale in which to export the peaks
          * @param {number} accuracy=10000
@@ -5673,13 +5862,16 @@ var app = (function () {
             return Math.round(val * accuracy) / accuracy;
           });
           return new Promise(function (resolve, reject) {
-            var json = JSON.stringify(arr);
-
             if (!noWindow) {
-              window.open('data:application/json;charset=utf-8,' + encodeURIComponent(json));
+              var blobJSON = new Blob([JSON.stringify(arr)], {
+                type: 'application/json;charset=utf-8'
+              });
+              var objURL = URL.createObjectURL(blobJSON);
+              window.open(objURL);
+              URL.revokeObjectURL(objURL);
             }
 
-            resolve(json);
+            resolve(arr);
           });
         }
         /**
@@ -5838,7 +6030,7 @@ var app = (function () {
     }(util.Observer);
 
     exports.default = WaveSurfer;
-    WaveSurfer.VERSION = "4.6.0";
+    WaveSurfer.VERSION = "5.0.0";
     WaveSurfer.util = util;
     module.exports = exports.default;
 
@@ -5860,9 +6052,9 @@ var app = (function () {
 
     var util = _interopRequireWildcard(__webpack_require__(/*! ./util */ "./src/util/index.js"));
 
-    function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-    function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
     function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -6192,7 +6384,7 @@ var app = (function () {
       }, {
         key: "removeOnAudioProcess",
         value: function removeOnAudioProcess() {
-          this.scriptNode.onaudioprocess = function () {};
+          this.scriptNode.onaudioprocess = null;
         }
         /** Create analyser node to perform audio analysis */
 
@@ -6744,8 +6936,8 @@ var app = (function () {
      * Returns a function, that, as long as it continues to be invoked, will not
      * be triggered. The function will be called after it stops being called for
      * N milliseconds. If `immediate` is passed, trigger the function on the
-     * leading edge, instead of the trailing. The function also has a property 'clear'
-     * that is a function which will clear the timer to prevent previously scheduled executions.
+     * leading edge, instead of the trailing. The function also has a property 'clear' 
+     * that is a function which will clear the timer to prevent previously scheduled executions. 
      *
      * @source underscore.js
      * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
@@ -6791,12 +6983,12 @@ var app = (function () {
           timeout = null;
         }
       };
-
+      
       debounced.flush = function() {
         if (timeout) {
           result = func.apply(context, args);
           context = args = null;
-
+          
           clearTimeout(timeout);
           timeout = null;
         }
@@ -6816,12 +7008,13 @@ var app = (function () {
     /************************************************************************/
     /******/ 	// The module cache
     /******/ 	var __webpack_module_cache__ = {};
-    /******/
+    /******/ 	
     /******/ 	// The require function
     /******/ 	function __webpack_require__(moduleId) {
     /******/ 		// Check if module is in cache
-    /******/ 		if(__webpack_module_cache__[moduleId]) {
-    /******/ 			return __webpack_module_cache__[moduleId].exports;
+    /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+    /******/ 		if (cachedModule !== undefined) {
+    /******/ 			return cachedModule.exports;
     /******/ 		}
     /******/ 		// Create a new module (and put it into the cache)
     /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -6829,21 +7022,21 @@ var app = (function () {
     /******/ 			// no module.loaded needed
     /******/ 			exports: {}
     /******/ 		};
-    /******/
+    /******/ 	
     /******/ 		// Execute the module function
     /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-    /******/
+    /******/ 	
     /******/ 		// Return the exports of the module
     /******/ 		return module.exports;
     /******/ 	}
-    /******/
+    /******/ 	
     /************************************************************************/
-    /******/
+    /******/ 	
     /******/ 	// startup
     /******/ 	// Load entry module and return exports
     /******/ 	// This entry module is referenced by other modules so it can't be inlined
     /******/ 	var __webpack_exports__ = __webpack_require__("./src/wavesurfer.js");
-    /******/
+    /******/ 	
     /******/ 	return __webpack_exports__;
     /******/ })()
     ;
@@ -6854,7 +7047,7 @@ var app = (function () {
     let waveSurfer;
     function createWaveFormElement(hook) {
         waveSurfer = wavesurfer.create({
-            container: '#waveform-image',
+            container: hook,
             waveColor: 'transparent',
             cursorColor: 'transparent',
             progressColor: 'transparent',
@@ -6862,24 +7055,34 @@ var app = (function () {
             responsive: true,
             hideScrollbar: true,
             barWidth: 1,
-            barGap: 0,
+            barGap: null,
             barMinHeight: 1
         });
         waveSurfer.setHeight(64);
     }
-    function setWaveSource(source) {
+    function setWaveSource(source, duration) {
         return new Promise((resolve, reject) => {
-            console.time(source);
-            waveSurfer.load(source);
-            waveSurfer.on('ready', () => {
-                console.timeEnd(source);
+            let pcm = JSON.parse(localStorage.getItem(source)) || undefined;
+            waveSurfer.load(source, pcm, undefined, duration);
+            waveSurfer.on('redraw', () => {
                 resolve('');
                 waveSurfer.unAll();
             });
+            waveSurfer.on('peaks-ready', (peaks) => {
+                // TODO Save peaks to pc
+                // console.log('peaks-ready', source)
+                // localStorage.setItem(source, JSON.stringify(peaks))
+                // resolve('')
+                // waveSurfer.unAll()
+            });
         });
     }
+    let currentWaveColor = '';
     function setWaveColor(hslColorString) {
-        waveSurfer.setWaveColor(hslColorString);
+        if (currentWaveColor !== hslColorString) {
+            currentWaveColor = hslColorString;
+            waveSurfer.setWaveColor(hslColorString);
+        }
     }
 
     async function getAlbumColors(id) {
@@ -8756,13 +8959,13 @@ var app = (function () {
     			progress_foreground = element("progress-foreground");
     			t = space();
     			div = element("div");
-    			set_custom_element_data(progress_foreground, "class", "svelte-wg5vcx");
-    			add_location(progress_foreground, file$8, 83, 1, 3738);
-    			attr_dev(div, "id", "waveform-image");
-    			attr_dev(div, "class", "svelte-wg5vcx");
-    			add_location(div, file$8, 84, 1, 3763);
-    			set_custom_element_data(player_progress, "class", "svelte-wg5vcx");
-    			add_location(player_progress, file$8, 82, 0, 3719);
+    			set_custom_element_data(progress_foreground, "class", "svelte-19dx646");
+    			add_location(progress_foreground, file$8, 84, 1, 3760);
+    			attr_dev(div, "id", "waveform-data");
+    			attr_dev(div, "class", "svelte-19dx646");
+    			add_location(div, file$8, 85, 1, 3785);
+    			set_custom_element_data(player_progress, "class", "svelte-19dx646");
+    			add_location(player_progress, file$8, 83, 0, 3741);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8844,8 +9047,8 @@ var app = (function () {
     	let pauseDebounce = undefined;
     	let isMouseDown = false;
     	let isMouseIn = false;
-    	let progressBackgroundEl = undefined;
     	let isPlaybackCursorFirstAssign = true;
+    	let playingSongID = undefined;
 
     	function getWaveformImage(index) {
     		return __awaiter(this, void 0, void 0, function* () {
@@ -8853,14 +9056,17 @@ var app = (function () {
     			? void 0
     			: $playbackStore[index];
 
+    			if (song.ID === playingSongID) return;
+    			playingSongID = song.ID;
+
     			// Fade Out
     			document.documentElement.style.setProperty("--waveform-opacity", "0");
 
-    			setWaveSource(song.SourceFile).then(() => {
-    				let currentSongPlaying = $playbackStore[$playbackCursor[0]];
-
+    			setWaveSource(song.SourceFile, song.Duration).then(() => {
     				setTimeout(
     					() => {
+    						let currentSongPlaying = $playbackStore[$playbackCursor[0]];
+
     						if (currentSongPlaying.ID === song.ID) {
     							document.documentElement.style.setProperty("--waveform-opacity", "1");
     						}
@@ -8872,9 +9078,8 @@ var app = (function () {
     	}
 
     	onMount(() => {
-    		createWaveFormElement();
+    		createWaveFormElement("#waveform-data");
     		hookPlayerProgressEvents();
-    		progressBackgroundEl = document.querySelector("img#waveform-image");
     	});
 
     	function hookPlayerProgressEvents() {
@@ -8941,8 +9146,8 @@ var app = (function () {
     		pauseDebounce,
     		isMouseDown,
     		isMouseIn,
-    		progressBackgroundEl,
     		isPlaybackCursorFirstAssign,
+    		playingSongID,
     		getWaveformImage,
     		hookPlayerProgressEvents,
     		$playbackCursor,
@@ -8956,8 +9161,8 @@ var app = (function () {
     		if ("pauseDebounce" in $$props) pauseDebounce = $$props.pauseDebounce;
     		if ("isMouseDown" in $$props) isMouseDown = $$props.isMouseDown;
     		if ("isMouseIn" in $$props) isMouseIn = $$props.isMouseIn;
-    		if ("progressBackgroundEl" in $$props) progressBackgroundEl = $$props.progressBackgroundEl;
     		if ("isPlaybackCursorFirstAssign" in $$props) $$invalidate(2, isPlaybackCursorFirstAssign = $$props.isPlaybackCursorFirstAssign);
+    		if ("playingSongID" in $$props) playingSongID = $$props.playingSongID;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -8967,9 +9172,7 @@ var app = (function () {
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*isPlaybackCursorFirstAssign, $playbackCursor*/ 12) {
     			 {
-    				if (isPlaybackCursorFirstAssign === true) {
-    					$$invalidate(2, isPlaybackCursorFirstAssign = false);
-    				} else {
+    				if (isPlaybackCursorFirstAssign === true) $$invalidate(2, isPlaybackCursorFirstAssign = false); else {
     					getWaveformImage($playbackCursor[0]);
     				}
     			}

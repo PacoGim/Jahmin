@@ -29,6 +29,14 @@ export function getConfigIPC(): Promise<object> {
 	})
 }
 
+export function saveWaveformIPC(audioBuffer:AudioBuffer) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('save-waveform', audioBuffer).then((result) => {
+			resolve(result)
+		})
+	})
+}
+
 export function saveConfig(newConfig: object) {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('save-config', newConfig).then((result) => {
@@ -37,6 +45,7 @@ export function saveConfig(newConfig: object) {
 	})
 }
 
+// TODO Dynamic
 const sortBy = 'RootDir'
 
 export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any> {
