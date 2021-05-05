@@ -14,7 +14,6 @@ loadIPC()
 import { getCollectionMap, loadDb } from './services/loki.service'
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
-import { getWaveformsFolderWatcher } from './functions/getWaveform.fn'
 
 async function createMainWindow() {
 	const config = getConfig()
@@ -107,7 +106,6 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
 	killAllWorkers()
 	getRootDirFolderWatcher()?.close()
-	getWaveformsFolderWatcher()?.close()
 })
 
 // process.on('exit',()=>{

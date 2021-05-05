@@ -4,7 +4,7 @@ import { setWaveColor } from './waveform.service'
 
 export async function getAlbumColors(id: string) {
 	getAlbumColorsIPC(id).then((color: ColorType) => {
-		setWaveColor(`hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
+		// setWaveColor(`hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
 
 		document.documentElement.style.setProperty('--low-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
 		document.documentElement.style.setProperty('--base-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessBase}%)`)

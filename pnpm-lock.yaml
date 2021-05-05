@@ -12,6 +12,7 @@ specifiers:
   '@types/sharp': ^0.27.3
   '@types/string-hash': ^1.1.1
   '@types/wavesurfer.js': ^3.3.2
+  '@types/xxhashjs': ^0.2.2
   canvas: ^2.6.1
   chokidar: ^3.5.1
   concurrently: ^5.3.0
@@ -45,6 +46,7 @@ specifiers:
   wavesurfer-sum-to-mono-plugin: ^1.0.1
   wavesurfer.js: ^4.6.0
   web-audio-api: ^0.2.2
+  xxhashjs: ^0.2.2
 
 dependencies:
   '@types/lokijs': 1.5.4
@@ -77,6 +79,7 @@ dependencies:
   wavesurfer-sum-to-mono-plugin: 1.0.1
   wavesurfer.js: 4.6.0
   web-audio-api: 0.2.2
+  xxhashjs: 0.2.2
 
 devDependencies:
   '@types/hash-sum': 1.0.0
@@ -89,6 +92,7 @@ devDependencies:
   '@types/sharp': 0.27.3
   '@types/string-hash': 1.1.1
   '@types/wavesurfer.js': 3.3.2
+  '@types/xxhashjs': 0.2.2
   concurrently: 5.3.0
   electron: 12.0.2
   electron-window-state: 5.0.3
@@ -215,6 +219,10 @@ packages:
   /@types/node/14.14.37:
     resolution: {integrity: sha512-XYmBiy+ohOR4Lh5jE379fV2IU+6Jn4g5qASinhitfyO71b/sCo6MKsMLF5tc7Zf2CE8hViVQyYSobJNke8OvUw==}
 
+  /@types/node/14.14.44:
+    resolution: {integrity: sha512-+gaugz6Oce6ZInfI/tK4Pq5wIIkJMEJUu92RB3Eu93mtj4wjjjz9EB5mLp5s1pSsLXdC/CPut/xF20ZzAQJbTA==}
+    dev: true
+
   /@types/node/14.14.7:
     resolution: {integrity: sha512-Zw1vhUSQZYw+7u5dAwNbIA9TuTotpzY/OF7sJM9FqPOF3SPjKnxrjoTktXDZgUjybf4cWVBP7O8wvKdSaGHweg==}
     dev: true
@@ -238,6 +246,12 @@ packages:
 
   /@types/wavesurfer.js/3.3.2:
     resolution: {integrity: sha512-bujQxJR+2TDXe5hc2kG36n38rJtdTbCafQddWaNJwgdNDVqMVxCCKAFYRQWq1aXnN/h9BTHLIVwi4gM8IwRt5A==}
+    dev: true
+
+  /@types/xxhashjs/0.2.2:
+    resolution: {integrity: sha512-+hlk/W1kgnZn0vR22XNhxHk/qIRQYF54i0UTF2MwBAPd0e7xSy+jKOJwSwTdRQrNnOMRVv+vsh8ITV0uyhp2yg==}
+    dependencies:
+      '@types/node': 14.14.44
     dev: true
 
   /aac/0.1.3_av@0.4.9:
@@ -828,6 +842,10 @@ packages:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+    dev: false
+
+  /cuint/0.2.2:
+    resolution: {integrity: sha1-QICG1AlVDCYxFVYZ6fp7ytw7mRs=}
     dev: false
 
   /currently-unhandled/0.4.1:
@@ -3578,6 +3596,12 @@ packages:
   /xtend/4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
+    dev: false
+
+  /xxhashjs/0.2.2:
+    resolution: {integrity: sha512-AkTuIuVTET12tpsVIQo+ZU6f/qDmKuRUcjaqR+OIvm+aCBsZ95i7UVY5WJ9TMsSaZ0DA2WxoZ4acu0sPH+OKAw==}
+    dependencies:
+      cuint: 0.2.2
     dev: false
 
   /y18n/4.0.1:

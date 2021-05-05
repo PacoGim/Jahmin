@@ -1,18 +1,15 @@
 import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
-import { getCollection, getCollectionMap, getNewPromiseDbVersion } from './loki.service'
+import { getCollectionMap, getNewPromiseDbVersion } from './loki.service'
 import { orderSongs } from './songFilter.service'
-// import { nanoid } from 'nanoid'
-import { getAlbumArray, getNewPromiseAlbumArray } from './albumFiltering.service'
 import { getAlbumCover } from './albumArt.service'
 import { getAlbumColors } from './getAlbumColors.fn'
-
 import { customAlphabet } from 'nanoid'
-import { getWaveform } from '../functions/getWaveform.fn'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
 import { groupSongs } from '../functions/groupSong.fn'
 import { getMaxTaskQueueLength, getTaskQueueLength } from './folderWatcher.service'
+import { getPeaks, savePeaks } from './peaks'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -35,9 +32,13 @@ export function loadIPC() {
 		return config
 	})
 
-	ipcMain.handle('save-waveform', async (evt, arg) => {
-		console.log(arg)
+	ipcMain.handle('save-peaks', async (evt, sourceFile, peaks) => {
+		savePeaks(sourceFile, peaks)
 		return ''
+	})
+
+	ipcMain.handle('get-peaks', async (evt, sourceFile) => {
+		return await getPeaks(sourceFile)
 	})
 
 	ipcMain.handle('get-grouping', async (evt, valueToGroupBy) => {
@@ -94,10 +95,6 @@ export function loadIPC() {
 
 	ipcMain.handle('sync-db-version', async (evt, value) => {
 		return await getNewPromiseDbVersion(value)
-	})
-
-	ipcMain.handle('get-waveform', async (evt, path) => {
-		return await getWaveform(path)
 	})
 
 	ipcMain.handle('get-changes-progress', async (evt) => {

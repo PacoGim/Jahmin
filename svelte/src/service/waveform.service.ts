@@ -1,11 +1,12 @@
-import WaveSurfer from '../service/wavesurfer/wavesurfer.js'
-import { saveWaveformIPC } from './ipc.service.js'
+import WaveSurfer from '../service/wavesurfer/wavesurfer.min.js'
+import { getPeaksIPC, savePeaksIPC } from './ipc.service.js'
 
-let waveSurfer: WaveSurfer
+// let waveSurfer: WaveSurfer
+let waveSurfer = undefined
 
-export function createWaveFormElement(hook: string) {
-	waveSurfer = WaveSurfer.create({
-		container: hook,
+function getNewWaveSurfer(hslColorString: string) {
+	let waveSurfer = WaveSurfer.create({
+		container: '#waveform-data',
 		waveColor: 'transparent',
 		cursorColor: 'transparent',
 		progressColor: 'transparent',
@@ -16,36 +17,43 @@ export function createWaveFormElement(hook: string) {
 		barGap: null,
 		barMinHeight: 1
 	})
-
+	waveSurfer.setWaveColor('#000')
+	// waveSurfer.setWaveColor(hslColorString)
 	waveSurfer.setHeight(64)
+
+	return waveSurfer
 }
 
-export function setWaveSource(source: string, duration: number) {
-	return new Promise((resolve, reject) => {
-		let pcm = JSON.parse(localStorage.getItem(source)) || undefined
-
-		waveSurfer.load(source, pcm, undefined, duration)
-
-		waveSurfer.on('redraw', () => {
-			resolve('')
+export function setWaveSource(sourceFile: string, duration: number) {
+	return new Promise(async (resolve, reject) => {
+		document.documentElement.style.setProperty('--waveform-opacity', '0')
+		if (waveSurfer !== undefined) {
+			waveSurfer.empty()
+			waveSurfer.destroy()
 			waveSurfer.unAll()
-		})
+			waveSurfer = undefined
+			document.querySelector('wave').remove()
+		}
 
-		waveSurfer.on('peaks-ready', (peaks: number[]) => {
-			// TODO Save peaks to pc
-			// console.log('peaks-ready', source)
-			// localStorage.setItem(source, JSON.stringify(peaks))
-			// resolve('')
-			// waveSurfer.unAll()
+		waveSurfer = getNewWaveSurfer('')
+
+		let peaks = await getPeaksIPC(sourceFile)
+
+		waveSurfer.load(sourceFile, peaks, undefined, duration)
+
+		waveSurfer.on('redraw', (newPeaks) => {
+			document.documentElement.style.setProperty('--waveform-opacity', '1')
+			if (!peaks) {
+				savePeaksIPC(sourceFile, newPeaks)
+			}
 		})
 	})
 }
 
-let currentWaveColor = ''
+// let currentWaveColor = ''
 
-export function setWaveColor(hslColorString: string) {
-	if (currentWaveColor !== hslColorString) {
-		currentWaveColor = hslColorString
-		waveSurfer.setWaveColor(hslColorString)
-	}
-}
+// export function setWaveColor(hslColorString: string) {
+// 	if (currentWaveColor !== hslColorString) {
+// 		currentWaveColor = hslColorString
+// 	}
+// }

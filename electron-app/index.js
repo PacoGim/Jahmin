@@ -24,7 +24,6 @@ const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const loki_service_1 = require("./services/loki.service");
 const folderWatcher_service_1 = require("./services/folderWatcher.service");
-const getWaveform_fn_1 = require("./functions/getWaveform.fn");
 function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = config_service_1.getConfig();
@@ -97,10 +96,9 @@ electron_1.app.on('window-all-closed', () => {
     }
 });
 electron_1.app.on('before-quit', () => {
-    var _a, _b;
+    var _a;
     worker_service_1.killAllWorkers();
     (_a = folderWatcher_service_1.getRootDirFolderWatcher()) === null || _a === void 0 ? void 0 : _a.close();
-    (_b = getWaveform_fn_1.getWaveformsFolderWatcher()) === null || _b === void 0 ? void 0 : _b.close();
 });
 // process.on('exit',()=>{
 // })

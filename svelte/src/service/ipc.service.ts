@@ -29,9 +29,17 @@ export function getConfigIPC(): Promise<object> {
 	})
 }
 
-export function saveWaveformIPC(audioBuffer:AudioBuffer) {
+export function savePeaksIPC(sourceFile: string, peaks: number[]): Promise<number[] | undefined> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('save-waveform', audioBuffer).then((result) => {
+		ipcRenderer.invoke('save-peaks', sourceFile, peaks).then((result: number[] | undefined) => {
+			resolve(result)
+		})
+	})
+}
+
+export function getPeaksIPC(sourceFile: string) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-peaks', sourceFile).then((result) => {
 			resolve(result)
 		})
 	})
@@ -121,18 +129,6 @@ export function getChangesProgressIPC() {
 		ipcRenderer.invoke('get-changes-progress').then((result) => {
 			resolve(result)
 		})
-	})
-}
-
-export function getWaveformIPC(path): Promise<string> {
-	return new Promise((resolve, reject) => {
-		try {
-			ipcRenderer.invoke('get-waveform', path).then((result) => {
-				resolve(result)
-			})
-		} catch (error) {
-			console.log('Oops', error)
-		}
 	})
 }
 

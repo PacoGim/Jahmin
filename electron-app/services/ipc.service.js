@@ -17,11 +17,11 @@ const songFilter_service_1 = require("./songFilter.service");
 const albumArt_service_1 = require("./albumArt.service");
 const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
 const nanoid_1 = require("nanoid");
-const getWaveform_fn_1 = require("../functions/getWaveform.fn");
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 const hashString_fn_1 = require("../functions/hashString.fn");
 const groupSong_fn_1 = require("../functions/groupSong.fn");
 const folderWatcher_service_1 = require("./folderWatcher.service");
+const peaks_1 = require("./peaks");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
@@ -39,9 +39,12 @@ function loadIPC() {
         let config = config_service_1.getConfig();
         return config;
     }));
-    electron_1.ipcMain.handle('save-waveform', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
-        console.log(arg);
+    electron_1.ipcMain.handle('save-peaks', (evt, sourceFile, peaks) => __awaiter(this, void 0, void 0, function* () {
+        peaks_1.savePeaks(sourceFile, peaks);
         return '';
+    }));
+    electron_1.ipcMain.handle('get-peaks', (evt, sourceFile) => __awaiter(this, void 0, void 0, function* () {
+        return yield peaks_1.getPeaks(sourceFile);
     }));
     electron_1.ipcMain.handle('get-grouping', (evt, valueToGroupBy) => __awaiter(this, void 0, void 0, function* () {
         return groupSong_fn_1.groupSongs(valueToGroupBy);
@@ -86,9 +89,6 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
         return yield loki_service_1.getNewPromiseDbVersion(value);
-    }));
-    electron_1.ipcMain.handle('get-waveform', (evt, path) => __awaiter(this, void 0, void 0, function* () {
-        return yield getWaveform_fn_1.getWaveform(path);
     }));
     electron_1.ipcMain.handle('get-changes-progress', (evt) => __awaiter(this, void 0, void 0, function* () {
         return {

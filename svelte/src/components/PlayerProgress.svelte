@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getWaveformIPC } from '../service/ipc.service'
+	import { getPeaksIPC } from '../service/ipc.service'
 	import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
-	import { createWaveFormElement, setWaveSource } from '../service/waveform.service'
+	import { setWaveSource } from '../service/waveform.service'
 
 	export let player: HTMLAudioElement
 	export let song: SongType
@@ -21,11 +21,11 @@
 		if (isPlaybackCursorFirstAssign === true) isPlaybackCursorFirstAssign = false
 		else {
 			$playbackCursor
-			getWaveformImage($playbackCursor[0])
+			getWaveform($playbackCursor[0])
 		}
 	}
 
-	async function getWaveformImage(index: number) {
+	async function getWaveform(index: number) {
 		let song = $playbackStore?.[index]
 
 		if (song.ID === playingSongID) return
@@ -33,21 +33,21 @@
 		playingSongID = song.ID
 
 		// Fade Out
-		document.documentElement.style.setProperty('--waveform-opacity', '0')
+		// document.documentElement.style.setProperty('--waveform-opacity', '1')
 
 		setWaveSource(song.SourceFile, song.Duration).then(() => {
-			setTimeout(() => {
+			// setTimeout(() => {
 				let currentSongPlaying = $playbackStore[$playbackCursor[0]]
 
 				if (currentSongPlaying.ID === song.ID) {
-					document.documentElement.style.setProperty('--waveform-opacity', '1')
+					// document.documentElement.style.setProperty('--waveform-opacity', '1')
 				}
-			}, 250)
+			// }, 250)
 		})
 	}
 
 	onMount(() => {
-		createWaveFormElement('#waveform-data')
+		// createWaveFormElement('#waveform-data')
 		hookPlayerProgressEvents()
 	})
 
@@ -129,7 +129,8 @@
 	player-progress #waveform-data {
 		z-index: 0;
 		width: 100%;
-		opacity: var(--waveform-opacity);
+		/* opacity: var(--waveform-opacity); */
+		opacity: 1;
 		/* backdrop-filter: blur(0px); */
 		transition: opacity 250ms linear;
 	}
