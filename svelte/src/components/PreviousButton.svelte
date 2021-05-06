@@ -34,3 +34,10 @@
 	<polygon points="13,48.5 100,92 100,5 " />
 	<rect x="0" y="4.75" transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 10 96.5001)" width="10" height="87" />
 </svg>
+
+<style>
+	svg {
+		filter: drop-shadow(1px 1px 0 var(--low-color)) drop-shadow(2px 2px 0 var(--low-color))
+			drop-shadow(3px 3px 0 var(--low-color));
+	}
+</style>

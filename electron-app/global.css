@@ -27,10 +27,15 @@
 	--art-grid-gap: 1rem;
 
 	--waveform-opacity: 1;
+	--waveform-transition-duration: 150ms;
 
 	--progress-bar-fill: 50%;
 
 	/* --song-list-svlt-height: 150px; */
+}
+
+wave canvas{
+	/* width: 100% !important; */
 }
 
 html {

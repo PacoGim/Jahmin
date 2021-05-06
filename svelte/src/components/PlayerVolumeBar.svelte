@@ -71,6 +71,7 @@
 
 <style>
 	volume-bar {
+		margin: 0 1rem;
 		display: grid;
 		grid-template-columns: 100%;
 

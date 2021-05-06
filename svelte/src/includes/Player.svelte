@@ -14,6 +14,7 @@
 	import { nextSong } from '../functions/nextSong.fn'
 	import { escapeString } from '../functions/escapeString.fn'
 	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/final.store'
+	import { parseDuration } from '../functions/parseDuration.fn'
 
 	let progress: number = 0
 
@@ -25,6 +26,12 @@
 	let playingInterval: NodeJS.Timeout = undefined
 
 	let firstPlaybackCursorAssign = true
+
+	let songTime = {
+		currentTime: '00:00',
+		duration: '00:00',
+		timeLeft: '00:00'
+	}
 
 	$: {
 		if (firstPlaybackCursorAssign === true) {
@@ -60,6 +67,12 @@
 		player.src = url
 
 		currentSong = songToPlay
+
+		songTime = {
+			currentTime: parseDuration(0),
+			duration: parseDuration(songToPlay['Duration']),
+			timeLeft: parseDuration(songToPlay['Duration'] - 0)
+		}
 
 		if (doPlayNow === true) {
 			player
@@ -151,6 +164,12 @@
 			progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
 
 			document.documentElement.style.setProperty('--song-time', `${progress}%`)
+
+			songTime = {
+				currentTime: parseDuration(player.currentTime),
+				duration: parseDuration(currentSong['Duration']),
+				timeLeft: parseDuration(currentSong['Duration'] - player.currentTime)
+			}
 		}, 100)
 	}
 
@@ -161,11 +180,11 @@
 	}
 </script>
 
-<player-svlt>
-	<audio controls={true} on:play={() => startInterval()} on:pause={() => stopInterval()} on:ended={() => nextSong()}>
-		<track kind="captions" />
-	</audio>
+<audio controls={true} on:play={() => startInterval()} on:pause={() => stopInterval()} on:ended={() => nextSong()}>
+	<track kind="captions" />
+</audio>
 
+<player-svlt>
 	<player-buttons>
 		<PreviousButton {player} />
 		<PlayButton {player} />
@@ -174,7 +193,15 @@
 
 	<PlayerVolumeBar {player} />
 
+	<song-duration>
+		{songTime.currentTime}/{songTime.duration}
+	</song-duration>
+
 	<PlayerProgress {player} song={currentSong} />
+
+	<song-time-left>
+		-{songTime.timeLeft}
+	</song-time-left>
 </player-svlt>
 
 <style>
@@ -184,8 +211,11 @@
 		display: flex;
 		align-items: center;
 		background-color: var(--high-color);
+		color: var(--low-color);
 
-		transition: background-color 300ms ease-in-out;
+		transition-property: background-color, color;
+		transition-duration: 300ms;
+		transition-timing-function: ease-in-out;
 	}
 
 	audio {
@@ -199,6 +229,10 @@
 		height: var(--button-size);
 		display: flex;
 		flex-direction: row;
+	}
+
+	song-time-left {
+		margin-right: 1rem;
 	}
 
 	:global(player-buttons > *) {

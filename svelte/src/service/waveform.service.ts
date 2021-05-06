@@ -1,10 +1,13 @@
 import WaveSurfer from '../service/wavesurfer/wavesurfer.min.js'
 import { getPeaksIPC, savePeaksIPC } from './ipc.service.js'
 
-// let waveSurfer: WaveSurfer
+let waveformTransitionDuration = Number(
+	getComputedStyle(document.body).getPropertyValue('--waveform-transition-duration').replace('ms', '')
+)
+
 let waveSurfer = undefined
 
-function getNewWaveSurfer(hslColorString: string) {
+function getNewWaveSurfer() {
 	let waveSurfer = WaveSurfer.create({
 		container: '#waveform-data',
 		waveColor: 'transparent',
@@ -15,45 +18,41 @@ function getNewWaveSurfer(hslColorString: string) {
 		hideScrollbar: true,
 		barWidth: 1,
 		barGap: null,
-		barMinHeight: 1
+		barMinHeight: 1/3
 	})
-	waveSurfer.setWaveColor('#000')
-	// waveSurfer.setWaveColor(hslColorString)
+
+	waveSurfer.setWaveColor(getComputedStyle(document.body).getPropertyValue('--low-color'))
 	waveSurfer.setHeight(64)
 
 	return waveSurfer
 }
 
-export function setWaveSource(sourceFile: string, duration: number) {
-	return new Promise(async (resolve, reject) => {
-		document.documentElement.style.setProperty('--waveform-opacity', '0')
+export async function setWaveSource(sourceFile: string, duration: number) {
+	let peaks = await getPeaksIPC(sourceFile)
+
+	document.documentElement.style.setProperty('--waveform-opacity', '0')
+
+	setTimeout(() => {
 		if (waveSurfer !== undefined) {
 			waveSurfer.empty()
 			waveSurfer.destroy()
 			waveSurfer.unAll()
 			waveSurfer = undefined
-			document.querySelector('wave').remove()
 		}
 
 		waveSurfer = getNewWaveSurfer('')
-
-		let peaks = await getPeaksIPC(sourceFile)
-
 		waveSurfer.load(sourceFile, peaks, undefined, duration)
 
-		waveSurfer.on('redraw', (newPeaks) => {
+		if (peaks) {
 			document.documentElement.style.setProperty('--waveform-opacity', '1')
-			if (!peaks) {
-				savePeaksIPC(sourceFile, newPeaks)
-			}
-		})
-	})
+		} else {
+			waveSurfer.on('redraw', () => {
+				document.documentElement.style.setProperty('--waveform-opacity', '1')
+
+				waveSurfer.exportPCM(512, undefined, true, undefined).then((newPeaks) => {
+					savePeaksIPC(sourceFile, newPeaks)
+				})
+			})
+		}
+	}, waveformTransitionDuration)
 }
-
-// let currentWaveColor = ''
-
-// export function setWaveColor(hslColorString: string) {
-// 	if (currentWaveColor !== hslColorString) {
-// 		currentWaveColor = hslColorString
-// 	}
-// }

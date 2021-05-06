@@ -6,17 +6,12 @@
 	import { albumPlayingIdStore, selectedAlbumId, selectedSongsStore, songPlayingIDStore } from '../store/final.store'
 
 	import Star from './Star.svelte'
+import { parseDuration } from '../functions/parseDuration.fn';
 
 	export let song: SongType
 	export let index: number
 
-	function parseDuration(duration: number) {
-		if (duration >= 60 * 60) {
-			return new Date(duration * 1000).toISOString().substr(11, 8)
-		} else {
-			return new Date(duration * 1000).toISOString().substr(14, 5)
-		}
-	}
+
 
 	onMount(() => {
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))

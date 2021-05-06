@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getPeaksIPC } from '../service/ipc.service'
 	import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 	import { setWaveSource } from '../service/waveform.service'
@@ -32,22 +31,10 @@
 
 		playingSongID = song.ID
 
-		// Fade Out
-		// document.documentElement.style.setProperty('--waveform-opacity', '1')
-
-		setWaveSource(song.SourceFile, song.Duration).then(() => {
-			// setTimeout(() => {
-				let currentSongPlaying = $playbackStore[$playbackCursor[0]]
-
-				if (currentSongPlaying.ID === song.ID) {
-					// document.documentElement.style.setProperty('--waveform-opacity', '1')
-				}
-			// }, 250)
-		})
+		setWaveSource(song.SourceFile, song.Duration)
 	}
 
 	onMount(() => {
-		// createWaveFormElement('#waveform-data')
 		hookPlayerProgressEvents()
 	})
 
@@ -97,41 +84,70 @@
 </script>
 
 <player-progress>
+	<player-gloss />
 	<progress-foreground />
 	<div id="waveform-data" />
 </player-progress>
 
 <style>
 	player-progress {
-		position: relative;
+		--player-progress-border-radius: 4px;
+
+		cursor: pointer;
+
+		display: grid;
 		width: 100%;
-		height: 64px;
+		margin: 1rem;
+		height: calc(100% - 1rem);
+		border: 2px solid white;
+
+		border-radius: var(--player-progress-border-radius);
 	}
 
-	player-progress > * {
-		position: absolute;
-		top: 0;
-		left: 0;
-		display: block;
-		height: 64px;
+	player-gloss {
+		grid-area: 1/1/1/1;
+		pointer-events: none;
+
+		background: linear-gradient(
+			to bottom,
+			rgba(255, 255, 255, 0.5) 0%,
+			rgba(255, 255, 255, 0.25) 8%,
+			rgba(255, 255, 255, 0) 100%
+		);
+
+		height: 100%;
+		width: 100%;
+		z-index: 2;
 	}
 
 	player-progress progress-foreground {
+		grid-area: 1/1/1/1;
 		z-index: 1;
-		mix-blend-mode: soft-light;
-		background-color: rgba(0, 0, 0, 0.5);
-		/* mix-blend-mode: hard-light;
-		background-color: var(--high-color); */
+		opacity: 0.5;
+		background-color: var(--high-color);
+
+		width: 0;
 		min-width: var(--song-time);
-		transition: min-width 100ms linear;
+
+		transition-property: min-width, background-color;
+		transition-duration: 100ms, 300ms;
+		transition-timing-function: linear;
+		height: 100%;
+
+		border-radius: var(--player-progress-border-radius);
 	}
 
 	player-progress #waveform-data {
+		grid-area: 1/1/1/1;
 		z-index: 0;
 		width: 100%;
-		/* opacity: var(--waveform-opacity); */
-		opacity: 1;
-		/* backdrop-filter: blur(0px); */
-		transition: opacity 250ms linear;
+		border-radius: var(--player-progress-border-radius);
+		opacity: var(--waveform-opacity);
+		transition: opacity var(--waveform-transition-duration) linear;
+	}
+
+	:global(player-progress #waveform-data wave) {
+		border-radius: var(--player-progress-border-radius);
+		height: 100% !important;
 	}
 </style>
