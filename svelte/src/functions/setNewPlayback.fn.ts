@@ -5,12 +5,12 @@ import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/fin
 import type { SongType } from '../types/song.type'
 
 export async function setNewPlayback(
-	albumID: string,
+	albumId: string,
 	playbackSongs: SongType[],
-	SONG_ID_TO_PLAY: number | undefined,
+	SONG_Id_TO_PLAY: number | undefined,
 	playNow: boolean
 ) {
-	let indexToPlay = playbackSongs.findIndex((song) => song.ID === SONG_ID_TO_PLAY)
+	let indexToPlay = playbackSongs.findIndex((song) => song.ID === SONG_Id_TO_PLAY)
 
 	if (indexToPlay === -1) {
 		indexToPlay = 0
@@ -18,15 +18,15 @@ export async function setNewPlayback(
 
 	//TODO Sorting
 
-	albumPlayingIdStore.set(albumID)
+	albumPlayingIdStore.set(albumId)
 	playbackStore.set(playbackSongs)
 	playbackCursor.set([indexToPlay, playNow])
-	getAlbumColors(albumID)
+	getAlbumColors(albumId)
 }
 
-function fetchAlbum(albumID): Promise<SongType[]> {
+function fetchAlbum(albumId): Promise<SongType[]> {
 	return new Promise(async (resolve, reject) => {
-		let album = await getAlbumIPC(albumID)
+		let album = await getAlbumIPC(albumId)
 		let songs = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
 		resolve(songs)
 	})

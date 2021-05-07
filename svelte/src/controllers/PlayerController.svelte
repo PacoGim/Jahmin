@@ -54,8 +54,8 @@
 	})
 
 	function loadPreviousState() {
-		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumID')
-		let lastPlayedSongID = Number(localStorage.getItem('LastPlayedSongID'))
+		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
+		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 
 		getAlbumColors(lastPlayedAlbumId)
 
@@ -64,7 +64,7 @@
 		getAlbumIPC(lastPlayedAlbumId).then((result) => {
 			$songListStore = result.Songs
 
-			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongID, false)
+			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongId, false)
 		})
 	}
 
@@ -81,16 +81,16 @@
 		const TAG_EDIT_SVLT = elementMap.get('TAG-EDIT-SVLT')
 
 		if (ALBUM_ELEMENT) {
-			const ALBUM_ID = ALBUM_ELEMENT.getAttribute('id')
+			const ALBUM_Id = ALBUM_ELEMENT.getAttribute('id')
 
-			getAlbumIPC(ALBUM_ID).then((result) => {
+			getAlbumIPC(ALBUM_Id).then((result) => {
 				if (evt.type === 'dblclick') {
-					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
+					setNewPlayback(ALBUM_Id, result.Songs, undefined, true)
 				} else if (evt.type === 'click') {
 					// Prevents resetting array if album unchanged.
 
-					if ($selectedAlbumId !== ALBUM_ID) {
-						$selectedAlbumId = ALBUM_ID
+					if ($selectedAlbumId !== ALBUM_Id) {
+						$selectedAlbumId = ALBUM_Id
 						$songListStore = result.Songs
 					}
 				}
@@ -98,11 +98,11 @@
 		}
 
 		if (SONG_LIST_ITEM_ELEMENT) {
-			const SONG_ID_TO_PLAY = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
+			const SONG_Id_TO_PLAY = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then((result) => {
-					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID_TO_PLAY, true)
+					setNewPlayback($selectedAlbumId, result.Songs, SONG_Id_TO_PLAY, true)
 				})
 			}
 		}

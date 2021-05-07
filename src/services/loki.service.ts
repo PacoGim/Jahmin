@@ -65,7 +65,7 @@ export function loadDb(): Promise<void> {
 				})
 			},
 			autosave: true,
-			autosaveInterval: 60000,
+			autosaveInterval: 10000,
 			autosaveCallback: () => {
 				mapCollection()
 				dbVersionResolve(getDBFileTimeStamp())

@@ -54,7 +54,7 @@ function loadDb() {
                 });
             },
             autosave: true,
-            autosaveInterval: 60000,
+            autosaveInterval: 10000,
             autosaveCallback: () => {
                 mapCollection();
                 dbVersionResolve(getDBFileTimeStamp());

@@ -13,9 +13,9 @@
 	let coverSrc = undefined /* Image Source URL */
 
 	onMount(() => {
-		let lastPlayedAlbumID = localStorage.getItem('LastPlayedAlbumID')
+		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 
-		if (album.ID === lastPlayedAlbumID) {
+		if (album.ID === lastPlayedAlbumId) {
 			let albumEl = document.querySelector(`#${CSS.escape(album.ID)}`)
 			if (albumEl) {
 				albumEl.scrollIntoView({ block: 'center' })
@@ -43,7 +43,7 @@
 	// 			}
 	// 		},
 	// 		{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
-	// 	).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['ID'])}`))
+	// 	).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['Id'])}`))
 	// }
 
 	/*

@@ -2,7 +2,7 @@
 	import { albumCoverArtMapStore, selectedAlbumId } from '../store/final.store'
 
 	let previousCoverArtVersion = undefined
-	let previousCoverArtID = undefined
+	let previousCoverArtId = undefined
 
 	$: {
 		// Loads cover if Cover Art map (If image updated) or Selected Album changes.
@@ -13,9 +13,9 @@
 		// If Found
 		if (coverArt) {
 			// Checks if the previous id changed.
-			if (previousCoverArtID !== $selectedAlbumId) {
+			if (previousCoverArtId !== $selectedAlbumId) {
 				// If changed it updates both id and version.
-				previousCoverArtID = $selectedAlbumId
+				previousCoverArtId = $selectedAlbumId
 				previousCoverArtVersion = coverArt.version
 
 				// If a cover is available, load it.

@@ -32,12 +32,12 @@
 			if (pathsName.includes('ALBUM')) {
 				let albumElement: HTMLElement = e.composedPath().find((path: HTMLElement) => path.tagName === 'ALBUM') as HTMLElement
 
-				let albumID = albumElement.getAttribute('id')
+				let albumId = albumElement.getAttribute('id')
 
 				showContextMenuIPC(
 					'AlbumContextMenu',
 					JSON.stringify({
-						albumID
+						albumId
 					})
 				)
 			}

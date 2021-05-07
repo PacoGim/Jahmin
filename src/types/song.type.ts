@@ -1,19 +1,19 @@
 export type SongType = {
-	[index: string]: string | number | undefined
+	[index: string]: string | number | undefined | null
 	Album?: string // Modifiable
 	AlbumArtist?: string // Modifiable
 	Artist?: string // Modifiable
 	Composer?: string // Modifiable
 	Genre?: string // Modifiable
 	Title?: string // Modifiable
-	Track?: number // Modifiable
+	Track?: number | null // Modifiable
 	Rating?: number // Modifiable
 	Comment?: string // Modifiable
-	DiscNumber?: number // Modifiable
-	Date_Year?: number | undefined // Modifiable
-	Date_Month?: number | undefined // Modifiable
-	Date_Day?: number | undefined // Modifiable
-	SourceFile: string
+	DiscNumber?: number | null // Modifiable
+	Date_Year?: number | null // Modifiable
+	Date_Month?: number | null // Modifiable
+	Date_Day?: number | null // Modifiable
+	SourceFile?: string
 	Extension?: string
 	Size?: number
 	Duration?: number

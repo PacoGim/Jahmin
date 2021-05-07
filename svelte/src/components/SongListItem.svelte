@@ -3,7 +3,7 @@
 
 	import type { SongType } from '../types/song.type'
 
-	import { albumPlayingIdStore, selectedAlbumId, selectedSongsStore, songPlayingIDStore } from '../store/final.store'
+	import { albumPlayingIdStore, selectedAlbumId, selectedSongsStore, songPlayingIdStore } from '../store/final.store'
 
 	import Star from './Star.svelte'
 import { parseDuration } from '../functions/parseDuration.fn';
@@ -14,9 +14,9 @@ import { parseDuration } from '../functions/parseDuration.fn';
 
 
 	onMount(() => {
-		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))
+		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 
-		$songPlayingIDStore = lastPlayedSongId
+		$songPlayingIdStore = lastPlayedSongId
 
 		if (lastPlayedSongId === song.ID) {
 			let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
@@ -36,7 +36,7 @@ import { parseDuration } from '../functions/parseDuration.fn';
 	id={song.ID}
 	{index}
 	class="
-	{$songPlayingIDStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
+	{$songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
 		? 'playing'
 		: ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"

@@ -1,4 +1,6 @@
+import { escapeString } from '../functions/escapeString.fn.js'
 import WaveSurfer from '../service/wavesurfer/wavesurfer.min.js'
+import { getAlbumColors } from './getAlbumColors.fn.js'
 import { getPeaksIPC, savePeaksIPC } from './ipc.service.js'
 
 let waveformTransitionDuration = Number(
@@ -7,7 +9,7 @@ let waveformTransitionDuration = Number(
 
 let waveSurfer = undefined
 
-function getNewWaveSurfer() {
+function getNewWaveSurfer(color: string) {
 	let waveSurfer = WaveSurfer.create({
 		container: '#waveform-data',
 		waveColor: 'transparent',
@@ -18,17 +20,18 @@ function getNewWaveSurfer() {
 		hideScrollbar: true,
 		barWidth: 1,
 		barGap: null,
-		barMinHeight: 1/3
+		barMinHeight: 1 / 3
 	})
 
-	waveSurfer.setWaveColor(getComputedStyle(document.body).getPropertyValue('--low-color'))
+	waveSurfer.setWaveColor(color)
 	waveSurfer.setHeight(64)
 
 	return waveSurfer
 }
 
-export async function setWaveSource(sourceFile: string, duration: number) {
+export async function setWaveSource(sourceFile: string, albumId: string, duration: number) {
 	let peaks = await getPeaksIPC(sourceFile)
+	let color = await getAlbumColors(albumId)
 
 	document.documentElement.style.setProperty('--waveform-opacity', '0')
 
@@ -40,13 +43,15 @@ export async function setWaveSource(sourceFile: string, duration: number) {
 			waveSurfer = undefined
 		}
 
-		waveSurfer = getNewWaveSurfer('')
-		waveSurfer.load(sourceFile, peaks, undefined, duration)
+		waveSurfer = getNewWaveSurfer(`hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
+
+		waveSurfer.load(escapeString(sourceFile), peaks, undefined, duration)
 
 		if (peaks) {
 			document.documentElement.style.setProperty('--waveform-opacity', '1')
 		} else {
 			waveSurfer.on('redraw', () => {
+				console.log('Redrawing')
 				document.documentElement.style.setProperty('--waveform-opacity', '1')
 
 				waveSurfer.exportPCM(512, undefined, true, undefined).then((newPeaks) => {

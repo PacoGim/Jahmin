@@ -9,23 +9,22 @@
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
-	import { isPlaying, songPlayingIDStore } from '../store/final.store'
+	import { isPlaying, songPlayingIdStore } from '../store/final.store'
 
 	import { nextSong } from '../functions/nextSong.fn'
 	import { escapeString } from '../functions/escapeString.fn'
 	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/final.store'
 	import { parseDuration } from '../functions/parseDuration.fn'
+	import { setWaveSource } from '../service/waveform.service'
 
 	let progress: number = 0
 
 	let currentSong: SongType = undefined
-	let nextSongPreloaded: { ID: number; BufferUrl: string } = undefined
+	let nextSongPreloaded: { Id: number; BufferUrl: string } = undefined
 
 	let player: HTMLAudioElement = undefined
 
 	let playingInterval: NodeJS.Timeout = undefined
-
-	let firstPlaybackCursorAssign = true
 
 	let songTime = {
 		currentTime: '00:00',
@@ -33,15 +32,7 @@
 		timeLeft: '00:00'
 	}
 
-	$: {
-		if (firstPlaybackCursorAssign === true) {
-			firstPlaybackCursorAssign = false
-		} else {
-			// resetProgress()
-
-			playSong($playbackCursor)
-		}
-	}
+	$: playSong($playbackCursor)
 
 	let preLoadNextSongDebounce: NodeJS.Timeout = undefined
 
@@ -52,7 +43,9 @@
 		let songToPlay = songs[indexToPlay]
 		let url: string = undefined
 
-		if (songToPlay?.ID === nextSongPreloaded?.ID) {
+		if (songToPlay === undefined) return
+
+		if (songToPlay?.ID === nextSongPreloaded?.Id) {
 			url = nextSongPreloaded.BufferUrl
 		} else if (songToPlay?.ID) {
 			let songBuffer = await fetchSong(escapeString(songToPlay['SourceFile']))
@@ -74,14 +67,16 @@
 			timeLeft: parseDuration(songToPlay['Duration'] - 0)
 		}
 
+		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
+
 		if (doPlayNow === true) {
 			player
 				.play()
 				.then(() => {
-					$songPlayingIDStore = songToPlay.ID
+					$songPlayingIdStore = songToPlay.ID
 
-					localStorage.setItem('LastPlayedAlbumID', $albumPlayingIdStore)
-					localStorage.setItem('LastPlayedSongID', String(songToPlay.ID))
+					localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
+					localStorage.setItem('LastPlayedSongId', String(songToPlay.ID))
 					localStorage.setItem('LastPlayedSongIndex', String(indexToPlay))
 
 					clearTimeout(preLoadNextSongDebounce)
@@ -104,7 +99,7 @@
 		if (songToPlay) {
 			fetchSong(escapeString(songToPlay['SourceFile'])).then((buffer) => {
 				nextSongPreloaded = {
-					ID: songToPlay.ID,
+					Id: songToPlay.ID,
 					BufferUrl: getUrlFromBuffer(buffer)
 				}
 			})
@@ -193,13 +188,13 @@
 
 	<PlayerVolumeBar {player} />
 
-	<song-duration>
+	<song-duration class="song-time">
 		{songTime.currentTime}/{songTime.duration}
 	</song-duration>
 
 	<PlayerProgress {player} song={currentSong} />
 
-	<song-time-left>
+	<song-time-left class="song-time">
 		-{songTime.timeLeft}
 	</song-time-left>
 </player-svlt>
@@ -231,6 +226,10 @@
 		flex-direction: row;
 	}
 
+	.song-time {
+		font-size: 0.9rem;
+		font-variation-settings: 'wght' 500;
+	}
 	song-time-left {
 		margin-right: 1rem;
 	}

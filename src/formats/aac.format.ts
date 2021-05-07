@@ -22,7 +22,6 @@ function writeAacTags(filePath: string, newTags: any) {
 }
 
 export function getAacTags(filePath: string): Promise<SongType> {
-
 	return new Promise((resolve, reject) => {
 		exiftool.read(filePath).then((tags) => {
 			fs.stat(filePath, (err, fileStats) => {
@@ -44,16 +43,16 @@ export function getAacTags(filePath: string): Promise<SongType> {
 					//@ts-expect-error
 					Genre: tags['Genre'] || '',
 					//@ts-expect-error
-					DiscNumber: tags['DiskNumber'] || '',
+					DiscNumber: tags['DiskNumber'] || null,
 					Title: tags['Title'] || '',
 					//@ts-expect-error
-					Track: getTrack(tags['TrackNumber'], tags['Track']),
-					Rating: tags['RatingPercent'],
-					Date_Year: dateParsed['year'],
-					Date_Month: dateParsed['month'],
-					Date_Day: dateParsed['day'],
+					Track: getTrack(tags['TrackNumber'], tags['Track'])||null,
+					Rating: tags['RatingPercent'] || 0,
+					Date_Year: dateParsed['year'] || null,
+					Date_Month: dateParsed['month'] || null,
+					Date_Day: dateParsed['day'] || null,
 					Comment: tags['Comment'] || '',
-					SourceFile: tags['SourceFile'],
+					SourceFile: tags['SourceFile'] || '',
 					Extension: tags['FileTypeExtension'],
 					Size: fileStats.size,
 					Duration: tags['Duration'],

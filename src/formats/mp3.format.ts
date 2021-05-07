@@ -64,6 +64,8 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 
 		let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
 
+		tags.ID = stringHash(filePath)
+
 		tags.LastModified = STATS.mtimeMs
 		tags.Size = STATS.size
 		tags.SourceFile = filePath
@@ -71,20 +73,19 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 		tags.BitRate = METADATA.format.bitrate / 1000
 		tags.Duration = Math.trunc(METADATA.format.duration)
 
-		tags.Album = nativeTags?.TALB
-		tags.Artist = nativeTags?.TPE1
-		tags.AlbumArtist = nativeTags?.TPE2
-		tags.Comment = nativeTags?.COMM?.text
-		tags.Composer = nativeTags?.TCOM
-		tags.Date_Year = dateParsed.year
-		tags.Date_Month = dateParsed.month
-		tags.Date_Day = dateParsed.day
-		tags.DiscNumber = Number(nativeTags?.TPOS) || undefined
-		tags.Track = Number(nativeTags?.TRCK) || undefined
-		tags.Title = nativeTags?.TIT2
-		tags.Genre = nativeTags?.TCON
-		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating)
-		tags.ID = stringHash(filePath)
+		tags.Album = nativeTags?.TALB || ''
+		tags.Artist = nativeTags?.TPE1 || ''
+		tags.AlbumArtist = nativeTags?.TPE2 || ''
+		tags.Comment = nativeTags?.COMM?.text || ''
+		tags.Composer = nativeTags?.TCOM || ''
+		tags.Date_Year = dateParsed.year || null
+		tags.Date_Month = dateParsed.month || null
+		tags.Date_Day = dateParsed.day || null
+		tags.DiscNumber = Number(nativeTags?.TPOS) || null
+		tags.Track = Number(nativeTags?.TRCK) || null
+		tags.Title = nativeTags?.TIT2 || ''
+		tags.Genre = nativeTags?.TCON || ''
+		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || 0
 
 		resolve(tags)
 	})

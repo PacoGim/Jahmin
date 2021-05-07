@@ -67,7 +67,7 @@
 		e['path'].forEach((element: HTMLElement) => {
 			if (element.tagName === 'SONG-LIST-ITEM') {
 				let id = Number(element.getAttribute('id'))
-				let currentSelectedSong = Number(element.getAttribute('index'))
+				let currentSelectedSong = $songListStore.findIndex((song) => song.ID === Number(element.getAttribute('id')))
 
 				if (ctrlKey === false && metaKey === false && shiftKey === false) {
 					$selectedSongsStore = [id]
@@ -83,10 +83,10 @@
 
 				if (shiftKey === true && ctrlKey === false && metaKey === false) {
 					for (let i = currentSelectedSong; i !== lastSelectedSong; currentSelectedSong < lastSelectedSong ? i++ : i--) {
-						let currentID = $songListStore[i].ID
+						let currentId = $songListStore[i].ID
 
-						if (!$selectedSongsStore.find((i) => i === currentID)) {
-							$selectedSongsStore.push(currentID)
+						if (!$selectedSongsStore.find((i) => i === currentId)) {
+							$selectedSongsStore.push(currentId)
 						}
 					}
 				}
@@ -116,13 +116,12 @@
 	let isMouseDownInScroll = false
 
 	onMount(() => {
-
 		// Set an approximate value on how high would the song list container be to prevent
 		document.documentElement.style.setProperty('--song-list-svlt-height', `${SONG_AMOUNT * 30}px`)
 
 		scrollBarHandler()
 
-		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongID'))
+		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 
 		setTimeout(() => {
 			setScrollTimeFromSong(lastPlayedSongId)
@@ -237,10 +236,14 @@
 	}
 
 	song-list-progress-bar {
-		cursor: pointer;
 		display: block;
 		width: 1rem;
 		background-color: rgba(255, 255, 255, 0.15);
+
+		cursor: grab;
+	}
+	song-list-progress-bar:active {
+		cursor: grabbing;
 	}
 
 	song-list-progress-bar progress-fill {

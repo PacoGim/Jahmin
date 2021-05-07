@@ -104,9 +104,9 @@ export function getCoverIPC(rootDir) {
 	})
 }
 
-export function getAlbumIPC(albumID: string): Promise<AlbumType> {
+export function getAlbumIPC(albumId: string): Promise<AlbumType> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-album', albumID).then((result: AlbumType) => {
+		ipcRenderer.invoke('get-album', albumId).then((result: AlbumType) => {
 			if (result) {
 				// TODO Add custom sorting.
 				result.Songs = result.Songs.sort((a, b) => a.Track - b.Track)

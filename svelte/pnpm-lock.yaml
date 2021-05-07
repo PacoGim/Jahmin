@@ -153,7 +153,7 @@ packages:
     engines:
       node: '>=8'
     resolution:
-      integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
+      integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IdohdPlFp222wVALIheZJQSEg==
   /anymatch/3.1.1:
     dependencies:
       normalize-path: 3.0.0
@@ -207,7 +207,7 @@ packages:
     engines:
       node: '>=6'
     resolution:
-      integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
+      integrity: sha512-P8BjAsXvZS+VIdUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
   /chalk/2.4.2:
     dependencies:
       ansi-styles: 3.2.1

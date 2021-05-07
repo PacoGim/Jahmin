@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { playbackCursor, playbackStore } from '../store/final.store'
+	// import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
-	import { setWaveSource } from '../service/waveform.service'
+	// import { setWaveSource } from '../service/waveform.service'
 
 	export let player: HTMLAudioElement
 	export let song: SongType
@@ -12,10 +12,10 @@
 	let isMouseDown = false
 	let isMouseIn = false
 
-	let isPlaybackCursorFirstAssign = true
+	// let isPlaybackCursorFirstAssign = true
 
-	let playingSongID = undefined
-
+	// let playingSongId = undefined
+	/*
 	$: {
 		if (isPlaybackCursorFirstAssign === true) isPlaybackCursorFirstAssign = false
 		else {
@@ -27,12 +27,13 @@
 	async function getWaveform(index: number) {
 		let song = $playbackStore?.[index]
 
-		if (song.ID === playingSongID) return
+		if (song.ID === playingSongId) return
 
-		playingSongID = song.ID
+		playingSongId = song.ID
 
 		setWaveSource(song.SourceFile, song.Duration)
 	}
+	*/
 
 	onMount(() => {
 		hookPlayerProgressEvents()
@@ -93,7 +94,7 @@
 	player-progress {
 		--player-progress-border-radius: 4px;
 
-		cursor: pointer;
+		cursor: grab;
 
 		display: grid;
 		width: 100%;
@@ -102,6 +103,10 @@
 		border: 2px solid white;
 
 		border-radius: var(--player-progress-border-radius);
+	}
+
+	player-progress:active {
+		cursor: grabbing;
 	}
 
 	player-gloss {
