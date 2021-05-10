@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { updateSongProgress } from '../store/final.store'
 	// import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 	// import { setWaveSource } from '../service/waveform.service'
@@ -71,12 +72,17 @@
 
 			let selectedPercent = Math.ceil((100 / playerWidth) * evt['offsetX'])
 
+			let songPercentTime = song['Duration'] / (100 / selectedPercent)
+
+			// Allows for the player component to get the new value and update the song duration.
+			$updateSongProgress = songPercentTime
+
 			document.documentElement.style.setProperty('--song-time', `${selectedPercent}%`)
 
 			clearTimeout(pauseDebounce)
 
 			pauseDebounce = setTimeout(() => {
-				player.currentTime = song['Duration'] / (100 / selectedPercent)
+				player.currentTime = songPercentTime
 				playerForeground.classList.remove('not-smooth')
 				player.play()
 			}, 500)

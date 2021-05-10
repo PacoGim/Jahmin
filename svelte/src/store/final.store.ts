@@ -35,3 +35,5 @@ export let albumCoverArtMapStore: Writable<Map<string, CoverArtType>> = writable
 export let appTitle: Writable<string> = writable('Jahmin')
 
 export let dbVersion: Writable<number> = writable(0)
+
+export let updateSongProgress: Writable<number> = writable(-1)

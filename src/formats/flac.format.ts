@@ -66,7 +66,7 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 		tags.Date_Month = dateParsed.month || null
 		tags.Date_Day = dateParsed.day || null
 		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
-		tags.Track = Number(nativeTags?.TRACKNUMBER) || null
+		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
 		tags.Title = nativeTags?.TITLE || ''
 		tags.Genre = nativeTags?.GENRE || ''
 		tags.Rating = Number(nativeTags?.RATING) || 0

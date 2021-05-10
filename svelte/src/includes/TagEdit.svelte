@@ -1,13 +1,33 @@
 <script lang="ts">
+	import Star from '../components/Star.svelte'
+
+	import TagEditEditor from '../components/TagEdit-Editor.svelte'
+
+	import { getEmptyTagList } from '../functions/getEmptyTagList.fn'
+
 	import { selectedSongsStore, songListStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 
 	let songsToEdit: SongType[] = []
-	// let tagList=
+	let tagList = getEmptyTagList()
 
 	$: getSelectedSongs($selectedSongsStore, $songListStore)
 
 	$: if (songsToEdit.length !== 0) groupSongs(songsToEdit)
+
+	$: checkNewTags(tagList)
+
+	function checkNewTags(tagList) {
+		let newTags = {}
+
+		for (let tagName in tagList) {
+			if (tagList[tagName].value !== tagList[tagName].bind) {
+				newTags[tagName] = tagList[tagName].bind
+			}
+		}
+
+		console.log(newTags)
+	}
 
 	function getSelectedSongs(selectedSongs: number[], songList: SongType[]) {
 		if (songList.length <= 0) return
@@ -18,15 +38,137 @@
 			: (songsToEdit = songList.filter((song) => selectedSongs.includes(song.ID)))
 	}
 
-	function groupSongs(songsToEdit:SongType[]) {
+	function groupSongs(songsToEdit: SongType[]) {
+		let firstSong = songsToEdit[0]
 
-		console.log(songsToEdit[0])
+		// Sets up the tag lists with all the tags from the first song.
+		for (let tagName in firstSong) {
+			if (tagList[tagName]) {
+				tagList[tagName].value = firstSong[tagName]
+			}
+		}
 
+		for (let song of songsToEdit) {
+			for (let tagName in song) {
+				if (tagList[tagName] && tagList[tagName].value !== song[tagName]) {
+					tagList[tagName].value = '-'
+				}
+			}
+		}
+
+		for (let tagName in tagList) {
+			tagList[tagName].bind = tagList[tagName].value
+		}
+	}
+
+	function setStar(starChangeEvent) {
+		tagList.Rating.bind = starChangeEvent.detail.starLevel
+	}
+
+	function undoChange(tagType) {
+		tagList[tagType].bind = tagList[tagType].value
 	}
 </script>
 
 <tag-edit-svlt>
-	<component-name>Tag Edit</component-name>
+	<component-name>Songs Editing: {songsToEdit.length}</component-name>
+
+	<TagEditEditor
+		tagName="Title"
+		on:undoChange={() => undoChange('Title')}
+		type="input"
+		bind:value={tagList.Title.bind}
+		showUndo={tagList.Title.bind !== tagList.Title.value}
+	/>
+	<TagEditEditor
+		tagName="Album"
+		on:undoChange={() => undoChange('Album')}
+		type="input"
+		bind:value={tagList.Album.bind}
+		showUndo={tagList.Album.bind !== tagList.Album.value}
+	/>
+
+	<track-disc-tag-editor>
+		<TagEditEditor
+			tagName="Track #"
+			on:undoChange={() => undoChange('Track')}
+			warningMessage={tagList.Track.value === '.'
+				? 'It is not recommended to edit the track number of multiple songs at once.'
+				: undefined}
+			type="number"
+			bind:value={tagList.Track.bind}
+			showUndo={tagList.Track.bind !== tagList.Track.value}
+		/>
+		<TagEditEditor
+			tagName="Disc #"
+			on:undoChange={() => undoChange('DiscNumber')}
+			type="number"
+			bind:value={tagList.DiscNumber.bind}
+			showUndo={tagList.DiscNumber.bind !== tagList.DiscNumber.value}
+		/>
+	</track-disc-tag-editor>
+
+	<TagEditEditor
+		tagName="Artist"
+		on:undoChange={() => undoChange('Artist')}
+		type="textarea"
+		bind:value={tagList.Artist.bind}
+		showUndo={tagList.Artist.bind !== tagList.Artist.value}
+	/>
+	<TagEditEditor
+		tagName="Album Artist"
+		on:undoChange={() => undoChange('AlbumArtist')}
+		type="textarea"
+		bind:value={tagList.AlbumArtist.bind}
+		showUndo={tagList.AlbumArtist.bind !== tagList.AlbumArtist.value}
+	/>
+	<TagEditEditor
+		tagName="Genre"
+		on:undoChange={() => undoChange('Genre')}
+		type="input"
+		bind:value={tagList.Genre.bind}
+		showUndo={tagList.Genre.bind !== tagList.Genre.value}
+	/>
+	<TagEditEditor
+		tagName="Composer"
+		on:undoChange={() => undoChange('Composer')}
+		type="input"
+		bind:value={tagList.Composer.bind}
+		showUndo={tagList.Composer.bind !== tagList.Composer.value}
+	/>
+	<TagEditEditor
+		tagName="Comment"
+		on:undoChange={() => undoChange('Comment')}
+		type="textarea"
+		bind:value={tagList.Comment.bind}
+		showUndo={tagList.Comment.bind !== tagList.Comment.value}
+	/>
+
+	<date-tag-editor>
+		<TagEditEditor
+			tagName="Year"
+			on:undoChange={() => undoChange('Date_Year')}
+			type="number"
+			bind:value={tagList.Date_Year.bind}
+			showUndo={tagList.Date_Year.bind !== tagList.Date_Year.value}
+		/>
+		<TagEditEditor
+			tagName="Month"
+			on:undoChange={() => undoChange('Date_Month')}
+			type="number"
+			bind:value={tagList.Date_Month.bind}
+			showUndo={tagList.Date_Month.bind !== tagList.Date_Month.value}
+		/>
+		<TagEditEditor
+			tagName="Day"
+			on:undoChange={() => undoChange('Date_Day')}
+			type="number"
+			bind:value={tagList.Date_Day.bind}
+			showUndo={tagList.Date_Day.bind !== tagList.Date_Day.value}
+		/>
+	</date-tag-editor>
+
+	<Star on:starChange={setStar} songRating={Number(tagList.Rating.bind)} />
 
 	<button-group>
 		<button>Update</button>

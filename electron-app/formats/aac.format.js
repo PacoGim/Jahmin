@@ -47,7 +47,7 @@ function getAacTags(filePath) {
                     DiscNumber: tags['DiskNumber'] || null,
                     Title: tags['Title'] || '',
                     //@ts-expect-error
-                    Track: getTrack(tags['TrackNumber'], tags['Track']) || null,
+                    Track: getTrack(tags['TrackNumber'], tags['Track']) || 0,
                     Rating: tags['RatingPercent'] || 0,
                     Date_Year: dateParsed['year'] || null,
                     Date_Month: dateParsed['month'] || null,

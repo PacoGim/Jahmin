@@ -1,18 +1,22 @@
 <script lang="ts">
 	import { nanoid } from 'nanoid'
-	import { onMount } from 'svelte'
+	import { createEventDispatcher } from 'svelte'
+	const dispatch = createEventDispatcher()
 
 	import TagEditSeparator from './TagEdit-Separator.svelte'
 
 	export let value: string | number = ''
 	export let type: 'input' | 'textarea' | 'number' = 'input'
+	export let showUndo = false
 	export let placeholder = undefined
 	export let tagName
 	export let warningMessage = undefined
 
 	$: {
-		if (type === 'number' && value === null) {
-			value = ''
+		if (value && value !== '-' && type === 'number') {
+			if (typeof value === 'string') {
+				value = value.replace(/[^\d]/g, '')
+			}
 		}
 	}
 
@@ -36,11 +40,16 @@
 		{tagName}
 
 		<warning title={warningMessage} style={warningMessage === undefined ? 'display:none' : ''}>(❗)</warning>
+
+		{#if showUndo}
+			<img class="undoIcon" on:click={() => dispatch('undoChange')} src="./img/undo-arrow-svgrepo-com.svg" alt="" />
+		{/if}
 	</tag-name>
 	{#if type === 'input'}
 		<input type="text" {placeholder} bind:value />
 	{:else if type === 'number'}
-		<input type="number" {placeholder} bind:value />
+		<input type="text" {placeholder} bind:value />
+		<!-- <input type="number" {placeholder} bind:value /> -->
 	{:else if type === 'textarea'}
 		<textarea
 			rows="1"
@@ -69,9 +78,7 @@
 
 	tag-edit tag-name {
 		font-size: 0.9rem;
-
 		display: flex;
-
 		align-items: center;
 	}
 
@@ -81,6 +88,13 @@
 		line-height: 0;
 		margin-left: 5px;
 		cursor: help;
+	}
+
+	tag-edit tag-name img.undoIcon {
+		cursor: pointer;
+		height: 0.9rem;
+		filter: invert(1);
+		margin-left: 5px;
 	}
 
 	tag-edit textarea {

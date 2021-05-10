@@ -9,7 +9,7 @@
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
-	import { isPlaying, songPlayingIdStore } from '../store/final.store'
+	import { isPlaying, songPlayingIdStore, updateSongProgress } from '../store/final.store'
 
 	import { nextSong } from '../functions/nextSong.fn'
 	import { escapeString } from '../functions/escapeString.fn'
@@ -33,6 +33,17 @@
 	}
 
 	$: playSong($playbackCursor)
+
+	$: {
+		// Updates the song time based of the user seeking in the player progress component.
+		if ($updateSongProgress !== -1) {
+			songTime = {
+				currentTime: parseDuration($updateSongProgress),
+				duration: parseDuration(currentSong['Duration']),
+				timeLeft: parseDuration(currentSong['Duration'] - $updateSongProgress)
+			}
+		}
+	}
 
 	let preLoadNextSongDebounce: NodeJS.Timeout = undefined
 

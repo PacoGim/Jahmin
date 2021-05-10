@@ -162,6 +162,9 @@ var app = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
+    }
     let flushing = false;
     const seen_callbacks = new Set();
     function flush() {
@@ -346,6 +349,14 @@ var app = (function () {
                 throw new Error('Cannot have duplicate keys in a keyed each');
             }
             keys.add(key);
+        }
+    }
+
+    function bind(component, name, callback) {
+        const index = component.$$.props[name];
+        if (index !== undefined) {
+            component.$$.bound[index] = callback;
+            callback(component.$$.ctx[index]);
         }
     }
     function create_component(block) {
@@ -696,6 +707,7 @@ var app = (function () {
     let albumCoverArtMapStore = writable(new Map());
     let appTitle = writable('Jahmin');
     let dbVersion = writable(0);
+    let updateSongProgress = writable(-1);
 
     const { ipcRenderer } = require('electron');
     function getGroupingIPC(valueToGroupBy) {
@@ -2711,14 +2723,14 @@ var app = (function () {
     			t1 = space();
     			div = element("div");
     			set_custom_element_data(player_gloss, "class", "svelte-p2oxk6");
-    			add_location(player_gloss, file$8, 65, 1, 2315);
+    			add_location(player_gloss, file$8, 69, 1, 2562);
     			set_custom_element_data(progress_foreground, "class", "svelte-p2oxk6");
-    			add_location(progress_foreground, file$8, 66, 1, 2333);
+    			add_location(progress_foreground, file$8, 70, 1, 2580);
     			attr_dev(div, "id", "waveform-data");
     			attr_dev(div, "class", "svelte-p2oxk6");
-    			add_location(div, file$8, 67, 1, 2358);
+    			add_location(div, file$8, 71, 1, 2605);
     			set_custom_element_data(player_progress, "class", "svelte-p2oxk6");
-    			add_location(player_progress, file$8, 64, 0, 2296);
+    			add_location(player_progress, file$8, 68, 0, 2543);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2751,6 +2763,9 @@ var app = (function () {
     }
 
     function instance$8($$self, $$props, $$invalidate) {
+    	let $updateSongProgress;
+    	validate_store(updateSongProgress, "updateSongProgress");
+    	component_subscribe($$self, updateSongProgress, $$value => $$invalidate(5, $updateSongProgress = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerProgress", slots, []);
     	
@@ -2811,12 +2826,17 @@ var app = (function () {
     			playerForeground.classList.add("not-smooth");
     			let playerWidth = playerProgress["scrollWidth"];
     			let selectedPercent = Math.ceil(100 / playerWidth * evt["offsetX"]);
+    			let songPercentTime = song["Duration"] / (100 / selectedPercent);
+
+    			// Allows for the player component to get the new value and update the song duration.
+    			set_store_value(updateSongProgress, $updateSongProgress = songPercentTime, $updateSongProgress);
+
     			document.documentElement.style.setProperty("--song-time", `${selectedPercent}%`);
     			clearTimeout(pauseDebounce);
 
     			pauseDebounce = setTimeout(
     				() => {
-    					$$invalidate(0, player.currentTime = song["Duration"] / (100 / selectedPercent), player);
+    					$$invalidate(0, player.currentTime = songPercentTime, player);
     					playerForeground.classList.remove("not-smooth");
     					player.play();
     				},
@@ -2838,12 +2858,14 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		onMount,
+    		updateSongProgress,
     		player,
     		song,
     		pauseDebounce,
     		isMouseDown,
     		isMouseIn,
-    		hookPlayerProgressEvents
+    		hookPlayerProgressEvents,
+    		$updateSongProgress
     	});
 
     	$$self.$inject_state = $$props => {
@@ -3315,18 +3337,18 @@ var app = (function () {
     			t10 = text("-");
     			t11 = text(t11_value);
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$a, 155, 1, 6203);
+    			add_location(track, file$a, 165, 1, 6601);
     			audio.controls = audio_controls_value = true;
     			attr_dev(audio, "class", "svelte-72an4d");
-    			add_location(audio, file$a, 154, 0, 6086);
+    			add_location(audio, file$a, 164, 0, 6484);
     			set_custom_element_data(player_buttons, "class", "svelte-72an4d");
-    			add_location(player_buttons, file$a, 159, 1, 6254);
+    			add_location(player_buttons, file$a, 169, 1, 6652);
     			set_custom_element_data(song_duration, "class", "song-time svelte-72an4d");
-    			add_location(song_duration, file$a, 167, 1, 6396);
+    			add_location(song_duration, file$a, 177, 1, 6794);
     			set_custom_element_data(song_time_left, "class", "song-time svelte-72an4d");
-    			add_location(song_time_left, file$a, 173, 1, 6544);
+    			add_location(song_time_left, file$a, 183, 1, 6942);
     			set_custom_element_data(player_svlt, "class", "svelte-72an4d");
-    			add_location(player_svlt, file$a, 158, 0, 6239);
+    			add_location(player_svlt, file$a, 168, 0, 6637);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3359,9 +3381,9 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(audio, "play", /*play_handler*/ ctx[6], false, false, false),
-    					listen_dev(audio, "pause", /*pause_handler*/ ctx[7], false, false, false),
-    					listen_dev(audio, "ended", /*ended_handler*/ ctx[8], false, false, false)
+    					listen_dev(audio, "play", /*play_handler*/ ctx[7], false, false, false),
+    					listen_dev(audio, "pause", /*pause_handler*/ ctx[8], false, false, false),
+    					listen_dev(audio, "ended", /*ended_handler*/ ctx[9], false, false, false)
     				];
 
     				mounted = true;
@@ -3460,20 +3482,23 @@ var app = (function () {
 
     function instance$a($$self, $$props, $$invalidate) {
     	let $playbackCursor;
+    	let $updateSongProgress;
     	let $playbackStore;
     	let $isPlaying;
     	let $albumPlayingIdStore;
     	let $songPlayingIdStore;
     	validate_store(playbackCursor, "playbackCursor");
     	component_subscribe($$self, playbackCursor, $$value => $$invalidate(5, $playbackCursor = $$value));
+    	validate_store(updateSongProgress, "updateSongProgress");
+    	component_subscribe($$self, updateSongProgress, $$value => $$invalidate(6, $updateSongProgress = $$value));
     	validate_store(playbackStore, "playbackStore");
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(13, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(14, $playbackStore = $$value));
     	validate_store(isPlaying, "isPlaying");
-    	component_subscribe($$self, isPlaying, $$value => $$invalidate(14, $isPlaying = $$value));
+    	component_subscribe($$self, isPlaying, $$value => $$invalidate(15, $isPlaying = $$value));
     	validate_store(albumPlayingIdStore, "albumPlayingIdStore");
-    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(15, $albumPlayingIdStore = $$value));
+    	component_subscribe($$self, albumPlayingIdStore, $$value => $$invalidate(16, $albumPlayingIdStore = $$value));
     	validate_store(songPlayingIdStore, "songPlayingIdStore");
-    	component_subscribe($$self, songPlayingIdStore, $$value => $$invalidate(16, $songPlayingIdStore = $$value));
+    	component_subscribe($$self, songPlayingIdStore, $$value => $$invalidate(17, $songPlayingIdStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Player", slots, []);
 
@@ -3664,6 +3689,7 @@ var app = (function () {
     		PlayerVolumeBar,
     		isPlaying,
     		songPlayingIdStore,
+    		updateSongProgress,
     		nextSong,
     		escapeString,
     		albumPlayingIdStore,
@@ -3687,6 +3713,7 @@ var app = (function () {
     		startInterval,
     		stopInterval,
     		$playbackCursor,
+    		$updateSongProgress,
     		$playbackStore,
     		$isPlaying,
     		$albumPlayingIdStore,
@@ -3712,6 +3739,19 @@ var app = (function () {
     		if ($$self.$$.dirty & /*$playbackCursor*/ 32) {
     			 playSong($playbackCursor);
     		}
+
+    		if ($$self.$$.dirty & /*$updateSongProgress, currentSong*/ 65) {
+    			 {
+    				// Updates the song time based of the user seeking in the player progress component.
+    				if ($updateSongProgress !== -1) {
+    					$$invalidate(2, songTime = {
+    						currentTime: parseDuration($updateSongProgress),
+    						duration: parseDuration(currentSong["Duration"]),
+    						timeLeft: parseDuration(currentSong["Duration"] - $updateSongProgress)
+    					});
+    				}
+    			}
+    		}
     	};
 
     	return [
@@ -3721,6 +3761,7 @@ var app = (function () {
     		startInterval,
     		stopInterval,
     		$playbackCursor,
+    		$updateSongProgress,
     		play_handler,
     		pause_handler,
     		ended_handler
@@ -4733,60 +4774,87 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/TagEdit.svelte generated by Svelte v3.31.0 */
+    // This file replaces `index.js` in bundlers like webpack or Rollup,
 
-    const { console: console_1$2 } = globals;
-    const file$e = "src/includes/TagEdit.svelte";
+    if (process.env.NODE_ENV !== 'production') {
+      // All bundlers will remove this block in the production bundle.
+      if (
+        typeof navigator !== 'undefined' &&
+        navigator.product === 'ReactNative' &&
+        typeof crypto === 'undefined'
+      ) {
+        throw new Error(
+          'React Native does not have a built-in secure random generator. ' +
+            'If you don’t need unpredictable IDs use `nanoid/non-secure`. ' +
+            'For secure IDs, import `react-native-get-random-values` ' +
+            'before Nano ID.'
+        )
+      }
+      if (typeof msCrypto !== 'undefined' && typeof crypto === 'undefined') {
+        throw new Error(
+          'Import file with `if (!window.crypto) window.crypto = window.msCrypto`' +
+            ' before importing Nano ID to fix IE 11 support'
+        )
+      }
+      if (typeof crypto === 'undefined') {
+        throw new Error(
+          'Your browser does not have secure random generator. ' +
+            'If you don’t need unpredictable IDs, you can use nanoid/non-secure.'
+        )
+      }
+    }
+
+    let nanoid = (size = 21) => {
+      let id = '';
+      let bytes = crypto.getRandomValues(new Uint8Array(size));
+
+      // A compact alternative for `for (var i = 0; i < step; i++)`.
+      while (size--) {
+        // It is incorrect to use bytes exceeding the alphabet size.
+        // The following mask reduces the random byte in the 0-255 value
+        // range to the 0-63 value range. Therefore, adding hacks, such
+        // as empty string fallback or magic numbers, is unneccessary because
+        // the bitmask trims bytes down to the alphabet size.
+        let byte = bytes[size] & 63;
+        if (byte < 36) {
+          // `0-9a-z`
+          id += byte.toString(36);
+        } else if (byte < 62) {
+          // `A-Z`
+          id += (byte - 26).toString(36).toUpperCase();
+        } else if (byte < 63) {
+          id += '_';
+        } else {
+          id += '-';
+        }
+      }
+      return id
+    };
+
+    /* src/components/TagEdit-Separator.svelte generated by Svelte v3.31.0 */
+
+    const file$e = "src/components/TagEdit-Separator.svelte";
 
     function create_fragment$e(ctx) {
-    	let tag_edit_svlt;
-    	let component_name;
-    	let t1;
-    	let button_group;
-    	let button0;
-    	let t3;
-    	let button1;
+    	let tag_edit_separator;
 
     	const block = {
     		c: function create() {
-    			tag_edit_svlt = element("tag-edit-svlt");
-    			component_name = element("component-name");
-    			component_name.textContent = "Tag Edit";
-    			t1 = space();
-    			button_group = element("button-group");
-    			button0 = element("button");
-    			button0.textContent = "Update";
-    			t3 = space();
-    			button1 = element("button");
-    			button1.textContent = "Cancel";
-    			set_custom_element_data(component_name, "class", "svelte-1qow5dk");
-    			add_location(component_name, file$e, 21, 1, 685);
-    			attr_dev(button0, "class", "svelte-1qow5dk");
-    			add_location(button0, file$e, 24, 2, 746);
-    			attr_dev(button1, "class", "svelte-1qow5dk");
-    			add_location(button1, file$e, 26, 2, 773);
-    			set_custom_element_data(button_group, "class", "svelte-1qow5dk");
-    			add_location(button_group, file$e, 23, 1, 729);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1qow5dk");
-    			add_location(tag_edit_svlt, file$e, 20, 0, 668);
+    			tag_edit_separator = element("tag-edit-separator");
+    			set_custom_element_data(tag_edit_separator, "class", "svelte-igry7v");
+    			add_location(tag_edit_separator, file$e, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, tag_edit_svlt, anchor);
-    			append_dev(tag_edit_svlt, component_name);
-    			append_dev(tag_edit_svlt, t1);
-    			append_dev(tag_edit_svlt, button_group);
-    			append_dev(button_group, button0);
-    			append_dev(button_group, t3);
-    			append_dev(button_group, button1);
+    			insert_dev(target, tag_edit_separator, anchor);
     		},
     		p: noop,
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tag_edit_svlt);
+    			if (detaching) detach_dev(tag_edit_separator);
     		}
     	};
 
@@ -4801,21 +4869,1280 @@ var app = (function () {
     	return block;
     }
 
-    function groupSongs(songsToEdit) {
-    	console.log(songsToEdit[0]);
+    function instance$e($$self, $$props) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("TagEdit_Separator", slots, []);
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<TagEdit_Separator> was created with unknown prop '${key}'`);
+    	});
+
+    	return [];
     }
 
-    function instance$e($$self, $$props, $$invalidate) {
+    class TagEdit_Separator extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$e, create_fragment$e, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "TagEdit_Separator",
+    			options,
+    			id: create_fragment$e.name
+    		});
+    	}
+    }
+
+    /* src/components/TagEdit-Editor.svelte generated by Svelte v3.31.0 */
+    const file$f = "src/components/TagEdit-Editor.svelte";
+
+    // (38:2) {#if showUndo}
+    function create_if_block_3$1(ctx) {
+    	let img;
+    	let img_src_value;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			img = element("img");
+    			attr_dev(img, "class", "undoIcon svelte-rqpajj");
+    			if (img.src !== (img_src_value = "./img/undo-arrow-svgrepo-com.svg")) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "");
+    			add_location(img, file$f, 38, 3, 1141);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, img, anchor);
+
+    			if (!mounted) {
+    				dispose = listen_dev(img, "click", /*click_handler*/ ctx[8], false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(img);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3$1.name,
+    		type: "if",
+    		source: "(38:2) {#if showUndo}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (47:31) 
+    function create_if_block_2$1(ctx) {
+    	let textarea;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			textarea = element("textarea");
+    			attr_dev(textarea, "rows", "1");
+    			attr_dev(textarea, "class", "svelte-rqpajj");
+    			add_location(textarea, file$f, 47, 2, 1519);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, textarea, anchor);
+    			set_input_value(textarea, /*value*/ ctx[0]);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[11]),
+    					listen_dev(textarea, "mouseleave", /*mouseleave_handler*/ ctx[12], false, false, false),
+    					listen_dev(textarea, "mouseover", /*mouseover_handler*/ ctx[13], false, false, false),
+    					listen_dev(textarea, "input", /*input_handler*/ ctx[14], false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*value*/ 1) {
+    				set_input_value(textarea, /*value*/ ctx[0]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(textarea);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$1.name,
+    		type: "if",
+    		source: "(47:31) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (44:29) 
+    function create_if_block_1$2(ctx) {
+    	let input;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			input = element("input");
+    			attr_dev(input, "type", "text");
+    			attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
+    			attr_dev(input, "class", "svelte-rqpajj");
+    			add_location(input, file$f, 44, 2, 1378);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, input, anchor);
+    			set_input_value(input, /*value*/ ctx[0]);
+
+    			if (!mounted) {
+    				dispose = listen_dev(input, "input", /*input_input_handler_1*/ ctx[10]);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*placeholder*/ 8) {
+    				attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
+    			}
+
+    			if (dirty & /*value*/ 1 && input.value !== /*value*/ ctx[0]) {
+    				set_input_value(input, /*value*/ ctx[0]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(input);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(44:29) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (42:1) {#if type === 'input'}
+    function create_if_block$3(ctx) {
+    	let input;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			input = element("input");
+    			attr_dev(input, "type", "text");
+    			attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
+    			attr_dev(input, "class", "svelte-rqpajj");
+    			add_location(input, file$f, 42, 2, 1299);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, input, anchor);
+    			set_input_value(input, /*value*/ ctx[0]);
+
+    			if (!mounted) {
+    				dispose = listen_dev(input, "input", /*input_input_handler*/ ctx[9]);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*placeholder*/ 8) {
+    				attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
+    			}
+
+    			if (dirty & /*value*/ 1 && input.value !== /*value*/ ctx[0]) {
+    				set_input_value(input, /*value*/ ctx[0]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(input);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(42:1) {#if type === 'input'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$f(ctx) {
+    	let tag_edit;
+    	let tag_name;
+    	let t0;
+    	let t1;
+    	let warning;
+    	let t2;
+    	let warning_style_value;
+    	let t3;
+    	let t4;
+    	let t5;
+    	let tageditseparator;
+    	let current;
+    	let if_block0 = /*showUndo*/ ctx[2] && create_if_block_3$1(ctx);
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*type*/ ctx[1] === "input") return create_if_block$3;
+    		if (/*type*/ ctx[1] === "number") return create_if_block_1$2;
+    		if (/*type*/ ctx[1] === "textarea") return create_if_block_2$1;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block1 = current_block_type && current_block_type(ctx);
+    	tageditseparator = new TagEdit_Separator({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			tag_edit = element("tag-edit");
+    			tag_name = element("tag-name");
+    			t0 = text(/*tagName*/ ctx[4]);
+    			t1 = space();
+    			warning = element("warning");
+    			t2 = text("(❗)");
+    			t3 = space();
+    			if (if_block0) if_block0.c();
+    			t4 = space();
+    			if (if_block1) if_block1.c();
+    			t5 = space();
+    			create_component(tageditseparator.$$.fragment);
+    			attr_dev(warning, "title", /*warningMessage*/ ctx[5]);
+
+    			attr_dev(warning, "style", warning_style_value = /*warningMessage*/ ctx[5] === undefined
+    			? "display:none"
+    			: "");
+
+    			attr_dev(warning, "class", "svelte-rqpajj");
+    			add_location(warning, file$f, 35, 2, 1015);
+    			set_custom_element_data(tag_name, "class", "svelte-rqpajj");
+    			add_location(tag_name, file$f, 32, 1, 989);
+    			set_custom_element_data(tag_edit, "id", /*id*/ ctx[7]);
+    			set_custom_element_data(tag_edit, "class", "svelte-rqpajj");
+    			add_location(tag_edit, file$f, 31, 0, 972);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tag_edit, anchor);
+    			append_dev(tag_edit, tag_name);
+    			append_dev(tag_name, t0);
+    			append_dev(tag_name, t1);
+    			append_dev(tag_name, warning);
+    			append_dev(warning, t2);
+    			append_dev(tag_name, t3);
+    			if (if_block0) if_block0.m(tag_name, null);
+    			append_dev(tag_edit, t4);
+    			if (if_block1) if_block1.m(tag_edit, null);
+    			append_dev(tag_edit, t5);
+    			mount_component(tageditseparator, tag_edit, null);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (!current || dirty & /*tagName*/ 16) set_data_dev(t0, /*tagName*/ ctx[4]);
+
+    			if (!current || dirty & /*warningMessage*/ 32) {
+    				attr_dev(warning, "title", /*warningMessage*/ ctx[5]);
+    			}
+
+    			if (!current || dirty & /*warningMessage*/ 32 && warning_style_value !== (warning_style_value = /*warningMessage*/ ctx[5] === undefined
+    			? "display:none"
+    			: "")) {
+    				attr_dev(warning, "style", warning_style_value);
+    			}
+
+    			if (/*showUndo*/ ctx[2]) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+    				} else {
+    					if_block0 = create_if_block_3$1(ctx);
+    					if_block0.c();
+    					if_block0.m(tag_name, null);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
+    				if_block1.p(ctx, dirty);
+    			} else {
+    				if (if_block1) if_block1.d(1);
+    				if_block1 = current_block_type && current_block_type(ctx);
+
+    				if (if_block1) {
+    					if_block1.c();
+    					if_block1.m(tag_edit, t5);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tageditseparator.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tageditseparator.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tag_edit);
+    			if (if_block0) if_block0.d();
+
+    			if (if_block1) {
+    				if_block1.d();
+    			}
+
+    			destroy_component(tageditseparator);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$f.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function resizeTextArea(id, type) {
+    	let textAreaElement = document.querySelector(`#${CSS.escape(id)}`).querySelector("textarea");
+
+    	if (textAreaElement) {
+    		if (type === "expand") {
+    			textAreaElement.style.minHeight = textAreaElement.scrollHeight + "px";
+    		} else if (type === "collapse") {
+    			textAreaElement.style.minHeight = "0px";
+    		}
+    	}
+    }
+
+    function instance$f($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("TagEdit_Editor", slots, []);
+    	const dispatch = createEventDispatcher();
+    	let { value = "" } = $$props;
+    	let { type = "input" } = $$props;
+    	let { showUndo = false } = $$props;
+    	let { placeholder = undefined } = $$props;
+    	let { tagName } = $$props;
+    	let { warningMessage = undefined } = $$props;
+    	let id = nanoid(10);
+    	const writable_props = ["value", "type", "showUndo", "placeholder", "tagName", "warningMessage"];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<TagEdit_Editor> was created with unknown prop '${key}'`);
+    	});
+
+    	const click_handler = () => dispatch("undoChange");
+
+    	function input_input_handler() {
+    		value = this.value;
+    		($$invalidate(0, value), $$invalidate(1, type));
+    	}
+
+    	function input_input_handler_1() {
+    		value = this.value;
+    		($$invalidate(0, value), $$invalidate(1, type));
+    	}
+
+    	function textarea_input_handler() {
+    		value = this.value;
+    		($$invalidate(0, value), $$invalidate(1, type));
+    	}
+
+    	const mouseleave_handler = () => {
+    		resizeTextArea(id, "collapse");
+    	};
+
+    	const mouseover_handler = () => {
+    		resizeTextArea(id, "expand");
+    	};
+
+    	const input_handler = () => {
+    		resizeTextArea(id, "expand");
+    	};
+
+    	$$self.$$set = $$props => {
+    		if ("value" in $$props) $$invalidate(0, value = $$props.value);
+    		if ("type" in $$props) $$invalidate(1, type = $$props.type);
+    		if ("showUndo" in $$props) $$invalidate(2, showUndo = $$props.showUndo);
+    		if ("placeholder" in $$props) $$invalidate(3, placeholder = $$props.placeholder);
+    		if ("tagName" in $$props) $$invalidate(4, tagName = $$props.tagName);
+    		if ("warningMessage" in $$props) $$invalidate(5, warningMessage = $$props.warningMessage);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		nanoid,
+    		createEventDispatcher,
+    		dispatch,
+    		TagEditSeparator: TagEdit_Separator,
+    		value,
+    		type,
+    		showUndo,
+    		placeholder,
+    		tagName,
+    		warningMessage,
+    		id,
+    		resizeTextArea
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("value" in $$props) $$invalidate(0, value = $$props.value);
+    		if ("type" in $$props) $$invalidate(1, type = $$props.type);
+    		if ("showUndo" in $$props) $$invalidate(2, showUndo = $$props.showUndo);
+    		if ("placeholder" in $$props) $$invalidate(3, placeholder = $$props.placeholder);
+    		if ("tagName" in $$props) $$invalidate(4, tagName = $$props.tagName);
+    		if ("warningMessage" in $$props) $$invalidate(5, warningMessage = $$props.warningMessage);
+    		if ("id" in $$props) $$invalidate(7, id = $$props.id);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*value, type*/ 3) {
+    			 {
+    				if (value && value !== "-" && type === "number") {
+    					if (typeof value === "string") {
+    						$$invalidate(0, value = value.replace(/[^\d]/g, ""));
+    					}
+    				}
+    			}
+    		}
+    	};
+
+    	return [
+    		value,
+    		type,
+    		showUndo,
+    		placeholder,
+    		tagName,
+    		warningMessage,
+    		dispatch,
+    		id,
+    		click_handler,
+    		input_input_handler,
+    		input_input_handler_1,
+    		textarea_input_handler,
+    		mouseleave_handler,
+    		mouseover_handler,
+    		input_handler
+    	];
+    }
+
+    class TagEdit_Editor extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$f, create_fragment$f, safe_not_equal, {
+    			value: 0,
+    			type: 1,
+    			showUndo: 2,
+    			placeholder: 3,
+    			tagName: 4,
+    			warningMessage: 5
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "TagEdit_Editor",
+    			options,
+    			id: create_fragment$f.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*tagName*/ ctx[4] === undefined && !("tagName" in props)) {
+    			console.warn("<TagEdit_Editor> was created without expected prop 'tagName'");
+    		}
+    	}
+
+    	get value() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set value(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get type() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set type(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get showUndo() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set showUndo(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get placeholder() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set placeholder(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get tagName() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set tagName(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get warningMessage() {
+    		throw new Error("<TagEdit_Editor>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set warningMessage(value) {
+    		throw new Error("<TagEdit_Editor>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    function getEmptyTagList() {
+        return {
+            Album: {
+                value: undefined,
+                bind: undefined
+            },
+            AlbumArtist: {
+                value: undefined,
+                bind: undefined
+            },
+            Comment: {
+                value: undefined,
+                bind: undefined
+            },
+            Composer: {
+                value: undefined,
+                bind: undefined
+            },
+            Artist: {
+                value: undefined,
+                bind: undefined
+            },
+            Date_Day: {
+                value: undefined,
+                bind: undefined
+            },
+            Date_Month: {
+                value: undefined,
+                bind: undefined
+            },
+            Date_Year: {
+                value: undefined,
+                bind: undefined
+            },
+            DiscNumber: {
+                value: undefined,
+                bind: undefined
+            },
+            Genre: {
+                value: undefined,
+                bind: undefined
+            },
+            Rating: {
+                value: undefined,
+                bind: undefined
+            },
+            Title: {
+                value: undefined,
+                bind: undefined
+            },
+            Track: {
+                value: undefined,
+                bind: undefined
+            }
+        };
+    }
+
+    /* src/includes/TagEdit.svelte generated by Svelte v3.31.0 */
+
+    const { console: console_1$2 } = globals;
+    const file$g = "src/includes/TagEdit.svelte";
+
+    function create_fragment$g(ctx) {
+    	let tag_edit_svlt;
+    	let component_name;
+    	let t0;
+    	let t1_value = /*songsToEdit*/ ctx[0].length + "";
+    	let t1;
+    	let t2;
+    	let tagediteditor0;
+    	let updating_value;
+    	let t3;
+    	let tagediteditor1;
+    	let updating_value_1;
+    	let t4;
+    	let track_disc_tag_editor;
+    	let tagediteditor2;
+    	let updating_value_2;
+    	let t5;
+    	let tagediteditor3;
+    	let updating_value_3;
+    	let t6;
+    	let tagediteditor4;
+    	let updating_value_4;
+    	let t7;
+    	let tagediteditor5;
+    	let updating_value_5;
+    	let t8;
+    	let tagediteditor6;
+    	let updating_value_6;
+    	let t9;
+    	let tagediteditor7;
+    	let updating_value_7;
+    	let t10;
+    	let tagediteditor8;
+    	let updating_value_8;
+    	let t11;
+    	let date_tag_editor;
+    	let tagediteditor9;
+    	let updating_value_9;
+    	let t12;
+    	let tagediteditor10;
+    	let updating_value_10;
+    	let t13;
+    	let tagediteditor11;
+    	let updating_value_11;
+    	let t14;
+    	let star;
+    	let t15;
+    	let button_group;
+    	let button0;
+    	let t17;
+    	let button1;
+    	let current;
+
+    	function tagediteditor0_value_binding(value) {
+    		/*tagediteditor0_value_binding*/ ctx[6].call(null, value);
+    	}
+
+    	let tagediteditor0_props = {
+    		tagName: "Title",
+    		type: "input",
+    		showUndo: /*tagList*/ ctx[1].Title.bind !== /*tagList*/ ctx[1].Title.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Title.bind !== void 0) {
+    		tagediteditor0_props.value = /*tagList*/ ctx[1].Title.bind;
+    	}
+
+    	tagediteditor0 = new TagEdit_Editor({
+    			props: tagediteditor0_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor0, "value", tagediteditor0_value_binding));
+    	tagediteditor0.$on("undoChange", /*undoChange_handler*/ ctx[7]);
+
+    	function tagediteditor1_value_binding(value) {
+    		/*tagediteditor1_value_binding*/ ctx[8].call(null, value);
+    	}
+
+    	let tagediteditor1_props = {
+    		tagName: "Album",
+    		type: "input",
+    		showUndo: /*tagList*/ ctx[1].Album.bind !== /*tagList*/ ctx[1].Album.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Album.bind !== void 0) {
+    		tagediteditor1_props.value = /*tagList*/ ctx[1].Album.bind;
+    	}
+
+    	tagediteditor1 = new TagEdit_Editor({
+    			props: tagediteditor1_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor1, "value", tagediteditor1_value_binding));
+    	tagediteditor1.$on("undoChange", /*undoChange_handler_1*/ ctx[9]);
+
+    	function tagediteditor2_value_binding(value) {
+    		/*tagediteditor2_value_binding*/ ctx[10].call(null, value);
+    	}
+
+    	let tagediteditor2_props = {
+    		tagName: "Track #",
+    		warningMessage: /*tagList*/ ctx[1].Track.value === "."
+    		? "It is not recommended to edit the track number of multiple songs at once."
+    		: undefined,
+    		type: "number",
+    		showUndo: /*tagList*/ ctx[1].Track.bind !== /*tagList*/ ctx[1].Track.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Track.bind !== void 0) {
+    		tagediteditor2_props.value = /*tagList*/ ctx[1].Track.bind;
+    	}
+
+    	tagediteditor2 = new TagEdit_Editor({
+    			props: tagediteditor2_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor2, "value", tagediteditor2_value_binding));
+    	tagediteditor2.$on("undoChange", /*undoChange_handler_2*/ ctx[11]);
+
+    	function tagediteditor3_value_binding(value) {
+    		/*tagediteditor3_value_binding*/ ctx[12].call(null, value);
+    	}
+
+    	let tagediteditor3_props = {
+    		tagName: "Disc #",
+    		type: "number",
+    		showUndo: /*tagList*/ ctx[1].DiscNumber.bind !== /*tagList*/ ctx[1].DiscNumber.value
+    	};
+
+    	if (/*tagList*/ ctx[1].DiscNumber.bind !== void 0) {
+    		tagediteditor3_props.value = /*tagList*/ ctx[1].DiscNumber.bind;
+    	}
+
+    	tagediteditor3 = new TagEdit_Editor({
+    			props: tagediteditor3_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor3, "value", tagediteditor3_value_binding));
+    	tagediteditor3.$on("undoChange", /*undoChange_handler_3*/ ctx[13]);
+
+    	function tagediteditor4_value_binding(value) {
+    		/*tagediteditor4_value_binding*/ ctx[14].call(null, value);
+    	}
+
+    	let tagediteditor4_props = {
+    		tagName: "Artist",
+    		type: "textarea",
+    		showUndo: /*tagList*/ ctx[1].Artist.bind !== /*tagList*/ ctx[1].Artist.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Artist.bind !== void 0) {
+    		tagediteditor4_props.value = /*tagList*/ ctx[1].Artist.bind;
+    	}
+
+    	tagediteditor4 = new TagEdit_Editor({
+    			props: tagediteditor4_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor4, "value", tagediteditor4_value_binding));
+    	tagediteditor4.$on("undoChange", /*undoChange_handler_4*/ ctx[15]);
+
+    	function tagediteditor5_value_binding(value) {
+    		/*tagediteditor5_value_binding*/ ctx[16].call(null, value);
+    	}
+
+    	let tagediteditor5_props = {
+    		tagName: "Album Artist",
+    		type: "textarea",
+    		showUndo: /*tagList*/ ctx[1].AlbumArtist.bind !== /*tagList*/ ctx[1].AlbumArtist.value
+    	};
+
+    	if (/*tagList*/ ctx[1].AlbumArtist.bind !== void 0) {
+    		tagediteditor5_props.value = /*tagList*/ ctx[1].AlbumArtist.bind;
+    	}
+
+    	tagediteditor5 = new TagEdit_Editor({
+    			props: tagediteditor5_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor5, "value", tagediteditor5_value_binding));
+    	tagediteditor5.$on("undoChange", /*undoChange_handler_5*/ ctx[17]);
+
+    	function tagediteditor6_value_binding(value) {
+    		/*tagediteditor6_value_binding*/ ctx[18].call(null, value);
+    	}
+
+    	let tagediteditor6_props = {
+    		tagName: "Genre",
+    		type: "input",
+    		showUndo: /*tagList*/ ctx[1].Genre.bind !== /*tagList*/ ctx[1].Genre.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Genre.bind !== void 0) {
+    		tagediteditor6_props.value = /*tagList*/ ctx[1].Genre.bind;
+    	}
+
+    	tagediteditor6 = new TagEdit_Editor({
+    			props: tagediteditor6_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor6, "value", tagediteditor6_value_binding));
+    	tagediteditor6.$on("undoChange", /*undoChange_handler_6*/ ctx[19]);
+
+    	function tagediteditor7_value_binding(value) {
+    		/*tagediteditor7_value_binding*/ ctx[20].call(null, value);
+    	}
+
+    	let tagediteditor7_props = {
+    		tagName: "Composer",
+    		type: "input",
+    		showUndo: /*tagList*/ ctx[1].Composer.bind !== /*tagList*/ ctx[1].Composer.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Composer.bind !== void 0) {
+    		tagediteditor7_props.value = /*tagList*/ ctx[1].Composer.bind;
+    	}
+
+    	tagediteditor7 = new TagEdit_Editor({
+    			props: tagediteditor7_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor7, "value", tagediteditor7_value_binding));
+    	tagediteditor7.$on("undoChange", /*undoChange_handler_7*/ ctx[21]);
+
+    	function tagediteditor8_value_binding(value) {
+    		/*tagediteditor8_value_binding*/ ctx[22].call(null, value);
+    	}
+
+    	let tagediteditor8_props = {
+    		tagName: "Comment",
+    		type: "textarea",
+    		showUndo: /*tagList*/ ctx[1].Comment.bind !== /*tagList*/ ctx[1].Comment.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Comment.bind !== void 0) {
+    		tagediteditor8_props.value = /*tagList*/ ctx[1].Comment.bind;
+    	}
+
+    	tagediteditor8 = new TagEdit_Editor({
+    			props: tagediteditor8_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor8, "value", tagediteditor8_value_binding));
+    	tagediteditor8.$on("undoChange", /*undoChange_handler_8*/ ctx[23]);
+
+    	function tagediteditor9_value_binding(value) {
+    		/*tagediteditor9_value_binding*/ ctx[24].call(null, value);
+    	}
+
+    	let tagediteditor9_props = {
+    		tagName: "Year",
+    		type: "number",
+    		showUndo: /*tagList*/ ctx[1].Date_Year.bind !== /*tagList*/ ctx[1].Date_Year.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Date_Year.bind !== void 0) {
+    		tagediteditor9_props.value = /*tagList*/ ctx[1].Date_Year.bind;
+    	}
+
+    	tagediteditor9 = new TagEdit_Editor({
+    			props: tagediteditor9_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor9, "value", tagediteditor9_value_binding));
+    	tagediteditor9.$on("undoChange", /*undoChange_handler_9*/ ctx[25]);
+
+    	function tagediteditor10_value_binding(value) {
+    		/*tagediteditor10_value_binding*/ ctx[26].call(null, value);
+    	}
+
+    	let tagediteditor10_props = {
+    		tagName: "Month",
+    		type: "number",
+    		showUndo: /*tagList*/ ctx[1].Date_Month.bind !== /*tagList*/ ctx[1].Date_Month.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Date_Month.bind !== void 0) {
+    		tagediteditor10_props.value = /*tagList*/ ctx[1].Date_Month.bind;
+    	}
+
+    	tagediteditor10 = new TagEdit_Editor({
+    			props: tagediteditor10_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor10, "value", tagediteditor10_value_binding));
+    	tagediteditor10.$on("undoChange", /*undoChange_handler_10*/ ctx[27]);
+
+    	function tagediteditor11_value_binding(value) {
+    		/*tagediteditor11_value_binding*/ ctx[28].call(null, value);
+    	}
+
+    	let tagediteditor11_props = {
+    		tagName: "Day",
+    		type: "number",
+    		showUndo: /*tagList*/ ctx[1].Date_Day.bind !== /*tagList*/ ctx[1].Date_Day.value
+    	};
+
+    	if (/*tagList*/ ctx[1].Date_Day.bind !== void 0) {
+    		tagediteditor11_props.value = /*tagList*/ ctx[1].Date_Day.bind;
+    	}
+
+    	tagediteditor11 = new TagEdit_Editor({
+    			props: tagediteditor11_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(tagediteditor11, "value", tagediteditor11_value_binding));
+    	tagediteditor11.$on("undoChange", /*undoChange_handler_11*/ ctx[29]);
+
+    	star = new Star({
+    			props: {
+    				songRating: Number(/*tagList*/ ctx[1].Rating.bind)
+    			},
+    			$$inline: true
+    		});
+
+    	star.$on("starChange", /*setStar*/ ctx[2]);
+
+    	const block = {
+    		c: function create() {
+    			tag_edit_svlt = element("tag-edit-svlt");
+    			component_name = element("component-name");
+    			t0 = text("Songs Editing: ");
+    			t1 = text(t1_value);
+    			t2 = space();
+    			create_component(tagediteditor0.$$.fragment);
+    			t3 = space();
+    			create_component(tagediteditor1.$$.fragment);
+    			t4 = space();
+    			track_disc_tag_editor = element("track-disc-tag-editor");
+    			create_component(tagediteditor2.$$.fragment);
+    			t5 = space();
+    			create_component(tagediteditor3.$$.fragment);
+    			t6 = space();
+    			create_component(tagediteditor4.$$.fragment);
+    			t7 = space();
+    			create_component(tagediteditor5.$$.fragment);
+    			t8 = space();
+    			create_component(tagediteditor6.$$.fragment);
+    			t9 = space();
+    			create_component(tagediteditor7.$$.fragment);
+    			t10 = space();
+    			create_component(tagediteditor8.$$.fragment);
+    			t11 = space();
+    			date_tag_editor = element("date-tag-editor");
+    			create_component(tagediteditor9.$$.fragment);
+    			t12 = space();
+    			create_component(tagediteditor10.$$.fragment);
+    			t13 = space();
+    			create_component(tagediteditor11.$$.fragment);
+    			t14 = space();
+    			create_component(star.$$.fragment);
+    			t15 = space();
+    			button_group = element("button-group");
+    			button0 = element("button");
+    			button0.textContent = "Update";
+    			t17 = space();
+    			button1 = element("button");
+    			button1.textContent = "Cancel";
+    			set_custom_element_data(component_name, "class", "svelte-1qow5dk");
+    			add_location(component_name, file$g, 56, 1, 1879);
+    			set_custom_element_data(track_disc_tag_editor, "class", "svelte-1qow5dk");
+    			add_location(track_disc_tag_editor, file$g, 73, 1, 2325);
+    			set_custom_element_data(date_tag_editor, "class", "svelte-1qow5dk");
+    			add_location(date_tag_editor, file$g, 129, 1, 3942);
+    			attr_dev(button0, "class", "svelte-1qow5dk");
+    			add_location(button0, file$g, 156, 2, 4705);
+    			attr_dev(button1, "class", "svelte-1qow5dk");
+    			add_location(button1, file$g, 158, 2, 4732);
+    			set_custom_element_data(button_group, "class", "svelte-1qow5dk");
+    			add_location(button_group, file$g, 155, 1, 4688);
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1qow5dk");
+    			add_location(tag_edit_svlt, file$g, 55, 0, 1862);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tag_edit_svlt, anchor);
+    			append_dev(tag_edit_svlt, component_name);
+    			append_dev(component_name, t0);
+    			append_dev(component_name, t1);
+    			append_dev(tag_edit_svlt, t2);
+    			mount_component(tagediteditor0, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t3);
+    			mount_component(tagediteditor1, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t4);
+    			append_dev(tag_edit_svlt, track_disc_tag_editor);
+    			mount_component(tagediteditor2, track_disc_tag_editor, null);
+    			append_dev(track_disc_tag_editor, t5);
+    			mount_component(tagediteditor3, track_disc_tag_editor, null);
+    			append_dev(tag_edit_svlt, t6);
+    			mount_component(tagediteditor4, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t7);
+    			mount_component(tagediteditor5, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t8);
+    			mount_component(tagediteditor6, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t9);
+    			mount_component(tagediteditor7, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t10);
+    			mount_component(tagediteditor8, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t11);
+    			append_dev(tag_edit_svlt, date_tag_editor);
+    			mount_component(tagediteditor9, date_tag_editor, null);
+    			append_dev(date_tag_editor, t12);
+    			mount_component(tagediteditor10, date_tag_editor, null);
+    			append_dev(date_tag_editor, t13);
+    			mount_component(tagediteditor11, date_tag_editor, null);
+    			append_dev(tag_edit_svlt, t14);
+    			mount_component(star, tag_edit_svlt, null);
+    			append_dev(tag_edit_svlt, t15);
+    			append_dev(tag_edit_svlt, button_group);
+    			append_dev(button_group, button0);
+    			append_dev(button_group, t17);
+    			append_dev(button_group, button1);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if ((!current || dirty[0] & /*songsToEdit*/ 1) && t1_value !== (t1_value = /*songsToEdit*/ ctx[0].length + "")) set_data_dev(t1, t1_value);
+    			const tagediteditor0_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor0_changes.showUndo = /*tagList*/ ctx[1].Title.bind !== /*tagList*/ ctx[1].Title.value;
+
+    			if (!updating_value && dirty[0] & /*tagList*/ 2) {
+    				updating_value = true;
+    				tagediteditor0_changes.value = /*tagList*/ ctx[1].Title.bind;
+    				add_flush_callback(() => updating_value = false);
+    			}
+
+    			tagediteditor0.$set(tagediteditor0_changes);
+    			const tagediteditor1_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor1_changes.showUndo = /*tagList*/ ctx[1].Album.bind !== /*tagList*/ ctx[1].Album.value;
+
+    			if (!updating_value_1 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_1 = true;
+    				tagediteditor1_changes.value = /*tagList*/ ctx[1].Album.bind;
+    				add_flush_callback(() => updating_value_1 = false);
+    			}
+
+    			tagediteditor1.$set(tagediteditor1_changes);
+    			const tagediteditor2_changes = {};
+
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor2_changes.warningMessage = /*tagList*/ ctx[1].Track.value === "."
+    			? "It is not recommended to edit the track number of multiple songs at once."
+    			: undefined;
+
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor2_changes.showUndo = /*tagList*/ ctx[1].Track.bind !== /*tagList*/ ctx[1].Track.value;
+
+    			if (!updating_value_2 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_2 = true;
+    				tagediteditor2_changes.value = /*tagList*/ ctx[1].Track.bind;
+    				add_flush_callback(() => updating_value_2 = false);
+    			}
+
+    			tagediteditor2.$set(tagediteditor2_changes);
+    			const tagediteditor3_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor3_changes.showUndo = /*tagList*/ ctx[1].DiscNumber.bind !== /*tagList*/ ctx[1].DiscNumber.value;
+
+    			if (!updating_value_3 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_3 = true;
+    				tagediteditor3_changes.value = /*tagList*/ ctx[1].DiscNumber.bind;
+    				add_flush_callback(() => updating_value_3 = false);
+    			}
+
+    			tagediteditor3.$set(tagediteditor3_changes);
+    			const tagediteditor4_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor4_changes.showUndo = /*tagList*/ ctx[1].Artist.bind !== /*tagList*/ ctx[1].Artist.value;
+
+    			if (!updating_value_4 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_4 = true;
+    				tagediteditor4_changes.value = /*tagList*/ ctx[1].Artist.bind;
+    				add_flush_callback(() => updating_value_4 = false);
+    			}
+
+    			tagediteditor4.$set(tagediteditor4_changes);
+    			const tagediteditor5_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor5_changes.showUndo = /*tagList*/ ctx[1].AlbumArtist.bind !== /*tagList*/ ctx[1].AlbumArtist.value;
+
+    			if (!updating_value_5 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_5 = true;
+    				tagediteditor5_changes.value = /*tagList*/ ctx[1].AlbumArtist.bind;
+    				add_flush_callback(() => updating_value_5 = false);
+    			}
+
+    			tagediteditor5.$set(tagediteditor5_changes);
+    			const tagediteditor6_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor6_changes.showUndo = /*tagList*/ ctx[1].Genre.bind !== /*tagList*/ ctx[1].Genre.value;
+
+    			if (!updating_value_6 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_6 = true;
+    				tagediteditor6_changes.value = /*tagList*/ ctx[1].Genre.bind;
+    				add_flush_callback(() => updating_value_6 = false);
+    			}
+
+    			tagediteditor6.$set(tagediteditor6_changes);
+    			const tagediteditor7_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor7_changes.showUndo = /*tagList*/ ctx[1].Composer.bind !== /*tagList*/ ctx[1].Composer.value;
+
+    			if (!updating_value_7 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_7 = true;
+    				tagediteditor7_changes.value = /*tagList*/ ctx[1].Composer.bind;
+    				add_flush_callback(() => updating_value_7 = false);
+    			}
+
+    			tagediteditor7.$set(tagediteditor7_changes);
+    			const tagediteditor8_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor8_changes.showUndo = /*tagList*/ ctx[1].Comment.bind !== /*tagList*/ ctx[1].Comment.value;
+
+    			if (!updating_value_8 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_8 = true;
+    				tagediteditor8_changes.value = /*tagList*/ ctx[1].Comment.bind;
+    				add_flush_callback(() => updating_value_8 = false);
+    			}
+
+    			tagediteditor8.$set(tagediteditor8_changes);
+    			const tagediteditor9_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor9_changes.showUndo = /*tagList*/ ctx[1].Date_Year.bind !== /*tagList*/ ctx[1].Date_Year.value;
+
+    			if (!updating_value_9 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_9 = true;
+    				tagediteditor9_changes.value = /*tagList*/ ctx[1].Date_Year.bind;
+    				add_flush_callback(() => updating_value_9 = false);
+    			}
+
+    			tagediteditor9.$set(tagediteditor9_changes);
+    			const tagediteditor10_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor10_changes.showUndo = /*tagList*/ ctx[1].Date_Month.bind !== /*tagList*/ ctx[1].Date_Month.value;
+
+    			if (!updating_value_10 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_10 = true;
+    				tagediteditor10_changes.value = /*tagList*/ ctx[1].Date_Month.bind;
+    				add_flush_callback(() => updating_value_10 = false);
+    			}
+
+    			tagediteditor10.$set(tagediteditor10_changes);
+    			const tagediteditor11_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) tagediteditor11_changes.showUndo = /*tagList*/ ctx[1].Date_Day.bind !== /*tagList*/ ctx[1].Date_Day.value;
+
+    			if (!updating_value_11 && dirty[0] & /*tagList*/ 2) {
+    				updating_value_11 = true;
+    				tagediteditor11_changes.value = /*tagList*/ ctx[1].Date_Day.bind;
+    				add_flush_callback(() => updating_value_11 = false);
+    			}
+
+    			tagediteditor11.$set(tagediteditor11_changes);
+    			const star_changes = {};
+    			if (dirty[0] & /*tagList*/ 2) star_changes.songRating = Number(/*tagList*/ ctx[1].Rating.bind);
+    			star.$set(star_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tagediteditor0.$$.fragment, local);
+    			transition_in(tagediteditor1.$$.fragment, local);
+    			transition_in(tagediteditor2.$$.fragment, local);
+    			transition_in(tagediteditor3.$$.fragment, local);
+    			transition_in(tagediteditor4.$$.fragment, local);
+    			transition_in(tagediteditor5.$$.fragment, local);
+    			transition_in(tagediteditor6.$$.fragment, local);
+    			transition_in(tagediteditor7.$$.fragment, local);
+    			transition_in(tagediteditor8.$$.fragment, local);
+    			transition_in(tagediteditor9.$$.fragment, local);
+    			transition_in(tagediteditor10.$$.fragment, local);
+    			transition_in(tagediteditor11.$$.fragment, local);
+    			transition_in(star.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tagediteditor0.$$.fragment, local);
+    			transition_out(tagediteditor1.$$.fragment, local);
+    			transition_out(tagediteditor2.$$.fragment, local);
+    			transition_out(tagediteditor3.$$.fragment, local);
+    			transition_out(tagediteditor4.$$.fragment, local);
+    			transition_out(tagediteditor5.$$.fragment, local);
+    			transition_out(tagediteditor6.$$.fragment, local);
+    			transition_out(tagediteditor7.$$.fragment, local);
+    			transition_out(tagediteditor8.$$.fragment, local);
+    			transition_out(tagediteditor9.$$.fragment, local);
+    			transition_out(tagediteditor10.$$.fragment, local);
+    			transition_out(tagediteditor11.$$.fragment, local);
+    			transition_out(star.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tag_edit_svlt);
+    			destroy_component(tagediteditor0);
+    			destroy_component(tagediteditor1);
+    			destroy_component(tagediteditor2);
+    			destroy_component(tagediteditor3);
+    			destroy_component(tagediteditor4);
+    			destroy_component(tagediteditor5);
+    			destroy_component(tagediteditor6);
+    			destroy_component(tagediteditor7);
+    			destroy_component(tagediteditor8);
+    			destroy_component(tagediteditor9);
+    			destroy_component(tagediteditor10);
+    			destroy_component(tagediteditor11);
+    			destroy_component(star);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$g.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function checkNewTags(tagList) {
+    	let newTags = {};
+
+    	for (let tagName in tagList) {
+    		if (tagList[tagName].value !== tagList[tagName].bind) {
+    			newTags[tagName] = tagList[tagName].bind;
+    		}
+    	}
+
+    	console.log(newTags);
+    }
+
+    function instance$g($$self, $$props, $$invalidate) {
     	let $selectedSongsStore;
     	let $songListStore;
     	validate_store(selectedSongsStore, "selectedSongsStore");
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(1, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(4, $selectedSongsStore = $$value));
     	validate_store(songListStore, "songListStore");
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(2, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(5, $songListStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TagEdit", slots, []);
     	
     	let songsToEdit = [];
+    	let tagList = getEmptyTagList();
 
     	function getSelectedSongs(selectedSongs, songList) {
     		if (songList.length <= 0) return;
@@ -4826,24 +6153,147 @@ var app = (function () {
     		: $$invalidate(0, songsToEdit = songList.filter(song => selectedSongs.includes(song.ID)));
     	}
 
+    	function groupSongs(songsToEdit) {
+    		let firstSong = songsToEdit[0];
+
+    		// Sets up the tag lists with all the tags from the first song.
+    		for (let tagName in firstSong) {
+    			if (tagList[tagName]) {
+    				$$invalidate(1, tagList[tagName].value = firstSong[tagName], tagList);
+    			}
+    		}
+
+    		for (let song of songsToEdit) {
+    			for (let tagName in song) {
+    				if (tagList[tagName] && tagList[tagName].value !== song[tagName]) {
+    					$$invalidate(1, tagList[tagName].value = "-", tagList);
+    				}
+    			}
+    		}
+
+    		for (let tagName in tagList) {
+    			$$invalidate(1, tagList[tagName].bind = tagList[tagName].value, tagList);
+    		}
+    	}
+
+    	function setStar(starChangeEvent) {
+    		$$invalidate(1, tagList.Rating.bind = starChangeEvent.detail.starLevel, tagList);
+    	}
+
+    	function undoChange(tagType) {
+    		$$invalidate(1, tagList[tagType].bind = tagList[tagType].value, tagList);
+    	}
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<TagEdit> was created with unknown prop '${key}'`);
     	});
 
+    	function tagediteditor0_value_binding(value) {
+    		tagList.Title.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler = () => undoChange("Title");
+
+    	function tagediteditor1_value_binding(value) {
+    		tagList.Album.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_1 = () => undoChange("Album");
+
+    	function tagediteditor2_value_binding(value) {
+    		tagList.Track.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_2 = () => undoChange("Track");
+
+    	function tagediteditor3_value_binding(value) {
+    		tagList.DiscNumber.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_3 = () => undoChange("DiscNumber");
+
+    	function tagediteditor4_value_binding(value) {
+    		tagList.Artist.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_4 = () => undoChange("Artist");
+
+    	function tagediteditor5_value_binding(value) {
+    		tagList.AlbumArtist.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_5 = () => undoChange("AlbumArtist");
+
+    	function tagediteditor6_value_binding(value) {
+    		tagList.Genre.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_6 = () => undoChange("Genre");
+
+    	function tagediteditor7_value_binding(value) {
+    		tagList.Composer.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_7 = () => undoChange("Composer");
+
+    	function tagediteditor8_value_binding(value) {
+    		tagList.Comment.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_8 = () => undoChange("Comment");
+
+    	function tagediteditor9_value_binding(value) {
+    		tagList.Date_Year.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_9 = () => undoChange("Date_Year");
+
+    	function tagediteditor10_value_binding(value) {
+    		tagList.Date_Month.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_10 = () => undoChange("Date_Month");
+
+    	function tagediteditor11_value_binding(value) {
+    		tagList.Date_Day.bind = value;
+    		$$invalidate(1, tagList);
+    	}
+
+    	const undoChange_handler_11 = () => undoChange("Date_Day");
+
     	$$self.$capture_state = () => ({
+    		Star,
+    		TagEditEditor: TagEdit_Editor,
+    		getEmptyTagList,
     		selectedSongsStore,
     		songListStore,
     		songsToEdit,
+    		tagList,
+    		checkNewTags,
     		getSelectedSongs,
     		groupSongs,
+    		setStar,
+    		undoChange,
     		$selectedSongsStore,
     		$songListStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ("songsToEdit" in $$props) $$invalidate(0, songsToEdit = $$props.songsToEdit);
+    		if ("tagList" in $$props) $$invalidate(1, tagList = $$props.tagList);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -4851,36 +6301,70 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedSongsStore, $songListStore*/ 6) {
-    			// let tagList=
+    		if ($$self.$$.dirty[0] & /*$selectedSongsStore, $songListStore*/ 48) {
     			 getSelectedSongs($selectedSongsStore, $songListStore);
     		}
 
-    		if ($$self.$$.dirty & /*songsToEdit*/ 1) {
+    		if ($$self.$$.dirty[0] & /*songsToEdit*/ 1) {
     			 if (songsToEdit.length !== 0) groupSongs(songsToEdit);
+    		}
+
+    		if ($$self.$$.dirty[0] & /*tagList*/ 2) {
+    			 checkNewTags(tagList);
     		}
     	};
 
-    	return [songsToEdit, $selectedSongsStore, $songListStore];
+    	return [
+    		songsToEdit,
+    		tagList,
+    		setStar,
+    		undoChange,
+    		$selectedSongsStore,
+    		$songListStore,
+    		tagediteditor0_value_binding,
+    		undoChange_handler,
+    		tagediteditor1_value_binding,
+    		undoChange_handler_1,
+    		tagediteditor2_value_binding,
+    		undoChange_handler_2,
+    		tagediteditor3_value_binding,
+    		undoChange_handler_3,
+    		tagediteditor4_value_binding,
+    		undoChange_handler_4,
+    		tagediteditor5_value_binding,
+    		undoChange_handler_5,
+    		tagediteditor6_value_binding,
+    		undoChange_handler_6,
+    		tagediteditor7_value_binding,
+    		undoChange_handler_7,
+    		tagediteditor8_value_binding,
+    		undoChange_handler_8,
+    		tagediteditor9_value_binding,
+    		undoChange_handler_9,
+    		tagediteditor10_value_binding,
+    		undoChange_handler_10,
+    		tagediteditor11_value_binding,
+    		undoChange_handler_11
+    	];
     }
 
     class TagEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$e, create_fragment$e, safe_not_equal, {});
+    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {}, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit",
     			options,
-    			id: create_fragment$e.name
+    			id: create_fragment$g.name
     		});
     	}
     }
 
     /* src/controllers/ConfigController.svelte generated by Svelte v3.31.0 */
 
-    function create_fragment$f(ctx) {
+    function create_fragment$h(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -4895,7 +6379,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$f.name,
+    		id: create_fragment$h.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4904,7 +6388,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$f($$self, $$props, $$invalidate) {
+    function instance$h($$self, $$props, $$invalidate) {
     	let $albumArtSizeConfig;
     	validate_store(albumArtSizeConfig, "albumArtSizeConfig");
     	component_subscribe($$self, albumArtSizeConfig, $$value => $$invalidate(0, $albumArtSizeConfig = $$value));
@@ -4960,20 +6444,20 @@ var app = (function () {
     class ConfigController extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, {});
+    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ConfigController",
     			options,
-    			id: create_fragment$f.name
+    			id: create_fragment$h.name
     		});
     	}
     }
 
     /* src/controllers/PlayerController.svelte generated by Svelte v3.31.0 */
 
-    function create_fragment$g(ctx) {
+    function create_fragment$i(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -4988,7 +6472,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$g.name,
+    		id: create_fragment$i.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4997,7 +6481,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$g($$self, $$props, $$invalidate) {
+    function instance$i($$self, $$props, $$invalidate) {
     	let $selectedGroupByStore;
     	let $selectedGroupByValueStore;
     	let $dbVersion;
@@ -5174,22 +6658,22 @@ var app = (function () {
     class PlayerController extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {});
+    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerController",
     			options,
-    			id: create_fragment$g.name
+    			id: create_fragment$i.name
     		});
     	}
     }
 
     /* src/includes/BackgroundArt.svelte generated by Svelte v3.31.0 */
 
-    const file$f = "src/includes/BackgroundArt.svelte";
+    const file$h = "src/includes/BackgroundArt.svelte";
 
-    function create_fragment$h(ctx) {
+    function create_fragment$j(ctx) {
     	let img;
     	let img_src_value;
 
@@ -5199,7 +6683,7 @@ var app = (function () {
     			if (img.src !== (img_src_value = "./img/bg.jpg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-ufzy90");
-    			add_location(img, file$f, 0, 0, 0);
+    			add_location(img, file$h, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5217,7 +6701,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$h.name,
+    		id: create_fragment$j.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5226,7 +6710,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$h($$self, $$props) {
+    function instance$j($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("BackgroundArt", slots, []);
     	const writable_props = [];
@@ -5241,28 +6725,28 @@ var app = (function () {
     class BackgroundArt extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
+    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "BackgroundArt",
     			options,
-    			id: create_fragment$h.name
+    			id: create_fragment$j.name
     		});
     	}
     }
 
     /* src/includes/SongListBackground.svelte generated by Svelte v3.31.0 */
-    const file$g = "src/includes/SongListBackground.svelte";
+    const file$i = "src/includes/SongListBackground.svelte";
 
-    function create_fragment$i(ctx) {
+    function create_fragment$k(ctx) {
     	let song_list_background_svlt;
 
     	const block = {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
     			set_custom_element_data(song_list_background_svlt, "class", "svelte-1gvvzcg");
-    			add_location(song_list_background_svlt, file$g, 36, 0, 1382);
+    			add_location(song_list_background_svlt, file$i, 36, 0, 1382);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5280,7 +6764,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$i.name,
+    		id: create_fragment$k.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5299,7 +6783,7 @@ var app = (function () {
     	}
     }
 
-    function instance$i($$self, $$props, $$invalidate) {
+    function instance$k($$self, $$props, $$invalidate) {
     	let $albumCoverArtMapStore;
     	let $selectedAlbumId;
     	validate_store(albumCoverArtMapStore, "albumCoverArtMapStore");
@@ -5375,13 +6859,13 @@ var app = (function () {
     class SongListBackground extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
+    		init(this, options, instance$k, create_fragment$k, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListBackground",
     			options,
-    			id: create_fragment$i.name
+    			id: create_fragment$k.name
     		});
     	}
     }
@@ -5389,9 +6873,9 @@ var app = (function () {
     /* src/App.svelte generated by Svelte v3.31.0 */
 
     const { console: console_1$3, document: document_1 } = globals;
-    const file$h = "src/App.svelte";
+    const file$j = "src/App.svelte";
 
-    function create_fragment$j(ctx) {
+    function create_fragment$l(ctx) {
     	let title_value;
     	let t0;
     	let playercontroller;
@@ -5451,7 +6935,7 @@ var app = (function () {
     			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-1fro297");
-    			add_location(main, file$h, 60, 0, 2226);
+    			add_location(main, file$j, 60, 0, 2226);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5532,7 +7016,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$j.name,
+    		id: create_fragment$l.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5541,7 +7025,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$j($$self, $$props, $$invalidate) {
+    function instance$l($$self, $$props, $$invalidate) {
     	let $appTitle;
     	validate_store(appTitle, "appTitle");
     	component_subscribe($$self, appTitle, $$value => $$invalidate(0, $appTitle = $$value));
@@ -5625,13 +7109,13 @@ var app = (function () {
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
+    		init(this, options, instance$l, create_fragment$l, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "App",
     			options,
-    			id: create_fragment$j.name
+    			id: create_fragment$l.name
     		});
     	}
     }
