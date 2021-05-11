@@ -3788,10 +3788,19 @@ var app = (function () {
     function create_fragment$b(ctx) {
     	let stars;
     	let img0;
+    	let img0_class_value;
     	let img0_src_value;
-    	let t;
+    	let t0;
     	let img1;
+    	let img1_class_value;
     	let img1_src_value;
+    	let stars_class_value;
+    	let t1;
+    	let button;
+    	let t2;
+    	let img2;
+    	let img2_src_value;
+    	let button_class_value;
     	let mounted;
     	let dispose;
 
@@ -3799,18 +3808,28 @@ var app = (function () {
     		c: function create() {
     			stars = element("stars");
     			img0 = element("img");
-    			t = space();
+    			t0 = space();
     			img1 = element("img");
-    			attr_dev(img0, "class", "delete-star svelte-1vgxguc");
+    			t1 = space();
+    			button = element("button");
+    			t2 = text("Undo Rating ");
+    			img2 = element("img");
+    			attr_dev(img0, "class", img0_class_value = "delete-star " + /*klass*/ ctx[0] + " svelte-1rcb0e4");
     			if (img0.src !== (img0_src_value = "./img/star/star-delete.svg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$b, 30, 1, 800);
-    			attr_dev(img1, "class", "star svelte-1vgxguc");
-    			if (img1.src !== (img1_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) attr_dev(img1, "src", img1_src_value);
+    			add_location(img0, file$b, 37, 1, 1180);
+    			attr_dev(img1, "class", img1_class_value = "star " + /*klass*/ ctx[0] + " svelte-1rcb0e4");
+    			if (img1.src !== (img1_src_value = "./img/star/star-" + /*starRating*/ ctx[2] + ".svg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$b, 44, 1, 1218);
-    			attr_dev(stars, "class", "svelte-1vgxguc");
-    			add_location(stars, file$b, 29, 0, 726);
+    			add_location(img1, file$b, 51, 1, 1627);
+    			attr_dev(stars, "class", stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-1rcb0e4"));
+    			add_location(stars, file$b, 36, 0, 1090);
+    			attr_dev(img2, "class", "undoIcon svelte-1rcb0e4");
+    			if (img2.src !== (img2_src_value = "./img/undo-arrow-svgrepo-com.svg")) attr_dev(img2, "src", img2_src_value);
+    			attr_dev(img2, "alt", "");
+    			add_location(img2, file$b, 66, 16, 1999);
+    			attr_dev(button, "class", button_class_value = "" + (/*klass*/ ctx[0] + " " + (/*showUndo*/ ctx[1] ? "show-undo" : "") + " svelte-1rcb0e4"));
+    			add_location(button, file$b, 61, 0, 1863);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3818,25 +3837,30 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, stars, anchor);
     			append_dev(stars, img0);
-    			append_dev(stars, t);
+    			append_dev(stars, t0);
     			append_dev(stars, img1);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t2);
+    			append_dev(button, img2);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(img0, "click", /*click_handler*/ ctx[5], false, false, false),
-    					listen_dev(img1, "mouseleave", /*mouseleave_handler*/ ctx[6], false, false, false),
-    					listen_dev(img1, "click", /*click_handler_1*/ ctx[7], false, false, false),
-    					listen_dev(img1, "mousemove", /*mousemove_handler*/ ctx[8], false, false, false),
+    					listen_dev(img0, "click", /*click_handler*/ ctx[8], false, false, false),
+    					listen_dev(img1, "mouseleave", /*mouseleave_handler*/ ctx[9], false, false, false),
+    					listen_dev(img1, "click", /*click_handler_1*/ ctx[10], false, false, false),
+    					listen_dev(img1, "mousemove", /*mousemove_handler*/ ctx[11], false, false, false),
     					listen_dev(
     						stars,
     						"click",
     						function () {
-    							if (is_function(/*dispatch*/ ctx[2]("starChange", { starLevel: /*starLevel*/ ctx[0] * 10 }))) /*dispatch*/ ctx[2]("starChange", { starLevel: /*starLevel*/ ctx[0] * 10 }).apply(this, arguments);
+    							if (is_function(/*dispatch*/ ctx[4]("starChange", { starRating: /*starRating*/ ctx[2] * 10 }))) /*dispatch*/ ctx[4]("starChange", { starRating: /*starRating*/ ctx[2] * 10 }).apply(this, arguments);
     						},
     						false,
     						false,
     						false
-    					)
+    					),
+    					listen_dev(button, "click", /*click_handler_2*/ ctx[12], false, false, false)
     				];
 
     				mounted = true;
@@ -3845,14 +3869,32 @@ var app = (function () {
     		p: function update(new_ctx, [dirty]) {
     			ctx = new_ctx;
 
-    			if (dirty & /*starLevel*/ 1 && img1.src !== (img1_src_value = "./img/star/star-" + /*starLevel*/ ctx[0] + ".svg")) {
+    			if (dirty & /*klass*/ 1 && img0_class_value !== (img0_class_value = "delete-star " + /*klass*/ ctx[0] + " svelte-1rcb0e4")) {
+    				attr_dev(img0, "class", img0_class_value);
+    			}
+
+    			if (dirty & /*klass*/ 1 && img1_class_value !== (img1_class_value = "star " + /*klass*/ ctx[0] + " svelte-1rcb0e4")) {
+    				attr_dev(img1, "class", img1_class_value);
+    			}
+
+    			if (dirty & /*starRating*/ 4 && img1.src !== (img1_src_value = "./img/star/star-" + /*starRating*/ ctx[2] + ".svg")) {
     				attr_dev(img1, "src", img1_src_value);
+    			}
+
+    			if (dirty & /*klass*/ 1 && stars_class_value !== (stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-1rcb0e4"))) {
+    				attr_dev(stars, "class", stars_class_value);
+    			}
+
+    			if (dirty & /*klass, showUndo*/ 3 && button_class_value !== (button_class_value = "" + (/*klass*/ ctx[0] + " " + (/*showUndo*/ ctx[1] ? "show-undo" : "") + " svelte-1rcb0e4"))) {
+    				attr_dev(button, "class", button_class_value);
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(stars);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(button);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -3874,59 +3916,89 @@ var app = (function () {
     	validate_slots("Star", slots, []);
     	const dispatch = createEventDispatcher();
     	let { songRating = 0 } = $$props;
-    	let starLevel = songRating / 10;
-    	let starLevelTemp = starLevel;
+    	let { hook } = $$props;
+    	let { klass = "" } = $$props;
+    	let { showUndo = false } = $$props;
+    	let starRating = 0;
+    	let starRatingTemp = 0; // Keeps track of the user selected rating.
     	let starElementWidth = undefined;
 
-    	function setStarLevel(e) {
-    		if (!starElementWidth) {
-    			starElementWidth = document.querySelector("img.star").scrollWidth;
+    	function convertRating(fnSongRating) {
+    		// Converts 0-100 Rating to 0-10
+    		if (fnSongRating && fnSongRating !== 0) {
+    			$$invalidate(2, starRating = fnSongRating / 10);
+    		} else {
+    			$$invalidate(2, starRating = 0);
     		}
 
+    		$$invalidate(3, starRatingTemp = starRating);
+    	}
+
+    	function setStarRating(e) {
+    		if (!starElementWidth) {
+    			starElementWidth = document.querySelector(`${hook} img.star`).scrollWidth;
+    		}
+
+    		// Gets a value from 0 to 10 based on the percentage of the cursor position on star element.
     		let starValue = Math.trunc(100 / starElementWidth * e.offsetX / (100 / 10)) + 1;
 
-    		if (starValue < 1) {
+    		if (starValue <= 1) {
     			starValue = 1;
-    		} else if (starValue > 10) {
+    		} else if (starValue >= 10) {
     			starValue = 10;
     		}
 
-    		$$invalidate(0, starLevel = starValue);
+    		$$invalidate(2, starRating = starValue);
     	}
 
-    	const writable_props = ["songRating"];
+    	const writable_props = ["songRating", "hook", "klass", "showUndo"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Star> was created with unknown prop '${key}'`);
     	});
 
     	const click_handler = () => {
-    		$$invalidate(0, starLevel = 0);
-    		$$invalidate(1, starLevelTemp = 0);
+    		$$invalidate(2, starRating = 0);
+    		$$invalidate(3, starRatingTemp = 0);
     	};
 
-    	const mouseleave_handler = () => $$invalidate(0, starLevel = starLevelTemp);
-    	const click_handler_1 = () => $$invalidate(1, starLevelTemp = starLevel);
-    	const mousemove_handler = e => setStarLevel(e);
+    	const mouseleave_handler = () => $$invalidate(2, starRating = starRatingTemp);
+    	const click_handler_1 = () => $$invalidate(3, starRatingTemp = starRating);
+    	const mousemove_handler = e => setStarRating(e);
+
+    	const click_handler_2 = () => {
+    		$$invalidate(3, starRatingTemp = 0);
+    		dispatch("undoChange");
+    	};
 
     	$$self.$$set = $$props => {
-    		if ("songRating" in $$props) $$invalidate(4, songRating = $$props.songRating);
+    		if ("songRating" in $$props) $$invalidate(6, songRating = $$props.songRating);
+    		if ("hook" in $$props) $$invalidate(7, hook = $$props.hook);
+    		if ("klass" in $$props) $$invalidate(0, klass = $$props.klass);
+    		if ("showUndo" in $$props) $$invalidate(1, showUndo = $$props.showUndo);
     	};
 
     	$$self.$capture_state = () => ({
     		createEventDispatcher,
     		dispatch,
     		songRating,
-    		starLevel,
-    		starLevelTemp,
+    		hook,
+    		klass,
+    		showUndo,
+    		starRating,
+    		starRatingTemp,
     		starElementWidth,
-    		setStarLevel
+    		convertRating,
+    		setStarRating
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ("songRating" in $$props) $$invalidate(4, songRating = $$props.songRating);
-    		if ("starLevel" in $$props) $$invalidate(0, starLevel = $$props.starLevel);
-    		if ("starLevelTemp" in $$props) $$invalidate(1, starLevelTemp = $$props.starLevelTemp);
+    		if ("songRating" in $$props) $$invalidate(6, songRating = $$props.songRating);
+    		if ("hook" in $$props) $$invalidate(7, hook = $$props.hook);
+    		if ("klass" in $$props) $$invalidate(0, klass = $$props.klass);
+    		if ("showUndo" in $$props) $$invalidate(1, showUndo = $$props.showUndo);
+    		if ("starRating" in $$props) $$invalidate(2, starRating = $$props.starRating);
+    		if ("starRatingTemp" in $$props) $$invalidate(3, starRatingTemp = $$props.starRatingTemp);
     		if ("starElementWidth" in $$props) starElementWidth = $$props.starElementWidth;
     	};
 
@@ -3935,34 +4007,38 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*songRating*/ 16) {
-    			 {
-    				if (songRating) {
-    					$$invalidate(0, starLevel = songRating / 10);
-    				} else {
-    					$$invalidate(0, starLevel = 0);
-    				}
-    			}
+    		if ($$self.$$.dirty & /*songRating*/ 64) {
+    			 convertRating(songRating);
     		}
     	};
 
     	return [
-    		starLevel,
-    		starLevelTemp,
+    		klass,
+    		showUndo,
+    		starRating,
+    		starRatingTemp,
     		dispatch,
-    		setStarLevel,
+    		setStarRating,
     		songRating,
+    		hook,
     		click_handler,
     		mouseleave_handler,
     		click_handler_1,
-    		mousemove_handler
+    		mousemove_handler,
+    		click_handler_2
     	];
     }
 
     class Star extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$b, create_fragment$b, safe_not_equal, { songRating: 4 });
+
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {
+    			songRating: 6,
+    			hook: 7,
+    			klass: 0,
+    			showUndo: 1
+    		});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -3970,6 +4046,13 @@ var app = (function () {
     			options,
     			id: create_fragment$b.name
     		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*hook*/ ctx[7] === undefined && !("hook" in props)) {
+    			console.warn("<Star> was created without expected prop 'hook'");
+    		}
     	}
 
     	get songRating() {
@@ -3977,6 +4060,30 @@ var app = (function () {
     	}
 
     	set songRating(value) {
+    		throw new Error("<Star>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get hook() {
+    		throw new Error("<Star>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set hook(value) {
+    		throw new Error("<Star>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get klass() {
+    		throw new Error("<Star>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set klass(value) {
+    		throw new Error("<Star>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get showUndo() {
+    		throw new Error("<Star>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set showUndo(value) {
     		throw new Error("<Star>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -4008,7 +4115,10 @@ var app = (function () {
     	let current;
 
     	star = new Star({
-    			props: { songRating: /*song*/ ctx[0].Rating },
+    			props: {
+    				songRating: /*song*/ ctx[0].Rating,
+    				hook: "song-list-item"
+    			},
     			$$inline: true
     		});
 
@@ -4034,7 +4144,7 @@ var app = (function () {
     			set_custom_element_data(song_title, "class", "svelte-r9k04x");
     			add_location(song_title, file$c, 34, 1, 1122);
     			set_custom_element_data(song_duration, "class", "svelte-r9k04x");
-    			add_location(song_duration, file$c, 36, 1, 1220);
+    			add_location(song_duration, file$c, 36, 1, 1242);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0].ID);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
 
@@ -4899,7 +5009,7 @@ var app = (function () {
     const file$f = "src/components/TagEdit-Editor.svelte";
 
     // (38:2) {#if showUndo}
-    function create_if_block_3$1(ctx) {
+    function create_if_block_2$1(ctx) {
     	let img;
     	let img_src_value;
     	let mounted;
@@ -4911,7 +5021,7 @@ var app = (function () {
     			attr_dev(img, "class", "undoIcon svelte-rqpajj");
     			if (img.src !== (img_src_value = "./img/undo-arrow-svgrepo-com.svg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			add_location(img, file$f, 38, 3, 1141);
+    			add_location(img, file$f, 38, 3, 1140);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -4931,7 +5041,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3$1.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
     		source: "(38:2) {#if showUndo}",
     		ctx
@@ -4940,8 +5050,8 @@ var app = (function () {
     	return block;
     }
 
-    // (47:31) 
-    function create_if_block_2$1(ctx) {
+    // (44:31) 
+    function create_if_block_1$2(ctx) {
     	let textarea;
     	let mounted;
     	let dispose;
@@ -4951,7 +5061,7 @@ var app = (function () {
     			textarea = element("textarea");
     			attr_dev(textarea, "rows", "1");
     			attr_dev(textarea, "class", "svelte-rqpajj");
-    			add_location(textarea, file$f, 47, 2, 1519);
+    			add_location(textarea, file$f, 44, 2, 1396);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
@@ -4959,10 +5069,10 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[11]),
-    					listen_dev(textarea, "mouseleave", /*mouseleave_handler*/ ctx[12], false, false, false),
-    					listen_dev(textarea, "mouseover", /*mouseover_handler*/ ctx[13], false, false, false),
-    					listen_dev(textarea, "input", /*input_handler*/ ctx[14], false, false, false)
+    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[10]),
+    					listen_dev(textarea, "mouseleave", /*mouseleave_handler*/ ctx[11], false, false, false),
+    					listen_dev(textarea, "mouseover", /*mouseover_handler*/ ctx[12], false, false, false),
+    					listen_dev(textarea, "input", /*input_handler*/ ctx[13], false, false, false)
     				];
 
     				mounted = true;
@@ -4982,66 +5092,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
-    		type: "if",
-    		source: "(47:31) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (44:29) 
-    function create_if_block_1$2(ctx) {
-    	let input;
-    	let mounted;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			input = element("input");
-    			attr_dev(input, "type", "text");
-    			attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
-    			attr_dev(input, "class", "svelte-rqpajj");
-    			add_location(input, file$f, 44, 2, 1378);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, input, anchor);
-    			set_input_value(input, /*value*/ ctx[0]);
-
-    			if (!mounted) {
-    				dispose = listen_dev(input, "input", /*input_input_handler_1*/ ctx[10]);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*placeholder*/ 8) {
-    				attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
-    			}
-
-    			if (dirty & /*value*/ 1 && input.value !== /*value*/ ctx[0]) {
-    				set_input_value(input, /*value*/ ctx[0]);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(input);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
     		id: create_if_block_1$2.name,
     		type: "if",
-    		source: "(44:29) ",
+    		source: "(44:31) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:1) {#if type === 'input'}
+    // (42:1) {#if ['text', 'number'].includes(type)}
     function create_if_block$3(ctx) {
     	let input;
     	let mounted;
@@ -5053,7 +5113,7 @@ var app = (function () {
     			attr_dev(input, "type", "text");
     			attr_dev(input, "placeholder", /*placeholder*/ ctx[3]);
     			attr_dev(input, "class", "svelte-rqpajj");
-    			add_location(input, file$f, 42, 2, 1299);
+    			add_location(input, file$f, 42, 2, 1315);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -5084,7 +5144,7 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(42:1) {#if type === 'input'}",
+    		source: "(42:1) {#if ['text', 'number'].includes(type)}",
     		ctx
     	});
 
@@ -5101,18 +5161,19 @@ var app = (function () {
     	let warning_style_value;
     	let t3;
     	let t4;
+    	let show_if;
     	let t5;
     	let tageditseparator;
     	let current;
-    	let if_block0 = /*showUndo*/ ctx[2] && create_if_block_3$1(ctx);
+    	let if_block0 = /*showUndo*/ ctx[2] && create_if_block_2$1(ctx);
 
     	function select_block_type(ctx, dirty) {
-    		if (/*type*/ ctx[1] === "input") return create_if_block$3;
-    		if (/*type*/ ctx[1] === "number") return create_if_block_1$2;
-    		if (/*type*/ ctx[1] === "textarea") return create_if_block_2$1;
+    		if (show_if == null || dirty & /*type*/ 2) show_if = !!["text", "number"].includes(/*type*/ ctx[1]);
+    		if (show_if) return create_if_block$3;
+    		if (/*type*/ ctx[1] === "textarea") return create_if_block_1$2;
     	}
 
-    	let current_block_type = select_block_type(ctx);
+    	let current_block_type = select_block_type(ctx, -1);
     	let if_block1 = current_block_type && current_block_type(ctx);
     	tageditseparator = new TagEdit_Separator({ $$inline: true });
 
@@ -5137,12 +5198,12 @@ var app = (function () {
     			: "");
 
     			attr_dev(warning, "class", "svelte-rqpajj");
-    			add_location(warning, file$f, 35, 2, 1015);
+    			add_location(warning, file$f, 35, 2, 1014);
     			set_custom_element_data(tag_name, "class", "svelte-rqpajj");
-    			add_location(tag_name, file$f, 32, 1, 989);
+    			add_location(tag_name, file$f, 32, 1, 988);
     			set_custom_element_data(tag_edit, "id", /*id*/ ctx[7]);
     			set_custom_element_data(tag_edit, "class", "svelte-rqpajj");
-    			add_location(tag_edit, file$f, 31, 0, 972);
+    			add_location(tag_edit, file$f, 31, 0, 971);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5179,7 +5240,7 @@ var app = (function () {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_3$1(ctx);
+    					if_block0 = create_if_block_2$1(ctx);
     					if_block0.c();
     					if_block0.m(tag_name, null);
     				}
@@ -5188,7 +5249,7 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx, dirty)) && if_block1) {
     				if_block1.p(ctx, dirty);
     			} else {
     				if (if_block1) if_block1.d(1);
@@ -5249,7 +5310,7 @@ var app = (function () {
     	validate_slots("TagEdit_Editor", slots, []);
     	const dispatch = createEventDispatcher();
     	let { value = "" } = $$props;
-    	let { type = "input" } = $$props;
+    	let { type = "text" } = $$props;
     	let { showUndo = false } = $$props;
     	let { placeholder = undefined } = $$props;
     	let { tagName } = $$props;
@@ -5264,11 +5325,6 @@ var app = (function () {
     	const click_handler = () => dispatch("undoChange");
 
     	function input_input_handler() {
-    		value = this.value;
-    		($$invalidate(0, value), $$invalidate(1, type));
-    	}
-
-    	function input_input_handler_1() {
     		value = this.value;
     		($$invalidate(0, value), $$invalidate(1, type));
     	}
@@ -5351,7 +5407,6 @@ var app = (function () {
     		id,
     		click_handler,
     		input_input_handler,
-    		input_input_handler_1,
     		textarea_input_handler,
     		mouseleave_handler,
     		mouseover_handler,
@@ -5557,7 +5612,7 @@ var app = (function () {
 
     	let tagediteditor0_props = {
     		tagName: "Title",
-    		type: "input",
+    		type: "text",
     		showUndo: /*tagList*/ ctx[1].Title.bind !== /*tagList*/ ctx[1].Title.value
     	};
 
@@ -5579,7 +5634,7 @@ var app = (function () {
 
     	let tagediteditor1_props = {
     		tagName: "Album",
-    		type: "input",
+    		type: "text",
     		showUndo: /*tagList*/ ctx[1].Album.bind !== /*tagList*/ ctx[1].Album.value
     	};
 
@@ -5692,7 +5747,7 @@ var app = (function () {
 
     	let tagediteditor6_props = {
     		tagName: "Genre",
-    		type: "input",
+    		type: "text",
     		showUndo: /*tagList*/ ctx[1].Genre.bind !== /*tagList*/ ctx[1].Genre.value
     	};
 
@@ -5714,7 +5769,7 @@ var app = (function () {
 
     	let tagediteditor7_props = {
     		tagName: "Composer",
-    		type: "input",
+    		type: "text",
     		showUndo: /*tagList*/ ctx[1].Composer.bind !== /*tagList*/ ctx[1].Composer.value
     	};
 
@@ -5820,12 +5875,16 @@ var app = (function () {
 
     	star = new Star({
     			props: {
-    				songRating: Number(/*tagList*/ ctx[1].Rating.bind)
+    				songRating: Number(/*tagList*/ ctx[1].Rating.bind),
+    				hook: "tag-edit-svlt",
+    				klass: "tag-edit-star",
+    				showUndo: /*tagList*/ ctx[1].Rating.bind !== /*tagList*/ ctx[1].Rating.value
     			},
     			$$inline: true
     		});
 
     	star.$on("starChange", /*setStar*/ ctx[2]);
+    	star.$on("undoChange", /*undoChange_handler_12*/ ctx[30]);
 
     	const block = {
     		c: function create() {
@@ -5868,20 +5927,18 @@ var app = (function () {
     			t17 = space();
     			button1 = element("button");
     			button1.textContent = "Cancel";
-    			set_custom_element_data(component_name, "class", "svelte-1qow5dk");
-    			add_location(component_name, file$g, 56, 1, 1879);
-    			set_custom_element_data(track_disc_tag_editor, "class", "svelte-1qow5dk");
-    			add_location(track_disc_tag_editor, file$g, 73, 1, 2325);
-    			set_custom_element_data(date_tag_editor, "class", "svelte-1qow5dk");
-    			add_location(date_tag_editor, file$g, 129, 1, 3942);
-    			attr_dev(button0, "class", "svelte-1qow5dk");
-    			add_location(button0, file$g, 156, 2, 4705);
-    			attr_dev(button1, "class", "svelte-1qow5dk");
-    			add_location(button1, file$g, 158, 2, 4732);
-    			set_custom_element_data(button_group, "class", "svelte-1qow5dk");
-    			add_location(button_group, file$g, 155, 1, 4688);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1qow5dk");
-    			add_location(tag_edit_svlt, file$g, 55, 0, 1862);
+    			set_custom_element_data(component_name, "class", "svelte-n1tzt2");
+    			add_location(component_name, file$g, 56, 1, 1880);
+    			set_custom_element_data(track_disc_tag_editor, "class", "svelte-n1tzt2");
+    			add_location(track_disc_tag_editor, file$g, 74, 1, 2325);
+    			set_custom_element_data(date_tag_editor, "class", "svelte-n1tzt2");
+    			add_location(date_tag_editor, file$g, 135, 1, 3945);
+    			add_location(button0, file$g, 169, 2, 4863);
+    			add_location(button1, file$g, 171, 2, 4890);
+    			set_custom_element_data(button_group, "class", "svelte-n1tzt2");
+    			add_location(button_group, file$g, 168, 1, 4846);
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-n1tzt2");
+    			add_location(tag_edit_svlt, file$g, 55, 0, 1863);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6055,6 +6112,7 @@ var app = (function () {
     			tagediteditor11.$set(tagediteditor11_changes);
     			const star_changes = {};
     			if (dirty[0] & /*tagList*/ 2) star_changes.songRating = Number(/*tagList*/ ctx[1].Rating.bind);
+    			if (dirty[0] & /*tagList*/ 2) star_changes.showUndo = /*tagList*/ ctx[1].Rating.bind !== /*tagList*/ ctx[1].Rating.value;
     			star.$set(star_changes);
     		},
     		i: function intro(local) {
@@ -6177,7 +6235,7 @@ var app = (function () {
     	}
 
     	function setStar(starChangeEvent) {
-    		$$invalidate(1, tagList.Rating.bind = starChangeEvent.detail.starLevel, tagList);
+    		$$invalidate(1, tagList.Rating.bind = starChangeEvent.detail.starRating, tagList);
     	}
 
     	function undoChange(tagType) {
@@ -6273,6 +6331,7 @@ var app = (function () {
     	}
 
     	const undoChange_handler_11 = () => undoChange("Date_Day");
+    	const undoChange_handler_12 = () => undoChange("Rating");
 
     	$$self.$capture_state = () => ({
     		Star,
@@ -6344,7 +6403,8 @@ var app = (function () {
     		tagediteditor10_value_binding,
     		undoChange_handler_10,
     		tagediteditor11_value_binding,
-    		undoChange_handler_11
+    		undoChange_handler_11,
+    		undoChange_handler_12
     	];
     }
 

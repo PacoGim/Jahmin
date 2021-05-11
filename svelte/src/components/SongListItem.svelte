@@ -44,7 +44,7 @@ import { parseDuration } from '../functions/parseDuration.fn';
 	<!-- <song-number>{song.Track}</song-number> -->
 	<song-number>{index} - {song.Track}</song-number>
 	<song-title>{song.Title}</song-title>
-	<Star on:starChange={setStar} songRating={song.Rating} />
+	<Star on:starChange={setStar} songRating={song.Rating} hook='song-list-item' />
 	<song-duration>{parseDuration(song.Duration)}</song-duration>
 </song-list-item>
 

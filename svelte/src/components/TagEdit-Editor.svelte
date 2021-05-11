@@ -6,7 +6,7 @@
 	import TagEditSeparator from './TagEdit-Separator.svelte'
 
 	export let value: string | number = ''
-	export let type: 'input' | 'textarea' | 'number' = 'input'
+	export let type: 'text' | 'textarea' | 'number' = 'text'
 	export let showUndo = false
 	export let placeholder = undefined
 	export let tagName
@@ -45,11 +45,8 @@
 			<img class="undoIcon" on:click={() => dispatch('undoChange')} src="./img/undo-arrow-svgrepo-com.svg" alt="" />
 		{/if}
 	</tag-name>
-	{#if type === 'input'}
+	{#if ['text', 'number'].includes(type)}
 		<input type="text" {placeholder} bind:value />
-	{:else if type === 'number'}
-		<input type="text" {placeholder} bind:value />
-		<!-- <input type="number" {placeholder} bind:value /> -->
 	{:else if type === 'textarea'}
 		<textarea
 			rows="1"

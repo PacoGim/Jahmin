@@ -34,8 +34,12 @@
 	/* --song-list-svlt-height: 150px; */
 }
 
-wave canvas{
-	/* width: 100% !important; */
+button {
+	cursor: pointer;
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
+	border: none;
+	font-family: inherit;
 }
 
 html {

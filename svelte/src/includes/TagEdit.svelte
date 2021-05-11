@@ -62,7 +62,7 @@
 	}
 
 	function setStar(starChangeEvent) {
-		tagList.Rating.bind = starChangeEvent.detail.starLevel
+		tagList.Rating.bind = starChangeEvent.detail.starRating
 	}
 
 	function undoChange(tagType) {
@@ -76,14 +76,15 @@
 	<TagEditEditor
 		tagName="Title"
 		on:undoChange={() => undoChange('Title')}
-		type="input"
+		type="text"
 		bind:value={tagList.Title.bind}
 		showUndo={tagList.Title.bind !== tagList.Title.value}
 	/>
+
 	<TagEditEditor
 		tagName="Album"
 		on:undoChange={() => undoChange('Album')}
-		type="input"
+		type="text"
 		bind:value={tagList.Album.bind}
 		showUndo={tagList.Album.bind !== tagList.Album.value}
 	/>
@@ -99,6 +100,7 @@
 			bind:value={tagList.Track.bind}
 			showUndo={tagList.Track.bind !== tagList.Track.value}
 		/>
+
 		<TagEditEditor
 			tagName="Disc #"
 			on:undoChange={() => undoChange('DiscNumber')}
@@ -115,6 +117,7 @@
 		bind:value={tagList.Artist.bind}
 		showUndo={tagList.Artist.bind !== tagList.Artist.value}
 	/>
+
 	<TagEditEditor
 		tagName="Album Artist"
 		on:undoChange={() => undoChange('AlbumArtist')}
@@ -122,20 +125,23 @@
 		bind:value={tagList.AlbumArtist.bind}
 		showUndo={tagList.AlbumArtist.bind !== tagList.AlbumArtist.value}
 	/>
+
 	<TagEditEditor
 		tagName="Genre"
 		on:undoChange={() => undoChange('Genre')}
-		type="input"
+		type="text"
 		bind:value={tagList.Genre.bind}
 		showUndo={tagList.Genre.bind !== tagList.Genre.value}
 	/>
+
 	<TagEditEditor
 		tagName="Composer"
 		on:undoChange={() => undoChange('Composer')}
-		type="input"
+		type="text"
 		bind:value={tagList.Composer.bind}
 		showUndo={tagList.Composer.bind !== tagList.Composer.value}
 	/>
+
 	<TagEditEditor
 		tagName="Comment"
 		on:undoChange={() => undoChange('Comment')}
@@ -168,7 +174,14 @@
 		/>
 	</date-tag-editor>
 
-	<Star on:starChange={setStar} songRating={Number(tagList.Rating.bind)} />
+	<Star
+		on:starChange={setStar}
+		on:undoChange={() => undoChange('Rating')}
+		songRating={Number(tagList.Rating.bind)}
+		hook="tag-edit-svlt"
+		klass="tag-edit-star"
+		showUndo={tagList.Rating.bind !== tagList.Rating.value}
+	/>
 
 	<button-group>
 		<button>Update</button>
@@ -183,12 +196,12 @@
 		justify-content: space-evenly;
 	}
 
-	button-group button {
+	/* button-group button {
 		cursor: pointer;
 		padding: 0.25rem 0.5rem;
 		border-radius: 4px;
 		border: none;
-	}
+	} */
 
 	date-tag-editor {
 		display: grid;
