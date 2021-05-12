@@ -10,6 +10,7 @@ import { hash } from '../functions/hashString.fn'
 import { groupSongs } from '../functions/groupSong.fn'
 import { getMaxTaskQueueLength, getTaskQueueLength } from './folderWatcher.service'
 import { getPeaks, savePeaks } from './peaks'
+import { tagEdit } from './tagEdit.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -34,6 +35,11 @@ export function loadIPC() {
 
 	ipcMain.handle('save-peaks', async (evt, sourceFile, peaks) => {
 		savePeaks(sourceFile, peaks)
+		return ''
+	})
+
+	ipcMain.handle('edit-tags', async (evt, songList, newTags) => {
+		tagEdit(songList, newTags)
 		return ''
 	})
 

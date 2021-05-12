@@ -2,23 +2,30 @@ import { ExifTool } from 'exiftool-vendored'
 const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import fs from 'fs'
 import stringHash from 'string-hash'
+import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
 
-function writeAacTags(filePath: string, newTags: any) {
+export function writeAacTags(filePath: string, newTags: any) {
+	return new Promise((resolve, reject) => {
+		newTags = normalizeNewTags(newTags)
+		resolve('')
+	})
+
+	/*
 	exiftool.write(filePath, {
-		//@ts-expect-error
 		Album: 'New Album',
 		AlbumArtist: 'New Album Artist',
 		Artist: 'New Artist',
 		Composer: 'New Composer',
-		ContentCreateDate: new Date(),
+		ContentCreateDate: new Date('2020').toISOString(),
+		DiskNumber: 6,
 		Genre: 'New Genre',
 		Title: 'New Title',
 		TrackNumber: 258,
 		RatingPercent: 95,
 		Comment: 'New Comment'
 	})
-	// let time = DateTime.fromISO('1999-01-01T01:01').toFormat('yyyy:mm:dd HH:MM:ss')
+	*/
 }
 
 export function getAacTags(filePath: string): Promise<SongType> {
@@ -28,7 +35,7 @@ export function getAacTags(filePath: string): Promise<SongType> {
 				// let fileStats = fs.statSync(filePath)
 
 				//@ts-expect-error
-				let dateParsed = getDate(String(tags.ContentCreateDate))
+				let dateParsed = getDate(String(tags.CreateDate || tags.ContentCreateDate))
 
 				resolve({
 					ID: stringHash(filePath),
@@ -39,7 +46,6 @@ export function getAacTags(filePath: string): Promise<SongType> {
 					Artist: tags['Artist'] || '',
 					//@ts-expect-error
 					Composer: tags['Composer'] || '',
-					// Date: tags['ContentCreateDate'],
 					//@ts-expect-error
 					Genre: tags['Genre'] || '',
 					//@ts-expect-error
@@ -66,6 +72,54 @@ export function getAacTags(filePath: string): Promise<SongType> {
 	})
 }
 
+function normalizeNewTags(newTags: EditTag) {
+	let stringObject = JSON.stringify(newTags)
+
+	if (newTags.DiscNumber) {
+		stringObject = stringObject.split('DiscNumber').join('DiskNumber')
+	}
+
+	if (newTags.Track) {
+		stringObject = stringObject.split('Track').join('TrackNumber')
+	}
+
+	if (newTags.Rating) {
+		stringObject = stringObject.split('Rating').join('RatingPercent')
+	}
+
+	newTags = JSON.parse(stringObject)
+
+	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
+		newTags.AllDates = `${newTags.Date_Year} ${newTags.Date_Month} ${newTags.Date_Day}`
+	}
+
+	console.log(newTags)
+
+	/*
+	exiftool.write(filePath, {
+		ContentCreateDate: new Date('2020').toISOString(),
+		DiskNumber: 6,
+		TrackNumber: 258,
+		RatingPercent: 95,
+	})
+		Album: 'new album',
+		AlbumArtist: 'new album artist',
+		Comment: 'new comment',
+		Composer: 'new composer',
+		Artist: 'new artisr',
+		Date_Day: '1',
+		Date_Month: '1',
+		Date_Year: '1999',
+		DiscNumber: '7',
+		Genre: 'new genre',
+		Rating: 30,
+		Title: 'new title',
+		Track: '6'
+	*/
+
+	return newTags
+}
+
 function getBitRate(bitRate: string | undefined) {
 	if (bitRate) {
 		return Number(bitRate.replace(/\D/g, ''))
@@ -74,7 +128,7 @@ function getBitRate(bitRate: string | undefined) {
 	}
 }
 
-function getDate(dateString: string): DateType {
+function getDate(dateString: string) {
 	let splitDate: any = []
 
 	if (!dateString) {
@@ -83,6 +137,10 @@ function getDate(dateString: string): DateType {
 			month: undefined,
 			day: undefined
 		}
+	}
+
+	if (dateString.includes('T')) {
+		dateString = dateString.split('T')[0]
 	}
 
 	// For - Separator

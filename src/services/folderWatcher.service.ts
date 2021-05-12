@@ -50,7 +50,7 @@ export function watchFolders(rootDirectories: string[]) {
 function startWorkers() {
 	workerSongData.forEach((worker, index) => {
 		setTimeout(() => {
-			console.log(index, 10000 * index)
+			// console.log(index, 10000 * index)
 
 			worker.on('message', (options: OptionsType) => {
 				if (options.task === 'Not Tasks Left') {

@@ -22,6 +22,7 @@ const hashString_fn_1 = require("../functions/hashString.fn");
 const groupSong_fn_1 = require("../functions/groupSong.fn");
 const folderWatcher_service_1 = require("./folderWatcher.service");
 const peaks_1 = require("./peaks");
+const tagEdit_service_1 = require("./tagEdit.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
@@ -41,6 +42,10 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('save-peaks', (evt, sourceFile, peaks) => __awaiter(this, void 0, void 0, function* () {
         peaks_1.savePeaks(sourceFile, peaks);
+        return '';
+    }));
+    electron_1.ipcMain.handle('edit-tags', (evt, songList, newTags) => __awaiter(this, void 0, void 0, function* () {
+        tagEdit_service_1.tagEdit(songList, newTags);
         return '';
     }));
     electron_1.ipcMain.handle('get-peaks', (evt, sourceFile) => __awaiter(this, void 0, void 0, function* () {

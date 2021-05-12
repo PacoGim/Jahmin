@@ -13,29 +13,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFlacTags = exports.writeFlacTags = void 0;
-const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const mm = require('music-metadata');
 function writeFlacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         let ffmpegMetatagString = objectToFfmpegString(newTags);
-        child_process_1.exec(`../binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
-            .split('/')
-            .pop()}"`, (error, stdout, stderr) => {
-            // if (error) {
-            // 	console.log(error)
-            // }
-            // if (stdout) {
-            // 	console.log(stdout)
-            // }
-            // if (stderr) {
-            // 	console.log(stderr)
-            // 	resolve(undefined)
-            // }
-        }).on('close', () => {
-            resolve('Done');
-        });
+        resolve('');
+        /*
+                exec(
+                    `../binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
+                        .split('/')
+                        .pop()}"`,
+                    (error, stdout, stderr) => {
+                        // if (error) {
+                        // 	console.log(error)
+                        // }
+                        // if (stdout) {
+                        // 	console.log(stdout)
+                        // }
+                        // if (stderr) {
+                        // 	console.log(stderr)
+                        // 	resolve(undefined)
+                        // }
+                    }
+                ).on('close', () => {
+                    resolve('Done')
+                })
+                */
     });
 }
 exports.writeFlacTags = writeFlacTags;

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSongDataWorkers = exports.getSongFilterWorker = exports.killAllWorkers = exports.initWorkers = void 0;
+exports.getTagEditWorker = exports.getSongDataWorkers = exports.getSongFilterWorker = exports.killAllWorkers = exports.initWorkers = void 0;
 const worker_threads_1 = require("worker_threads");
 const os_1 = require("os");
 const path_1 = __importDefault(require("path"));
@@ -28,6 +28,13 @@ function initWorkers() {
         type: 'SongFilter',
         worker: workerSongFilter
     });
+    // Single worker song tag edit
+    const workerTagEdit = new worker_threads_1.Worker(getWorkerPath('tagEdit'));
+    workers.push({
+        id: workerSongFilter.threadId,
+        type: 'TagEdit',
+        worker: workerTagEdit
+    });
 }
 exports.initWorkers = initWorkers;
 function killAllWorkers() {
@@ -42,6 +49,10 @@ function getSongDataWorkers() {
     return workers.filter((worker) => worker.type === 'SongData').map((worker) => worker.worker);
 }
 exports.getSongDataWorkers = getSongDataWorkers;
+function getTagEditWorker() {
+    return workers.filter((worker) => worker.type === 'TagEdit')[0].worker;
+}
+exports.getTagEditWorker = getTagEditWorker;
 function getWorkerPath(workerName) {
     return path_1.default.join(WORKER_FOLDER_PATH, `${workerName}.worker.js`);
 }

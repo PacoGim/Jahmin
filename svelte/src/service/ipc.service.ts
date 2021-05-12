@@ -29,6 +29,14 @@ export function getConfigIPC(): Promise<object> {
 	})
 }
 
+export function editTagsIPC(songList: string[], newTags: Object): Promise<number[] | undefined> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('edit-tags', songList, newTags).then((response) => {
+			resolve(response)
+		})
+	})
+}
+
 export function savePeaksIPC(sourceFile: string, peaks: number[]): Promise<number[] | undefined> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('save-peaks', sourceFile, peaks).then((result: number[] | undefined) => {

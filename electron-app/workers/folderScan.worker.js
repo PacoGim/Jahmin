@@ -6,9 +6,7 @@ const flac_format_1 = require("../formats/flac.format");
 const mp3_format_1 = require("../formats/mp3.format");
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', (options) => {
     if (options.task === 'Get Song Data') {
-        // console.time(options.data.path)
         getSongTags(options.data.path).then((data) => {
-            // console.timeEnd(options.data.path)
             worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
                 task: options.task,
                 data

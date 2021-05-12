@@ -10,10 +10,11 @@ import { TagModType } from '../types/tagMod.type'
 
 const mm = require('music-metadata')
 
-export function writeFlacTags(filePath: string, newTags: TagModType) {
+export function writeFlacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
 		let ffmpegMetatagString = objectToFfmpegString(newTags)
-
+		resolve('')
+/*
 		exec(
 			`../binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
 				.split('/')
@@ -33,6 +34,7 @@ export function writeFlacTags(filePath: string, newTags: TagModType) {
 		).on('close', () => {
 			resolve('Done')
 		})
+		*/
 	})
 }
 

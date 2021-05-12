@@ -106,9 +106,12 @@
 		width: 100%;
 		margin: 1rem;
 		height: calc(100% - 1rem);
-		border: 2px solid white;
+		/* border: 2px solid white; */
+		border: 2px solid var(--base-color);
 
 		border-radius: var(--player-progress-border-radius);
+
+		transition: border 300ms linear;
 	}
 
 	player-progress:active {

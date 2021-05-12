@@ -3,27 +3,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAacTags = void 0;
+exports.getAacTags = exports.writeAacTags = void 0;
 const exiftool_vendored_1 = require("exiftool-vendored");
 const exiftool = new exiftool_vendored_1.ExifTool({ taskTimeoutMillis: 5000 });
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 function writeAacTags(filePath, newTags) {
+    return new Promise((resolve, reject) => {
+        newTags = normalizeNewTags(newTags);
+        resolve('');
+    });
+    /*
     exiftool.write(filePath, {
-        //@ts-expect-error
         Album: 'New Album',
         AlbumArtist: 'New Album Artist',
         Artist: 'New Artist',
         Composer: 'New Composer',
-        ContentCreateDate: new Date(),
+        ContentCreateDate: new Date('2020').toISOString(),
+        DiskNumber: 6,
         Genre: 'New Genre',
         Title: 'New Title',
         TrackNumber: 258,
         RatingPercent: 95,
         Comment: 'New Comment'
-    });
-    // let time = DateTime.fromISO('1999-01-01T01:01').toFormat('yyyy:mm:dd HH:MM:ss')
+    })
+    */
 }
+exports.writeAacTags = writeAacTags;
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => {
         exiftool.read(filePath).then((tags) => {
@@ -67,6 +73,46 @@ function getAacTags(filePath) {
     });
 }
 exports.getAacTags = getAacTags;
+function normalizeNewTags(newTags) {
+    let stringObject = JSON.stringify(newTags);
+    if (newTags.DiscNumber) {
+        stringObject = stringObject.split('DiscNumber').join('DiskNumber');
+    }
+    if (newTags.Track) {
+        stringObject = stringObject.split('Track').join('TrackNumber');
+    }
+    if (newTags.Rating) {
+        stringObject = stringObject.split('Rating').join('RatingPercent');
+    }
+    newTags = JSON.parse(stringObject);
+    if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
+        let date = new Date(new Date().setFullYear(newTags.Date_Year, newTags.Date_Month - 1, newTags.Date_Day)).toISOString();
+        console.log(date);
+    }
+    console.log(newTags);
+    /*
+    exiftool.write(filePath, {
+        ContentCreateDate: new Date('2020').toISOString(),
+        DiskNumber: 6,
+        TrackNumber: 258,
+        RatingPercent: 95,
+    })
+        Album: 'new album',
+        AlbumArtist: 'new album artist',
+        Comment: 'new comment',
+        Composer: 'new composer',
+        Artist: 'new artisr',
+        Date_Day: '1',
+        Date_Month: '1',
+        Date_Year: '1999',
+        DiscNumber: '7',
+        Genre: 'new genre',
+        Rating: 30,
+        Title: 'new title',
+        Track: '6'
+    */
+    return newTags;
+}
 function getBitRate(bitRate) {
     if (bitRate) {
         return Number(bitRate.replace(/\D/g, ''));
@@ -83,6 +129,9 @@ function getDate(dateString) {
             month: undefined,
             day: undefined
         };
+    }
+    if (dateString.includes('T')) {
+        dateString = dateString.split('T')[0];
     }
     // For - Separator
     if (dateString.includes('-')) {

@@ -4,29 +4,47 @@
 	import TagEditEditor from '../components/TagEdit-Editor.svelte'
 
 	import { getEmptyTagList } from '../functions/getEmptyTagList.fn'
+	import { isEmptyObject } from '../functions/isEmptyObject.fn'
+	import { editTagsIPC } from '../service/ipc.service'
 
 	import { selectedSongsStore, songListStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 
 	let songsToEdit: SongType[] = []
 	let tagList = getEmptyTagList()
+	let enableButtons = false
+	let newTags = {}
 
 	$: getSelectedSongs($selectedSongsStore, $songListStore)
 
 	$: if (songsToEdit.length !== 0) groupSongs(songsToEdit)
 
-	$: checkNewTags(tagList)
+	$: {
+		tagList
+		if (songsToEdit.length !== 0) checkNewTags()
+	}
 
-	function checkNewTags(tagList) {
-		let newTags = {}
+	function checkNewTags() {
+		enableButtons = false
+		newTags = {}
 
 		for (let tagName in tagList) {
 			if (tagList[tagName].value !== tagList[tagName].bind) {
-				newTags[tagName] = tagList[tagName].bind
+				if (['Date_Year', 'Date_Month', 'Date_Day'].includes(tagName)) {
+					newTags.Date_Year = Number(tagList.Date_Year.bind)
+					newTags.Date_Month = Number(tagList.Date_Month.bind)
+					newTags.Date_Day = Number(tagList.Date_Day.bind)
+				} else {
+					newTags[tagName] = tagList[tagName].bind
+				}
 			}
 		}
 
-		console.log(newTags)
+		if (!isEmptyObject(newTags)) {
+			enableButtons = true
+		} else {
+			enableButtons = false
+		}
 	}
 
 	function getSelectedSongs(selectedSongs: number[], songList: SongType[]) {
@@ -65,8 +83,23 @@
 		tagList.Rating.bind = starChangeEvent.detail.starRating
 	}
 
-	function undoChange(tagType) {
-		tagList[tagType].bind = tagList[tagType].value
+	function undoChange(tagName) {
+		tagList[tagName].bind = tagList[tagName].value
+	}
+
+	function undoAllChanges() {
+		for (let tagName in tagList) {
+			tagList[tagName].bind = tagList[tagName].value
+		}
+	}
+
+	function updateSongs() {
+		if (enableButtons === true) {
+			editTagsIPC(
+				songsToEdit.map((song) => song.SourceFile),
+				newTags
+			)
+		}
 	}
 </script>
 
@@ -184,9 +217,8 @@
 	/>
 
 	<button-group>
-		<button>Update</button>
-
-		<button>Cancel</button>
+		<button on:click={updateSongs} class="update-button {enableButtons ? '' : 'disabled'}">Update</button>
+		<button on:click={undoAllChanges} class="cancel-button {enableButtons ? '' : 'disabled'}">Cancel</button>
 	</button-group>
 </tag-edit-svlt>
 
@@ -196,12 +228,26 @@
 		justify-content: space-evenly;
 	}
 
-	/* button-group button {
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		border: none;
-	} */
+	button-group button {
+		color: #fff;
+		transition-property: background-color, color;
+		transition-duration: 300ms;
+		transition-timing-function: linear;
+	}
+
+	button-group button.update-button {
+		background-color: hsl(213, 85%, 60%);
+	}
+
+	button-group button.cancel-button {
+		background-color: hsl(349, 85%, 60%);
+	}
+
+	button-group button.disabled {
+		cursor: not-allowed;
+		background-color: #d5d5d5;
+		color: #3c3c3c;
+	}
 
 	date-tag-editor {
 		display: grid;
