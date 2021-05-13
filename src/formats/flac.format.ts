@@ -2,39 +2,28 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
+import { EditTag } from '../types/editTag.type'
 import { FlacTagType } from '../types/flacTagType'
 import { SongType } from '../types/song.type'
 import { StreamSongType } from '../types/streamTag.type'
 import { TagType } from '../types/tag.type'
 import { TagModType } from '../types/tagMod.type'
 
+let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
+
 const mm = require('music-metadata')
 
 export function writeFlacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
 		let ffmpegMetatagString = objectToFfmpegString(newTags)
-		resolve('')
-/*
+		let templFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
+
 		exec(
-			`../binaries/ffmpeg -i "${filePath}"  -map 0 -y -codec copy -write_id3v2 1 ${ffmpegMetatagString} "./out/${filePath
-				.split('/')
-				.pop()}"`,
-			(error, stdout, stderr) => {
-				// if (error) {
-				// 	console.log(error)
-				// }
-				// if (stdout) {
-				// 	console.log(stdout)
-				// }
-				// if (stderr) {
-				// 	console.log(stderr)
-				// 	resolve(undefined)
-				// }
-			}
+			`"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
+			(error, stdout, stderr) => {}
 		).on('close', () => {
 			resolve('Done')
 		})
-		*/
 	})
 }
 
@@ -64,16 +53,14 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 		tags.AlbumArtist = nativeTags?.ALBUMARTIST || ''
 		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || ''
 		tags.Composer = nativeTags?.COMPOSER || ''
-		tags.Date_Year = dateParsed.year || null
-		tags.Date_Month = dateParsed.month || null
-		tags.Date_Day = dateParsed.day || null
-		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
+		tags.Date_Year = dateParsed.year || 0
+		tags.Date_Month = dateParsed.month || 0
+		tags.Date_Day = dateParsed.day || 0
+		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || 0
 		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
 		tags.Title = nativeTags?.TITLE || ''
 		tags.Genre = nativeTags?.GENRE || ''
 		tags.Rating = Number(nativeTags?.RATING) || 0
-
-		// console.log(tags)
 
 		resolve(tags)
 	})
@@ -114,6 +101,9 @@ function getDate(dateString: string): DateType {
 		// For . Separator
 	} else if (dateString.includes('.')) {
 		splitDate = dateString.split('.')
+		// For : Separator
+	} else if (dateString.includes(':')) {
+		splitDate = dateString.split(':')
 	}
 
 	if (splitDate.length > 1) {
@@ -137,11 +127,30 @@ type DateType = {
 	day: number | undefined
 }
 
-function objectToFfmpegString(tags: TagModType) {
+function objectToFfmpegString(newTags: EditTag) {
+	let stringObject = JSON.stringify(newTags)
 	let finalString = ''
 
-	for (let key in tags) {
-		finalString += ` -metadata "${key}=${tags[key]}" `
+	if (newTags.DiscNumber) {
+		stringObject = stringObject.replace('DiscNumber', 'disc')
+	}
+
+	if (newTags.AlbumArtist) {
+		stringObject = stringObject.replace('AlbumArtist', 'Album_Artist')
+	}
+
+	newTags = JSON.parse(stringObject)
+
+	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
+		newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`
+
+		delete newTags.Date_Year
+		delete newTags.Date_Month
+		delete newTags.Date_Day
+	}
+
+	for (let key in newTags) {
+		finalString += ` -metadata "${key}=${newTags[key]}" `
 	}
 
 	return finalString

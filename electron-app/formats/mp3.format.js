@@ -12,48 +12,68 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMp3Tags = void 0;
+exports.getMp3Tags = exports.writeMp3Tags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const node_id3_1 = __importDefault(require("node-id3"));
 const mm = require('music-metadata');
-/*
-writeMp3Tags(
-    {
-        TIT2: 'New Title',
-        TRCK: 4,
-        TALB: 'New Album',
-        TPE2: 'New Album Artist',
-        TPE1: 'New Artist',
-        comment: {
-            language: 'eng',
-            text: 'this is a comment'
-        },
-        TCOM: 'New Composer',
-        TDRC: '1998-12-12',
-        TPOS: 3,
-        TCON: 'New Genre',
-        popularimeter: {
-            email: 'foo@bar.baz',
-            rating: 100,
-            counter: 0
-        }
-    },
-    '/Users/fran/MEGA/Projects/Temp Project/ffmpeg-tag-read-write/input.mp3'
-).then(() => getMp3Tags('/Users/fran/MEGA/Projects/Temp Project/ffmpeg-tag-read-write/input.mp3'))
-*/
-function writeMp3Tags(newTags, filePath) {
+function writeMp3Tags(filePath, newTags) {
     return new Promise((resolve, reject) => {
+        newTags = normalizeNewTags(newTags);
         node_id3_1.default.write(newTags, filePath, (err) => {
             if (err) {
                 console.log(err);
-                reject();
+                reject(err);
             }
             else {
-                resolve();
+                resolve('');
             }
         });
     });
+}
+exports.writeMp3Tags = writeMp3Tags;
+function normalizeNewTags(newTags) {
+    let stringObject = JSON.stringify(newTags);
+    if (newTags.Title)
+        stringObject = stringObject.replace('Title', 'TIT2');
+    if (newTags.Track)
+        stringObject = stringObject.replace('Track', 'TRCK');
+    if (newTags.Album)
+        stringObject = stringObject.replace('Album', 'TALB');
+    if (newTags.AlbumArtist)
+        stringObject = stringObject.replace('AlbumArtist', 'TPE2');
+    if (newTags.Artist)
+        stringObject = stringObject.replace('Artist', 'TPE1');
+    if (newTags.Composer)
+        stringObject = stringObject.replace('Composer', 'TCOM');
+    if (newTags.DiscNumber)
+        stringObject = stringObject.replace('DiscNumber', 'TPOS');
+    if (newTags.Genre)
+        stringObject = stringObject.replace('Genre', 'TCON');
+    if (newTags.Comment)
+        stringObject = stringObject.replace('Comment', 'comment');
+    newTags = JSON.parse(stringObject);
+    if (newTags.comment) {
+        newTags.comment = {
+            language: 'eng',
+            text: newTags.comment
+        };
+    }
+    if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
+        newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`;
+        delete newTags.Date_Year;
+        delete newTags.Date_Month;
+        delete newTags.Date_Day;
+    }
+    if (newTags.Rating) {
+        newTags.popularimeter = {
+            email: 'foo@bar.baz',
+            rating: convertRating('Mp3', newTags.Rating),
+            counter: 0
+        };
+        delete newTags.Rating;
+    }
+    return newTags;
 }
 function getMp3Tags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
