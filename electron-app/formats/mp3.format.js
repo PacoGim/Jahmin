@@ -16,6 +16,7 @@ exports.getMp3Tags = exports.writeMp3Tags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const node_id3_1 = __importDefault(require("node-id3"));
+const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const mm = require('music-metadata');
 function writeMp3Tags(filePath, newTags) {
     return new Promise((resolve, reject) => {
@@ -33,26 +34,24 @@ function writeMp3Tags(filePath, newTags) {
 }
 exports.writeMp3Tags = writeMp3Tags;
 function normalizeNewTags(newTags) {
-    let stringObject = JSON.stringify(newTags);
     if (newTags.Title)
-        stringObject = stringObject.replace('Title', 'TIT2');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Title', 'TIT2');
     if (newTags.Track)
-        stringObject = stringObject.replace('Track', 'TRCK');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Track', 'TRCK');
     if (newTags.Album)
-        stringObject = stringObject.replace('Album', 'TALB');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Album', 'TALB');
     if (newTags.AlbumArtist)
-        stringObject = stringObject.replace('AlbumArtist', 'TPE2');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'AlbumArtist', 'TPE2');
     if (newTags.Artist)
-        stringObject = stringObject.replace('Artist', 'TPE1');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Artist', 'TPE1');
     if (newTags.Composer)
-        stringObject = stringObject.replace('Composer', 'TCOM');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Composer', 'TCOM');
     if (newTags.DiscNumber)
-        stringObject = stringObject.replace('DiscNumber', 'TPOS');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'DiscNumber', 'TPOS');
     if (newTags.Genre)
-        stringObject = stringObject.replace('Genre', 'TCON');
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Genre', 'TCON');
     if (newTags.Comment)
-        stringObject = stringObject.replace('Comment', 'comment');
-    newTags = JSON.parse(stringObject);
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Comment', 'comment');
     if (newTags.comment) {
         newTags.comment = {
             language: 'eng',
@@ -60,7 +59,7 @@ function normalizeNewTags(newTags) {
         };
     }
     if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
-        newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`;
+        newTags.TDRC = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`;
         delete newTags.Date_Year;
         delete newTags.Date_Month;
         delete newTags.Date_Day;
@@ -215,18 +214,4 @@ function getDate(dateString) {
             day: undefined
         };
     }
-}
-function objectToFfmpegString(tags) {
-    let finalString = '';
-    for (let key in tags) {
-        finalString += ` -metadata "${key}=${tags[key]}" `;
-    }
-    return finalString;
-}
-function lowerCaseObjectKeys(objectToProcess) {
-    let newObject = {};
-    for (let key in objectToProcess) {
-        newObject[key.toLowerCase()] = objectToProcess[key];
-    }
-    return newObject;
 }

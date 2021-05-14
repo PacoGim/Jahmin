@@ -2,6 +2,7 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
+import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { EditTag } from '../types/editTag.type'
 import { FlacTagType } from '../types/flacTagType'
 import { SongType } from '../types/song.type'
@@ -128,18 +129,10 @@ type DateType = {
 }
 
 function objectToFfmpegString(newTags: EditTag) {
-	let stringObject = JSON.stringify(newTags)
 	let finalString = ''
 
-	if (newTags.DiscNumber) {
-		stringObject = stringObject.replace('DiscNumber', 'disc')
-	}
-
-	if (newTags.AlbumArtist) {
-		stringObject = stringObject.replace('AlbumArtist', 'Album_Artist')
-	}
-
-	newTags = JSON.parse(stringObject)
+	if (newTags.DiscNumber) renameObjectKey(newTags, 'DiscNumber', 'disc')
+	if (newTags.AlbumArtist) renameObjectKey(newTags, 'AlbumArtist', 'Album_Artist')
 
 	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
 		newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`
@@ -154,14 +147,4 @@ function objectToFfmpegString(newTags: EditTag) {
 	}
 
 	return finalString
-}
-
-function lowerCaseObjectKeys(objectToProcess: any) {
-	let newObject: any = {}
-
-	for (let key in objectToProcess) {
-		newObject[key.toLowerCase()] = objectToProcess[key]
-	}
-
-	return newObject
 }

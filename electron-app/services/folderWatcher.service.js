@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.taskQueue = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = require("chokidar");
 const loki_service_1 = require("./loki.service");
 const worker_service_1 = require("./worker.service");
+const string_hash_1 = __importDefault(require("string-hash"));
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3'];
 function getRootDirFolderWatcher() {
@@ -24,9 +28,12 @@ function getTaskQueueLength() {
 exports.getTaskQueueLength = getTaskQueueLength;
 function watchFolders(rootDirectories) {
     watcher = chokidar_1.watch(rootDirectories, {
-        awaitWriteFinish: true
+        awaitWriteFinish: true,
+        ignored: '**/*.DS_Store'
     });
     watcher.on('add', (path) => preAppStartFileDetection(path));
+    watcher.on('change', (path) => addToTaskQueue(path, 'add'));
+    watcher.on('unlink', (path) => addToTaskQueue(path, 'delete'));
     watcher.on('ready', () => {
         watcher.on('add', (path) => addToTaskQueue(path, 'add'));
         checkNewSongs();
@@ -69,6 +76,10 @@ function processQueue(worker) {
                     path
                 }
             });
+        }
+        if (type === 'delete') {
+            // console.log(task, path)
+            loki_service_1.deleteData({ ID: string_hash_1.default(path) }).then(() => processQueue(worker));
         }
     }
     else {

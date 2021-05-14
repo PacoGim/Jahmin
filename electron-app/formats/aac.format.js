@@ -8,6 +8,7 @@ const exiftool_vendored_1 = require("exiftool-vendored");
 const exiftool = new exiftool_vendored_1.ExifTool({ taskTimeoutMillis: 5000 });
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
+const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
@@ -64,17 +65,12 @@ function getAacTags(filePath) {
 }
 exports.getAacTags = getAacTags;
 function normalizeNewTags(newTags) {
-    let stringObject = JSON.stringify(newTags);
-    if (newTags.DiscNumber) {
-        stringObject = stringObject.replace('DiscNumber', 'DiskNumber');
-    }
-    if (newTags.Track) {
-        stringObject = stringObject.replace('Track', 'TrackNumber');
-    }
-    if (newTags.Rating) {
-        stringObject = stringObject.replace('Rating', 'RatingPercent');
-    }
-    newTags = JSON.parse(stringObject);
+    if (newTags.DiscNumber)
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'DiscNumber', 'DiskNumber');
+    if (newTags.Track)
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Track', 'TrackNumber');
+    if (newTags.Rating)
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'Rating', 'RatingPercent');
     if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
         newTags.AllDates = `${newTags.Date_Year || '0000'} ${newTags.Date_Month || '00'} ${newTags.Date_Day || '00'}`;
         if (newTags.Date_Year && newTags.Date_Month) {

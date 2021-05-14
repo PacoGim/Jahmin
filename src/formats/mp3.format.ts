@@ -11,10 +11,11 @@ import NodeID3 from 'node-id3'
 import { TagModMp3Type } from '../types/tagModMp3.type'
 import { Mp3TagType } from '../types/mp3TagType'
 import { EditTag } from '../types/editTag.type'
+import { renameObjectKey } from '../functions/renameObjectKey.fn'
 
 const mm = require('music-metadata')
 
-export function writeMp3Tags(filePath: string, newTags: EditTag) {
+export function writeMp3Tags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
 		newTags = normalizeNewTags(newTags)
 
@@ -30,27 +31,15 @@ export function writeMp3Tags(filePath: string, newTags: EditTag) {
 }
 
 function normalizeNewTags(newTags: EditTag) {
-	let stringObject = JSON.stringify(newTags)
-
-	if (newTags.Title) stringObject = stringObject.replace('Title', 'TIT2')
-
-	if (newTags.Track) stringObject = stringObject.replace('Track', 'TRCK')
-
-	if (newTags.Album) stringObject = stringObject.replace('Album', 'TALB')
-
-	if (newTags.AlbumArtist) stringObject = stringObject.replace('AlbumArtist', 'TPE2')
-
-	if (newTags.Artist) stringObject = stringObject.replace('Artist', 'TPE1')
-
-	if (newTags.Composer) stringObject = stringObject.replace('Composer', 'TCOM')
-
-	if (newTags.DiscNumber) stringObject = stringObject.replace('DiscNumber', 'TPOS')
-
-	if (newTags.Genre) stringObject = stringObject.replace('Genre', 'TCON')
-
-	if (newTags.Comment) stringObject = stringObject.replace('Comment', 'comment')
-
-	newTags = JSON.parse(stringObject)
+	if (newTags.Title) renameObjectKey(newTags, 'Title', 'TIT2')
+	if (newTags.Track) renameObjectKey(newTags, 'Track', 'TRCK')
+	if (newTags.Album) renameObjectKey(newTags, 'Album', 'TALB')
+	if (newTags.AlbumArtist) renameObjectKey(newTags, 'AlbumArtist', 'TPE2')
+	if (newTags.Artist) renameObjectKey(newTags, 'Artist', 'TPE1')
+	if (newTags.Composer) renameObjectKey(newTags, 'Composer', 'TCOM')
+	if (newTags.DiscNumber) renameObjectKey(newTags, 'DiscNumber', 'TPOS')
+	if (newTags.Genre) renameObjectKey(newTags, 'Genre', 'TCON')
+	if (newTags.Comment) renameObjectKey(newTags, 'Comment', 'comment')
 
 	if (newTags.comment) {
 		newTags.comment = {
@@ -60,7 +49,7 @@ function normalizeNewTags(newTags: EditTag) {
 	}
 
 	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
-		newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`
+		newTags.TDRC = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`
 
 		delete newTags.Date_Year
 		delete newTags.Date_Month
@@ -244,24 +233,4 @@ type DateType = {
 	year: number | undefined
 	month: number | undefined
 	day: number | undefined
-}
-
-function objectToFfmpegString(tags: TagModType) {
-	let finalString = ''
-
-	for (let key in tags) {
-		finalString += ` -metadata "${key}=${tags[key]}" `
-	}
-
-	return finalString
-}
-
-function lowerCaseObjectKeys(objectToProcess: any) {
-	let newObject: any = {}
-
-	for (let key in objectToProcess) {
-		newObject[key.toLowerCase()] = objectToProcess[key]
-	}
-
-	return newObject
 }

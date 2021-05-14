@@ -1,4 +1,5 @@
 export type EditTag = {
+	[index: string]: string | number | undefined
 	Album?: string
 	AlbumArtist?: string
 	Comment?: string
@@ -12,6 +13,7 @@ export type EditTag = {
 	Rating?: number
 	Title?: string
 	Track?: number
+	TDRC?: string // Not coming from renderer. Added for simplicity sake.
 	popularimeter?: any // Not coming from renderer. Added for simplicity sake.
 	comment?: any // Not coming from renderer. Added for simplicity sake.
 	Date?: string // Not coming from renderer. Added for simplicity sake.

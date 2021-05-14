@@ -56,6 +56,7 @@ function loadDb() {
             autosave: true,
             autosaveInterval: 10000,
             autosaveCallback: () => {
+                console.log('Saving...');
                 mapCollection();
                 dbVersionResolve(getDBFileTimeStamp());
             }
@@ -69,10 +70,11 @@ function getCollectionMap() {
 exports.getCollectionMap = getCollectionMap;
 function mapCollection() {
     const COLLECTION = db.getCollection('music').find();
-    let map = getCollectionMap();
+    let map = new Map();
+    console.time();
     COLLECTION.forEach((song) => {
         let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/');
-        let rootId = hashString_fn_1.hash(rootDir);
+        let rootId = hashString_fn_1.hash(rootDir, 'text');
         let data = map.get(rootId);
         if (data) {
             if (!data.Songs.find((i) => i.ID === song.ID)) {
@@ -89,7 +91,10 @@ function mapCollection() {
             });
         }
     });
+    songMap = map;
+    console.timeEnd();
 }
+function clearNotFoundSongs() { }
 function getCollection() {
     const COLLECTION = db.getCollection('music').find();
     return COLLECTION;
@@ -161,7 +166,6 @@ function updateData(query, newData) {
 exports.updateData = updateData;
 function deleteData(query) {
     return new Promise((resolve, reject) => {
-        // console.log(query)
         const COLLECTION = db.getCollection('music');
         if (!COLLECTION)
             throw new Error(`Collection ${'music'} not created/available.`);

@@ -2,6 +2,7 @@ import { ExifTool } from 'exiftool-vendored'
 const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import fs from 'fs'
 import stringHash from 'string-hash'
+import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
 
@@ -63,21 +64,9 @@ export function getAacTags(filePath: string): Promise<SongType> {
 }
 
 function normalizeNewTags(newTags: EditTag) {
-	let stringObject = JSON.stringify(newTags)
-
-	if (newTags.DiscNumber) {
-		stringObject = stringObject.replace('DiscNumber', 'DiskNumber')
-	}
-
-	if (newTags.Track) {
-		stringObject = stringObject.replace('Track', 'TrackNumber')
-	}
-
-	if (newTags.Rating) {
-		stringObject = stringObject.replace('Rating', 'RatingPercent')
-	}
-
-	newTags = JSON.parse(stringObject)
+	if (newTags.DiscNumber) renameObjectKey(newTags, 'DiscNumber', 'DiskNumber')
+	if (newTags.Track) renameObjectKey(newTags, 'Track', 'TrackNumber')
+	if (newTags.Rating) renameObjectKey(newTags, 'Rating', 'RatingPercent')
 
 	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
 		newTags.AllDates = `${newTags.Date_Year || '0000'} ${newTags.Date_Month || '00'} ${newTags.Date_Day || '00'}`

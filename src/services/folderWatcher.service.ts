@@ -1,9 +1,11 @@
 import { FSWatcher, watch } from 'chokidar'
-import { createData, getCollection } from './loki.service'
+import { createData, deleteData, getCollection } from './loki.service'
 
 import { Worker } from 'worker_threads'
 import { getSongDataWorkers, getSongFilterWorker } from './worker.service'
 import { OptionsType } from '../types/options.type'
+
+import stringHash from 'string-hash'
 
 let watcher: FSWatcher
 
@@ -31,10 +33,14 @@ export function getTaskQueueLength() {
 
 export function watchFolders(rootDirectories: string[]) {
 	watcher = watch(rootDirectories, {
-		awaitWriteFinish: true
+		awaitWriteFinish: true,
+		ignored: '**/*.DS_Store'
 	})
 
 	watcher.on('add', (path) => preAppStartFileDetection(path))
+
+	watcher.on('change', (path) => addToTaskQueue(path, 'add'))
+	watcher.on('unlink', (path) => addToTaskQueue(path, 'delete'))
 
 	watcher.on('ready', () => {
 		watcher.on('add', (path) => addToTaskQueue(path, 'add'))
@@ -86,6 +92,11 @@ function processQueue(worker: Worker) {
 					path
 				}
 			})
+		}
+
+		if (type === 'delete') {
+			// console.log(task, path)
+			deleteData({ ID: stringHash(path) }).then(() => processQueue(worker))
 		}
 	} else {
 		worker.postMessage({

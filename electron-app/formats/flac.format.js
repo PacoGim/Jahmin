@@ -17,6 +17,7 @@ const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
+const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
 function writeFlacTags(filePath, newTags) {
@@ -118,15 +119,11 @@ function getDate(dateString) {
     }
 }
 function objectToFfmpegString(newTags) {
-    let stringObject = JSON.stringify(newTags);
     let finalString = '';
-    if (newTags.DiscNumber) {
-        stringObject = stringObject.replace('DiscNumber', 'disc');
-    }
-    if (newTags.AlbumArtist) {
-        stringObject = stringObject.replace('AlbumArtist', 'Album_Artist');
-    }
-    newTags = JSON.parse(stringObject);
+    if (newTags.DiscNumber)
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'DiscNumber', 'disc');
+    if (newTags.AlbumArtist)
+        renameObjectKey_fn_1.renameObjectKey(newTags, 'AlbumArtist', 'Album_Artist');
     if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
         newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`;
         delete newTags.Date_Year;
@@ -137,11 +134,4 @@ function objectToFfmpegString(newTags) {
         finalString += ` -metadata "${key}=${newTags[key]}" `;
     }
     return finalString;
-}
-function lowerCaseObjectKeys(objectToProcess) {
-    let newObject = {};
-    for (let key in objectToProcess) {
-        newObject[key.toLowerCase()] = objectToProcess[key];
-    }
-    return newObject;
 }
