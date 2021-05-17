@@ -4,10 +4,29 @@ import { dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
+let isGetTagEditProgressRunning = false
+
+export function getTagEditProgressIPC(): Promise<string[]> {
+	return new Promise((resolve, reject) => {
+		if (!isGetTagEditProgressRunning) {
+			isGetTagEditProgressRunning = true
+
+			ipcRenderer.invoke('get-tag-edit-progress').then((result) => {
+				isGetTagEditProgressRunning = false
+				console.log(result)
+
+				setTimeout(() => {
+					getTagEditProgressIPC()
+				}, 2000)
+				resolve(result)
+			})
+		}
+	})
+}
+
 export function getOrderIPC(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-order', index).then((result) => {
-			//TODO Gets called too many times
 			resolve(result)
 		})
 	})

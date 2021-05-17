@@ -78,7 +78,7 @@ ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
 	parameters = JSON.parse(parameters)
 
 	if (menuToOpen === 'AlbumContextMenu') {
-		let album = getCollectionMap().get(parameters.albumID)
+		let album = getCollectionMap().get(parameters.albumId)
 
 		template = [
 			{

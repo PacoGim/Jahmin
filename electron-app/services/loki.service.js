@@ -54,7 +54,7 @@ function loadDb() {
                 });
             },
             autosave: true,
-            autosaveInterval: 10000,
+            autosaveInterval: 2500,
             autosaveCallback: () => {
                 console.log('Saving...');
                 mapCollection();
@@ -94,7 +94,6 @@ function mapCollection() {
     songMap = map;
     console.timeEnd();
 }
-function clearNotFoundSongs() { }
 function getCollection() {
     const COLLECTION = db.getCollection('music').find();
     return COLLECTION;

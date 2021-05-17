@@ -5,7 +5,7 @@
 
 	import { getEmptyTagList } from '../functions/getEmptyTagList.fn'
 	import { isEmptyObject } from '../functions/isEmptyObject.fn'
-	import { editTagsIPC } from '../service/ipc.service'
+	import { editTagsIPC, getTagEditProgressIPC } from '../service/ipc.service'
 
 	import { selectedSongsStore, songListStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
@@ -99,6 +99,8 @@
 				songsToEdit.map((song) => song.SourceFile),
 				newTags
 			)
+
+			getTagEditProgressIPC().then((result) => console.log(result))
 		}
 	}
 </script>
@@ -264,8 +266,6 @@
 
 		display: flex;
 		flex-direction: column;
-
-		background-color: rgba(0, 0, 0, 0.25);
 	}
 
 	component-name {

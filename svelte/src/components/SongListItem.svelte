@@ -42,7 +42,7 @@ import { parseDuration } from '../functions/parseDuration.fn';
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	<!-- <song-number>{song.Track}</song-number> -->
-	<song-number>{index} - {song.Track}</song-number>
+	<song-number>{song.Genre} - {song.Track}</song-number>
 	<song-title>{song.Title}</song-title>
 	<Star on:starChange={setStar} songRating={song.Rating} hook='song-list-item' />
 	<song-duration>{parseDuration(song.Duration)}</song-duration>

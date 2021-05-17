@@ -23,6 +23,7 @@ const groupSong_fn_1 = require("../functions/groupSong.fn");
 const folderWatcher_service_1 = require("./folderWatcher.service");
 const peaks_1 = require("./peaks");
 const tagEdit_service_1 = require("./tagEdit.service");
+const getTagEditProgress_fn_1 = require("../functions/getTagEditProgress.fn");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
@@ -100,6 +101,9 @@ function loadIPC() {
             total: folderWatcher_service_1.getMaxTaskQueueLength(),
             current: folderWatcher_service_1.getTaskQueueLength()
         };
+    }));
+    electron_1.ipcMain.handle('get-tag-edit-progress', () => __awaiter(this, void 0, void 0, function* () {
+        return yield getTagEditProgress_fn_1.getTagEditProgress();
     }));
 }
 exports.loadIPC = loadIPC;

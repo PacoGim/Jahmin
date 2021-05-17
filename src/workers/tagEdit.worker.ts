@@ -4,16 +4,37 @@ import { writeFlacTags } from '../formats/flac.format'
 import { writeMp3Tags } from '../formats/mp3.format'
 
 let songToEditQueue: { sourceFile: string; newTags: object }[] = []
+let maxQueueLength = 0
 let isQueueuIterating = false
 
-parentPort?.on('message', (tagsToEditAndSourceFile) => {
+parentPort?.on('message', (data: { message: string; parameter: any }) => {
+	if (data.message === 'TagEdit') {
+		handleTagEdit(data.parameter)
+	}
+
+	if (data.message === 'GetProgress') {
+		parentPort?.postMessage({
+			message: data.message,
+			parameter: {
+				currentLength: songToEditQueue.length,
+				maxLength: maxQueueLength
+			}
+		})
+	}
+})
+
+function handleTagEdit(tagsToEditAndSourceFile: any) {
 	songToEditQueue.push(tagsToEditAndSourceFile)
+
+	if (maxQueueLength < songToEditQueue.length) {
+		maxQueueLength = songToEditQueue.length
+	}
 
 	if (!isQueueuIterating) {
 		isQueueuIterating = true
 		iterateQueue()
 	}
-})
+}
 
 function iterateQueue() {
 	let file = songToEditQueue.shift()

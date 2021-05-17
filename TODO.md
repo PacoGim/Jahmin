@@ -1,2 +1,2 @@
 ## TODO
-* Save in local storage the song list height
+* Save in local storage the song list height.

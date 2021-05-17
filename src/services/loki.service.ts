@@ -65,7 +65,7 @@ export function loadDb(): Promise<void> {
 				})
 			},
 			autosave: true,
-			autosaveInterval: 10000,
+			autosaveInterval: 2500,
 			autosaveCallback: () => {
 				console.log('Saving...')
 				mapCollection()
@@ -109,8 +109,6 @@ function mapCollection() {
 	songMap = map
 	console.timeEnd()
 }
-
-function clearNotFoundSongs() {}
 
 export function getCollection() {
 	const COLLECTION = db.getCollection('music').find()

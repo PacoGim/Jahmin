@@ -75,7 +75,7 @@ electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) 
     let template = [];
     parameters = JSON.parse(parameters);
     if (menuToOpen === 'AlbumContextMenu') {
-        let album = loki_service_1.getCollectionMap().get(parameters.albumID);
+        let album = loki_service_1.getCollectionMap().get(parameters.albumId);
         template = [
             {
                 label: `Open ${(album === null || album === void 0 ? void 0 : album.Name) || ''} Folder`,
