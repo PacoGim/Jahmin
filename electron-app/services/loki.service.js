@@ -170,7 +170,7 @@ function deleteData(query) {
             throw new Error(`Collection ${'music'} not created/available.`);
         const DOC = COLLECTION.find(query)[0];
         resolve(COLLECTION.remove(DOC));
-    });
+    }).catch(err => console.log('Do not know'));
 }
 exports.deleteData = deleteData;
 function handleErrors(error) {

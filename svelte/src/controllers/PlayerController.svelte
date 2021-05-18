@@ -8,6 +8,7 @@
 	import {
 		albumListStore,
 		dbVersion,
+		elementMap,
 		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
@@ -69,16 +70,19 @@
 	}
 
 	function handleClickEvent(evt: MouseEvent) {
-		let elementMap = new Map<string, HTMLElement>()
+		$elementMap = new Map<string, HTMLElement>()
 
 		evt.composedPath().forEach((element: HTMLElement) => {
-			elementMap.set(element.tagName, element)
+			$elementMap.set(element.tagName, element)
 		})
 
-		const ALBUM_ELEMENT = elementMap.get('ALBUM')
-		const SONG_LIST_ITEM_ELEMENT = elementMap.get('SONG-LIST-ITEM')
-		const SONG_LIST_SVLT = elementMap.get('SONG-LIST-SVLT')
-		const TAG_EDIT_SVLT = elementMap.get('TAG-EDIT-SVLT')
+		const ALBUM_ELEMENT = $elementMap.get('ALBUM')
+		const SONG_LIST_ITEM_ELEMENT = $elementMap.get('SONG-LIST-ITEM')
+		// const GROUPING_SVLT = $elementMap.get('GROUPING-SVLT')
+		// const SONG_LIST_ITEM_ELEMENT = $elementMap.get('SONG-LIST-ITEM')
+		// const ART_GRID_SVLT_SVLT = $elementMap.get('ART-GRID-SVLT')
+		// const SONG_LIST_SVLT = $elementMap.get('SONG-LIST-SVLT')
+		// const TAG_EDIT_SVLT = $elementMap.get('TAG-EDIT-SVLT')
 
 		if (ALBUM_ELEMENT) {
 			const ALBUM_Id = ALBUM_ELEMENT.getAttribute('id')
@@ -98,17 +102,13 @@
 		}
 
 		if (SONG_LIST_ITEM_ELEMENT) {
-			const SONG_Id_TO_PLAY = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
+			const SONG_ID_TO_PLAY = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then((result) => {
-					setNewPlayback($selectedAlbumId, result.Songs, SONG_Id_TO_PLAY, true)
+					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID_TO_PLAY, true)
 				})
 			}
-		}
-
-		if (!(SONG_LIST_SVLT || TAG_EDIT_SVLT)) {
-			$selectedSongsStore = []
 		}
 	}
 </script>

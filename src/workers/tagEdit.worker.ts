@@ -56,5 +56,6 @@ function iterateQueue() {
 		}
 	} else {
 		isQueueuIterating = false
+		maxQueueLength = 0
 	}
 }

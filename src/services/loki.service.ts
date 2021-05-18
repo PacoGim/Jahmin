@@ -190,7 +190,7 @@ export function deleteData(query: any) {
 		const DOC = COLLECTION.find(query)[0]
 
 		resolve(COLLECTION.remove(DOC))
-	})
+	}).catch(err=>console.log('Do not know'))
 }
 
 function handleErrors(error: Error | string) {

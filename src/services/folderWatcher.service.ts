@@ -40,7 +40,12 @@ export function watchFolders(rootDirectories: string[]) {
 	watcher.on('add', (path) => preAppStartFileDetection(path))
 
 	watcher.on('change', (path) => addToTaskQueue(path, 'add'))
+
 	watcher.on('unlink', (path) => addToTaskQueue(path, 'delete'))
+
+	// watcher.on('all', (event, path) => {
+	// 	console.log(event, path)
+	// })
 
 	watcher.on('ready', () => {
 		watcher.on('add', (path) => addToTaskQueue(path, 'add'))

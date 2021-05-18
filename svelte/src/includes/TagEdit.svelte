@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte'
+
 	import Star from '../components/Star.svelte'
 
 	import TagEditEditor from '../components/TagEdit-Editor.svelte'
@@ -7,7 +9,7 @@
 	import { isEmptyObject } from '../functions/isEmptyObject.fn'
 	import { editTagsIPC, getTagEditProgressIPC } from '../service/ipc.service'
 
-	import { selectedSongsStore, songListStore } from '../store/final.store'
+	import { elementMap, selectedSongsStore, songListStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 
 	let songsToEdit: SongType[] = []
@@ -23,6 +25,16 @@
 		tagList
 		if (songsToEdit.length !== 0) checkNewTags()
 	}
+
+	onMount(() => {
+		document.addEventListener('keypress', ({ key }) => {
+			if (key === 'Enter') {
+				if (document.activeElement.parentElement.tagName === 'TAG-EDIT') {
+					updateSongs()
+				}
+			}
+		})
+	})
 
 	function checkNewTags() {
 		enableButtons = false

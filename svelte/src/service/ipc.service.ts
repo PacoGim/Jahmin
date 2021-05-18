@@ -13,7 +13,7 @@ export function getTagEditProgressIPC(): Promise<string[]> {
 
 			ipcRenderer.invoke('get-tag-edit-progress').then((result) => {
 				isGetTagEditProgressRunning = false
-				console.log(result)
+				console.log((100 / result.parameter.maxLength) * result.parameter.currentLength)
 
 				setTimeout(() => {
 					getTagEditProgressIPC()
