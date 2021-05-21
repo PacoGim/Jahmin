@@ -2,10 +2,11 @@ import { FSWatcher, watch } from 'chokidar'
 import { createData, deleteData, getCollection } from './loki.service'
 
 import { Worker } from 'worker_threads'
-import { getSongDataWorkers, getSongFilterWorker } from './worker.service'
+import { getSongDataWorkers, getSongFilterWorker, getStorageWorker } from './worker.service'
 import { OptionsType } from '../types/options.type'
 
 import stringHash from 'string-hash'
+import { appDataPath } from '..'
 
 let watcher: FSWatcher
 
@@ -22,6 +23,8 @@ let filesFound: string[] = []
 export let maxTaskQueueLength: number = 0
 
 let workerSongData = getSongDataWorkers()
+
+let storageWorker = getStorageWorker()
 
 export function getMaxTaskQueueLength() {
 	return maxTaskQueueLength
@@ -69,9 +72,16 @@ function startWorkers() {
 						processQueue(worker)
 					}, 2000)
 				} else if (options.task === 'Get Song Data') {
-					createData(options.data).then(() => {
-						processQueue(worker)
+					storageWorker.postMessage({
+						type: 'Add',
+						data: options.data,
+						appDataPath: appDataPath()
 					})
+					processQueue(worker)
+					/*
+					createData(options.data).then(() => {
+					})
+					 */
 				}
 			})
 

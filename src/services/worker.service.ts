@@ -7,7 +7,7 @@ const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
 
 type WorkerType = {
 	id: number
-	type: 'SongData' | 'SongFilter' | 'TagEdit'
+	type: 'SongData' | 'SongFilter' | 'TagEdit' | 'Storage'
 	worker: Worker
 }
 
@@ -44,6 +44,15 @@ export function initWorkers() {
 		type: 'TagEdit',
 		worker: workerTagEdit
 	})
+
+	// Single worker storage
+	const workerStorage = new Worker(getWorkerPath('storage'))
+
+	workers.push({
+		id: workerSongFilter.threadId,
+		type: 'Storage',
+		worker: workerStorage
+	})
 }
 
 export function killAllWorkers() {
@@ -60,6 +69,10 @@ export function getSongDataWorkers() {
 
 export function getTagEditWorker() {
 	return workers.filter((worker) => worker.type === 'TagEdit')[0].worker
+}
+
+export function getStorageWorker() {
+	return workers.filter((worker) => worker.type === 'Storage')[0].worker
 }
 
 function getWorkerPath(workerName: string) {

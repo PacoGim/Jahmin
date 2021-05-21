@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTagEditWorker = exports.getSongDataWorkers = exports.getSongFilterWorker = exports.killAllWorkers = exports.initWorkers = void 0;
+exports.getStorageWorker = exports.getTagEditWorker = exports.getSongDataWorkers = exports.getSongFilterWorker = exports.killAllWorkers = exports.initWorkers = void 0;
 const worker_threads_1 = require("worker_threads");
 const os_1 = require("os");
 const path_1 = __importDefault(require("path"));
@@ -35,6 +35,13 @@ function initWorkers() {
         type: 'TagEdit',
         worker: workerTagEdit
     });
+    // Single worker storage
+    const workerStorage = new worker_threads_1.Worker(getWorkerPath('storage'));
+    workers.push({
+        id: workerSongFilter.threadId,
+        type: 'Storage',
+        worker: workerStorage
+    });
 }
 exports.initWorkers = initWorkers;
 function killAllWorkers() {
@@ -53,6 +60,10 @@ function getTagEditWorker() {
     return workers.filter((worker) => worker.type === 'TagEdit')[0].worker;
 }
 exports.getTagEditWorker = getTagEditWorker;
+function getStorageWorker() {
+    return workers.filter((worker) => worker.type === 'Storage')[0].worker;
+}
+exports.getStorageWorker = getStorageWorker;
 function getWorkerPath(workerName) {
     return path_1.default.join(WORKER_FOLDER_PATH, `${workerName}.worker.js`);
 }

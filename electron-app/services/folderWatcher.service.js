@@ -8,6 +8,7 @@ const chokidar_1 = require("chokidar");
 const loki_service_1 = require("./loki.service");
 const worker_service_1 = require("./worker.service");
 const string_hash_1 = __importDefault(require("string-hash"));
+const __1 = require("..");
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3'];
 function getRootDirFolderWatcher() {
@@ -18,6 +19,7 @@ exports.taskQueue = [];
 let filesFound = [];
 exports.maxTaskQueueLength = 0;
 let workerSongData = worker_service_1.getSongDataWorkers();
+let storageWorker = worker_service_1.getStorageWorker();
 function getMaxTaskQueueLength() {
     return exports.maxTaskQueueLength;
 }
@@ -56,9 +58,16 @@ function startWorkers() {
                     }, 2000);
                 }
                 else if (options.task === 'Get Song Data') {
-                    loki_service_1.createData(options.data).then(() => {
-                        processQueue(worker);
+                    storageWorker.postMessage({
+                        type: 'Add',
+                        data: options.data,
+                        appDataPath: __1.appDataPath()
                     });
+                    processQueue(worker);
+                    /*
+                    createData(options.data).then(() => {
+                    })
+                     */
                 }
             });
             processQueue(worker);
