@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.orderSongs = void 0;
 const albumFiltering_service_1 = require("./albumFiltering.service");
-const loki_service_1 = require("./loki.service");
+// import { getCollection } from './loki.service.bak'
 function orderSongs(index, grouping, filtering) {
     // Retrieves the songs from DB.
-    let songs = loki_service_1.getCollection();
+    let songs = getCollection();
     // Array returned at the end of the whole process of filtering.
     let tempArray = [];
     // Array to be filtered again and again.

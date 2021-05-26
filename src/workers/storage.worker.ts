@@ -7,11 +7,6 @@ import { parentPort } from 'worker_threads'
 import { hash } from '../functions/hashString.fn'
 import { TagType } from '../types/tag.type'
 
-// const store = new Store({
-// 	name: 'Test',
-// 	cwd: 'Unicorn'
-// })
-
 let storagePath: string | undefined = undefined
 
 type MessageType = {
@@ -21,13 +16,7 @@ type MessageType = {
 }
 
 parentPort?.on('message', ({ type, data, appDataPath }: MessageType) => {
-	if (storagePath === undefined) {
-		storagePath = path.join(appDataPath, 'storage')
-
-		if (!fs.existsSync(storagePath)) {
-			fs.mkdirSync(storagePath)
-		}
-	}
+	if (storagePath === undefined) storagePath = path.join(appDataPath, 'storage')
 
 	if (type === 'Add') add(data)
 })

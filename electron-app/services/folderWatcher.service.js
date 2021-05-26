@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.taskQueue = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = require("chokidar");
-const loki_service_1 = require("./loki.service");
 const worker_service_1 = require("./worker.service");
 const string_hash_1 = __importDefault(require("string-hash"));
 const __1 = require("..");
@@ -64,14 +63,10 @@ function startWorkers() {
                         appDataPath: __1.appDataPath()
                     });
                     processQueue(worker);
-                    /*
-                    createData(options.data).then(() => {
-                    })
-                     */
                 }
             });
             processQueue(worker);
-        }, 10000 * index);
+        }, 5000 * index);
     });
 }
 function processQueue(worker) {
@@ -91,7 +86,7 @@ function processQueue(worker) {
         }
         if (type === 'delete') {
             // console.log(task, path)
-            loki_service_1.deleteData({ ID: string_hash_1.default(path) }).then(() => processQueue(worker));
+            deleteData({ ID: string_hash_1.default(path) }).then(() => processQueue(worker));
         }
     }
     else {
@@ -101,7 +96,7 @@ function processQueue(worker) {
     }
 }
 function checkNewSongs() {
-    let collection = loki_service_1.getCollection().map((song) => song.SourceFile);
+    let collection = getCollection().map((song) => song.SourceFile);
     let worker = worker_service_1.getSongFilterWorker();
     worker.on('message', (data) => {
         data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'add')));

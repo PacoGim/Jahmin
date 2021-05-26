@@ -1,5 +1,5 @@
 import { setAlbumArray } from './albumFiltering.service'
-import { getCollection } from './loki.service'
+// import { getCollection } from './loki.service.bak'
 
 export function orderSongs(index: number, grouping: string[], filtering: string[]) {
 	// Retrieves the songs from DB.

@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
-import { getCollectionMap, getNewPromiseDbVersion } from './loki.service'
+// import { getCollectionMap, getNewPromiseDbVersion } from './loki.service.bak'
 import { orderSongs } from './songFilter.service'
 import { getAlbumCover } from './albumArt.service'
 import { getAlbumColors } from './getAlbumColors.fn'
@@ -13,6 +13,7 @@ import { getPeaks, savePeaks } from './peaks'
 import { tagEdit } from './tagEdit.service'
 import { getTagEditWorker } from './worker.service'
 import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
+import { getStorageMap } from './storage.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -64,7 +65,7 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('get-albums', async (evt, groupBy, groupByValue) => {
-		let docs = getCollectionMap()
+		let docs = getStorageMap()
 		let groupedSongs: any[] = []
 
 		docs.forEach((doc) => {
@@ -90,7 +91,7 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('get-album', (evt, albumID) => {
-		return getCollectionMap().get(albumID)
+		return getStorageMap().get(albumID)
 	})
 
 	ipcMain.handle('get-cover', async (evt, rootDir) => {
@@ -102,6 +103,7 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('sync-db-version', async (evt, value) => {
+		return ''
 		return await getNewPromiseDbVersion(value)
 	})
 

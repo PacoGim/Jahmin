@@ -16,7 +16,6 @@ exports.watchFolders = exports.getTotalProcessedChanged = exports.getTotalChange
 const chokidar_1 = __importDefault(require("chokidar"));
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
-const loki_service_1 = require("./loki.service");
 const observeArray_fn_1 = require("../functions/observeArray.fn");
 const aac_format_1 = require("../formats/aac.format");
 const flac_format_1 = require("../formats/flac.format");
@@ -55,11 +54,11 @@ function applyFolderChanges() {
             if (['update', 'add'].includes(event)) {
                 let fileToUpdate = yield processedFilePath(path);
                 if (fileToUpdate !== undefined) {
-                    yield loki_service_1.createData(fileToUpdate);
+                    yield createData(fileToUpdate);
                 }
             }
             else if (['delete'].includes(event)) {
-                yield loki_service_1.deleteData({ SourceFile: path });
+                yield deleteData({ SourceFile: path });
             }
             totalProcessedChanged++;
             setImmediate(() => applyFolderChanges());
@@ -150,7 +149,7 @@ function processedFilePath(filePath) {
         const extension = filePath.split('.').pop() || '';
         const fileStats = fs_1.default.statSync(filePath);
         let isFileModified = false;
-        let dbDoc = loki_service_1.readData({ ID: id });
+        let dbDoc = readData({ ID: id });
         if (dbDoc) {
             if (fileStats.mtimeMs !== dbDoc['LastModified']) {
                 isFileModified = true;
@@ -174,11 +173,11 @@ function processedFilePath(filePath) {
     }));
 }
 function removeDeadFiles() {
-    let collection = loki_service_1.getCollection();
+    let collection = getCollection();
     collection.forEach((song) => {
         if (!fs_1.default.existsSync(song['SourceFile'])) {
             console.log('Delete:', song['SourceFile']);
-            loki_service_1.deleteData({ SourceFile: song['SourceFile'] });
+            deleteData({ SourceFile: song['SourceFile'] });
         }
     });
 }

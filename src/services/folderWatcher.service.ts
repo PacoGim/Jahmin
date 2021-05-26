@@ -1,5 +1,5 @@
 import { FSWatcher, watch } from 'chokidar'
-import { createData, deleteData, getCollection } from './loki.service'
+// import { createData, deleteData, getCollection } from './loki.service.bak'
 
 import { Worker } from 'worker_threads'
 import { getSongDataWorkers, getSongFilterWorker, getStorageWorker } from './worker.service'
@@ -78,15 +78,11 @@ function startWorkers() {
 						appDataPath: appDataPath()
 					})
 					processQueue(worker)
-					/*
-					createData(options.data).then(() => {
-					})
-					 */
 				}
 			})
 
 			processQueue(worker)
-		}, 10000 * index)
+		}, 5000 * index)
 	})
 }
 

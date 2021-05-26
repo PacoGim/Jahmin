@@ -1,8 +1,10 @@
 import { app, BrowserWindow, ipcMain, Menu, protocol, screen, shell } from 'electron'
+
 import path from 'path'
 
 export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
 
+import { consolidateStorage } from './services/storage.service'
 import { getConfig, saveConfig } from './services/config.service'
 
 import { initWorkers, killAllWorkers } from './services/worker.service'
@@ -11,7 +13,7 @@ initWorkers()
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 
-import { getCollectionMap, loadDb } from './services/loki.service'
+import { getCollectionMap, loadDb } from './services/loki.service.bak'
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
 
@@ -26,7 +28,8 @@ async function createMainWindow() {
 	window.webContents.openDevTools()
 	window.loadFile('index.html')
 
-	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+	consolidateStorage()
+	// if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
 
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }

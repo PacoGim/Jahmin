@@ -17,7 +17,7 @@ exports.scanFolders = exports.validFormats = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const music_metadata_1 = require("music-metadata");
-const loki_service_1 = require("./loki.service");
+// import { createData, readData } from './loki.service.bak'
 // import { customAlphabet } from 'nanoid'
 // const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
 exports.validFormats = ['.flac', '.m4a', '.mp3', '.wav', '.ogg', '.opus'];
@@ -89,7 +89,7 @@ function getFilesMetaTag(files) {
             return console.log('Done');
         const extension = filePath.split('.').pop() || '';
         const fileStats = fs_1.default.statSync(filePath);
-        let doc = loki_service_1.readData({ SourceFile: filePath });
+        let doc = readData({ SourceFile: filePath });
         let isDiffTime = false;
         if (doc) {
             isDiffTime = fs_1.default.statSync(filePath).mtimeMs !== doc['LastModified'];
@@ -134,7 +134,7 @@ function parseAndSaveFile(filePath, extension, fileStats) {
             // 		delete doc[i]
             // 	}
             // }
-            setTimeout(() => loki_service_1.createData(doc), 0);
+            setTimeout(() => createData(doc), 0);
         })
             .catch((err) => {
             console.error('Parse File', err.message);
