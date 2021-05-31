@@ -26,11 +26,12 @@ const validVideoExtensions = ['gif', 'mp4'];
 const validImageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 const validExtensions = [...validImageExtensions, ...validVideoExtensions];
 const validNames = ['cover', 'folder', 'front', 'art'];
+//TODO Improve that
 function getAlbumCover(rootDir) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         var _a;
         let imagePathArray = [];
-        let rootDirHashed = hashString_fn_1.hash(rootDir);
+        let rootDirHashed = hashString_fn_1.hash(rootDir, 'text');
         let config = config_service_1.getConfig();
         let dimension = (_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension'];
         let artDirPath = path_1.default.join(__1.appDataPath(), 'art', String(dimension));
@@ -57,6 +58,7 @@ function getAlbumCover(rootDir) {
         if (imagePathArray.length === 0) {
             return resolve(null);
         }
+        //@ts-expect-error
         const videoCoverFound = imagePathArray.find((file) => validVideoExtensions.includes(file.split('.').pop()));
         if (videoCoverFound) {
             return resolve({ fileType: 'video', filePath: videoCoverFound });

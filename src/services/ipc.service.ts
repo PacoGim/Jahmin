@@ -13,7 +13,7 @@ import { getPeaks, savePeaks } from './peaks'
 import { tagEdit } from './tagEdit.service'
 import { getTagEditWorker } from './worker.service'
 import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
-import { getStorageMap } from './storage.service'
+import { getNewPromiseDbVersion, getStorageMap } from './storage.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
@@ -71,6 +71,7 @@ export function loadIPC() {
 		docs.forEach((doc) => {
 			doc.Songs.forEach((song) => {
 				if (song[groupBy] === groupByValue) {
+					//@ts-expect-error
 					let rootDir = song.SourceFile.split('/').slice(0, -1).join('/')
 
 					let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
@@ -103,7 +104,6 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('sync-db-version', async (evt, value) => {
-		return ''
 		return await getNewPromiseDbVersion(value)
 	})
 

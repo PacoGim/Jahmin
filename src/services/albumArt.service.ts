@@ -15,10 +15,11 @@ const validImageExtensions = ['jpg', 'jpeg', 'png', 'webp']
 const validExtensions = [...validImageExtensions, ...validVideoExtensions]
 const validNames = ['cover', 'folder', 'front', 'art']
 
+//TODO Improve that
 export function getAlbumCover(rootDir: /* Root Directory */ string) {
 	return new Promise(async (resolve, reject) => {
 		let imagePathArray: string[] = []
-		let rootDirHashed = hash(rootDir)
+		let rootDirHashed = hash(rootDir, 'text') as string
 		let config = getConfig()
 		let dimension = config?.['art']?.['dimension']
 		let artDirPath = path.join(appDataPath(), 'art', String(dimension))
@@ -50,6 +51,7 @@ export function getAlbumCover(rootDir: /* Root Directory */ string) {
 			return resolve(null)
 		}
 
+		//@ts-expect-error
 		const videoCoverFound = imagePathArray.find((file) => validVideoExtensions.includes(file.split('.').pop()))
 
 		if (videoCoverFound) {

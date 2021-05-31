@@ -1,6 +1,8 @@
 import path from 'path'
 import fs from 'fs'
 
+import chokidar from 'chokidar'
+
 import { appDataPath } from '..'
 
 import { AlbumType } from '../types/album.type'
@@ -8,9 +10,40 @@ import { hash } from '../functions/hashString.fn'
 import { SongType } from '../types/song.type'
 
 const STORAGE_PATH = path.join(appDataPath(), 'storage')
+const STORAGE_VERSION_FILE_PATH = path.join(STORAGE_PATH, 'version')
 
 let storageMap: Map<String, AlbumType>
 let storageVersion: number
+
+// Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
+let dbVersionResolve: any = undefined
+
+let watcher: chokidar.FSWatcher
+
+function watchVersionFile() {
+	if (!fs.existsSync(STORAGE_VERSION_FILE_PATH)) {
+		fs.writeFileSync(STORAGE_VERSION_FILE_PATH, '0')
+	}
+
+	watcher = chokidar.watch(path.join(STORAGE_PATH, 'version')).on('change', () => {
+		dbVersionResolve(storageVersion)
+	})
+}
+
+export function updateStorageVersion() {
+	fs.writeFileSync(STORAGE_VERSION_FILE_PATH, String(new Date().getTime()))
+}
+
+export function killStorageWatcher() {
+	if (watcher) {
+		watcher.close()
+	}
+}
+
+export function initStorage() {
+	consolidateStorage()
+	watchVersionFile()
+}
 
 export function getStorageMapToArray() {
 	let map = getStorageMap()
@@ -34,14 +67,20 @@ export function getStorageMap() {
 	}
 }
 
-export function consolidateStorage() {
+function consolidateStorage() {
 	let map = new Map<String, AlbumType>()
 
 	if (!fs.existsSync(STORAGE_PATH)) {
 		fs.mkdirSync(STORAGE_PATH)
 	}
 
-	let storageFiles = fs.readdirSync(STORAGE_PATH).filter((file) => !['.DS_Store', 'version'].includes(file))
+	let storageFiles = fs.readdirSync(STORAGE_PATH).filter((file) => {
+		if (['.DS_Store', 'version'].includes(file)) {
+			return false
+		} else {
+			return file.indexOf('.tmp-') === -1
+		}
+	})
 
 	storageFiles.forEach((file) => {
 		let fileData = JSON.parse(fs.readFileSync(path.join(STORAGE_PATH, file), { encoding: 'utf-8' }))
@@ -77,4 +116,16 @@ export function consolidateStorage() {
 
 function getStorageVersion() {
 	return Number(fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }))
+}
+
+export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<number> {
+	let dbFileTimeStamp = getStorageVersion()
+
+	// If the db version changed while going back and forth Main <-> Renderer
+	if (dbFileTimeStamp > rendererDbVersion) {
+		return new Promise((resolve) => resolve(dbFileTimeStamp))
+	} else {
+		// If didn't change, wait for a change to happen.
+		return new Promise((resolve) => (dbVersionResolve = resolve))
+	}
 }

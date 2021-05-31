@@ -1,13 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.taskQueue = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = require("chokidar");
 const worker_service_1 = require("./worker.service");
-const string_hash_1 = __importDefault(require("string-hash"));
 const __1 = require("..");
+const storage_service_1 = require("./storage.service");
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3'];
 function getRootDirFolderWatcher() {
@@ -86,7 +83,8 @@ function processQueue(worker) {
         }
         if (type === 'delete') {
             // console.log(task, path)
-            deleteData({ ID: string_hash_1.default(path) }).then(() => processQueue(worker));
+            //TODO
+            // deleteData({ ID: stringHash(path) }).then(() => processQueue(worker))
         }
     }
     else {
@@ -96,7 +94,7 @@ function processQueue(worker) {
     }
 }
 function checkNewSongs() {
-    let collection = getCollection().map((song) => song.SourceFile);
+    let collection = storage_service_1.getStorageMapToArray().map((song) => song.SourceFile);
     let worker = worker_service_1.getSongFilterWorker();
     worker.on('message', (data) => {
         data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'add')));

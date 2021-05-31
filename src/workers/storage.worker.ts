@@ -1,7 +1,7 @@
 import Store from 'electron-store'
 
-import fs from 'fs'
 import path from 'path'
+import fs from 'fs'
 
 import { parentPort } from 'worker_threads'
 import { hash } from '../functions/hashString.fn'
@@ -32,4 +32,11 @@ function add(data: TagType) {
 	})
 
 	store.set(songId, data)
+	updateStorageVersion()
+}
+
+function updateStorageVersion() {
+	if (storagePath) {
+		fs.writeFileSync(path.join(storagePath, 'version'), String(new Date().getTime()))
+	}
 }

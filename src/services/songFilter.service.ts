@@ -1,15 +1,17 @@
+import { SongType } from '../types/song.type'
 import { setAlbumArray } from './albumFiltering.service'
+import { getStorageMapToArray } from './storage.service'
 // import { getCollection } from './loki.service.bak'
 
 export function orderSongs(index: number, grouping: string[], filtering: string[]) {
 	// Retrieves the songs from DB.
-	let songs = getCollection()
+	let songs = getStorageMapToArray()
 
 	// Array returned at the end of the whole process of filtering.
 	let tempArray: string[] = []
 
 	// Array to be filtered again and again.
-	let filteredArray = []
+	let filteredArray: SongType[] = []
 
 	// Iterates through from 0 to the component index to filter or group upwards.
 	for (let i = 0; i <= index; i++) {
@@ -35,7 +37,7 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 			filteredArray.forEach((song) => {
 				// Group by i or index since they match it should be grouped.
 				// i === index -> 4 === 4 -> Group by Album Artist since it is the last grouping array element.
-				let valueToGroupBy = song[grouping[i]]
+				let valueToGroupBy:any = song[grouping[i]]
 
 				if (['', undefined, null, 'undefined', 'null'].includes(valueToGroupBy)) {
 					valueToGroupBy = 'Unknown'

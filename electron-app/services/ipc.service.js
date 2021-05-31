@@ -70,6 +70,7 @@ function loadIPC() {
         docs.forEach((doc) => {
             doc.Songs.forEach((song) => {
                 if (song[groupBy] === groupByValue) {
+                    //@ts-expect-error
                     let rootDir = song.SourceFile.split('/').slice(0, -1).join('/');
                     let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
                     if (!foundAlbum) {
@@ -95,8 +96,7 @@ function loadIPC() {
         return yield getAlbumColors_fn_1.getAlbumColors(imageId);
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
-        return '';
-        return yield getNewPromiseDbVersion(value);
+        return yield storage_service_1.getNewPromiseDbVersion(value);
     }));
     electron_1.ipcMain.handle('get-changes-progress', (evt) => __awaiter(this, void 0, void 0, function* () {
         return {

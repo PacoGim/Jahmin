@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_store_1 = __importDefault(require("electron-store"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const worker_threads_1 = require("worker_threads");
 const hashString_fn_1 = require("../functions/hashString.fn");
 let storagePath = undefined;
@@ -24,4 +25,10 @@ function add(data) {
         name: rootFolderId
     });
     store.set(songId, data);
+    updateStorageVersion();
+}
+function updateStorageVersion() {
+    if (storagePath) {
+        fs_1.default.writeFileSync(path_1.default.join(storagePath, 'version'), String(new Date().getTime()));
+    }
 }

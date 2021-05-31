@@ -4,7 +4,7 @@ import path from 'path'
 
 export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
 
-import { consolidateStorage } from './services/storage.service'
+import { getStorageMap, initStorage, killStorageWatcher } from './services/storage.service'
 import { getConfig, saveConfig } from './services/config.service'
 
 import { initWorkers, killAllWorkers } from './services/worker.service'
@@ -13,14 +13,11 @@ initWorkers()
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 
-import { getCollectionMap, loadDb } from './services/loki.service.bak'
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'
 
 async function createMainWindow() {
 	const config = getConfig()
-
-	await loadDb()
 
 	// Create the browser window.
 	const window = new BrowserWindow(loadOptions(config))
@@ -28,8 +25,9 @@ async function createMainWindow() {
 	window.webContents.openDevTools()
 	window.loadFile('index.html')
 
-	consolidateStorage()
-	// if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+	// Gets the storage data from files and creates a map.
+	initStorage()
+	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
 
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }
@@ -81,7 +79,7 @@ ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
 	parameters = JSON.parse(parameters)
 
 	if (menuToOpen === 'AlbumContextMenu') {
-		let album = getCollectionMap().get(parameters.albumId)
+		let album = getStorageMap().get(parameters.albumId)
 
 		template = [
 			{
@@ -108,6 +106,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
 	killAllWorkers()
+	killStorageWatcher()
 	getRootDirFolderWatcher()?.close()
 })
 

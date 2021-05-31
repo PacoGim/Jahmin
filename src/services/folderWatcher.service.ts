@@ -7,6 +7,7 @@ import { OptionsType } from '../types/options.type'
 
 import stringHash from 'string-hash'
 import { appDataPath } from '..'
+import { getStorageMapToArray } from './storage.service'
 
 let watcher: FSWatcher
 
@@ -107,7 +108,8 @@ function processQueue(worker: Worker) {
 
 		if (type === 'delete') {
 			// console.log(task, path)
-			deleteData({ ID: stringHash(path) }).then(() => processQueue(worker))
+			//TODO
+			// deleteData({ ID: stringHash(path) }).then(() => processQueue(worker))
 		}
 	} else {
 		worker.postMessage({
@@ -117,7 +119,7 @@ function processQueue(worker: Worker) {
 }
 
 function checkNewSongs() {
-	let collection = getCollection().map((song) => song.SourceFile)
+	let collection = getStorageMapToArray().map((song) => song.SourceFile)
 
 	let worker = getSongFilterWorker()
 
