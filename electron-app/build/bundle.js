@@ -863,8 +863,9 @@ var app = (function () {
         // Waits for the version to change in main.
         ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
             dbVersion.set(result);
-            console.log(result);
-            syncDbVersionIPC();
+            setTimeout(() => {
+                syncDbVersionIPC();
+            }, 500);
         });
     }
 

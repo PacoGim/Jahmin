@@ -31,7 +31,8 @@ export function writeFlacTags(filePath: string, newTags: any) {
 export async function getFlacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
 		let tags: SongType = {
-			Extension: 'flac'
+			Extension: 'flac',
+			SourceFile: ''
 		}
 
 		const STATS = fs.statSync(filePath)

@@ -34,7 +34,8 @@ function getFlacTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let tags = {
-                Extension: 'flac'
+                Extension: 'flac',
+                SourceFile: ''
             };
             const STATS = fs_1.default.statSync(filePath);
             const METADATA = yield mm.parseFile(filePath);

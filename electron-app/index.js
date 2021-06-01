@@ -17,12 +17,12 @@ const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
 const appDataPath = () => path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
 exports.appDataPath = appDataPath;
-const storage_service_1 = require("./services/storage.service");
 const config_service_1 = require("./services/config.service");
 const worker_service_1 = require("./services/worker.service");
 worker_service_1.initWorkers();
 const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
+const storage_service_1 = require("./services/storage.service");
 const folderWatcher_service_1 = require("./services/folderWatcher.service");
 function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {

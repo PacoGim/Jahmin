@@ -79,7 +79,8 @@ function getMp3Tags(filePath) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             let tags = {
-                Extension: 'mp3'
+                Extension: 'mp3',
+                SourceFile: ''
             };
             const STATS = fs_1.default.statSync(filePath);
             const METADATA = yield mm.parseFile(filePath);

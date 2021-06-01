@@ -72,7 +72,8 @@ function normalizeNewTags(newTags: EditTag) {
 export async function getMp3Tags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
 		let tags: SongType = {
-			Extension: 'mp3'
+			Extension: 'mp3',
+			SourceFile: ''
 		}
 
 		const STATS = fs.statSync(filePath)

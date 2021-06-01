@@ -4,7 +4,6 @@ import path from 'path'
 
 export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
 
-import { getStorageMap, initStorage, killStorageWatcher } from './services/storage.service'
 import { getConfig, saveConfig } from './services/config.service'
 
 import { initWorkers, killAllWorkers } from './services/worker.service'
@@ -12,6 +11,8 @@ initWorkers()
 
 import { loadIPC } from './services/ipc.service'
 loadIPC()
+
+import { getStorageMap, initStorage, killStorageWatcher } from './services/storage.service'
 
 import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
 import { ConfigType } from './types/config.type'

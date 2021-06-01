@@ -13,7 +13,7 @@ export type SongType = {
 	Date_Year?: number | null // Modifiable
 	Date_Month?: number | null // Modifiable
 	Date_Day?: number | null // Modifiable
-	SourceFile?: string
+	SourceFile: string
 	Extension?: string
 	Size?: number
 	Duration?: number

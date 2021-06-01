@@ -70,7 +70,6 @@ function loadIPC() {
         docs.forEach((doc) => {
             doc.Songs.forEach((song) => {
                 if (song[groupBy] === groupByValue) {
-                    //@ts-expect-error
                     let rootDir = song.SourceFile.split('/').slice(0, -1).join('/');
                     let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
                     if (!foundAlbum) {

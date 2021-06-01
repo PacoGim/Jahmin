@@ -8,68 +8,49 @@ import { appDataPath } from '..'
 import { AlbumType } from '../types/album.type'
 import { hash } from '../functions/hashString.fn'
 import { SongType } from '../types/song.type'
+import { getStorageWorker } from './worker.service'
 
 const STORAGE_PATH = path.join(appDataPath(), 'storage')
 const STORAGE_VERSION_FILE_PATH = path.join(STORAGE_PATH, 'version')
 
-let storageMap: Map<String, AlbumType>
-let storageVersion: number
+let storageMap: Map<String, AlbumType> = new Map<String, AlbumType>()
+// let storageVersion: number
 
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve: any = undefined
 
 let watcher: chokidar.FSWatcher
 
-function watchVersionFile() {
-	if (!fs.existsSync(STORAGE_VERSION_FILE_PATH)) {
-		fs.writeFileSync(STORAGE_VERSION_FILE_PATH, '0')
+let worker = getStorageWorker()
+
+worker.on('message', (message) => {
+	if (message.type === 'Add') {
+		addData(message.data)
 	}
+})
 
-	watcher = chokidar.watch(path.join(STORAGE_PATH, 'version')).on('change', () => {
-		dbVersionResolve(storageVersion)
-	})
-}
+function addData(songData: SongType) {
+	let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/')
+	let rootId = hash(rootDir, 'text') as string
 
-export function updateStorageVersion() {
-	fs.writeFileSync(STORAGE_VERSION_FILE_PATH, String(new Date().getTime()))
-}
+	let mappedData = storageMap.get(rootId)
 
-export function killStorageWatcher() {
-	if (watcher) {
-		watcher.close()
-	}
-}
-
-export function initStorage() {
-	consolidateStorage()
-	watchVersionFile()
-}
-
-export function getStorageMapToArray() {
-	let map = getStorageMap()
-	let array: SongType[] = []
-
-	map.forEach((album) => {
-		array = array.concat(album.Songs)
-	})
-
-	return array
-}
-
-export function getStorageMap() {
-	let version = getStorageVersion()
-
-	if (version !== storageVersion) {
-		storageVersion = version
-		return consolidateStorage()
+	if (mappedData) {
+		mappedData?.Songs.push(songData)
 	} else {
-		return storageMap
+		storageMap.set(rootId, {
+			ID: rootId,
+			RootDir: rootDir,
+			Name: songData.Album || '',
+			Songs: [songData]
+		})
 	}
+
+	dbVersionResolve(new Date().getTime())
 }
 
 function consolidateStorage() {
-	let map = new Map<String, AlbumType>()
-
+	console.log('Consolidating...')
 	if (!fs.existsSync(STORAGE_PATH)) {
 		fs.mkdirSync(STORAGE_PATH)
 	}
@@ -91,16 +72,16 @@ function consolidateStorage() {
 			let rootDir = song.SourceFile.split('/').slice(0, -1).join('/')
 			let rootId = hash(rootDir, 'text') as string
 
-			let data = map.get(rootId)
+			let data = storageMap.get(rootId)
 
 			if (data) {
 				if (!data.Songs.find((i) => i.ID === song.ID)) {
 					data.Songs.push(song)
 
-					map.set(rootId, data)
+					storageMap.set(rootId, data)
 				}
 			} else {
-				map.set(rootId, {
+				storageMap.set(rootId, {
 					ID: rootId,
 					RootDir: rootDir,
 					Name: song.Album,
@@ -110,12 +91,19 @@ function consolidateStorage() {
 		}
 	})
 
-	storageMap = map
-	return map
+	// storageMap = map
+	// return map
 }
 
-function getStorageVersion() {
-	return Number(fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }))
+export function getStorageMapToArray() {
+	let map = getStorageMap()
+	let array: SongType[] = []
+
+	map.forEach((album) => {
+		array = array.concat(album.Songs)
+	})
+
+	return array
 }
 
 export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<number> {
@@ -128,4 +116,39 @@ export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<numbe
 		// If didn't change, wait for a change to happen.
 		return new Promise((resolve) => (dbVersionResolve = resolve))
 	}
+}
+
+/*
+function watchVersionFile() {
+	if (!fs.existsSync(STORAGE_VERSION_FILE_PATH)) {
+		fs.writeFileSync(STORAGE_VERSION_FILE_PATH, '0')
+	}
+
+	watcher = chokidar.watch(path.join(STORAGE_PATH, 'version')).on('change', () => {
+		dbVersionResolve(getStorageVersion())
+	})
+}
+*/
+
+export function updateStorageVersion() {
+	fs.writeFileSync(STORAGE_VERSION_FILE_PATH, String(new Date().getTime()))
+}
+
+export function killStorageWatcher() {
+	if (watcher) {
+		watcher.close()
+	}
+}
+
+export function initStorage() {
+	consolidateStorage()
+	// watchVersionFile()
+}
+
+function getStorageVersion() {
+	return Number(fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }))
+}
+
+export function getStorageMap() {
+	return storageMap
 }

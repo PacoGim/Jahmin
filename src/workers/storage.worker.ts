@@ -9,30 +9,75 @@ import { TagType } from '../types/tag.type'
 
 let storagePath: string | undefined = undefined
 
-type MessageType = {
+let workQueue: WorkType[] = []
+let isWorkQueueuIterating = false
+
+type WorkType = {
 	type: 'Add' | 'Delete' | 'Update' | 'Read'
 	data: any
-	appDataPath: 'string'
+	appDataPath?: 'string'
 }
 
-parentPort?.on('message', ({ type, data, appDataPath }: MessageType) => {
-	if (storagePath === undefined) storagePath = path.join(appDataPath, 'storage')
+parentPort?.on('message', ({ type, data, appDataPath }: WorkType) => {
+	if (appDataPath && storagePath === undefined) storagePath = path.join(appDataPath, 'storage')
 
-	if (type === 'Add') add(data)
+	if (type === 'Add' || type === 'Delete' || type === 'Update') {
+		workQueue.push({
+			type,
+			data
+		})
+
+		if (!isWorkQueueuIterating) {
+			isWorkQueueuIterating = true
+			iterateWorkQueue()
+		}
+	}
 })
 
+function iterateWorkQueue() {
+	let work = workQueue.shift()
+
+	if (work) {
+		if (work.type === 'Add') {
+			add(work.data).then(() => {
+				// Tell to storage service to add to array
+				parentPort?.postMessage({
+					type: work?.type,
+					data: work?.data
+				})
+
+				iterateWorkQueue()
+			})
+
+			// process.nextTick(() => iterateWorkQueue())
+		}
+	} else {
+		isWorkQueueuIterating = false
+	}
+}
+
+let storesMap = new Map<String, Store<Record<string, unknown>>>()
+
 function add(data: TagType) {
-	let rootFolder = data.SourceFile?.split('/').slice(0, -1).join('/')
-	let rootFolderId = hash(rootFolder!, 'text') as string
-	let songId = String(hash(data.SourceFile!, 'number'))
+	return new Promise((resolve, reject) => {
+		let rootFolder = data.SourceFile?.split('/').slice(0, -1).join('/')
+		let rootFolderId = hash(rootFolder!, 'text') as string
+		let songId = String(hash(data.SourceFile!, 'number'))
 
-	const store = new Store({
-		cwd: storagePath,
-		name: rootFolderId
+		let store = storesMap.get(rootFolderId)
+
+		if (!store) {
+			store = new Store({
+				cwd: storagePath,
+				name: rootFolderId
+			})
+			storesMap.set(rootFolderId, store)
+		}
+
+		store.set(songId, data)
+		updateStorageVersion()
+		resolve('')
 	})
-
-	store.set(songId, data)
-	updateStorageVersion()
 }
 
 function updateStorageVersion() {
