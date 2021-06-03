@@ -2,6 +2,7 @@ import { parentPort } from 'worker_threads'
 import { getAacTags } from '../formats/aac.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getMp3Tags } from '../formats/mp3.format'
+import { getOpusTags } from '../formats/opus.format'
 import { OptionsType } from '../types/options.type'
 import { SongType } from '../types/song.type'
 
@@ -28,6 +29,8 @@ function getSongTags(path: string): Promise<SongType> {
 
 		if (extension === 'm4a') {
 			getAacTags(path).then((data) => resolve(data))
+		} else if (extension === 'opus') {
+			getOpusTags(path).then((data) => resolve(data))
 		} else if (extension === 'flac') {
 			getFlacTags(path).then((data) => resolve(data))
 		} else if (extension === 'mp3') {

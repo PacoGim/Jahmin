@@ -6,7 +6,7 @@ const worker_service_1 = require("./worker.service");
 const __1 = require("..");
 const storage_service_1 = require("./storage.service");
 let watcher;
-const EXTENSIONS = ['flac', 'm4a', 'mp3'];
+const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
 function getRootDirFolderWatcher() {
     return watcher;
 }

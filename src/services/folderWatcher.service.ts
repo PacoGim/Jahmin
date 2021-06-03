@@ -11,7 +11,7 @@ import { getStorageMapToArray } from './storage.service'
 
 let watcher: FSWatcher
 
-const EXTENSIONS = ['flac', 'm4a', 'mp3']
+const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
 
 export function getRootDirFolderWatcher() {
 	return watcher
