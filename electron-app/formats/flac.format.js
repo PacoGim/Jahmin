@@ -34,33 +34,33 @@ function getFlacTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let tags = {
+                ID: string_hash_1.default(filePath),
                 Extension: 'flac',
-                SourceFile: ''
+                SourceFile: filePath
             };
             const STATS = fs_1.default.statSync(filePath);
             const METADATA = yield mm.parseFile(filePath);
             let nativeTags = mergeNatives(METADATA.native);
             let dateParsed = getDate(String(nativeTags.DATE));
-            tags.ID = string_hash_1.default(filePath);
-            tags.LastModified = STATS.mtimeMs;
-            tags.Size = STATS.size;
-            tags.SourceFile = filePath;
-            tags.SampleRate = METADATA.format.sampleRate;
-            tags.BitRate = METADATA.format.bitrate / 1000;
-            tags.Duration = Math.trunc(METADATA.format.duration);
             tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUM) || '';
-            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ARTIST) || '';
             tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUMARTIST) || '';
+            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ARTIST) || '';
             tags.Comment = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DESCRIPTION) || (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMMENT) || '';
             tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMPOSER) || '';
             tags.Date_Year = dateParsed.year || 0;
             tags.Date_Month = dateParsed.month || 0;
             tags.Date_Day = dateParsed.day || 0;
             tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DISCNUMBER) || 0;
-            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || 0;
-            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || '';
             tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.GENRE) || '';
             tags.Rating = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.RATING) || 0;
+            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || '';
+            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || 0;
+            tags.BitDepth = METADATA.format.bitsPerSample;
+            tags.BitRate = METADATA.format.bitrate / 1000;
+            tags.Duration = Math.trunc(METADATA.format.duration);
+            tags.LastModified = STATS.mtimeMs;
+            tags.SampleRate = METADATA.format.sampleRate;
+            tags.Size = STATS.size;
             resolve(tags);
         }));
     });

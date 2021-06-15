@@ -23,7 +23,7 @@ worker_service_1.initWorkers();
 const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const storage_service_1 = require("./services/storage.service");
-const folderWatcher_service_1 = require("./services/folderWatcher.service");
+const songSync_service_1 = require("./services/songSync.service");
 function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = config_service_1.getConfig();
@@ -33,8 +33,9 @@ function createMainWindow() {
         window.loadFile('index.html');
         // Gets the storage data from files and creates a map.
         storage_service_1.initStorage();
-        if (config === null || config === void 0 ? void 0 : config['rootDirectories'])
-            folderWatcher_service_1.watchFolders(config['rootDirectories']);
+        // Watches the given root folder.
+        if (config === null || config === void 0 ? void 0 : config.rootDirectories)
+            songSync_service_1.watchFolders(config.rootDirectories);
         window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window));
     });
 }
@@ -45,6 +46,7 @@ function loadOptions(config) {
         y: 0,
         width: 800,
         height: 800,
+        backgroundColor: '#000000',
         webPreferences: {
             nodeIntegration: true,
             worldSafeExecuteJavaScript: true,
@@ -100,7 +102,7 @@ electron_1.app.on('before-quit', () => {
     var _a;
     worker_service_1.killAllWorkers();
     storage_service_1.killStorageWatcher();
-    (_a = folderWatcher_service_1.getRootDirFolderWatcher()) === null || _a === void 0 ? void 0 : _a.close();
+    (_a = songSync_service_1.getRootDirFolderWatcher()) === null || _a === void 0 ? void 0 : _a.close();
 });
 // process.on('exit',()=>{
 // })

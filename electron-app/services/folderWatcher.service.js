@@ -30,8 +30,13 @@ function watchFolders(rootDirectories) {
         ignored: '**/*.DS_Store'
     });
     watcher.on('add', (path) => preAppStartFileDetection(path));
-    watcher.on('change', (path) => addToTaskQueue(path, 'add'));
-    watcher.on('unlink', (path) => addToTaskQueue(path, 'delete'));
+    watcher.on('change', (path) => {
+        // TODO Storage fn
+        // console.log('Changed: ',path)
+    });
+    watcher.on('unlink', (path) => {
+        // TODO Storage fn
+    });
     // watcher.on('all', (event, path) => {
     // 	console.log(event, path)
     // })

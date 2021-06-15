@@ -2,6 +2,7 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
+import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { OpusTagType } from '../types/opus.type'
 import { SongType } from '../types/song.type'
@@ -9,25 +10,47 @@ let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
 const mm = require('music-metadata')
 
+const ffmpegWorker = getWorker('Ffmpeg')
+
 export function writeOpusTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
+		console.log(2, new Date().toTimeString())
 		let ffmpegMetatagString = objectToFfmpegString(newTags)
 		let templFileName = filePath.replace(/(\.opus)$/, '.temp.opus')
 
+		if (ffmpegWorker) {
+			ffmpegWorker.postMessage('TEST')
+		}
+
+		// console.log(ffmpegMetatagString,templFileName)
+
+		// ffmpegWorker.postMessage('Test')
+
+		/*
+		console.log(3,new Date().toTimeString())
+		console.time()
+
 		exec(
-			`"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
-			(error, stdout, stderr) => {}
+			// `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
+			`ls`,
+			(error, stdout, stderr) => {
+				console.log('error: ',error)
+				console.log('stdout: ',stdout)
+				console.log('stderr: ',stderr)
+			}
 		).on('close', () => {
+			console.log(4,new Date().toTimeString())
 			resolve('Done')
-		})
+		})*/
 	})
 }
 
 export async function getOpusTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
 		let tags: SongType = {
+			ID: stringHash(filePath),
 			Extension: 'opus',
-			SourceFile: ''
+			SourceFile: filePath
 		}
 
 		const STATS = fs.statSync(filePath)
@@ -36,30 +59,26 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 
 		let dateParsed = getDate(String(nativeTags.DATE))
 
-		tags.ID = stringHash(filePath)
-
-		tags.LastModified = STATS.mtimeMs
-		tags.Size = STATS.size
-		tags.SourceFile = filePath
-		tags.SampleRate = 40000
-
-		// tags.SampleRate = METADATA.format.sampleRate
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
-
 		tags.Album = nativeTags?.ALBUM || ''
-		tags.Artist = nativeTags?.ARTIST || ''
 		tags.AlbumArtist = nativeTags?.ALBUMARTIST || ''
+		tags.Artist = nativeTags?.ARTIST || ''
 		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || ''
 		tags.Composer = nativeTags?.COMPOSER || ''
 		tags.Date_Year = dateParsed.year || 0
 		tags.Date_Month = dateParsed.month || 0
 		tags.Date_Day = dateParsed.day || 0
 		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || 0
-		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
-		tags.Title = nativeTags?.TITLE || ''
 		tags.Genre = nativeTags?.GENRE || ''
 		tags.Rating = Number(nativeTags?.RATING) || 0
+		tags.Title = nativeTags?.TITLE || ''
+		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
+
+		tags.BitRate = METADATA.format.bitrate / 1000
+		tags.Duration = Math.trunc(METADATA.format.duration)
+		tags.LastModified = STATS.mtimeMs
+		tags.SampleRate = 40000
+		// tags.SampleRate = METADATA.format.sampleRate
+		tags.Size = STATS.size
 
 		resolve(tags)
 	})

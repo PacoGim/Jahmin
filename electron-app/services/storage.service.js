@@ -16,12 +16,18 @@ let storageMap = new Map();
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve = undefined;
 let watcher;
-let worker = worker_service_1.getStorageWorker();
+let worker = worker_service_1.getWorker('storage');
 worker.on('message', (message) => {
     if (message.type === 'Add') {
         addData(message.data);
     }
+    else if (message.type === 'Update') {
+        updateData(message.data);
+    }
 });
+function updateData(songData) {
+    // TODO Logic
+}
 function addData(songData) {
     let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
     let rootId = hashString_fn_1.hash(rootDir, 'text');
@@ -37,7 +43,8 @@ function addData(songData) {
             Songs: [songData]
         });
     }
-    dbVersionResolve(new Date().getTime());
+    if (dbVersionResolve !== undefined)
+        dbVersionResolve(new Date().getTime());
 }
 function consolidateStorage() {
     console.log('Consolidating...');
@@ -126,7 +133,12 @@ function initStorage() {
 }
 exports.initStorage = initStorage;
 function getStorageVersion() {
-    return Number(fs_1.default.readFileSync(path_1.default.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }));
+    try {
+        return Number(fs_1.default.readFileSync(path_1.default.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }));
+    }
+    catch (error) {
+        return 0;
+    }
 }
 function getStorageMap() {
     return storageMap;

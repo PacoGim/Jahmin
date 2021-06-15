@@ -20,7 +20,13 @@ export function getAlbumColors(imageId: string): Promise<ColorType> {
 			.raw()
 			.toBuffer((err, buffer) => {
 				if (err) {
-					return
+					return resolve({
+						hue: 0,
+						lightnessBase: 50,
+						lightnessHigh: 25,
+						lightnessLow: 75,
+						saturation: 0
+					})
 				}
 
 				let hexColor = buffer.toString('hex')

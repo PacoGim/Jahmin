@@ -1671,7 +1671,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (39:1) {#each $albumListStore as album, index (album.ID)}
+    // (38:1) {#each $albumListStore as album, index (album.ID)}
     function create_each_block$2(key_1, ctx) {
     	let first;
     	let album;
@@ -1724,7 +1724,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(39:1) {#each $albumListStore as album, index (album.ID)}",
+    		source: "(38:1) {#each $albumListStore as album, index (album.ID)}",
     		ctx
     	});
 
@@ -1756,7 +1756,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(art_grid_svlt, "class", "svelte-13lfcks");
-    			add_location(art_grid_svlt, file$g, 37, 0, 1470);
+    			add_location(art_grid_svlt, file$g, 36, 0, 1375);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1888,7 +1888,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (79:2) {#each groups as group (group.id)}
+    // (77:2) {#each groups as group (group.id)}
     function create_each_block$1(key_1, ctx) {
     	let group;
     	let input;
@@ -1920,13 +1920,13 @@ var app = (function () {
     			input.value = input.__value;
     			attr_dev(input, "class", "svelte-z201rr");
     			/*$$binding_groups*/ ctx[9][0].push(input);
-    			add_location(input, file$f, 80, 4, 2583);
+    			add_location(input, file$f, 78, 4, 2513);
     			attr_dev(label, "for", label_for_value = /*group*/ ctx[15].id);
     			attr_dev(label, "class", "svelte-z201rr");
-    			add_location(label, file$f, 81, 4, 2677);
+    			add_location(label, file$f, 79, 4, 2607);
     			attr_dev(group, "name", group_name_value = /*group*/ ctx[15].name);
     			attr_dev(group, "class", "svelte-z201rr");
-    			add_location(group, file$f, 79, 3, 2553);
+    			add_location(group, file$f, 77, 3, 2483);
     			this.first = group;
     		},
     		m: function mount(target, anchor) {
@@ -1981,7 +1981,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(79:2) {#each groups as group (group.id)}",
+    		source: "(77:2) {#each groups as group (group.id)}",
     		ctx
     	});
 
@@ -2054,31 +2054,31 @@ var app = (function () {
     			option0.value = option0.__value;
     			option0.disabled = true;
     			option0.selected = true;
-    			add_location(option0, file$f, 67, 2, 2147);
+    			add_location(option0, file$f, 65, 2, 2077);
     			option1.__value = "none";
     			option1.value = option1.__value;
-    			add_location(option1, file$f, 68, 2, 2209);
+    			add_location(option1, file$f, 66, 2, 2139);
     			option2.__value = "Genre";
     			option2.value = option2.__value;
-    			add_location(option2, file$f, 69, 2, 2246);
+    			add_location(option2, file$f, 67, 2, 2176);
     			option3.__value = "AlbumArtist";
     			option3.value = option3.__value;
-    			add_location(option3, file$f, 70, 2, 2285);
+    			add_location(option3, file$f, 68, 2, 2215);
     			option4.__value = "Album";
     			option4.value = option4.__value;
-    			add_location(option4, file$f, 71, 2, 2337);
+    			add_location(option4, file$f, 69, 2, 2267);
     			option5.__value = "Composer";
     			option5.value = option5.__value;
-    			add_location(option5, file$f, 72, 2, 2376);
+    			add_location(option5, file$f, 70, 2, 2306);
     			attr_dev(select, "class", "svelte-z201rr");
     			if (/*selectedGroupBy*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[7].call(select));
-    			add_location(select, file$f, 66, 1, 2107);
+    			add_location(select, file$f, 64, 1, 2037);
     			set_custom_element_data(total_groups, "class", "svelte-z201rr");
-    			add_location(total_groups, file$f, 75, 1, 2432);
+    			add_location(total_groups, file$f, 73, 1, 2362);
     			attr_dev(groups_1, "class", "svelte-z201rr");
-    			add_location(groups_1, file$f, 77, 1, 2504);
+    			add_location(groups_1, file$f, 75, 1, 2434);
     			set_custom_element_data(grouping_svlt, "class", "svelte-z201rr");
-    			add_location(grouping_svlt, file$f, 65, 0, 2090);
+    			add_location(grouping_svlt, file$f, 63, 0, 2020);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2270,7 +2270,6 @@ var app = (function () {
     		if ($$self.$$.dirty & /*selectedGroupByValue*/ 2) {
     			{
     				// Get Art Grid Albums as soon as the variable is set.
-    				//TODO Save to config file
     				set_store_value(selectedGroupByValueStore, $selectedGroupByValueStore = selectedGroupByValue, $selectedGroupByValueStore);
     			}
     		}
@@ -2292,7 +2291,7 @@ var app = (function () {
 
     						set_store_value(selectedGroupByStore, $selectedGroupByStore = selectedGroupBy, $selectedGroupByStore);
     						localStorage.setItem("GroupBy", selectedGroupBy);
-    					} //TODO Save to config file
+    					}
     				}
     			}
     		}
@@ -2753,14 +2752,14 @@ var app = (function () {
     			t1 = space();
     			div = element("div");
     			set_custom_element_data(player_gloss, "class", "svelte-1eondcn");
-    			add_location(player_gloss, file$b, 69, 1, 2562);
+    			add_location(player_gloss, file$b, 72, 1, 2632);
     			set_custom_element_data(progress_foreground, "class", "svelte-1eondcn");
-    			add_location(progress_foreground, file$b, 70, 1, 2580);
+    			add_location(progress_foreground, file$b, 73, 1, 2650);
     			attr_dev(div, "id", "waveform-data");
     			attr_dev(div, "class", "svelte-1eondcn");
-    			add_location(div, file$b, 71, 1, 2605);
+    			add_location(div, file$b, 74, 1, 2675);
     			set_custom_element_data(player_progress, "class", "svelte-1eondcn");
-    			add_location(player_progress, file$b, 68, 0, 2543);
+    			add_location(player_progress, file$b, 71, 0, 2613);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2852,11 +2851,15 @@ var app = (function () {
     		playerProgress.addEventListener("click", evt => applyProgressChange(evt));
 
     		function applyProgressChange(evt) {
+    			if (song === undefined) return;
     			player.pause();
     			playerForeground.classList.add("not-smooth");
-    			let playerWidth = playerProgress["scrollWidth"];
-    			let selectedPercent = Math.ceil(100 / playerWidth * evt["offsetX"]);
-    			let songPercentTime = song["Duration"] / (100 / selectedPercent);
+    			let playerWidth = playerProgress.scrollWidth;
+
+    			//@ts-expect-error
+    			let selectedPercent = Math.ceil(100 / playerWidth * evt.offsetX);
+
+    			let songPercentTime = song.Duration / (100 / selectedPercent);
 
     			// Allows for the player component to get the new value and update the song duration.
     			set_store_value(updateSongProgress, $updateSongProgress = songPercentTime, $updateSongProgress);
@@ -4168,11 +4171,11 @@ var app = (function () {
     			song_duration = element("song-duration");
     			t7 = text(t7_value);
     			set_custom_element_data(song_number, "class", "svelte-r9k04x");
-    			add_location(song_number, file$7, 33, 1, 1071);
+    			add_location(song_number, file$7, 33, 1, 1102);
     			set_custom_element_data(song_title, "class", "svelte-r9k04x");
-    			add_location(song_title, file$7, 34, 1, 1127);
+    			add_location(song_title, file$7, 34, 1, 1158);
     			set_custom_element_data(song_duration, "class", "svelte-r9k04x");
-    			add_location(song_duration, file$7, 36, 1, 1247);
+    			add_location(song_duration, file$7, 36, 1, 1278);
     			set_custom_element_data(song_list_item, "id", song_list_item_id_value = /*song*/ ctx[0].ID);
     			set_custom_element_data(song_list_item, "index", /*index*/ ctx[1]);
 
@@ -4182,7 +4185,7 @@ var app = (function () {
     			? "selected"
     			: "") + " svelte-r9k04x");
 
-    			add_location(song_list_item, file$7, 23, 0, 809);
+    			add_location(song_list_item, file$7, 23, 0, 840);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4287,7 +4290,7 @@ var app = (function () {
     	});
 
     	function setStar(starChangeEvent) {
-    		// TODO: Add updater
+    		// TODO: Add updater - starLevel gives undefined 😩
     		console.log(song.SourceFile, starChangeEvent.detail.starLevel);
     	}
 

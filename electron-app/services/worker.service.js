@@ -3,44 +3,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStorageWorker = exports.getTagEditWorker = exports.getSongDataWorkers = exports.getSongFilterWorker = exports.killAllWorkers = exports.initWorkers = void 0;
+exports.killWorker = exports.getWorker = exports.killAllWorkers = exports.initWorkers = void 0;
 const worker_threads_1 = require("worker_threads");
 const os_1 = require("os");
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const TOTAL_CPUS = os_1.cpus().length;
 const WORKER_FOLDER_PATH = path_1.default.join(path_1.default.resolve(), 'electron-app/workers');
 let workers = [];
 function initWorkers() {
-    const SONG_WORKER_QTY = TOTAL_CPUS >= 2 ? 2 : 1;
-    // Song Data Scan Multi Workers
-    for (let i = 0; i !== SONG_WORKER_QTY; i++) {
-        const workerSongData = new worker_threads_1.Worker(getWorkerPath('folderScan'));
+    let workerFiles = fs_1.default.readdirSync(WORKER_FOLDER_PATH);
+    workerFiles.forEach((workerFile) => {
+        let worker = new worker_threads_1.Worker(getWorkerPath(workerFile));
         workers.push({
-            id: workerSongData.threadId,
-            type: 'SongData',
-            worker: workerSongData
+            id: worker.threadId,
+            name: workerFile.replace('.worker.js', ''),
+            worker
         });
-    }
-    // Single worker song array filtering
-    const workerSongFilter = new worker_threads_1.Worker(getWorkerPath('songFilter'));
-    workers.push({
-        id: workerSongFilter.threadId,
-        type: 'SongFilter',
-        worker: workerSongFilter
-    });
-    // Single worker song tag edit
-    const workerTagEdit = new worker_threads_1.Worker(getWorkerPath('tagEdit'));
-    workers.push({
-        id: workerSongFilter.threadId,
-        type: 'TagEdit',
-        worker: workerTagEdit
-    });
-    // Single worker storage
-    const workerStorage = new worker_threads_1.Worker(getWorkerPath('storage'));
-    workers.push({
-        id: workerSongFilter.threadId,
-        type: 'Storage',
-        worker: workerStorage
     });
 }
 exports.initWorkers = initWorkers;
@@ -48,22 +27,20 @@ function killAllWorkers() {
     workers.forEach((worker) => worker.worker.terminate());
 }
 exports.killAllWorkers = killAllWorkers;
-function getSongFilterWorker() {
-    return workers.filter((worker) => worker.type === 'SongFilter')[0].worker;
+function getWorker(name) {
+    let workersFound = workers.filter((worker) => worker.name === name).map((worker) => worker.worker)[0];
+    if (workersFound) {
+        return workersFound;
+    }
+    else {
+        return undefined;
+    }
 }
-exports.getSongFilterWorker = getSongFilterWorker;
-function getSongDataWorkers() {
-    return workers.filter((worker) => worker.type === 'SongData').map((worker) => worker.worker);
+exports.getWorker = getWorker;
+function killWorker(name) {
+    workers.filter((worker) => worker.name === name).forEach((worker) => worker.worker.terminate());
 }
-exports.getSongDataWorkers = getSongDataWorkers;
-function getTagEditWorker() {
-    return workers.filter((worker) => worker.type === 'TagEdit')[0].worker;
-}
-exports.getTagEditWorker = getTagEditWorker;
-function getStorageWorker() {
-    return workers.filter((worker) => worker.type === 'Storage')[0].worker;
-}
-exports.getStorageWorker = getStorageWorker;
+exports.killWorker = killWorker;
 function getWorkerPath(workerName) {
-    return path_1.default.join(WORKER_FOLDER_PATH, `${workerName}.worker.js`);
+    return path_1.default.join(WORKER_FOLDER_PATH, workerName);
 }

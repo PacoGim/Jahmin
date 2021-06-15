@@ -72,8 +72,9 @@ function normalizeNewTags(newTags: EditTag) {
 export async function getMp3Tags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
 		let tags: SongType = {
+			ID: stringHash(filePath),
 			Extension: 'mp3',
-			SourceFile: ''
+			SourceFile: filePath
 		}
 
 		const STATS = fs.statSync(filePath)
@@ -82,28 +83,25 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 
 		let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
 
-		tags.ID = stringHash(filePath)
-
-		tags.LastModified = STATS.mtimeMs
-		tags.Size = STATS.size
-		tags.SourceFile = filePath
-		tags.SampleRate = METADATA.format.sampleRate
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
-
 		tags.Album = nativeTags?.TALB || ''
-		tags.Artist = nativeTags?.TPE1 || ''
 		tags.AlbumArtist = nativeTags?.TPE2 || ''
+		tags.Artist = nativeTags?.TPE1 || ''
 		tags.Comment = nativeTags?.COMM?.text || ''
 		tags.Composer = nativeTags?.TCOM || ''
 		tags.Date_Year = dateParsed.year || null
 		tags.Date_Month = dateParsed.month || null
 		tags.Date_Day = dateParsed.day || null
 		tags.DiscNumber = Number(nativeTags?.TPOS) || null
-		tags.Track = Number(nativeTags?.TRCK) || 0
-		tags.Title = nativeTags?.TIT2 || ''
 		tags.Genre = nativeTags?.TCON || ''
 		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || 0
+		tags.Title = nativeTags?.TIT2 || ''
+		tags.Track = Number(nativeTags?.TRCK) || 0
+
+		tags.BitRate = METADATA.format.bitrate / 1000
+		tags.Duration = Math.trunc(METADATA.format.duration)
+		tags.LastModified = STATS.mtimeMs
+		tags.SampleRate = METADATA.format.sampleRate
+		tags.Size = STATS.size
 
 		resolve(tags)
 	})

@@ -20,7 +20,7 @@ const nanoid_1 = require("nanoid");
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 const hashString_fn_1 = require("../functions/hashString.fn");
 const groupSong_fn_1 = require("../functions/groupSong.fn");
-const folderWatcher_service_1 = require("./folderWatcher.service");
+const songSync_service_1 = require("./songSync.service");
 const peaks_1 = require("./peaks");
 const tagEdit_service_1 = require("./tagEdit.service");
 const getTagEditProgress_fn_1 = require("../functions/getTagEditProgress.fn");
@@ -99,8 +99,8 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('get-changes-progress', (evt) => __awaiter(this, void 0, void 0, function* () {
         return {
-            total: folderWatcher_service_1.getMaxTaskQueueLength(),
-            current: folderWatcher_service_1.getTaskQueueLength()
+            total: songSync_service_1.getMaxTaskQueueLength(),
+            current: songSync_service_1.getTaskQueueLength()
         };
     }));
     electron_1.ipcMain.handle('get-tag-edit-progress', () => __awaiter(this, void 0, void 0, function* () {

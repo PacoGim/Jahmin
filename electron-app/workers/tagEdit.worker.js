@@ -4,6 +4,7 @@ const worker_threads_1 = require("worker_threads");
 const aac_format_1 = require("../formats/aac.format");
 const flac_format_1 = require("../formats/flac.format");
 const mp3_format_1 = require("../formats/mp3.format");
+const opus_format_1 = require("../formats/opus.format");
 let songToEditQueue = [];
 let maxQueueLength = 0;
 let isQueueuIterating = false;
@@ -34,20 +35,36 @@ function handleTagEdit(tagsToEditAndSourceFile) {
 function iterateQueue() {
     let file = songToEditQueue.shift();
     if (file) {
+        console.time(file.sourceFile);
         let extension = file.sourceFile.split('.').pop();
         if (extension === 'm4a') {
             aac_format_1.writeAacTags(file.sourceFile, file.newTags)
-                .then(() => iterateQueue())
+                .then(() => {
+                console.timeEnd(file.sourceFile);
+                iterateQueue();
+            })
                 .catch((err) => {
                 //IMPORTANT Do something if err
                 iterateQueue();
             });
         }
+        else if (extension === 'opus') {
+            opus_format_1.writeOpusTags(file.sourceFile, file.newTags).then(() => {
+                console.timeEnd(file.sourceFile);
+                iterateQueue();
+            });
+        }
         else if (extension === 'flac') {
-            flac_format_1.writeFlacTags(file.sourceFile, file.newTags).then(() => iterateQueue());
+            flac_format_1.writeFlacTags(file.sourceFile, file.newTags).then(() => {
+                console.timeEnd(file.sourceFile);
+                iterateQueue();
+            });
         }
         else if (extension === 'mp3') {
-            mp3_format_1.writeMp3Tags(file.sourceFile, file.newTags).then(() => iterateQueue());
+            mp3_format_1.writeMp3Tags(file.sourceFile, file.newTags).then(() => {
+                console.timeEnd(file.sourceFile);
+                iterateQueue();
+            });
         }
     }
     else {

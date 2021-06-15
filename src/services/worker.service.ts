@@ -1,57 +1,32 @@
 import { Worker } from 'worker_threads'
 import { cpus } from 'os'
 import path from 'path'
+import fs from 'fs'
 
 const TOTAL_CPUS = cpus().length
 const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
 
+type WorkerNameType = 'ffmpeg' | 'songFilter' | 'tagEdit' | 'storage' | 'folderScan' | 'opusFormat'
+
 type WorkerType = {
 	id: number
-	type: 'SongData' | 'SongFilter' | 'TagEdit' | 'Storage'
+	name: string
 	worker: Worker
 }
 
 let workers: WorkerType[] = []
 
 export function initWorkers() {
-	const SONG_WORKER_QTY = TOTAL_CPUS >= 2 ? 2 : 1
+	let workerFiles = fs.readdirSync(WORKER_FOLDER_PATH)
 
-	// Song Data Scan Multi Workers
-	for (let i = 0; i !== SONG_WORKER_QTY; i++) {
-		const workerSongData = new Worker(getWorkerPath('folderScan'))
+	workerFiles.forEach((workerFile) => {
+		let worker = new Worker(getWorkerPath(workerFile))
 
 		workers.push({
-			id: workerSongData.threadId,
-			type: 'SongData',
-			worker: workerSongData
+			id: worker.threadId,
+			name: workerFile.replace('.worker.js', ''),
+			worker
 		})
-	}
-
-	// Single worker song array filtering
-	const workerSongFilter = new Worker(getWorkerPath('songFilter'))
-
-	workers.push({
-		id: workerSongFilter.threadId,
-		type: 'SongFilter',
-		worker: workerSongFilter
-	})
-
-	// Single worker song tag edit
-	const workerTagEdit = new Worker(getWorkerPath('tagEdit'))
-
-	workers.push({
-		id: workerSongFilter.threadId,
-		type: 'TagEdit',
-		worker: workerTagEdit
-	})
-
-	// Single worker storage
-	const workerStorage = new Worker(getWorkerPath('storage'))
-
-	workers.push({
-		id: workerSongFilter.threadId,
-		type: 'Storage',
-		worker: workerStorage
 	})
 }
 
@@ -59,22 +34,20 @@ export function killAllWorkers() {
 	workers.forEach((worker) => worker.worker.terminate())
 }
 
-export function getSongFilterWorker() {
-	return workers.filter((worker) => worker.type === 'SongFilter')[0].worker
+export function getWorker(name: WorkerNameType): Worker | undefined {
+	let workersFound = workers.filter((worker) => worker.name === name).map((worker) => worker.worker)[0]
+
+	if (workersFound) {
+		return workersFound
+	} else {
+		return undefined
+	}
 }
 
-export function getSongDataWorkers() {
-	return workers.filter((worker) => worker.type === 'SongData').map((worker) => worker.worker)
-}
-
-export function getTagEditWorker() {
-	return workers.filter((worker) => worker.type === 'TagEdit')[0].worker
-}
-
-export function getStorageWorker() {
-	return workers.filter((worker) => worker.type === 'Storage')[0].worker
+export function killWorker(name: WorkerNameType) {
+	workers.filter((worker) => worker.name === name).forEach((worker) => worker.worker.terminate())
 }
 
 function getWorkerPath(workerName: string) {
-	return path.join(WORKER_FOLDER_PATH, `${workerName}.worker.js`)
+	return path.join(WORKER_FOLDER_PATH, workerName)
 }

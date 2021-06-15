@@ -14,7 +14,7 @@ loadIPC()
 
 import { getStorageMap, initStorage, killStorageWatcher } from './services/storage.service'
 
-import { getRootDirFolderWatcher, watchFolders } from './services/folderWatcher.service'
+import { getRootDirFolderWatcher, watchFolders } from './services/songSync.service'
 import { ConfigType } from './types/config.type'
 
 async function createMainWindow() {
@@ -28,7 +28,9 @@ async function createMainWindow() {
 
 	// Gets the storage data from files and creates a map.
 	initStorage()
-	if (config?.['rootDirectories']) watchFolders(config['rootDirectories'])
+
+	// Watches the given root folder.
+	if (config?.rootDirectories) watchFolders(config.rootDirectories)
 
 	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
 }
@@ -40,6 +42,7 @@ function loadOptions(config: ConfigType) {
 		y: 0,
 		width: 800,
 		height: 800,
+		backgroundColor: '#000000',
 		webPreferences: {
 			nodeIntegration: true,
 			worldSafeExecuteJavaScript: true,

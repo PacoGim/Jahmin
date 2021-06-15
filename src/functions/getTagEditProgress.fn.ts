@@ -1,6 +1,6 @@
-import { getTagEditWorker } from '../services/worker.service'
+import { getWorker } from '../services/worker.service'
 
-let worker = getTagEditWorker()
+let worker = getWorker('tagEdit')
 
 let deferedPromise: any = undefined
 

@@ -31,8 +31,6 @@
 	// 	}
 	// }
 
-	// IMPORTANT: Create symlinks between config types and create somehow a script to create them.
-
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
 		selectedGroupByStore.subscribe(() => {

@@ -22,7 +22,13 @@ function getAlbumColors(imageId) {
             .raw()
             .toBuffer((err, buffer) => {
             if (err) {
-                return;
+                return resolve({
+                    hue: 0,
+                    lightnessBase: 50,
+                    lightnessHigh: 25,
+                    lightnessLow: 75,
+                    saturation: 0
+                });
             }
             let hexColor = buffer.toString('hex');
             let hslColorObject = color_type_1.ColorTypeShell();

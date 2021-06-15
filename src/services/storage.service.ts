@@ -8,7 +8,7 @@ import { appDataPath } from '..'
 import { AlbumType } from '../types/album.type'
 import { hash } from '../functions/hashString.fn'
 import { SongType } from '../types/song.type'
-import { getStorageWorker } from './worker.service'
+import { getWorker } from './worker.service'
 
 const STORAGE_PATH = path.join(appDataPath(), 'storage')
 const STORAGE_VERSION_FILE_PATH = path.join(STORAGE_PATH, 'version')
@@ -21,13 +21,19 @@ let dbVersionResolve: any = undefined
 
 let watcher: chokidar.FSWatcher
 
-let worker = getStorageWorker()
+let worker = getWorker('storage')
 
 worker.on('message', (message) => {
 	if (message.type === 'Add') {
 		addData(message.data)
+	} else if (message.type === 'Update') {
+		updateData(message.data)
 	}
 })
+
+function updateData(songData: SongType) {
+	// TODO Logic
+}
 
 function addData(songData: SongType) {
 	let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/')
@@ -46,7 +52,7 @@ function addData(songData: SongType) {
 		})
 	}
 
-	dbVersionResolve(new Date().getTime())
+	if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
 }
 
 function consolidateStorage() {
@@ -146,7 +152,11 @@ export function initStorage() {
 }
 
 function getStorageVersion() {
-	return Number(fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }))
+	try {
+		return Number(fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }))
+	} catch (error) {
+		return 0
+	}
 }
 
 export function getStorageMap() {

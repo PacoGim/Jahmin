@@ -31,33 +31,33 @@ function getAacTags(filePath) {
                 let dateParsed = getDate(String(tags.CreateDate || tags.ContentCreateDate));
                 resolve({
                     ID: string_hash_1.default(filePath),
+                    Extension: tags.FileTypeExtension,
+                    SourceFile: tags.SourceFile || '',
                     //@ts-expect-error
-                    Album: tags['Album'] || '',
+                    Album: tags.Album || '',
                     //@ts-expect-error
-                    AlbumArtist: tags['AlbumArtist'] || '',
-                    Artist: tags['Artist'] || '',
+                    AlbumArtist: tags.AlbumArtist || '',
+                    Artist: tags.Artist || '',
+                    Comment: tags.Comment || '',
                     //@ts-expect-error
-                    Composer: tags['Composer'] || '',
+                    Composer: tags.Composer || '',
+                    Date_Year: dateParsed.year || 0,
+                    Date_Month: dateParsed.month || 0,
                     //@ts-expect-error
-                    Genre: tags['Genre'] || '',
+                    DiscNumber: tags.DiskNumber || 0,
+                    Date_Day: dateParsed.day || 0,
                     //@ts-expect-error
-                    DiscNumber: tags['DiskNumber'] || 0,
-                    Title: tags['Title'] || '',
+                    Genre: tags.Genre || '',
+                    Rating: tags.RatingPercent || 0,
+                    Title: tags.Title || '',
                     //@ts-expect-error
-                    Track: getTrack(tags['TrackNumber'], tags['Track']) || 0,
-                    Rating: tags['RatingPercent'] || 0,
-                    Date_Year: dateParsed['year'] || 0,
-                    Date_Month: dateParsed['month'] || 0,
-                    Date_Day: dateParsed['day'] || 0,
-                    Comment: tags['Comment'] || '',
-                    SourceFile: tags['SourceFile'] || '',
-                    Extension: tags['FileTypeExtension'],
-                    Size: fileStats.size,
-                    Duration: tags['Duration'],
-                    SampleRate: tags['AudioSampleRate'],
+                    Track: getTrack(tags.TrackNumber, tags.Track) || 0,
+                    BitDepth: tags.AudioBitsPerSample,
+                    BitRate: getBitRate(tags.AvgBitrate),
+                    Duration: tags.Duration,
                     LastModified: fileStats.mtimeMs,
-                    BitRate: getBitRate(tags['AvgBitrate']),
-                    BitDepth: tags['AudioBitsPerSample']
+                    SampleRate: tags.AudioSampleRate,
+                    Size: fileStats.size,
                 });
             });
         });

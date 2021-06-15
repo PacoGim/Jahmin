@@ -13,19 +13,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOpusTags = exports.writeOpusTags = void 0;
-const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
+const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
+const ffmpegWorker = worker_service_1.getWorker('Ffmpeg');
 function writeOpusTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
+        console.log(2, new Date().toTimeString());
         let ffmpegMetatagString = objectToFfmpegString(newTags);
         let templFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
-        child_process_1.exec(`"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`, (error, stdout, stderr) => { }).on('close', () => {
-            resolve('Done');
-        });
+        if (ffmpegWorker) {
+            ffmpegWorker.postMessage('TEST');
+        }
+        // console.log(ffmpegMetatagString,templFileName)
+        // ffmpegWorker.postMessage('Test')
+        /*
+        console.log(3,new Date().toTimeString())
+        console.time()
+
+        exec(
+            // `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
+            `ls`,
+            (error, stdout, stderr) => {
+                console.log('error: ',error)
+                console.log('stdout: ',stdout)
+                console.log('stderr: ',stderr)
+            }
+        ).on('close', () => {
+            console.log(4,new Date().toTimeString())
+            resolve('Done')
+        })*/
     });
 }
 exports.writeOpusTags = writeOpusTags;
@@ -33,34 +53,33 @@ function getOpusTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             let tags = {
+                ID: string_hash_1.default(filePath),
                 Extension: 'opus',
-                SourceFile: ''
+                SourceFile: filePath
             };
             const STATS = fs_1.default.statSync(filePath);
             const METADATA = yield mm.parseFile(filePath);
             let nativeTags = mergeNatives(METADATA.native);
             let dateParsed = getDate(String(nativeTags.DATE));
-            tags.ID = string_hash_1.default(filePath);
-            tags.LastModified = STATS.mtimeMs;
-            tags.Size = STATS.size;
-            tags.SourceFile = filePath;
-            tags.SampleRate = 40000;
-            // tags.SampleRate = METADATA.format.sampleRate
-            tags.BitRate = METADATA.format.bitrate / 1000;
-            tags.Duration = Math.trunc(METADATA.format.duration);
             tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUM) || '';
-            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ARTIST) || '';
             tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUMARTIST) || '';
+            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ARTIST) || '';
             tags.Comment = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DESCRIPTION) || (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMMENT) || '';
             tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMPOSER) || '';
             tags.Date_Year = dateParsed.year || 0;
             tags.Date_Month = dateParsed.month || 0;
             tags.Date_Day = dateParsed.day || 0;
             tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DISCNUMBER) || 0;
-            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || 0;
-            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || '';
             tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.GENRE) || '';
             tags.Rating = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.RATING) || 0;
+            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || '';
+            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || 0;
+            tags.BitRate = METADATA.format.bitrate / 1000;
+            tags.Duration = Math.trunc(METADATA.format.duration);
+            tags.LastModified = STATS.mtimeMs;
+            tags.SampleRate = 40000;
+            // tags.SampleRate = METADATA.format.sampleRate
+            tags.Size = STATS.size;
             resolve(tags);
         }));
     });

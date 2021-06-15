@@ -31,8 +31,9 @@ export function writeFlacTags(filePath: string, newTags: any) {
 export async function getFlacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
 		let tags: SongType = {
+			ID: stringHash(filePath),
 			Extension: 'flac',
-			SourceFile: ''
+			SourceFile: filePath
 		}
 
 		const STATS = fs.statSync(filePath)
@@ -41,28 +42,27 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 
 		let dateParsed = getDate(String(nativeTags.DATE))
 
-		tags.ID = stringHash(filePath)
-
-		tags.LastModified = STATS.mtimeMs
-		tags.Size = STATS.size
-		tags.SourceFile = filePath
-		tags.SampleRate = METADATA.format.sampleRate
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
-
 		tags.Album = nativeTags?.ALBUM || ''
-		tags.Artist = nativeTags?.ARTIST || ''
 		tags.AlbumArtist = nativeTags?.ALBUMARTIST || ''
+		tags.Artist = nativeTags?.ARTIST || ''
 		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || ''
 		tags.Composer = nativeTags?.COMPOSER || ''
 		tags.Date_Year = dateParsed.year || 0
 		tags.Date_Month = dateParsed.month || 0
 		tags.Date_Day = dateParsed.day || 0
 		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || 0
-		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
-		tags.Title = nativeTags?.TITLE || ''
 		tags.Genre = nativeTags?.GENRE || ''
 		tags.Rating = Number(nativeTags?.RATING) || 0
+		tags.Title = nativeTags?.TITLE || ''
+		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
+
+
+		tags.BitDepth = METADATA.format.bitsPerSample
+		tags.BitRate = METADATA.format.bitrate / 1000
+		tags.Duration = Math.trunc(METADATA.format.duration)
+		tags.LastModified = STATS.mtimeMs
+		tags.SampleRate = METADATA.format.sampleRate
+		tags.Size = STATS.size
 
 		resolve(tags)
 	})

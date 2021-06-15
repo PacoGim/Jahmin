@@ -64,15 +64,18 @@
 		playerProgress.addEventListener('click', (evt) => applyProgressChange(evt))
 
 		function applyProgressChange(evt: Event) {
+			if (song === undefined) return
+
 			player.pause()
 
 			playerForeground.classList.add('not-smooth')
 
-			let playerWidth = playerProgress['scrollWidth']
+			let playerWidth = playerProgress.scrollWidth
 
-			let selectedPercent = Math.ceil((100 / playerWidth) * evt['offsetX'])
+			//@ts-expect-error
+			let selectedPercent = Math.ceil((100 / playerWidth) * evt.offsetX)
 
-			let songPercentTime = song['Duration'] / (100 / selectedPercent)
+			let songPercentTime = song.Duration / (100 / selectedPercent)
 
 			// Allows for the player component to get the new value and update the song duration.
 			$updateSongProgress = songPercentTime

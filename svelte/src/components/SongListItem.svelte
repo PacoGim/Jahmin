@@ -27,7 +27,7 @@ import { parseDuration } from '../functions/parseDuration.fn';
 	})
 
 	function setStar(starChangeEvent) {
-		// TODO: Add updater
+		// TODO: Add updater - starLevel gives undefined 😩
 		console.log(song.SourceFile, starChangeEvent.detail.starLevel)
 	}
 </script>

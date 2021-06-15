@@ -40,7 +40,19 @@ function iterateWorkQueue() {
 	if (work) {
 		if (work.type === 'Add') {
 			add(work.data).then(() => {
-				// Tell to storage service to add to array
+				// Tell to storage service to add to song map
+				parentPort?.postMessage({
+					type: work?.type,
+					data: work?.data
+				})
+
+				iterateWorkQueue()
+			})
+
+			// process.nextTick(() => iterateWorkQueue())
+		} else if (work.type === 'Update') {
+			update(work.data).then(() => {
+				// Tell to storage service to update son map
 				parentPort?.postMessage({
 					type: work?.type,
 					data: work?.data
@@ -56,6 +68,12 @@ function iterateWorkQueue() {
 	}
 }
 
+function update(data: TagType) {
+	return new Promise((resolve, reject) => {
+		// TODO Update Logic
+	})
+}
+
 let storesMap = new Map<String, Store<Record<string, unknown>>>()
 
 function add(data: TagType) {
@@ -67,10 +85,13 @@ function add(data: TagType) {
 		let store = storesMap.get(rootFolderId)
 
 		if (!store) {
-			store = new Store({
-				cwd: storagePath,
+			let storeConfig: { name: string; cwd?: string } = {
 				name: rootFolderId
-			})
+			}
+
+			if (storagePath) storeConfig.cwd = storagePath
+
+			store = new Store(storeConfig)
 			storesMap.set(rootFolderId, store)
 		}
 

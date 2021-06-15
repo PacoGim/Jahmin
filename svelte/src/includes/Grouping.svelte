@@ -28,7 +28,6 @@
 
 	$: {
 		// Get Art Grid Albums as soon as the variable is set.
-		//TODO Save to config file
 		$selectedGroupByValueStore = selectedGroupByValue
 	}
 
@@ -47,8 +46,6 @@
 				getGrouping()
 				$selectedGroupByStore = selectedGroupBy
 				localStorage.setItem('GroupBy', selectedGroupBy)
-
-				//TODO Save to config file
 			}
 		}
 	}

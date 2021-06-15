@@ -30,7 +30,18 @@ function iterateWorkQueue() {
     if (work) {
         if (work.type === 'Add') {
             add(work.data).then(() => {
-                // Tell to storage service to add to array
+                // Tell to storage service to add to song map
+                worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
+                    type: work === null || work === void 0 ? void 0 : work.type,
+                    data: work === null || work === void 0 ? void 0 : work.data
+                });
+                iterateWorkQueue();
+            });
+            // process.nextTick(() => iterateWorkQueue())
+        }
+        else if (work.type === 'Update') {
+            update(work.data).then(() => {
+                // Tell to storage service to update son map
                 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
                     type: work === null || work === void 0 ? void 0 : work.type,
                     data: work === null || work === void 0 ? void 0 : work.data
@@ -44,6 +55,11 @@ function iterateWorkQueue() {
         isWorkQueueuIterating = false;
     }
 }
+function update(data) {
+    return new Promise((resolve, reject) => {
+        // TODO Update Logic
+    });
+}
 let storesMap = new Map();
 function add(data) {
     return new Promise((resolve, reject) => {
@@ -53,10 +69,12 @@ function add(data) {
         let songId = String(hashString_fn_1.hash(data.SourceFile, 'number'));
         let store = storesMap.get(rootFolderId);
         if (!store) {
-            store = new electron_store_1.default({
-                cwd: storagePath,
+            let storeConfig = {
                 name: rootFolderId
-            });
+            };
+            if (storagePath)
+                storeConfig.cwd = storagePath;
+            store = new electron_store_1.default(storeConfig);
             storesMap.set(rootFolderId, store);
         }
         store.set(songId, data);
