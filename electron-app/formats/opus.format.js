@@ -19,10 +19,9 @@ const string_hash_1 = __importDefault(require("string-hash"));
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
-const ffmpegWorker = worker_service_1.getWorker('Ffmpeg');
+const ffmpegWorker = worker_service_1.getWorker('ffmpeg');
 function writeOpusTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
-        console.log(2, new Date().toTimeString());
         let ffmpegMetatagString = objectToFfmpegString(newTags);
         let templFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
         if (ffmpegWorker) {
@@ -49,16 +48,25 @@ function writeOpusTags(filePath, newTags) {
     });
 }
 exports.writeOpusTags = writeOpusTags;
+let worker = worker_service_1.getWorker('musicMetadata');
+let deferredPromise = new Map();
+worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
+    deferredPromise.get(data.filePath)(data.metadata);
+    deferredPromise.delete(data.filePath);
+});
 function getOpusTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            const METADATA = yield new Promise((resolve, reject) => {
+                deferredPromise.set(filePath, resolve);
+                worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
+            });
             let tags = {
                 ID: string_hash_1.default(filePath),
                 Extension: 'opus',
                 SourceFile: filePath
             };
             const STATS = fs_1.default.statSync(filePath);
-            const METADATA = yield mm.parseFile(filePath);
             let nativeTags = mergeNatives(METADATA.native);
             let dateParsed = getDate(String(nativeTags.DATE));
             tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUM) || '';
@@ -77,8 +85,7 @@ function getOpusTags(filePath) {
             tags.BitRate = METADATA.format.bitrate / 1000;
             tags.Duration = Math.trunc(METADATA.format.duration);
             tags.LastModified = STATS.mtimeMs;
-            tags.SampleRate = 40000;
-            // tags.SampleRate = METADATA.format.sampleRate
+            tags.SampleRate = METADATA.format.sampleRate;
             tags.Size = STATS.size;
             resolve(tags);
         }));

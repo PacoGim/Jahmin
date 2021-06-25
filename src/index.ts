@@ -1,3 +1,4 @@
+import { exec } from 'child_process'
 import { app, BrowserWindow, ipcMain, Menu, protocol, screen, shell } from 'electron'
 
 import path from 'path'

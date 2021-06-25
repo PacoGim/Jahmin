@@ -10,11 +10,10 @@ let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
 const mm = require('music-metadata')
 
-const ffmpegWorker = getWorker('Ffmpeg')
+const ffmpegWorker = getWorker('ffmpeg')
 
 export function writeOpusTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
-		console.log(2, new Date().toTimeString())
 		let ffmpegMetatagString = objectToFfmpegString(newTags)
 		let templFileName = filePath.replace(/(\.opus)$/, '.temp.opus')
 
@@ -45,8 +44,22 @@ export function writeOpusTags(filePath: string, newTags: any) {
 	})
 }
 
+let worker = getWorker('musicMetadata')
+
+let deferredPromise: Map<string, any> = new Map<string, any>()
+
+worker?.on('message', (data) => {
+	deferredPromise.get(data.filePath)(data.metadata)
+	deferredPromise.delete(data.filePath)
+})
+
 export async function getOpusTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
+		const METADATA: any = await new Promise((resolve, reject) => {
+			deferredPromise.set(filePath, resolve)
+			worker?.postMessage(filePath)
+		})
+
 		let tags: SongType = {
 			ID: stringHash(filePath),
 			Extension: 'opus',
@@ -54,7 +67,6 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 		}
 
 		const STATS = fs.statSync(filePath)
-		const METADATA = await mm.parseFile(filePath)
 		let nativeTags: OpusTagType = mergeNatives(METADATA.native)
 
 		let dateParsed = getDate(String(nativeTags.DATE))
@@ -76,8 +88,7 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 		tags.BitRate = METADATA.format.bitrate / 1000
 		tags.Duration = Math.trunc(METADATA.format.duration)
 		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = 40000
-		// tags.SampleRate = METADATA.format.sampleRate
+		tags.SampleRate = METADATA.format.sampleRate
 		tags.Size = STATS.size
 
 		resolve(tags)

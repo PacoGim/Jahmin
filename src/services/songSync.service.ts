@@ -8,6 +8,7 @@ import { OptionsType } from '../types/options.type'
 import stringHash from 'string-hash'
 import { appDataPath } from '..'
 import { getStorageMapToArray } from './storage.service'
+import { getOpusTags } from '../formats/opus.format'
 
 let watcher: FSWatcher
 
@@ -17,7 +18,52 @@ export function getRootDirFolderWatcher() {
 	return watcher
 }
 
-export let taskQueue: any[] = []
+// export let taskQueue: any[] = []
+
+let isQueueRunning = false
+let count = 0
+
+let workerExec = getWorker('nodeExec')
+
+let taskQueue = new Proxy([] as any[], {
+	get(target, fn: 'push' | 'unshift' | 'length') {
+		if (fn === 'length' && target.length !== 0 && isQueueRunning === false) {
+			isQueueRunning = true
+			setTimeout(() => {
+				processQueue()
+			}, 1000)
+		}
+		return target[fn]
+	}
+})
+
+function processQueue() {
+	console.log(taskQueue.length, isQueueRunning)
+	let task = taskQueue.shift()
+	let task2 = taskQueue.shift()
+
+	if (task === undefined && task2 === undefined) {
+		isQueueRunning = false
+		return
+	}
+
+	if (task) getTags(task)
+
+	if (task2) getTags(task2)
+}
+
+function getTags(task: any) {
+	let extension = task.path.split('.').pop().toLowerCase()
+
+	if (extension === 'opus') {
+		getOpusTags(task.path).then((tags) => {
+			//TODO Save to DB
+			processQueue()
+		})
+	} else {
+		processQueue()
+	}
+}
 
 let songsFound: string[] = []
 
@@ -66,9 +112,9 @@ export function watchFolders(rootDirectories: string[]) {
 		// When watcher is done getting files, any new files added afterwards are detected here.
 		watcher.on('add', (path) => addToTaskQueue(path, 'add'))
 
-		filterNewSongs().then(() => {
+		filterNewSongs() /*.then(() => {
 			addNewSongs()
-		})
+		})*/
 
 		// startWorkers()
 
@@ -76,74 +122,7 @@ export function watchFolders(rootDirectories: string[]) {
 	})
 }
 
-let opusFormatWorker = getWorker('opusFormat')
-
-/*
-	Adds new found songs.
-		1. Get song tags
-		2. Save to storage
-*/
-function addNewSongs() {
-
-	console.log()
-
-}
-
-function startWorkers() {
-	/* 	workerSongData.forEach((worker, index) => {
-		setTimeout(() => {
-			// console.log(index, 10000 * index)
-
-			worker.on('message', (options: OptionsType) => {
-				if (options.task === 'Not Tasks Left') {
-					setTimeout(() => {
-						processQueue(worker)
-					}, 2000)
-				} else if (options.task === 'Get Song Data') {
-					storageWorker.postMessage({
-						type: 'Add',
-						data: options.data,
-						appDataPath: appDataPath()
-					})
-					processQueue(worker)
-				}
-			})
-
-			processQueue(worker)
-		}, 5000 * index)
-	}) */
-}
-
-function processQueue(worker: Worker) {
-	let task = taskQueue.shift()
-
-	if (task) {
-		if (taskQueue.length > maxTaskQueueLength) {
-			maxTaskQueueLength = taskQueue.length
-		}
-
-		let { type, path } = task
-
-		if (type === 'add') {
-			worker.postMessage({
-				task: 'Get Song Data',
-				data: {
-					path
-				}
-			})
-		}
-
-		if (type === 'delete') {
-			// console.log(task, path)
-			//TODO
-			// deleteData({ ID: stringHash(path) }).then(() => processQueue(worker))
-		}
-	} else {
-		worker.postMessage({
-			task: 'Not Tasks Left'
-		})
-	}
-}
+let nodeExecWorker = getWorker('nodeExec')
 
 function filterNewSongs() {
 	return new Promise((resolve, reject) => {
