@@ -1,4 +1,5 @@
 import { FSWatcher, watch } from 'chokidar'
+import { cpus } from 'os'
 // import { createData, deleteData, getCollection } from './loki.service.bak'
 
 import { Worker } from 'worker_threads'
@@ -9,6 +10,8 @@ import stringHash from 'string-hash'
 import { appDataPath } from '..'
 import { getStorageMapToArray } from './storage.service'
 import { getOpusTags } from '../formats/opus.format'
+
+const TOTAL_CPUS = cpus().length
 
 let watcher: FSWatcher
 
@@ -21,7 +24,6 @@ export function getRootDirFolderWatcher() {
 // export let taskQueue: any[] = []
 
 let isQueueRunning = false
-let count = 0
 
 let workerExec = getWorker('nodeExec')
 
@@ -37,32 +39,45 @@ let taskQueue = new Proxy([] as any[], {
 	}
 })
 
+// Splits excecution based on the amount of cpus.
 function processQueue() {
-	console.log(taskQueue.length, isQueueRunning)
-	let task = taskQueue.shift()
-	let task2 = taskQueue.shift()
+	// Creates an array with the length from cpus amount and map it to true.
+	let processesRunning = Array.from(Array(TOTAL_CPUS >= 3 ? 2 : 1).keys()).map(() => true)
 
-	if (task === undefined && task2 === undefined) {
-		isQueueRunning = false
-		return
+	// For each process, get a task.
+	processesRunning.forEach((process, index) => getTask(index))
+
+	// Shifts a taks from array and gets the tags.
+	function getTask(cpuNumber: number) {
+		let task = taskQueue.shift()
+
+		if (task) {
+			getTags(task).then((tags) => {
+				//TODO Storage
+				getTask(cpuNumber)
+			})
+		} else {
+			// If no task left then sets its own process as false.
+			processesRunning[cpuNumber] = false
+
+			// And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
+			if (processesRunning.every((process) => process === false)) {
+				isQueueRunning = false
+			}
+		}
 	}
-
-	if (task) getTags(task)
-
-	if (task2) getTags(task2)
 }
 
 function getTags(task: any) {
-	let extension = task.path.split('.').pop().toLowerCase()
+	return new Promise((resolve, reject) => {
+		let extension = task.path.split('.').pop().toLowerCase()
 
-	if (extension === 'opus') {
-		getOpusTags(task.path).then((tags) => {
-			//TODO Save to DB
-			processQueue()
-		})
-	} else {
-		processQueue()
-	}
+		if (extension === 'opus') {
+			getOpusTags(task.path).then((tags) => resolve(tags))
+		} else {
+			resolve('')
+		}
+	})
 }
 
 let songsFound: string[] = []

@@ -2,9 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = require("chokidar");
+const os_1 = require("os");
 const worker_service_1 = require("./worker.service");
 const storage_service_1 = require("./storage.service");
 const opus_format_1 = require("../formats/opus.format");
+const TOTAL_CPUS = os_1.cpus().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
 function getRootDirFolderWatcher() {
@@ -13,7 +15,6 @@ function getRootDirFolderWatcher() {
 exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 // export let taskQueue: any[] = []
 let isQueueRunning = false;
-let count = 0;
 let workerExec = worker_service_1.getWorker('nodeExec');
 let taskQueue = new Proxy([], {
     get(target, fn) {
@@ -26,30 +27,41 @@ let taskQueue = new Proxy([], {
         return target[fn];
     }
 });
+// Splits excecution based on the amount of cpus.
 function processQueue() {
-    console.log(taskQueue.length, isQueueRunning);
-    let task = taskQueue.shift();
-    let task2 = taskQueue.shift();
-    if (task === undefined && task2 === undefined) {
-        isQueueRunning = false;
-        return;
+    // Creates an array with the length from cpus amount and map it to true.
+    let processesRunning = Array.from(Array(TOTAL_CPUS >= 3 ? 2 : 1).keys()).map(() => true);
+    // For each process, get a task.
+    processesRunning.forEach((process, index) => getTask(index));
+    // Shifts a taks from array and gets the tags.
+    function getTask(cpuNumber) {
+        let task = taskQueue.shift();
+        if (task) {
+            getTags(task).then((tags) => {
+                //TODO Storage
+                getTask(cpuNumber);
+            });
+        }
+        else {
+            // If no task left then sets its own process as false.
+            processesRunning[cpuNumber] = false;
+            // And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
+            if (processesRunning.every((process) => process === false)) {
+                isQueueRunning = false;
+            }
+        }
     }
-    if (task)
-        getTags(task);
-    if (task2)
-        getTags(task2);
 }
 function getTags(task) {
-    let extension = task.path.split('.').pop().toLowerCase();
-    if (extension === 'opus') {
-        opus_format_1.getOpusTags(task.path).then((tags) => {
-            //TODO Save to DB
-            processQueue();
-        });
-    }
-    else {
-        processQueue();
-    }
+    return new Promise((resolve, reject) => {
+        let extension = task.path.split('.').pop().toLowerCase();
+        if (extension === 'opus') {
+            opus_format_1.getOpusTags(task.path).then((tags) => resolve(tags));
+        }
+        else {
+            resolve('');
+        }
+    });
 }
 let songsFound = [];
 exports.maxTaskQueueLength = 0;
