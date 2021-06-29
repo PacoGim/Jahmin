@@ -6,7 +6,7 @@ import fs from 'fs'
 const TOTAL_CPUS = cpus().length
 const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
 
-type WorkerNameType = 'ffmpeg' | 'songFilter' | 'tagEdit' | 'storage' | 'folderScan' | 'nodeExec' | 'musicMetadata'
+type WorkerNameType = 'ffmpeg' | 'songFilter' | 'tagEdit' | 'storage' | 'folderScan' | 'nodeExec' | 'musicMetadata' | 'exifTool'
 
 type WorkerType = {
 	id: number

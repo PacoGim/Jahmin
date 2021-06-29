@@ -11,7 +11,6 @@ import { groupSongs } from '../functions/groupSong.fn'
 import { getMaxTaskQueueLength, getTaskQueueLength } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
 import { tagEdit } from './tagEdit.service'
-import { getTagEditWorker } from './worker.service'
 import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 import { getNewPromiseDbVersion, getStorageMap } from './storage.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)

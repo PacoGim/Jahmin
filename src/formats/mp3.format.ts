@@ -12,6 +12,7 @@ import { TagModMp3Type } from '../types/tagModMp3.type'
 import { Mp3TagType } from '../types/mp3TagType'
 import { EditTag } from '../types/editTag.type'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
+import { getWorker } from '../services/worker.service'
 
 const mm = require('music-metadata')
 
@@ -27,6 +28,60 @@ export function writeMp3Tags(filePath: string, newTags: any) {
 				resolve('')
 			}
 		})
+	})
+}
+
+/********************** Get Mp3 Tags **********************/
+let worker = getWorker('musicMetadata')
+
+let deferredPromise: Map<string, any> = new Map<string, any>()
+
+worker?.on('message', (data) => {
+	if (deferredPromise.has(data.filePath)) {
+		deferredPromise.get(data.filePath)(data.metadata)
+		deferredPromise.delete(data.filePath)
+	}
+})
+
+export async function getMp3Tags(filePath: string): Promise<SongType> {
+	return new Promise(async (resolve, reject) => {
+		const METADATA: any = await new Promise((resolve, reject) => {
+			deferredPromise.set(filePath, resolve)
+			worker?.postMessage(filePath)
+		})
+
+		let tags: SongType = {
+			ID: stringHash(filePath),
+			Extension: 'mp3',
+			SourceFile: filePath
+		}
+
+		const STATS = fs.statSync(filePath)
+		let nativeTags: Mp3TagType = mergeNatives(METADATA.native)
+
+		let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
+
+		tags.Album = nativeTags?.TALB || ''
+		tags.AlbumArtist = nativeTags?.TPE2 || ''
+		tags.Artist = nativeTags?.TPE1 || ''
+		tags.Comment = nativeTags?.COMM?.text || ''
+		tags.Composer = nativeTags?.TCOM || ''
+		tags.Date_Year = dateParsed.year || null
+		tags.Date_Month = dateParsed.month || null
+		tags.Date_Day = dateParsed.day || null
+		tags.DiscNumber = Number(nativeTags?.TPOS) || null
+		tags.Genre = nativeTags?.TCON || ''
+		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || 0
+		tags.Title = nativeTags?.TIT2 || ''
+		tags.Track = Number(nativeTags?.TRCK) || 0
+
+		tags.BitRate = METADATA.format.bitrate / 1000
+		tags.Duration = Math.trunc(METADATA.format.duration)
+		tags.LastModified = STATS.mtimeMs
+		tags.SampleRate = METADATA.format.sampleRate
+		tags.Size = STATS.size
+
+		resolve(tags)
 	})
 }
 
@@ -67,44 +122,6 @@ function normalizeNewTags(newTags: EditTag) {
 	}
 
 	return newTags
-}
-
-export async function getMp3Tags(filePath: string): Promise<SongType> {
-	return new Promise(async (resolve, reject) => {
-		let tags: SongType = {
-			ID: stringHash(filePath),
-			Extension: 'mp3',
-			SourceFile: filePath
-		}
-
-		const STATS = fs.statSync(filePath)
-		const METADATA = await mm.parseFile(filePath)
-		let nativeTags: Mp3TagType = mergeNatives(METADATA.native)
-
-		let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
-
-		tags.Album = nativeTags?.TALB || ''
-		tags.AlbumArtist = nativeTags?.TPE2 || ''
-		tags.Artist = nativeTags?.TPE1 || ''
-		tags.Comment = nativeTags?.COMM?.text || ''
-		tags.Composer = nativeTags?.TCOM || ''
-		tags.Date_Year = dateParsed.year || null
-		tags.Date_Month = dateParsed.month || null
-		tags.Date_Day = dateParsed.day || null
-		tags.DiscNumber = Number(nativeTags?.TPOS) || null
-		tags.Genre = nativeTags?.TCON || ''
-		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || 0
-		tags.Title = nativeTags?.TIT2 || ''
-		tags.Track = Number(nativeTags?.TRCK) || 0
-
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
-		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = METADATA.format.sampleRate
-		tags.Size = STATS.size
-
-		resolve(tags)
-	})
 }
 
 /**

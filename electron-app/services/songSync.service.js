@@ -4,8 +4,12 @@ exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLengt
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
 const worker_service_1 = require("./worker.service");
+const __1 = require("..");
 const storage_service_1 = require("./storage.service");
 const opus_format_1 = require("../formats/opus.format");
+const mp3_format_1 = require("../formats/mp3.format");
+const flac_format_1 = require("../formats/flac.format");
+const aac_format_1 = require("../formats/aac.format");
 const TOTAL_CPUS = os_1.cpus().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
@@ -16,6 +20,7 @@ exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 // export let taskQueue: any[] = []
 let isQueueRunning = false;
 let workerExec = worker_service_1.getWorker('nodeExec');
+let storageWorker = worker_service_1.getWorker('storage');
 let taskQueue = new Proxy([], {
     get(target, fn) {
         if (fn === 'length' && target.length !== 0 && isQueueRunning === false) {
@@ -32,19 +37,23 @@ function processQueue() {
     // Creates an array with the length from cpus amount and map it to true.
     let processesRunning = Array.from(Array(TOTAL_CPUS >= 3 ? 2 : 1).keys()).map(() => true);
     // For each process, get a task.
-    processesRunning.forEach((process, index) => getTask(index));
+    processesRunning.forEach((process, processIndex) => getTask(processIndex));
     // Shifts a taks from array and gets the tags.
-    function getTask(cpuNumber) {
+    function getTask(processIndex) {
         let task = taskQueue.shift();
         if (task) {
             getTags(task).then((tags) => {
-                //TODO Storage
-                getTask(cpuNumber);
+                storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+                    type: 'Add',
+                    data: tags,
+                    appDataPath: __1.appDataPath()
+                });
+                getTask(processIndex);
             });
         }
         else {
             // If no task left then sets its own process as false.
-            processesRunning[cpuNumber] = false;
+            processesRunning[processIndex] = false;
             // And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
             if (processesRunning.every((process) => process === false)) {
                 isQueueRunning = false;
@@ -52,11 +61,21 @@ function processQueue() {
         }
     }
 }
+// 343 Total Songs
 function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();
         if (extension === 'opus') {
             opus_format_1.getOpusTags(task.path).then((tags) => resolve(tags));
+        }
+        else if (extension === 'mp3') {
+            mp3_format_1.getMp3Tags(task.path).then((tags) => resolve(tags));
+        }
+        else if (extension === 'flac') {
+            flac_format_1.getFlacTags(task.path).then((tags) => resolve(tags));
+        }
+        else if (extension === 'm4a') {
+            aac_format_1.getAacTags(task.path).then((tags) => resolve(tags));
         }
         else {
             resolve('');
@@ -65,8 +84,6 @@ function getTags(task) {
 }
 let songsFound = [];
 exports.maxTaskQueueLength = 0;
-// let workerSongData = getWorker('')
-let storageWorker = worker_service_1.getWorker('storage');
 function getMaxTaskQueueLength() {
     return exports.maxTaskQueueLength;
 }

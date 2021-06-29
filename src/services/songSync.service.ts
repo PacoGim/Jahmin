@@ -10,6 +10,9 @@ import stringHash from 'string-hash'
 import { appDataPath } from '..'
 import { getStorageMapToArray } from './storage.service'
 import { getOpusTags } from '../formats/opus.format'
+import { getMp3Tags } from '../formats/mp3.format'
+import { getFlacTags } from '../formats/flac.format'
+import { getAacTags } from '../formats/aac.format'
 
 const TOTAL_CPUS = cpus().length
 
@@ -26,6 +29,7 @@ export function getRootDirFolderWatcher() {
 let isQueueRunning = false
 
 let workerExec = getWorker('nodeExec')
+let storageWorker = getWorker('storage')
 
 let taskQueue = new Proxy([] as any[], {
 	get(target, fn: 'push' | 'unshift' | 'length') {
@@ -45,20 +49,24 @@ function processQueue() {
 	let processesRunning = Array.from(Array(TOTAL_CPUS >= 3 ? 2 : 1).keys()).map(() => true)
 
 	// For each process, get a task.
-	processesRunning.forEach((process, index) => getTask(index))
+	processesRunning.forEach((process, processIndex) => getTask(processIndex))
 
 	// Shifts a taks from array and gets the tags.
-	function getTask(cpuNumber: number) {
+	function getTask(processIndex: number) {
 		let task = taskQueue.shift()
 
 		if (task) {
 			getTags(task).then((tags) => {
-				//TODO Storage
-				getTask(cpuNumber)
+				storageWorker?.postMessage({
+					type: 'Add',
+					data: tags,
+					appDataPath: appDataPath()
+				})
+				getTask(processIndex)
 			})
 		} else {
 			// If no task left then sets its own process as false.
-			processesRunning[cpuNumber] = false
+			processesRunning[processIndex] = false
 
 			// And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
 			if (processesRunning.every((process) => process === false)) {
@@ -74,6 +82,12 @@ function getTags(task: any) {
 
 		if (extension === 'opus') {
 			getOpusTags(task.path).then((tags) => resolve(tags))
+		} else if (extension === 'mp3') {
+			getMp3Tags(task.path).then((tags) => resolve(tags))
+		} else if (extension === 'flac') {
+			getFlacTags(task.path).then((tags) => resolve(tags))
+		} else if (extension === 'm4a') {
+			getAacTags(task.path).then((tags) => resolve(tags))
 		} else {
 			resolve('')
 		}
@@ -83,10 +97,6 @@ function getTags(task: any) {
 let songsFound: string[] = []
 
 export let maxTaskQueueLength: number = 0
-
-// let workerSongData = getWorker('')
-
-let storageWorker = getWorker('storage')
 
 export function getMaxTaskQueueLength() {
 	return maxTaskQueueLength

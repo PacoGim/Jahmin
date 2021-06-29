@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -9,6 +18,7 @@ const exiftool = new exiftool_vendored_1.ExifTool({ taskTimeoutMillis: 5000 });
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
+const worker_service_1 = require("../services/worker.service");
 function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
@@ -23,45 +33,47 @@ function writeAacTags(filePath, newTags) {
     });
 }
 exports.writeAacTags = writeAacTags;
+/********************** Get Aac Tags **********************/
+let worker = worker_service_1.getWorker('exifTool');
+let deferredPromise = new Map();
+worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
+    deferredPromise.get(data.filePath)(data.metadata);
+    deferredPromise.delete(data.filePath);
+});
 function getAacTags(filePath) {
-    return new Promise((resolve, reject) => {
-        exiftool.read(filePath).then((tags) => {
-            fs_1.default.stat(filePath, (err, fileStats) => {
-                //@ts-expect-error
-                let dateParsed = getDate(String(tags.CreateDate || tags.ContentCreateDate));
-                resolve({
-                    ID: string_hash_1.default(filePath),
-                    Extension: tags.FileTypeExtension,
-                    SourceFile: tags.SourceFile || '',
-                    //@ts-expect-error
-                    Album: tags.Album || '',
-                    //@ts-expect-error
-                    AlbumArtist: tags.AlbumArtist || '',
-                    Artist: tags.Artist || '',
-                    Comment: tags.Comment || '',
-                    //@ts-expect-error
-                    Composer: tags.Composer || '',
-                    Date_Year: dateParsed.year || 0,
-                    Date_Month: dateParsed.month || 0,
-                    //@ts-expect-error
-                    DiscNumber: tags.DiskNumber || 0,
-                    Date_Day: dateParsed.day || 0,
-                    //@ts-expect-error
-                    Genre: tags.Genre || '',
-                    Rating: tags.RatingPercent || 0,
-                    Title: tags.Title || '',
-                    //@ts-expect-error
-                    Track: getTrack(tags.TrackNumber, tags.Track) || 0,
-                    BitDepth: tags.AudioBitsPerSample,
-                    BitRate: getBitRate(tags.AvgBitrate),
-                    Duration: tags.Duration,
-                    LastModified: fileStats.mtimeMs,
-                    SampleRate: tags.AudioSampleRate,
-                    Size: fileStats.size,
-                });
-            });
+    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        const METADATA = yield new Promise((resolve, reject) => {
+            deferredPromise.set(filePath, resolve);
+            worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
         });
-    });
+        const STATS = fs_1.default.statSync(filePath);
+        let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));
+        resolve({
+            ID: string_hash_1.default(filePath),
+            Extension: METADATA.FileTypeExtension,
+            SourceFile: METADATA.SourceFile || '',
+            Album: METADATA.Album || '',
+            AlbumArtist: METADATA.AlbumArtist || '',
+            Artist: METADATA.Artist || '',
+            Comment: METADATA.Comment || '',
+            Composer: METADATA.Composer || '',
+            Date_Year: dateParsed.year || 0,
+            Date_Month: dateParsed.month || 0,
+            DiscNumber: METADATA.DiskNumber || 0,
+            Date_Day: dateParsed.day || 0,
+            Genre: METADATA.Genre || '',
+            Rating: METADATA.RatingPercent || 0,
+            Title: METADATA.Title || '',
+            //@ts-expect-error
+            Track: getTrack(METADATA.TrackNumber, METADATA.Track) || 0,
+            BitDepth: METADATA.AudioBitsPerSample,
+            BitRate: getBitRate(METADATA.AvgBitrate),
+            Duration: METADATA.Duration,
+            LastModified: STATS.mtimeMs,
+            SampleRate: METADATA.AudioSampleRate,
+            Size: STATS.size
+        });
+    }));
 }
 exports.getAacTags = getAacTags;
 function normalizeNewTags(newTags) {

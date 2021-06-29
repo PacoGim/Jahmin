@@ -18,6 +18,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
+const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
 function writeFlacTags(filePath, newTags) {
@@ -30,16 +31,28 @@ function writeFlacTags(filePath, newTags) {
     });
 }
 exports.writeFlacTags = writeFlacTags;
+/********************** Get Flac Tags **********************/
+let worker = worker_service_1.getWorker('musicMetadata');
+let deferredPromise = new Map();
+worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
+    if (deferredPromise.has(data.filePath)) {
+        deferredPromise.get(data.filePath)(data.metadata);
+        deferredPromise.delete(data.filePath);
+    }
+});
 function getFlacTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            const METADATA = yield new Promise((resolve, reject) => {
+                deferredPromise.set(filePath, resolve);
+                worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
+            });
             let tags = {
                 ID: string_hash_1.default(filePath),
                 Extension: 'flac',
                 SourceFile: filePath
             };
             const STATS = fs_1.default.statSync(filePath);
-            const METADATA = yield mm.parseFile(filePath);
             let nativeTags = mergeNatives(METADATA.native);
             let dateParsed = getDate(String(nativeTags.DATE));
             tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUM) || '';

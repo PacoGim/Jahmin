@@ -48,11 +48,14 @@ function writeOpusTags(filePath, newTags) {
     });
 }
 exports.writeOpusTags = writeOpusTags;
+/********************** Get Opus Tags **********************/
 let worker = worker_service_1.getWorker('musicMetadata');
 let deferredPromise = new Map();
 worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
-    deferredPromise.get(data.filePath)(data.metadata);
-    deferredPromise.delete(data.filePath);
+    if (deferredPromise.has(data.filePath)) {
+        deferredPromise.get(data.filePath)(data.metadata);
+        deferredPromise.delete(data.filePath);
+    }
 });
 function getOpusTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {

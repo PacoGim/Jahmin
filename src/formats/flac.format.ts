@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
+import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { FlacTagType } from '../types/flacTagType'
 import { SongType } from '../types/song.type'
@@ -28,8 +29,25 @@ export function writeFlacTags(filePath: string, newTags: any) {
 	})
 }
 
+/********************** Get Flac Tags **********************/
+let worker = getWorker('musicMetadata')
+
+let deferredPromise: Map<string, any> = new Map<string, any>()
+
+worker?.on('message', (data) => {
+	if (deferredPromise.has(data.filePath)) {
+		deferredPromise.get(data.filePath)(data.metadata)
+		deferredPromise.delete(data.filePath)
+	}
+})
+
 export async function getFlacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
+		const METADATA: any = await new Promise((resolve, reject) => {
+			deferredPromise.set(filePath, resolve)
+			worker?.postMessage(filePath)
+		})
+
 		let tags: SongType = {
 			ID: stringHash(filePath),
 			Extension: 'flac',
@@ -37,7 +55,6 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 		}
 
 		const STATS = fs.statSync(filePath)
-		const METADATA = await mm.parseFile(filePath)
 		let nativeTags: FlacTagType = mergeNatives(METADATA.native)
 
 		let dateParsed = getDate(String(nativeTags.DATE))

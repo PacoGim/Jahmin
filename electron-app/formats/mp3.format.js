@@ -17,6 +17,7 @@ const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const node_id3_1 = __importDefault(require("node-id3"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
+const worker_service_1 = require("../services/worker.service");
 const mm = require('music-metadata');
 function writeMp3Tags(filePath, newTags) {
     return new Promise((resolve, reject) => {
@@ -33,6 +34,54 @@ function writeMp3Tags(filePath, newTags) {
     });
 }
 exports.writeMp3Tags = writeMp3Tags;
+/********************** Get Mp3 Tags **********************/
+let worker = worker_service_1.getWorker('musicMetadata');
+let deferredPromise = new Map();
+worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
+    if (deferredPromise.has(data.filePath)) {
+        deferredPromise.get(data.filePath)(data.metadata);
+        deferredPromise.delete(data.filePath);
+    }
+});
+function getMp3Tags(filePath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const METADATA = yield new Promise((resolve, reject) => {
+                deferredPromise.set(filePath, resolve);
+                worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
+            });
+            let tags = {
+                ID: string_hash_1.default(filePath),
+                Extension: 'mp3',
+                SourceFile: filePath
+            };
+            const STATS = fs_1.default.statSync(filePath);
+            let nativeTags = mergeNatives(METADATA.native);
+            let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER));
+            tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TALB) || '';
+            tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE2) || '';
+            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE1) || '';
+            tags.Comment = ((_a = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMM) === null || _a === void 0 ? void 0 : _a.text) || '';
+            tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCOM) || '';
+            tags.Date_Year = dateParsed.year || null;
+            tags.Date_Month = dateParsed.month || null;
+            tags.Date_Day = dateParsed.day || null;
+            tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPOS) || null;
+            tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCON) || '';
+            tags.Rating = convertRating('Jahmin', (_b = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.POPM) === null || _b === void 0 ? void 0 : _b.rating) || 0;
+            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2) || '';
+            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || 0;
+            tags.BitRate = METADATA.format.bitrate / 1000;
+            tags.Duration = Math.trunc(METADATA.format.duration);
+            tags.LastModified = STATS.mtimeMs;
+            tags.SampleRate = METADATA.format.sampleRate;
+            tags.Size = STATS.size;
+            resolve(tags);
+        }));
+    });
+}
+exports.getMp3Tags = getMp3Tags;
 function normalizeNewTags(newTags) {
     if (newTags.Title)
         renameObjectKey_fn_1.renameObjectKey(newTags, 'Title', 'TIT2');
@@ -74,42 +123,6 @@ function normalizeNewTags(newTags) {
     }
     return newTags;
 }
-function getMp3Tags(filePath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
-            let tags = {
-                ID: string_hash_1.default(filePath),
-                Extension: 'mp3',
-                SourceFile: filePath
-            };
-            const STATS = fs_1.default.statSync(filePath);
-            const METADATA = yield mm.parseFile(filePath);
-            let nativeTags = mergeNatives(METADATA.native);
-            let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER));
-            tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TALB) || '';
-            tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE2) || '';
-            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE1) || '';
-            tags.Comment = ((_a = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMM) === null || _a === void 0 ? void 0 : _a.text) || '';
-            tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCOM) || '';
-            tags.Date_Year = dateParsed.year || null;
-            tags.Date_Month = dateParsed.month || null;
-            tags.Date_Day = dateParsed.day || null;
-            tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPOS) || null;
-            tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCON) || '';
-            tags.Rating = convertRating('Jahmin', (_b = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.POPM) === null || _b === void 0 ? void 0 : _b.rating) || 0;
-            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2) || '';
-            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || 0;
-            tags.BitRate = METADATA.format.bitrate / 1000;
-            tags.Duration = Math.trunc(METADATA.format.duration);
-            tags.LastModified = STATS.mtimeMs;
-            tags.SampleRate = METADATA.format.sampleRate;
-            tags.Size = STATS.size;
-            resolve(tags);
-        }));
-    });
-}
-exports.getMp3Tags = getMp3Tags;
 /**
  * @param {('Mp3' | 'Jahmin')} to - Mp3: Converts from (0 - 100) to (0 - 255) to save rating tag in file from renderer
  * @param {('Mp3' | 'Jahmin')} to - Jahmin: Converts from (0 - 255) to (0 - 100) for the renderer

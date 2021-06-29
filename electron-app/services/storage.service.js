@@ -17,7 +17,7 @@ let storageMap = new Map();
 let dbVersionResolve = undefined;
 let watcher;
 let worker = worker_service_1.getWorker('storage');
-worker.on('message', (message) => {
+worker === null || worker === void 0 ? void 0 : worker.on('message', (message) => {
     if (message.type === 'Add') {
         addData(message.data);
     }

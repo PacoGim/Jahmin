@@ -40,7 +40,6 @@ function iterateQueue() {
         if (extension === 'm4a') {
             aac_format_1.writeAacTags(file.sourceFile, file.newTags)
                 .then(() => {
-                console.timeEnd(file.sourceFile);
                 iterateQueue();
             })
                 .catch((err) => {
@@ -50,19 +49,16 @@ function iterateQueue() {
         }
         else if (extension === 'opus') {
             opus_format_1.writeOpusTags(file.sourceFile, file.newTags).then(() => {
-                console.timeEnd(file.sourceFile);
                 iterateQueue();
             });
         }
         else if (extension === 'flac') {
             flac_format_1.writeFlacTags(file.sourceFile, file.newTags).then(() => {
-                console.timeEnd(file.sourceFile);
                 iterateQueue();
             });
         }
         else if (extension === 'mp3') {
             mp3_format_1.writeMp3Tags(file.sourceFile, file.newTags).then(() => {
-                console.timeEnd(file.sourceFile);
                 iterateQueue();
             });
         }

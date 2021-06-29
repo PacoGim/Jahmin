@@ -44,13 +44,16 @@ export function writeOpusTags(filePath: string, newTags: any) {
 	})
 }
 
+/********************** Get Opus Tags **********************/
 let worker = getWorker('musicMetadata')
 
 let deferredPromise: Map<string, any> = new Map<string, any>()
 
 worker?.on('message', (data) => {
-	deferredPromise.get(data.filePath)(data.metadata)
-	deferredPromise.delete(data.filePath)
+	if (deferredPromise.has(data.filePath)) {
+		deferredPromise.get(data.filePath)(data.metadata)
+		deferredPromise.delete(data.filePath)
+	}
 })
 
 export async function getOpusTags(filePath: string): Promise<SongType> {

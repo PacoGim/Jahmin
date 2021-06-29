@@ -3,6 +3,7 @@ const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import fs from 'fs'
 import stringHash from 'string-hash'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
+import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
 
@@ -21,44 +22,50 @@ export function writeAacTags(filePath: string, newTags: any) {
 	})
 }
 
-export function getAacTags(filePath: string): Promise<SongType> {
-	return new Promise((resolve, reject) => {
-		exiftool.read(filePath).then((tags) => {
-			fs.stat(filePath, (err, fileStats) => {
-				//@ts-expect-error
-				let dateParsed = getDate(String(tags.CreateDate || tags.ContentCreateDate))
+/********************** Get Aac Tags **********************/
+let worker = getWorker('exifTool')
 
-				resolve({
-					ID: stringHash(filePath),
-					Extension: tags.FileTypeExtension,
-					SourceFile: tags.SourceFile || '',
-					//@ts-expect-error
-					Album: tags.Album || '',
-					//@ts-expect-error
-					AlbumArtist: tags.AlbumArtist || '',
-					Artist: tags.Artist || '',
-					Comment: tags.Comment || '',
-					//@ts-expect-error
-					Composer: tags.Composer || '',
-					Date_Year: dateParsed.year || 0,
-					Date_Month: dateParsed.month || 0,
-					//@ts-expect-error
-					DiscNumber: tags.DiskNumber || 0,
-					Date_Day: dateParsed.day || 0,
-					//@ts-expect-error
-					Genre: tags.Genre || '',
-					Rating: tags.RatingPercent || 0,
-					Title: tags.Title || '',
-					//@ts-expect-error
-					Track: getTrack(tags.TrackNumber, tags.Track) || 0,
-					BitDepth: tags.AudioBitsPerSample,
-					BitRate: getBitRate(tags.AvgBitrate),
-					Duration: tags.Duration,
-					LastModified: fileStats.mtimeMs,
-					SampleRate: tags.AudioSampleRate,
-					Size: fileStats.size,
-				})
-			})
+let deferredPromise: Map<string, any> = new Map<string, any>()
+
+worker?.on('message', (data) => {
+	deferredPromise.get(data.filePath)(data.metadata)
+	deferredPromise.delete(data.filePath)
+})
+
+export function getAacTags(filePath: string): Promise<SongType> {
+	return new Promise(async (resolve, reject) => {
+		const METADATA: any = await new Promise((resolve, reject) => {
+			deferredPromise.set(filePath, resolve)
+			worker?.postMessage(filePath)
+		})
+
+		const STATS = fs.statSync(filePath)
+		let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate))
+
+		resolve({
+			ID: stringHash(filePath),
+			Extension: METADATA.FileTypeExtension,
+			SourceFile: METADATA.SourceFile || '',
+			Album: METADATA.Album || '',
+			AlbumArtist: METADATA.AlbumArtist || '',
+			Artist: METADATA.Artist || '',
+			Comment: METADATA.Comment || '',
+			Composer: METADATA.Composer || '',
+			Date_Year: dateParsed.year || 0,
+			Date_Month: dateParsed.month || 0,
+			DiscNumber: METADATA.DiskNumber || 0,
+			Date_Day: dateParsed.day || 0,
+			Genre: METADATA.Genre || '',
+			Rating: METADATA.RatingPercent || 0,
+			Title: METADATA.Title || '',
+			//@ts-expect-error
+			Track: getTrack(METADATA.TrackNumber, METADATA.Track) || 0,
+			BitDepth: METADATA.AudioBitsPerSample,
+			BitRate: getBitRate(METADATA.AvgBitrate),
+			Duration: METADATA.Duration,
+			LastModified: STATS.mtimeMs,
+			SampleRate: METADATA.AudioSampleRate,
+			Size: STATS.size
 		})
 	})
 }

@@ -4,12 +4,12 @@ exports.getTagEditProgress = void 0;
 const worker_service_1 = require("../services/worker.service");
 let worker = worker_service_1.getWorker('tagEdit');
 let deferedPromise = undefined;
-worker.on('message', (progress) => {
+worker === null || worker === void 0 ? void 0 : worker.on('message', (progress) => {
     deferedPromise(progress);
 });
 function getTagEditProgress() {
     return new Promise((resolve, reject) => {
-        worker.postMessage({ message: 'GetProgress' });
+        worker === null || worker === void 0 ? void 0 : worker.postMessage({ message: 'GetProgress' });
         deferedPromise = resolve;
     });
 }

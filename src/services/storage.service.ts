@@ -23,7 +23,7 @@ let watcher: chokidar.FSWatcher
 
 let worker = getWorker('storage')
 
-worker.on('message', (message) => {
+worker?.on('message', (message) => {
 	if (message.type === 'Add') {
 		addData(message.data)
 	} else if (message.type === 'Update') {
