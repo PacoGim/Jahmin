@@ -19,32 +19,38 @@ const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
+/********************** Write Aac Tags **********************/
+let exifToolWriteWorker = undefined;
+let tagWriteDeferredPromise = undefined;
 function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
+        if (exifToolWriteWorker === undefined) {
+            exifToolWriteWorker = worker_service_1.getWorker('exifToolRead');
+            exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.on('message', (response) => {
+                console.log(response);
+            });
+        }
         newTags = normalizeNewTags(newTags);
-        exiftool
-            .write(filePath, newTags, ['-overwrite_original'])
-            .then(() => {
-            resolve('');
-        })
-            .catch((err) => {
-            reject(err);
-        });
+        tagWriteDeferredPromise = resolve;
+        exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.postMessage({ filePath, newTags });
     });
 }
 exports.writeAacTags = writeAacTags;
-/********************** Get Aac Tags **********************/
-let worker = worker_service_1.getWorker('exifTool');
-let deferredPromise = new Map();
-worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
-    deferredPromise.get(data.filePath)(data.metadata);
-    deferredPromise.delete(data.filePath);
-});
+/********************** Read Aac Tags **********************/
+let exifToolReadWorker = undefined;
+let tagReadDeferredPromises = new Map();
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        if (exifToolReadWorker === undefined) {
+            exifToolReadWorker = worker_service_1.getWorker('exifToolRead');
+            exifToolReadWorker === null || exifToolReadWorker === void 0 ? void 0 : exifToolReadWorker.on('message', (response) => {
+                tagReadDeferredPromises.get(response.filePath)(response.metadata);
+                tagReadDeferredPromises.delete(response.filePath);
+            });
+        }
         const METADATA = yield new Promise((resolve, reject) => {
-            deferredPromise.set(filePath, resolve);
-            worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
+            tagReadDeferredPromises.set(filePath, resolve);
+            exifToolReadWorker === null || exifToolReadWorker === void 0 ? void 0 : exifToolReadWorker.postMessage(filePath);
         });
         const STATS = fs_1.default.statSync(filePath);
         let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));

@@ -7,39 +7,52 @@ import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
 
+/********************** Write Aac Tags **********************/
+let exifToolWriteWorker: any = undefined
+let tagWriteDeferredPromise = undefined
+
 export function writeAacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
+
+		if (exifToolWriteWorker === undefined) {
+			exifToolWriteWorker = getWorker('exifToolRead')
+
+			exifToolWriteWorker?.on('message', (response: any) => {
+				console.log(response)
+			})
+		}
+
 		newTags = normalizeNewTags(newTags)
 
-		exiftool
-			.write(filePath, newTags, ['-overwrite_original'])
-			.then(() => {
-				resolve('')
-			})
-			.catch((err) => {
-				reject(err)
-			})
+		tagWriteDeferredPromise = resolve
+
+		exifToolWriteWorker?.postMessage({ filePath, newTags })
 	})
 }
 
-/********************** Get Aac Tags **********************/
-let worker = getWorker('exifTool')
+/********************** Read Aac Tags **********************/
+let exifToolReadWorker: any = undefined
 
-let deferredPromise: Map<string, any> = new Map<string, any>()
-
-worker?.on('message', (data) => {
-	deferredPromise.get(data.filePath)(data.metadata)
-	deferredPromise.delete(data.filePath)
-})
+let tagReadDeferredPromises: Map<string, any> = new Map<string, any>()
 
 export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
+		if (exifToolReadWorker === undefined) {
+			exifToolReadWorker = getWorker('exifToolRead')
+
+			exifToolReadWorker?.on('message', (response: any) => {
+				tagReadDeferredPromises.get(response.filePath)(response.metadata)
+				tagReadDeferredPromises.delete(response.filePath)
+			})
+		}
+
 		const METADATA: any = await new Promise((resolve, reject) => {
-			deferredPromise.set(filePath, resolve)
-			worker?.postMessage(filePath)
+			tagReadDeferredPromises.set(filePath, resolve)
+			exifToolReadWorker?.postMessage(filePath)
 		})
 
 		const STATS = fs.statSync(filePath)
+
 		let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate))
 
 		resolve({

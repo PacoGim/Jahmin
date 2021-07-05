@@ -61,7 +61,6 @@ function processQueue() {
         }
     }
 }
-// 343 Total Songs
 function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();

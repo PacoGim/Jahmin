@@ -28,9 +28,18 @@ function killAllWorkers() {
 }
 exports.killAllWorkers = killAllWorkers;
 function getWorker(name) {
-    let workersFound = workers.filter((worker) => worker.name === name).map((worker) => worker.worker)[0];
-    if (workersFound) {
-        return workersFound;
+    var _a;
+    let workerFound = (_a = workers.find((worker) => worker.name === name)) === null || _a === void 0 ? void 0 : _a.worker;
+    if (name === 'exifToolWrite') {
+        console.log(',,,,,,,,,,,,,,,');
+        console.log(name);
+        console.log(workers);
+        // workers.find((worker) => {
+        // 	console.log(worker)
+        // })
+    }
+    if (workerFound) {
+        return workerFound;
     }
     else {
         return undefined;
