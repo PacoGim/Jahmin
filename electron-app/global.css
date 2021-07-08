@@ -1,11 +1,6 @@
 @font-face {
-	font-family: SourceSans;
-	src: url('./fonts/SourceSans.woff2');
-}
-
-@font-face {
-	font-family: Golos;
-	src: url('./fonts/Golos UI_VF.woff2');
+	font-family: Roboto;
+	src: url('./fonts/Roboto.ttf');
 }
 
 * {
@@ -50,7 +45,8 @@ body {
 	color: #fff;
 	height: 100%;
 	display: block;
-	font-family: Golos;
+	font-family: Roboto;
+	/* font-family: Golos; */
 	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' 400;
 }
@@ -100,8 +96,7 @@ tag-edit select {
 
 	margin: 0.5rem 0;
 
-	font-family: SourceSans;
-	font-variation-settings: 'wght' 450;
+	font-family: inherit;
 
 	background-color: rgba(255, 255, 255, 0.15);
 	padding: 0.25rem 0.3rem;

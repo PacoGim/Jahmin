@@ -3,10 +3,19 @@ import { cpus } from 'os'
 import path from 'path'
 import fs from 'fs'
 
-const TOTAL_CPUS = cpus().length
 const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
 
-type WorkerNameType = 'ffmpeg' | 'songFilter' | 'tagEdit' | 'storage' | 'folderScan' | 'nodeExec' | 'musicMetadata' | 'exifTool'
+type WorkerNameType =
+	| 'ffmpeg'
+	| 'songFilter'
+	| 'tagEdit'
+	| 'storage'
+	| 'folderScan'
+	| 'nodeExec'
+	| 'musicMetadata'
+	| 'exifToolRead'
+	| 'exifToolWrite'
+	| 'nodeID3'
 
 type WorkerType = {
 	id: number
@@ -35,10 +44,10 @@ export function killAllWorkers() {
 }
 
 export function getWorker(name: WorkerNameType): Worker | undefined {
-	let workersFound = workers.filter((worker) => worker.name === name).map((worker) => worker.worker)[0]
+	let workerFound = workers.find((worker) => worker.name === name)?.worker
 
-	if (workersFound) {
-		return workersFound
+	if (workerFound) {
+		return workerFound
 	} else {
 		return undefined
 	}

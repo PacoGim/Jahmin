@@ -2,6 +2,8 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
+import trash from 'trash'
+import { generateId } from '../functions/generateId.fn'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
@@ -15,19 +17,48 @@ let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
 const mm = require('music-metadata')
 
+/********************** Write Flac Tags **********************/
+let ffmpegDeferredPromise: any = undefined
+let ffmpegDeferredPromiseId: string
+
+const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) => {
+	if (response.id === ffmpegDeferredPromiseId) {
+		await trash(response.filePath)
+		fs.renameSync(response.tempFileName, response.filePath)
+		ffmpegDeferredPromise(response.status)
+	}
+})
+
 export function writeFlacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
-		let ffmpegMetatagString = objectToFfmpegString(newTags)
-		let templFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
+		ffmpegDeferredPromise = resolve
+		ffmpegDeferredPromiseId = generateId()
 
-		exec(
-			`"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
-			(error, stdout, stderr) => {}
-		).on('close', () => {
-			resolve('Done')
-		})
+		let ffmpegString = objectToFfmpegString(newTags)
+		let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
+
+		let command = `"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`
+
+		ffmpegWorker?.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command })
 	})
 }
+
+/* export function writeFlacTags(filePath: string, newTags: any) {
+	return new Promise((resolve, reject) => {
+
+		resolve('')
+
+		// let ffmpegMetatagString = objectToFfmpegString(newTags)
+		// let templFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
+
+		// exec(
+		// 	`"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
+		// 	(error, stdout, stderr) => {}
+		// ).on('close', () => {
+		// 	resolve('Done')
+		// })
+	})
+} */
 
 /********************** Get Flac Tags **********************/
 let worker = getWorker('musicMetadata')
@@ -72,7 +103,6 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 		tags.Rating = Number(nativeTags?.RATING) || 0
 		tags.Title = nativeTags?.TITLE || ''
 		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
-
 
 		tags.BitDepth = METADATA.format.bitsPerSample
 		tags.BitRate = METADATA.format.bitrate / 1000

@@ -31,17 +31,7 @@ let isQueueRunning = false
 let workerExec = getWorker('nodeExec')
 let storageWorker = getWorker('storage')
 
-let taskQueue = new Proxy([] as any[], {
-	get(target, fn: 'push' | 'unshift' | 'length') {
-		if (fn === 'length' && target.length !== 0 && isQueueRunning === false) {
-			isQueueRunning = true
-			setTimeout(() => {
-				processQueue()
-			}, 1000)
-		}
-		return target[fn]
-	}
-})
+let taskQueue: any[] = []
 
 // Splits excecution based on the amount of cpus.
 function processQueue() {
@@ -172,6 +162,10 @@ function addToTaskQueue(path: string, type: string) {
 		type,
 		path
 	})
+
+	if (isQueueRunning === false) {
+		processQueue()
+	}
 }
 
 function isAudioFile(path: string) {

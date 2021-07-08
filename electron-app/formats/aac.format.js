@@ -11,40 +11,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAacTags = exports.writeAacTags = void 0;
-const exiftool_vendored_1 = require("exiftool-vendored");
-const exiftool = new exiftool_vendored_1.ExifTool({ taskTimeoutMillis: 5000 });
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
+/********************** Write Aac Tags **********************/
+let tagWriteDeferredPromise = undefined;
+let exifToolWriteWorker = (_a = worker_service_1.getWorker('exifToolWrite')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
+    tagWriteDeferredPromise(response);
+});
 function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
-        exiftool
-            .write(filePath, newTags, ['-overwrite_original'])
-            .then(() => {
-            resolve('');
-        })
-            .catch((err) => {
-            reject(err);
-        });
+        tagWriteDeferredPromise = resolve;
+        exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.postMessage({ filePath, newTags });
     });
 }
 exports.writeAacTags = writeAacTags;
-/********************** Get Aac Tags **********************/
-let worker = worker_service_1.getWorker('exifTool');
-let deferredPromise = new Map();
-worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
-    deferredPromise.get(data.filePath)(data.metadata);
-    deferredPromise.delete(data.filePath);
-});
+/********************** Read Aac Tags **********************/
+let exifToolReadWorker = undefined;
+let tagReadDeferredPromises = new Map();
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        if (exifToolReadWorker === undefined) {
+            exifToolReadWorker = worker_service_1.getWorker('exifToolRead');
+            exifToolReadWorker === null || exifToolReadWorker === void 0 ? void 0 : exifToolReadWorker.on('message', (response) => {
+                tagReadDeferredPromises.get(response.filePath)(response.metadata);
+                tagReadDeferredPromises.delete(response.filePath);
+            });
+        }
         const METADATA = yield new Promise((resolve, reject) => {
-            deferredPromise.set(filePath, resolve);
-            worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
+            tagReadDeferredPromises.set(filePath, resolve);
+            exifToolReadWorker === null || exifToolReadWorker === void 0 ? void 0 : exifToolReadWorker.postMessage(filePath);
         });
         const STATS = fs_1.default.statSync(filePath);
         let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));

@@ -11,58 +11,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOpusTags = exports.writeOpusTags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
+const generateId_fn_1 = require("../functions/generateId.fn");
 const worker_service_1 = require("../services/worker.service");
+const trash_1 = __importDefault(require("trash"));
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
-const ffmpegWorker = worker_service_1.getWorker('ffmpeg');
+/********************** Write Opus Tags **********************/
+let ffmpegDeferredPromise = undefined;
+let ffmpegDeferredPromiseId;
+const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
+    if (response.id === ffmpegDeferredPromiseId) {
+        yield trash_1.default(response.filePath);
+        fs_1.default.renameSync(response.tempFileName, response.filePath);
+        ffmpegDeferredPromise(response.status);
+    }
+}));
 function writeOpusTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
-        let ffmpegMetatagString = objectToFfmpegString(newTags);
-        let templFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
-        if (ffmpegWorker) {
-            ffmpegWorker.postMessage('TEST');
-        }
-        // console.log(ffmpegMetatagString,templFileName)
-        // ffmpegWorker.postMessage('Test')
-        /*
-        console.log(3,new Date().toTimeString())
-        console.time()
-
-        exec(
-            // `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
-            `ls`,
-            (error, stdout, stderr) => {
-                console.log('error: ',error)
-                console.log('stdout: ',stdout)
-                console.log('stderr: ',stderr)
-            }
-        ).on('close', () => {
-            console.log(4,new Date().toTimeString())
-            resolve('Done')
-        })*/
+        ffmpegDeferredPromise = resolve;
+        ffmpegDeferredPromiseId = generateId_fn_1.generateId();
+        let ffmpegString = objectToFfmpegString(newTags);
+        let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
+        let command = `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`;
+        ffmpegWorker === null || ffmpegWorker === void 0 ? void 0 : ffmpegWorker.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command });
     });
 }
 exports.writeOpusTags = writeOpusTags;
 /********************** Get Opus Tags **********************/
-let worker = worker_service_1.getWorker('musicMetadata');
-let deferredPromise = new Map();
-worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
-    if (deferredPromise.has(data.filePath)) {
-        deferredPromise.get(data.filePath)(data.metadata);
-        deferredPromise.delete(data.filePath);
+let mmWorker = worker_service_1.getWorker('musicMetadata');
+let mmDeferredPromises = new Map();
+mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.on('message', (data) => {
+    if (mmDeferredPromises.has(data.filePath)) {
+        mmDeferredPromises.get(data.filePath)(data.metadata);
+        mmDeferredPromises.delete(data.filePath);
     }
 });
 function getOpusTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             const METADATA = yield new Promise((resolve, reject) => {
-                deferredPromise.set(filePath, resolve);
-                worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
+                mmDeferredPromises.set(filePath, resolve);
+                mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.postMessage(filePath);
             });
             let tags = {
                 ID: string_hash_1.default(filePath),

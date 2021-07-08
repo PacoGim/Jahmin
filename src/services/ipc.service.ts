@@ -10,8 +10,8 @@ import { hash } from '../functions/hashString.fn'
 import { groupSongs } from '../functions/groupSong.fn'
 import { getMaxTaskQueueLength, getTaskQueueLength } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
-import { tagEdit } from './tagEdit.service'
-import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
+import { getTagEditProgress, tagEdit } from './tagEdit.service'
+// import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 import { getNewPromiseDbVersion, getStorageMap } from './storage.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
@@ -112,7 +112,7 @@ export function loadIPC() {
 		}
 	})
 
-	ipcMain.handle('get-tag-edit-progress', async () => {
-		return await getTagEditProgress()
+	ipcMain.handle('get-tag-edit-progress', () => {
+		return getTagEditProgress()
 	})
 }

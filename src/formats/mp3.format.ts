@@ -1,33 +1,27 @@
-import { exec } from 'child_process'
 import fs from 'fs'
-import path from 'path'
 
 import stringHash from 'string-hash'
 import { SongType } from '../types/song.type'
-import { TagType } from '../types/tag.type'
-import { TagModType } from '../types/tagMod.type'
 
-import NodeID3 from 'node-id3'
-import { TagModMp3Type } from '../types/tagModMp3.type'
 import { Mp3TagType } from '../types/mp3TagType'
 import { EditTag } from '../types/editTag.type'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { getWorker } from '../services/worker.service'
 
-const mm = require('music-metadata')
+/********************** Write Mp3 Tags **********************/
+let tagWriteDeferredPromise: any = undefined
+
+let nodeId3Worker: any = getWorker('nodeID3')?.on('message', (response: any) => {
+	tagWriteDeferredPromise(response)
+})
 
 export function writeMp3Tags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
 		newTags = normalizeNewTags(newTags)
 
-		NodeID3.write(newTags, filePath, (err) => {
-			if (err) {
-				console.log(err)
-				reject(err)
-			} else {
-				resolve('')
-			}
-		})
+		tagWriteDeferredPromise = resolve
+
+		nodeId3Worker?.postMessage({ filePath, newTags })
 	})
 }
 

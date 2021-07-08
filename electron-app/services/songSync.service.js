@@ -21,17 +21,7 @@ exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 let isQueueRunning = false;
 let workerExec = worker_service_1.getWorker('nodeExec');
 let storageWorker = worker_service_1.getWorker('storage');
-let taskQueue = new Proxy([], {
-    get(target, fn) {
-        if (fn === 'length' && target.length !== 0 && isQueueRunning === false) {
-            isQueueRunning = true;
-            setTimeout(() => {
-                processQueue();
-            }, 1000);
-        }
-        return target[fn];
-    }
-});
+let taskQueue = [];
 // Splits excecution based on the amount of cpus.
 function processQueue() {
     // Creates an array with the length from cpus amount and map it to true.
@@ -61,7 +51,6 @@ function processQueue() {
         }
     }
 }
-// 343 Total Songs
 function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();
@@ -146,6 +135,9 @@ function addToTaskQueue(path, type) {
         type,
         path
     });
+    if (isQueueRunning === false) {
+        processQueue();
+    }
 }
 function isAudioFile(path) {
     return EXTENSIONS.includes(path.split('.').pop() || '');

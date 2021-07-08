@@ -11,26 +11,55 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFlacTags = exports.writeFlacTags = void 0;
-const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
+const trash_1 = __importDefault(require("trash"));
+const generateId_fn_1 = require("../functions/generateId.fn");
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
+/********************** Write Flac Tags **********************/
+let ffmpegDeferredPromise = undefined;
+let ffmpegDeferredPromiseId;
+const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
+    if (response.id === ffmpegDeferredPromiseId) {
+        yield trash_1.default(response.filePath);
+        fs_1.default.renameSync(response.tempFileName, response.filePath);
+        ffmpegDeferredPromise(response.status);
+    }
+}));
 function writeFlacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
-        let ffmpegMetatagString = objectToFfmpegString(newTags);
-        let templFileName = filePath.replace(/(\.flac)$/, '.temp.flac');
-        child_process_1.exec(`"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`, (error, stdout, stderr) => { }).on('close', () => {
-            resolve('Done');
-        });
+        ffmpegDeferredPromise = resolve;
+        ffmpegDeferredPromiseId = generateId_fn_1.generateId();
+        let ffmpegString = objectToFfmpegString(newTags);
+        let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac');
+        let command = `"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`;
+        ffmpegWorker === null || ffmpegWorker === void 0 ? void 0 : ffmpegWorker.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command });
     });
 }
 exports.writeFlacTags = writeFlacTags;
+/* export function writeFlacTags(filePath: string, newTags: any) {
+    return new Promise((resolve, reject) => {
+
+        resolve('')
+
+        // let ffmpegMetatagString = objectToFfmpegString(newTags)
+        // let templFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
+
+        // exec(
+        // 	`"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
+        // 	(error, stdout, stderr) => {}
+        // ).on('close', () => {
+        // 	resolve('Done')
+        // })
+    })
+} */
 /********************** Get Flac Tags **********************/
 let worker = worker_service_1.getWorker('musicMetadata');
 let deferredPromise = new Map();

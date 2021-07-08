@@ -23,7 +23,7 @@ const groupSong_fn_1 = require("../functions/groupSong.fn");
 const songSync_service_1 = require("./songSync.service");
 const peaks_1 = require("./peaks");
 const tagEdit_service_1 = require("./tagEdit.service");
-const getTagEditProgress_fn_1 = require("../functions/getTagEditProgress.fn");
+// import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 const storage_service_1 = require("./storage.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
@@ -103,8 +103,8 @@ function loadIPC() {
             current: songSync_service_1.getTaskQueueLength()
         };
     }));
-    electron_1.ipcMain.handle('get-tag-edit-progress', () => __awaiter(this, void 0, void 0, function* () {
-        return yield getTagEditProgress_fn_1.getTagEditProgress();
-    }));
+    electron_1.ipcMain.handle('get-tag-edit-progress', () => {
+        return tagEdit_service_1.getTagEditProgress();
+    });
 }
 exports.loadIPC = loadIPC;

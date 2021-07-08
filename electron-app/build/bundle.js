@@ -1,5 +1,5 @@
 
-(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(window.document);
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 var app = (function () {
     'use strict';
 
@@ -50,11 +50,119 @@ var app = (function () {
         return ret;
     }
 
+    // Track which nodes are claimed during hydration. Unclaimed nodes can then be removed from the DOM
+    // at the end of hydration without touching the remaining nodes.
+    let is_hydrating = false;
+    function start_hydrating() {
+        is_hydrating = true;
+    }
+    function end_hydrating() {
+        is_hydrating = false;
+    }
+    function upper_bound(low, high, key, value) {
+        // Return first index of value larger than input value in the range [low, high)
+        while (low < high) {
+            const mid = low + ((high - low) >> 1);
+            if (key(mid) <= value) {
+                low = mid + 1;
+            }
+            else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+    function init_hydrate(target) {
+        if (target.hydrate_init)
+            return;
+        target.hydrate_init = true;
+        // We know that all children have claim_order values since the unclaimed have been detached
+        const children = target.childNodes;
+        /*
+        * Reorder claimed children optimally.
+        * We can reorder claimed children optimally by finding the longest subsequence of
+        * nodes that are already claimed in order and only moving the rest. The longest
+        * subsequence subsequence of nodes that are claimed in order can be found by
+        * computing the longest increasing subsequence of .claim_order values.
+        *
+        * This algorithm is optimal in generating the least amount of reorder operations
+        * possible.
+        *
+        * Proof:
+        * We know that, given a set of reordering operations, the nodes that do not move
+        * always form an increasing subsequence, since they do not move among each other
+        * meaning that they must be already ordered among each other. Thus, the maximal
+        * set of nodes that do not move form a longest increasing subsequence.
+        */
+        // Compute longest increasing subsequence
+        // m: subsequence length j => index k of smallest value that ends an increasing subsequence of length j
+        const m = new Int32Array(children.length + 1);
+        // Predecessor indices + 1
+        const p = new Int32Array(children.length);
+        m[0] = -1;
+        let longest = 0;
+        for (let i = 0; i < children.length; i++) {
+            const current = children[i].claim_order;
+            // Find the largest subsequence length such that it ends in a value less than our current value
+            // upper_bound returns first greater value, so we subtract one
+            const seqLen = upper_bound(1, longest + 1, idx => children[m[idx]].claim_order, current) - 1;
+            p[i] = m[seqLen] + 1;
+            const newLen = seqLen + 1;
+            // We can guarantee that current is the smallest value. Otherwise, we would have generated a longer sequence.
+            m[newLen] = i;
+            longest = Math.max(newLen, longest);
+        }
+        // The longest increasing subsequence of nodes (initially reversed)
+        const lis = [];
+        // The rest of the nodes, nodes that will be moved
+        const toMove = [];
+        let last = children.length - 1;
+        for (let cur = m[longest] + 1; cur != 0; cur = p[cur - 1]) {
+            lis.push(children[cur - 1]);
+            for (; last >= cur; last--) {
+                toMove.push(children[last]);
+            }
+            last--;
+        }
+        for (; last >= 0; last--) {
+            toMove.push(children[last]);
+        }
+        lis.reverse();
+        // We sort the nodes being moved to guarantee that their insertion order matches the claim order
+        toMove.sort((a, b) => a.claim_order - b.claim_order);
+        // Finally, we move the nodes
+        for (let i = 0, j = 0; i < toMove.length; i++) {
+            while (j < lis.length && toMove[i].claim_order >= lis[j].claim_order) {
+                j++;
+            }
+            const anchor = j < lis.length ? lis[j] : null;
+            target.insertBefore(toMove[i], anchor);
+        }
+    }
     function append(target, node) {
-        target.appendChild(node);
+        if (is_hydrating) {
+            init_hydrate(target);
+            if ((target.actual_end_child === undefined) || ((target.actual_end_child !== null) && (target.actual_end_child.parentElement !== target))) {
+                target.actual_end_child = target.firstChild;
+            }
+            if (node !== target.actual_end_child) {
+                target.insertBefore(node, target.actual_end_child);
+            }
+            else {
+                target.actual_end_child = node.nextSibling;
+            }
+        }
+        else if (node.parentNode !== target) {
+            target.appendChild(node);
+        }
     }
     function insert(target, node, anchor) {
-        target.insertBefore(node, anchor || null);
+        if (is_hydrating && !anchor) {
+            append(target, node);
+        }
+        else if (node.parentNode !== target || (anchor && node.nextSibling !== anchor)) {
+            target.insertBefore(node, anchor || null);
+        }
     }
     function detach(node) {
         node.parentNode.removeChild(node);
@@ -444,6 +552,7 @@ var app = (function () {
         $$.fragment = create_fragment ? create_fragment($$.ctx) : false;
         if (options.target) {
             if (options.hydrate) {
+                start_hydrating();
                 const nodes = children(options.target);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 $$.fragment && $$.fragment.l(nodes);
@@ -456,6 +565,7 @@ var app = (function () {
             if (options.intro)
                 transition_in(component.$$.fragment);
             mount_component(component, options.target, options.anchor, options.customElement);
+            end_hydrating();
             flush();
         }
         set_current_component(parent_component);
@@ -487,7 +597,7 @@ var app = (function () {
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.38.2' }, detail)));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.38.3' }, detail)));
     }
     function append_dev(target, node) {
         dispatch_dev('SvelteDOMInsert', { target, node });
@@ -568,7 +678,7 @@ var app = (function () {
         $inject_state() { }
     }
 
-    /* src/includes/Navigation.svelte generated by Svelte v3.38.2 */
+    /* src/includes/Navigation.svelte generated by Svelte v3.38.3 */
 
     const file$j = "src/includes/Navigation.svelte";
 
@@ -720,10 +830,13 @@ var app = (function () {
                 isGetTagEditProgressRunning = true;
                 ipcRenderer.invoke('get-tag-edit-progress').then((result) => {
                     isGetTagEditProgressRunning = false;
-                    console.log((100 / result.parameter.maxLength) * result.parameter.currentLength);
-                    setTimeout(() => {
-                        getTagEditProgressIPC();
-                    }, 2000);
+                    let percentage = (100 / (result === null || result === void 0 ? void 0 : result.maxLength)) * (result === null || result === void 0 ? void 0 : result.currentLength);
+                    console.log(percentage);
+                    if (percentage !== 0) {
+                        setTimeout(() => {
+                            getTagEditProgressIPC();
+                        }, 2000);
+                    }
                     resolve(result);
                 });
             }
@@ -892,7 +1005,7 @@ var app = (function () {
         getAlbumColors(albumId);
     }
 
-    /* src/components/CoverArt.svelte generated by Svelte v3.38.2 */
+    /* src/components/CoverArt.svelte generated by Svelte v3.38.3 */
     const file$i = "src/components/CoverArt.svelte";
 
     // (59:1) {#if coverType === undefined}
@@ -1319,7 +1432,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/Album.svelte generated by Svelte v3.38.2 */
+    /* src/components/Album.svelte generated by Svelte v3.38.3 */
     const file$h = "src/components/Album.svelte";
 
     // (58:2) {:else}
@@ -1660,7 +1773,7 @@ var app = (function () {
 
     let albumArtSizeConfig = writable(localStorage.getItem('AlbumArtSize'));
 
-    /* src/includes/ArtGrid.svelte generated by Svelte v3.38.2 */
+    /* src/includes/ArtGrid.svelte generated by Svelte v3.38.3 */
 
     const file$g = "src/includes/ArtGrid.svelte";
 
@@ -1878,7 +1991,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/Grouping.svelte generated by Svelte v3.38.2 */
+    /* src/includes/Grouping.svelte generated by Svelte v3.38.3 */
 
     const file$f = "src/includes/Grouping.svelte";
 
@@ -2342,7 +2455,7 @@ var app = (function () {
         // })
     }
 
-    /* src/components/NextButton.svelte generated by Svelte v3.38.2 */
+    /* src/components/NextButton.svelte generated by Svelte v3.38.3 */
     const file$e = "src/components/NextButton.svelte";
 
     function create_fragment$g(ctx) {
@@ -2437,7 +2550,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/PreviousButton.svelte generated by Svelte v3.38.2 */
+    /* src/components/PreviousButton.svelte generated by Svelte v3.38.3 */
     const file$d = "src/components/PreviousButton.svelte";
 
     function create_fragment$f(ctx) {
@@ -2591,7 +2704,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/PlayButton.svelte generated by Svelte v3.38.2 */
+    /* src/components/PlayButton.svelte generated by Svelte v3.38.3 */
     const file$c = "src/components/PlayButton.svelte";
 
     function create_fragment$e(ctx) {
@@ -2732,7 +2845,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/PlayerProgress.svelte generated by Svelte v3.38.2 */
+    /* src/components/PlayerProgress.svelte generated by Svelte v3.38.3 */
     const file$b = "src/components/PlayerProgress.svelte";
 
     function create_fragment$d(ctx) {
@@ -2957,7 +3070,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/PlayerVolumeBar.svelte generated by Svelte v3.38.2 */
+    /* src/components/PlayerVolumeBar.svelte generated by Svelte v3.38.3 */
     const file$a = "src/components/PlayerVolumeBar.svelte";
 
     function create_fragment$c(ctx) {
@@ -3280,7 +3393,7 @@ var app = (function () {
         }, waveformTransitionDuration);
     }
 
-    /* src/includes/Player.svelte generated by Svelte v3.38.2 */
+    /* src/includes/Player.svelte generated by Svelte v3.38.3 */
 
     const { console: console_1$3 } = globals;
     const file$9 = "src/includes/Player.svelte";
@@ -3812,7 +3925,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/Star.svelte generated by Svelte v3.38.2 */
+    /* src/components/Star.svelte generated by Svelte v3.38.3 */
     const file$8 = "src/components/Star.svelte";
 
     function create_fragment$a(ctx) {
@@ -4118,7 +4231,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/SongListItem.svelte generated by Svelte v3.38.2 */
+    /* src/components/SongListItem.svelte generated by Svelte v3.38.3 */
 
     const { console: console_1$2 } = globals;
     const file$7 = "src/components/SongListItem.svelte";
@@ -4383,7 +4496,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/SongList.svelte generated by Svelte v3.38.2 */
+    /* src/includes/SongList.svelte generated by Svelte v3.38.3 */
 
     const file$6 = "src/includes/SongList.svelte";
 
@@ -4973,7 +5086,7 @@ var app = (function () {
       return id
     };
 
-    /* src/components/TagEdit-Separator.svelte generated by Svelte v3.38.2 */
+    /* src/components/TagEdit-Separator.svelte generated by Svelte v3.38.3 */
 
     const file$5 = "src/components/TagEdit-Separator.svelte";
 
@@ -5037,7 +5150,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/TagEdit-Editor.svelte generated by Svelte v3.38.2 */
+    /* src/components/TagEdit-Editor.svelte generated by Svelte v3.38.3 */
     const file$4 = "src/components/TagEdit-Editor.svelte";
 
     // (38:2) {#if showUndo}
@@ -5584,7 +5697,7 @@ var app = (function () {
         return Object.keys(object).length === 0;
     }
 
-    /* src/includes/TagEdit.svelte generated by Svelte v3.38.2 */
+    /* src/includes/TagEdit.svelte generated by Svelte v3.38.3 */
 
     const { console: console_1$1 } = globals;
 
@@ -6564,7 +6677,7 @@ var app = (function () {
     	}
     }
 
-    /* src/controllers/ConfigController.svelte generated by Svelte v3.38.2 */
+    /* src/controllers/ConfigController.svelte generated by Svelte v3.38.3 */
 
     function create_fragment$4(ctx) {
     	const block = {
@@ -6657,7 +6770,7 @@ var app = (function () {
     	}
     }
 
-    /* src/controllers/PlayerController.svelte generated by Svelte v3.38.2 */
+    /* src/controllers/PlayerController.svelte generated by Svelte v3.38.3 */
 
     function create_fragment$3(ctx) {
     	const block = {
@@ -6871,7 +6984,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/BackgroundArt.svelte generated by Svelte v3.38.2 */
+    /* src/includes/BackgroundArt.svelte generated by Svelte v3.38.3 */
 
     const file$2 = "src/includes/BackgroundArt.svelte";
 
@@ -6938,7 +7051,7 @@ var app = (function () {
     	}
     }
 
-    /* src/includes/SongListBackground.svelte generated by Svelte v3.38.2 */
+    /* src/includes/SongListBackground.svelte generated by Svelte v3.38.3 */
     const file$1 = "src/includes/SongListBackground.svelte";
 
     function create_fragment$1(ctx) {
@@ -7072,7 +7185,7 @@ var app = (function () {
     	}
     }
 
-    /* src/App.svelte generated by Svelte v3.38.2 */
+    /* src/App.svelte generated by Svelte v3.38.3 */
 
     const { console: console_1, document: document_1 } = globals;
     const file = "src/App.svelte";

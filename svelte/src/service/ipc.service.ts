@@ -13,11 +13,16 @@ export function getTagEditProgressIPC(): Promise<string[]> {
 
 			ipcRenderer.invoke('get-tag-edit-progress').then((result) => {
 				isGetTagEditProgressRunning = false
-				console.log((100 / result.parameter.maxLength) * result.parameter.currentLength)
+				let percentage = (100 / result?.maxLength) * result?.currentLength
 
-				setTimeout(() => {
-					getTagEditProgressIPC()
-				}, 2000)
+				console.log(percentage)
+
+				if (percentage !== 0) {
+					setTimeout(() => {
+						getTagEditProgressIPC()
+					}, 2000)
+				}
+
 				resolve(result)
 			})
 		}

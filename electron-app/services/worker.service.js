@@ -5,10 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.killWorker = exports.getWorker = exports.killAllWorkers = exports.initWorkers = void 0;
 const worker_threads_1 = require("worker_threads");
-const os_1 = require("os");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const TOTAL_CPUS = os_1.cpus().length;
 const WORKER_FOLDER_PATH = path_1.default.join(path_1.default.resolve(), 'electron-app/workers');
 let workers = [];
 function initWorkers() {
@@ -28,9 +26,10 @@ function killAllWorkers() {
 }
 exports.killAllWorkers = killAllWorkers;
 function getWorker(name) {
-    let workersFound = workers.filter((worker) => worker.name === name).map((worker) => worker.worker)[0];
-    if (workersFound) {
-        return workersFound;
+    var _a;
+    let workerFound = (_a = workers.find((worker) => worker.name === name)) === null || _a === void 0 ? void 0 : _a.worker;
+    if (workerFound) {
+        return workerFound;
     }
     else {
         return undefined;

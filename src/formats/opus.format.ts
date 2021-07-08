@@ -2,65 +2,60 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
+import { generateId } from '../functions/generateId.fn'
 import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { OpusTagType } from '../types/opus.type'
 import { SongType } from '../types/song.type'
+import trash from 'trash'
+
 let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
 const mm = require('music-metadata')
 
-const ffmpegWorker = getWorker('ffmpeg')
+/********************** Write Opus Tags **********************/
+let ffmpegDeferredPromise: any = undefined
+let ffmpegDeferredPromiseId: string
+
+const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) => {
+	if (response.id === ffmpegDeferredPromiseId) {
+		await trash(response.filePath)
+		fs.renameSync(response.tempFileName, response.filePath)
+		ffmpegDeferredPromise(response.status)
+	}
+})
 
 export function writeOpusTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
-		let ffmpegMetatagString = objectToFfmpegString(newTags)
-		let templFileName = filePath.replace(/(\.opus)$/, '.temp.opus')
+		ffmpegDeferredPromise = resolve
+		ffmpegDeferredPromiseId = generateId()
 
-		if (ffmpegWorker) {
-			ffmpegWorker.postMessage('TEST')
-		}
+		let ffmpegString = objectToFfmpegString(newTags)
+		let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus')
 
-		// console.log(ffmpegMetatagString,templFileName)
+		let command = `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`
 
-		// ffmpegWorker.postMessage('Test')
-
-		/*
-		console.log(3,new Date().toTimeString())
-		console.time()
-
-		exec(
-			// `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
-			`ls`,
-			(error, stdout, stderr) => {
-				console.log('error: ',error)
-				console.log('stdout: ',stdout)
-				console.log('stderr: ',stderr)
-			}
-		).on('close', () => {
-			console.log(4,new Date().toTimeString())
-			resolve('Done')
-		})*/
+		ffmpegWorker?.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command })
 	})
 }
 
 /********************** Get Opus Tags **********************/
-let worker = getWorker('musicMetadata')
+let mmWorker = getWorker('musicMetadata')
 
-let deferredPromise: Map<string, any> = new Map<string, any>()
+let mmDeferredPromises: Map<string, any> = new Map<string, any>()
 
-worker?.on('message', (data) => {
-	if (deferredPromise.has(data.filePath)) {
-		deferredPromise.get(data.filePath)(data.metadata)
-		deferredPromise.delete(data.filePath)
+mmWorker?.on('message', (data) => {
+	if (mmDeferredPromises.has(data.filePath)) {
+		mmDeferredPromises.get(data.filePath)(data.metadata)
+		mmDeferredPromises.delete(data.filePath)
 	}
 })
 
 export async function getOpusTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
 		const METADATA: any = await new Promise((resolve, reject) => {
-			deferredPromise.set(filePath, resolve)
-			worker?.postMessage(filePath)
+			mmDeferredPromises.set(filePath, resolve)
+			mmWorker?.postMessage(filePath)
 		})
 
 		let tags: SongType = {

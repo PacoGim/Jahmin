@@ -11,26 +11,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMp3Tags = exports.writeMp3Tags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
-const node_id3_1 = __importDefault(require("node-id3"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
-const mm = require('music-metadata');
+/********************** Write Mp3 Tags **********************/
+let tagWriteDeferredPromise = undefined;
+let nodeId3Worker = (_a = worker_service_1.getWorker('nodeID3')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
+    tagWriteDeferredPromise(response);
+});
 function writeMp3Tags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
-        node_id3_1.default.write(newTags, filePath, (err) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-            }
-            else {
-                resolve('');
-            }
-        });
+        tagWriteDeferredPromise = resolve;
+        nodeId3Worker === null || nodeId3Worker === void 0 ? void 0 : nodeId3Worker.postMessage({ filePath, newTags });
     });
 }
 exports.writeMp3Tags = writeMp3Tags;
