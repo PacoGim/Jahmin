@@ -11,20 +11,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAacTags = exports.writeAacTags = void 0;
+const exiftool_vendored_1 = require("exiftool-vendored");
+const exiftool = new exiftool_vendored_1.ExifTool({ taskTimeoutMillis: 5000 });
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 /********************** Write Aac Tags **********************/
+let exifToolWriteWorker = undefined;
 let tagWriteDeferredPromise = undefined;
-let exifToolWriteWorker = (_a = worker_service_1.getWorker('exifToolWrite')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
-    tagWriteDeferredPromise(response);
-});
 function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
+        if (exifToolWriteWorker === undefined) {
+            exifToolWriteWorker = worker_service_1.getWorker('exifToolRead');
+            exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.on('message', (response) => {
+                console.log(response);
+            });
+        }
         newTags = normalizeNewTags(newTags);
         tagWriteDeferredPromise = resolve;
         exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.postMessage({ filePath, newTags });

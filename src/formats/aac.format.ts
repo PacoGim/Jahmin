@@ -1,3 +1,5 @@
+import { ExifTool } from 'exiftool-vendored'
+const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import fs from 'fs'
 import stringHash from 'string-hash'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
@@ -6,14 +8,20 @@ import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
 
 /********************** Write Aac Tags **********************/
-let tagWriteDeferredPromise: any = undefined
-
-let exifToolWriteWorker: any = getWorker('exifToolWrite')?.on('message', (response: any) => {
-	tagWriteDeferredPromise(response)
-})
+let exifToolWriteWorker: any = undefined
+let tagWriteDeferredPromise = undefined
 
 export function writeAacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
+
+		if (exifToolWriteWorker === undefined) {
+			exifToolWriteWorker = getWorker('exifToolRead')
+
+			exifToolWriteWorker?.on('message', (response: any) => {
+				console.log(response)
+			})
+		}
+
 		newTags = normalizeNewTags(newTags)
 
 		tagWriteDeferredPromise = resolve
