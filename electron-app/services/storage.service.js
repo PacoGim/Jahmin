@@ -18,17 +18,52 @@ let dbVersionResolve = undefined;
 let watcher;
 let worker = worker_service_1.getWorker('storage');
 worker === null || worker === void 0 ? void 0 : worker.on('message', (message) => {
-    if (message.type === 'Add') {
-        addData(message.data);
+    if (message.type === 'insert') {
+        insertData(message.data);
     }
-    else if (message.type === 'Update') {
+    else if (message.type === 'update') {
         updateData(message.data);
     }
+    else if (message.type === 'delete') {
+        deleteData(message.data);
+    }
 });
-function updateData(songData) {
-    // TODO Logic
+function deleteData(songPath) {
+    let rootDir = songPath.split('/').slice(0, -1).join('/');
+    let rootId = hashString_fn_1.hash(rootDir, 'text');
+    let songId = hashString_fn_1.hash(songPath, 'number');
+    let mappedData = storageMap.get(rootId);
+    let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
+    if (mappedData && songs) {
+        songs = songs.filter((song) => song.ID !== songId);
+        // If all songs removed from drive, then, delete the album and all data from map.
+        if (songs.length === 0) {
+            storageMap.delete(rootDir);
+        }
+        else {
+            mappedData.Songs = songs;
+            storageMap.set(rootDir, mappedData);
+        }
+        if (dbVersionResolve !== undefined)
+            dbVersionResolve(new Date().getTime());
+    }
 }
-function addData(songData) {
+function updateData(songData) {
+    let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
+    let rootId = hashString_fn_1.hash(rootDir, 'text');
+    let songId = hashString_fn_1.hash(songData.SourceFile, 'number');
+    let mappedData = storageMap.get(rootId);
+    let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
+    if (mappedData && songs) {
+        let songIndex = songs.findIndex((song) => song.ID === songId);
+        songs[songIndex] = songData;
+        mappedData.Songs = songs;
+        storageMap.set(rootDir, mappedData);
+        if (dbVersionResolve !== undefined)
+            dbVersionResolve(new Date().getTime());
+    }
+}
+function insertData(songData) {
     let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
     let rootId = hashString_fn_1.hash(rootDir, 'text');
     let mappedData = storageMap.get(rootId);

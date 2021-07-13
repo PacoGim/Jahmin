@@ -19,7 +19,6 @@ function getRootDirFolderWatcher() {
 exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 // export let taskQueue: any[] = []
 let isQueueRunning = false;
-let workerExec = worker_service_1.getWorker('nodeExec');
 let storageWorker = worker_service_1.getWorker('storage');
 let taskQueue = [];
 // Splits excecution based on the amount of cpus.
@@ -28,18 +27,27 @@ function processQueue() {
     let processesRunning = Array.from(Array(TOTAL_CPUS >= 3 ? 2 : 1).keys()).map(() => true);
     // For each process, get a task.
     processesRunning.forEach((process, processIndex) => getTask(processIndex));
-    // Shifts a taks from array and gets the tags.
+    // Shifts a task from array and gets the tags.
     function getTask(processIndex) {
         let task = taskQueue.shift();
-        if (task) {
+        // This part goes to Storage Worker TS
+        if (task !== undefined && ['insert', 'update'].includes(task.type)) {
             getTags(task).then((tags) => {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
-                    type: 'Add',
+                    type: task.type,
                     data: tags,
                     appDataPath: __1.appDataPath()
                 });
                 getTask(processIndex);
             });
+        }
+        else if (task !== undefined && ['delete'].includes(task.type)) {
+            storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+                type: task.type,
+                data: task.path,
+                appDataPath: __1.appDataPath()
+            });
+            getTask(processIndex);
         }
         else {
             // If no task left then sets its own process as false.
@@ -89,38 +97,35 @@ function watchFolders(rootDirectories) {
     watcher.on('add', (path) => {
         // For every file found, check if is a available audio format and add to list.
         if (isAudioFile(path)) {
-            // Uses unshift instead of push to add to the beginning of the array since chokidar brings folders in reverse order.
             songsFound.push(path);
         }
     });
     watcher.on('change', (path) => {
-        // TODO Storage fn
-        // console.log('Changed: ',path)
+        if (isAudioFile(path)) {
+            addToTaskQueue(path, 'update');
+        }
     });
     watcher.on('unlink', (path) => {
-        // TODO Storage fn
+        if (isAudioFile(path)) {
+            addToTaskQueue(path, 'delete');
+        }
     });
     // watcher.on('all', (event, path) => {
     // 	console.log(event, path)
     // })
     watcher.on('ready', () => {
         // When watcher is done getting files, any new files added afterwards are detected here.
-        watcher.on('add', (path) => addToTaskQueue(path, 'add'));
-        filterNewSongs(); /*.then(() => {
-            addNewSongs()
-        })*/
-        // startWorkers()
-        console.log('ready');
+        watcher.on('add', (path) => addToTaskQueue(path, 'insert'));
+        filterNewSongs();
     });
 }
 exports.watchFolders = watchFolders;
-let nodeExecWorker = worker_service_1.getWorker('nodeExec');
 function filterNewSongs() {
     return new Promise((resolve, reject) => {
         let worker = worker_service_1.getWorker('songFilter');
         let collection = storage_service_1.getStorageMapToArray().map((song) => song.SourceFile);
         worker.on('message', (data) => {
-            data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'add')));
+            data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
             worker_service_1.killWorker('songFilter');
             resolve(null);
         });

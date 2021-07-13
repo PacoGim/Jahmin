@@ -14,7 +14,7 @@ let isWorkQueueuIterating = false;
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', ({ type, data, appDataPath }) => {
     if (appDataPath && storagePath === undefined)
         storagePath = path_1.default.join(appDataPath, 'storage');
-    if (type === 'Add' || type === 'Delete' || type === 'Update') {
+    if (type === 'insert' || type === 'delete' || type === 'update') {
         workQueue.push({
             type,
             data
@@ -28,40 +28,46 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
 function iterateWorkQueue() {
     let work = workQueue.shift();
     if (work) {
-        if (work.type === 'Add') {
-            add(work.data).then(() => {
-                // Tell to storage service to add to song map
+        if (['insert', 'update'].includes(work.type)) {
+            // console.log(work)
+            insert(work.data).then(() => {
+                // Tell to storage service to insert to song map
                 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
                     type: work === null || work === void 0 ? void 0 : work.type,
                     data: work === null || work === void 0 ? void 0 : work.data
                 });
                 iterateWorkQueue();
             });
-            // process.nextTick(() => iterateWorkQueue())
         }
-        else if (work.type === 'Update') {
-            update(work.data).then(() => {
-                // Tell to storage service to update son map
+        else if (['delete'].includes(work.type)) {
+            deleteData(work.data).then(() => {
                 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
                     type: work === null || work === void 0 ? void 0 : work.type,
                     data: work === null || work === void 0 ? void 0 : work.data
                 });
                 iterateWorkQueue();
             });
-            // process.nextTick(() => iterateWorkQueue())
         }
     }
     else {
         isWorkQueueuIterating = false;
     }
 }
-function update(data) {
+let storesMap = new Map();
+function deleteData(path) {
     return new Promise((resolve, reject) => {
-        // TODO Update Logic
+        let rootFolder = path === null || path === void 0 ? void 0 : path.split('/').slice(0, -1).join('/');
+        let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
+        let songId = String(hashString_fn_1.hash(path, 'number'));
+        let store = storesMap.get(rootFolderId);
+        if (store) {
+            store.delete(songId);
+        }
+        updateStorageVersion();
+        resolve('');
     });
 }
-let storesMap = new Map();
-function add(data) {
+function insert(data) {
     return new Promise((resolve, reject) => {
         var _a;
         let rootFolder = (_a = data.SourceFile) === null || _a === void 0 ? void 0 : _a.split('/').slice(0, -1).join('/');

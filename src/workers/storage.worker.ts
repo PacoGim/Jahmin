@@ -13,7 +13,7 @@ let workQueue: WorkType[] = []
 let isWorkQueueuIterating = false
 
 type WorkType = {
-	type: 'Add' | 'Delete' | 'Update' | 'Read'
+	type: 'insert' | 'delete' | 'update' | 'read'
 	data: any
 	appDataPath?: 'string'
 }
@@ -21,7 +21,7 @@ type WorkType = {
 parentPort?.on('message', ({ type, data, appDataPath }: WorkType) => {
 	if (appDataPath && storagePath === undefined) storagePath = path.join(appDataPath, 'storage')
 
-	if (type === 'Add' || type === 'Delete' || type === 'Update') {
+	if (type === 'insert' || type === 'delete' || type === 'update') {
 		workQueue.push({
 			type,
 			data
@@ -38,9 +38,10 @@ function iterateWorkQueue() {
 	let work = workQueue.shift()
 
 	if (work) {
-		if (work.type === 'Add') {
-			add(work.data).then(() => {
-				// Tell to storage service to add to song map
+		if (['insert', 'update'].includes(work.type)) {
+			// console.log(work)
+			insert(work.data).then(() => {
+				// Tell to storage service to insert to song map
 				parentPort?.postMessage({
 					type: work?.type,
 					data: work?.data
@@ -48,11 +49,8 @@ function iterateWorkQueue() {
 
 				iterateWorkQueue()
 			})
-
-			// process.nextTick(() => iterateWorkQueue())
-		} else if (work.type === 'Update') {
-			update(work.data).then(() => {
-				// Tell to storage service to update son map
+		} else if (['delete'].includes(work.type)) {
+			deleteData(work.data).then(() => {
 				parentPort?.postMessage({
 					type: work?.type,
 					data: work?.data
@@ -60,23 +58,32 @@ function iterateWorkQueue() {
 
 				iterateWorkQueue()
 			})
-
-			// process.nextTick(() => iterateWorkQueue())
 		}
 	} else {
 		isWorkQueueuIterating = false
 	}
 }
 
-function update(data: TagType) {
+let storesMap = new Map<String, Store<Record<string, unknown>>>()
+
+function deleteData(path: string) {
 	return new Promise((resolve, reject) => {
-		// TODO Update Logic
+		let rootFolder = path?.split('/').slice(0, -1).join('/')
+		let rootFolderId = hash(rootFolder!, 'text') as string
+		let songId = String(hash(path, 'number'))
+
+		let store = storesMap.get(rootFolderId)
+
+		if (store) {
+			store.delete(songId)
+		}
+
+		updateStorageVersion()
+		resolve('')
 	})
 }
 
-let storesMap = new Map<String, Store<Record<string, unknown>>>()
-
-function add(data: TagType) {
+function insert(data: TagType) {
 	return new Promise((resolve, reject) => {
 		let rootFolder = data.SourceFile?.split('/').slice(0, -1).join('/')
 		let rootFolderId = hash(rootFolder!, 'text') as string

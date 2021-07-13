@@ -49,8 +49,6 @@ async function processQueue() {
 			break
 	}
 
-	console.log(result)
-
 	processQueue()
 }
 

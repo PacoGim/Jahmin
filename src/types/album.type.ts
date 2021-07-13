@@ -5,5 +5,5 @@ export type AlbumType = {
 	ID: string
 	RootDir: string
 	Name: string
-	Songs: [SongType]
+	Songs: SongType[]
 }

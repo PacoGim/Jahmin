@@ -1,12 +1,9 @@
 import { FSWatcher, watch } from 'chokidar'
 import { cpus } from 'os'
-// import { createData, deleteData, getCollection } from './loki.service.bak'
 
 import { Worker } from 'worker_threads'
 import { getWorker, killWorker } from './worker.service'
-import { OptionsType } from '../types/options.type'
 
-import stringHash from 'string-hash'
 import { appDataPath } from '..'
 import { getStorageMapToArray } from './storage.service'
 import { getOpusTags } from '../formats/opus.format'
@@ -28,7 +25,6 @@ export function getRootDirFolderWatcher() {
 
 let isQueueRunning = false
 
-let workerExec = getWorker('nodeExec')
 let storageWorker = getWorker('storage')
 
 let taskQueue: any[] = []
@@ -41,19 +37,27 @@ function processQueue() {
 	// For each process, get a task.
 	processesRunning.forEach((process, processIndex) => getTask(processIndex))
 
-	// Shifts a taks from array and gets the tags.
+	// Shifts a task from array and gets the tags.
 	function getTask(processIndex: number) {
 		let task = taskQueue.shift()
 
-		if (task) {
+		// This part goes to Storage Worker TS
+		if (task !== undefined && ['insert', 'update'].includes(task.type)) {
 			getTags(task).then((tags) => {
 				storageWorker?.postMessage({
-					type: 'Add',
+					type: task.type,
 					data: tags,
 					appDataPath: appDataPath()
 				})
 				getTask(processIndex)
 			})
+		} else if (task !== undefined && ['delete'].includes(task.type)) {
+			storageWorker?.postMessage({
+				type: task.type,
+				data: task.path,
+				appDataPath: appDataPath()
+			})
+			getTask(processIndex)
 		} else {
 			// If no task left then sets its own process as false.
 			processesRunning[processIndex] = false
@@ -105,18 +109,20 @@ export function watchFolders(rootDirectories: string[]) {
 	watcher.on('add', (path) => {
 		// For every file found, check if is a available audio format and add to list.
 		if (isAudioFile(path)) {
-			// Uses unshift instead of push to add to the beginning of the array since chokidar brings folders in reverse order.
 			songsFound.push(path)
 		}
 	})
 
 	watcher.on('change', (path) => {
-		// TODO Storage fn
-		// console.log('Changed: ',path)
+		if (isAudioFile(path)) {
+			addToTaskQueue(path, 'update')
+		}
 	})
 
 	watcher.on('unlink', (path) => {
-		// TODO Storage fn
+		if (isAudioFile(path)) {
+			addToTaskQueue(path, 'delete')
+		}
 	})
 
 	// watcher.on('all', (event, path) => {
@@ -125,19 +131,11 @@ export function watchFolders(rootDirectories: string[]) {
 
 	watcher.on('ready', () => {
 		// When watcher is done getting files, any new files added afterwards are detected here.
-		watcher.on('add', (path) => addToTaskQueue(path, 'add'))
+		watcher.on('add', (path) => addToTaskQueue(path, 'insert'))
 
-		filterNewSongs() /*.then(() => {
-			addNewSongs()
-		})*/
-
-		// startWorkers()
-
-		console.log('ready')
+		filterNewSongs()
 	})
 }
-
-let nodeExecWorker = getWorker('nodeExec')
 
 function filterNewSongs() {
 	return new Promise((resolve, reject) => {
@@ -145,7 +143,7 @@ function filterNewSongs() {
 		let collection = getStorageMapToArray().map((song) => song.SourceFile)
 
 		worker.on('message', (data: string[]) => {
-			data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'add')))
+			data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
 			killWorker('songFilter')
 			resolve(null)
 		})

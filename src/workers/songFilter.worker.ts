@@ -16,7 +16,7 @@ parentPort?.on('message', (data: FilterSongData) => {
 	})
 
 	// Sorts all songs to start adding them in alphabetical order.
-	newSongs = newSongs.sort((a, b) => a.localeCompare(b))
+	newSongs = newSongs.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
 	parentPort?.postMessage(newSongs)
 })

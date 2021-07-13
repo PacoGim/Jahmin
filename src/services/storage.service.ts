@@ -24,18 +24,59 @@ let watcher: chokidar.FSWatcher
 let worker = getWorker('storage')
 
 worker?.on('message', (message) => {
-	if (message.type === 'Add') {
-		addData(message.data)
-	} else if (message.type === 'Update') {
+	if (message.type === 'insert') {
+		insertData(message.data)
+	} else if (message.type === 'update') {
 		updateData(message.data)
+	} else if (message.type === 'delete') {
+		deleteData(message.data)
 	}
 })
 
-function updateData(songData: SongType) {
-	// TODO Logic
+function deleteData(songPath: string) {
+	let rootDir = songPath.split('/').slice(0, -1).join('/')
+	let rootId = hash(rootDir, 'text') as string
+	let songId = hash(songPath, 'number')
+
+	let mappedData = storageMap.get(rootId)
+
+	let songs = mappedData?.Songs
+
+	if (mappedData && songs) {
+		songs = songs.filter((song) => song.ID !== songId)
+
+		// If all songs removed from drive, then, delete the album and all data from map.
+		if (songs.length === 0) {
+			storageMap.delete(rootDir)
+		} else {
+			mappedData.Songs = songs
+			storageMap.set(rootDir, mappedData)
+		}
+
+		if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+	}
 }
 
-function addData(songData: SongType) {
+function updateData(songData: SongType) {
+	let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/')
+	let rootId = hash(rootDir, 'text') as string
+	let songId = hash(songData.SourceFile, 'number')
+
+	let mappedData = storageMap.get(rootId)
+
+	let songs = mappedData?.Songs
+
+	if (mappedData && songs) {
+		let songIndex = songs.findIndex((song) => song.ID === songId)
+		songs[songIndex] = songData
+		mappedData.Songs = songs
+		storageMap.set(rootDir, mappedData)
+
+		if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+	}
+}
+
+function insertData(songData: SongType) {
 	let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/')
 	let rootId = hash(rootDir, 'text') as string
 
