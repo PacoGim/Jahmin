@@ -978,7 +978,7 @@ var app = (function () {
             dbVersion.set(result);
             setTimeout(() => {
                 syncDbVersionIPC();
-            }, 500);
+            }, 2000);
         });
     }
 
@@ -1442,7 +1442,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			album_artist = element("album-artist");
-    			set_custom_element_data(album_artist, "class", "svelte-oc8a79");
+    			set_custom_element_data(album_artist, "class", "svelte-kmxgr9");
     			add_location(album_artist, file$h, 58, 3, 1896);
     		},
     		m: function mount(target, anchor) {
@@ -1475,7 +1475,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-oc8a79");
+    			set_custom_element_data(album_artist, "class", "svelte-kmxgr9");
     			add_location(album_artist, file$h, 56, 3, 1824);
     		},
     		m: function mount(target, anchor) {
@@ -1511,7 +1511,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-oc8a79");
+    			set_custom_element_data(album_artist, "class", "svelte-kmxgr9");
     			add_location(album_artist, file$h, 54, 3, 1714);
     		},
     		m: function mount(target, anchor) {
@@ -1581,17 +1581,17 @@ var app = (function () {
     			t2 = text(t2_value);
     			t3 = space();
     			if_block.c();
-    			set_custom_element_data(overlay_gradient, "class", "svelte-oc8a79");
+    			set_custom_element_data(overlay_gradient, "class", "svelte-kmxgr9");
     			add_location(overlay_gradient, file$h, 48, 1, 1585);
-    			set_custom_element_data(album_name, "class", "svelte-oc8a79");
+    			set_custom_element_data(album_name, "class", "svelte-kmxgr9");
     			add_location(album_name, file$h, 51, 2, 1626);
-    			set_custom_element_data(album_details, "class", "svelte-oc8a79");
+    			set_custom_element_data(album_details, "class", "svelte-kmxgr9");
     			add_location(album_details, file$h, 50, 1, 1608);
     			attr_dev(album_1, "id", album_1_id_value = /*album*/ ctx[0].ID);
 
     			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbumId*/ ctx[1] === /*album*/ ctx[0]?.ID
     			? "selected"
-    			: "") + " svelte-oc8a79"));
+    			: "") + " svelte-kmxgr9"));
 
     			add_location(album_1, file$h, 45, 0, 1447);
     		},
@@ -1636,7 +1636,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$selectedAlbumId, album*/ 3 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty(/*$selectedAlbumId*/ ctx[1] === /*album*/ ctx[0]?.ID
     			? "selected"
-    			: "") + " svelte-oc8a79"))) {
+    			: "") + " svelte-kmxgr9"))) {
     				attr_dev(album_1, "class", album_1_class_value);
     			}
     		},

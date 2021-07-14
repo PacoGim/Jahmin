@@ -71,6 +71,18 @@ function insert(data) {
     return new Promise((resolve, reject) => {
         var _a;
         let rootFolder = (_a = data.SourceFile) === null || _a === void 0 ? void 0 : _a.split('/').slice(0, -1).join('/');
+        if (rootFolder === undefined) {
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log(rootFolder);
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
+            return resolve('');
+        }
         let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
         let songId = String(hashString_fn_1.hash(data.SourceFile, 'number'));
         let store = storesMap.get(rootFolderId);

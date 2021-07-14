@@ -141,6 +141,7 @@ function addToTaskQueue(path, type) {
         path
     });
     if (isQueueRunning === false) {
+        isQueueRunning = true;
         processQueue();
     }
 }

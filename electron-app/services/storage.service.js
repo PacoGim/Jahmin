@@ -49,6 +49,9 @@ function deleteData(songPath) {
     }
 }
 function updateData(songData) {
+    if ((songData === null || songData === void 0 ? void 0 : songData.SourceFile) === undefined) {
+        return;
+    }
     let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
     let rootId = hashString_fn_1.hash(rootDir, 'text');
     let songId = hashString_fn_1.hash(songData.SourceFile, 'number');
@@ -64,6 +67,9 @@ function updateData(songData) {
     }
 }
 function insertData(songData) {
+    if (songData === undefined) {
+        return;
+    }
     let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
     let rootId = hashString_fn_1.hash(rootDir, 'text');
     let mappedData = storageMap.get(rootId);

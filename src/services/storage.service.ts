@@ -58,6 +58,10 @@ function deleteData(songPath: string) {
 }
 
 function updateData(songData: SongType) {
+	if (songData?.SourceFile === undefined) {
+		return
+	}
+
 	let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/')
 	let rootId = hash(rootDir, 'text') as string
 	let songId = hash(songData.SourceFile, 'number')
@@ -77,6 +81,10 @@ function updateData(songData: SongType) {
 }
 
 function insertData(songData: SongType) {
+	if (songData === undefined) {
+		return
+	}
+
 	let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/')
 	let rootId = hash(rootDir, 'text') as string
 

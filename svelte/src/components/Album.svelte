@@ -23,7 +23,6 @@
 		}
 	})
 
-
 	// function fetchAlbumCover() {
 	// 	getCoverIPC(album['RootDir']).then((result) => {
 	// 		if (result !== null) {
@@ -91,10 +90,27 @@
 		max-height: var(--cover-dimension);
 	}
 
+	album:hover overlay-gradient {
+		opacity: 1;
+	}
+
+	album:hover album-name {
+		transform: translateY(0px) rotateX(0deg);
+		opacity: 1;
+	}
+
+	album:hover album-artist {
+		transform: translateY(0px) rotateX(0deg);
+		opacity: 1;
+	}
+
 	overlay-gradient {
 		background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.5) 25%, rgba(0, 0, 0, 0) 50%);
 		height: inherit;
 		width: inherit;
+		opacity: 0;
+
+		transition: opacity 250ms ease-in-out;
 	}
 
 	album-details {
@@ -103,6 +119,20 @@
 		flex-direction: column;
 		align-self: end;
 		text-align: center;
+		transition: opacity 250ms ease-in-out;
+	}
+
+	album-details album-name {
+		transition: transform 250ms ease-in-out, opacity 250ms ease-in-out;
+		opacity: 0;
+		transform: translateY(-25px) rotateX(90deg);
+	}
+
+	album-details album-artist {
+		transition: transform 250ms ease-in-out, opacity 250ms ease-in-out;
+		transition-delay: 100ms;
+		opacity: 0;
+		transform: translateY(-25px) rotateX(90deg);
 	}
 
 	album > * {

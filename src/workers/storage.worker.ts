@@ -86,7 +86,21 @@ function deleteData(path: string) {
 function insert(data: TagType) {
 	return new Promise((resolve, reject) => {
 		let rootFolder = data.SourceFile?.split('/').slice(0, -1).join('/')
-		let rootFolderId = hash(rootFolder!, 'text') as string
+
+		if (rootFolder === undefined) {
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log(rootFolder)
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
+			return resolve('')
+		}
+
+		let rootFolderId = hash(rootFolder, 'text') as string
 		let songId = String(hash(data.SourceFile!, 'number'))
 
 		let store = storesMap.get(rootFolderId)

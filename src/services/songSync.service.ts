@@ -162,6 +162,7 @@ function addToTaskQueue(path: string, type: string) {
 	})
 
 	if (isQueueRunning === false) {
+		isQueueRunning = true
 		processQueue()
 	}
 }
