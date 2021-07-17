@@ -7,10 +7,10 @@ import type { SongType } from '../types/song.type'
 export async function setNewPlayback(
 	albumId: string,
 	playbackSongs: SongType[],
-	SONG_Id_TO_PLAY: number | undefined,
+	songIdToPlay: number | undefined,
 	playNow: boolean
 ) {
-	let indexToPlay = playbackSongs.findIndex((song) => song.ID === SONG_Id_TO_PLAY)
+	let indexToPlay = playbackSongs.findIndex((song) => song.ID === songIdToPlay)
 
 	if (indexToPlay === -1) {
 		indexToPlay = 0

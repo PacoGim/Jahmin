@@ -8,16 +8,19 @@ import { mkdirSync } from 'original-fs'
 import { getConfig } from './config.service'
 import { hash } from '../functions/hashString.fn'
 
-const validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg']
-const notCompress = ['mp4', 'webm', 'apng', 'gif']
-const videoFormats = ['mp4', 'webm']
-// const animatedImageFormats = ['apng', 'gif', 'webp']
-const validNames = ['cover', 'folder', 'front', 'art']
-
-const allowedNames = validNames.map((name) => validFormats.map((ext) => `${name}.${ext}`)).flat()
-
-export function getAlbumCover(rootDir: string) {
+export function getAlbumCover(rootDir: string, forceImage: boolean = false): Promise<{ fileType: string; filePath: string }> {
 	return new Promise((resolve, reject) => {
+		let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg']
+		const notCompress = ['mp4', 'webm', 'apng', 'gif']
+		const videoFormats = ['mp4', 'webm']
+		const validNames = ['cover', 'folder', 'front', 'art']
+
+		if (forceImage === true) {
+			validFormats = validFormats.filter((format) => !videoFormats.includes(format))
+		}
+
+		const allowedNames = validNames.map((name) => validFormats.map((ext) => `${name}.${ext}`)).flat()
+
 		let rootDirHashed = hash(rootDir, 'text') as string
 		let config = getConfig()
 		let dimension = config?.art?.dimension || 128
@@ -53,7 +56,7 @@ export function getAlbumCover(rootDir: string) {
 		} else {
 			resolve({ fileType: 'image', filePath: preferredArt })
 
-			if (!notCompress.includes(getExtension(preferredArt))) {
+			if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
 				compressImage(preferredArt, artDirPath, artFilePath)
 			}
 		}

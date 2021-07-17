@@ -1,23 +1,36 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAlbumColors = void 0;
 const sharp_1 = __importDefault(require("sharp"));
-const path_1 = __importDefault(require("path"));
-const __1 = require("..");
-const config_service_1 = require("./config.service");
 const color_type_1 = require("../types/color.type");
 //@ts-expect-error
 const hex_to_hsl_1 = __importDefault(require("hex-to-hsl"));
+const albumArt_service_1 = require("./albumArt.service");
+const storage_service_1 = require("./storage.service");
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 function getAlbumColors(imageId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         var _a;
-        let config = config_service_1.getConfig();
-        let imagePath = path_1.default.join(__1.appDataPath(), '/art', String((_a = config === null || config === void 0 ? void 0 : config['art']) === null || _a === void 0 ? void 0 : _a['dimension']), `${imageId}.webp`);
-        sharp_1.default(imagePath)
+        let rootDir = (_a = storage_service_1.getStorageMap().get(imageId)) === null || _a === void 0 ? void 0 : _a.RootDir;
+        if (!rootDir) {
+            return resolve(undefined);
+        }
+        const image = yield albumArt_service_1.getAlbumCover(rootDir, true);
+        // let config = getConfig()
+        // let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
+        sharp_1.default(image.filePath)
             .resize(1, 1)
             .raw()
             .toBuffer((err, buffer) => {
@@ -53,6 +66,6 @@ function getAlbumColors(imageId) {
             }
             resolve(hslColorObject);
         });
-    });
+    }));
 }
 exports.getAlbumColors = getAlbumColors;

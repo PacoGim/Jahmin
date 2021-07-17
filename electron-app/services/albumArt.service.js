@@ -11,15 +11,17 @@ const __1 = require("..");
 const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
-const validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg'];
-const notCompress = ['mp4', 'webm', 'apng', 'gif'];
-const videoFormats = ['mp4', 'webm'];
-// const animatedImageFormats = ['apng', 'gif', 'webp']
-const validNames = ['cover', 'folder', 'front', 'art'];
-const allowedNames = validNames.map((name) => validFormats.map((ext) => `${name}.${ext}`)).flat();
-function getAlbumCover(rootDir) {
+function getAlbumCover(rootDir, forceImage = false) {
     return new Promise((resolve, reject) => {
         var _a;
+        let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg'];
+        const notCompress = ['mp4', 'webm', 'apng', 'gif'];
+        const videoFormats = ['mp4', 'webm'];
+        const validNames = ['cover', 'folder', 'front', 'art'];
+        if (forceImage === true) {
+            validFormats = validFormats.filter((format) => !videoFormats.includes(format));
+        }
+        const allowedNames = validNames.map((name) => validFormats.map((ext) => `${name}.${ext}`)).flat();
         let rootDirHashed = hashString_fn_1.hash(rootDir, 'text');
         let config = config_service_1.getConfig();
         let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
@@ -49,7 +51,7 @@ function getAlbumCover(rootDir) {
         }
         else {
             resolve({ fileType: 'image', filePath: preferredArt });
-            if (!notCompress.includes(getExtension(preferredArt))) {
+            if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
                 compressImage(preferredArt, artDirPath, artFilePath);
             }
         }
