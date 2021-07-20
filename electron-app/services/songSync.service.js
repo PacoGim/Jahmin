@@ -69,15 +69,36 @@ function reloadAlbumData(albumId) {
     let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
     if (rootDir === undefined)
         return;
-    let rootDirAudioFiles = fs_1.default
+    // Gets all song in folder.
+    let rootDirSongs = fs_1.default
         .readdirSync(rootDir)
         .filter((file) => isAudioFile(file))
         .map((file) => path_1.default.join(rootDir || '', file));
-    let audioToRemove = album === null || album === void 0 ? void 0 : album.Songs.filter((song) => !(rootDirAudioFiles === null || rootDirAudioFiles === void 0 ? void 0 : rootDirAudioFiles.includes(song.SourceFile)));
-    if (audioToRemove && (audioToRemove === null || audioToRemove === void 0 ? void 0 : audioToRemove.length) > 0) {
+    // Filters all song present in DB but NOT in folder in another array.
+    let songToRemove = album === null || album === void 0 ? void 0 : album.Songs.filter((song) => !(rootDirSongs === null || rootDirSongs === void 0 ? void 0 : rootDirSongs.includes(song.SourceFile)));
+    if (songToRemove && (songToRemove === null || songToRemove === void 0 ? void 0 : songToRemove.length) > 0) {
+        songToRemove.forEach((song) => {
+            storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+                type: 'delete',
+                data: song.SourceFile,
+                appDataPath: __1.appDataPath()
+            });
+        });
     }
-    // console.log(rootDirAudioFiles)
-    // console.log(album?.Songs.length)
+    // Check changes between local songs and DB song by comparing last modified time.
+    rootDirSongs.forEach((songPath) => {
+        let dbSong = album === null || album === void 0 ? void 0 : album.Songs.find((song) => song.SourceFile === songPath);
+        // If song found in db and local song modified time is bigger than db song.
+        if (dbSong && fs_1.default.statSync(dbSong === null || dbSong === void 0 ? void 0 : dbSong.SourceFile).mtimeMs > (dbSong === null || dbSong === void 0 ? void 0 : dbSong.LastModified)) {
+            getTags({ path: dbSong.SourceFile }).then((tags) => {
+                storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+                    type: 'update',
+                    data: tags,
+                    appDataPath: __1.appDataPath()
+                });
+            });
+        }
+    });
 }
 exports.reloadAlbumData = reloadAlbumData;
 function getTags(task) {

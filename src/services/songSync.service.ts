@@ -78,21 +78,40 @@ export function reloadAlbumData(albumId: string) {
 
 	if (rootDir === undefined) return
 
-	let rootDirAudioFiles = fs
+	// Gets all song in folder.
+	let rootDirSongs = fs
 		.readdirSync(rootDir)
 		.filter((file) => isAudioFile(file))
 		.map((file) => path.join(rootDir || '', file))
 
-	let audioToRemove = album?.Songs.filter((song) => !rootDirAudioFiles?.includes(song.SourceFile))
+	// Filters all song present in DB but NOT in folder in another array.
+	let songToRemove = album?.Songs.filter((song) => !rootDirSongs?.includes(song.SourceFile))
 
-	if (audioToRemove && audioToRemove?.length > 0) {
-
-
-
+	if (songToRemove && songToRemove?.length > 0) {
+		songToRemove.forEach((song) => {
+			storageWorker?.postMessage({
+				type: 'delete',
+				data: song.SourceFile,
+				appDataPath: appDataPath()
+			})
+		})
 	}
 
-	// console.log(rootDirAudioFiles)
-	// console.log(album?.Songs.length)
+	// Check changes between local songs and DB song by comparing last modified time.
+	rootDirSongs.forEach((songPath) => {
+		let dbSong = album?.Songs.find((song) => song.SourceFile === songPath)
+
+		// If song found in db and local song modified time is bigger than db song.
+		if (dbSong && fs.statSync(dbSong?.SourceFile).mtimeMs > dbSong?.LastModified!) {
+			getTags({ path: dbSong.SourceFile }).then((tags) => {
+				storageWorker?.postMessage({
+					type: 'update',
+					data: tags,
+					appDataPath: appDataPath()
+				})
+			})
+		}
+	})
 }
 
 function getTags(task: any) {

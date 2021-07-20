@@ -74,10 +74,18 @@ function deleteData(path: string) {
 
 		let store = storesMap.get(rootFolderId)
 
-		if (store) {
-			store.delete(songId)
+		if (!store) {
+			let storeConfig: { name: string; cwd?: string } = {
+				name: rootFolderId
+			}
+
+			if (storagePath) storeConfig.cwd = storagePath
+
+			store = new Store(storeConfig)
+			storesMap.set(rootFolderId, store)
 		}
 
+		store.delete(songId)
 		updateStorageVersion()
 		resolve('')
 	})

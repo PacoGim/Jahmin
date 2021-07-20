@@ -60,9 +60,16 @@ function deleteData(path) {
         let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
         let songId = String(hashString_fn_1.hash(path, 'number'));
         let store = storesMap.get(rootFolderId);
-        if (store) {
-            store.delete(songId);
+        if (!store) {
+            let storeConfig = {
+                name: rootFolderId
+            };
+            if (storagePath)
+                storeConfig.cwd = storagePath;
+            store = new electron_store_1.default(storeConfig);
+            storesMap.set(rootFolderId, store);
         }
+        store.delete(songId);
         updateStorageVersion();
         resolve('');
     });
