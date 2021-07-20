@@ -13,9 +13,12 @@ import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 import { getNewPromiseDbVersion, getStorageMap } from './storage.service'
+import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 export function loadIPC() {
+	ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => loadContextMenu(event, menuToOpen, parameters))
+
 	ipcMain.handle('get-order', async (evt, arg) => {
 		let config = getConfig()
 		let grouping = config['order']['grouping'] || []

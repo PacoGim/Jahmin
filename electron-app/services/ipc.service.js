@@ -25,8 +25,10 @@ const peaks_1 = require("./peaks");
 const tagEdit_service_1 = require("./tagEdit.service");
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 const storage_service_1 = require("./storage.service");
+const contextMenu_service_1 = require("./contextMenu.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 function loadIPC() {
+    electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => contextMenu_service_1.loadContextMenu(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();
         let grouping = config['order']['grouping'] || [];

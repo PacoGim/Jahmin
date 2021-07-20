@@ -1,4 +1,3 @@
-import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
@@ -7,7 +6,6 @@ import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { OpusTagType } from '../types/opus.type'
 import { SongType } from '../types/song.type'
-import trash from 'trash'
 
 let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
@@ -19,7 +17,7 @@ let ffmpegDeferredPromiseId: string
 
 const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) => {
 	if (response.id === ffmpegDeferredPromiseId) {
-		await trash(response.filePath)
+		fs.unlinkSync(response.filePath)
 		fs.renameSync(response.tempFileName, response.filePath)
 		ffmpegDeferredPromise(response.status)
 	}

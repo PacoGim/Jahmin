@@ -6,12 +6,11 @@
 	import { albumPlayingIdStore, selectedAlbumId, selectedSongsStore, songPlayingIdStore } from '../store/final.store'
 
 	import Star from './Star.svelte'
-import { parseDuration } from '../functions/parseDuration.fn';
+	import { parseDuration } from '../functions/parseDuration.fn'
+	import { editTagsIPC } from '../service/ipc.service'
 
 	export let song: SongType
 	export let index: number
-
-
 
 	onMount(() => {
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
@@ -27,8 +26,10 @@ import { parseDuration } from '../functions/parseDuration.fn';
 	})
 
 	function setStar(starChangeEvent) {
-		// TODO: Add updater - starLevel gives undefined 😩
-		console.log(song.SourceFile, starChangeEvent.detail.starLevel)
+		// console.log(song.SourceFile, starChangeEvent.detail.starRating)
+		editTagsIPC([song.SourceFile], {
+			Rating: starChangeEvent.detail.starRating
+		})
 	}
 </script>
 
@@ -36,19 +37,23 @@ import { parseDuration } from '../functions/parseDuration.fn';
 	id={song.ID}
 	{index}
 	class="
-	{$songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
-		? 'playing'
-		: ''}
+	{$songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore ? 'playing' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	<!-- <song-number>{song.Track}</song-number> -->
 	<song-number>{song.Genre} - {song.Track}</song-number>
 	<song-title>{song.Title}</song-title>
-	<Star on:starChange={setStar} songRating={song.Rating} hook='song-list-item' />
+	<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
 	<song-duration>{parseDuration(song.Duration)}</song-duration>
 </song-list-item>
 
 <style>
+	song-title {
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
 	song-list-item.playing song-title::before {
 		content: '▶ ';
 		font-size: 0.75rem;

@@ -19,7 +19,6 @@ const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const generateId_fn_1 = require("../functions/generateId.fn");
 const worker_service_1 = require("../services/worker.service");
-const trash_1 = __importDefault(require("trash"));
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
 /********************** Write Opus Tags **********************/
@@ -27,7 +26,7 @@ let ffmpegDeferredPromise = undefined;
 let ffmpegDeferredPromiseId;
 const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
     if (response.id === ffmpegDeferredPromiseId) {
-        yield trash_1.default(response.filePath);
+        fs_1.default.unlinkSync(response.filePath);
         fs_1.default.renameSync(response.tempFileName, response.filePath);
         ffmpegDeferredPromise(response.status);
     }

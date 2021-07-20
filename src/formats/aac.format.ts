@@ -8,21 +8,17 @@ import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
 
 /********************** Write Aac Tags **********************/
-let exifToolWriteWorker: any = undefined
-let tagWriteDeferredPromise = undefined
+let tagWriteDeferredPromise: any = undefined
+
+let exifToolWriteWorker: any = getWorker('exifToolWrite')?.on('message', (response: any) => {
+	tagWriteDeferredPromise(response)
+})
 
 export function writeAacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
-
-		if (exifToolWriteWorker === undefined) {
-			exifToolWriteWorker = getWorker('exifToolRead')
-
-			exifToolWriteWorker?.on('message', (response: any) => {
-				console.log(response)
-			})
-		}
-
+		console.log(newTags)
 		newTags = normalizeNewTags(newTags)
+		console.log(newTags)
 
 		tagWriteDeferredPromise = resolve
 
@@ -84,9 +80,9 @@ export function getAacTags(filePath: string): Promise<SongType> {
 }
 
 function normalizeNewTags(newTags: EditTag) {
-	if (newTags.DiscNumber) renameObjectKey(newTags, 'DiscNumber', 'DiskNumber')
-	if (newTags.Track) renameObjectKey(newTags, 'Track', 'TrackNumber')
-	if (newTags.Rating) renameObjectKey(newTags, 'Rating', 'RatingPercent')
+	if (newTags.DiscNumber !== undefined) renameObjectKey(newTags, 'DiscNumber', 'DiskNumber')
+	if (newTags.Track !== undefined) renameObjectKey(newTags, 'Track', 'TrackNumber')
+	if (newTags.Rating !== undefined) renameObjectKey(newTags, 'Rating', 'RatingPercent')
 
 	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
 		newTags.AllDates = `${newTags.Date_Year || '0000'} ${newTags.Date_Month || '00'} ${newTags.Date_Day || '00'}`

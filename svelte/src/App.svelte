@@ -14,6 +14,7 @@
 	import { onMount } from 'svelte'
 	import { getChangesProgressIPC, showContextMenuIPC, syncDbVersionIPC } from './service/ipc.service'
 	import { albumListStore, appTitle } from './store/final.store'
+	import { handleContextMenuEvent } from './service/contextMenu.service'
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -24,39 +25,7 @@
 			return !(e.code == 'Space' && e.target == document.body)
 		}
 
-		window.addEventListener('contextmenu', (e: MouseEvent) => {
-			e.preventDefault()
-
-			const pathsName = e.composedPath().map((path: HTMLElement) => path.tagName)
-
-			if (pathsName.includes('ALBUM')) {
-				let albumElement: HTMLElement = e.composedPath().find((path: HTMLElement) => path.tagName === 'ALBUM') as HTMLElement
-
-				let albumId = albumElement.getAttribute('id')
-
-				showContextMenuIPC(
-					'AlbumContextMenu',
-					JSON.stringify({
-						albumId
-					})
-				)
-			}
-		})
-
-		// window.onclick = (evt: MouseEvent) => {
-		// 	let songListSvelteFound = false
-
-		// 	evt['path'].forEach((element: HTMLElement) => {
-		// 		if (element.tagName === 'SONG-LIST-SVLT') {
-		// 			songListSvelteFound = true
-		// 		}
-		// 	})
-
-		// 	if (songListSvelteFound === false) {
-		// 		$selectedSongs = []
-		// 		songListSvelteFound = false
-		// 	}
-		// }
+		window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
 	})
 
 	function getNewDbChangesProgress() {

@@ -1,5 +1,5 @@
-import { exec } from 'child_process'
-import { app, BrowserWindow, ipcMain, Menu, protocol, screen, shell } from 'electron'
+// import { exec } from 'child_process'
+import { app, BrowserWindow, ipcMain, screen, shell } from 'electron'
 
 import path from 'path'
 
@@ -17,6 +17,7 @@ import { getStorageMap, initStorage, killStorageWatcher } from './services/stora
 
 import { getRootDirFolderWatcher, watchFolders } from './services/songSync.service'
 import { ConfigType } from './types/config.type'
+import { loadContextMenu } from './services/contextMenu.service'
 
 async function createMainWindow() {
 	const config = getConfig()
@@ -78,7 +79,7 @@ function loadOptions(config: ConfigType) {
 	return options
 }
 
-ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
+/* ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
 	let template: any = []
 
 	parameters = JSON.parse(parameters)
@@ -99,7 +100,9 @@ ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
 	const menu = Menu.buildFromTemplate(template)
 	//@ts-expect-error
 	menu.popup(BrowserWindow.fromWebContents(event.sender))
-})
+}) */
+
+// loadContextMenu(ipcMain,shell)
 
 app.whenReady().then(createMainWindow)
 

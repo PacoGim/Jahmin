@@ -1,8 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.getRootDirFolderWatcher = void 0;
+exports.watchFolders = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.maxTaskQueueLength = exports.reloadAlbumData = exports.getRootDirFolderWatcher = void 0;
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const worker_service_1 = require("./worker.service");
 const __1 = require("..");
 const storage_service_1 = require("./storage.service");
@@ -59,6 +64,22 @@ function processQueue() {
         }
     }
 }
+function reloadAlbumData(albumId) {
+    let album = storage_service_1.getStorageMap().get(albumId);
+    let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
+    if (rootDir === undefined)
+        return;
+    let rootDirAudioFiles = fs_1.default
+        .readdirSync(rootDir)
+        .filter((file) => isAudioFile(file))
+        .map((file) => path_1.default.join(rootDir || '', file));
+    let audioToRemove = album === null || album === void 0 ? void 0 : album.Songs.filter((song) => !(rootDirAudioFiles === null || rootDirAudioFiles === void 0 ? void 0 : rootDirAudioFiles.includes(song.SourceFile)));
+    if (audioToRemove && (audioToRemove === null || audioToRemove === void 0 ? void 0 : audioToRemove.length) > 0) {
+    }
+    // console.log(rootDirAudioFiles)
+    // console.log(album?.Songs.length)
+}
+exports.reloadAlbumData = reloadAlbumData;
 function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();
@@ -110,9 +131,9 @@ function watchFolders(rootDirectories) {
             addToTaskQueue(path, 'delete');
         }
     });
-    // watcher.on('all', (event, path) => {
-    // 	console.log(event, path)
-    // })
+    /* watcher.on('all', (event, path) => {
+        console.log(event, path)
+    }) */
     watcher.on('ready', () => {
         // When watcher is done getting files, any new files added afterwards are detected here.
         watcher.on('add', (path) => addToTaskQueue(path, 'insert'));

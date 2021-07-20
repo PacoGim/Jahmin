@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.appDataPath = void 0;
+// import { exec } from 'child_process'
 const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
 const appDataPath = () => path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
@@ -74,24 +75,29 @@ function loadOptions(config) {
     }
     return options;
 }
-electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
-    let template = [];
-    parameters = JSON.parse(parameters);
+/* ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
+    let template: any = []
+
+    parameters = JSON.parse(parameters)
+
     if (menuToOpen === 'AlbumContextMenu') {
-        let album = storage_service_1.getStorageMap().get(parameters.albumId);
+        let album = getStorageMap().get(parameters.albumId)
+
         template = [
             {
-                label: `Open ${(album === null || album === void 0 ? void 0 : album.Name) || ''} Folder`,
+                label: `Open ${album?.Name || ''} Folder`,
                 click: () => {
-                    electron_1.shell.showItemInFolder((album === null || album === void 0 ? void 0 : album.RootDir) || '');
+                    shell.showItemInFolder(album?.RootDir || '')
                 }
             }
-        ];
+        ]
     }
-    const menu = electron_1.Menu.buildFromTemplate(template);
+
+    const menu = Menu.buildFromTemplate(template)
     //@ts-expect-error
-    menu.popup(electron_1.BrowserWindow.fromWebContents(event.sender));
-});
+    menu.popup(BrowserWindow.fromWebContents(event.sender))
+}) */
+// loadContextMenu(ipcMain,shell)
 electron_1.app.whenReady().then(createMainWindow);
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

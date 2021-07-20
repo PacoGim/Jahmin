@@ -10,6 +10,7 @@ specifiers:
   electron: 11.4.8
   electron-store: ^8.0.0
   exiftool-vendored: ^14.4.0
+  filespy: ^1.2.4
   hex-to-hsl: ^1.0.2
   image-info: ^0.0.2
   music-metadata: ^7.8.5
@@ -26,6 +27,7 @@ dependencies:
   deepmerge: 4.2.2
   electron-store: 8.0.0
   exiftool-vendored: 14.5.0
+  filespy: 1.2.4
   hex-to-hsl: 1.0.2
   image-info: 0.0.2
   music-metadata: 7.8.6
@@ -84,6 +86,15 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@parcel/watcher/2.0.0-alpha.10:
+    resolution: {integrity: sha512-8uA7Tmx/1XvmUdGzksg0+oN7uj24pXFFnKJqZr3L3mgYjdrL7CMs3PRIHv1k3LUz/hNRsb/p3qxztSkWz1IGZA==}
+    engines: {node: '>= 10.0.0'}
+    requiresBuild: true
+    dependencies:
+      node-addon-api: 3.2.1
+      node-gyp-build: 4.2.3
+    dev: false
 
   /@sindresorhus/df/1.0.1:
     resolution: {integrity: sha1-xptm9S9vzdKHyAffIQMF2694UA0=}
@@ -273,6 +284,10 @@ packages:
   /binary-extensions/2.2.0:
     resolution: {integrity: sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==}
     engines: {node: '>=8'}
+    dev: false
+
+  /binary-insert/1.2.1:
+    resolution: {integrity: sha512-CGsSYzBUL/QqnmL4CTwLQnnVBj5RqPCmVifo5SnqTSbH5heFPtDijsIZJCKmOaXowaYUiiDOc+eZUjpU6NdpMg==}
     dev: false
 
   /bl/4.1.0:
@@ -773,6 +788,15 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
+  /filespy/1.2.4:
+    resolution: {integrity: sha512-eEfawBwgA0vXsjaO3K2vkbmSoh3gdoID1z79VZsQStSL9WL2YPAEZRyjBSf7x1o6/ajttiFTeUBTkwR5nj6YCA==}
+    dependencies:
+      '@parcel/watcher': 2.0.0-alpha.10
+      binary-insert: 1.2.1
+      glob-regex: 0.3.2
+      slash: 3.0.0
+    dev: false
+
   /fill-range/7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}
     engines: {node: '>=8'}
@@ -867,6 +891,10 @@ packages:
     engines: {node: '>= 6'}
     dependencies:
       is-glob: 4.0.1
+    dev: false
+
+  /glob-regex/0.3.2:
+    resolution: {integrity: sha512-m5blUd3/OqDTWwzBBtWBPrGlAzatRywHameHeekAZyZrskYouOGdNB8T/q6JucucvJXtOuyHIn0/Yia7iDasDw==}
     dev: false
 
   /glob/7.1.7:
@@ -1363,6 +1391,11 @@ packages:
 
   /node-addon-api/3.2.1:
     resolution: {integrity: sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==}
+    dev: false
+
+  /node-gyp-build/4.2.3:
+    resolution: {integrity: sha512-MN6ZpzmfNCRM+3t57PTJHgHyw/h4OWnZ6mR8P5j/uZtqQr46RRuDE/P+g3n0YR/AiYXeWixZZzaip77gdICfRg==}
+    hasBin: true
     dev: false
 
   /node-id3/0.2.3:
@@ -1865,6 +1898,11 @@ packages:
   /slash/1.0.0:
     resolution: {integrity: sha1-xB8vbDn8FtHNF61LXYlhFK5HDVU=}
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  /slash/3.0.0:
+    resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
+    engines: {node: '>=8'}
     dev: false
 
   /spawn-command/0.0.2-1:

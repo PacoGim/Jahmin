@@ -1,6 +1,5 @@
 import { parentPort } from 'worker_threads'
 import { exec } from 'child_process'
-import path from 'path'
 
 parentPort?.on('message', (message) => {
 	let { id, filePath, tempFileName, command } = message

@@ -1,11 +1,13 @@
 import { FSWatcher, watch } from 'chokidar'
 import { cpus } from 'os'
+import fs from 'fs'
+import path from 'path'
 
 import { Worker } from 'worker_threads'
 import { getWorker, killWorker } from './worker.service'
 
 import { appDataPath } from '..'
-import { getStorageMapToArray } from './storage.service'
+import { getStorageMap, getStorageMapToArray } from './storage.service'
 import { getOpusTags } from '../formats/opus.format'
 import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
@@ -70,6 +72,29 @@ function processQueue() {
 	}
 }
 
+export function reloadAlbumData(albumId: string) {
+	let album = getStorageMap().get(albumId)
+	let rootDir = album?.RootDir
+
+	if (rootDir === undefined) return
+
+	let rootDirAudioFiles = fs
+		.readdirSync(rootDir)
+		.filter((file) => isAudioFile(file))
+		.map((file) => path.join(rootDir || '', file))
+
+	let audioToRemove = album?.Songs.filter((song) => !rootDirAudioFiles?.includes(song.SourceFile))
+
+	if (audioToRemove && audioToRemove?.length > 0) {
+
+
+
+	}
+
+	// console.log(rootDirAudioFiles)
+	// console.log(album?.Songs.length)
+}
+
 function getTags(task: any) {
 	return new Promise((resolve, reject) => {
 		let extension = task.path.split('.').pop().toLowerCase()
@@ -125,9 +150,9 @@ export function watchFolders(rootDirectories: string[]) {
 		}
 	})
 
-	// watcher.on('all', (event, path) => {
-	// 	console.log(event, path)
-	// })
+	/* watcher.on('all', (event, path) => {
+		console.log(event, path)
+	}) */
 
 	watcher.on('ready', () => {
 		// When watcher is done getting files, any new files added afterwards are detected here.
