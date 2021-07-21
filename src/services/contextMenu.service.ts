@@ -1,4 +1,5 @@
 import { shell, Menu, BrowserWindow } from 'electron'
+import { dialog, MenuItemConstructorOptions } from 'electron/main'
 import { reloadAlbumData } from './songSync.service'
 import { getStorageMap } from './storage.service'
 
@@ -18,7 +19,7 @@ export function loadContextMenu(event: any, menuToOpen: string, parameters: any)
 
 function getAlbumContextMenuTemplate(albumId: string) {
 	let album = getStorageMap().get(albumId)
-	let template = []
+	let template: MenuItemConstructorOptions[] = []
 
 	template.push({
 		label: `Show ${album?.Name || ''} Folder`,
@@ -31,6 +32,15 @@ function getAlbumContextMenuTemplate(albumId: string) {
 		label: `Reload Album Data`,
 		click: () => {
 			reloadAlbumData(albumId)
+		}
+	})
+
+	template.push({
+		label: `Add Album Cover`,
+		click: () => {
+			dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
+				console.log(result)
+			})
 		}
 	})
 

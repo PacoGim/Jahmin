@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadContextMenu = void 0;
 const electron_1 = require("electron");
+const main_1 = require("electron/main");
 const songSync_service_1 = require("./songSync.service");
 const storage_service_1 = require("./storage.service");
 function loadContextMenu(event, menuToOpen, parameters) {
@@ -28,6 +29,14 @@ function getAlbumContextMenuTemplate(albumId) {
         label: `Reload Album Data`,
         click: () => {
             songSync_service_1.reloadAlbumData(albumId);
+        }
+    });
+    template.push({
+        label: `Add Album Cover`,
+        click: () => {
+            main_1.dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
+                console.log(result);
+            });
         }
     });
     return template;

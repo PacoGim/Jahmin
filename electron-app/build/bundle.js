@@ -7223,8 +7223,6 @@ var app = (function () {
     	let t7;
     	let tagedit;
     	let t8;
-    	let backgroundart;
-    	let t9;
     	let songlistbackground;
     	let current;
     	document_1.title = title_value = /*$appTitle*/ ctx[0];
@@ -7236,7 +7234,6 @@ var app = (function () {
     	player = new Player({ $$inline: true });
     	songlist = new SongList({ $$inline: true });
     	tagedit = new TagEdit({ $$inline: true });
-    	backgroundart = new BackgroundArt({ $$inline: true });
     	songlistbackground = new SongListBackground({ $$inline: true });
 
     	const block = {
@@ -7259,8 +7256,6 @@ var app = (function () {
     			t7 = space();
     			create_component(tagedit.$$.fragment);
     			t8 = space();
-    			create_component(backgroundart.$$.fragment);
-    			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-1fro297");
     			add_location(main, file, 39, 0, 1520);
@@ -7287,8 +7282,6 @@ var app = (function () {
     			append_dev(main, t7);
     			mount_component(tagedit, main, null);
     			append_dev(main, t8);
-    			mount_component(backgroundart, main, null);
-    			append_dev(main, t9);
     			mount_component(songlistbackground, main, null);
     			current = true;
     		},
@@ -7307,7 +7300,6 @@ var app = (function () {
     			transition_in(player.$$.fragment, local);
     			transition_in(songlist.$$.fragment, local);
     			transition_in(tagedit.$$.fragment, local);
-    			transition_in(backgroundart.$$.fragment, local);
     			transition_in(songlistbackground.$$.fragment, local);
     			current = true;
     		},
@@ -7320,7 +7312,6 @@ var app = (function () {
     			transition_out(player.$$.fragment, local);
     			transition_out(songlist.$$.fragment, local);
     			transition_out(tagedit.$$.fragment, local);
-    			transition_out(backgroundart.$$.fragment, local);
     			transition_out(songlistbackground.$$.fragment, local);
     			current = false;
     		},
@@ -7337,7 +7328,6 @@ var app = (function () {
     			destroy_component(player);
     			destroy_component(songlist);
     			destroy_component(tagedit);
-    			destroy_component(backgroundart);
     			destroy_component(songlistbackground);
     		}
     	};

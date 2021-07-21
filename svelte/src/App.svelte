@@ -53,7 +53,7 @@
 	<Player />
 	<SongList />
 	<TagEdit />
-	<BackgroundArt />
+	<!-- <BackgroundArt /> -->
 	<SongListBackground />
 </main>
 

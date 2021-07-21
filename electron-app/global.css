@@ -42,7 +42,9 @@ html {
 }
 
 body {
-	color: #fff;
+	/* color: #fff; */
+	color: #EAE6D9;
+	background-color: #1D1C23;
 	height: 100%;
 	display: block;
 	font-family: Roboto;
@@ -61,7 +63,7 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color: #fff; /* color of the scroll thumb */
+	background-color: #EAE6D9; /* color of the scroll thumb */
 	border-radius: 200px;
 	/* border: 4px solid #fff; creates padding around scroll thumb */
 }
@@ -89,7 +91,7 @@ tag-edit select {
 	width: 100%;
 
 	text-align: center;
-	color: #fff;
+	color: #EAE6D9;
 	width: calc(100% - 2rem);
 
 	outline: none;
