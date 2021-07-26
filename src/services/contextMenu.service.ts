@@ -1,7 +1,9 @@
 import { shell, Menu, BrowserWindow } from 'electron'
 import { dialog, MenuItemConstructorOptions } from 'electron/main'
+import { getAlbumCover } from './albumArt.service'
 import { reloadAlbumData } from './songSync.service'
 import { getStorageMap } from './storage.service'
+import { addTaskToSync } from './systemSync.service'
 
 export function loadContextMenu(event: any, menuToOpen: string, parameters: any) {
 	let template: any = []
@@ -36,11 +38,20 @@ function getAlbumContextMenuTemplate(albumId: string) {
 	})
 
 	template.push({
-		label: `Add Album Cover`,
+		label: `Reload Album Cover`,
 		click: () => {
-			dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
-				console.log(result)
-			})
+			if (album) {
+				getAlbumCover(album.RootDir).then((result) => {
+					addTaskToSync({
+						type: 'newCoverArt',
+						data: {
+							id: album?.ID,
+							filePath: result.filePath,
+							fileType: result.fileType
+						}
+					})
+				})
+			}
 		}
 	})
 

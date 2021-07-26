@@ -29,6 +29,23 @@ export function getTagEditProgressIPC(): Promise<string[]> {
 	})
 }
 
+export function getTasksToSyncIPC(currentTasks): Promise<any[]> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('sync-tasks',currentTasks).then((result) => {
+			resolve(result)
+		})
+	})
+}
+
+export function streamAudio(path: string): Promise<string[]> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('stream-audio', path).then((result) => {
+			// console.log(result)
+			// resolve(result)
+		})
+	})
+}
+
 export function getOrderIPC(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-order', index).then((result) => {

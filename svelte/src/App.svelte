@@ -12,9 +12,10 @@
 	import BackgroundArt from './includes/BackgroundArt.svelte'
 	import SongListBackground from './includes/SongListBackground.svelte'
 	import { onMount } from 'svelte'
-	import { getChangesProgressIPC, showContextMenuIPC, syncDbVersionIPC } from './service/ipc.service'
+	import { getChangesProgressIPC, getTasksToSyncIPC, showContextMenuIPC, syncDbVersionIPC } from './service/ipc.service'
 	import { albumListStore, appTitle } from './store/final.store'
 	import { handleContextMenuEvent } from './service/contextMenu.service'
+	import SyncTasks from './controllers/SyncTasks.svelte'
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -29,7 +30,7 @@
 	})
 
 	function getNewDbChangesProgress() {
-		getChangesProgressIPC().then((result) => {
+		getChangesProgressIPC().then((result: any) => {
 			console.log(result.total, result.current, (100 / result.total) * result.current || 0, '%')
 
 			setTimeout(() => {
@@ -45,6 +46,7 @@
 
 <PlayerController />
 <ConfigController />
+<SyncTasks />
 
 <main>
 	<Navigation />

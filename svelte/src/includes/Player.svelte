@@ -16,6 +16,7 @@
 	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/final.store'
 	import { parseDuration } from '../functions/parseDuration.fn'
 	import { setWaveSource } from '../service/waveform.service'
+	import { streamAudio } from '../service/ipc.service'
 
 	let progress: number = 0
 

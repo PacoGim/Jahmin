@@ -682,7 +682,7 @@ var app = (function () {
 
     const file$j = "src/includes/Navigation.svelte";
 
-    function create_fragment$l(ctx) {
+    function create_fragment$m(ctx) {
     	let navigation_svlt;
     	let h1;
 
@@ -712,7 +712,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$l.name,
+    		id: create_fragment$m.name,
     		type: "component",
     		source: "",
     		ctx
@@ -721,7 +721,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$l($$self, $$props) {
+    function instance$m($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Navigation", slots, []);
     	const writable_props = [];
@@ -736,13 +736,13 @@ var app = (function () {
     class Navigation extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$l, create_fragment$l, safe_not_equal, {});
+    		init(this, options, instance$m, create_fragment$m, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Navigation",
     			options,
-    			id: create_fragment$l.name
+    			id: create_fragment$m.name
     		});
     	}
     }
@@ -840,6 +840,21 @@ var app = (function () {
                     resolve(result);
                 });
             }
+        });
+    }
+    function getTasksToSyncIPC(currentTasks) {
+        return new Promise((resolve, reject) => {
+            ipcRenderer.invoke('sync-tasks', currentTasks).then((result) => {
+                resolve(result);
+            });
+        });
+    }
+    function streamAudio(path) {
+        return new Promise((resolve, reject) => {
+            ipcRenderer.invoke('stream-audio', path).then((result) => {
+                // console.log(result)
+                // resolve(result)
+            });
         });
     }
     function getGroupingIPC(valueToGroupBy) {
@@ -1156,7 +1171,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$k(ctx) {
+    function create_fragment$l(ctx) {
     	let cover_art;
     	let t0;
     	let t1;
@@ -1254,7 +1269,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$k.name,
+    		id: create_fragment$l.name,
     		type: "component",
     		source: "",
     		ctx
@@ -1263,7 +1278,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$k($$self, $$props, $$invalidate) {
+    function instance$l($$self, $$props, $$invalidate) {
     	let $albumCoverArtMapStore;
     	validate_store(albumCoverArtMapStore, "albumCoverArtMapStore");
     	component_subscribe($$self, albumCoverArtMapStore, $$value => $$invalidate(5, $albumCoverArtMapStore = $$value));
@@ -1394,13 +1409,13 @@ var app = (function () {
     class CoverArt extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { rootDir: 2, albumId: 3 });
+    		init(this, options, instance$l, create_fragment$l, safe_not_equal, { rootDir: 2, albumId: 3 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "CoverArt",
     			options,
-    			id: create_fragment$k.name
+    			id: create_fragment$l.name
     		});
 
     		const { ctx } = this.$$;
@@ -1537,7 +1552,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$j(ctx) {
+    function create_fragment$k(ctx) {
     	let album_1;
     	let coverart;
     	let t0;
@@ -1658,7 +1673,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$j.name,
+    		id: create_fragment$k.name,
     		type: "component",
     		source: "",
     		ctx
@@ -1667,7 +1682,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$j($$self, $$props, $$invalidate) {
+    function instance$k($$self, $$props, $$invalidate) {
     	let $selectedAlbumId;
     	validate_store(selectedAlbumId, "selectedAlbumId");
     	component_subscribe($$self, selectedAlbumId, $$value => $$invalidate(1, $selectedAlbumId = $$value));
@@ -1733,13 +1748,13 @@ var app = (function () {
     class Album extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$j, create_fragment$j, safe_not_equal, { album: 0, index: 2 });
+    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { album: 0, index: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Album",
     			options,
-    			id: create_fragment$j.name
+    			id: create_fragment$k.name
     		});
 
     		const { ctx } = this.$$;
@@ -1844,7 +1859,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$i(ctx) {
+    function create_fragment$j(ctx) {
     	let art_grid_svlt;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -1920,7 +1935,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$i.name,
+    		id: create_fragment$j.name,
     		type: "component",
     		source: "",
     		ctx
@@ -1929,7 +1944,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$i($$self, $$props, $$invalidate) {
+    function instance$j($$self, $$props, $$invalidate) {
     	let $albumArtSizeConfig;
     	let $albumListStore;
     	validate_store(albumArtSizeConfig, "albumArtSizeConfig");
@@ -1980,13 +1995,13 @@ var app = (function () {
     class ArtGrid extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
+    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ArtGrid",
     			options,
-    			id: create_fragment$i.name
+    			id: create_fragment$j.name
     		});
     	}
     }
@@ -2101,7 +2116,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$h(ctx) {
+    function create_fragment$i(ctx) {
     	let grouping_svlt;
     	let select;
     	let option0;
@@ -2255,7 +2270,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$h.name,
+    		id: create_fragment$i.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2264,7 +2279,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$h($$self, $$props, $$invalidate) {
+    function instance$i($$self, $$props, $$invalidate) {
     	let $dbVersion;
     	let $albumPlayingIdStore;
     	let $selectedGroupByValueStore;
@@ -2427,13 +2442,13 @@ var app = (function () {
     class Grouping extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
+    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Grouping",
     			options,
-    			id: create_fragment$h.name
+    			id: create_fragment$i.name
     		});
     	}
     }
@@ -2458,7 +2473,7 @@ var app = (function () {
     /* src/components/NextButton.svelte generated by Svelte v3.38.3 */
     const file$e = "src/components/NextButton.svelte";
 
-    function create_fragment$g(ctx) {
+    function create_fragment$h(ctx) {
     	let svg;
     	let polygon;
     	let rect;
@@ -2513,7 +2528,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$g.name,
+    		id: create_fragment$h.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2522,7 +2537,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$g($$self, $$props, $$invalidate) {
+    function instance$h($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("NextButton", slots, []);
     	const writable_props = [];
@@ -2539,13 +2554,13 @@ var app = (function () {
     class NextButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {});
+    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "NextButton",
     			options,
-    			id: create_fragment$g.name
+    			id: create_fragment$h.name
     		});
     	}
     }
@@ -2553,7 +2568,7 @@ var app = (function () {
     /* src/components/PreviousButton.svelte generated by Svelte v3.38.3 */
     const file$d = "src/components/PreviousButton.svelte";
 
-    function create_fragment$f(ctx) {
+    function create_fragment$g(ctx) {
     	let svg;
     	let polygon;
     	let rect;
@@ -2609,7 +2624,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$f.name,
+    		id: create_fragment$g.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2618,7 +2633,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$f($$self, $$props, $$invalidate) {
+    function instance$g($$self, $$props, $$invalidate) {
     	let $playbackCursor;
     	let $playbackStore;
     	validate_store(playbackCursor, "playbackCursor");
@@ -2678,13 +2693,13 @@ var app = (function () {
     class PreviousButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { player: 1 });
+    		init(this, options, instance$g, create_fragment$g, safe_not_equal, { player: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PreviousButton",
     			options,
-    			id: create_fragment$f.name
+    			id: create_fragment$g.name
     		});
 
     		const { ctx } = this.$$;
@@ -2707,7 +2722,7 @@ var app = (function () {
     /* src/components/PlayButton.svelte generated by Svelte v3.38.3 */
     const file$c = "src/components/PlayButton.svelte";
 
-    function create_fragment$e(ctx) {
+    function create_fragment$f(ctx) {
     	let play_pause_button;
     	let left_part;
     	let t;
@@ -2759,7 +2774,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$e.name,
+    		id: create_fragment$f.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2768,7 +2783,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$e($$self, $$props, $$invalidate) {
+    function instance$f($$self, $$props, $$invalidate) {
     	let $isPlaying;
     	validate_store(isPlaying, "isPlaying");
     	component_subscribe($$self, isPlaying, $$value => $$invalidate(0, $isPlaying = $$value));
@@ -2819,13 +2834,13 @@ var app = (function () {
     class PlayButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$e, create_fragment$e, safe_not_equal, { player: 2 });
+    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { player: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayButton",
     			options,
-    			id: create_fragment$e.name
+    			id: create_fragment$f.name
     		});
 
     		const { ctx } = this.$$;
@@ -2848,7 +2863,7 @@ var app = (function () {
     /* src/components/PlayerProgress.svelte generated by Svelte v3.38.3 */
     const file$b = "src/components/PlayerProgress.svelte";
 
-    function create_fragment$d(ctx) {
+    function create_fragment$e(ctx) {
     	let player_progress;
     	let player_gloss;
     	let t0;
@@ -2895,7 +2910,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$d.name,
+    		id: create_fragment$e.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2904,7 +2919,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$d($$self, $$props, $$invalidate) {
+    function instance$e($$self, $$props, $$invalidate) {
     	let $updateSongProgress;
     	validate_store(updateSongProgress, "updateSongProgress");
     	component_subscribe($$self, updateSongProgress, $$value => $$invalidate(5, $updateSongProgress = $$value));
@@ -3032,13 +3047,13 @@ var app = (function () {
     class PlayerProgress extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$d, create_fragment$d, safe_not_equal, { player: 0, song: 1 });
+    		init(this, options, instance$e, create_fragment$e, safe_not_equal, { player: 0, song: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerProgress",
     			options,
-    			id: create_fragment$d.name
+    			id: create_fragment$e.name
     		});
 
     		const { ctx } = this.$$;
@@ -3073,7 +3088,7 @@ var app = (function () {
     /* src/components/PlayerVolumeBar.svelte generated by Svelte v3.38.3 */
     const file$a = "src/components/PlayerVolumeBar.svelte";
 
-    function create_fragment$c(ctx) {
+    function create_fragment$d(ctx) {
     	let volume_bar;
     	let input;
     	let input_step_value;
@@ -3154,7 +3169,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$c.name,
+    		id: create_fragment$d.name,
     		type: "component",
     		source: "",
     		ctx
@@ -3163,7 +3178,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$c($$self, $$props, $$invalidate) {
+    function instance$d($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("PlayerVolumeBar", slots, []);
     	let volume = 0;
@@ -3281,13 +3296,13 @@ var app = (function () {
     class PlayerVolumeBar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$c, create_fragment$c, safe_not_equal, { player: 2 });
+    		init(this, options, instance$d, create_fragment$d, safe_not_equal, { player: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerVolumeBar",
     			options,
-    			id: create_fragment$c.name
+    			id: create_fragment$d.name
     		});
 
     		const { ctx } = this.$$;
@@ -3395,10 +3410,10 @@ var app = (function () {
 
     /* src/includes/Player.svelte generated by Svelte v3.38.3 */
 
-    const { console: console_1$2 } = globals;
+    const { console: console_1$3 } = globals;
     const file$9 = "src/includes/Player.svelte";
 
-    function create_fragment$b(ctx) {
+    function create_fragment$c(ctx) {
     	let audio;
     	let track;
     	let t0;
@@ -3480,18 +3495,18 @@ var app = (function () {
     			t10 = text("-");
     			t11 = text(t11_value);
     			attr_dev(track, "kind", "captions");
-    			add_location(track, file$9, 165, 1, 6601);
+    			add_location(track, file$9, 166, 1, 6655);
     			audio.controls = true;
     			attr_dev(audio, "class", "svelte-72an4d");
-    			add_location(audio, file$9, 164, 0, 6484);
+    			add_location(audio, file$9, 165, 0, 6538);
     			set_custom_element_data(player_buttons, "class", "svelte-72an4d");
-    			add_location(player_buttons, file$9, 169, 1, 6652);
+    			add_location(player_buttons, file$9, 170, 1, 6706);
     			set_custom_element_data(song_duration, "class", "song-time svelte-72an4d");
-    			add_location(song_duration, file$9, 177, 1, 6794);
+    			add_location(song_duration, file$9, 178, 1, 6848);
     			set_custom_element_data(song_time_left, "class", "song-time svelte-72an4d");
-    			add_location(song_time_left, file$9, 183, 1, 6942);
+    			add_location(song_time_left, file$9, 184, 1, 6996);
     			set_custom_element_data(player_svlt, "class", "svelte-72an4d");
-    			add_location(player_svlt, file$9, 168, 0, 6637);
+    			add_location(player_svlt, file$9, 169, 0, 6691);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3583,7 +3598,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$b.name,
+    		id: create_fragment$c.name,
     		type: "component",
     		source: "",
     		ctx
@@ -3623,7 +3638,7 @@ var app = (function () {
     		});
     }
 
-    function instance$b($$self, $$props, $$invalidate) {
+    function instance$c($$self, $$props, $$invalidate) {
     	let $playbackCursor;
     	let $updateSongProgress;
     	let $playbackStore;
@@ -3815,7 +3830,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<Player> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$3.warn(`<Player> was created with unknown prop '${key}'`);
     	});
 
     	const play_handler = () => startInterval();
@@ -3840,6 +3855,7 @@ var app = (function () {
     		playbackStore,
     		parseDuration,
     		setWaveSource,
+    		streamAudio,
     		progress,
     		currentSong,
     		nextSongPreloaded,
@@ -3914,13 +3930,13 @@ var app = (function () {
     class Player extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {});
+    		init(this, options, instance$c, create_fragment$c, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Player",
     			options,
-    			id: create_fragment$b.name
+    			id: create_fragment$c.name
     		});
     	}
     }
@@ -3928,7 +3944,7 @@ var app = (function () {
     /* src/components/Star.svelte generated by Svelte v3.38.3 */
     const file$8 = "src/components/Star.svelte";
 
-    function create_fragment$a(ctx) {
+    function create_fragment$b(ctx) {
     	let stars;
     	let img0;
     	let img0_class_value;
@@ -4045,7 +4061,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$a.name,
+    		id: create_fragment$b.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4054,7 +4070,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$a($$self, $$props, $$invalidate) {
+    function instance$b($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("Star", slots, []);
     	const dispatch = createEventDispatcher();
@@ -4176,7 +4192,7 @@ var app = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$a, create_fragment$a, safe_not_equal, {
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {
     			songRating: 6,
     			hook: 7,
     			klass: 0,
@@ -4187,7 +4203,7 @@ var app = (function () {
     			component: this,
     			tagName: "Star",
     			options,
-    			id: create_fragment$a.name
+    			id: create_fragment$b.name
     		});
 
     		const { ctx } = this.$$;
@@ -4234,7 +4250,7 @@ var app = (function () {
     /* src/components/SongListItem.svelte generated by Svelte v3.38.3 */
     const file$7 = "src/components/SongListItem.svelte";
 
-    function create_fragment$9(ctx) {
+    function create_fragment$a(ctx) {
     	let song_list_item;
     	let song_number;
     	let t0_value = /*song*/ ctx[0].Genre + "";
@@ -4359,7 +4375,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$9.name,
+    		id: create_fragment$a.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4368,7 +4384,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$9($$self, $$props, $$invalidate) {
+    function instance$a($$self, $$props, $$invalidate) {
     	let $songPlayingIdStore;
     	let $selectedAlbumId;
     	let $albumPlayingIdStore;
@@ -4459,13 +4475,13 @@ var app = (function () {
     class SongListItem extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$9, create_fragment$9, safe_not_equal, { song: 0, index: 1 });
+    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { song: 0, index: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListItem",
     			options,
-    			id: create_fragment$9.name
+    			id: create_fragment$a.name
     		});
 
     		const { ctx } = this.$$;
@@ -4647,7 +4663,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$8(ctx) {
+    function create_fragment$9(ctx) {
     	let song_list_svlt;
     	let song_list;
     	let t;
@@ -4739,7 +4755,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$8.name,
+    		id: create_fragment$9.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4756,7 +4772,7 @@ var app = (function () {
     	// If the tag name matches the array of valid values.
     }
 
-    function instance$8($$self, $$props, $$invalidate) {
+    function instance$9($$self, $$props, $$invalidate) {
     	let $songListStore;
     	let $selectedAlbumId;
     	let $selectedSongsStore;
@@ -5019,13 +5035,13 @@ var app = (function () {
     class SongList extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongList",
     			options,
-    			id: create_fragment$8.name
+    			id: create_fragment$9.name
     		});
     	}
     }
@@ -5091,7 +5107,7 @@ var app = (function () {
 
     const file$5 = "src/components/TagEdit-Separator.svelte";
 
-    function create_fragment$7(ctx) {
+    function create_fragment$8(ctx) {
     	let tag_edit_separator;
 
     	const block = {
@@ -5116,7 +5132,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$7.name,
+    		id: create_fragment$8.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5125,7 +5141,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$7($$self, $$props) {
+    function instance$8($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TagEdit_Separator", slots, []);
     	const writable_props = [];
@@ -5140,13 +5156,13 @@ var app = (function () {
     class TagEdit_Separator extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit_Separator",
     			options,
-    			id: create_fragment$7.name
+    			id: create_fragment$8.name
     		});
     	}
     }
@@ -5297,7 +5313,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$6(ctx) {
+    function create_fragment$7(ctx) {
     	let tag_edit;
     	let tag_name;
     	let t0;
@@ -5430,7 +5446,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$6.name,
+    		id: create_fragment$7.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5451,7 +5467,7 @@ var app = (function () {
     	}
     }
 
-    function instance$6($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("TagEdit_Editor", slots, []);
     	const dispatch = createEventDispatcher();
@@ -5564,7 +5580,7 @@ var app = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {
     			value: 0,
     			type: 1,
     			showUndo: 2,
@@ -5577,7 +5593,7 @@ var app = (function () {
     			component: this,
     			tagName: "TagEdit_Editor",
     			options,
-    			id: create_fragment$6.name
+    			id: create_fragment$7.name
     		});
 
     		const { ctx } = this.$$;
@@ -5700,11 +5716,11 @@ var app = (function () {
 
     /* src/includes/TagEdit.svelte generated by Svelte v3.38.3 */
 
-    const { console: console_1$1 } = globals;
+    const { console: console_1$2 } = globals;
 
     const file$3 = "src/includes/TagEdit.svelte";
 
-    function create_fragment$5(ctx) {
+    function create_fragment$6(ctx) {
     	let tag_edit_svlt;
     	let component_name;
     	let t0;
@@ -6348,7 +6364,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$5.name,
+    		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
@@ -6357,7 +6373,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$5($$self, $$props, $$invalidate) {
+    function instance$6($$self, $$props, $$invalidate) {
     	let $selectedSongsStore;
     	let $songListStore;
     	validate_store(selectedSongsStore, "selectedSongsStore");
@@ -6461,7 +6477,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<TagEdit> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$2.warn(`<TagEdit> was created with unknown prop '${key}'`);
     	});
 
     	function tagediteditor0_value_binding(value) {
@@ -6667,20 +6683,20 @@ var app = (function () {
     class TagEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {}, [-1, -1]);
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {}, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit",
     			options,
-    			id: create_fragment$5.name
+    			id: create_fragment$6.name
     		});
     	}
     }
 
     /* src/controllers/ConfigController.svelte generated by Svelte v3.38.3 */
 
-    function create_fragment$4(ctx) {
+    function create_fragment$5(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -6695,7 +6711,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$4.name,
+    		id: create_fragment$5.name,
     		type: "component",
     		source: "",
     		ctx
@@ -6704,7 +6720,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$4($$self, $$props, $$invalidate) {
+    function instance$5($$self, $$props, $$invalidate) {
     	let $albumArtSizeConfig;
     	validate_store(albumArtSizeConfig, "albumArtSizeConfig");
     	component_subscribe($$self, albumArtSizeConfig, $$value => $$invalidate(0, $albumArtSizeConfig = $$value));
@@ -6760,20 +6776,20 @@ var app = (function () {
     class ConfigController extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ConfigController",
     			options,
-    			id: create_fragment$4.name
+    			id: create_fragment$5.name
     		});
     	}
     }
 
     /* src/controllers/PlayerController.svelte generated by Svelte v3.38.3 */
 
-    function create_fragment$3(ctx) {
+    function create_fragment$4(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -6788,7 +6804,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
+    		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
@@ -6797,7 +6813,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$3($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	let $selectedGroupByStore;
     	let $selectedGroupByValueStore;
     	let $dbVersion;
@@ -6974,13 +6990,13 @@ var app = (function () {
     class PlayerController extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerController",
     			options,
-    			id: create_fragment$3.name
+    			id: create_fragment$4.name
     		});
     	}
     }
@@ -6989,7 +7005,7 @@ var app = (function () {
 
     const file$2 = "src/includes/BackgroundArt.svelte";
 
-    function create_fragment$2(ctx) {
+    function create_fragment$3(ctx) {
     	let img;
     	let img_src_value;
 
@@ -7017,7 +7033,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$2.name,
+    		id: create_fragment$3.name,
     		type: "component",
     		source: "",
     		ctx
@@ -7026,7 +7042,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$2($$self, $$props) {
+    function instance$3($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("BackgroundArt", slots, []);
     	const writable_props = [];
@@ -7041,13 +7057,13 @@ var app = (function () {
     class BackgroundArt extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "BackgroundArt",
     			options,
-    			id: create_fragment$2.name
+    			id: create_fragment$3.name
     		});
     	}
     }
@@ -7055,7 +7071,7 @@ var app = (function () {
     /* src/includes/SongListBackground.svelte generated by Svelte v3.38.3 */
     const file$1 = "src/includes/SongListBackground.svelte";
 
-    function create_fragment$1(ctx) {
+    function create_fragment$2(ctx) {
     	let song_list_background_svlt;
 
     	const block = {
@@ -7080,7 +7096,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1.name,
+    		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
@@ -7099,7 +7115,7 @@ var app = (function () {
     	}
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
+    function instance$2($$self, $$props, $$invalidate) {
     	let $albumCoverArtMapStore;
     	let $selectedAlbumId;
     	validate_store(albumCoverArtMapStore, "albumCoverArtMapStore");
@@ -7175,13 +7191,13 @@ var app = (function () {
     class SongListBackground extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListBackground",
     			options,
-    			id: create_fragment$1.name
+    			id: create_fragment$2.name
     		});
     	}
     }
@@ -7198,6 +7214,110 @@ var app = (function () {
         }
     }
 
+    /* src/controllers/SyncTasks.svelte generated by Svelte v3.38.3 */
+
+    const { console: console_1$1 } = globals;
+
+    function create_fragment$1(ctx) {
+    	const block = {
+    		c: noop,
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: noop,
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: noop
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$1.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$1($$self, $$props, $$invalidate) {
+    	let $albumCoverArtMapStore;
+    	validate_store(albumCoverArtMapStore, "albumCoverArtMapStore");
+    	component_subscribe($$self, albumCoverArtMapStore, $$value => $$invalidate(1, $albumCoverArtMapStore = $$value));
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("SyncTasks", slots, []);
+    	let currentTasks = [];
+
+    	onMount(() => {
+    		syncTasks();
+    	});
+
+    	function syncTasks() {
+    		getTasksToSyncIPC(currentTasks).then(newTasks => {
+    			console.log(newTasks);
+    			currentTasks = newTasks;
+    			syncTasks();
+    			workOnTasks();
+    		});
+    	}
+
+    	function workOnTasks() {
+    		currentTasks.forEach(task => {
+    			if (task.type === "newCoverArt") {
+    				$albumCoverArtMapStore.set(task.data.id, {
+    					version: Date.now(),
+    					filePath: task.data.filePath,
+    					fileType: task.data.fileType
+    				});
+
+    				task.isDone = true;
+    			}
+    		});
+    	}
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console_1$1.warn(`<SyncTasks> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$capture_state = () => ({
+    		onMount,
+    		getTasksToSyncIPC,
+    		albumCoverArtMapStore,
+    		currentTasks,
+    		syncTasks,
+    		workOnTasks,
+    		$albumCoverArtMapStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("currentTasks" in $$props) currentTasks = $$props.currentTasks;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [];
+    }
+
+    class SyncTasks extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "SyncTasks",
+    			options,
+    			id: create_fragment$1.name
+    		});
+    	}
+    }
+
     /* src/App.svelte generated by Svelte v3.38.3 */
 
     const { console: console_1, document: document_1 } = globals;
@@ -7210,24 +7330,27 @@ var app = (function () {
     	let t1;
     	let configcontroller;
     	let t2;
+    	let synctasks;
+    	let t3;
     	let main;
     	let navigation;
-    	let t3;
-    	let artgrid;
     	let t4;
-    	let grouping;
+    	let artgrid;
     	let t5;
-    	let player;
+    	let grouping;
     	let t6;
-    	let songlist;
+    	let player;
     	let t7;
-    	let tagedit;
+    	let songlist;
     	let t8;
+    	let tagedit;
+    	let t9;
     	let songlistbackground;
     	let current;
     	document_1.title = title_value = /*$appTitle*/ ctx[0];
     	playercontroller = new PlayerController({ $$inline: true });
     	configcontroller = new ConfigController({ $$inline: true });
+    	synctasks = new SyncTasks({ $$inline: true });
     	navigation = new Navigation({ $$inline: true });
     	artgrid = new ArtGrid({ $$inline: true });
     	grouping = new Grouping({ $$inline: true });
@@ -7243,22 +7366,24 @@ var app = (function () {
     			t1 = space();
     			create_component(configcontroller.$$.fragment);
     			t2 = space();
+    			create_component(synctasks.$$.fragment);
+    			t3 = space();
     			main = element("main");
     			create_component(navigation.$$.fragment);
-    			t3 = space();
-    			create_component(artgrid.$$.fragment);
     			t4 = space();
-    			create_component(grouping.$$.fragment);
+    			create_component(artgrid.$$.fragment);
     			t5 = space();
-    			create_component(player.$$.fragment);
+    			create_component(grouping.$$.fragment);
     			t6 = space();
-    			create_component(songlist.$$.fragment);
+    			create_component(player.$$.fragment);
     			t7 = space();
-    			create_component(tagedit.$$.fragment);
+    			create_component(songlist.$$.fragment);
     			t8 = space();
+    			create_component(tagedit.$$.fragment);
+    			t9 = space();
     			create_component(songlistbackground.$$.fragment);
     			attr_dev(main, "class", "svelte-1fro297");
-    			add_location(main, file, 39, 0, 1520);
+    			add_location(main, file, 41, 0, 1609);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -7269,19 +7394,21 @@ var app = (function () {
     			insert_dev(target, t1, anchor);
     			mount_component(configcontroller, target, anchor);
     			insert_dev(target, t2, anchor);
+    			mount_component(synctasks, target, anchor);
+    			insert_dev(target, t3, anchor);
     			insert_dev(target, main, anchor);
     			mount_component(navigation, main, null);
-    			append_dev(main, t3);
-    			mount_component(artgrid, main, null);
     			append_dev(main, t4);
-    			mount_component(grouping, main, null);
+    			mount_component(artgrid, main, null);
     			append_dev(main, t5);
-    			mount_component(player, main, null);
+    			mount_component(grouping, main, null);
     			append_dev(main, t6);
-    			mount_component(songlist, main, null);
+    			mount_component(player, main, null);
     			append_dev(main, t7);
-    			mount_component(tagedit, main, null);
+    			mount_component(songlist, main, null);
     			append_dev(main, t8);
+    			mount_component(tagedit, main, null);
+    			append_dev(main, t9);
     			mount_component(songlistbackground, main, null);
     			current = true;
     		},
@@ -7294,6 +7421,7 @@ var app = (function () {
     			if (current) return;
     			transition_in(playercontroller.$$.fragment, local);
     			transition_in(configcontroller.$$.fragment, local);
+    			transition_in(synctasks.$$.fragment, local);
     			transition_in(navigation.$$.fragment, local);
     			transition_in(artgrid.$$.fragment, local);
     			transition_in(grouping.$$.fragment, local);
@@ -7306,6 +7434,7 @@ var app = (function () {
     		o: function outro(local) {
     			transition_out(playercontroller.$$.fragment, local);
     			transition_out(configcontroller.$$.fragment, local);
+    			transition_out(synctasks.$$.fragment, local);
     			transition_out(navigation.$$.fragment, local);
     			transition_out(artgrid.$$.fragment, local);
     			transition_out(grouping.$$.fragment, local);
@@ -7321,6 +7450,8 @@ var app = (function () {
     			if (detaching) detach_dev(t1);
     			destroy_component(configcontroller, detaching);
     			if (detaching) detach_dev(t2);
+    			destroy_component(synctasks, detaching);
+    			if (detaching) detach_dev(t3);
     			if (detaching) detach_dev(main);
     			destroy_component(navigation);
     			destroy_component(artgrid);
@@ -7393,11 +7524,13 @@ var app = (function () {
     		SongListBackground,
     		onMount,
     		getChangesProgressIPC,
+    		getTasksToSyncIPC,
     		showContextMenuIPC,
     		syncDbVersionIPC,
     		albumListStore,
     		appTitle,
     		handleContextMenuEvent,
+    		SyncTasks,
     		getNewDbChangesProgress,
     		$appTitle
     	});

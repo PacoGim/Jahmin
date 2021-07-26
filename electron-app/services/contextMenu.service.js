@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadContextMenu = void 0;
 const electron_1 = require("electron");
-const main_1 = require("electron/main");
+const albumArt_service_1 = require("./albumArt.service");
 const songSync_service_1 = require("./songSync.service");
 const storage_service_1 = require("./storage.service");
+const systemSync_service_1 = require("./systemSync.service");
 function loadContextMenu(event, menuToOpen, parameters) {
     let template = [];
     parameters = JSON.parse(parameters);
@@ -32,11 +33,20 @@ function getAlbumContextMenuTemplate(albumId) {
         }
     });
     template.push({
-        label: `Add Album Cover`,
+        label: `Reload Album Cover`,
         click: () => {
-            main_1.dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => {
-                console.log(result);
-            });
+            if (album) {
+                albumArt_service_1.getAlbumCover(album.RootDir).then((result) => {
+                    systemSync_service_1.addTaskToSync({
+                        type: 'newCoverArt',
+                        data: {
+                            id: album === null || album === void 0 ? void 0 : album.ID,
+                            filePath: result.filePath,
+                            fileType: result.fileType
+                        }
+                    });
+                });
+            }
         }
     });
     return template;

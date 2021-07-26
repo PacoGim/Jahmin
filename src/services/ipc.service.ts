@@ -16,8 +16,19 @@ import { getNewPromiseDbVersion, getStorageMap } from './storage.service'
 import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
+import { getTasksToSync } from './systemSync.service'
+
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => loadContextMenu(event, menuToOpen, parameters))
+
+	ipcMain.handle('stream-audio', async (evt, path) => {
+		// console.log(path)
+		// return fs.createReadStream(path)
+	})
+
+	ipcMain.handle('sync-tasks', async (evt, currentTasks) => {
+		return await getTasksToSync(currentTasks)
+	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {
 		let config = getConfig()
