@@ -1,10 +1,30 @@
 const { ipcRenderer } = require('electron')
 
-import { dbVersion } from '../store/final.store'
+import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
+
+ipcRenderer.on('new-cover', (event, data) => {
+	if (data.success === true) {
+		let tempAlbumCoverArtMap = undefined
+
+		albumCoverArtMapStore.subscribe((albumCoverArtMap) => {
+			albumCoverArtMap.set(data.id, {
+				version: Date.now(),
+				filePath: data.filePath,
+				fileType: data.fileType
+			})
+
+			tempAlbumCoverArtMap = albumCoverArtMap
+		})()
+
+		if (tempAlbumCoverArtMap) {
+			albumCoverArtMapStore.set(tempAlbumCoverArtMap)
+		}
+	}
+})
 
 export function getTagEditProgressIPC(): Promise<string[]> {
 	return new Promise((resolve, reject) => {
@@ -29,9 +49,9 @@ export function getTagEditProgressIPC(): Promise<string[]> {
 	})
 }
 
-export function getTasksToSyncIPC(currentTasks): Promise<any[]> {
+export function getTasksToSyncIPC(): Promise<any[]> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('sync-tasks',currentTasks).then((result) => {
+		ipcRenderer.invoke('sync-tasks').then((result) => {
 			resolve(result)
 		})
 	})

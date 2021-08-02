@@ -12,7 +12,7 @@ import { getStorageMap } from './storage.service'
 
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-export function getAlbumColors(imageId: string): Promise<ColorType> {
+export function getAlbumColors(imageId: string): Promise<ColorType | undefined> {
 	return new Promise(async (resolve, reject) => {
 		let rootDir = getStorageMap().get(imageId)?.RootDir
 
@@ -21,6 +21,10 @@ export function getAlbumColors(imageId: string): Promise<ColorType> {
 		}
 
 		const image = await getAlbumCover(rootDir, true)
+
+		if (image === undefined) {
+			return resolve(undefined)
+		}
 
 		// let config = getConfig()
 		// let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)

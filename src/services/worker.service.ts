@@ -15,6 +15,7 @@ type WorkerNameType =
 	| 'exifToolRead'
 	| 'exifToolWrite'
 	| 'nodeID3'
+	| 'sharp'
 
 type WorkerType = {
 	id: number

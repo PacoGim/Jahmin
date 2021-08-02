@@ -30,8 +30,21 @@ worker?.on('message', (message) => {
 		updateData(message.data)
 	} else if (message.type === 'delete') {
 		deleteData(message.data)
+	} else if (message.type === 'deleteFolder') {
+		deleteFolder(message.data)
 	}
 })
+
+function deleteFolder(rootDir: string) {
+	let rootId = hash(rootDir, 'text') as string
+
+	let mappedData = storageMap.get(rootId)
+
+	if (mappedData) {
+		storageMap.delete(rootId)
+		if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+	}
+}
 
 function deleteData(songPath: string) {
 	let rootDir = songPath.split('/').slice(0, -1).join('/')

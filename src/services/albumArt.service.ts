@@ -8,12 +8,16 @@ import { mkdirSync } from 'original-fs'
 import { getConfig } from './config.service'
 import { hash } from '../functions/hashString.fn'
 
-export function getAlbumCover(rootDir: string, forceImage: boolean = false): Promise<{ fileType: string; filePath: string }> {
+export function getAlbumCover(
+	rootDir: string,
+	forceImage: boolean = false,
+	forceNewImage: boolean = false
+): Promise<{ fileType: string; filePath: string } | undefined> {
 	return new Promise((resolve, reject) => {
 		let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg']
 		const notCompress = ['mp4', 'webm', 'apng', 'gif']
 		const videoFormats = ['mp4', 'webm']
-		const validNames = ['cover', 'folder', 'front', 'art']
+		const validNames = ['cover', 'folder', 'front', 'art', 'album']
 
 		if (forceImage === true) {
 			validFormats = validFormats.filter((format) => !videoFormats.includes(format))
@@ -28,13 +32,17 @@ export function getAlbumCover(rootDir: string, forceImage: boolean = false): Pro
 		let artFilePath = path.join(artDirPath, rootDirHashed) + '.webp'
 
 		// If exists resolve right now the already compressed IMAGE ART
-		if (fs.existsSync(artFilePath)) {
+		if (forceNewImage === false && fs.existsSync(artFilePath)) {
 			return resolve({ fileType: 'image', filePath: artFilePath })
+		}
+
+		if (fs.existsSync(rootDir) === false) {
+			return resolve(undefined)
 		}
 
 		let allowedMediaFiles = fs
 			.readdirSync(rootDir)
-			.filter((file) => allowedNames.includes(file))
+			.filter((file) => allowedNames.includes(file.toLowerCase()))
 			.map((file) => path.join(rootDir, file))
 			.sort((a, b) => {
 				// Gets the priority from the index of the valid formats above.
@@ -46,7 +54,7 @@ export function getAlbumCover(rootDir: string, forceImage: boolean = false): Pro
 			})
 
 		if (allowedMediaFiles.length === 0) {
-			return resolve(null)
+			return resolve(undefined)
 		}
 
 		let preferredArt = allowedMediaFiles[0]
@@ -71,6 +79,13 @@ function compressImage(filePath: string, artDirPath: string, artPath: string) {
 		mkdirSync(artDirPath, { recursive: true })
 	}
 
+	// let data = {
+	// 	filePath,
+	// 	dimension,
+	// 	artPath
+	// }
+
+	// sharpWorker?.postMessage(data)
 	sharp(filePath)
 		.resize({
 			height: dimension * 2,

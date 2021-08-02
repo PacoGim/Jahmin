@@ -28,6 +28,9 @@ function getAlbumColors(imageId) {
             return resolve(undefined);
         }
         const image = yield albumArt_service_1.getAlbumCover(rootDir, true);
+        if (image === undefined) {
+            return resolve(undefined);
+        }
         // let config = getConfig()
         // let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
         sharp_1.default(image.filePath)

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { hash } from '../functions/hashString.fn'
 	import { getCoverIPC } from '../service/ipc.service'
 	import { albumCoverArtMapStore } from '../store/final.store'
 	import type { CoverArtType } from '../types/coverArt.type'
@@ -8,25 +9,34 @@
 	let coverSrc = undefined
 
 	export let rootDir
-	export let albumId
+	export let observe = false
 
 	let albumCoverArtVersion = undefined
 
 	let coverArtObserver: IntersectionObserver
 
 	$: {
-		const ALBUM_COVER_ART_DATA = $albumCoverArtMapStore.get(albumId)
+		console.log(rootDir)
+	}
 
+	$: {
+		console.log('yes')
+
+		let albumId = hash(rootDir, 'text')
+		const ALBUM_COVER_ART_DATA = $albumCoverArtMapStore.get(albumId)
 		if (ALBUM_COVER_ART_DATA?.version !== albumCoverArtVersion) {
 			setCoverData(ALBUM_COVER_ART_DATA)
 		}
 	}
 
 	onMount(() => {
-		addIntersectionObserver()
+		if (observe) {
+			addIntersectionObserver()
+		}
 	})
 
 	function addIntersectionObserver() {
+		let albumId = hash(rootDir, 'text')
 		coverArtObserver = new IntersectionObserver(
 			(entries) => {
 				if (entries[0].isIntersecting === true) {
@@ -45,17 +55,20 @@
 			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
 		)
 
-		coverArtObserver.observe(document.querySelector(`art-grid-svlt > #${CSS.escape(albumId)}`))
+		coverArtObserver.observe(document.querySelector(`art-grid-svlt > #${CSS.escape(String(albumId))}`))
 	}
 
 	function setCoverData(coverData: CoverArtType) {
-		albumCoverArtVersion = coverData.version
-		coverType = coverData.fileType
-		coverSrc = coverData.filePath
+		if (coverData) {
+			albumCoverArtVersion = coverData.version
+			coverType = coverData.fileType
+			coverSrc = `${coverData.filePath}#${coverData.version}`
+		}
 	}
 
 	function getAlbumCover() {
 		getCoverIPC(rootDir).then((response: CoverArtType) => {
+			let albumId = hash(rootDir, 'text')
 			if (response) {
 				$albumCoverArtMapStore.set(albumId, {
 					version: 0,
@@ -64,9 +77,9 @@
 				})
 
 				$albumCoverArtMapStore = $albumCoverArtMapStore
-			}else{
-        coverType='not found'
-      }
+			} else {
+				coverType = 'not found'
+			}
 		})
 	}
 </script>

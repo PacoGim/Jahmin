@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import CoverArt from '../components/CoverArt.svelte'
 
 	import Star from '../components/Star.svelte'
 
@@ -9,13 +10,20 @@
 	import { isEmptyObject } from '../functions/isEmptyObject.fn'
 	import { editTagsIPC, getTagEditProgressIPC } from '../service/ipc.service'
 
-	import { elementMap, selectedSongsStore, songListStore } from '../store/final.store'
+	import { selectedSongsStore, songListStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 
 	let songsToEdit: SongType[] = []
 	let tagList = getEmptyTagList()
 	let enableButtons = false
-	let newTags = {}
+	let newTags: any = {}
+	let rootDir = ''
+
+	$: {
+		if ($songListStore.length > 0) {
+			rootDir = $songListStore[0].SourceFile.split('/').slice(0, -1).join('/')
+		}
+	}
 
 	$: getSelectedSongs($selectedSongsStore, $songListStore)
 
@@ -230,6 +238,10 @@
 		showUndo={tagList.Rating.bind !== tagList.Rating.value}
 	/>
 
+	<cover-art>
+		<!-- <CoverArt {rootDir} /> -->
+	</cover-art>
+
 	<button-group>
 		<button on:click={updateSongs} class="update-button {enableButtons ? '' : 'disabled'}">Update</button>
 		<button on:click={undoAllChanges} class="cancel-button {enableButtons ? '' : 'disabled'}">Cancel</button>
@@ -237,6 +249,10 @@
 </tag-edit-svlt>
 
 <style>
+
+	cover-art{
+		width: 100%;
+	}
 	button-group {
 		display: flex;
 		justify-content: space-evenly;

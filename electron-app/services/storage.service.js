@@ -27,7 +27,19 @@ worker === null || worker === void 0 ? void 0 : worker.on('message', (message) =
     else if (message.type === 'delete') {
         deleteData(message.data);
     }
+    else if (message.type === 'deleteFolder') {
+        deleteFolder(message.data);
+    }
 });
+function deleteFolder(rootDir) {
+    let rootId = hashString_fn_1.hash(rootDir, 'text');
+    let mappedData = storageMap.get(rootId);
+    if (mappedData) {
+        storageMap.delete(rootId);
+        if (dbVersionResolve !== undefined)
+            dbVersionResolve(new Date().getTime());
+    }
+}
 function deleteData(songPath) {
     let rootDir = songPath.split('/').slice(0, -1).join('/');
     let rootId = hashString_fn_1.hash(rootDir, 'text');

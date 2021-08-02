@@ -34,8 +34,8 @@ function loadIPC() {
         // console.log(path)
         // return fs.createReadStream(path)
     }));
-    electron_1.ipcMain.handle('sync-tasks', (evt, currentTasks) => __awaiter(this, void 0, void 0, function* () {
-        return yield systemSync_service_1.getTasksToSync(currentTasks);
+    electron_1.ipcMain.handle('sync-tasks', (evt) => __awaiter(this, void 0, void 0, function* () {
+        return yield systemSync_service_1.getTasksToSync();
     }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();

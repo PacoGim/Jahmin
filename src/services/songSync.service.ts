@@ -73,10 +73,23 @@ function processQueue() {
 }
 
 export function reloadAlbumData(albumId: string) {
+	//IMPORTANT Fix issue when deleting songs? Or when updating
+	// Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
+	console.log(albumId)
 	let album = getStorageMap().get(albumId)
 	let rootDir = album?.RootDir
 
 	if (rootDir === undefined) return
+
+	if (fs.existsSync(rootDir) === false) {
+		storageWorker?.postMessage({
+			type: 'deleteFolder',
+			data: rootDir,
+			appDataPath: appDataPath()
+		})
+
+		return
+	}
 
 	// Gets all song in folder.
 	let rootDirSongs = fs
@@ -175,7 +188,11 @@ export function watchFolders(rootDirectories: string[]) {
 
 	watcher.on('ready', () => {
 		// When watcher is done getting files, any new files added afterwards are detected here.
-		watcher.on('add', (path) => addToTaskQueue(path, 'insert'))
+		watcher.on('add', (path) => {
+			if (isAudioFile(path)) {
+				addToTaskQueue(path, 'insert')
+			}
+		})
 
 		filterNewSongs()
 	})

@@ -11,19 +11,21 @@ const hashString_fn_1 = require("../functions/hashString.fn");
 let storagePath = undefined;
 let workQueue = [];
 let isWorkQueueuIterating = false;
+let storesMap = new Map();
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', ({ type, data, appDataPath }) => {
     if (appDataPath && storagePath === undefined)
         storagePath = path_1.default.join(appDataPath, 'storage');
-    if (type === 'insert' || type === 'delete' || type === 'update') {
-        workQueue.push({
-            type,
-            data
-        });
-        if (!isWorkQueueuIterating) {
-            isWorkQueueuIterating = true;
-            iterateWorkQueue();
-        }
+    // console.log(type, data)
+    // if (type === 'insert' || type === 'delete' || type === 'update') {
+    workQueue.push({
+        type,
+        data
+    });
+    if (!isWorkQueueuIterating) {
+        isWorkQueueuIterating = true;
+        iterateWorkQueue();
     }
+    // }
 });
 function iterateWorkQueue() {
     let work = workQueue.shift();
@@ -48,12 +50,39 @@ function iterateWorkQueue() {
                 iterateWorkQueue();
             });
         }
+        else if (['deleteFolder'].includes(work.type)) {
+            deleteFolder(work.data).then(() => {
+                worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
+                    type: work === null || work === void 0 ? void 0 : work.type,
+                    data: work === null || work === void 0 ? void 0 : work.data
+                });
+                iterateWorkQueue();
+            });
+        }
     }
     else {
         isWorkQueueuIterating = false;
     }
 }
-let storesMap = new Map();
+function deleteFolder(rootFolder) {
+    return new Promise((resolve, reject) => {
+        let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
+        let store = storesMap.get(rootFolderId);
+        if (!store) {
+            store = loadStore(rootFolderId);
+            /* 			let storeConfig: { name: string; cwd?: string } = {
+                name: rootFolderId
+            }
+
+            if (storagePath) storeConfig.cwd = storagePath
+
+            store = new Store(storeConfig)
+            storesMap.set(rootFolderId, store) */
+        }
+        store.clear();
+        resolve('');
+    });
+}
 function deleteData(path) {
     return new Promise((resolve, reject) => {
         let rootFolder = path === null || path === void 0 ? void 0 : path.split('/').slice(0, -1).join('/');
@@ -61,13 +90,15 @@ function deleteData(path) {
         let songId = String(hashString_fn_1.hash(path, 'number'));
         let store = storesMap.get(rootFolderId);
         if (!store) {
-            let storeConfig = {
+            store = loadStore(rootFolderId);
+            /* 			let storeConfig: { name: string; cwd?: string } = {
                 name: rootFolderId
-            };
-            if (storagePath)
-                storeConfig.cwd = storagePath;
-            store = new electron_store_1.default(storeConfig);
-            storesMap.set(rootFolderId, store);
+            }
+
+            if (storagePath) storeConfig.cwd = storagePath
+
+            store = new Store(storeConfig)
+            storesMap.set(rootFolderId, store) */
         }
         store.delete(songId);
         updateStorageVersion();
@@ -94,18 +125,31 @@ function insert(data) {
         let songId = String(hashString_fn_1.hash(data.SourceFile, 'number'));
         let store = storesMap.get(rootFolderId);
         if (!store) {
-            let storeConfig = {
+            store = loadStore(rootFolderId);
+            /* 			let storeConfig: { name: string; cwd?: string } = {
                 name: rootFolderId
-            };
-            if (storagePath)
-                storeConfig.cwd = storagePath;
-            store = new electron_store_1.default(storeConfig);
-            storesMap.set(rootFolderId, store);
+            }
+
+            if (storagePath) storeConfig.cwd = storagePath
+
+            store = new Store(storeConfig)
+            storesMap.set(rootFolderId, store) */
         }
         store.set(songId, data);
         updateStorageVersion();
         resolve('');
     });
+}
+function loadStore(rootFolderId) {
+    let store = storesMap.get(rootFolderId);
+    let storeConfig = {
+        name: rootFolderId
+    };
+    if (storagePath)
+        storeConfig.cwd = storagePath;
+    store = new electron_store_1.default(storeConfig);
+    storesMap.set(rootFolderId, store);
+    return store;
 }
 function updateStorageVersion() {
     if (storagePath) {

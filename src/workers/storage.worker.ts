@@ -12,8 +12,10 @@ let storagePath: string | undefined = undefined
 let workQueue: WorkType[] = []
 let isWorkQueueuIterating = false
 
+let storesMap = new Map<String, Store<Record<string, unknown>>>()
+
 type WorkType = {
-	type: 'insert' | 'delete' | 'update' | 'read'
+	type: 'insert' | 'delete' | 'update' | 'deleteFolder'
 	data: any
 	appDataPath?: 'string'
 }
@@ -21,17 +23,19 @@ type WorkType = {
 parentPort?.on('message', ({ type, data, appDataPath }: WorkType) => {
 	if (appDataPath && storagePath === undefined) storagePath = path.join(appDataPath, 'storage')
 
-	if (type === 'insert' || type === 'delete' || type === 'update') {
-		workQueue.push({
-			type,
-			data
-		})
+	// console.log(type, data)
 
-		if (!isWorkQueueuIterating) {
-			isWorkQueueuIterating = true
-			iterateWorkQueue()
-		}
+	// if (type === 'insert' || type === 'delete' || type === 'update') {
+	workQueue.push({
+		type,
+		data
+	})
+
+	if (!isWorkQueueuIterating) {
+		isWorkQueueuIterating = true
+		iterateWorkQueue()
 	}
+	// }
 })
 
 function iterateWorkQueue() {
@@ -58,13 +62,43 @@ function iterateWorkQueue() {
 
 				iterateWorkQueue()
 			})
+		} else if (['deleteFolder'].includes(work.type)) {
+			deleteFolder(work.data).then(() => {
+				parentPort?.postMessage({
+					type: work?.type,
+					data: work?.data
+				})
+
+				iterateWorkQueue()
+			})
 		}
 	} else {
 		isWorkQueueuIterating = false
 	}
 }
 
-let storesMap = new Map<String, Store<Record<string, unknown>>>()
+function deleteFolder(rootFolder: string) {
+	return new Promise((resolve, reject) => {
+		let rootFolderId = hash(rootFolder!, 'text') as string
+		let store = storesMap.get(rootFolderId)
+
+		if (!store) {
+			store = loadStore(rootFolderId)
+			/* 			let storeConfig: { name: string; cwd?: string } = {
+				name: rootFolderId
+			}
+
+			if (storagePath) storeConfig.cwd = storagePath
+
+			store = new Store(storeConfig)
+			storesMap.set(rootFolderId, store) */
+		}
+
+		store.clear()
+
+		resolve('')
+	})
+}
 
 function deleteData(path: string) {
 	return new Promise((resolve, reject) => {
@@ -75,14 +109,15 @@ function deleteData(path: string) {
 		let store = storesMap.get(rootFolderId)
 
 		if (!store) {
-			let storeConfig: { name: string; cwd?: string } = {
+			store = loadStore(rootFolderId)
+			/* 			let storeConfig: { name: string; cwd?: string } = {
 				name: rootFolderId
 			}
 
 			if (storagePath) storeConfig.cwd = storagePath
 
 			store = new Store(storeConfig)
-			storesMap.set(rootFolderId, store)
+			storesMap.set(rootFolderId, store) */
 		}
 
 		store.delete(songId)
@@ -114,20 +149,36 @@ function insert(data: TagType) {
 		let store = storesMap.get(rootFolderId)
 
 		if (!store) {
-			let storeConfig: { name: string; cwd?: string } = {
+			store = loadStore(rootFolderId)
+			/* 			let storeConfig: { name: string; cwd?: string } = {
 				name: rootFolderId
 			}
 
 			if (storagePath) storeConfig.cwd = storagePath
 
 			store = new Store(storeConfig)
-			storesMap.set(rootFolderId, store)
+			storesMap.set(rootFolderId, store) */
 		}
 
 		store.set(songId, data)
 		updateStorageVersion()
 		resolve('')
 	})
+}
+
+function loadStore(rootFolderId: string) {
+	let store = storesMap.get(rootFolderId)
+
+	let storeConfig: { name: string; cwd?: string } = {
+		name: rootFolderId
+	}
+
+	if (storagePath) storeConfig.cwd = storagePath
+
+	store = new Store(storeConfig)
+	storesMap.set(rootFolderId, store)
+
+	return store
 }
 
 function updateStorageVersion() {

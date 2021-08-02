@@ -65,10 +65,21 @@ function processQueue() {
     }
 }
 function reloadAlbumData(albumId) {
+    //IMPORTANT Fix issue when deleting songs? Or when updating
+    // Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
+    console.log(albumId);
     let album = storage_service_1.getStorageMap().get(albumId);
     let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
     if (rootDir === undefined)
         return;
+    if (fs_1.default.existsSync(rootDir) === false) {
+        storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+            type: 'deleteFolder',
+            data: rootDir,
+            appDataPath: __1.appDataPath()
+        });
+        return;
+    }
     // Gets all song in folder.
     let rootDirSongs = fs_1.default
         .readdirSync(rootDir)
@@ -157,7 +168,11 @@ function watchFolders(rootDirectories) {
     }) */
     watcher.on('ready', () => {
         // When watcher is done getting files, any new files added afterwards are detected here.
-        watcher.on('add', (path) => addToTaskQueue(path, 'insert'));
+        watcher.on('add', (path) => {
+            if (isAudioFile(path)) {
+                addToTaskQueue(path, 'insert');
+            }
+        });
         filterNewSongs();
     });
 }

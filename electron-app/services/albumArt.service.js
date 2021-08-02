@@ -11,13 +11,13 @@ const __1 = require("..");
 const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
-function getAlbumCover(rootDir, forceImage = false) {
+function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
     return new Promise((resolve, reject) => {
         var _a;
         let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg'];
         const notCompress = ['mp4', 'webm', 'apng', 'gif'];
         const videoFormats = ['mp4', 'webm'];
-        const validNames = ['cover', 'folder', 'front', 'art'];
+        const validNames = ['cover', 'folder', 'front', 'art', 'album'];
         if (forceImage === true) {
             validFormats = validFormats.filter((format) => !videoFormats.includes(format));
         }
@@ -28,12 +28,15 @@ function getAlbumCover(rootDir, forceImage = false) {
         let artDirPath = path_1.default.join(__1.appDataPath(), 'art', String(dimension));
         let artFilePath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
         // If exists resolve right now the already compressed IMAGE ART
-        if (fs_1.default.existsSync(artFilePath)) {
+        if (forceNewImage === false && fs_1.default.existsSync(artFilePath)) {
             return resolve({ fileType: 'image', filePath: artFilePath });
+        }
+        if (fs_1.default.existsSync(rootDir) === false) {
+            return resolve(undefined);
         }
         let allowedMediaFiles = fs_1.default
             .readdirSync(rootDir)
-            .filter((file) => allowedNames.includes(file))
+            .filter((file) => allowedNames.includes(file.toLowerCase()))
             .map((file) => path_1.default.join(rootDir, file))
             .sort((a, b) => {
             // Gets the priority from the index of the valid formats above.
@@ -43,7 +46,7 @@ function getAlbumCover(rootDir, forceImage = false) {
             return aExtension - bExtension;
         });
         if (allowedMediaFiles.length === 0) {
-            return resolve(null);
+            return resolve(undefined);
         }
         let preferredArt = allowedMediaFiles[0];
         if (videoFormats.includes(getExtension(preferredArt))) {
@@ -65,6 +68,12 @@ function compressImage(filePath, artDirPath, artPath) {
     if (!fs_1.default.existsSync(artDirPath)) {
         original_fs_1.mkdirSync(artDirPath, { recursive: true });
     }
+    // let data = {
+    // 	filePath,
+    // 	dimension,
+    // 	artPath
+    // }
+    // sharpWorker?.postMessage(data)
     sharp_1.default(filePath)
         .resize({
         height: dimension * 2,

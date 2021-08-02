@@ -26,7 +26,7 @@ function getAlbumContextMenuTemplate(albumId: string) {
 	template.push({
 		label: `Show ${album?.Name || ''} Folder`,
 		click: () => {
-			shell.showItemInFolder(album?.RootDir || '')
+			shell.openPath(album?.RootDir || '')
 		}
 	})
 
@@ -39,16 +39,14 @@ function getAlbumContextMenuTemplate(albumId: string) {
 
 	template.push({
 		label: `Reload Album Cover`,
-		click: () => {
+		click: (menuItem, browserWindow, event) => {
 			if (album) {
-				getAlbumCover(album.RootDir).then((result) => {
-					addTaskToSync({
-						type: 'newCoverArt',
-						data: {
-							id: album?.ID,
-							filePath: result.filePath,
-							fileType: result.fileType
-						}
+				getAlbumCover(album.RootDir, false, true).then((result) => {
+					browserWindow?.webContents.send('new-cover', {
+						success: result !== undefined,
+						id: album?.ID,
+						filePath: result?.filePath,
+						fileType: result?.fileType
 					})
 				})
 			}

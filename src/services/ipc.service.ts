@@ -26,8 +26,8 @@ export function loadIPC() {
 		// return fs.createReadStream(path)
 	})
 
-	ipcMain.handle('sync-tasks', async (evt, currentTasks) => {
-		return await getTasksToSync(currentTasks)
+	ipcMain.handle('sync-tasks', async (evt) => {
+		return await getTasksToSync()
 	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {

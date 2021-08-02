@@ -5,7 +5,6 @@ const electron_1 = require("electron");
 const albumArt_service_1 = require("./albumArt.service");
 const songSync_service_1 = require("./songSync.service");
 const storage_service_1 = require("./storage.service");
-const systemSync_service_1 = require("./systemSync.service");
 function loadContextMenu(event, menuToOpen, parameters) {
     let template = [];
     parameters = JSON.parse(parameters);
@@ -23,7 +22,7 @@ function getAlbumContextMenuTemplate(albumId) {
     template.push({
         label: `Show ${(album === null || album === void 0 ? void 0 : album.Name) || ''} Folder`,
         click: () => {
-            electron_1.shell.showItemInFolder((album === null || album === void 0 ? void 0 : album.RootDir) || '');
+            electron_1.shell.openPath((album === null || album === void 0 ? void 0 : album.RootDir) || '');
         }
     });
     template.push({
@@ -34,16 +33,14 @@ function getAlbumContextMenuTemplate(albumId) {
     });
     template.push({
         label: `Reload Album Cover`,
-        click: () => {
+        click: (menuItem, browserWindow, event) => {
             if (album) {
-                albumArt_service_1.getAlbumCover(album.RootDir).then((result) => {
-                    systemSync_service_1.addTaskToSync({
-                        type: 'newCoverArt',
-                        data: {
-                            id: album === null || album === void 0 ? void 0 : album.ID,
-                            filePath: result.filePath,
-                            fileType: result.fileType
-                        }
+                albumArt_service_1.getAlbumCover(album.RootDir, false, true).then((result) => {
+                    browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('new-cover', {
+                        success: result !== undefined,
+                        id: album === null || album === void 0 ? void 0 : album.ID,
+                        filePath: result === null || result === void 0 ? void 0 : result.filePath,
+                        fileType: result === null || result === void 0 ? void 0 : result.fileType
                     });
                 });
             }

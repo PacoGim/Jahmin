@@ -30,7 +30,7 @@ export let selectedAlbumId: Writable<string> = writable(undefined)
 
 export let selectedSongsStore: Writable<number[]> = writable([])
 
-export let albumCoverArtMapStore: Writable<Map<string, CoverArtType>> = writable(new Map<string, CoverArtType>())
+export let albumCoverArtMapStore: Writable<Map<string|number, CoverArtType>> = writable(new Map<string, CoverArtType>())
 
 export let appTitle: Writable<string> = writable('Jahmin')
 
