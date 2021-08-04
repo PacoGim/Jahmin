@@ -6,9 +6,12 @@
 
 	$: {
 		// Loads cover if Cover Art map (If image updated) or Selected Album changes.
+		// console.log($selectedAlbumId)
 
 		// Get Cover Art from Map.
 		let coverArt = $albumCoverArtMapStore.get($selectedAlbumId)
+
+		// console.log(coverArt)
 
 		// If Found
 		if (coverArt) {
@@ -58,7 +61,7 @@
 		/* background-size: cover; */
 		background-repeat: no-repeat;
 		background-size: 100% 100%;
-		z-index: -1;
+		z-index: 1;
 
 		transition: background-image 300ms;
 	}
@@ -70,6 +73,6 @@
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.33);
 		backdrop-filter: blur(100px);
-		/* z-index: 1; */
+		/* z-index: 2; */
 	}
 </style>

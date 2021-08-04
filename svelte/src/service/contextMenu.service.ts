@@ -1,4 +1,5 @@
 import { showContextMenuIPC } from './ipc.service'
+import { selectedAlbumId, selectedSongsStore } from '../store/final.store'
 
 export function handleContextMenuEvent(e: MouseEvent) {
 	e.preventDefault()
@@ -10,11 +11,21 @@ export function handleContextMenuEvent(e: MouseEvent) {
 
 		let albumId = albumElement.getAttribute('id')
 
-		showContextMenuIPC(
-			'AlbumContextMenu',
-			JSON.stringify({
-				albumId
-			})
-		)
+		showContextMenuIPC('AlbumContextMenu', {
+			albumId
+		})
+	}
+
+	if (pathsName.includes('SONG-LIST')) {
+		let albumId
+		let songs
+
+		selectedAlbumId.subscribe((_) => (albumId = _))()
+		selectedSongsStore.subscribe((_) => (songs = _))()
+
+		showContextMenuIPC('SongContextMenu', {
+			albumId,
+			songs
+		})
 	}
 }

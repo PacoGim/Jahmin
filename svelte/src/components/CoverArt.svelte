@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { hash } from '../functions/hashString.fn'
+	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
 	import { getCoverIPC } from '../service/ipc.service'
 	import { albumCoverArtMapStore } from '../store/final.store'
 	import type { CoverArtType } from '../types/coverArt.type'
@@ -13,52 +14,42 @@
 
 	let albumCoverArtVersion = undefined
 
-	let coverArtObserver: IntersectionObserver
+	// let coverArtObserver: IntersectionObserver
 
 	$: {
-		console.log(rootDir)
+		forceCoverSource(rootDir)
 	}
 
 	$: {
-		console.log('yes')
-
 		let albumId = hash(rootDir, 'text')
 		const ALBUM_COVER_ART_DATA = $albumCoverArtMapStore.get(albumId)
 		if (ALBUM_COVER_ART_DATA?.version !== albumCoverArtVersion) {
-			setCoverData(ALBUM_COVER_ART_DATA)
+			setCoverArtSource(ALBUM_COVER_ART_DATA)
 		}
 	}
 
 	onMount(() => {
 		if (observe) {
-			addIntersectionObserver()
+			addIntersectionObserver(rootDir).then((result:any) => {
+				if (result.status === 'cover-not-found') {
+					getAlbumCover()
+				} else if (result.status === 'cover-found') {
+					setCoverArtSource(result.data)
+				}
+			})
+
+			// addIntersectionObserver()
 		}
 	})
 
-	function addIntersectionObserver() {
+	function forceCoverSource(rootDir: string) {
 		let albumId = hash(rootDir, 'text')
-		coverArtObserver = new IntersectionObserver(
-			(entries) => {
-				if (entries[0].isIntersecting === true) {
-					const ALBUM_COVER_ART_DATA = $albumCoverArtMapStore.get(albumId)
+		const ALBUM_COVER_ART_DATA = $albumCoverArtMapStore.get(albumId)
 
-					if (ALBUM_COVER_ART_DATA) {
-						setCoverData(ALBUM_COVER_ART_DATA)
-					} else {
-						getAlbumCover()
-					}
-
-					// "Closes" the Cover Art Observer to avoid unnecessary checks.
-					coverArtObserver.disconnect()
-				}
-			},
-			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
-		)
-
-		coverArtObserver.observe(document.querySelector(`art-grid-svlt > #${CSS.escape(String(albumId))}`))
+		setCoverArtSource(ALBUM_COVER_ART_DATA)
 	}
 
-	function setCoverData(coverData: CoverArtType) {
+	function setCoverArtSource(coverData: CoverArtType) {
 		if (coverData) {
 			albumCoverArtVersion = coverData.version
 			coverType = coverData.fileType

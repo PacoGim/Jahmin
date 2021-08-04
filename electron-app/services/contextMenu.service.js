@@ -5,19 +5,32 @@ const electron_1 = require("electron");
 const albumArt_service_1 = require("./albumArt.service");
 const songSync_service_1 = require("./songSync.service");
 const storage_service_1 = require("./storage.service");
-function loadContextMenu(event, menuToOpen, parameters) {
+function loadContextMenu(event, menuToOpen, data) {
     let template = [];
-    parameters = JSON.parse(parameters);
     if (menuToOpen === 'AlbumContextMenu') {
-        template = getAlbumContextMenuTemplate(parameters.albumId);
+        template = getAlbumContextMenuTemplate(data);
+    }
+    else if (menuToOpen === 'SongContextMenu') {
+        template = getSongContextMenuTemplate(data);
     }
     const menu = electron_1.Menu.buildFromTemplate(template);
     //@ts-expect-error
     menu.popup(electron_1.BrowserWindow.fromWebContents(event.sender));
 }
 exports.loadContextMenu = loadContextMenu;
-function getAlbumContextMenuTemplate(albumId) {
-    let album = storage_service_1.getStorageMap().get(albumId);
+function getSongContextMenuTemplate(data) {
+    let template = [];
+    console.log(data);
+    template.push({
+        label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
+        click: () => {
+            console.log('Cool');
+        }
+    });
+    return template;
+}
+function getAlbumContextMenuTemplate(data) {
+    let album = storage_service_1.getStorageMap().get(data.albumId);
     let template = [];
     template.push({
         label: `Show ${(album === null || album === void 0 ? void 0 : album.Name) || ''} Folder`,
@@ -28,7 +41,7 @@ function getAlbumContextMenuTemplate(albumId) {
     template.push({
         label: `Reload Album Data`,
         click: () => {
-            songSync_service_1.reloadAlbumData(albumId);
+            songSync_service_1.reloadAlbumData(data.albumId);
         }
     });
     template.push({

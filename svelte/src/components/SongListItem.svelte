@@ -12,6 +12,11 @@
 	export let song: SongType
 	export let index: number
 
+	$: {
+		song
+		setDynamicArtists()
+	}
+
 	onMount(() => {
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 
@@ -24,6 +29,14 @@
 			}
 		}
 	})
+
+	function setDynamicArtists() {
+		let splitArtists = song.Artist.split('//').filter((artist) => !song.AlbumArtist.includes(artist))
+
+		if (splitArtists.length > 0) {
+			song.DynamicArtists = `(feat. ${splitArtists.join('//')})`
+		}
+	}
 
 	function setStar(starChangeEvent) {
 		// console.log(song.SourceFile, starChangeEvent.detail.starRating)
@@ -40,9 +53,9 @@
 	{$songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore ? 'playing' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
-	<!-- <song-number>{song.Track}</song-number> -->
-	<song-number>{song.Genre} - {song.Track}</song-number>
+	<song-number>{song.Track}</song-number>
 	<song-title>{song.Title}</song-title>
+	<song-artist>{song.DynamicArtists !== undefined ? song.DynamicArtists : ''}</song-artist>
 	<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
 	<song-duration>{parseDuration(song.Duration)}</song-duration>
 </song-list-item>
@@ -67,7 +80,7 @@
 		min-height: 30px;
 
 		display: grid;
-		grid-template-columns: max-content auto max-content max-content;
+		grid-template-columns: max-content auto max-content max-content max-content;
 		grid-template-rows: auto;
 
 		margin: 0.25rem 0;

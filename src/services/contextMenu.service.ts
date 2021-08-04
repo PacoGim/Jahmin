@@ -1,17 +1,16 @@
 import { shell, Menu, BrowserWindow } from 'electron'
-import { dialog, MenuItemConstructorOptions } from 'electron/main'
+import { MenuItemConstructorOptions } from 'electron/main'
 import { getAlbumCover } from './albumArt.service'
 import { reloadAlbumData } from './songSync.service'
 import { getStorageMap } from './storage.service'
-import { addTaskToSync } from './systemSync.service'
 
-export function loadContextMenu(event: any, menuToOpen: string, parameters: any) {
+export function loadContextMenu(event: any, menuToOpen: string, data: any) {
 	let template: any = []
 
-	parameters = JSON.parse(parameters)
-
 	if (menuToOpen === 'AlbumContextMenu') {
-		template = getAlbumContextMenuTemplate(parameters.albumId)
+		template = getAlbumContextMenuTemplate(data)
+	} else if (menuToOpen === 'SongContextMenu') {
+		template = getSongContextMenuTemplate(data)
 	}
 
 	const menu = Menu.buildFromTemplate(template)
@@ -19,8 +18,23 @@ export function loadContextMenu(event: any, menuToOpen: string, parameters: any)
 	menu.popup(BrowserWindow.fromWebContents(event.sender))
 }
 
-function getAlbumContextMenuTemplate(albumId: string) {
-	let album = getStorageMap().get(albumId)
+function getSongContextMenuTemplate(data: any) {
+	let template: MenuItemConstructorOptions[] = []
+
+	console.log(data)
+
+	template.push({
+		label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
+		click: () => {
+			console.log('Cool')
+		}
+	})
+
+	return template
+}
+
+function getAlbumContextMenuTemplate(data: any) {
+	let album = getStorageMap().get(data.albumId)
 	let template: MenuItemConstructorOptions[] = []
 
 	template.push({
@@ -33,7 +47,7 @@ function getAlbumContextMenuTemplate(albumId: string) {
 	template.push({
 		label: `Reload Album Data`,
 		click: () => {
-			reloadAlbumData(albumId)
+			reloadAlbumData(data.albumId)
 		}
 	})
 

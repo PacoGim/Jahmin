@@ -5,6 +5,7 @@ export type SongType = {
 	AlbumArtist?: string // Modifiable
 	Artist?: string // Modifiable
 	Composer?: string // Modifiable
+	DynamicArtists?:string // Programmatically added
 	Genre?: string // Modifiable
 	Title?: string // Modifiable
 	Track?: number // Modifiable

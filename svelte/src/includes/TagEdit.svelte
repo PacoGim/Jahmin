@@ -239,7 +239,7 @@
 	/>
 
 	<cover-art>
-		<!-- <CoverArt {rootDir} /> -->
+		<CoverArt {rootDir} />
 	</cover-art>
 
 	<button-group>

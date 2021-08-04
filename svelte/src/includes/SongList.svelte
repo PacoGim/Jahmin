@@ -6,9 +6,9 @@
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
-	let scrollTime = 0
+	let scrollAmount = 0
 	let progressValue = 0
-	const SONG_AMOUNT = 7
+	const SONG_AMOUNT = 8
 
 	// Keeps track of the max size of the song list element.
 	let maxSongListHeight = 0
@@ -23,7 +23,7 @@
 				| Song 4 |		->			| 			 |
 		*/
 
-		scrollTime
+		scrollAmount
 		$songListStore
 
 		let songList = document.querySelector('song-list')
@@ -41,22 +41,29 @@
 		if (isSelectedAlbumIdFirstAssign) {
 			isSelectedAlbumIdFirstAssign = false
 		} else {
-			scrollTime = 0
+			scrollAmount = 0
+			previousScrollAmount = -1
 		}
 	}
 
 	$: {
 		$songListStore
-		scrollTime
+		scrollAmount
 		trimSongsArray()
 	}
 
-	function trimSongsArray() {
-		// 1º Slice: Slice array from scrollTime to end. Cuts from array songs already scrolled.
-		// 2º Slice: Keep songs from 0 to the set amount.
-		songsTrimmed = $songListStore.slice(scrollTime).slice(0, SONG_AMOUNT)
+	let previousScrollAmount = -1
 
-		setProgress()
+	function trimSongsArray() {
+		if ($songListStore.length > 0 && previousScrollAmount !== scrollAmount) {
+			previousScrollAmount = scrollAmount
+
+			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
+			// 2º Slice: Keep songs from 0 to the set amount.
+			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, SONG_AMOUNT)
+
+			setProgress()
+		}
 	}
 
 	let lastSelectedSong = 0
@@ -98,18 +105,18 @@
 	}
 
 	function scrollContainer(e: WheelEvent) {
-		scrollTime = scrollTime + Math.sign(e.deltaY)
+		scrollAmount = scrollAmount + Math.sign(e.deltaY)
 
 		// Stops scrolling beyond arrays end and always keeps one element visible.
-		if (scrollTime >= $songListStore.length - 1) {
-			scrollTime = $songListStore.length - 1
-		} else if (scrollTime < 0) {
-			scrollTime = 0
+		if (scrollAmount >= $songListStore.length - 1) {
+			scrollAmount = $songListStore.length - 1
+		} else if (scrollAmount < 0) {
+			scrollAmount = 0
 		}
 	}
 
 	function setProgress() {
-		progressValue = ((100 / ($songListStore.length - 1)) * scrollTime) | 0
+		progressValue = ((100 / ($songListStore.length - 1)) * scrollAmount) | 0
 		document.documentElement.style.setProperty('--progress-bar-fill', `${progressValue}%`)
 	}
 
@@ -124,27 +131,28 @@
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 
 		setTimeout(() => {
-			setScrollTimeFromSong(lastPlayedSongId)
+			setScrollAmountFromSong(lastPlayedSongId)
 		}, 250)
 	})
 
-	function setScrollTimeFromSong(lastPlayedSongId) {
+	// Manages to "scroll" to the proper song on demand.
+	function setScrollAmountFromSong(lastPlayedSongId) {
 		let songIndex = $songListStore.findIndex((song) => song.ID === lastPlayedSongId)
 		let differenceAmount = Math.floor(SONG_AMOUNT / 2)
 
 		if (songIndex !== -1) {
 			if (songIndex < differenceAmount) {
-				scrollTime = 0
+				scrollAmount = 0
 			} else {
-				scrollTime = songIndex - differenceAmount
+				scrollAmount = songIndex - differenceAmount
 			}
 		}
 	}
 
-	// Sets the proper scrollTime based of the percentage (in distance) of the bar clicked. 0% = top and 100% = bottom.
-	function setScrollTime(songListProgressBar: HTMLDivElement, e: MouseEvent) {
+	// Sets the proper scrollAmount based of the percentage (in distance) of the bar clicked. 0% = top and 100% = bottom.
+	function setScrollAmount(songListProgressBar: HTMLDivElement, e: MouseEvent) {
 		let percentClick = (100 / songListProgressBar.clientHeight) * e.offsetY
-		scrollTime = ($songListStore.length / 100) * percentClick
+		scrollAmount = ($songListStore.length / 100) * percentClick
 	}
 
 	function isValidPath(event: Event, validPaths: string[]) {
@@ -180,8 +188,8 @@
 					percentage = 0
 				}
 
-				// Sets the scrollTime value with the newly calculated one.
-				scrollTime = (($songListStore.length - 1) / 100) * percentage
+				// Sets the scrollAmount value with the newly calculated one.
+				scrollAmount = (($songListStore.length - 1) / 100) * percentage
 			}
 		})
 
@@ -197,8 +205,8 @@
 			isMouseDownInScroll = false
 		})
 
-		// If the user click on the scrollbar, calls setScrollTime.
-		songListProgressBar.addEventListener('click', (evt) => setScrollTime(songListProgressBar, evt))
+		// If the user click on the scrollbar, calls setScrollAmount.
+		songListProgressBar.addEventListener('click', (evt) => setScrollAmount(songListProgressBar, evt))
 	}
 </script>
 
@@ -220,6 +228,7 @@
 		grid-area: song-list-svlt;
 		display: grid;
 		grid-template-columns: auto max-content;
+		z-index: 2;
 
 		/* transition: all 1000ms ease-in-out; */
 	}

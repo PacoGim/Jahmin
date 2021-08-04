@@ -50,6 +50,7 @@
 	onMount(() => {
 		document.addEventListener('click', (evt: MouseEvent) => handleClickEvent(evt))
 		document.addEventListener('dblclick', (evt: MouseEvent) => handleClickEvent(evt))
+		document.addEventListener('contextmenu', (evt: MouseEvent) => handleClickEvent(evt))
 
 		loadPreviousState()
 	})
@@ -102,12 +103,18 @@
 		}
 
 		if (SONG_LIST_ITEM_ELEMENT) {
-			const SONG_ID_TO_PLAY = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
+			const SONG_ID = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then((result) => {
-					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID_TO_PLAY, true)
+					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID, true)
 				})
+			}
+
+			if (evt.type === 'contextmenu') {
+				if (!$selectedSongsStore.includes(SONG_ID)) {
+					$selectedSongsStore = [SONG_ID]
+				}
 			}
 		}
 	}
