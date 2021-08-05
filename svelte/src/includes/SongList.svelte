@@ -36,14 +36,24 @@
 		}
 	}
 
+	let isScrollAtBottom = false
+	let isScrollAtTop = false
+
 	$: {
 		$selectedAlbumId
 		if (isSelectedAlbumIdFirstAssign) {
 			isSelectedAlbumIdFirstAssign = false
 		} else {
 			scrollAmount = 0
-			previousScrollAmount = -1
+			isScrollAtBottom = false
+			isScrollAtTop = false
 		}
+	}
+
+	$:{
+		$songListStore
+		isScrollAtBottom = false
+		isScrollAtTop = false
 	}
 
 	$: {
@@ -52,18 +62,15 @@
 		trimSongsArray()
 	}
 
-	let previousScrollAmount = -1
-
 	function trimSongsArray() {
-		if ($songListStore.length > 0 && previousScrollAmount !== scrollAmount) {
-			previousScrollAmount = scrollAmount
-
+		if (isScrollAtBottom === false && isScrollAtTop === false) {
+			console.log('Trimmig')
 			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
 			// 2º Slice: Keep songs from 0 to the set amount.
 			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, SONG_AMOUNT)
-
-			setProgress()
 		}
+
+		setProgress()
 	}
 
 	let lastSelectedSong = 0
@@ -108,10 +115,15 @@
 		scrollAmount = scrollAmount + Math.sign(e.deltaY)
 
 		// Stops scrolling beyond arrays end and always keeps one element visible.
-		if (scrollAmount >= $songListStore.length - 1) {
+		if (scrollAmount === $songListStore.length) {
 			scrollAmount = $songListStore.length - 1
+			isScrollAtBottom = true
 		} else if (scrollAmount < 0) {
 			scrollAmount = 0
+			isScrollAtTop = true
+		} else {
+			isScrollAtBottom = false
+			isScrollAtTop = false
 		}
 	}
 

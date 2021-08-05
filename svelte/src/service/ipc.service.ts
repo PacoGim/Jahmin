@@ -6,26 +6,6 @@ import type { SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
 
-ipcRenderer.on('new-cover', (event, data) => {
-	if (data.success === true) {
-		let tempAlbumCoverArtMap = undefined
-
-		albumCoverArtMapStore.subscribe((albumCoverArtMap) => {
-			albumCoverArtMap.set(data.id, {
-				version: Date.now(),
-				filePath: data.filePath,
-				fileType: data.fileType
-			})
-
-			tempAlbumCoverArtMap = albumCoverArtMap
-		})()
-
-		if (tempAlbumCoverArtMap) {
-			albumCoverArtMapStore.set(tempAlbumCoverArtMap)
-		}
-	}
-})
-
 export function getTagEditProgressIPC(): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		if (!isGetTagEditProgressRunning) {

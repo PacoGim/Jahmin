@@ -15,6 +15,7 @@
 	import { getChangesProgressIPC, getTasksToSyncIPC, showContextMenuIPC, syncDbVersionIPC } from './service/ipc.service'
 	import { albumListStore, appTitle } from './store/final.store'
 	import { handleContextMenuEvent } from './service/contextMenu.service'
+	import IpcController from './controllers/IpcController.svelte'
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -45,6 +46,7 @@
 
 <PlayerController />
 <ConfigController />
+<IpcController />
 
 <main>
 	<Navigation />

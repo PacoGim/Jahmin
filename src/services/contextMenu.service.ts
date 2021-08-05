@@ -21,8 +21,6 @@ export function loadContextMenu(event: any, menuToOpen: string, data: any) {
 function getSongContextMenuTemplate(data: any) {
 	let template: MenuItemConstructorOptions[] = []
 
-	console.log(data)
-
 	template.push({
 		label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
 		click: () => {
@@ -30,7 +28,67 @@ function getSongContextMenuTemplate(data: any) {
 		}
 	})
 
+	template.push({
+		type: 'separator'
+	})
+
+	template.push({
+		label: 'Sort by',
+		type: 'submenu',
+		submenu: getSortMenu()
+	})
+
 	return template
+}
+
+function getSortMenu() {
+	let submenu: MenuItemConstructorOptions[] = []
+	let options = [
+		'Artist',
+		'BitRate',
+		'Comment',
+		'Composer',
+		'Date',
+		'Disc #',
+		'Duration',
+		'Extension',
+		'Genre',
+		'Rating',
+		'Sample Rate',
+		'Size',
+		'Title',
+		'Track'
+	]
+
+	options.forEach((option) => {
+		submenu.push({
+			label: option,
+			type: 'submenu',
+			submenu: [
+				{
+					label: 'Asc ▲',
+					click: (menuItem, browserWindow, event) => {
+						sendSortingToRenderer(browserWindow, option, 1)
+					}
+				},
+				{
+					label: 'Desc ▼',
+					click: (menuItem, browserWindow, event) => {
+						sendSortingToRenderer(browserWindow, option, -1)
+					}
+				}
+			]
+		})
+	})
+
+	return submenu
+}
+
+function sendSortingToRenderer(browserWindow: BrowserWindow | undefined, tag: string, order: number) {
+	browserWindow?.webContents.send('sort-songs', {
+		tag,
+		order
+	})
 }
 
 function getAlbumContextMenuTemplate(data: any) {

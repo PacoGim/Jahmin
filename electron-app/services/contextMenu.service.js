@@ -20,14 +20,67 @@ function loadContextMenu(event, menuToOpen, data) {
 exports.loadContextMenu = loadContextMenu;
 function getSongContextMenuTemplate(data) {
     let template = [];
-    console.log(data);
     template.push({
         label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
         click: () => {
             console.log('Cool');
         }
     });
+    template.push({
+        type: 'separator'
+    });
+    template.push({
+        label: 'Sort by',
+        type: 'submenu',
+        submenu: getSortMenu()
+    });
     return template;
+}
+function getSortMenu() {
+    let submenu = [];
+    let options = [
+        'Artist',
+        'BitRate',
+        'Comment',
+        'Composer',
+        'Date',
+        'Disc #',
+        'Duration',
+        'Extension',
+        'Genre',
+        'Rating',
+        'Sample Rate',
+        'Size',
+        'Title',
+        'Track'
+    ];
+    options.forEach((option) => {
+        submenu.push({
+            label: option,
+            type: 'submenu',
+            submenu: [
+                {
+                    label: 'Asc ▲',
+                    click: (menuItem, browserWindow, event) => {
+                        sendSortingToRenderer(browserWindow, option, 1);
+                    }
+                },
+                {
+                    label: 'Desc ▼',
+                    click: (menuItem, browserWindow, event) => {
+                        sendSortingToRenderer(browserWindow, option, -1);
+                    }
+                }
+            ]
+        });
+    });
+    return submenu;
+}
+function sendSortingToRenderer(browserWindow, tag, order) {
+    browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('sort-songs', {
+        tag,
+        order
+    });
 }
 function getAlbumContextMenuTemplate(data) {
     let album = storage_service_1.getStorageMap().get(data.albumId);
