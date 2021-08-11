@@ -43,21 +43,29 @@ function getSongContextMenuTemplate(data: any) {
 
 function getSortMenu() {
 	let submenu: MenuItemConstructorOptions[] = []
+	submenu.push({
+		label: 'Add Sorting',
+		click: () => {
+			//TODO Add sorting option
+			console.log('Add Sorting')
+		}
+	})
+
 	let options = [
+		'Track',
+		'Rating',
+		'Title',
 		'Artist',
-		'BitRate',
-		'Comment',
 		'Composer',
 		'Date',
-		'Disc #',
 		'Duration',
 		'Extension',
 		'Genre',
-		'Rating',
 		'Sample Rate',
 		'Size',
-		'Title',
-		'Track'
+		'BitRate',
+		'Comment',
+		'Disc #'
 	]
 
 	options.forEach((option) => {
@@ -66,13 +74,13 @@ function getSortMenu() {
 			type: 'submenu',
 			submenu: [
 				{
-					label: 'Asc ▲',
+					label: 'Asc (A->Z)',
 					click: (menuItem, browserWindow, event) => {
 						sendSortingToRenderer(browserWindow, option, 1)
 					}
 				},
 				{
-					label: 'Desc ▼',
+					label: 'Desc (Z->A)',
 					click: (menuItem, browserWindow, event) => {
 						sendSortingToRenderer(browserWindow, option, -1)
 					}

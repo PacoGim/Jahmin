@@ -747,6 +747,43 @@ var app = (function () {
     	}
     }
 
+    var sortSongsArrayFn = (songs, tag, order) => {
+        if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate'].includes(tag)) {
+            if (order === 1) {
+                songs = songs.sort((a, b) => a[tag] - b[tag]);
+            }
+            else {
+                songs = songs.sort((a, b) => b[tag] - a[tag]);
+            }
+        }
+        if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
+            // console.log(data)
+            if (order === 1) {
+                songs = songs.sort((a, b) => a[tag].localeCompare(b[tag], undefined, { numeric: true }));
+            }
+            else {
+                songs = songs.sort((a, b) => b[tag].localeCompare(a[tag], undefined, { numeric: true }));
+            }
+        }
+        if (['Date'].includes(tag)) {
+            if (order === 1) {
+                songs.sort((a, b) => {
+                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
+                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
+                    return dateA - dateB;
+                });
+            }
+            else {
+                songs.sort((a, b) => {
+                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
+                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
+                    return dateB - dateA;
+                });
+            }
+        }
+        return songs;
+    };
+
     const subscriber_queue = [];
     /**
      * Create a `Writable` store that allows both updating and reading by subscription.
@@ -943,8 +980,13 @@ var app = (function () {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('get-album', albumId).then((result) => {
                 if (result) {
-                    // TODO Add custom sorting.
-                    result.Songs = result.Songs.sort((a, b) => a.Track - b.Track);
+                    let sorting = JSON.parse(localStorage.getItem('sorting')) || undefined;
+                    if (sorting) {
+                        result.Songs = sortSongsArrayFn(result.Songs, sorting.tag, sorting.order);
+                    }
+                    else {
+                        result.Songs = sortSongsArrayFn(result.Songs, 'Track', 1);
+                    }
                     resolve(result);
                 }
             });
@@ -7425,40 +7467,8 @@ var app = (function () {
 
     	onMount(() => {
     		ipcRenderer.on("sort-songs", (event, data) => {
-    			if (["Duration", "Track", "Size", "Sample Rate", "Rating", "Disc #", "BitRate"].includes(data.tag)) {
-    				if (data.order === 1) {
-    					set_store_value(songListStore, $songListStore = $songListStore.sort((a, b) => a[data.tag] - b[data.tag]), $songListStore);
-    				} else {
-    					set_store_value(songListStore, $songListStore = $songListStore.sort((a, b) => b[data.tag] - a[data.tag]), $songListStore);
-    				}
-    			}
-
-    			if (["Artist", "Comment", "Composer", "Extension", "Genre", "Title"].includes(data.tag)) {
-    				// console.log(data)
-    				if (data.order === 1) {
-    					set_store_value(songListStore, $songListStore = $songListStore.sort((a, b) => a[data.tag].localeCompare(b[data.tag], undefined, { numeric: true })), $songListStore);
-    				} else {
-    					set_store_value(songListStore, $songListStore = $songListStore.sort((a, b) => b[data.tag].localeCompare(a[data.tag], undefined, { numeric: true })), $songListStore);
-    				}
-    			}
-
-    			if (["Date"].includes(data.tag)) {
-    				if (data.order === 1) {
-    					$songListStore.sort((a, b) => {
-    						let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
-    						let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
-    						return dateA - dateB;
-    					});
-    				} else {
-    					$songListStore.sort((a, b) => {
-    						let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
-    						let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
-    						return dateB - dateA;
-    					});
-    				}
-    			}
-
-    			songListStore.set($songListStore);
+    			localStorage.setItem("sorting", JSON.stringify({ tag: data.tag, order: data.order }));
+    			set_store_value(songListStore, $songListStore = sortSongsArrayFn($songListStore, data.tag, data.order), $songListStore);
     		});
 
     		ipcRenderer.on("new-cover", (event, data) => {
@@ -7483,6 +7493,7 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		ipcRenderer,
     		onMount,
+    		sortSongsArrayFn,
     		albumCoverArtMapStore,
     		songListStore,
     		$songListStore,

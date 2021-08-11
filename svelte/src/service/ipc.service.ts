@@ -1,5 +1,6 @@
 const { ipcRenderer } = require('electron')
 
+import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
@@ -157,8 +158,14 @@ export function getAlbumIPC(albumId: string): Promise<AlbumType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album', albumId).then((result: AlbumType) => {
 			if (result) {
-				// TODO Add custom sorting.
-				result.Songs = result.Songs.sort((a, b) => a.Track - b.Track)
+				let sorting = JSON.parse(localStorage.getItem('sorting')) || undefined
+
+				if (sorting) {
+					result.Songs = sortSongsArrayFn(result.Songs, sorting.tag, sorting.order)
+				} else {
+					result.Songs = sortSongsArrayFn(result.Songs, 'Track', 1)
+				}
+
 				resolve(result)
 			}
 		})
