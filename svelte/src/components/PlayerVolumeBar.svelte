@@ -87,10 +87,11 @@
 		height: 100%;
 		z-index: 1;
 		opacity: 0;
+		cursor: grab;
 	}
 
 	input:active {
-		cursor: none;
+		cursor: grabbing;
 	}
 
 	volume-thumb {

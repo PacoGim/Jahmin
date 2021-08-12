@@ -9,8 +9,12 @@
 	let coverType = undefined
 	let coverSrc = undefined
 
+	export let klass
 	export let rootDir
 	export let observe = false
+	export let height
+	export let width
+	export let cursor = 'default'
 
 	let albumCoverArtVersion = undefined
 
@@ -30,7 +34,7 @@
 
 	onMount(() => {
 		if (observe) {
-			addIntersectionObserver(rootDir).then((result:any) => {
+			addIntersectionObserver(rootDir).then((result: any) => {
 				if (result.status === 'cover-not-found') {
 					getAlbumCover()
 				} else if (result.status === 'cover-found') {
@@ -75,14 +79,14 @@
 	}
 </script>
 
-<cover-art>
+<cover-art style="height: {height}; width:{width}; cursor:{cursor};">
 	{#if coverType === undefined}
 		<img src="./img/audio.svg" class="loader" alt="" />
 	{/if}
 	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
-	{#if coverType === 'image'}<img src={coverSrc} alt="" />{/if}
+	{#if coverType === 'image'}<img class={klass} src={coverSrc} alt="" />{/if}
 	{#if coverType === 'video'}
-		<video autoplay loop>
+		<video class={klass} autoplay loop>
 			<track kind="captions" />
 			<source src={coverSrc} />
 		</video>
@@ -93,8 +97,6 @@
 	cover-art {
 		grid-column: 1;
 		grid-row: 1;
-		width: inherit;
-		height: inherit;
 	}
 
 	video {

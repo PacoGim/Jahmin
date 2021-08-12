@@ -17,11 +17,14 @@
 	import { parseDuration } from '../functions/parseDuration.fn'
 	import { setWaveSource } from '../service/waveform.service'
 	import { streamAudio } from '../service/ipc.service'
+	import CoverArt from '../components/CoverArt.svelte'
 
 	let progress: number = 0
 
 	let currentSong: SongType = undefined
 	let nextSongPreloaded: { Id: number; BufferUrl: string } = undefined
+
+	let rootDir = ''
 
 	let player: HTMLAudioElement = undefined
 
@@ -56,6 +59,8 @@
 		let url: string = undefined
 
 		if (songToPlay === undefined) return
+
+		rootDir = songToPlay.SourceFile.split('/').slice(0, -1).join('/')
 
 		if (songToPlay?.ID === nextSongPreloaded?.Id) {
 			url = nextSongPreloaded.BufferUrl
@@ -192,6 +197,8 @@
 </audio>
 
 <player-svlt>
+	<CoverArt klass="Player" {rootDir} height="64px" width="auto" cursor="pointer" observe={false} />
+
 	<player-buttons>
 		<PreviousButton {player} />
 		<PlayButton {player} />

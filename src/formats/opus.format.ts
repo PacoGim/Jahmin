@@ -96,7 +96,11 @@ function mergeNatives(native: any) {
 
 	for (let key in native) {
 		for (let value in native[key]) {
-			finalObject[native[key][value]['id']] = native[key][value]['value']
+			if (finalObject[native[key][value]['id']]) {
+				finalObject[native[key][value]['id']] = finalObject[native[key][value]['id']] + '//' + native[key][value]['value']
+			} else {
+				finalObject[native[key][value]['id']] = native[key][value]['value']
+			}
 		}
 	}
 

@@ -52,7 +52,7 @@
 </script>
 
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
-	<CoverArt rootDir={album.RootDir} observe={true} />
+	<CoverArt klass="Album" rootDir={album.RootDir} height="inherit" width="inherit" observe={true} />
 
 	<overlay-gradient />
 

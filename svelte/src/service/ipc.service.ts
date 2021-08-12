@@ -103,7 +103,7 @@ export function saveConfig(newConfig: object) {
 	})
 }
 
-// TODO Dynamic
+// TODO Add Option to sort albums
 const sortBy = 'RootDir'
 
 export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any> {

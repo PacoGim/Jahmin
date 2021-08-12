@@ -16,8 +16,6 @@ export async function setNewPlayback(
 		indexToPlay = 0
 	}
 
-	//TODO Sorting
-
 	albumPlayingIdStore.set(albumId)
 	playbackStore.set(playbackSongs)
 	playbackCursor.set([indexToPlay, playNow])

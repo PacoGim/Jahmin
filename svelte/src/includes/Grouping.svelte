@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { getGroupingIPC } from '../service/ipc.service'
-	import { albumPlayingIdStore, dbVersion, selectedGroupByStore, selectedGroupByValueStore } from '../store/final.store'
+	import {
+		albumPlayingIdStore,
+		dbVersion,
+		selectedGroupByStore,
+		selectedGroupByValueStore,
+		triggerGroupingChangeEvent
+	} from '../store/final.store'
 
 	let selectedGroupBy = localStorage.getItem('GroupBy')
 	let selectedGroupByValue = localStorage.getItem('GroupByValue')
@@ -9,7 +15,6 @@
 	let groups = []
 
 	let firstSelectedGroupByAssign = true
-	let firstSelectedGroupByValueAssign = true
 	let firstDbVersionAssign = true
 
 	$: {
@@ -19,6 +24,17 @@
 		} else {
 			getGrouping()
 		}
+	}
+
+	$: {
+		if ($triggerGroupingChangeEvent === true) {
+			setPlayingSongGroupingValue()
+		}
+	}
+
+	function setPlayingSongGroupingValue() {
+		$triggerGroupingChangeEvent = false
+		selectedGroupByValue = localStorage.getItem('GroupByValue')
 	}
 
 	$: {
@@ -75,11 +91,9 @@
 <grouping-svlt>
 	<select bind:value={selectedGroupBy}>
 		<option value="null" disabled selected>Group by...</option>
-		<option value="none">None</option>
 		<option value="Genre">Genre</option>
 		<option value="AlbumArtist">Album Artist</option>
 		<option value="Album">Album</option>
-		<option value="Composer">Composer</option>
 	</select>
 
 	<total-groups>Total {selectedGroupBy}: {groups.length}</total-groups>

@@ -64,7 +64,6 @@
 
 	function trimSongsArray() {
 		if (isScrollAtBottom === false && isScrollAtTop === false) {
-			console.log('Trimmig')
 			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
 			// 2º Slice: Keep songs from 0 to the set amount.
 			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, SONG_AMOUNT)

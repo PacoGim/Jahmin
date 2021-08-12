@@ -13,7 +13,8 @@
 		selectedGroupByStore,
 		selectedGroupByValueStore,
 		selectedSongsStore,
-		songListStore
+		songListStore,
+		triggerGroupingChangeEvent
 	} from '../store/final.store'
 
 	let firstGroupByAssign = true
@@ -77,6 +78,7 @@
 			$elementMap.set(element.tagName, element)
 		})
 
+		const IMG_ELEMENT = $elementMap.get('IMG')
 		const ALBUM_ELEMENT = $elementMap.get('ALBUM')
 		const SONG_LIST_ITEM_ELEMENT = $elementMap.get('SONG-LIST-ITEM')
 		// const GROUPING_SVLT = $elementMap.get('GROUPING-SVLT')
@@ -115,6 +117,12 @@
 				if (!$selectedSongsStore.includes(SONG_ID)) {
 					$selectedSongsStore = [SONG_ID]
 				}
+			}
+		}
+
+		if (IMG_ELEMENT) {
+			if (IMG_ELEMENT.classList.contains('Player')) {
+				$triggerGroupingChangeEvent = true
 			}
 		}
 	}
