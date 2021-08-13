@@ -8,7 +8,7 @@
 	import CoverArt from './CoverArt.svelte'
 
 	export let album: AlbumType
-	export let index
+	// export let index
 	let coverType = undefined
 	let coverSrc = undefined /* Image Source URL */
 

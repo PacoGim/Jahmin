@@ -14,7 +14,8 @@
 		selectedGroupByValueStore,
 		selectedSongsStore,
 		songListStore,
-		triggerGroupingChangeEvent
+		triggerGroupingChangeEvent,
+		triggerScrollToSongEvent
 	} from '../store/final.store'
 
 	let firstGroupByAssign = true
@@ -88,16 +89,16 @@
 		// const TAG_EDIT_SVLT = $elementMap.get('TAG-EDIT-SVLT')
 
 		if (ALBUM_ELEMENT) {
-			const ALBUM_Id = ALBUM_ELEMENT.getAttribute('id')
+			const ALBUM_ID = ALBUM_ELEMENT.getAttribute('id')
 
-			getAlbumIPC(ALBUM_Id).then((result) => {
+			getAlbumIPC(ALBUM_ID).then((result) => {
 				if (evt.type === 'dblclick') {
-					setNewPlayback(ALBUM_Id, result.Songs, undefined, true)
+					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
 				} else if (evt.type === 'click') {
 					// Prevents resetting array if album unchanged.
 
-					if ($selectedAlbumId !== ALBUM_Id) {
-						$selectedAlbumId = ALBUM_Id
+					if ($selectedAlbumId !== ALBUM_ID) {
+						$selectedAlbumId = ALBUM_ID
 						$songListStore = result.Songs
 					}
 				}
@@ -123,6 +124,11 @@
 		if (IMG_ELEMENT) {
 			if (IMG_ELEMENT.classList.contains('Player')) {
 				$triggerGroupingChangeEvent = true
+
+				// setTimeout(() => {
+
+					$triggerScrollToSongEvent = true
+				// }, 100);
 			}
 		}
 	}

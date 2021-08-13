@@ -9,7 +9,7 @@
 	import PlayerProgress from '../components/PlayerProgress.svelte'
 	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
 
-	import { isPlaying, songPlayingIdStore, updateSongProgress } from '../store/final.store'
+	import { isPlaying, playingSongStore, songPlayingIdStore, updateSongProgress } from '../store/final.store'
 
 	import { nextSong } from '../functions/nextSong.fn'
 	import { escapeString } from '../functions/escapeString.fn'
@@ -77,6 +77,7 @@
 		player.src = url
 
 		currentSong = songToPlay
+		$playingSongStore = currentSong
 
 		songTime = {
 			currentTime: parseDuration(0),
@@ -197,7 +198,7 @@
 </audio>
 
 <player-svlt>
-	<CoverArt klass="Player" {rootDir} height="64px" width="auto" cursor="pointer" observe={false} />
+	<CoverArt klass="Player id={currentSong?.ID}" {rootDir} height="64px" width="auto" cursor="pointer" observe={false} />
 
 	<player-buttons>
 		<PreviousButton {player} />
@@ -220,7 +221,7 @@
 
 <style>
 	player-svlt {
-		z-index: 1;
+		z-index: 3;
 		grid-area: player-svlt;
 		display: flex;
 		align-items: center;

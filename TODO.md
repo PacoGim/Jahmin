@@ -1,4 +1,5 @@
 ## TODO
+* Add Album id to player cover thing to
 * Add a played counter
 * Weird background image flickering when clicking on different album.
 * When clicking on album it does not add it to tag edit.

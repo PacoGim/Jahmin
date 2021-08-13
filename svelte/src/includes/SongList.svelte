@@ -2,19 +2,65 @@
 	import { onMount } from 'svelte'
 
 	import SongListItem from '../components/SongListItem.svelte'
-	import { selectedAlbumId, songListStore, selectedSongsStore } from '../store/final.store'
+	import {
+		selectedAlbumId,
+		songListStore,
+		selectedSongsStore,
+		triggerScrollToSongEvent,
+		playingSongStore
+	} from '../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
 	let scrollAmount = 0
 	let progressValue = 0
+	let lastSelectedSong = 0
+	let isScrollAtBottom = false
+	let isScrollAtTop = false
 	const SONG_AMOUNT = 8
 
 	// Keeps track of the max size of the song list element.
 	let maxSongListHeight = 0
 
 	$: {
-		// This allows, based on the SONG_AMOUNT set buy user or the default value, to dynamically keep the biggest auto sizing of the element allowing to have song lists with very few songs to fit properly on the same element with a lot of songs. It prevents jumps if the list of songs is too small after a big list of songs.
+		$songListStore
+		setMaxSongListHeight()
+		trimSongsArray()
+	}
+
+	$: {
+		// When new album selected, reset scroll to 0 (to be on top of scroll) and reset scroll edges checks.
+		$selectedAlbumId
+		if (isSelectedAlbumIdFirstAssign) {
+			isSelectedAlbumIdFirstAssign = false
+		} else {
+			setScroll(0)
+			isScrollAtBottom = false
+			isScrollAtTop = false
+		}
+	}
+
+	$: {
+		if ($triggerScrollToSongEvent === true) {
+			setScrollAmountFromSong($playingSongStore.ID)
+			isScrollAtBottom = false
+			isScrollAtTop = false
+			$triggerScrollToSongEvent = false
+		}
+	}
+
+	$: {
+		// Trim array of songs when the user scrolls.
+		scrollAmount
+		trimSongsArray()
+	}
+
+	function setScroll(value: number) {
+		scrollAmount = value
+	}
+
+	function setMaxSongListHeight() {
+		// This allows, based on the SONG_AMOUNT set by user or the default value, to dynamically keep the biggest auto sizing of the element allowing to have song lists with very few songs to fit properly on the same element with a lot of songs. It prevents jumps if the list of songs is too small after a big list of songs.
 
 		/*
 				| Song 1 |		->			| Song 1 |
@@ -22,9 +68,6 @@
 				| Song 3 |		->			| 			 |
 				| Song 4 |		->			| 			 |
 		*/
-
-		scrollAmount
-		$songListStore
 
 		let songList = document.querySelector('song-list')
 
@@ -36,32 +79,6 @@
 		}
 	}
 
-	let isScrollAtBottom = false
-	let isScrollAtTop = false
-
-	$: {
-		$selectedAlbumId
-		if (isSelectedAlbumIdFirstAssign) {
-			isSelectedAlbumIdFirstAssign = false
-		} else {
-			scrollAmount = 0
-			isScrollAtBottom = false
-			isScrollAtTop = false
-		}
-	}
-
-	$:{
-		$songListStore
-		isScrollAtBottom = false
-		isScrollAtTop = false
-	}
-
-	$: {
-		$songListStore
-		scrollAmount
-		trimSongsArray()
-	}
-
 	function trimSongsArray() {
 		if (isScrollAtBottom === false && isScrollAtTop === false) {
 			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
@@ -71,8 +88,6 @@
 
 		setProgress()
 	}
-
-	let lastSelectedSong = 0
 
 	function selectSongs(e: MouseEvent) {
 		let { ctrlKey, metaKey, shiftKey } = e
@@ -111,14 +126,14 @@
 	}
 
 	function scrollContainer(e: WheelEvent) {
-		scrollAmount = scrollAmount + Math.sign(e.deltaY)
+		setScroll(scrollAmount + Math.sign(e.deltaY))
 
 		// Stops scrolling beyond arrays end and always keeps one element visible.
 		if (scrollAmount === $songListStore.length) {
-			scrollAmount = $songListStore.length - 1
+			setScroll($songListStore.length - 1)
 			isScrollAtBottom = true
 		} else if (scrollAmount < 0) {
-			scrollAmount = 0
+			setScroll(0)
 			isScrollAtTop = true
 		} else {
 			isScrollAtBottom = false
@@ -146,24 +161,30 @@
 		}, 250)
 	})
 
+	/*
+			User clicks on image
+			sets proper category
+			scrolls to song
+	*/
+
 	// Manages to "scroll" to the proper song on demand.
-	function setScrollAmountFromSong(lastPlayedSongId) {
-		let songIndex = $songListStore.findIndex((song) => song.ID === lastPlayedSongId)
+	function setScrollAmountFromSong(songId) {
+		let songIndex = $songListStore.findIndex((song) => song.ID === songId)
 		let differenceAmount = Math.floor(SONG_AMOUNT / 2)
 
 		if (songIndex !== -1) {
 			if (songIndex < differenceAmount) {
-				scrollAmount = 0
+				setScroll(0)
 			} else {
-				scrollAmount = songIndex - differenceAmount
+				setScroll(songIndex - differenceAmount)
 			}
 		}
 	}
 
 	// Sets the proper scrollAmount based of the percentage (in distance) of the bar clicked. 0% = top and 100% = bottom.
-	function setScrollAmount(songListProgressBar: HTMLDivElement, e: MouseEvent) {
+	function setScrollAmountBar(songListProgressBar: HTMLDivElement, e: MouseEvent) {
 		let percentClick = (100 / songListProgressBar.clientHeight) * e.offsetY
-		scrollAmount = ($songListStore.length / 100) * percentClick
+		setScroll(($songListStore.length / 100) * percentClick)
 	}
 
 	function isValidPath(event: Event, validPaths: string[]) {
@@ -200,7 +221,7 @@
 				}
 
 				// Sets the scrollAmount value with the newly calculated one.
-				scrollAmount = (($songListStore.length - 1) / 100) * percentage
+				setScroll((($songListStore.length - 1) / 100) * percentage)
 			}
 		})
 
@@ -216,8 +237,8 @@
 			isMouseDownInScroll = false
 		})
 
-		// If the user click on the scrollbar, calls setScrollAmount.
-		songListProgressBar.addEventListener('click', (evt) => setScrollAmount(songListProgressBar, evt))
+		// If the user click on the scrollbar, calls setScrollAmountBar.
+		songListProgressBar.addEventListener('click', (evt) => setScrollAmountBar(songListProgressBar, evt))
 	}
 </script>
 

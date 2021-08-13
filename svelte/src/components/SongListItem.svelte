@@ -22,12 +22,12 @@
 
 		$songPlayingIdStore = lastPlayedSongId
 
-		if (lastPlayedSongId === song.ID) {
-			let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
-			if (songEl) {
-				songEl.scrollIntoView({ block: 'center' })
-			}
-		}
+		// if (lastPlayedSongId === song.ID) {
+			// let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
+			// if (songEl) {
+			// 	songEl.scrollIntoView({ block: 'center' })
+			// }
+		// }
 	})
 
 	function setDynamicArtists() {

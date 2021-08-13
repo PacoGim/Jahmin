@@ -29,11 +29,11 @@
 	$: {
 		if ($triggerGroupingChangeEvent === true) {
 			setPlayingSongGroupingValue()
+			$triggerGroupingChangeEvent = false
 		}
 	}
 
 	function setPlayingSongGroupingValue() {
-		$triggerGroupingChangeEvent = false
 		selectedGroupByValue = localStorage.getItem('GroupByValue')
 	}
 

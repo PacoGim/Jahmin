@@ -44,8 +44,8 @@
 </script>
 
 <art-grid-svlt>
-	{#each $albumListStore as album, index (album.ID)}
-		<Album {album} {index} />
+	{#each $albumListStore as album (album.ID)}
+		<Album {album} />
 	{/each}
 </art-grid-svlt>
 

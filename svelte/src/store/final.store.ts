@@ -26,6 +26,8 @@ export let songPlayingIdStore: Writable<number> = writable(undefined)
 // Allows to share with the rest of the app whether the player is playing or not.
 export let isPlaying: Writable<boolean> = writable(false)
 
+export let playingSongStore: Writable<SongType> = writable(undefined)
+
 export let selectedAlbumId: Writable<string> = writable(undefined)
 
 export let selectedSongsStore: Writable<number[]> = writable([])
@@ -40,4 +42,8 @@ export let updateSongProgress: Writable<number> = writable(-1)
 
 export let elementMap: Writable<Map<string, HTMLElement>> = writable(undefined)
 
+// PlayerController.svelte -> Grouping.svelte
 export let triggerGroupingChangeEvent: Writable<boolean> = writable(false)
+
+// PlayerController.svelte -> SongList.svelte
+export let triggerScrollToSongEvent: Writable<boolean> = writable(false)
