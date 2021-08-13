@@ -1,3 +1,7 @@
 node_modules
 .DS_Store
 node_modules.nosync
+binaries
+.vscode
+pnpm-lock.yaml
+electron-app/build
