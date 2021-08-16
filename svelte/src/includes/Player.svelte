@@ -198,7 +198,7 @@
 </audio>
 
 <player-svlt>
-	<CoverArt klass="Player id={currentSong?.ID}" {rootDir} height="64px" width="auto" cursor="pointer" observe={false} />
+	<CoverArt klass="Player" {rootDir} style="height:64px;width:auto;cursor:pointer" observe={false} />
 
 	<player-buttons>
 		<PreviousButton {player} />

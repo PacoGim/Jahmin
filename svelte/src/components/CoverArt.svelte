@@ -12,13 +12,9 @@
 	export let klass
 	export let rootDir
 	export let observe = false
-	export let height
-	export let width
-	export let cursor = 'default'
+	export let style
 
 	let albumCoverArtVersion = undefined
-
-	// let coverArtObserver: IntersectionObserver
 
 	$: {
 		forceCoverSource(rootDir)
@@ -79,7 +75,7 @@
 	}
 </script>
 
-<cover-art style="height: {height}; width:{width}; cursor:{cursor};">
+<cover-art {style}>
 	{#if coverType === undefined}
 		<img src="./img/audio.svg" class="loader" alt="" />
 	{/if}
@@ -95,6 +91,7 @@
 
 <style>
 	cover-art {
+		cursor: default;
 		grid-column: 1;
 		grid-row: 1;
 	}

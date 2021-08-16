@@ -64,18 +64,22 @@ function loadOptions(config: ConfigType) {
 			bounds.x + bounds.width <= area.x + area.width &&
 			bounds.y + bounds.height <= area.y + area.height
 		) {
-			options['x'] = bounds['x']
-			options['y'] = bounds['y']
+			options.x = bounds.x
+			options.y = bounds.y
+		} else {
+			options.x = 0
+			options.y = 0
 		}
 
-		if (bounds.width <= area.width || bounds.height <= area.height) {
-			options['height'] = bounds['height']
-			options['width'] = bounds['width']
+		if (bounds.width <= area.width && bounds.height <= area.height && bounds.height >= 500 && bounds.width >= 500) {
+			options.height = bounds.height
+			options.width = bounds.width
 		}
 	} else {
 		console.log('No Config')
 	}
 
+	console.log(options)
 	return options
 }
 

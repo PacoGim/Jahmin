@@ -57,6 +57,7 @@
 			on:mouseover={() => {
 				resizeTextArea(id, 'expand')
 			}}
+			on:focus={()=>{}}
 			on:input={() => {
 				resizeTextArea(id, 'expand')
 			}}

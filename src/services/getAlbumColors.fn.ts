@@ -43,7 +43,7 @@ export function getAlbumColors(imageId: string): Promise<ColorType | undefined> 
 					})
 				}
 
-				let hexColor = buffer.toString('hex')
+				let hexColor = buffer.toString('hex').substring(0, 6)
 
 				let hslColorObject: ColorType = ColorTypeShell()
 

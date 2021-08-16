@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { hash } from '../functions/hashString.fn'
+	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { getAlbumColors } from '../service/getAlbumColors.fn'
 
@@ -9,6 +11,8 @@
 		albumListStore,
 		dbVersion,
 		elementMap,
+		playbackStore,
+		playingSongStore,
 		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
@@ -123,12 +127,14 @@
 
 		if (IMG_ELEMENT) {
 			if (IMG_ELEMENT.classList.contains('Player')) {
+				let playingSong = $playingSongStore
+				let albumID = hash(playingSong.SourceFile.split('/').slice(0, -1).join('/'), 'text') as string
+
+				$selectedAlbumId = albumID
+				$songListStore = $playbackStore
 				$triggerGroupingChangeEvent = true
-
-				// setTimeout(() => {
-
-					$triggerScrollToSongEvent = true
-				// }, 100);
+				$triggerScrollToSongEvent = true
+				scrollToAlbumFn(albumID)
 			}
 		}
 	}

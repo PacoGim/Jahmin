@@ -6,6 +6,7 @@
 	import type { AlbumType } from '../types/album.type'
 	import { albumPlayingIdStore, selectedAlbumId } from '../store/final.store'
 	import CoverArt from './CoverArt.svelte'
+	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 
 	export let album: AlbumType
 	// export let index
@@ -16,10 +17,7 @@
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 
 		if (album.ID === lastPlayedAlbumId) {
-			let albumEl = document.querySelector(`#${CSS.escape(album.ID)}`)
-			if (albumEl) {
-				albumEl.scrollIntoView({ block: 'center' })
-			}
+			scrollToAlbumFn(album.ID)
 		}
 	})
 
@@ -52,7 +50,7 @@
 </script>
 
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
-	<CoverArt klass="Album" rootDir={album.RootDir} height="inherit" width="inherit" observe={true} />
+	<CoverArt klass="Album" rootDir={album.RootDir} style="height:inherit;width:inherit" observe={true} />
 
 	<overlay-gradient />
 
@@ -88,6 +86,7 @@
 		width: var(--cover-dimension);
 		max-width: var(--cover-dimension);
 		max-height: var(--cover-dimension);
+		z-index: 10;
 	}
 
 	album:hover overlay-gradient {

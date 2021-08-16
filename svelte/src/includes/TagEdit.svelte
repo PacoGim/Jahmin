@@ -238,9 +238,7 @@
 		showUndo={tagList.Rating.bind !== tagList.Rating.value}
 	/>
 
-
-		<CoverArt klass="TagEdit" {rootDir} height="auto" width="100%"/>
-
+	<CoverArt klass="TagEdit" {rootDir} style="height:auto;width:100%;" />
 
 	<button-group>
 		<button on:click={updateSongs} class="update-button {enableButtons ? '' : 'disabled'}">Update</button>
@@ -249,10 +247,9 @@
 </tag-edit-svlt>
 
 <style>
-
-tag-edit-svlt{
-	overflow-y: overlay;
-}
+	tag-edit-svlt {
+		overflow-y: overlay;
+	}
 
 	button-group {
 		display: flex;
