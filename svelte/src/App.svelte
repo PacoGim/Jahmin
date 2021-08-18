@@ -16,6 +16,7 @@
 	import { albumListStore, appTitle } from './store/final.store'
 	import { handleContextMenuEvent } from './service/contextMenu.service'
 	import IpcController from './controllers/IpcController.svelte'
+import SongInfo from './includes/SongInfo.svelte';
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -55,7 +56,7 @@
 	<Player />
 	<SongList />
 	<TagEdit />
-	<!-- <BackgroundArt /> -->
+	<SongInfo/>
 	<SongListBackground />
 </main>
 
@@ -70,6 +71,6 @@
 		grid-template-areas:
 			'navigation-svlt grouping-svlt art-grid-svlt tag-edit-svlt'
 			'navigation-svlt grouping-svlt song-list-svlt tag-edit-svlt'
-			'navigation-svlt grouping-svlt player-svlt tag-edit-svlt';
+			'song-info-svlt song-info-svlt player-svlt tag-edit-svlt';
 	}
 </style>
