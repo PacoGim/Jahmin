@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { getGroupingIPC } from '../service/ipc.service'
+	import { getGroupingIPC } from '../../service/ipc.service'
 	import {
 		albumPlayingIdStore,
 		dbVersion,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
 		triggerGroupingChangeEvent
-	} from '../store/final.store'
+	} from '../../store/final.store'
 
 	let selectedGroupBy = localStorage.getItem('GroupBy')
 	let selectedGroupByValue = localStorage.getItem('GroupByValue')
@@ -67,7 +67,7 @@
 	}
 
 	function getGrouping() {
-		getGroupingIPC(selectedGroupBy).then((result) => {
+		getGroupingIPC(selectedGroupBy).then(result => {
 			groups = result
 
 			setTimeout(() => {

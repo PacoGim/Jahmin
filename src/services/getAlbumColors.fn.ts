@@ -47,7 +47,7 @@ export function getAlbumColors(imageId: string): Promise<ColorType | undefined> 
 
 				let hslColorObject: ColorType = ColorTypeShell()
 
-				const difference = 15
+				const difference = 20
 
 				let hslColor = hexToHsl(hexColor)
 

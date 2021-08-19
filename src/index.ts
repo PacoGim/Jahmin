@@ -79,7 +79,6 @@ function loadOptions(config: ConfigType) {
 		console.log('No Config')
 	}
 
-	console.log(options)
 	return options
 }
 

@@ -47,3 +47,7 @@ export let triggerGroupingChangeEvent: Writable<boolean> = writable(false)
 
 // PlayerController.svelte -> SongList.svelte
 export let triggerScrollToSongEvent: Writable<boolean> = writable(false)
+
+/********************** ConfigLayout **********************/
+// export let showConfigLayout:Writable<boolean> = writable(false)
+export let showConfigLayout:Writable<boolean> = writable(true)

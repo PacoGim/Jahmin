@@ -15,6 +15,7 @@ const opus_format_1 = require("../formats/opus.format");
 const mp3_format_1 = require("../formats/mp3.format");
 const flac_format_1 = require("../formats/flac.format");
 const aac_format_1 = require("../formats/aac.format");
+const fileExistsWithCaseSync_fn_1 = __importDefault(require("../functions/fileExistsWithCaseSync.fn"));
 const TOTAL_CPUS = os_1.cpus().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
@@ -67,12 +68,11 @@ function processQueue() {
 function reloadAlbumData(albumId) {
     //IMPORTANT Fix issue when deleting songs? Or when updating
     // Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
-    console.log(albumId);
     let album = storage_service_1.getStorageMap().get(albumId);
     let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
     if (rootDir === undefined)
         return;
-    if (fs_1.default.existsSync(rootDir) === false) {
+    if (fileExistsWithCaseSync_fn_1.default(rootDir) === false) {
         storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
             type: 'deleteFolder',
             data: rootDir,

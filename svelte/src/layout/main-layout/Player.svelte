@@ -1,23 +1,22 @@
 <script lang="ts">
-	import type { SongType } from '../types/song.type'
+	import type { SongType } from '../../types/song.type'
 
 	import { onMount } from 'svelte'
 
-	import NextButton from '../components/NextButton.svelte'
-	import PreviousButton from '../components/PreviousButton.svelte'
-	import PlayButton from '../components/PlayButton.svelte'
-	import PlayerProgress from '../components/PlayerProgress.svelte'
-	import PlayerVolumeBar from '../components/PlayerVolumeBar.svelte'
+	import NextButton from './sub-layout/NextButton.svelte'
+	import PreviousButton from './sub-layout/PreviousButton.svelte'
+	import PlayButton from './sub-layout/PlayButton.svelte'
+	import PlayerProgress from './sub-layout/PlayerProgress.svelte'
+	import PlayerVolumeBar from './sub-layout/PlayerVolumeBar.svelte'
 
-	import { isPlaying, playingSongStore, songPlayingIdStore, updateSongProgress } from '../store/final.store'
+	import { isPlaying, playingSongStore, songPlayingIdStore, updateSongProgress } from '../../store/final.store'
 
-	import { nextSong } from '../functions/nextSong.fn'
-	import { escapeString } from '../functions/escapeString.fn'
-	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../store/final.store'
-	import { parseDuration } from '../functions/parseDuration.fn'
-	import { setWaveSource } from '../service/waveform.service'
-	import { streamAudio } from '../service/ipc.service'
-	import CoverArt from '../components/CoverArt.svelte'
+	import { nextSong } from '../../functions/nextSong.fn'
+	import { escapeString } from '../../functions/escapeString.fn'
+	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../../store/final.store'
+	import { parseDuration } from '../../functions/parseDuration.fn'
+	import { setWaveSource } from '../../service/waveform.service'
+	import CoverArt from '../../components/CoverArt.svelte'
 
 	let progress: number = 0
 

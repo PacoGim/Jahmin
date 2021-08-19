@@ -48,7 +48,7 @@ function getAlbumColors(imageId) {
             }
             let hexColor = buffer.toString('hex').substring(0, 6);
             let hslColorObject = color_type_1.ColorTypeShell();
-            const difference = 15;
+            const difference = 20;
             let hslColor = hex_to_hsl_1.default(hexColor);
             hslColorObject.hue = hslColor[0];
             hslColorObject.saturation = hslColor[1];

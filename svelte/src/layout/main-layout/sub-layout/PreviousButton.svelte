@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { playbackCursor, playbackStore } from '../store/final.store'
+	import { playbackCursor, playbackStore } from '../../../store/final.store'
 
 	export let player: HTMLAudioElement
 

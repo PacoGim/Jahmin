@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { albumCoverArtMapStore, selectedAlbumId } from '../store/final.store'
+	import { albumCoverArtMapStore, selectedAlbumId } from '../../store/final.store'
 
 	let previousCoverArtVersion = undefined
 	let previousCoverArtId = undefined

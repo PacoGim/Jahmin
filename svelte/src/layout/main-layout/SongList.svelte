@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import SongListItem from '../components/SongListItem.svelte'
+	import SongListItem from '../../components/SongListItem.svelte'
+
 	import {
 		selectedAlbumId,
 		songListStore,
 		selectedSongsStore,
 		triggerScrollToSongEvent,
 		playingSongStore
-	} from '../store/final.store'
+	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []

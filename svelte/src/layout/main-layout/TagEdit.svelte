@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import CoverArt from '../components/CoverArt.svelte'
+	import CoverArt from '../../components/CoverArt.svelte'
 
-	import Star from '../components/Star.svelte'
+	import Star from '../../components/Star.svelte'
 
-	import TagEditEditor from '../components/TagEdit-Editor.svelte'
+	import TagEditEditor from './sub-layout/TagEdit-Editor.svelte'
 
-	import { getEmptyTagList } from '../functions/getEmptyTagList.fn'
-	import { isEmptyObject } from '../functions/isEmptyObject.fn'
-	import { editTagsIPC, getTagEditProgressIPC } from '../service/ipc.service'
+	import { getEmptyTagList } from '../../functions/getEmptyTagList.fn'
+	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
+	import { editTagsIPC, getTagEditProgressIPC } from '../../service/ipc.service'
 
-	import { selectedSongsStore, songListStore } from '../store/final.store'
-	import type { SongType } from '../types/song.type'
+	import { selectedSongsStore, songListStore } from '../../store/final.store'
+	import type { SongType } from '../../types/song.type'
 
 	let songsToEdit: SongType[] = []
 	let tagList = getEmptyTagList()

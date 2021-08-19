@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { updateSongProgress } from '../store/final.store'
+	import { updateSongProgress } from '../../../store/final.store'
 	// import { playbackCursor, playbackStore } from '../store/final.store'
-	import type { SongType } from '../types/song.type'
+	import type { SongType } from '../../../types/song.type'
 	// import { setWaveSource } from '../service/waveform.service'
 
 	export let player: HTMLAudioElement
@@ -57,11 +57,11 @@
 
 		playerProgress.addEventListener('mouseup', () => (isMouseDown = false))
 
-		playerProgress.addEventListener('mousemove', (evt) => {
+		playerProgress.addEventListener('mousemove', evt => {
 			if (isMouseDown && isMouseIn) applyProgressChange(evt)
 		})
 
-		playerProgress.addEventListener('click', (evt) => applyProgressChange(evt))
+		playerProgress.addEventListener('click', evt => applyProgressChange(evt))
 
 		function applyProgressChange(evt: Event) {
 			if (song === undefined) return

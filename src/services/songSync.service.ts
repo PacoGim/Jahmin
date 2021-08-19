@@ -12,6 +12,7 @@ import { getOpusTags } from '../formats/opus.format'
 import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
+import fileExistsWithCaseSync from '../functions/fileExistsWithCaseSync.fn'
 
 const TOTAL_CPUS = cpus().length
 
@@ -72,16 +73,17 @@ function processQueue() {
 	}
 }
 
+
+
 export function reloadAlbumData(albumId: string) {
 	//IMPORTANT Fix issue when deleting songs? Or when updating
 	// Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
-	console.log(albumId)
 	let album = getStorageMap().get(albumId)
 	let rootDir = album?.RootDir
 
 	if (rootDir === undefined) return
 
-	if (fs.existsSync(rootDir) === false) {
+	if (fileExistsWithCaseSync(rootDir) === false) {
 		storageWorker?.postMessage({
 			type: 'deleteFolder',
 			data: rootDir,

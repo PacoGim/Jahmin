@@ -77,7 +77,6 @@ function loadOptions(config) {
     else {
         console.log('No Config');
     }
-    console.log(options);
     return options;
 }
 /* ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
