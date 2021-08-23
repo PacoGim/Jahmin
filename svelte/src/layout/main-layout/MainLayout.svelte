@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import ArtGrid from './ArtGrid.svelte'
 	import Grouping from './Grouping.svelte'
 	import Navigation from './Navigation.svelte'

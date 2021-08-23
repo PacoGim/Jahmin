@@ -27,14 +27,15 @@
 	}
 
 	$: {
-		if ($triggerGroupingChangeEvent === true) {
+		if ($triggerGroupingChangeEvent !== '') {
 			setPlayingSongGroupingValue()
-			$triggerGroupingChangeEvent = false
+			$triggerGroupingChangeEvent = ''
 		}
 	}
 
 	function setPlayingSongGroupingValue() {
-		selectedGroupByValue = localStorage.getItem('GroupByValue')
+		console.log($triggerGroupingChangeEvent)
+		selectedGroupByValue = $triggerGroupingChangeEvent
 	}
 
 	$: {

@@ -43,11 +43,12 @@ export let updateSongProgress: Writable<number> = writable(-1)
 export let elementMap: Writable<Map<string, HTMLElement>> = writable(undefined)
 
 // PlayerController.svelte -> Grouping.svelte
-export let triggerGroupingChangeEvent: Writable<boolean> = writable(false)
+export let triggerGroupingChangeEvent: Writable<string> = writable('')
 
 // PlayerController.svelte -> SongList.svelte
 export let triggerScrollToSongEvent: Writable<boolean> = writable(false)
 
 /********************** ConfigLayout **********************/
 // export let showConfigLayout:Writable<boolean> = writable(false)
-export let showConfigLayout:Writable<boolean> = writable(true)
+// export let showConfigLayout:Writable<boolean> = writable(true)
+export let layoutToShow:Writable<'Main'|'Search'|'Config'> = writable('Search')

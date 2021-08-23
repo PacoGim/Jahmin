@@ -12,9 +12,11 @@ import { getMaxTaskQueueLength, getTaskQueueLength } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
-import { getNewPromiseDbVersion, getStorageMap } from './storage.service'
+import { getFuzzyList, getNewPromiseDbVersion, getStorageMap, getStorageMapToArray } from './storage.service'
 import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
+
+import Fuse from 'fuse.js'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -30,7 +32,7 @@ export function loadIPC() {
 		let filtering = config['order']['filtering'] || []
 		let result: any[] = orderSongs(arg, grouping, filtering)
 
-		result = result.map((value) => ({
+		result = result.map(value => ({
 			id: nanoid(),
 			value
 		}))
@@ -41,6 +43,19 @@ export function loadIPC() {
 	ipcMain.handle('get-config', async (evt, arg) => {
 		let config = getConfig()
 		return config
+	})
+
+	ipcMain.handle('search', async (evt, arg) => {
+		// console.log('Main:',arg)
+		const fuse = new Fuse(getStorageMapToArray(), {
+			// keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
+			keys: ['Title'],
+			includeMatches: true
+		})
+
+		const result = fuse.search(arg)
+
+		return result.slice(0, 100)
 	})
 
 	ipcMain.handle('save-peaks', async (evt, sourceFile, peaks) => {
@@ -75,12 +90,12 @@ export function loadIPC() {
 		let docs = getStorageMap()
 		let groupedSongs: any[] = []
 
-		docs.forEach((doc) => {
-			doc.Songs.forEach((song) => {
+		docs.forEach(doc => {
+			doc.Songs.forEach(song => {
 				if (song[groupBy] === groupByValue) {
 					let rootDir = song.SourceFile.split('/').slice(0, -1).join('/')
 
-					let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir)
+					let foundAlbum = groupedSongs.find(i => i['RootDir'] === rootDir)
 
 					if (!foundAlbum) {
 						groupedSongs.push({
@@ -113,7 +128,7 @@ export function loadIPC() {
 		return await getNewPromiseDbVersion(value)
 	})
 
-	ipcMain.handle('get-changes-progress', async (evt) => {
+	ipcMain.handle('get-changes-progress', async evt => {
 		return {
 			total: getMaxTaskQueueLength(),
 			current: getTaskQueueLength()

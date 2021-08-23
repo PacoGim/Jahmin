@@ -5,7 +5,7 @@ export type SongType = {
 	AlbumArtist?: string // Modifiable
 	Artist?: string // Modifiable
 	Composer?: string // Modifiable
-	DynamicArtists?:string // Programmatically added
+	DynamicArtists?: string // Programmatically added
 	Genre?: string // Modifiable
 	Title?: string // Modifiable
 	Track?: number // Modifiable
@@ -23,4 +23,8 @@ export type SongType = {
 	LastModified?: number
 	BitRate?: string
 	BitDepth?: number
+}
+
+export type SongFuzzySearchType = {
+	item: SongType
 }

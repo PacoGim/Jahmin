@@ -23,7 +23,7 @@ let watcher: chokidar.FSWatcher
 
 let worker = getWorker('storage')
 
-worker?.on('message', (message) => {
+worker?.on('message', message => {
 	if (message.type === 'insert') {
 		insertData(message.data)
 	} else if (message.type === 'update') {
@@ -56,7 +56,7 @@ function deleteData(songPath: string) {
 	let songs = mappedData?.Songs
 
 	if (mappedData && songs) {
-		songs = songs.filter((song) => song.ID !== songId)
+		songs = songs.filter(song => song.ID !== songId)
 
 		// If all songs removed from drive, then, delete the album and all data from map.
 		if (songs.length === 0) {
@@ -84,7 +84,7 @@ function updateData(songData: SongType) {
 	let songs = mappedData?.Songs
 
 	if (mappedData && songs) {
-		let songIndex = songs.findIndex((song) => song.ID === songId)
+		let songIndex = songs.findIndex(song => song.ID === songId)
 		songs[songIndex] = songData
 		mappedData.Songs = songs
 		storageMap.set(rootDir, mappedData)
@@ -117,13 +117,15 @@ function insertData(songData: SongType) {
 	if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
 }
 
+let fuzzyArray: (string | undefined)[] = []
+
 function consolidateStorage() {
 	console.log('Consolidating...')
 	if (!fs.existsSync(STORAGE_PATH)) {
 		fs.mkdirSync(STORAGE_PATH)
 	}
 
-	let storageFiles = fs.readdirSync(STORAGE_PATH).filter((file) => {
+	let storageFiles = fs.readdirSync(STORAGE_PATH).filter(file => {
 		if (['.DS_Store', 'version'].includes(file)) {
 			return false
 		} else {
@@ -131,7 +133,7 @@ function consolidateStorage() {
 		}
 	})
 
-	storageFiles.forEach((file) => {
+	storageFiles.forEach(file => {
 		let fileData = JSON.parse(fs.readFileSync(path.join(STORAGE_PATH, file), { encoding: 'utf-8' }))
 
 		for (let songId in fileData) {
@@ -143,7 +145,7 @@ function consolidateStorage() {
 			let data = storageMap.get(rootId)
 
 			if (data) {
-				if (!data.Songs.find((i) => i.ID === song.ID)) {
+				if (!data.Songs.find(i => i.ID === song.ID)) {
 					data.Songs.push(song)
 
 					storageMap.set(rootId, data)
@@ -158,16 +160,17 @@ function consolidateStorage() {
 			}
 		}
 	})
+}
 
-	// storageMap = map
-	// return map
+export function getFuzzyList() {
+	return fuzzyArray
 }
 
 export function getStorageMapToArray() {
 	let map = getStorageMap()
 	let array: SongType[] = []
 
-	map.forEach((album) => {
+	map.forEach(album => {
 		array = array.concat(album.Songs)
 	})
 
@@ -179,10 +182,10 @@ export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<numbe
 
 	// If the db version changed while going back and forth Main <-> Renderer
 	if (dbFileTimeStamp > rendererDbVersion) {
-		return new Promise((resolve) => resolve(dbFileTimeStamp))
+		return new Promise(resolve => resolve(dbFileTimeStamp))
 	} else {
 		// If didn't change, wait for a change to happen.
-		return new Promise((resolve) => (dbVersionResolve = resolve))
+		return new Promise(resolve => (dbVersionResolve = resolve))
 	}
 }
 

@@ -56,6 +56,18 @@ body {
 	font-variation-settings: 'wght' 400;
 }
 
+.layout{
+	margin-left: 64px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: calc(100% - 64px);
+	width: 100%;
+	background-color: var(--secondary-color);
+	overflow-y: hidden;
+	z-index: 10;
+}
+
 *::-webkit-scrollbar {
 	width: 6px;
 }

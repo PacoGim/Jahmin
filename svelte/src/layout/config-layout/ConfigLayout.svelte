@@ -1,7 +1,6 @@
-<script>
-	import { showConfigLayout } from '../../store/final.store'
+<script lang="ts">
+	import { layoutToShow } from '../../store/final.store'
 
-	import Navigation from '../main-layout/Navigation.svelte'
 	import ArtGridOption from './options/ArtGridOption.svelte'
 	import EqualizerOption from './options/EqualizerOption.svelte'
 	import SongInfoOption from './options/SongInfoOption.svelte'
@@ -16,8 +15,7 @@
 	}
 </script>
 
-<config-layout style="opacity:{$showConfigLayout === true ? '1' : '0'}">
-	<Navigation />
+<config-layout class="layout" style="display:{$layoutToShow === 'Config' ? 'block' : 'none'}">
 	<OptionsList on:optionSelected={handleOptionSelected} />
 	<selected-option>
 		{#if selectedOption === 'Art Grid'}
@@ -36,21 +34,10 @@
 
 <style>
 	config-layout {
-		position: fixed;
-		top: 0;
-		left: 0;
-		height: calc(100% - 64px);
-		width: 100%;
+		grid-template-columns: max-content auto;
 
-		background-color: var(--secondary-color);
-
-		grid-template-columns: 64px max-content auto;
-		overflow-y: hidden;
 		display: grid;
-		z-index: 10;
 
-		grid-template-areas: 'navigation-svlt options-list selected-option';
-
-		transition: opacity 300ms ease-in-out;
+		grid-template-areas: 'options-list selected-option';
 	}
 </style>

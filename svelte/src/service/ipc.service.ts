@@ -3,16 +3,24 @@ const { ipcRenderer } = require('electron')
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
-import type { SongType } from '../types/song.type'
+import type { SongFuzzySearchType, SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
+
+export function userSearchIPC(searchString: string):Promise<SongFuzzySearchType[]> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('search', searchString).then(result => {
+			resolve(result)
+		})
+	})
+}
 
 export function getTagEditProgressIPC(): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		if (!isGetTagEditProgressRunning) {
 			isGetTagEditProgressRunning = true
 
-			ipcRenderer.invoke('get-tag-edit-progress').then((result) => {
+			ipcRenderer.invoke('get-tag-edit-progress').then(result => {
 				isGetTagEditProgressRunning = false
 				let percentage = (100 / result?.maxLength) * result?.currentLength
 
@@ -32,7 +40,7 @@ export function getTagEditProgressIPC(): Promise<string[]> {
 
 export function getTasksToSyncIPC(): Promise<any[]> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('sync-tasks').then((result) => {
+		ipcRenderer.invoke('sync-tasks').then(result => {
 			resolve(result)
 		})
 	})
@@ -40,7 +48,7 @@ export function getTasksToSyncIPC(): Promise<any[]> {
 
 export function streamAudio(path: string): Promise<string[]> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('stream-audio', path).then((result) => {
+		ipcRenderer.invoke('stream-audio', path).then(result => {
 			// console.log(result)
 			// resolve(result)
 		})
@@ -49,7 +57,7 @@ export function streamAudio(path: string): Promise<string[]> {
 
 export function getOrderIPC(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-order', index).then((result) => {
+		ipcRenderer.invoke('get-order', index).then(result => {
 			resolve(result)
 		})
 	})
@@ -57,7 +65,7 @@ export function getOrderIPC(index: number): Promise<string[]> {
 
 export function getGroupingIPC(valueToGroupBy: string): Promise<string[]> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-grouping', valueToGroupBy).then((result) => {
+		ipcRenderer.invoke('get-grouping', valueToGroupBy).then(result => {
 			resolve(result)
 		})
 	})
@@ -65,7 +73,7 @@ export function getGroupingIPC(valueToGroupBy: string): Promise<string[]> {
 
 export function getConfigIPC(): Promise<object> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-config').then((result) => {
+		ipcRenderer.invoke('get-config').then(result => {
 			resolve(result)
 		})
 	})
@@ -73,7 +81,7 @@ export function getConfigIPC(): Promise<object> {
 
 export function editTagsIPC(songList: string[], newTags: Object): Promise<number[] | undefined> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('edit-tags', songList, newTags).then((response) => {
+		ipcRenderer.invoke('edit-tags', songList, newTags).then(response => {
 			resolve(response)
 		})
 	})
@@ -89,7 +97,7 @@ export function savePeaksIPC(sourceFile: string, peaks: number[]): Promise<numbe
 
 export function getPeaksIPC(sourceFile: string) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-peaks', sourceFile).then((result) => {
+		ipcRenderer.invoke('get-peaks', sourceFile).then(result => {
 			resolve(result)
 		})
 	})
@@ -97,7 +105,7 @@ export function getPeaksIPC(sourceFile: string) {
 
 export function saveConfig(newConfig: object) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('save-config', newConfig).then((result) => {
+		ipcRenderer.invoke('save-config', newConfig).then(result => {
 			resolve(result)
 		})
 	})
@@ -108,7 +116,7 @@ const sortBy = 'RootDir'
 
 export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-albums', groupBy, groupByValue).then((result) => {
+		ipcRenderer.invoke('get-albums', groupBy, groupByValue).then(result => {
 			result = result.sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])))
 			resolve(result)
 		})
@@ -148,7 +156,7 @@ export function getAllAlbumsIPC(): Promise<void> {
 
 export function getCoverIPC(rootDir) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-cover', rootDir).then((result) => {
+		ipcRenderer.invoke('get-cover', rootDir).then(result => {
 			resolve(result)
 		})
 	})
@@ -174,7 +182,7 @@ export function getAlbumIPC(albumId: string): Promise<AlbumType> {
 
 export function getAlbumColorsIPC(imageId) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-album-colors', imageId).then((result) => {
+		ipcRenderer.invoke('get-album-colors', imageId).then(result => {
 			resolve(result)
 		})
 	})
@@ -182,7 +190,7 @@ export function getAlbumColorsIPC(imageId) {
 
 export function getChangesProgressIPC() {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-changes-progress').then((result) => {
+		ipcRenderer.invoke('get-changes-progress').then(result => {
 			resolve(result)
 		})
 	})
@@ -218,10 +226,10 @@ export function showContextMenuIPC(menuToOpen, parameters) {
 export function syncDbVersionIPC() {
 	let storeDbVersion = undefined
 
-	dbVersion.subscribe((value) => (storeDbVersion = value))()
+	dbVersion.subscribe(value => (storeDbVersion = value))()
 
 	// Waits for the version to change in main.
-	ipcRenderer.invoke('sync-db-version', storeDbVersion).then((result) => {
+	ipcRenderer.invoke('sync-db-version', storeDbVersion).then(result => {
 		dbVersion.set(result)
 
 		setTimeout(() => {

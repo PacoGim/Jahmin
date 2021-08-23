@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStorageMap = exports.initStorage = exports.killStorageWatcher = exports.updateStorageVersion = exports.getNewPromiseDbVersion = exports.getStorageMapToArray = void 0;
+exports.getStorageMap = exports.initStorage = exports.killStorageWatcher = exports.updateStorageVersion = exports.getNewPromiseDbVersion = exports.getStorageMapToArray = exports.getFuzzyList = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const __1 = require("..");
@@ -17,7 +17,7 @@ let storageMap = new Map();
 let dbVersionResolve = undefined;
 let watcher;
 let worker = worker_service_1.getWorker('storage');
-worker === null || worker === void 0 ? void 0 : worker.on('message', (message) => {
+worker === null || worker === void 0 ? void 0 : worker.on('message', message => {
     if (message.type === 'insert') {
         insertData(message.data);
     }
@@ -47,7 +47,7 @@ function deleteData(songPath) {
     let mappedData = storageMap.get(rootId);
     let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
     if (mappedData && songs) {
-        songs = songs.filter((song) => song.ID !== songId);
+        songs = songs.filter(song => song.ID !== songId);
         // If all songs removed from drive, then, delete the album and all data from map.
         if (songs.length === 0) {
             storageMap.delete(rootDir);
@@ -70,7 +70,7 @@ function updateData(songData) {
     let mappedData = storageMap.get(rootId);
     let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
     if (mappedData && songs) {
-        let songIndex = songs.findIndex((song) => song.ID === songId);
+        let songIndex = songs.findIndex(song => song.ID === songId);
         songs[songIndex] = songData;
         mappedData.Songs = songs;
         storageMap.set(rootDir, mappedData);
@@ -99,12 +99,13 @@ function insertData(songData) {
     if (dbVersionResolve !== undefined)
         dbVersionResolve(new Date().getTime());
 }
+let fuzzyArray = [];
 function consolidateStorage() {
     console.log('Consolidating...');
     if (!fs_1.default.existsSync(STORAGE_PATH)) {
         fs_1.default.mkdirSync(STORAGE_PATH);
     }
-    let storageFiles = fs_1.default.readdirSync(STORAGE_PATH).filter((file) => {
+    let storageFiles = fs_1.default.readdirSync(STORAGE_PATH).filter(file => {
         if (['.DS_Store', 'version'].includes(file)) {
             return false;
         }
@@ -112,7 +113,7 @@ function consolidateStorage() {
             return file.indexOf('.tmp-') === -1;
         }
     });
-    storageFiles.forEach((file) => {
+    storageFiles.forEach(file => {
         let fileData = JSON.parse(fs_1.default.readFileSync(path_1.default.join(STORAGE_PATH, file), { encoding: 'utf-8' }));
         for (let songId in fileData) {
             let song = fileData[songId];
@@ -120,7 +121,7 @@ function consolidateStorage() {
             let rootId = hashString_fn_1.hash(rootDir, 'text');
             let data = storageMap.get(rootId);
             if (data) {
-                if (!data.Songs.find((i) => i.ID === song.ID)) {
+                if (!data.Songs.find(i => i.ID === song.ID)) {
                     data.Songs.push(song);
                     storageMap.set(rootId, data);
                 }
@@ -135,13 +136,15 @@ function consolidateStorage() {
             }
         }
     });
-    // storageMap = map
-    // return map
 }
+function getFuzzyList() {
+    return fuzzyArray;
+}
+exports.getFuzzyList = getFuzzyList;
 function getStorageMapToArray() {
     let map = getStorageMap();
     let array = [];
-    map.forEach((album) => {
+    map.forEach(album => {
         array = array.concat(album.Songs);
     });
     return array;
@@ -151,11 +154,11 @@ function getNewPromiseDbVersion(rendererDbVersion) {
     let dbFileTimeStamp = getStorageVersion();
     // If the db version changed while going back and forth Main <-> Renderer
     if (dbFileTimeStamp > rendererDbVersion) {
-        return new Promise((resolve) => resolve(dbFileTimeStamp));
+        return new Promise(resolve => resolve(dbFileTimeStamp));
     }
     else {
         // If didn't change, wait for a change to happen.
-        return new Promise((resolve) => (dbVersionResolve = resolve));
+        return new Promise(resolve => (dbVersionResolve = resolve));
     }
 }
 exports.getNewPromiseDbVersion = getNewPromiseDbVersion;

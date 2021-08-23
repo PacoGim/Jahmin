@@ -8,6 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadIPC = void 0;
 const electron_1 = require("electron");
@@ -27,6 +30,7 @@ const tagEdit_service_1 = require("./tagEdit.service");
 const storage_service_1 = require("./storage.service");
 const contextMenu_service_1 = require("./contextMenu.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
+const fuse_js_1 = __importDefault(require("fuse.js"));
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => contextMenu_service_1.loadContextMenu(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('stream-audio', (evt, path) => __awaiter(this, void 0, void 0, function* () {
@@ -38,7 +42,7 @@ function loadIPC() {
         let grouping = config['order']['grouping'] || [];
         let filtering = config['order']['filtering'] || [];
         let result = songFilter_service_1.orderSongs(arg, grouping, filtering);
-        result = result.map((value) => ({
+        result = result.map(value => ({
             id: nanoid(),
             value
         }));
@@ -47,6 +51,16 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-config', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();
         return config;
+    }));
+    electron_1.ipcMain.handle('search', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
+        // console.log('Main:',arg)
+        const fuse = new fuse_js_1.default(storage_service_1.getStorageMapToArray(), {
+            // keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
+            keys: ['Title'],
+            includeMatches: true
+        });
+        const result = fuse.search(arg);
+        return result.slice(0, 100);
     }));
     electron_1.ipcMain.handle('save-peaks', (evt, sourceFile, peaks) => __awaiter(this, void 0, void 0, function* () {
         peaks_1.savePeaks(sourceFile, peaks);
@@ -73,11 +87,11 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-albums', (evt, groupBy, groupByValue) => __awaiter(this, void 0, void 0, function* () {
         let docs = storage_service_1.getStorageMap();
         let groupedSongs = [];
-        docs.forEach((doc) => {
-            doc.Songs.forEach((song) => {
+        docs.forEach(doc => {
+            doc.Songs.forEach(song => {
                 if (song[groupBy] === groupByValue) {
                     let rootDir = song.SourceFile.split('/').slice(0, -1).join('/');
-                    let foundAlbum = groupedSongs.find((i) => i['RootDir'] === rootDir);
+                    let foundAlbum = groupedSongs.find(i => i['RootDir'] === rootDir);
                     if (!foundAlbum) {
                         groupedSongs.push({
                             ID: hashString_fn_1.hash(rootDir),

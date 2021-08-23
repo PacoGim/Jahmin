@@ -32,6 +32,8 @@
 		"electron-store": "^8.0.0",
 		"exiftool-vendored": "^14.4.0",
 		"filespy": "^1.2.4",
+		"fuse.js": "^6.4.6",
+		"fzf": "^0.4.1",
 		"hex-to-hsl": "^1.0.2",
 		"image-info": "^0.0.2",
 		"music-metadata": "^7.8.5",

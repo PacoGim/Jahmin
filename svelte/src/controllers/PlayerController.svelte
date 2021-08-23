@@ -42,7 +42,7 @@
 				getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
 
 				// Refills the current album selected songs to add them as they are found.
-				getAlbumIPC($selectedAlbumId).then((result) => {
+				getAlbumIPC($selectedAlbumId).then(result => {
 					$songListStore = result.Songs
 				})
 			}
@@ -50,7 +50,7 @@
 	}
 
 	function getAlbums(groupBy: string, groupByValue: string) {
-		getAlbumsIPC(groupBy, groupByValue).then((result) => ($albumListStore = result))
+		getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
 	}
 
 	onMount(() => {
@@ -69,7 +69,7 @@
 
 		$selectedAlbumId = lastPlayedAlbumId
 
-		getAlbumIPC(lastPlayedAlbumId).then((result) => {
+		getAlbumIPC(lastPlayedAlbumId).then(result => {
 			$songListStore = result.Songs
 
 			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongId, false)
@@ -95,7 +95,7 @@
 		if (ALBUM_ELEMENT) {
 			const ALBUM_ID = ALBUM_ELEMENT.getAttribute('id')
 
-			getAlbumIPC(ALBUM_ID).then((result) => {
+			getAlbumIPC(ALBUM_ID).then(result => {
 				if (evt.type === 'dblclick') {
 					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
 				} else if (evt.type === 'click') {
@@ -113,7 +113,7 @@
 			const SONG_ID = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
-				getAlbumIPC($selectedAlbumId).then((result) => {
+				getAlbumIPC($selectedAlbumId).then(result => {
 					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID, true)
 				})
 			}
@@ -132,7 +132,7 @@
 
 				$selectedAlbumId = albumID
 				$songListStore = $playbackStore
-				$triggerGroupingChangeEvent = true
+				$triggerGroupingChangeEvent = localStorage.getItem('GroupByValue')
 				$triggerScrollToSongEvent = true
 				scrollToAlbumFn(albumID)
 			}

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'

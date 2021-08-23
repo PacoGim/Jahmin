@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { playingSongStore } from '../../store/final.store'
 
 	let playingSong = {
