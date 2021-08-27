@@ -17,7 +17,7 @@ exports.getOpusTags = exports.writeOpusTags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
-const generateId_fn_1 = require("../functions/generateId.fn");
+const generateId_fn_1 = __importDefault(require("../../svelte/src/functions/generateId.fn"));
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');
@@ -34,7 +34,7 @@ const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a 
 function writeOpusTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         ffmpegDeferredPromise = resolve;
-        ffmpegDeferredPromiseId = generateId_fn_1.generateId();
+        ffmpegDeferredPromiseId = generateId_fn_1.default();
         let ffmpegString = objectToFfmpegString(newTags);
         let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
         let command = `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`;
@@ -45,7 +45,7 @@ exports.writeOpusTags = writeOpusTags;
 /********************** Get Opus Tags **********************/
 let mmWorker = worker_service_1.getWorker('musicMetadata');
 let mmDeferredPromises = new Map();
-mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.on('message', (data) => {
+mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.on('message', data => {
     if (mmDeferredPromises.has(data.filePath)) {
         mmDeferredPromises.get(data.filePath)(data.metadata);
         mmDeferredPromises.delete(data.filePath);

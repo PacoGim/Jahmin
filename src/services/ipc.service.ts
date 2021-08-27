@@ -47,15 +47,43 @@ export function loadIPC() {
 
 	ipcMain.handle('search', async (evt, arg) => {
 		// console.log('Main:',arg)
+
 		const fuse = new Fuse(getStorageMapToArray(), {
-			// keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
-			keys: ['Title'],
-			includeMatches: true
+			keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
+			// keys: ['Title'],
+			includeMatches: true,
+			threshold: 0.4
 		})
 
-		const result = fuse.search(arg)
+		let result = fuse.search(arg, { limit: 20 })
 
-		return result.slice(0, 100)
+		// result = result.map(search => {
+		// 	search.matches?.forEach(match => {
+		// 		let allIndices = []
+
+		// 		match.indices.forEach(index => {
+		// 			for (let i = index[0]; i <= index[1]; i++) {
+		// 				allIndices.push(i)
+		// 			}
+		// 		})
+
+		// 		let tempValue = ''
+		// 		// console.log(allIndices)
+		// 		for (let letterIndex in match.value) {
+		// 			if (allIndices.includes(Number(letterIndex))) {
+		// 				tempValue += `<highlight>${match.value[letterIndex]}</highlight>`
+		// 			} else {
+		// 				tempValue += match.value[letterIndex]
+		// 			}
+		// 		}
+
+		// 		search.item[match.key] = tempValue
+		// 	})
+
+		// 	return search.item
+		// })
+
+		return result
 	})
 
 	ipcMain.handle('save-peaks', async (evt, sourceFile, peaks) => {

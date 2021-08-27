@@ -55,12 +55,34 @@ function loadIPC() {
     electron_1.ipcMain.handle('search', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         // console.log('Main:',arg)
         const fuse = new fuse_js_1.default(storage_service_1.getStorageMapToArray(), {
-            // keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
-            keys: ['Title'],
-            includeMatches: true
+            keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
+            // keys: ['Title'],
+            includeMatches: true,
+            threshold: 0.4
         });
-        const result = fuse.search(arg);
-        return result.slice(0, 100);
+        let result = fuse.search(arg, { limit: 20 });
+        // result = result.map(search => {
+        // 	search.matches?.forEach(match => {
+        // 		let allIndices = []
+        // 		match.indices.forEach(index => {
+        // 			for (let i = index[0]; i <= index[1]; i++) {
+        // 				allIndices.push(i)
+        // 			}
+        // 		})
+        // 		let tempValue = ''
+        // 		// console.log(allIndices)
+        // 		for (let letterIndex in match.value) {
+        // 			if (allIndices.includes(Number(letterIndex))) {
+        // 				tempValue += `<highlight>${match.value[letterIndex]}</highlight>`
+        // 			} else {
+        // 				tempValue += match.value[letterIndex]
+        // 			}
+        // 		}
+        // 		search.item[match.key] = tempValue
+        // 	})
+        // 	return search.item
+        // })
+        return result;
     }));
     electron_1.ipcMain.handle('save-peaks', (evt, sourceFile, peaks) => __awaiter(this, void 0, void 0, function* () {
         peaks_1.savePeaks(sourceFile, peaks);

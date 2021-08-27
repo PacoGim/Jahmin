@@ -1,4 +1,6 @@
 <script lang="ts">
+	import generateId from '../../functions/generateId.fn'
+
 	import { hash } from '../../functions/hashString.fn'
 	import scrollToAlbumFn from '../../functions/scrollToAlbum.fn'
 
@@ -16,7 +18,7 @@
 
 	let debounce: NodeJS.Timeout = undefined
 
-	let searchString = ''
+	let searchString = 'rute'
 	let foundSongs: SongFuzzySearchType[] = []
 
 	$: {
@@ -26,8 +28,18 @@
 	function userTypingHandler(searchString: string) {
 		clearTimeout(debounce)
 		debounce = setTimeout(() => {
-			userSearchIPC(searchString).then(result => (foundSongs = result))
-		}, 500)
+			userSearchIPC(searchString).then(result => {
+				foundSongs = result
+
+				setTimeout(() => {
+					result.forEach(song => {
+						song.matches.forEach(match => {
+							highlightString(song.item, match)
+						})
+					})
+				}, 250)
+			})
+		}, 1000)
 	}
 
 	function selectSong(selectedSong: SongFuzzySearchType) {
@@ -48,19 +60,40 @@
 			scrollToAlbumFn(albumID)
 		}, 100)
 	}
+
+	function highlightString(song: SongType, indexes) {
+		const id = `${hash(song.SourceFile)}-${indexes.key}`
+		let doc = document.getElementById(id)
+
+		if (doc && indexes) {
+			let result = indexes.indices
+				.reduce((str, [start, end]) => {
+					str[start] = `<span class="highlight">${str[start]}`
+					str[end] = `${str[end]}</span>`
+					return str
+				}, song[indexes.key].split(''))
+				.join('')
+
+			doc.innerHTML = result
+		}
+	}
 </script>
 
 <search-layout class="layout" style="display:{$layoutToShow === 'Search' ? 'block' : 'none'}">
 	<input type="text" bind:value={searchString} />
 	<found-songs>
 		{#each foundSongs as song, index (index)}
-			<p
+			<found-song
 				on:click={() => {
 					selectSong(song)
 				}}
 			>
-				{song?.item.Title}
-			</p>
+				<search-title id="{hash(song.item.SourceFile)}-Title" />
+				<search-artist id="{hash(song.item.SourceFile)}-Artist" />
+				<search-album id="{hash(song.item.SourceFile)}-Album" />
+				<search-composer id="{hash(song.item.SourceFile)}-Composer" />
+				<search-album-artist id="{hash(song.item.SourceFile)}-AlbumArtist" />
+			</found-song>
 		{/each}
 	</found-songs>
 </search-layout>
@@ -73,6 +106,10 @@
 		overflow: auto;
 	}
 
-	found-songs {
+	found-song {
+		display: block;
+	}
+	:global(found-song *.highlight) {
+		color: red;
 	}
 </style>

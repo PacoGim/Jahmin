@@ -18,7 +18,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const trash_1 = __importDefault(require("trash"));
-const generateId_fn_1 = require("../functions/generateId.fn");
+const generateId_fn_1 = __importDefault(require("../../svelte/src/functions/generateId.fn"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
@@ -36,7 +36,7 @@ const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a 
 function writeFlacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         ffmpegDeferredPromise = resolve;
-        ffmpegDeferredPromiseId = generateId_fn_1.generateId();
+        ffmpegDeferredPromiseId = generateId_fn_1.default();
         let ffmpegString = objectToFfmpegString(newTags);
         let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac');
         let command = `"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`;
