@@ -238,7 +238,7 @@
 		showUndo={tagList.Rating.bind !== tagList.Rating.value}
 	/>
 
-	<CoverArt klass="TagEdit" {rootDir} style="height:auto;width:100%;" />
+	<CoverArt klass="TagEdit" {rootDir} style="height:auto;width:100%;" type="forceLoad" />
 
 	<button-group>
 		<button on:click={updateSongs} class="update-button {enableButtons ? '' : 'disabled'}">Update</button>

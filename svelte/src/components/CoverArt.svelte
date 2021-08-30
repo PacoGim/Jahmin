@@ -11,7 +11,8 @@
 
 	export let klass
 	export let rootDir
-	export let observe = false
+	export let type: 'forceLoad' | 'observe' | null = null
+	export let showPlaceholder = true
 	export let style
 
 	let albumCoverArtVersion = undefined
@@ -29,16 +30,16 @@
 	}
 
 	onMount(() => {
-		if (observe) {
+		if (type === 'observe') {
 			addIntersectionObserver(rootDir).then((result: any) => {
 				if (result.status === 'cover-not-found') {
-					getAlbumCover()
+					getAlbumCover(rootDir)
 				} else if (result.status === 'cover-found') {
 					setCoverArtSource(result.data)
 				}
 			})
-
-			// addIntersectionObserver()
+		} else if (type === 'forceLoad') {
+			getAlbumCover(rootDir)
 		}
 	})
 
@@ -57,7 +58,7 @@
 		}
 	}
 
-	function getAlbumCover() {
+	function getAlbumCover(rootDir: 'string') {
 		getCoverIPC(rootDir).then((response: CoverArtType) => {
 			let albumId = hash(rootDir, 'text')
 			if (response) {
@@ -76,10 +77,10 @@
 </script>
 
 <cover-art {style}>
-	{#if coverType === undefined}
+	{#if coverType === undefined && showPlaceholder === true}
 		<img src="./img/audio.svg" class="loader" alt="" />
 	{/if}
-	{#if coverType === 'not found'}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
+	{#if coverType === 'not found' && showPlaceholder === true}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
 	{#if coverType === 'image'}<img class={klass} src={coverSrc} alt="" />{/if}
 	{#if coverType === 'video'}
 		<video class={klass} autoplay loop>
@@ -94,6 +95,7 @@
 		cursor: default;
 		grid-column: 1;
 		grid-row: 1;
+		display: block;
 	}
 
 	video {

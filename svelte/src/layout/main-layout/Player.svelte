@@ -102,7 +102,7 @@
 						preLoadNextSong(playbackCursor)
 					}, 500)
 				})
-				.catch((err) => {})
+				.catch(err => {})
 		} else {
 			player.pause()
 		}
@@ -114,7 +114,7 @@
 		let songToPlay = songs[nextSong]
 
 		if (songToPlay) {
-			fetchSong(escapeString(songToPlay['SourceFile'])).then((buffer) => {
+			fetchSong(escapeString(songToPlay['SourceFile'])).then(buffer => {
 				nextSongPreloaded = {
 					Id: songToPlay.ID,
 					BufferUrl: getUrlFromBuffer(buffer)
@@ -155,11 +155,11 @@
 	function fetchSong(songPath: string): Promise<ArrayBuffer> {
 		return new Promise((resolve, reject) => {
 			fetch(songPath)
-				.then((data) => data.arrayBuffer())
-				.then((arrayBuffer) => {
+				.then(data => data.arrayBuffer())
+				.then(arrayBuffer => {
 					resolve(arrayBuffer)
 				})
-				.catch((err) => {
+				.catch(err => {
 					//TODO Alert user that song is not found and offer a way to remove from DB.
 					console.log('OOPS', err)
 				})
@@ -197,7 +197,7 @@
 </audio>
 
 <player-svlt>
-	<CoverArt klass="Player" {rootDir} style="height:64px;width:auto;cursor:pointer" observe={false} />
+	<CoverArt klass="Player" {rootDir} style="height:64px;width:auto;cursor:pointer" type="forceLoad" />
 
 	<player-buttons>
 		<PreviousButton {player} />
