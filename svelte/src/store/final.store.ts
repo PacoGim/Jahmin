@@ -46,7 +46,7 @@ export let elementMap: Writable<Map<string, HTMLElement>> = writable(undefined)
 export let triggerGroupingChangeEvent: Writable<string> = writable('')
 
 // PlayerController.svelte -> SongList.svelte
-export let triggerScrollToSongEvent: Writable<boolean> = writable(false)
+export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
 // export let showConfigLayout:Writable<boolean> = writable(false)

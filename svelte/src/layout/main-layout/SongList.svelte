@@ -42,11 +42,11 @@
 	}
 
 	$: {
-		if ($triggerScrollToSongEvent === true) {
-			setScrollAmountFromSong($playingSongStore.ID)
+		if ($triggerScrollToSongEvent !== 0) {
+			setScrollAmountFromSong($triggerScrollToSongEvent)
 			isScrollAtBottom = false
 			isScrollAtTop = false
-			$triggerScrollToSongEvent = false
+			$triggerScrollToSongEvent = 0
 		}
 	}
 
@@ -96,7 +96,7 @@
 		e['path'].forEach((element: HTMLElement) => {
 			if (element.tagName === 'SONG-LIST-ITEM') {
 				let id = Number(element.getAttribute('id'))
-				let currentSelectedSong = $songListStore.findIndex((song) => song.ID === Number(element.getAttribute('id')))
+				let currentSelectedSong = $songListStore.findIndex(song => song.ID === Number(element.getAttribute('id')))
 
 				if (ctrlKey === false && metaKey === false && shiftKey === false) {
 					$selectedSongsStore = [id]
@@ -114,7 +114,7 @@
 					for (let i = currentSelectedSong; i !== lastSelectedSong; currentSelectedSong < lastSelectedSong ? i++ : i--) {
 						let currentId = $songListStore[i].ID
 
-						if (!$selectedSongsStore.find((i) => i === currentId)) {
+						if (!$selectedSongsStore.find(i => i === currentId)) {
 							$selectedSongsStore.push(currentId)
 						}
 					}
@@ -170,7 +170,8 @@
 
 	// Manages to "scroll" to the proper song on demand.
 	function setScrollAmountFromSong(songId) {
-		let songIndex = $songListStore.findIndex((song) => song.ID === songId)
+		console.log(songId)
+		let songIndex = $songListStore.findIndex(song => song.ID === songId)
 		let differenceAmount = Math.floor(SONG_AMOUNT / 2)
 
 		if (songIndex !== -1) {
@@ -192,7 +193,7 @@
 		return event
 			.composedPath() // Return back an array of all elements clicked.
 			.map((path: HTMLElement) => path.tagName) // Gives only the tag name of the elements.
-			.find((tag) => validPaths.includes(tag)) // If the tag name matches the array of valid values.
+			.find(tag => validPaths.includes(tag)) // If the tag name matches the array of valid values.
 	}
 
 	function scrollBarHandler() {
@@ -227,7 +228,7 @@
 		})
 
 		// If the user clicks on either the scroll bar or the progress fill, set isMouseDownInScroll to true.
-		document.addEventListener('mousedown', (e) => {
+		document.addEventListener('mousedown', e => {
 			if (isValidPath(e, ['SONG-LIST-PROGRESS-BAR', 'PROGRESS-FILL'])) {
 				isMouseDownInScroll = true
 			}
@@ -239,11 +240,11 @@
 		})
 
 		// If the user click on the scrollbar, calls setScrollAmountBar.
-		songListProgressBar.addEventListener('click', (evt) => setScrollAmountBar(songListProgressBar, evt))
+		songListProgressBar.addEventListener('click', evt => setScrollAmountBar(songListProgressBar, evt))
 	}
 </script>
 
-<song-list-svlt on:mousewheel={(e) => scrollContainer(e)} on:click={(e) => selectSongs(e)}>
+<song-list-svlt on:mousewheel={e => scrollContainer(e)} on:click={e => selectSongs(e)}>
 	<song-list>
 		{#if $songListStore !== undefined}
 			{#each songsTrimmed as song, index (song.ID)}

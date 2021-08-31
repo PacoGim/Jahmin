@@ -31,7 +31,7 @@ export function addIntersectionObserver(rootDir: string) {
 					}
 				}
 			},
-			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
+			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '100% 0px 100% 0px' }
 		)
 
 		coverArtObserver.observe(document.querySelector(`art-grid-svlt > #${CSS.escape(String(albumId))}`))

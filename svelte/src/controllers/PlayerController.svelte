@@ -133,7 +133,8 @@
 				$selectedAlbumId = albumID
 				$songListStore = $playbackStore
 				$triggerGroupingChangeEvent = localStorage.getItem('GroupByValue')
-				$triggerScrollToSongEvent = true
+				$triggerScrollToSongEvent = playingSong.ID
+				$selectedSongsStore = [playingSong.ID]
 				scrollToAlbumFn(albumID)
 			}
 		}
