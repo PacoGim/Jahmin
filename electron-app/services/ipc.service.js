@@ -53,11 +53,12 @@ function loadIPC() {
         return config;
     }));
     electron_1.ipcMain.handle('search', (evt, searchString, keys) => __awaiter(this, void 0, void 0, function* () {
-        // console.log('Main:',searchString)
+        if (keys.includes('Album Artist')) {
+            keys.splice(keys.indexOf('Album Artist'), 1);
+            keys.push('AlbumArtist');
+        }
         const fuse = new fuse_js_1.default(storage_service_1.getStorageMapToArray(), {
-            // keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
             keys
-            // threshold: 0.4
         });
         let result = fuse.search(searchString, { limit: 20 });
         return result;

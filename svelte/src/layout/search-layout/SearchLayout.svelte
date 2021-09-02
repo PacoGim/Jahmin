@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte'
 
 	import CoverArt from '../../components/CoverArt.svelte'
-	import SongListItem from '../../components/SongListItem.svelte'
 	import generateId from '../../functions/generateId.fn'
 
 	import { hash } from '../../functions/hashString.fn'
@@ -21,17 +20,13 @@
 
 	import type { SongFuzzySearchType } from '../../types/song.type'
 
-	let searchString = Math.random().toString(36).substring(8)
+	let searchString = ''
 	let foundSongs: SongFuzzySearchType[] = []
 
 	const filterOptions = ['Title', 'Album', 'Album Artist', 'Artist', 'Composer']
 	let selectedFilters = ['Title']
 
-	$: {
-		if (selectedFilters.length === 0) {
-			selectedFilters = ['Title']
-		}
-	}
+	$: if (selectedFilters.length === 0) selectedFilters = ['Title']
 
 	function sendSearchString() {
 		userSearchIPC(searchString, selectedFilters).then(result => {
@@ -61,6 +56,15 @@
 		return value.split('/').slice(0, -1).join('/')
 	}
 
+	function toggleFilter(filterName: string) {
+		if (selectedFilters.includes(filterName)) {
+			selectedFilters = selectedFilters.filter(n => n !== filterName)
+		} else {
+			selectedFilters.push(filterName)
+			selectedFilters = selectedFilters
+		}
+	}
+
 	onMount(() => {
 		sendSearchString()
 		window.addEventListener('keypress', ({ code }) => {
@@ -72,6 +76,7 @@
 </script>
 
 <search-layout class="layout" style="display:{$layoutToShow === 'Search' ? 'grid' : 'none'}">
+	<h1>Search Song</h1>
 	<p>Press Enter or Search Button to search</p>
 	<search-input>
 		<input type="text" bind:value={searchString} />
@@ -79,9 +84,10 @@
 	</search-input>
 	<filter-selector>
 		{#each filterOptions as filter, index (index)}
-			<filter-check selected={selectedFilters.includes(filter)}>
+			<filter-check selected={selectedFilters.includes(filter)} on:click={() => toggleFilter(filter)}>
 				<input id="filter-check-{filter}" type="checkbox" bind:group={selectedFilters} value={filter} />
-				<label for="filter-check-{filter}">{filter}</label>
+				<span>{filter}</span>
+				<input-icon>{selectedFilters.includes(filter) ? '✓' : '✕'}</input-icon>
 			</filter-check>
 		{/each}
 	</filter-selector>
@@ -105,7 +111,7 @@
 					<CoverArt
 						klass="Search"
 						rootDir={getRootDir(song.item.SourceFile)}
-						style="height:40px;width:40px;"
+						style="height:3rem;width:3rem;cursor:pointer;"
 						type="forceLoad"
 						showPlaceholder={false}
 					/>
@@ -123,9 +129,20 @@
 <style>
 	search-layout {
 		grid-template-columns: auto;
-		grid-template-rows: repeat(4, max-content);
+		grid-template-rows: repeat(5, max-content);
+		row-gap: 1rem;
 		display: grid;
 		overflow: auto;
+	}
+
+	search-layout h1 {
+		padding-top: 1rem;
+		width: 100%;
+		text-align: center;
+	}
+
+	search-layout p {
+		text-align: center;
 	}
 
 	search-input {
@@ -161,48 +178,35 @@
 	filter-selector filter-check {
 		margin: 0 0.5rem;
 		border-radius: 3px;
-		height: 1.75rem;
+		height: 1.5rem;
 		display: flex;
+		font-size: 0.9rem;
+		align-items: center;
+		padding-left: 0.5rem;
+		cursor: pointer;
 	}
 
 	filter-selector filter-check input {
 		display: none;
 	}
-	filter-selector filter-check label {
+	filter-selector filter-check span {
 		display: inline-block;
-		padding: 0.25rem 0.5rem;
-		cursor: pointer;
 		color: #fff;
-		height: 1.75rem;
-		/* line-height: 1.75rem; */
 	}
-
-	filter-selector filter-check::after {
-		display: inline-block;
-		height: 1.75rem;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
-			sans-serif;
-		border-radius: 0 3px 3px 0;
-		filter: brightness(1.25);
-		padding: 0 0.5rem;
-		line-height: 1.75rem;
+	filter-selector filter-check input-icon {
+		/* height: 1.5rem; */
+		width: 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	filter-selector filter-check[selected='true'] {
 		background-color: forestgreen;
 	}
 
-	filter-selector filter-check[selected='true']::after {
-		background-color: forestgreen;
-		content: '✓';
-	}
 	filter-selector filter-check[selected='false'] {
 		background-color: crimson;
-	}
-
-	filter-selector filter-check[selected='false']::after {
-		background-color: crimson;
-		content: '✕';
 	}
 
 	search-grid {
@@ -211,17 +215,33 @@
 
 	search-grid grid-row {
 		display: grid;
-		grid-template-columns: 40px repeat(5, 1fr);
-		height: 40px;
+		grid-template-columns: 3rem repeat(5, 1fr);
 		cursor: pointer;
 		align-items: center;
-		margin: 0.25rem 0;
+		column-gap: 1rem;
+	}
+	grid-row:first-child {
+		height: 3rem;
+		cursor: default;
+		/* height: max-content; */
+		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+
+		background-color: rgba(128, 128, 128, 0.3);
 	}
 
-	grid-row:first-child {
-		cursor: default;
-		height: max-content;
-		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
+	search-grid grid-row:not(:first-child) {
+		transition: filter 150ms ease-in-out;
+	}
+	search-grid grid-row:not(:first-child):hover {
+		filter: brightness(1.25);
+	}
+
+	grid-row:nth-child(odd) {
+		background-color: rgba(128, 128, 128, 0.2);
+	}
+
+	grid-row:nth-child(even) {
+		background-color: rgba(128, 128, 128, 0.1);
 	}
 
 	search-grid grid-row grid-value {

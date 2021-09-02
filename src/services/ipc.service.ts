@@ -45,16 +45,18 @@ export function loadIPC() {
 		return config
 	})
 
-	ipcMain.handle('search', async (evt, searchString, keys) => {
-		// console.log('Main:',searchString)
+	ipcMain.handle('search', async (evt, searchString, keys: string[]) => {
+		if (keys.includes('Album Artist')) {
+			keys.splice(keys.indexOf('Album Artist'), 1)
+			keys.push('AlbumArtist')
+		}
 
 		const fuse = new Fuse(getStorageMapToArray(), {
-			// keys: ['Artist', 'Title', 'Album', 'Composer', 'AlbumArtist'],
 			keys
-			// threshold: 0.4
 		})
 
 		let result = fuse.search(searchString, { limit: 20 })
+
 		return result
 	})
 
