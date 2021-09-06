@@ -18,7 +18,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const trash_1 = __importDefault(require("trash"));
-const generateId_fn_1 = __importDefault(require("../../svelte/src/functions/generateId.fn"));
+const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
@@ -63,7 +63,7 @@ exports.writeFlacTags = writeFlacTags;
 /********************** Get Flac Tags **********************/
 let worker = worker_service_1.getWorker('musicMetadata');
 let deferredPromise = new Map();
-worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
+worker === null || worker === void 0 ? void 0 : worker.on('message', data => {
     if (deferredPromise.has(data.filePath)) {
         deferredPromise.get(data.filePath)(data.metadata);
         deferredPromise.delete(data.filePath);

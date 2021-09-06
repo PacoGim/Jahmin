@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte'
+	import { createEventDispatcher, onMount } from 'svelte'
 
 	const dispatch = createEventDispatcher()
 
@@ -9,6 +9,10 @@
 	$: {
 		dispatch('optionSelected', selectedOption)
 	}
+
+	onMount(() => {
+		selectedOption = 'Song List'
+	})
 </script>
 
 <options-list>
@@ -31,5 +35,9 @@
 
 	option-radio input {
 		display: none;
+	}
+
+	options-list {
+		grid-area: 'options-list';
 	}
 </style>

@@ -224,7 +224,7 @@
 		height: 3rem;
 		cursor: default;
 		/* height: max-content; */
-		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 25);
 
 		background-color: rgba(128, 128, 128, 0.3);
 	}

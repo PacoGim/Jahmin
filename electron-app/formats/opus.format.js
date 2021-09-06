@@ -17,7 +17,7 @@ exports.getOpusTags = exports.writeOpusTags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
-const generateId_fn_1 = __importDefault(require("../../svelte/src/functions/generateId.fn"));
+const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 const mm = require('music-metadata');

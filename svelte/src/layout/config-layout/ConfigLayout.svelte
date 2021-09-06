@@ -15,7 +15,7 @@
 	}
 </script>
 
-<config-layout class="layout" style="display:{$layoutToShow === 'Config' ? 'block' : 'none'}">
+<config-layout class="layout" style="display:{$layoutToShow === 'Config' ? 'grid' : 'none'}">
 	<OptionsList on:optionSelected={handleOptionSelected} />
 	<selected-option>
 		{#if selectedOption === 'Art Grid'}
@@ -36,8 +36,11 @@
 	config-layout {
 		grid-template-columns: max-content auto;
 
-		display: grid;
+		/* display: grid; */
 
 		grid-template-areas: 'options-list selected-option';
+	}
+	config-layout selected-option{
+		grid-area: 'selected-option';
 	}
 </style>

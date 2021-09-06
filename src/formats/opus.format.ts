@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
-import generateId from '../../svelte/src/functions/generateId.fn'
+import generateId from '../functions/generateId.fn'
 import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { OpusTagType } from '../types/opus.type'

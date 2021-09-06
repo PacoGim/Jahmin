@@ -1,6 +1,10 @@
-@font-face {
+/* @font-face {
 	font-family: Roboto;
 	src: url('./fonts/Roboto.ttf');
+} */
+@font-face {
+	font-family: Roboto;
+	src: url('./fonts/NunitoVFBeta.ttf');
 }
 
 * {
@@ -34,7 +38,8 @@
 	--primary-light-color:#8899a8;
 	--secondary-light-color:#e4e6e7;
 
-	--default-weight: 400;
+	/* Min 54 Mid 105 Max 156 */
+	--default-weight: 80;
 }
 
 button {
@@ -67,7 +72,7 @@ body {
 	top: 0;
 	left: 0;
 	height: calc(100% - 64px);
-	width: 100%;
+	width:calc(100% - 64px);
 	background-color: var(--secondary-color);
 	overflow-y: hidden;
 	z-index: 10;

@@ -3,15 +3,12 @@ import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
 import trash from 'trash'
-import generateId  from '../../svelte/src/functions/generateId.fn'
+import generateId from '../functions/generateId.fn'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { FlacTagType } from '../types/flacTagType'
 import { SongType } from '../types/song.type'
-import { StreamSongType } from '../types/streamTag.type'
-import { TagType } from '../types/tag.type'
-import { TagModType } from '../types/tagMod.type'
 
 let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
@@ -65,7 +62,7 @@ let worker = getWorker('musicMetadata')
 
 let deferredPromise: Map<string, any> = new Map<string, any>()
 
-worker?.on('message', (data) => {
+worker?.on('message', data => {
 	if (deferredPromise.has(data.filePath)) {
 		deferredPromise.get(data.filePath)(data.metadata)
 		deferredPromise.delete(data.filePath)

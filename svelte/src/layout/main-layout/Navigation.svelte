@@ -2,11 +2,17 @@
 	import { layoutToShow } from '../../store/final.store'
 </script>
 
-<navigation-svlt>
-	<img class="navButton" on:click={() => ($layoutToShow = 'Main')} src="./img/home.svg" alt="" />
-	<img class="navButton" on:click={() => ($layoutToShow = 'Search')} src="./img/search.svg" alt="" />
+<navigation-svlt class="dark-theme">
+	<nav-button on:click={() => ($layoutToShow = 'Main')}>
+		<img src="./img/home.svg" alt="" />
+	</nav-button>
+	<nav-button on:click={() => ($layoutToShow = 'Search')}>
+		<img src="./img/search.svg" alt="" />
+	</nav-button>
 	<separator />
-	<img class="navButton configButton" on:click={() => ($layoutToShow = 'Config')} src="./img/cog.svg" alt="" />
+	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
+		<img src="./img/cog.svg" alt="" />
+	</nav-button>
 </navigation-svlt>
 
 <style>
@@ -14,23 +20,38 @@
 		grid-area: navigation-svlt;
 
 		display: grid;
-		/* grid-template-columns: auto; */
-		grid-template-rows: repeat(2,max-content) auto max-content;
+		grid-template-rows: repeat(2, max-content) auto max-content;
 
 		background-color: rgba(255, 255, 255, 0.025);
 	}
 
-	img.navButton {
-		display: block;
-		cursor: pointer;
-		padding: 0.5rem;
-		filter: invert(98%) sepia(99%) saturate(124%) hue-rotate(324deg) brightness(95%) contrast(93%);
-		width: 100%;
-
-		-webkit-user-drag: none;
+	navigation-svlt.dark-theme nav-button img {
+		filter: invert(98%) sepia(99%) saturate(124%) hue-rotate(324deg) brightness(95%) contrast(93%)
+			drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.25));
 	}
 
-	img.configButton {
+	nav-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
+		border-radius: 7px;
+
+		cursor: pointer;
+		margin: 0.5rem;
+		margin-bottom: 0.25rem;
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+
+	nav-button img {
+		padding: 0.5rem;
+		-webkit-user-drag: none;
+		height: 48px;
+		width: 48px;
+	}
+
+	nav-button.configButton {
+		margin-bottom: 0.5rem;
+		/* margin: none; */
 	}
 </style>
