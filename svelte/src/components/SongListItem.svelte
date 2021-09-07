@@ -6,7 +6,7 @@
 	import { albumPlayingIdStore, selectedAlbumId, selectedSongsStore, songPlayingIdStore } from '../store/final.store'
 
 	import Star from './Star.svelte'
-	import { parseDuration } from '../functions/parseDuration.fn'
+	import parseDuration from '../functions/parseDuration.fn'
 	import { editTagsIPC } from '../service/ipc.service'
 
 	export let song: SongType

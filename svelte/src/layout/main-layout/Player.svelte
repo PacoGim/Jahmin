@@ -14,7 +14,7 @@
 	import { nextSong } from '../../functions/nextSong.fn'
 	import { escapeString } from '../../functions/escapeString.fn'
 	import { albumPlayingIdStore, playbackCursor, playbackStore } from '../../store/final.store'
-	import { parseDuration } from '../../functions/parseDuration.fn'
+	import parseDuration from '../../functions/parseDuration.fn'
 	import { setWaveSource } from '../../service/waveform.service'
 	import CoverArt from '../../components/CoverArt.svelte'
 
