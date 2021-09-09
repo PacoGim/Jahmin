@@ -2,12 +2,7 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import parseDuration from '../../../functions/parseDuration.fn'
 
-	let fieldAmount = 5
-	let fieldArray = new Array(1)
-
-	$: {
-		fieldArray = new Array(fieldAmount)
-	}
+	// let fieldsAmount = 1
 
 	let selectOptions = [
 		'Extension',
@@ -77,43 +72,127 @@
 
 		return foundTags
 	}
+
+	let selectedTags = [
+		{
+			// 0
+			name: 'Track',
+			size: 'Collapse',
+			align: 'Center'
+		},
+		{
+			// 1
+			name: 'Title',
+			size: 'Expand',
+			align: 'Left'
+		}
+	]
+
+	function fooClick(e: MouseEvent) {
+		let inputElement = e.composedPath().find((element: HTMLElement) => element.tagName === 'INPUT')
+
+		if (inputElement) {
+			let data = inputElement.dataset
+
+			selectedTags[data.index][data.type] = data.value
+		}
+	}
 </script>
 
 <OptionSection title="Edit shown tags">
-	<table slot="body">
-		<thead>
-			<tr>
-				<th />
-				<th>Tag</th>
-				<th>Size</th>
-				<th>Align</th>
-			</tr>
-		</thead>
-
-		<tbody>
-			{#each fieldArray as _, index (index)}
-				<tr id="table-row-{index}">
-					<td>x</td>
-					<td>
-						<select name="" id="">
-							{#each selectOptions as option, index (index)}
-								<option value={option}>{option}</option>
-							{/each}
-						</select>
-					</td>
-					<td>
-						<button>Expand</button><button>Collapse</button>
-					</td>
-					<td>
-						<button>Left</button><button>Center</button><button>Right</button>
-					</td>
+	<edit-song-string-section slot="body">
+		<table on:click={e => fooClick(e)}>
+			<thead>
+				<tr>
+					<th />
+					<th>Tag</th>
+					<th>Size</th>
+					<th>Align</th>
 				</tr>
-			{/each}
-		</tbody>
-		<tr>
-			<td><button on:click={() => fieldAmount++}>Add Field</button></td>
-		</tr>
-	</table>
+			</thead>
+
+			<tbody>
+				{#each selectedTags as tag, index (index)}
+					<tr id="table-row-{index}">
+						<td>x</td>
+						<td>
+							<select name="" id="">
+								{#each selectOptions as option, index (index)}
+									<option value={option} selected={option === tag.name}>{option}</option>
+								{/each}
+							</select>
+						</td>
+						<td>
+							<input
+								type="radio"
+								id="row-{index}-size-collapse"
+								name="row-{index}-size-radio"
+								checked={tag.size === 'Collapse'}
+								data-index={index}
+								data-type="size"
+								data-value="Collapse"
+							/>
+							<label for="row-{index}-size-collapse">Collapse</label>
+
+							<input
+								type="radio"
+								id="row-{index}-size-expand"
+								name="row-{index}-size-radio"
+								checked={tag.size === 'Expand'}
+								data-index={index}
+								data-type="size"
+								data-value="Expand"
+							/>
+							<label for="row-{index}-size-expand">Expand</label>
+						</td>
+						<td>
+							<input
+								type="radio"
+								id="row-{index}-align-left"
+								name="row-{index}-align-radio"
+								checked={tag.align === 'Left'}
+								data-index={index}
+								data-type="align"
+								data-value="Left"
+							/>
+							<label for="row-{index}-align-left">Left</label>
+
+							<input
+								type="radio"
+								id="row-{index}-align-center"
+								name="row-{index}-align-radio"
+								checked={tag.align === 'Center'}
+								data-index={index}
+								data-type="align"
+								data-value="Center"
+							/>
+							<label for="row-{index}-align-center">Center</label>
+
+							<input
+								type="radio"
+								id="row-{index}-align-right"
+								name="row-{index}-align-radio"
+								checked={tag.align === 'Right'}
+								data-index={index}
+								data-type="align"
+								data-value="Right"
+							/>
+							<label for="row-{index}-align-right">Right</label>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<button on:click={() => {}}>Add Field</button>
+		{#each selectedTags as fooTag, index (index)}
+			<p>
+				{index},
+				{fooTag.align},
+				{fooTag.name},
+				{fooTag.size}
+			</p>
+		{/each}
+	</edit-song-string-section>
 </OptionSection>
 
 <style>
