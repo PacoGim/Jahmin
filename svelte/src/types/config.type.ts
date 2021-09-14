@@ -8,6 +8,7 @@ export type ConfigType = {
 
 type UserOptions = {
 	groupOnlyByFolder: boolean
+	songListTags:any[]
 }
 
 type ArtType = {

@@ -1,8 +1,13 @@
 <script lang="ts">
-	import OptionSection from '../../../components/OptionSection.svelte'
-	import parseDuration from '../../../functions/parseDuration.fn'
+	import { onMount } from 'svelte'
 
-	// let fieldsAmount = 1
+	import OptionSection from '../../../components/OptionSection.svelte'
+	import { saveConfig } from '../../../service/ipc.service'
+	import { songListTagsConfig } from '../../../store/config.store'
+	import type { SelectedTagNameType, SelectedTagType } from '../../../types/selectedTag.type'
+	import SongTag from './components/songTag.svelte'
+
+	let gridStyle = ''
 
 	let selectOptions = [
 		'Extension',
@@ -46,50 +51,44 @@
 		Size: 5426420
 	}
 
-	function extractTagsFromUserInput(text: string) {
-		let currentFoundTag = '' // Current Tag found. Will append to it ouce a < character is found and stop when reaching >
-		let foundTags = [] // All tags found
-		let startAppending = false // Start or not appending to currentFoundTag variable to form a tag.
-
-		// Iterate through every character
-		for (let char of text) {
-			// If an opening < character is found, start appending the rest of the tag until reaching a closing > character
-			if (char === '<') {
-				startAppending = true
-			} else if (char === '>') {
-				// Stop appending since it reached a closing > character
-				startAppending = false
-
-				// Add current formed tag "currentFoundTag" to the array
-				foundTags.push(currentFoundTag)
-
-				// Resets currentFoundTag value
-				currentFoundTag = ''
-			} else if (startAppending === true) {
-				currentFoundTag += char
-			}
-		}
-
-		return foundTags
+	let defaultTag: SelectedTagType = {
+		name: 'Title',
+		size: 'Collapse',
+		align: 'Left'
 	}
 
-	let selectedTags = [
-		{
-			// 0
-			name: 'Track',
-			size: 'Collapse',
-			align: 'Center'
-		},
-		{
-			// 1
-			name: 'Title',
-			size: 'Expand',
-			align: 'Left'
-		}
-	]
+	let selectedTags: SelectedTagType[] = [defaultTag]
 
-	function fooClick(e: MouseEvent) {
-		let inputElement = e.composedPath().find((element: HTMLElement) => element.tagName === 'INPUT')
+	let isFirstSaveTrigger = true
+
+	$: {
+		gridStyle = ''
+		selectedTags.forEach(tag => {
+			if (tag.size === 'Collapse') {
+				gridStyle += ' max-content'
+			} else if (tag.size === 'Expand') {
+				gridStyle += ' auto'
+			}
+		})
+	}
+
+	$: {
+		selectedTags
+		if (isFirstSaveTrigger === true) {
+			isFirstSaveTrigger = false
+		} else {
+			saveConfig({
+				userOptions: {
+					songListTags: selectedTags
+				}
+			})
+		}
+	}
+
+	$: if ($songListTagsConfig) selectedTags = $songListTagsConfig
+
+	function handleClickEvent(e: MouseEvent) {
+		let inputElement = e.composedPath().find((element: HTMLElement) => element.tagName === 'INPUT') as HTMLElement
 
 		if (inputElement) {
 			let data = inputElement.dataset
@@ -97,11 +96,33 @@
 			selectedTags[data.index][data.type] = data.value
 		}
 	}
+
+	function handleOptionSelect(index: number) {
+		let selectElement = document.querySelector(`#row-${index}-select`) as HTMLSelectElement
+		selectedTags[index].name = selectElement.value as SelectedTagNameType
+	}
+
+	function addField() {
+		selectedTags.push({ ...defaultTag })
+		selectedTags = selectedTags
+	}
+
+	function deleteField(index: number) {
+		selectedTags.splice(index, 1)
+
+		if (selectedTags.length === 0) {
+			selectedTags.push({ ...defaultTag })
+		}
+
+		selectedTags = selectedTags
+	}
+
+	onMount(() => {})
 </script>
 
-<OptionSection title="Edit shown tags">
+<OptionSection title="Edit Song List Tags">
 	<edit-song-string-section slot="body">
-		<table on:click={e => fooClick(e)}>
+		<table on:click={e => handleClickEvent(e)}>
 			<thead>
 				<tr>
 					<th />
@@ -114,9 +135,9 @@
 			<tbody>
 				{#each selectedTags as tag, index (index)}
 					<tr id="table-row-{index}">
-						<td>x</td>
+						<td class="delete-button" on:click={() => deleteField(index)}><span>X</span></td>
 						<td>
-							<select name="" id="">
+							<select id="row-{index}-select" on:input={() => handleOptionSelect(index)}>
 								{#each selectOptions as option, index (index)}
 									<option value={option} selected={option === tag.name}>{option}</option>
 								{/each}
@@ -183,24 +204,87 @@
 				{/each}
 			</tbody>
 		</table>
-		<button on:click={() => {}}>Add Field</button>
-		{#each selectedTags as fooTag, index (index)}
-			<p>
-				{index},
-				{fooTag.align},
-				{fooTag.name},
-				{fooTag.size}
-			</p>
-		{/each}
+		<button
+			class="add-field"
+			on:click={() => {
+				addField()
+			}}>+</button
+		>
+
+		<grid-tags style="grid-template-columns:{gridStyle};">
+			{#each selectedTags as selectedTag, index (index)}
+				<SongTag data={data[selectedTag.name]} tagName={selectedTag.name} align={selectedTag?.align?.toLowerCase()} />
+			{/each}
+		</grid-tags>
 	</edit-song-string-section>
 </OptionSection>
 
 <style>
 	table {
-		width: max-content;
-
-		/* display: grid; */
-		/* flex-direction: column; */
-		/* align-items: center; */
+		margin: 0 auto;
+		border-spacing: 1.5rem 0.75rem;
+		font-variation-settings: 'wght' calc(var(--default-weight) - 20);
+	}
+	table td {
+		height: 2rem;
+	}
+	table thead {
+		font-variation-settings: 'wght' calc(var(--default-weight) + 20);
+	}
+	td.delete-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		transform: scale(0.75);
+		border: 2px solid #fff;
+		border-radius: 3.5px;
+		cursor: pointer;
+	}
+	td.delete-button span {
+		font-size: 0.75rem;
+		font-variation-settings: 'wght' 156;
+	}
+	td input {
+		display: none;
+	}
+	td input:checked + label {
+		color: var(--dark-theme-highlight);
+		text-decoration: underline;
+		font-variation-settings: 'wght' 110;
+	}
+	td label {
+		cursor: pointer;
+	}
+	button.add-field {
+		display: block;
+		width: 2.5rem;
+		height: 2.5rem;
+		margin: 0 auto;
+		margin-bottom: 1rem;
+		border-radius: 50px;
+		background-color: #057eb6;
+		color: #fff;
+		font-family: inherit;
+		font-size: 1.5rem;
+		font-variation-settings: 'wght' calc(var(--default-weight) + 10);
+	}
+	button.add-field:hover {
+		transform: scale(0.96);
+	}
+	select {
+		padding: 0.25rem 0.5rem;
+		border: none;
+		border-radius: 3.5px;
+		background-color: transparent;
+		color: inherit;
+		font-family: inherit;
+		font-size: inherit;
+		cursor: pointer;
+	}
+	grid-tags {
+		display: grid;
+		width: 100%;
 	}
 </style>

@@ -3,7 +3,7 @@
 	src: url('./fonts/Roboto.ttf');
 } */
 @font-face {
-	font-family: Roboto;
+	font-family: Nunito;
 	src: url('./fonts/NunitoVFBeta.ttf');
 }
 
@@ -34,9 +34,11 @@
 
 	--primary-color: #eae6d9;
 	--secondary-color: #1d1c23;
+	--dark-theme-highlight: #00bfff;
+	/* --dark-theme-highlight: #ff7f50; */
 
-	--primary-light-color:#8899a8;
-	--secondary-light-color:#e4e6e7;
+	--primary-light-color: #8899a8;
+	--secondary-light-color: #e4e6e7;
 
 	/* Min 54 Mid 105 Max 156 */
 	--default-weight: 80;
@@ -60,7 +62,7 @@ body {
 	background-color: var(--secondary-color);
 	height: 100%;
 	display: block;
-	font-family: Roboto;
+	font-family: Nunito;
 	/* font-family: Golos; */
 	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' var(--default-weight);
@@ -72,7 +74,7 @@ body {
 	top: 0;
 	left: 0;
 	height: calc(100% - 64px);
-	width:calc(100% - 64px);
+	width: calc(100% - 64px);
 	background-color: var(--secondary-color);
 	overflow-y: hidden;
 	z-index: 10;
@@ -97,9 +99,9 @@ input::-webkit-inner-spin-button {
 	margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
 
-input{
+input,
+select {
 	outline: none;
-
 }
 
 player-progress progress-foreground.not-smooth {
