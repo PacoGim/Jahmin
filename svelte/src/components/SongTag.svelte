@@ -1,11 +1,12 @@
 <script lang="ts">
-	import parseDuration from '../../../../functions/parseDuration.fn'
-	import type { SelectedTagNameType } from '../../../../types/selectedTag.type'
+	import parseDuration from '../functions/parseDuration.fn'
+
+	import type { SelectedTagNameType } from '../types/selectedTag.type'
 
 	export let align
 	export let tagName: SelectedTagNameType
-
 	export let data
+	export let customStyle = ''
 
 	$: {
 		data
@@ -37,10 +38,10 @@
 	}
 </script>
 
-<span style="text-align: {align};">{data}</span>
+<span style="text-align: {align};{customStyle}">{data}</span>
 
 <style>
 	span {
-		margin: 0.5rem;
+		margin: 0 0.5rem;
 	}
 </style>

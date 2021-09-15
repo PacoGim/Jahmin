@@ -5,7 +5,8 @@
 	import { saveConfig } from '../../../service/ipc.service'
 	import { songListTagsConfig } from '../../../store/config.store'
 	import type { SelectedTagNameType, SelectedTagType } from '../../../types/selectedTag.type'
-	import SongTag from './components/songTag.svelte'
+	import SongTag from '../../../components/SongTag.svelte'
+	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
 
 	let gridStyle = ''
 
@@ -62,14 +63,7 @@
 	let isFirstSaveTrigger = true
 
 	$: {
-		gridStyle = ''
-		selectedTags.forEach(tag => {
-			if (tag.size === 'Collapse') {
-				gridStyle += ' max-content'
-			} else if (tag.size === 'Expand') {
-				gridStyle += ' auto'
-			}
-		})
+		gridStyle = tagToGridStyleFn(selectedTags)
 	}
 
 	$: {
@@ -82,10 +76,18 @@
 					songListTags: selectedTags
 				}
 			})
+			saveSelectedTagsToLS()
 		}
 	}
 
+	$: {
+	}
+
 	$: if ($songListTagsConfig) selectedTags = $songListTagsConfig
+
+	function saveSelectedTagsToLS() {
+		$songListTagsConfig = selectedTags
+	}
 
 	function handleClickEvent(e: MouseEvent) {
 		let inputElement = e.composedPath().find((element: HTMLElement) => element.tagName === 'INPUT') as HTMLElement
@@ -116,8 +118,6 @@
 
 		selectedTags = selectedTags
 	}
-
-	onMount(() => {})
 </script>
 
 <OptionSection title="Edit Song List Tags">

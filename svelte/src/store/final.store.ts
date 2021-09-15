@@ -49,6 +49,4 @@ export let triggerGroupingChangeEvent: Writable<string> = writable('')
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
-// export let showConfigLayout:Writable<boolean> = writable(false)
-// export let showConfigLayout:Writable<boolean> = writable(true)
-export let layoutToShow:Writable<'Main'|'Search'|'Config'> = writable('Config')
+export let layoutToShow:Writable<'Main'|'Search'|'Config'> = writable('Main')

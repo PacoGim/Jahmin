@@ -4,14 +4,14 @@
 
 <navigation-svlt class="dark-theme">
 	<nav-button on:click={() => ($layoutToShow = 'Main')}>
-		<img src="./img/home.svg" alt="" />
+		<img data-active={$layoutToShow === 'Main'} src="./img/home.svg" alt="" />
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Search')}>
-		<img src="./img/search.svg" alt="" />
+		<img data-active={$layoutToShow === 'Search'} src="./img/search.svg" alt="" />
 	</nav-button>
 	<separator />
 	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
-		<img src="./img/cog.svg" alt="" />
+		<img data-active={$layoutToShow === 'Config'} src="./img/cog.svg" alt="" />
 	</nav-button>
 </navigation-svlt>
 
@@ -48,6 +48,10 @@
 		-webkit-user-drag: none;
 		height: 48px;
 		width: 48px;
+	}
+
+	nav-button img[data-active='true'] {
+		filter: invert(88%) sepia(31%) saturate(967%) hue-rotate(329deg) brightness(104%) contrast(92%)!important;
 	}
 
 	nav-button.configButton {
