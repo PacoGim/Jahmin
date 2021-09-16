@@ -11,7 +11,7 @@
 	}
 
 	onMount(() => {
-		selectedOption = 'Song List'
+		selectedOption = 'Equalizer'
 	})
 </script>
 

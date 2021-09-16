@@ -125,6 +125,8 @@
 		transition: transform 250ms ease-in-out, opacity 250ms ease-in-out;
 		opacity: 0;
 		transform: translateY(-25px) rotateX(90deg);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 30);
+		white-space: normal;
 	}
 
 	album-details album-artist {
@@ -144,10 +146,5 @@
 		overflow: hidden;
 		white-space: nowrap;
 		max-width: calc(var(--cover-dimension) - 1.5rem);
-	}
-
-	album-name {
-		font-variation-settings: 'wght' 500;
-		white-space: normal;
 	}
 </style>
