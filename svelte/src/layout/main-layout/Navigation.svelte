@@ -1,17 +1,21 @@
 <script lang="ts">
+import CogIcon from '../../icons/CogIcon.svelte';
+import HomeIcon from '../../icons/HomeIcon.svelte';
+import SearchIcon from '../../icons/SearchIcon.svelte';
+
 	import { layoutToShow } from '../../store/final.store'
 </script>
 
 <navigation-svlt class="dark-theme">
 	<nav-button on:click={() => ($layoutToShow = 'Main')}>
-		<img data-active={$layoutToShow === 'Main'} src="./img/home.svg" alt="" />
+		<HomeIcon isActive={$layoutToShow === 'Main'}/>
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Search')}>
-		<img data-active={$layoutToShow === 'Search'} src="./img/search.svg" alt="" />
+		<SearchIcon isActive={$layoutToShow === 'Search'}/>
 	</nav-button>
 	<separator />
 	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
-		<img data-active={$layoutToShow === 'Config'} src="./img/cog.svg" alt="" />
+		<CogIcon isActive={$layoutToShow === 'Config'}/>
 	</nav-button>
 </navigation-svlt>
 
@@ -25,11 +29,6 @@
 		background-color: rgba(255, 255, 255, 0.025);
 	}
 
-	navigation-svlt.dark-theme nav-button img {
-		filter: invert(98%) sepia(99%) saturate(124%) hue-rotate(324deg) brightness(95%) contrast(93%)
-			drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.25));
-	}
-
 	nav-button {
 		display: flex;
 		align-items: center;
@@ -41,17 +40,6 @@
 		margin: 0.5rem;
 		margin-bottom: 0.25rem;
 		background-color: rgba(255, 255, 255, 0.1);
-	}
-
-	nav-button img {
-		padding: 0.5rem;
-		-webkit-user-drag: none;
-		height: 48px;
-		width: 48px;
-	}
-
-	nav-button img[data-active='true'] {
-		filter: invert(88%) sepia(31%) saturate(967%) hue-rotate(329deg) brightness(104%) contrast(92%)!important;
 	}
 
 	nav-button.configButton {

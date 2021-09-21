@@ -45,6 +45,12 @@
 	--default-weight: 80;
 }
 
+.nav-icon {
+	height: 48px;
+	width: 48px;
+	padding: 0.5rem;
+}
+
 button {
 	cursor: pointer;
 	padding: 0.25rem 0.5rem;
@@ -82,16 +88,21 @@ body {
 }
 
 *::-webkit-scrollbar {
-	width: 6px;
+	width: 0.5rem;
 }
 
 *::-webkit-scrollbar-track {
-	background: transparent;
+	/* background-color: transparent; */
+	background-color: rgba(255, 255, 255, 0.5);
+	/* background-color: var(--high-color); */
+	transition: all 250ms ease-in-out;
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color: #eae6d9;
-	border-radius: 200px;
+	background-color: rgba(255, 255, 255, 0.75);
+	/* background-color: var(--low-color); */
+	/* background-color: transparent; */
+	transition: all 250ms ease-in-out;
 }
 
 input::-webkit-outer-spin-button,

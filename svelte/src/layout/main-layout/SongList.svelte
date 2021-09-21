@@ -14,7 +14,7 @@
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
 	let scrollAmount = 0
-	let progressValue = 0
+	let scrollValue = 0
 	let lastSelectedSong = 0
 	let isScrollAtBottom = false
 	let isScrollAtTop = false
@@ -87,7 +87,7 @@
 			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, SONG_AMOUNT)
 		}
 
-		setProgress()
+		setScrollProgress()
 	}
 
 	function selectSongs(e: MouseEvent) {
@@ -142,9 +142,9 @@
 		}
 	}
 
-	function setProgress() {
-		progressValue = ((100 / ($songListStore.length - 1)) * scrollAmount) | 0
-		document.documentElement.style.setProperty('--progress-bar-fill', `${progressValue}%`)
+	function setScrollProgress() {
+		scrollValue = ((100 / ($songListStore.length - 1)) * scrollAmount) | 0
+		document.documentElement.style.setProperty('--scrollbar-fill', `${scrollValue}%`)
 	}
 
 	let isMouseDownInScroll = false
@@ -184,8 +184,8 @@
 	}
 
 	// Sets the proper scrollAmount based of the percentage (in distance) of the bar clicked. 0% = top and 100% = bottom.
-	function setScrollAmountBar(songListProgressBar: HTMLDivElement, e: MouseEvent) {
-		let percentClick = (100 / songListProgressBar.clientHeight) * e.offsetY
+	function setScrollAmountBar(songListScrollBar: HTMLDivElement, e: MouseEvent) {
+		let percentClick = (100 / songListScrollBar.clientHeight) * e.offsetY
 		setScroll(($songListStore.length / 100) * percentClick)
 	}
 
@@ -197,14 +197,14 @@
 	}
 
 	function scrollBarHandler() {
-		let songListProgressBar: HTMLDivElement = document.querySelector('song-list-progress-bar')
+		let songListScrollBar: HTMLDivElement = document.querySelector('song-list-scroll-bar')
 
 		// Handles moving the cursor over the "scrollbar" then moving out of it so the "scrolling" does not stop abruptly.
 		document.addEventListener('mousemove', (e: MouseEvent) => {
 			// Checks if the other event triggered a mouse down on the "scrollbar".
 			if (isMouseDownInScroll) {
 				// Returns the position (top and height) on screen of the "scrollbar".
-				let { top, height } = songListProgressBar.getBoundingClientRect()
+				let { top, height } = songListScrollBar.getBoundingClientRect()
 
 				// Calculates the difference between the current cursor position on screen relative to the "scrollbar".
 				let difference = e.clientY - top
@@ -229,7 +229,7 @@
 
 		// If the user clicks on either the scroll bar or the progress fill, set isMouseDownInScroll to true.
 		document.addEventListener('mousedown', e => {
-			if (isValidPath(e, ['SONG-LIST-PROGRESS-BAR', 'PROGRESS-FILL'])) {
+			if (isValidPath(e, ['SONG-LIST-SCROLL-BAR', 'SCROLLBAR-FILL'])) {
 				isMouseDownInScroll = true
 			}
 		})
@@ -240,7 +240,7 @@
 		})
 
 		// If the user click on the scrollbar, calls setScrollAmountBar.
-		songListProgressBar.addEventListener('click', evt => setScrollAmountBar(songListProgressBar, evt))
+		songListScrollBar.addEventListener('click', evt => setScrollAmountBar(songListScrollBar, evt))
 	}
 </script>
 
@@ -252,9 +252,9 @@
 			{/each}
 		{/if}
 	</song-list>
-	<song-list-progress-bar>
-		<progress-fill />
-	</song-list-progress-bar>
+	<song-list-scroll-bar>
+		<scrollbar-fill />
+	</song-list-scroll-bar>
 </song-list-svlt>
 
 <style>
@@ -278,23 +278,25 @@
 		/* transition: all 1000ms ease-in-out; */
 	}
 
-	song-list-progress-bar {
+	song-list-scroll-bar {
 		display: block;
 		width: 1rem;
 		background-color: rgba(255, 255, 255, 0.15);
 
 		cursor: grab;
 	}
-	song-list-progress-bar:active {
+	song-list-scroll-bar:active {
 		cursor: grabbing;
 	}
 
-	song-list-progress-bar progress-fill {
+	song-list-scroll-bar scrollbar-fill {
 		display: block;
 		width: auto;
+		/* background-color: var(--high-color); */
 		background-color: rgba(255, 255, 255, 0.5);
-		height: var(--progress-bar-fill);
+		height: var(--scrollbar-fill);
 		border-bottom: 5px solid rgba(255, 255, 255, 0.75);
+		/* border-bottom: 5px solid var(--low-color); */
 		max-height: 100%;
 	}
 </style>
