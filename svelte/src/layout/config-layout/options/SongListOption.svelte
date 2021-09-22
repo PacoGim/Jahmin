@@ -1,5 +1,5 @@
 <script lang="ts">
-	import EditSongStringSection from '../option-sections/EditSongStringSection.svelte'
+	import EditSongListTagSection from '../option-sections/EditSongListTagSection.svelte'
 </script>
 
-<EditSongStringSection />
+<EditSongListTagSection />

@@ -4,12 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.saveConfig = exports.getConfig = void 0;
+const toml_1 = __importDefault(require("@iarna/toml"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const deepmerge_1 = __importDefault(require("deepmerge"));
 const __1 = require("..");
 const getConfigPathFile = () => {
-    const configFileName = 'config.json';
+    const configFileName = 'config.toml';
     const configFilePath = path_1.default.join(__1.appDataPath(), configFileName);
     if (!fs_1.default.existsSync(__1.appDataPath())) {
         fs_1.default.mkdirSync(__1.appDataPath());
@@ -21,7 +22,7 @@ function getConfig() {
     let config;
     if (fs_1.default.existsSync(getConfigPathFile())) {
         try {
-            config = JSON.parse(fs_1.default.readFileSync(getConfigPathFile(), { encoding: 'utf-8' }));
+            config = toml_1.default.parse(fs_1.default.readFileSync(getConfigPathFile(), { encoding: 'utf-8' }));
         }
         catch (error) {
             config = getDefaultConfigFile();
@@ -40,7 +41,7 @@ function saveConfig(newConfig) {
     let config = getConfig();
     config = deepmerge_1.default(config, newConfig, { arrayMerge: (destinationArray, sourceArray) => sourceArray });
     try {
-        fs_1.default.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2));
+        fs_1.default.writeFileSync(getConfigPathFile(), toml_1.default.stringify(config));
         return config;
     }
     catch (error) {
@@ -57,8 +58,6 @@ function getDefaultConfigFile() {
         art: {
             dimension: 128
         },
-        userOptions: {
-            groupOnlyByFolder: false
-        }
+        groupOnlyByFolder: false
     };
 }

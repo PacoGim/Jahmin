@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
-
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import { saveConfig } from '../../../service/ipc.service'
 	import { songListTagsConfig } from '../../../store/config.store'
@@ -72,15 +70,10 @@
 			isFirstSaveTrigger = false
 		} else {
 			saveConfig({
-				userOptions: {
-					songListTags: selectedTags
-				}
+				songListTags: selectedTags
 			})
 			saveSelectedTagsToLS()
 		}
-	}
-
-	$: {
 	}
 
 	$: if ($songListTagsConfig) selectedTags = $songListTagsConfig

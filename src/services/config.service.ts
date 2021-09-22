@@ -1,4 +1,5 @@
 import { ConfigType } from '../types/config.type'
+import TOML from '@iarna/toml'
 
 import fs from 'fs'
 import path from 'path'
@@ -7,7 +8,7 @@ import deepmerge from 'deepmerge'
 import { appDataPath } from '..'
 
 const getConfigPathFile = () => {
-	const configFileName = 'config.json'
+	const configFileName = 'config.toml'
 	const configFilePath = path.join(appDataPath(), configFileName)
 
 	if (!fs.existsSync(appDataPath())) {
@@ -22,7 +23,7 @@ export function getConfig(): ConfigType {
 
 	if (fs.existsSync(getConfigPathFile())) {
 		try {
-			config = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' }))
+			config = TOML.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
 		} catch (error) {
 			config = getDefaultConfigFile()
 		}
@@ -43,7 +44,7 @@ export function saveConfig(newConfig: any) {
 	config = deepmerge(config, newConfig, { arrayMerge: (destinationArray: any[], sourceArray: any[]) => sourceArray })
 
 	try {
-		fs.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2))
+		fs.writeFileSync(getConfigPathFile(), TOML.stringify(config))
 		return config
 	} catch (error) {
 		return false
@@ -59,8 +60,6 @@ function getDefaultConfigFile() {
 		art: {
 			dimension: 128
 		},
-		userOptions: {
-			groupOnlyByFolder: false
-		}
+		groupOnlyByFolder: false
 	}
 }

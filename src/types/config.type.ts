@@ -3,11 +3,9 @@ export type ConfigType = {
 	rootDirectories?: string[]
 	order: OrderType
 	art: ArtType
-	userOptions: UserOptions
-}
-
-type UserOptions = {
 	groupOnlyByFolder: boolean
+	songListTags: any[]
+	equalizerId: string
 }
 
 type ArtType = {

@@ -17,6 +17,8 @@
 	import parseDuration from '../../functions/parseDuration.fn'
 	import { setWaveSource } from '../../service/waveform.service'
 	import CoverArt from '../../components/CoverArt.svelte'
+	import { context, source } from '../../store/equalizer.store'
+import { loadEqualizer } from '../../service/equalizerLoader.service';
 
 	let progress: number = 0
 
@@ -33,6 +35,14 @@
 		currentTime: '00:00',
 		duration: '00:00',
 		timeLeft: '00:00'
+	}
+
+	$: {
+		if (player !== undefined && $context === undefined) {
+			$context = new window.AudioContext()
+			$source = $context.createMediaElementSource(player)
+			loadEqualizer()
+		}
 	}
 
 	$: playSong($playbackCursor)
@@ -141,6 +151,7 @@
 
 	onMount(() => {
 		player = document.querySelector('audio')
+		// console.log(player)
 	})
 
 	function stopPlayer() {
