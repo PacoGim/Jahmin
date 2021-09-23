@@ -2,9 +2,13 @@
 	font-family: Roboto;
 	src: url('./fonts/Roboto.ttf');
 } */
-@font-face {
+/* @font-face {
 	font-family: Nunito;
 	src: url('./fonts/NunitoVFBeta.ttf');
+} */
+@font-face {
+	font-family: RobotoFlex;
+	src: url('./fonts/RobotoFlex.ttf');
 }
 
 * {
@@ -41,8 +45,8 @@
 	--primary-light-color: #8899a8;
 	--secondary-light-color: #e4e6e7;
 
-	/* Min 54 Mid 105 Max 156 */
-	--default-weight: 80;
+	/* Min 100 Mid 450 Max 1000 */
+	--default-weight: 300;
 }
 
 .nav-icon {
@@ -69,7 +73,7 @@ body {
 	background-color: var(--secondary-color);
 	height: 100%;
 	display: block;
-	font-family: Nunito;
+	font-family: RobotoFlex;
 	/* font-family: Golos; */
 	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' var(--default-weight);

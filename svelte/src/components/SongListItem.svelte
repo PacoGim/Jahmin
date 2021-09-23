@@ -114,7 +114,7 @@
 	}
 
 	song-list-item.playing {
-		font-variation-settings: 'wght' calc(var(--default-weight) + 40);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
 		background-color: rgba(255, 255, 255, 0.1);
 	}

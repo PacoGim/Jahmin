@@ -2,55 +2,12 @@
 	import { onMount } from 'svelte'
 
 	import OptionSection from '../../../components/OptionSection.svelte'
-	import { audioFilters, context, source } from '../../../store/equalizer.store'
+	import { audioFilters } from '../../../store/equalizer.store'
 	import type { AudioFilterType } from '../../../types/audioFilter.type'
 
 	let isEqualizerEnabled = true
 
-	/* 	let audioFilters: { frequency: number; biquadFilter?: BiquadFilterNode; gain: number }[] = [
-		{ frequency: 32, gain: 0 },
-		{ frequency: 64, gain: 2 },
-		{ frequency: 128, gain: 0 },
-		{ frequency: 256, gain: -2 },
-		{ frequency: 512, gain: 0 },
-		{ frequency: 1024, gain: 0 },
-		{ frequency: 2048, gain: 0 },
-		{ frequency: 4096, gain: 2 },
-		{ frequency: 8192, gain: 2 },
-		{ frequency: 16384, gain: 1 }
-	] */
-
-	/*
-		equalizerId:"ad12er32rd"
-
-
-	*/
-
 	let audioFiltersCopy: AudioFilterType[] = $audioFilters
-
-	// loadEqualizer()
-
-	/* 	function loadEqualizer() {
-		let audioNode = undefined
-
-		audioFilters.forEach((audioFilter, index) => {
-			const biquadFilter = $context.createBiquadFilter()
-			biquadFilter.type = 'peaking'
-			biquadFilter.frequency.value = audioFilter.frequency
-			biquadFilter.gain.value = audioFilter.gain
-
-			audioFilter.biquadFilter = biquadFilter
-
-			if (index === 0) {
-				audioNode = $source.connect(biquadFilter)
-			} else if (index === audioFilters.length - 1) {
-				audioNode = audioNode.connect(biquadFilter)
-				audioNode = audioNode.connect($context.destination)
-			} else {
-				audioNode = audioNode.connect(biquadFilter)
-			}
-		})
-	} */
 
 	function gainChange(evt: Event, frequency: number) {
 		const target = evt.target as HTMLInputElement

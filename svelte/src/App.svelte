@@ -11,6 +11,8 @@
 	import MainLayout from './layout/main-layout/MainLayout.svelte'
 	import ConfigLayout from './layout/config-layout/ConfigLayout.svelte'
 	import SearchLayout from './layout/search-layout/SearchLayout.svelte'
+import generateId from './functions/generateId.fn';
+import EqualizerController from './controllers/EqualizerController.svelte';
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -30,6 +32,7 @@
 <PlayerController />
 <ConfigController />
 <IpcController />
+<EqualizerController/>
 
 <MainLayout />
 <ConfigLayout />

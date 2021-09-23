@@ -18,7 +18,6 @@
 	import { setWaveSource } from '../../service/waveform.service'
 	import CoverArt from '../../components/CoverArt.svelte'
 	import { context, source } from '../../store/equalizer.store'
-import { loadEqualizer } from '../../service/equalizerLoader.service';
 
 	let progress: number = 0
 
@@ -41,7 +40,6 @@ import { loadEqualizer } from '../../service/equalizerLoader.service';
 		if (player !== undefined && $context === undefined) {
 			$context = new window.AudioContext()
 			$source = $context.createMediaElementSource(player)
-			loadEqualizer()
 		}
 	}
 

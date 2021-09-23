@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 
 	import { getConfigIPC } from '../service/ipc.service'
-	import { albumArtSizeConfig, songListTagsConfig } from '../store/config.store'
+	import { albumArtSizeConfig, songListTagsConfig, equalizerIdConfig } from '../store/config.store'
 	import type { ConfigType } from '../types/config.type'
 
 	onMount(() => {
@@ -18,7 +18,14 @@
 	}
 
 	function syncEqualizerId(config: ConfigType) {
-		console.log(config)
+		let equalizerIdConfigFile = config?.equalizerId
+
+		let equalizerIdLS = localStorage.getItem('EqualizerId')
+
+		if (equalizerIdConfigFile !== undefined && equalizerIdConfigFile !== equalizerIdLS) {
+			$equalizerIdConfig = equalizerIdConfigFile
+			localStorage.setItem('EqualizerId', equalizerIdConfigFile)
+		}
 	}
 
 	function syncArtSize(config: ConfigType) {

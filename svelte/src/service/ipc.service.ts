@@ -7,9 +7,17 @@ import type { SongFuzzySearchType, SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
 
-export function userSearchIPC(searchString: string,keys:string[]):Promise<SongFuzzySearchType[]> {
+export function userSearchIPC(searchString: string, keys: string[]): Promise<SongFuzzySearchType[]> {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('search', searchString,keys).then(result => {
+		ipcRenderer.invoke('search', searchString, keys).then(result => {
+			resolve(result)
+		})
+	})
+}
+
+export function getEqualizersIPC(): Promise<any[]> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('get-equalizers').then(result => {
 			resolve(result)
 		})
 	})

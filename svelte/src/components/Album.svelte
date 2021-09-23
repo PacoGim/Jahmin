@@ -125,7 +125,7 @@
 		transition: transform 250ms ease-in-out, opacity 250ms ease-in-out;
 		opacity: 0;
 		transform: translateY(-25px) rotateX(90deg);
-		font-variation-settings: 'wght' calc(var(--default-weight) + 30);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 		white-space: normal;
 	}
 

@@ -3,4 +3,4 @@ import type { AudioFilterType } from '../types/audioFilter.type'
 
 export let context: Writable<AudioContext | undefined> = writable(undefined)
 export let source: Writable<MediaElementAudioSourceNode | undefined> = writable(undefined)
-export let audioFilters: Writable<AudioFilterType[]> = writable()
+export let audioFilters: Writable<AudioFilterType[]> = writable([])

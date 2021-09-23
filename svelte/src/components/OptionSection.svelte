@@ -25,7 +25,7 @@
 		width: 100%;
 
 		font-size: 1.75rem;
-		font-variation-settings: 'wght' calc(var(--default-weight) - 26);
+		font-variation-settings: 'wght' calc(var(--default-weight) - 150);
 
 		border-bottom: 1px white solid;
 	}

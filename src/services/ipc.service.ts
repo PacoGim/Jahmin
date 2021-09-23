@@ -17,6 +17,7 @@ import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 import Fuse from 'fuse.js'
+import { getEqualizers } from './getEqualizers.service'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -58,6 +59,10 @@ export function loadIPC() {
 		let result = fuse.search(searchString, { limit: 20 })
 
 		return result
+	})
+
+	ipcMain.handle('get-equalizers', async evt => {
+		return getEqualizers()
 	})
 
 	ipcMain.handle('save-peaks', async (evt, sourceFile, peaks) => {

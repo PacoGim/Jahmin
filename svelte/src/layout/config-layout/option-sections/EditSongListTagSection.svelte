@@ -216,13 +216,13 @@
 	table {
 		margin: 0 auto;
 		border-spacing: 1.5rem 0.75rem;
-		font-variation-settings: 'wght' calc(var(--default-weight) - 20);
+		/* font-variation-settings: 'wght' calc(var(--default-weight) - 100); */
 	}
 	table td {
 		height: 2rem;
 	}
 	table thead {
-		font-variation-settings: 'wght' calc(var(--default-weight) + 20);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 	}
 	td.delete-button {
 		display: flex;
@@ -237,7 +237,7 @@
 	}
 	td.delete-button span {
 		font-size: 0.75rem;
-		font-variation-settings: 'wght' 156;
+		font-variation-settings: 'wght' 400;
 	}
 	td input {
 		display: none;
@@ -261,7 +261,7 @@
 		color: #fff;
 		font-family: inherit;
 		font-size: 1.5rem;
-		font-variation-settings: 'wght' calc(var(--default-weight) + 10);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
 	}
 	button.add-field:hover {
 		transform: scale(0.96);
