@@ -1,16 +1,3 @@
-/* @font-face {
-	font-family: Roboto;
-	src: url('./fonts/Roboto.ttf');
-} */
-/* @font-face {
-	font-family: Nunito;
-	src: url('./fonts/NunitoVFBeta.ttf');
-} */
-@font-face {
-	font-family: RobotoFlex;
-	src: url('./fonts/RobotoFlex.ttf');
-}
-
 * {
 	box-sizing: border-box;
 	padding: 0;
@@ -73,9 +60,6 @@ body {
 	background-color: var(--secondary-color);
 	height: 100%;
 	display: block;
-	font-family: RobotoFlex;
-	/* font-family: Golos; */
-	/* font-family: SourceSans; */
 	font-variation-settings: 'wght' var(--default-weight);
 }
 

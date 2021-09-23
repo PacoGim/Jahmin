@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
-
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import { audioFilters } from '../../../store/equalizer.store'
 	import type { AudioFilterType } from '../../../types/audioFilter.type'
@@ -31,8 +29,6 @@
 		isEqualizerEnabled = !isEqualizerEnabled
 		$audioFilters = $audioFilters
 	}
-
-	onMount(() => {})
 </script>
 
 <OptionSection title="Equalizer">
