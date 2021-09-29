@@ -1,31 +1,34 @@
 <script lang="ts">
 	import OptionSection from '../../../components/OptionSection.svelte'
-	import generateId from '../../../functions/generateId.fn'
 	import EditIcon from '../../../icons/EditIcon.svelte'
 	import { selectedEq, equalizers } from '../../../store/equalizer.store'
-	import type { AudioFilterType } from '../../../types/audioFilter.type'
+	import type { EqualizerType } from '../../../types/equalizer.type'
 
 	let isEqualizerEnabled = true
 
-	let audioFiltersCopy: AudioFilterType[] = $selectedEq
+	let audioFiltersCopy: EqualizerType = $selectedEq
 
 	function gainChange(evt: Event, frequency: number) {
 		const target = evt.target as HTMLInputElement
 		const value = Number(target.value)
 
-		let audioFilter = $selectedEq.find(x => x.frequency === frequency)
+		let audioFilter = $selectedEq.values.find(x => x.frequency === frequency)
 
-		audioFilter.biquadFilter.gain.value = value
+		audioFilter.gain = value
 
 		$selectedEq = $selectedEq
 	}
 
+	$: {
+		// console.log($selectedEq)
+	}
+
 	function toggleEq() {
 		if (isEqualizerEnabled === true) {
-			$selectedEq.forEach(audioFilter => (audioFilter.biquadFilter.gain.value = 0))
+			$selectedEq.values.forEach(audioFilter => (audioFilter.biquadFilter.gain.value = 0))
 		} else {
-			audioFiltersCopy.forEach(audioFilter => {
-				$selectedEq.find(x => x.frequency === audioFilter.frequency).biquadFilter.gain.value = audioFilter.gain
+			audioFiltersCopy.values.forEach(audioFilter => {
+				$selectedEq.values.find(x => x.frequency === audioFilter.frequency).biquadFilter.gain.value = audioFilter.gain
 			})
 		}
 		isEqualizerEnabled = !isEqualizerEnabled
@@ -36,15 +39,37 @@
 		let equalizerFound = $equalizers.find(x => x.id === id)
 
 		if (equalizerFound) {
-			equalizerFound.values.forEach(eqValue => {
-				let audioFilter = $selectedEq.find(x => x.frequency === eqValue.frequency)
 
-				audioFilter.biquadFilter.gain.value = eqValue.gain
+			equalizerFound.values.forEach(eqValue => {
+
+				console.log(eqValue)
+
 			})
 
+
+		}
+
+		/*
+
+		if (equalizerFound) {
+			equalizerFound.values.forEach(eqValue => {
+				let audioFilter = $selectedEq.values.find(x => x.frequency === eqValue.frequency)
+
+				audioFilter.biquadFilter.gain.value = eqValue.gain
+
+				audioFilter.gain = eqValue.gain
+			})
+
+			$selectedEq.id = equalizerFound.id
+			$selectedEq.name = equalizerFound.name
 			$selectedEq = $selectedEq
 		}
+		*/
 	}
+
+	function renameEq(id: string) {}
+
+	function deleteEq(id: string) {}
 </script>
 
 <OptionSection title="Equalizer">
@@ -52,15 +77,17 @@
 		<p>Saved Equalizers</p>
 		<equalizer-list>
 			{#each $equalizers as eq (eq.id)}
-				<equalizer-field>
+				<equalizer-field id="eq-{eq.id}">
 					<equalizer-name on:click={() => selectEqualizer(eq.id)}>{eq.name}</equalizer-name>
-					<equalizer-delete>X</equalizer-delete>
-					<equalizer-rename><EditIcon style="height:inherit;width:auto;fill:#fff;" /></equalizer-rename>
+					<equalizer-rename on:click={() => renameEq(eq.id)}
+						>Rename <EditIcon style="height:1rem;width:auto;fill:#fff;" /></equalizer-rename
+					>
+					<equalizer-delete on:click={() => deleteEq(eq.id)}>Delete X</equalizer-delete>
 				</equalizer-field>
 			{/each}
 		</equalizer-list>
 		<audio-filters>
-			{#each $selectedEq as audioFilter, index (index)}
+			{#each $selectedEq.values as audioFilter, index (index)}
 				<audio-filter-range>
 					<filter-frequency>{audioFilter.frequency} Hz</filter-frequency>
 					<eq-input-container>
@@ -68,13 +95,14 @@
 							type="range"
 							min="-10"
 							max="10"
-							value={audioFilter.biquadFilter.gain.value}
+							step="1"
+							value={audioFilter.gain}
 							on:input={evt => {
 								gainChange(evt, audioFilter.frequency)
 							}}
 						/>
 					</eq-input-container>
-					<filter-gain>{audioFilter.biquadFilter.gain.value} dB</filter-gain>
+					<filter-gain>{audioFilter.gain} dB</filter-gain>
 				</audio-filter-range>
 			{/each}
 		</audio-filters>
@@ -85,27 +113,47 @@
 <style>
 	equalizer-list {
 		width: fit-content;
-		max-height: 6rem;
+		max-height: 10rem;
 		display: block;
 		overflow-y: scroll;
 		width: 33%;
 		margin: 0 auto;
 	}
 	equalizer-list equalizer-field {
-		height: 1rem;
-		display: flex;
-	}
-	equalizer-list equalizer-field equalizer-name {
 		cursor: pointer;
-		width: -webkit-fill-available;
+		display: grid;
+		grid-template-columns: auto max-content max-content;
+		transition: background-color 150ms ease-in-out;
 	}
 
-	equalizer-list equalizer-field equalizer-delete {
-		margin-left: auto;
+	equalizer-list equalizer-field * {
+		transition: background-color 150ms ease-in-out;
+	}
+
+	equalizer-list equalizer-field:hover {
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+	equalizer-list equalizer-field equalizer-name {
+		padding: 0.25rem 0.5rem;
 	}
 
 	equalizer-list equalizer-field equalizer-rename {
+		padding: 0.25rem 0.5rem;
 		height: inherit;
+		margin-right: 1rem;
+	}
+
+	equalizer-list equalizer-field equalizer-rename:hover {
+		background-color: cornflowerblue;
+	}
+
+	equalizer-list equalizer-field equalizer-delete {
+		margin-right: 1rem;
+		padding: 0.25rem 0.5rem;
+	}
+
+	equalizer-list equalizer-field equalizer-delete:hover {
+		background-color: crimson;
 	}
 
 	button {
@@ -133,14 +181,15 @@
 
 	eq-input-container {
 		--bar-width: 20px;
+		--bar-height: 250px;
 		width: var(--bar-width);
-		height: 150px;
+		height: var(--bar-height);
 	}
 
 	input {
-		width: 150px;
+		width: var(--bar-height);
 		height: var(--bar-width);
-		transform-origin: 75px 75px;
+		transform-origin: calc(var(--bar-height) / 2) calc(var(--bar-height) / 2);
 		transform: rotate(-90deg);
 
 		-webkit-appearance: none;
