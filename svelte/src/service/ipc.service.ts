@@ -4,6 +4,7 @@ import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { EqualizerType } from '../types/equalizer.type'
+import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 import type { SongFuzzySearchType, SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
@@ -16,7 +17,7 @@ export function userSearchIPC(searchString: string, keys: string[]): Promise<Son
 	})
 }
 
-export function getEqualizersIPC(): Promise<EqualizerType[]> {
+export function getEqualizersIPC(): Promise<EqualizerProfileType[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-equalizers').then(result => {
 			resolve(result)

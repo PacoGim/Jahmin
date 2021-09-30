@@ -1,29 +1,29 @@
 <script lang="ts">
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
-	import { selectedEq, equalizers } from '../../../store/equalizer.store'
+	import { equalizerProfiles, selectedEqId } from '../../../store/equalizer.store'
 	import type { EqualizerType } from '../../../types/equalizer.type'
 
 	let isEqualizerEnabled = true
 
-	let audioFiltersCopy: EqualizerType = $selectedEq
+	// let audioFiltersCopy: EqualizerType = $selectedEq
 
 	function gainChange(evt: Event, frequency: number) {
 		const target = evt.target as HTMLInputElement
 		const value = Number(target.value)
 
-		let audioFilter = $selectedEq.values.find(x => x.frequency === frequency)
+		// let audioFilter = $selectedEq.values.find(x => x.frequency === frequency)
 
-		audioFilter.gain = value
+		// audioFilter.gain = value
 
-		$selectedEq = $selectedEq
+		// $selectedEq = $selectedEq
 	}
 
 	$: {
 		// console.log($selectedEq)
 	}
 
-	function toggleEq() {
+	/* 	function toggleEq() {
 		if (isEqualizerEnabled === true) {
 			$selectedEq.values.forEach(audioFilter => (audioFilter.biquadFilter.gain.value = 0))
 		} else {
@@ -33,20 +33,15 @@
 		}
 		isEqualizerEnabled = !isEqualizerEnabled
 		$selectedEq = $selectedEq
-	}
+	} */
 
-	function selectEqualizer(id: string) {
+	/* 	function selectEqualizer(id: string) {
 		let equalizerFound = $equalizers.find(x => x.id === id)
 
 		if (equalizerFound) {
-
 			equalizerFound.values.forEach(eqValue => {
-
 				console.log(eqValue)
-
 			})
-
-
 		}
 
 		/*
@@ -64,19 +59,27 @@
 			$selectedEq.name = equalizerFound.name
 			$selectedEq = $selectedEq
 		}
-		*/
-	}
+
+	} */
 
 	function renameEq(id: string) {}
 
 	function deleteEq(id: string) {}
+
+	function selectEqualizer(id: string) {
+		console.log(id)
+	}
+
+	function toggleEq(){
+
+	}
 </script>
 
 <OptionSection title="Equalizer">
 	<equalizer-section slot="body">
 		<p>Saved Equalizers</p>
 		<equalizer-list>
-			{#each $equalizers as eq (eq.id)}
+			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
 					<equalizer-name on:click={() => selectEqualizer(eq.id)}>{eq.name}</equalizer-name>
 					<equalizer-rename on:click={() => renameEq(eq.id)}

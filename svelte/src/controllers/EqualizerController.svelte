@@ -1,50 +1,81 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
 	import { getEqualizersIPC } from '../service/ipc.service'
 	import { equalizerIdConfig } from '../store/config.store'
-	import { selectedEq, context, equalizers, source } from '../store/equalizer.store'
+	import { triggerEqualizerFrequencyValue, context, equalizerProfiles, selectedEqId, source } from '../store/equalizer.store'
 	import type { EqualizerType } from '../types/equalizer.type'
+
+	let equalizerGainValues = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
+	let equalizer: EqualizerType = {}
+
+	$: {
+		if ($context !== undefined) {
+			getAudioFilters().then(() => {
+				loadEqualizer()
+			})
+		}
+	}
+
+	$: {
+		console.log($selectedEqId)
+		if ($selectedEqId !== undefined) {
+			setTimeout(() => {
+				changeEqualizer()
+			}, 1000)
+		}
+	}
+
+	$: {
+		console.log($triggerEqualizerFrequencyValue)
+		if ($triggerEqualizerFrequencyValue !== undefined) {
+			console.log($triggerEqualizerFrequencyValue)
+		}
+	}
 
 	async function loadEqualizer() {
 		let audioNode = undefined
 
-		$selectedEq = await getAudioFilters()
-
-		$selectedEq.values.forEach((audioFilter, index) => {
+		for (const [index, equalizerGainValue] of equalizerGainValues.entries()) {
 			const biquadFilter = $context.createBiquadFilter()
 			biquadFilter.type = 'peaking'
-			biquadFilter.frequency.value = audioFilter.frequency
-			biquadFilter.gain.value = audioFilter.gain
+			biquadFilter.frequency.value = equalizerGainValue
+			biquadFilter.gain.value = 0
 
-			audioFilter.biquadFilter = biquadFilter
+			equalizer[equalizerGainValue] = biquadFilter
 
 			if (index === 0) {
 				audioNode = $source.connect(biquadFilter)
-			} else if (index === $selectedEq.values.length - 1) {
+			} else if (index === equalizerGainValues.length - 1) {
 				audioNode = audioNode.connect(biquadFilter)
 				audioNode = audioNode.connect($context.destination)
 			} else {
 				audioNode = audioNode.connect(biquadFilter)
 			}
-		})
+		}
 	}
 
-	function getAudioFilters(): Promise<EqualizerType> {
+	function changeEqualizer() {
+		let foundEqualizerProfile = $equalizerProfiles.find(x => x.id === $selectedEqId)
+
+		if (foundEqualizerProfile) {
+			for (const value of foundEqualizerProfile.values) {
+				equalizer[value.frequency].gain.value = value.gain
+			}
+		}
+	}
+
+	function getAudioFilters(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			getEqualizersIPC().then(result => {
-				$equalizers = result
+				$equalizerProfiles = result
+
 				let equalizerFound = result.find(x => x.id === $equalizerIdConfig)
 
 				if (equalizerFound) {
-					resolve(equalizerFound)
-				} else {
-					resolve(result[0])
+					$selectedEqId = equalizerFound.id
 				}
+
+				resolve()
 			})
 		})
 	}
-
-	onMount(() => {
-		loadEqualizer()
-	})
 </script>

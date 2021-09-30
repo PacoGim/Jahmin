@@ -1,6 +1,6 @@
 import { writable, Writable } from 'svelte/store'
-import type { AudioFilterType } from '../types/audioFilter.type'
 import type { EqualizerType } from '../types/equalizer.type'
+import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 
 const defaultEq = {
 	id: 'none',
@@ -10,5 +10,9 @@ const defaultEq = {
 
 export let context: Writable<AudioContext | undefined> = writable(undefined)
 export let source: Writable<MediaElementAudioSourceNode | undefined> = writable(undefined)
-export let selectedEq: Writable<EqualizerType> = writable(defaultEq)
 export let equalizers: Writable<EqualizerType[]> = writable([])
+
+export let selectedEqId: Writable<string> = writable(undefined)
+export let equalizerProfiles: Writable<EqualizerProfileType[]> = writable([])
+
+export let triggerEqualizerFrequencyValue: Writable<{ frequency: number; gain: number }> = writable(undefined)
