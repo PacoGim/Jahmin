@@ -12,10 +12,10 @@
 	xml:space="preserve"
 >
 	<style type="text/css">
-		.st0 {
+		.previous-button {
 			fill: var(--hi-color);
 		}
 	</style>
-	<polygon class="st0" points="13,48.5 100,92 100,5 " />
-	<rect x="0" y="4.75" transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 10 96.5001)" class="st0" width="10" height="87" />
+	<polygon class="previous-button" points="13,48.5 100,92 100,5 " />
+	<rect x="0" y="4.75" transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 10 96.5001)" class="previous-button" width="10" height="87" />
 </svg>

@@ -72,8 +72,11 @@
 		if (songToPlay?.ID === nextSongPreloaded?.Id) {
 			url = nextSongPreloaded.BufferUrl
 		} else if (songToPlay?.ID) {
-			let songBuffer = await fetchSong(escapeString(songToPlay['SourceFile']))
-			url = getUrlFromBuffer(songBuffer)
+			// if (songToPlay?.ID) {
+			// console.log('Fetching Song')
+			// let songBuffer = await fetchSong(escapeString(songToPlay['SourceFile']))
+			// url = getUrlFromBuffer(songBuffer)
+			url = escapeString(songToPlay['SourceFile'])
 		} else {
 			player.pause()
 			player.src = ''
@@ -92,12 +95,12 @@
 			timeLeft: parseDuration(songToPlay['Duration'] - 0)
 		}
 
-		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
-
 		if (doPlayNow === true) {
 			player
 				.play()
 				.then(() => {
+					setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
+
 					$songPlayingIdStore = songToPlay.ID
 
 					localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
@@ -108,7 +111,7 @@
 
 					preLoadNextSongDebounce = setTimeout(() => {
 						preLoadNextSong(playbackCursor)
-					}, 500)
+					}, 2000)
 				})
 				.catch(err => {})
 		} else {
@@ -117,6 +120,7 @@
 	}
 
 	function preLoadNextSong(playbackCursor: [number, boolean]) {
+		console.log('Preload')
 		let nextSong = playbackCursor[0] + 1
 		let songs = $playbackStore
 		let songToPlay = songs[nextSong]

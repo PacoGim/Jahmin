@@ -2,7 +2,7 @@
 	import { layoutToShow } from '../../store/final.store'
 
 	import ArtGridOption from './options/ArtGridOption.svelte'
-	/* import EqualizerOption from './options/EqualizerOption.svelte' */
+	import EqualizerOption from './options/EqualizerOption.svelte'
 	import SongInfoOption from './options/SongInfoOption.svelte'
 	import SongListOption from './options/SongListOption.svelte'
 	import VolumeOption from './options/VolumeOption.svelte'
@@ -21,7 +21,7 @@
 		{#if selectedOption === 'Art Grid'}
 			<ArtGridOption />
 		{:else if selectedOption === 'Equalizer'}
-			<!-- <EqualizerOption /> -->
+			<EqualizerOption />
 		{:else if selectedOption === 'Song Info'}
 			<SongInfoOption />
 		{:else if selectedOption === 'Song List'}
@@ -34,13 +34,12 @@
 
 <style>
 	config-layout {
-		grid-template-columns: max-content auto;
-
 		/* display: grid; */
+		grid-template-columns: max-content auto;
 
 		grid-template-areas: 'options-list selected-option';
 	}
 	config-layout selected-option{
-		grid-area: 'selected-option';
+		grid-area: selected-option;
 	}
 </style>

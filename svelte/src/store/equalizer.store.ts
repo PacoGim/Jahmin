@@ -11,8 +11,7 @@ const defaultEq = {
 export let context: Writable<AudioContext | undefined> = writable(undefined)
 export let source: Writable<MediaElementAudioSourceNode | undefined> = writable(undefined)
 export let equalizers: Writable<EqualizerType[]> = writable([])
+export let equalizer: Writable<EqualizerType> = writable({})
 
 export let selectedEqId: Writable<string> = writable(undefined)
 export let equalizerProfiles: Writable<EqualizerProfileType[]> = writable([])
-
-export let triggerEqualizerFrequencyValue: Writable<{ frequency: number; gain: number }> = writable(undefined)

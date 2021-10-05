@@ -62,7 +62,7 @@
 		class="star {klass}"
 		on:mouseleave={() => (starRating = starRatingTemp)}
 		on:click={() => (starRatingTemp = starRating)}
-		on:mousemove={(e) => setStarRating(e)}
+		on:mousemove={e => setStarRating(e)}
 		src="./img/star/star-{starRating}.svg"
 		alt=""
 	/>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
-	import { equalizerProfiles, selectedEqId } from '../../../store/equalizer.store'
+	import { equalizerProfiles, selectedEqId, equalizer } from '../../../store/equalizer.store'
 	import type { EqualizerType } from '../../../types/equalizer.type'
 
 	let isEqualizerEnabled = true
@@ -12,67 +12,22 @@
 		const target = evt.target as HTMLInputElement
 		const value = Number(target.value)
 
-		// let audioFilter = $selectedEq.values.find(x => x.frequency === frequency)
-
-		// audioFilter.gain = value
-
-		// $selectedEq = $selectedEq
+		$equalizer[frequency].gain.value = value
 	}
 
-	$: {
-		// console.log($selectedEq)
+	function objectToArray(inObject: object) {
+		let tempArray = []
+		for (const key in inObject) {
+			tempArray.push(inObject[key])
+		}
+		return tempArray
 	}
-
-	/* 	function toggleEq() {
-		if (isEqualizerEnabled === true) {
-			$selectedEq.values.forEach(audioFilter => (audioFilter.biquadFilter.gain.value = 0))
-		} else {
-			audioFiltersCopy.values.forEach(audioFilter => {
-				$selectedEq.values.find(x => x.frequency === audioFilter.frequency).biquadFilter.gain.value = audioFilter.gain
-			})
-		}
-		isEqualizerEnabled = !isEqualizerEnabled
-		$selectedEq = $selectedEq
-	} */
-
-	/* 	function selectEqualizer(id: string) {
-		let equalizerFound = $equalizers.find(x => x.id === id)
-
-		if (equalizerFound) {
-			equalizerFound.values.forEach(eqValue => {
-				console.log(eqValue)
-			})
-		}
-
-		/*
-
-		if (equalizerFound) {
-			equalizerFound.values.forEach(eqValue => {
-				let audioFilter = $selectedEq.values.find(x => x.frequency === eqValue.frequency)
-
-				audioFilter.biquadFilter.gain.value = eqValue.gain
-
-				audioFilter.gain = eqValue.gain
-			})
-
-			$selectedEq.id = equalizerFound.id
-			$selectedEq.name = equalizerFound.name
-			$selectedEq = $selectedEq
-		}
-
-	} */
 
 	function renameEq(id: string) {}
 
 	function deleteEq(id: string) {}
 
-	function selectEqualizer(id: string) {
-		console.log(id)
-	}
-
-	function toggleEq(){
-
-	}
+	function toggleEq() {}
 </script>
 
 <OptionSection title="Equalizer">
@@ -81,7 +36,7 @@
 		<equalizer-list>
 			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
-					<equalizer-name on:click={() => selectEqualizer(eq.id)}>{eq.name}</equalizer-name>
+					<equalizer-name on:click={() => ($selectedEqId = eq.id)}>{eq.name}</equalizer-name>
 					<equalizer-rename on:click={() => renameEq(eq.id)}
 						>Rename <EditIcon style="height:1rem;width:auto;fill:#fff;" /></equalizer-rename
 					>
@@ -90,22 +45,22 @@
 			{/each}
 		</equalizer-list>
 		<audio-filters>
-			{#each $selectedEq.values as audioFilter, index (index)}
+			{#each objectToArray($equalizer) as equalizer, index (index)}
 				<audio-filter-range>
-					<filter-frequency>{audioFilter.frequency} Hz</filter-frequency>
+					<filter-frequency>{equalizer.frequency.value} Hz</filter-frequency>
 					<eq-input-container>
 						<input
 							type="range"
 							min="-10"
 							max="10"
 							step="1"
-							value={audioFilter.gain}
+							value={equalizer.gain.value}
 							on:input={evt => {
-								gainChange(evt, audioFilter.frequency)
+								gainChange(evt, equalizer.frequency.value)
 							}}
 						/>
 					</eq-input-container>
-					<filter-gain>{audioFilter.gain} dB</filter-gain>
+					<filter-gain>{equalizer.gain.value} dB</filter-gain>
 				</audio-filter-range>
 			{/each}
 		</audio-filters>

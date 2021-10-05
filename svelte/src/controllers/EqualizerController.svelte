@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { getEqualizersIPC } from '../service/ipc.service'
 	import { equalizerIdConfig } from '../store/config.store'
-	import { triggerEqualizerFrequencyValue, context, equalizerProfiles, selectedEqId, source } from '../store/equalizer.store'
+	import { context, equalizerProfiles, selectedEqId, source, equalizer } from '../store/equalizer.store'
 	import type { EqualizerType } from '../types/equalizer.type'
 
 	let equalizerGainValues = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-	let equalizer: EqualizerType = {}
+	// let equalizer: EqualizerType = {}
 
 	$: {
 		if ($context !== undefined) {
@@ -16,18 +16,8 @@
 	}
 
 	$: {
-		console.log($selectedEqId)
 		if ($selectedEqId !== undefined) {
-			setTimeout(() => {
-				changeEqualizer()
-			}, 1000)
-		}
-	}
-
-	$: {
-		console.log($triggerEqualizerFrequencyValue)
-		if ($triggerEqualizerFrequencyValue !== undefined) {
-			console.log($triggerEqualizerFrequencyValue)
+			changeEqualizer()
 		}
 	}
 
@@ -40,7 +30,7 @@
 			biquadFilter.frequency.value = equalizerGainValue
 			biquadFilter.gain.value = 0
 
-			equalizer[equalizerGainValue] = biquadFilter
+			$equalizer[equalizerGainValue] = biquadFilter
 
 			if (index === 0) {
 				audioNode = $source.connect(biquadFilter)
@@ -58,8 +48,10 @@
 
 		if (foundEqualizerProfile) {
 			for (const value of foundEqualizerProfile.values) {
-				equalizer[value.frequency].gain.value = value.gain
+				$equalizer[value.frequency].gain.value = value.gain
 			}
+
+			$equalizer = $equalizer
 		}
 	}
 

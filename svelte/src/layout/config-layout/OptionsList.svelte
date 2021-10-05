@@ -38,6 +38,6 @@
 	}
 
 	options-list {
-		grid-area: 'options-list';
+		grid-area: options-list;
 	}
 </style>

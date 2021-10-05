@@ -71,7 +71,7 @@ body {
 	height: calc(100% - 64px);
 	width: calc(100% - 64px);
 	background-color: var(--secondary-color);
-	overflow-y: hidden;
+	overflow: hidden;
 	z-index: 10;
 }
 
