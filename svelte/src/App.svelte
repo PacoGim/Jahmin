@@ -11,8 +11,10 @@
 	import MainLayout from './layout/main-layout/MainLayout.svelte'
 	import ConfigLayout from './layout/config-layout/ConfigLayout.svelte'
 	import SearchLayout from './layout/search-layout/SearchLayout.svelte'
-import generateId from './functions/generateId.fn';
-import EqualizerController from './controllers/EqualizerController.svelte';
+	import generateId from './functions/generateId.fn'
+	import EqualizerController from './controllers/EqualizerController.svelte'
+	import { nextSong } from './functions/nextSong.fn'
+	import previousSongFn from './functions/previousSong.fn'
 
 	onMount(() => {
 		syncDbVersionIPC()
@@ -22,6 +24,28 @@ import EqualizerController from './controllers/EqualizerController.svelte';
 		}
 
 		window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
+
+		navigator.mediaSession.setActionHandler('previoustrack', function () {
+			previousSongFn()
+		})
+
+		navigator.mediaSession.setActionHandler('nexttrack', function () {
+			nextSong()
+			// console.log('Next Track')
+			// User hit "Previous Track" key.
+		})
+
+		let audio = document.querySelector('audio')
+
+		navigator.mediaSession.setActionHandler('seekbackward', evt => {
+			// User clicked "Seek Backward" media notification icon.
+			audio.currentTime = Math.max(audio.currentTime, 0)
+		})
+
+		navigator.mediaSession.setActionHandler('seekforward', evt => {
+			// User clicked "Seek Forward" media notification icon.
+			audio.currentTime = Math.min(audio.currentTime, audio.duration)
+		})
 	})
 </script>
 
@@ -32,7 +56,7 @@ import EqualizerController from './controllers/EqualizerController.svelte';
 <PlayerController />
 <ConfigController />
 <IpcController />
-<EqualizerController/>
+<EqualizerController />
 
 <MainLayout />
 <ConfigLayout />

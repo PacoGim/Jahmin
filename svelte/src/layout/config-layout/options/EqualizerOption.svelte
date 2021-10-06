@@ -7,12 +7,25 @@
 	let isEqualizerEnabled = true
 
 	// let audioFiltersCopy: EqualizerType = $selectedEq
+	let equalizerName = ''
+
+	$: {
+		$selectedEqId
+		equalizerName = getEqualizerName()
+	}
 
 	function gainChange(evt: Event, frequency: number) {
 		const target = evt.target as HTMLInputElement
 		const value = Number(target.value)
 
 		$equalizer[frequency].gain.value = value
+	}
+
+	function getEqualizerName(): string {
+		let equalizerProfileFound = $equalizerProfiles.find(x => x.id === $selectedEqId)
+		if (equalizerProfileFound) {
+			return equalizerProfileFound?.name || 'No Name'
+		}
 	}
 
 	function objectToArray(inObject: object) {
@@ -23,9 +36,18 @@
 		return tempArray
 	}
 
-	function renameEq(id: string) {}
+	function renameEq(id: string, name: string) {
+		// let value = window.prompt(`Enter new name for profile ${name}:`)
+		// console.log(value)
+	}
 
-	function deleteEq(id: string) {}
+	function deleteEq(id: string, name: string) {
+		if (confirm(`Do you really want to delete profile ${name}`)) {
+			console.log('To delete')
+		} else {
+			console.log('Dont delete')
+		}
+	}
 
 	function toggleEq() {}
 </script>
@@ -37,13 +59,14 @@
 			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
 					<equalizer-name on:click={() => ($selectedEqId = eq.id)}>{eq.name}</equalizer-name>
-					<equalizer-rename on:click={() => renameEq(eq.id)}
+					<equalizer-rename on:click={() => renameEq(eq.id, eq.name)}
 						>Rename <EditIcon style="height:1rem;width:auto;fill:#fff;" /></equalizer-rename
 					>
-					<equalizer-delete on:click={() => deleteEq(eq.id)}>Delete X</equalizer-delete>
+					<equalizer-delete on:click={() => deleteEq(eq.id, eq.name)}>Delete X</equalizer-delete>
 				</equalizer-field>
 			{/each}
 		</equalizer-list>
+		<p>{equalizerName}</p>
 		<audio-filters>
 			{#each objectToArray($equalizer) as equalizer, index (index)}
 				<audio-filter-range>

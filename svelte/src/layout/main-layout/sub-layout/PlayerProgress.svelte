@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { updateSongProgress } from '../../../store/final.store'
+	import { updateSongProgress,playerElement } from '../../../store/final.store'
 	// import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../../../types/song.type'
 	// import { setWaveSource } from '../service/waveform.service'
 
-	export let player: HTMLAudioElement
 	export let song: SongType
 
 	let pauseDebounce: NodeJS.Timeout = undefined
@@ -66,7 +65,7 @@
 		function applyProgressChange(evt: Event) {
 			if (song === undefined) return
 
-			player.pause()
+			$playerElement.pause()
 
 			playerForeground.classList.add('not-smooth')
 
@@ -85,9 +84,9 @@
 			clearTimeout(pauseDebounce)
 
 			pauseDebounce = setTimeout(() => {
-				player.currentTime = songPercentTime
+				$playerElement.currentTime = songPercentTime
 				playerForeground.classList.remove('not-smooth')
-				player.play()
+				$playerElement.play()
 			}, 500)
 		}
 	}
@@ -140,8 +139,8 @@
 	player-progress progress-foreground {
 		grid-area: 1/1/1/1;
 		z-index: 1;
-		opacity: 0.5;
-		background-color: var(--high-color);
+		/* opacity: 0.5; */
+		/* background-color: var(--high-color); */
 
 		width: 0;
 		min-width: var(--song-time);
@@ -152,6 +151,10 @@
 		height: 100%;
 
 		border-radius: var(--player-progress-border-radius);
+
+		/* backdrop-filter: invert(1); */
+		mix-blend-mode: difference;
+		border-right: 4px solid rgb(128,128,128);
 	}
 
 	player-progress #waveform-data {

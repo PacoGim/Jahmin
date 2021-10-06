@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.appDataPath = void 0;
+exports.getMainWindow = exports.appDataPath = void 0;
 // import { exec } from 'child_process'
 const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
@@ -25,19 +25,20 @@ const ipc_service_1 = require("./services/ipc.service");
 ipc_service_1.loadIPC();
 const storage_service_1 = require("./services/storage.service");
 const songSync_service_1 = require("./services/songSync.service");
+let browserWindow;
 function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = config_service_1.getConfig();
         // Create the browser window.
-        const window = new electron_1.BrowserWindow(loadOptions(config));
-        window.webContents.openDevTools();
-        window.loadFile('index.html');
+        browserWindow = new electron_1.BrowserWindow(loadOptions(config));
+        browserWindow.webContents.openDevTools();
+        browserWindow.loadFile('index.html');
         // Gets the storage data from files and creates a map.
         storage_service_1.initStorage();
         // Watches the given root folder.
         if (config === null || config === void 0 ? void 0 : config.rootDirectories)
             songSync_service_1.watchFolders(config.rootDirectories);
-        window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window));
+        browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow));
     });
 }
 function loadOptions(config) {
@@ -79,6 +80,10 @@ function loadOptions(config) {
     }
     return options;
 }
+function getMainWindow() {
+    return browserWindow;
+}
+exports.getMainWindow = getMainWindow;
 /* ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
     let template: any = []
 
@@ -102,7 +107,20 @@ function loadOptions(config) {
     menu.popup(BrowserWindow.fromWebContents(event.sender))
 }) */
 // loadContextMenu(ipcMain,shell)
-electron_1.app.whenReady().then(createMainWindow);
+electron_1.app
+    .whenReady()
+    .then(() => {
+    electron_1.globalShortcut.register('F7', () => {
+        console.log('MediaPlayPause');
+    });
+    electron_1.globalShortcut.register('MediaNextTrack', () => {
+        console.log('MediaNextTrack');
+    });
+    electron_1.globalShortcut.register('MediaPreviousTrack', () => {
+        console.log('MediaPreviousTrack');
+    });
+    createMainWindow();
+});
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();

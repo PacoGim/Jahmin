@@ -1,46 +1,54 @@
 <script lang="ts">
-	import { getEqualizersIPC } from '../service/ipc.service'
+	import { getEqualizersIPC, saveConfig } from '../service/ipc.service'
 	import { equalizerIdConfig } from '../store/config.store'
 	import { context, equalizerProfiles, selectedEqId, source, equalizer } from '../store/equalizer.store'
 	import type { EqualizerType } from '../types/equalizer.type'
 
 	let equalizerGainValues = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-	// let equalizer: EqualizerType = {}
+	let isFirstSelectedEqIdChange = true
 
 	$: {
 		if ($context !== undefined) {
 			getAudioFilters().then(() => {
-				loadEqualizer()
+				loadEqualizer().then(() => changeEqualizer())
 			})
 		}
 	}
 
 	$: {
 		if ($selectedEqId !== undefined) {
-			changeEqualizer()
+			if (isFirstSelectedEqIdChange === false) {
+				changeEqualizer()
+			} else {
+				isFirstSelectedEqIdChange = false
+			}
 		}
 	}
 
-	async function loadEqualizer() {
-		let audioNode = undefined
+	async function loadEqualizer(): Promise<void> {
+		return new Promise((resolve, reject) => {
+			let audioNode = undefined
 
-		for (const [index, equalizerGainValue] of equalizerGainValues.entries()) {
-			const biquadFilter = $context.createBiquadFilter()
-			biquadFilter.type = 'peaking'
-			biquadFilter.frequency.value = equalizerGainValue
-			biquadFilter.gain.value = 0
+			for (const [index, equalizerGainValue] of equalizerGainValues.entries()) {
+				const biquadFilter = $context.createBiquadFilter()
+				biquadFilter.type = 'peaking'
+				biquadFilter.frequency.value = equalizerGainValue
+				biquadFilter.gain.value = 0
 
-			$equalizer[equalizerGainValue] = biquadFilter
+				$equalizer[equalizerGainValue] = biquadFilter
 
-			if (index === 0) {
-				audioNode = $source.connect(biquadFilter)
-			} else if (index === equalizerGainValues.length - 1) {
-				audioNode = audioNode.connect(biquadFilter)
-				audioNode = audioNode.connect($context.destination)
-			} else {
-				audioNode = audioNode.connect(biquadFilter)
+				if (index === 0) {
+					audioNode = $source.connect(biquadFilter)
+				} else if (index === equalizerGainValues.length - 1) {
+					audioNode = audioNode.connect(biquadFilter)
+					audioNode = audioNode.connect($context.destination)
+				} else {
+					audioNode = audioNode.connect(biquadFilter)
+				}
 			}
-		}
+
+			resolve()
+		})
 	}
 
 	function changeEqualizer() {
@@ -52,6 +60,13 @@
 			}
 
 			$equalizer = $equalizer
+
+			// Save ID to config file
+			saveConfig({
+				userOptions: {
+					equalizerId: foundEqualizerProfile.id
+				}
+			})
 		}
 	}
 
@@ -64,6 +79,11 @@
 
 				if (equalizerFound) {
 					$selectedEqId = equalizerFound.id
+				} else {
+					let defaultEqualizerFound = result.find(x => x.id === 'default')
+					if (defaultEqualizerFound) {
+						$selectedEqId = defaultEqualizerFound.id
+					}
 				}
 
 				resolve()

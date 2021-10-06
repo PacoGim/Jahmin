@@ -19,6 +19,7 @@
 	},
 	"homepage": "https://github.com/Franchills/Jahmin#readme",
 	"devDependencies": {
+		"@types/electron-prompt": "^1.6.1",
 		"@types/sharp": "^0.28.2",
 		"@types/string-hash": "^1.1.1",
 		"@types/xxhashjs": "^0.2.2",
@@ -30,6 +31,7 @@
 		"@iarna/toml": "^2.2.5",
 		"chokidar": "^3.5.1",
 		"deepmerge": "^4.2.2",
+		"electron-prompt": "^1.7.0",
 		"electron-store": "^8.0.0",
 		"exiftool-vendored": "^14.4.0",
 		"filespy": "^1.2.4",

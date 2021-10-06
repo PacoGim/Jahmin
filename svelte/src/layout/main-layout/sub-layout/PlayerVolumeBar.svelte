@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { playerElement } from '../../../store/final.store'
 
 	let volume: number = 0
-	export let player: HTMLAudioElement
 
 	let isShiftKeyDown = false
 
@@ -11,7 +10,7 @@
 	let saveVolumeDebounce: NodeJS.Timeout = undefined
 
 	$: {
-		if (player && isPlayerLoaded === false) {
+		if ($playerElement && isPlayerLoaded === false) {
 			isPlayerLoaded = true
 			loadLocalStorageVolume()
 		}
@@ -24,10 +23,8 @@
 		}
 	}
 
-	onMount(() => {})
-
 	function volumeChange() {
-		player.volume = volume / 100
+		$playerElement.volume = volume / 100
 		let volumeBarWidth = document.querySelector('volume-bar').clientWidth
 		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
 		document.documentElement.style.setProperty('--volume-level', `${(volumeBarWidth - volumeThumbWidth) * (volume / 100)}px`)
@@ -47,7 +44,7 @@
 			localStorage.setItem('volume', String(volume))
 		}
 
-		player.volume = volume / 100
+		$playerElement.volume = volume / 100
 
 		volumeChange()
 	}
@@ -55,7 +52,7 @@
 
 <volume-bar>
 	<input
-		on:keydown={(evt) => {
+		on:keydown={evt => {
 			if (evt['key'] === 'Shift') isShiftKeyDown = true
 		}}
 		on:keyup={() => (isShiftKeyDown = false)}

@@ -9,7 +9,7 @@
 	import PlayerProgress from './sub-layout/PlayerProgress.svelte'
 	import PlayerVolumeBar from './sub-layout/PlayerVolumeBar.svelte'
 
-	import { isPlaying, playingSongStore, songPlayingIdStore, updateSongProgress } from '../../store/final.store'
+	import { isPlaying, playerElement, playingSongStore, songPlayingIdStore, updateSongProgress } from '../../store/final.store'
 
 	import { nextSong } from '../../functions/nextSong.fn'
 	import { escapeString } from '../../functions/escapeString.fn'
@@ -43,6 +43,12 @@
 		}
 	}
 
+	$: {
+		if (player !== undefined) {
+			$playerElement = player
+		}
+	}
+
 	$: playSong($playbackCursor)
 
 	$: {
@@ -60,7 +66,7 @@
 
 	async function playSong(playbackCursor: [number, boolean]) {
 		let indexToPlay = playbackCursor[0]
-		let doPlayNow = playbackCursor[1]
+		let playNow = playbackCursor[1]
 		let songs = $playbackStore
 		let songToPlay = songs[indexToPlay]
 		let url: string = undefined
@@ -72,10 +78,6 @@
 		if (songToPlay?.ID === nextSongPreloaded?.Id) {
 			url = nextSongPreloaded.BufferUrl
 		} else if (songToPlay?.ID) {
-			// if (songToPlay?.ID) {
-			// console.log('Fetching Song')
-			// let songBuffer = await fetchSong(escapeString(songToPlay['SourceFile']))
-			// url = getUrlFromBuffer(songBuffer)
 			url = escapeString(songToPlay['SourceFile'])
 		} else {
 			player.pause()
@@ -95,11 +97,24 @@
 			timeLeft: parseDuration(songToPlay['Duration'] - 0)
 		}
 
-		if (doPlayNow === true) {
+		navigator.mediaSession.metadata = new MediaMetadata({
+			title: songToPlay.Title,
+			artist: songToPlay.AlbumArtist,
+			album: songToPlay.Album
+		})
+
+		navigator.mediaSession.metadata.album = songToPlay.Album
+		navigator.mediaSession.metadata.artist = songToPlay.Artist
+		navigator.mediaSession.metadata.title = songToPlay.Title
+
+		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
+		navigator.mediaSession.playbackState = 'paused'
+		if (playNow === true) {
 			player
 				.play()
 				.then(() => {
-					setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
+					navigator.mediaSession.playbackState = 'playing'
+
 
 					$songPlayingIdStore = songToPlay.ID
 
@@ -116,6 +131,7 @@
 				.catch(err => {})
 		} else {
 			player.pause()
+			navigator.mediaSession.playbackState = 'paused'
 		}
 	}
 
@@ -195,6 +211,12 @@
 				duration: parseDuration(currentSong['Duration']),
 				timeLeft: parseDuration(currentSong['Duration'] - player.currentTime)
 			}
+
+			navigator.mediaSession.setPositionState({
+				duration: currentSong.Duration,
+				playbackRate: 1,
+				position: 0
+			})
 		}, 100)
 	}
 
@@ -213,18 +235,18 @@
 	<CoverArt klass="Player" {rootDir} style="height:64px;width:auto;cursor:pointer" type="forceLoad" />
 
 	<player-buttons>
-		<PreviousButton {player} />
-		<PlayButton {player} />
+		<PreviousButton />
+		<PlayButton />
 		<NextButton />
 	</player-buttons>
 
-	<PlayerVolumeBar {player} />
+	<PlayerVolumeBar />
 
 	<song-duration class="song-time">
 		{songTime.currentTime}/{songTime.duration}
 	</song-duration>
 
-	<PlayerProgress {player} song={currentSong} />
+	<PlayerProgress song={currentSong} />
 
 	<song-time-left class="song-time">
 		-{songTime.timeLeft}

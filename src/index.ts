@@ -1,5 +1,5 @@
 // import { exec } from 'child_process'
-import { app, BrowserWindow, ipcMain, screen, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, screen, shell, globalShortcut } from 'electron'
 
 import path from 'path'
 
@@ -19,14 +19,16 @@ import { getRootDirFolderWatcher, watchFolders } from './services/songSync.servi
 import { ConfigType } from './types/config.type'
 import { loadContextMenu } from './services/contextMenu.service'
 
+let browserWindow: BrowserWindow
+
 async function createMainWindow() {
 	const config = getConfig()
 
 	// Create the browser window.
-	const window = new BrowserWindow(loadOptions(config))
+	browserWindow = new BrowserWindow(loadOptions(config))
 
-	window.webContents.openDevTools()
-	window.loadFile('index.html')
+	browserWindow.webContents.openDevTools()
+	browserWindow.loadFile('index.html')
 
 	// Gets the storage data from files and creates a map.
 	initStorage()
@@ -34,7 +36,7 @@ async function createMainWindow() {
 	// Watches the given root folder.
 	if (config?.rootDirectories) watchFolders(config.rootDirectories)
 
-	window.on('resize', () => saveWindowBounds(window)).on('move', () => saveWindowBounds(window))
+	browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow))
 }
 
 function loadOptions(config: ConfigType) {
@@ -82,6 +84,10 @@ function loadOptions(config: ConfigType) {
 	return options
 }
 
+export function getMainWindow() {
+	return browserWindow
+}
+
 /* ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
 	let template: any = []
 
@@ -107,7 +113,24 @@ function loadOptions(config: ConfigType) {
 
 // loadContextMenu(ipcMain,shell)
 
-app.whenReady().then(createMainWindow)
+app
+	.whenReady()
+	.then(() => {
+    globalShortcut.register('F7', () => {
+      console.log('MediaPlayPause');
+    });
+
+    globalShortcut.register('MediaNextTrack', () => {
+      console.log('MediaNextTrack');
+    });
+
+    globalShortcut.register('MediaPreviousTrack', () => {
+      console.log('MediaPreviousTrack');
+    });
+
+		createMainWindow()
+	})
+
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {

@@ -1,27 +1,10 @@
 <script lang="ts">
-	import { playbackCursor, playbackStore } from '../../../store/final.store'
-
-	export let player: HTMLAudioElement
-
-	function previousButtonEvent() {
-		if (player.currentTime <= 2) {
-			let playbackCursorIndex = $playbackCursor[0]
-			let previousPlaybackCursorIndex = playbackCursorIndex - 1
-
-			let previousSong = $playbackStore[previousPlaybackCursorIndex]
-
-			if (previousSong) {
-				$playbackCursor = [previousPlaybackCursorIndex, true]
-			}
-		} else {
-			player.currentTime = 0
-		}
-	}
+	import previousSongFn from '../../../functions/previousSong.fn'
 </script>
 
 <svg
 	class="player-button"
-	on:click={() => previousButtonEvent()}
+	on:click={() => previousSongFn()}
 	version="1.1"
 	id="Layer_1"
 	xmlns="http://www.w3.org/2000/svg"

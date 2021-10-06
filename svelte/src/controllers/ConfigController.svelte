@@ -18,7 +18,7 @@
 	}
 
 	function syncEqualizerId(config: ConfigType) {
-		let equalizerIdConfigFile = config?.equalizerId
+		let equalizerIdConfigFile = config?.userOptions?.equalizerId
 
 		let equalizerIdLS = localStorage.getItem('EqualizerId')
 

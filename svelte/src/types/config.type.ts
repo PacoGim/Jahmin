@@ -5,6 +5,10 @@ export type ConfigType = {
 	art: ArtType
 	groupOnlyByFolder: boolean
 	songListTags: any[]
+	userOptions: UserOptionsType
+}
+
+type UserOptionsType = {
 	equalizerId: string
 }
 
