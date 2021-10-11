@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { layoutToShow } from '../../store/final.store'
+	import AppearanceOption from './options/AppearanceOption.svelte'
 
 	import ArtGridOption from './options/ArtGridOption.svelte'
 	import EqualizerOption from './options/EqualizerOption.svelte'
@@ -22,6 +23,8 @@
 			<ArtGridOption />
 		{:else if selectedOption === 'Equalizer'}
 			<EqualizerOption />
+		{:else if selectedOption === 'Appearance'}
+			<AppearanceOption />
 		{:else if selectedOption === 'Song Info'}
 			<SongInfoOption />
 		{:else if selectedOption === 'Song List'}
@@ -39,7 +42,7 @@
 
 		grid-template-areas: 'options-list selected-option';
 	}
-	config-layout selected-option{
+	config-layout selected-option {
 		grid-area: selected-option;
 	}
 </style>

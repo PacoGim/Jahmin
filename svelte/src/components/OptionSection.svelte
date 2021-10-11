@@ -22,6 +22,7 @@
 	} */
 
 	section-title {
+		margin-bottom: 2rem;
 		width: 100%;
 
 		font-size: 1.75rem;

@@ -3,7 +3,7 @@
 
 	const dispatch = createEventDispatcher()
 
-	let options = ['Equalizer', 'Art Grid', 'Song List', 'Song Info', 'Volume']
+	let options = ['Appearance', 'Equalizer', 'Art Grid', 'Song List', 'Song Info', 'Volume']
 	let selectedOption
 
 	$: {
@@ -11,7 +11,7 @@
 	}
 
 	onMount(() => {
-		selectedOption = 'Equalizer'
+		selectedOption = 'Appearance'
 	})
 </script>
 

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 
 	import { getConfigIPC } from '../service/ipc.service'
-	import { albumArtSizeConfig, songListTagsConfig, equalizerIdConfig } from '../store/config.store'
+	import { albumArtSizeConfig, songListTagsConfig, equalizerIdConfig, themeConfig } from '../store/config.store'
 	import type { ConfigType } from '../types/config.type'
 
 	onMount(() => {
@@ -15,6 +15,18 @@
 		syncArtSize(config)
 		syncSongListTags(config)
 		syncEqualizerId(config)
+		syncTheme(config)
+	}
+
+	function syncTheme(config: ConfigType) {
+		let themeConfigFile = config?.theme
+
+		let themeLS = localStorage.getItem('Theme')
+
+		if (themeConfigFile !== undefined && themeConfigFile !== themeLS) {
+			$themeConfig = themeConfigFile
+			localStorage.setItem('Theme', themeConfigFile)
+		}
 	}
 
 	function syncEqualizerId(config: ConfigType) {

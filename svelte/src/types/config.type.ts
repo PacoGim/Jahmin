@@ -4,12 +4,15 @@ export type ConfigType = {
 	order: OrderType
 	art: ArtType
 	groupOnlyByFolder: boolean
-	songListTags: any[]
-	userOptions: UserOptionsType
+	songListTags?: any[]
+	equalizerId?: string
+	theme: ThemeOptions
 }
 
-type UserOptionsType = {
-	equalizerId: string
+export enum ThemeOptions {
+	Auto = 'Auto',
+	Dark = 'Dark',
+	Light = 'Light'
 }
 
 type ArtType = {

@@ -4,7 +4,7 @@
 
 	import { onMount } from 'svelte'
 	import { syncDbVersionIPC } from './service/ipc.service'
-	import { appTitle } from './store/final.store'
+	import { appTitle, themeToEnable } from './store/final.store'
 	import { handleContextMenuEvent } from './service/contextMenu.service'
 	import IpcController from './controllers/IpcController.svelte'
 
@@ -15,8 +15,17 @@
 	import EqualizerController from './controllers/EqualizerController.svelte'
 	import { nextSong } from './functions/nextSong.fn'
 	import previousSongFn from './functions/previousSong.fn'
+	import Modal from './components/Modal.svelte'
+	import themeHandlerFn from './functions/themeHandler.fn'
+
+	$: {
+		// Sets the proper theme with Dark as default
+		document.body.setAttribute('theme', $themeToEnable || 'Dark')
+	}
 
 	onMount(() => {
+		themeHandlerFn()
+
 		syncDbVersionIPC()
 
 		window.onkeydown = function (e) {
@@ -52,6 +61,10 @@
 <svelte:head>
 	<title>{$appTitle}</title>
 </svelte:head>
+
+<!-- <Modal title="Rename Equalizer Preset">
+	<input slot="body" type="text" placeholder="Equalizer new name" />
+</Modal> -->
 
 <PlayerController />
 <ConfigController />

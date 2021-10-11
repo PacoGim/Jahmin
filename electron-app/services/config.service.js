@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.saveConfig = exports.getConfig = void 0;
+const config_type_1 = require("../types/config.type");
 const toml_1 = __importDefault(require("@iarna/toml"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -58,6 +59,7 @@ function getDefaultConfigFile() {
         art: {
             dimension: 128
         },
-        groupOnlyByFolder: false
+        groupOnlyByFolder: false,
+        theme: config_type_1.ThemeOptions.Auto
     };
 }

@@ -1,4 +1,4 @@
-import { ConfigType } from '../types/config.type'
+import { ConfigType, ThemeOptions } from '../types/config.type'
 import TOML from '@iarna/toml'
 
 import fs from 'fs'
@@ -60,6 +60,7 @@ function getDefaultConfigFile() {
 		art: {
 			dimension: 128
 		},
-		groupOnlyByFolder: false
+		groupOnlyByFolder: false,
+		theme: ThemeOptions.Auto
 	}
 }
