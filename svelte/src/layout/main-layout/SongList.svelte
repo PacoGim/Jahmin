@@ -259,6 +259,7 @@
 
 <style>
 	song-list-svlt {
+		color: #fff;
 		grid-area: song-list-svlt;
 		display: grid;
 		grid-template-columns: auto max-content;

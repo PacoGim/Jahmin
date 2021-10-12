@@ -57,7 +57,7 @@
 			on:mouseover={() => {
 				resizeTextArea(id, 'expand')
 			}}
-			on:focus={()=>{}}
+			on:focus={() => {}}
 			on:input={() => {
 				resizeTextArea(id, 'expand')
 			}}
@@ -98,12 +98,15 @@
 	tag-edit textarea {
 		min-height: 0px;
 		overflow-y: hidden;
-		transition: min-height 300ms ease-in-out;
 		resize: none;
+
+		transition-property: min-height, color, background-color;
+		transition-duration: 300ms, var(--theme-transition-duration), var(--theme-transition-duration);
+		transition-timing-function: ease-in-out, linear, linear;
 	}
 
 	tag-edit input::placeholder {
-		color: #aaa;
+		color: var(--color-fg-1);
 	}
 
 	/* tag-edit::after {

@@ -13,7 +13,7 @@
 	width="576.05px"
 	height="447.95px"
 	viewBox="0 0 576.05 447.95"
-	style="{isActive ? 'fill:var(--low-color);' : ''}overflow:visible;enable-background:new 0 0 474.82 496;"
+	style="{isActive ? 'fill:var(--color-hl-1);' : 'fill:var(--color-fg-1);'}overflow:visible;enable-background:new 0 0 474.82 496;"
 	xml:space="preserve"
 >
 	<path

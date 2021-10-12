@@ -249,6 +249,9 @@
 <style>
 	tag-edit-svlt {
 		overflow-y: overlay;
+		background-color: var(--color-bg-2);
+
+		transition: background-color var(--theme-transition-duration) linear;
 	}
 
 	button-group {
@@ -258,7 +261,8 @@
 
 	button-group button {
 		color: #fff;
-		transition-property: background-color, color;
+
+		transition-property: background-color color;
 		transition-duration: 300ms;
 		transition-timing-function: linear;
 	}
@@ -297,8 +301,9 @@
 	component-name {
 		text-align: center;
 		padding: 0.5rem;
-		background-color: rgba(255, 255, 255, 0.05);
+		background-color: var(--color-bg-1);
 		margin-bottom: 0.5rem;
-		/* font-size: .9rem; */
+
+		transition: background-color var(--theme-transition-duration) linear;
 	}
 </style>

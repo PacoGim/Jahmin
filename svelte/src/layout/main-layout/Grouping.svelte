@@ -111,14 +111,14 @@
 
 <style>
 	grouping-svlt {
-		--highlight-color: rgba(255, 255, 255, 0.25);
-
 		grid-area: grouping-svlt;
 
 		display: flex;
 		flex-direction: column;
 
 		height: 100%;
+
+		color: var(--color-fg-1);
 	}
 
 	grouping-svlt select {
@@ -126,12 +126,13 @@
 		padding: 0.5rem 1rem;
 		font-size: 1rem;
 		font-family: inherit;
-		background-color: rgba(255, 255, 255, 0.05);
-		color: #fff;
+		background-color: var(--color-bg-2);
 		border: none;
 		outline: none;
 		cursor: pointer;
 		width: 100%;
+
+		color: inherit;
 	}
 
 	grouping-svlt total-groups {
@@ -140,7 +141,7 @@
 		margin: 0.5rem;
 		border-radius: 5px;
 		font-size: 0.85rem;
-		background-color: rgba(255, 255, 255, 0.1);
+		background-color: var(--color-bg-2);
 	}
 
 	groups {
@@ -169,7 +170,7 @@
 	}
 
 	groups group:hover label {
-		background-color: var(--highlight-color);
+		background-color: var(--color-bg-2);
 	}
 
 	groups group label {
@@ -188,7 +189,7 @@
 		transition: opacity 300ms ease-in-out;
 	}
 	groups group input[type='radio']:checked + label {
-		background-color: var(--highlight-color);
+		background-color: var(--color-bg-2);
 	}
 
 	groups group input[type='radio']:checked + label::before {

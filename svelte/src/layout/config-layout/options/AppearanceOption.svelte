@@ -2,18 +2,15 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import { saveConfig } from '../../../service/ipc.service'
 	import { themeConfig } from '../../../store/config.store'
+	import type { ThemeOptions } from '../../../types/config.type'
 
-	$: {
-		console.log($themeConfig)
-	}
-
-	function saveThemeToConfig(themeName: 'Auto' | 'Light' | 'Dark') {
+	function saveThemeToConfig(themeName: string) {
 		saveConfig({
 			theme: themeName
 		})
 
 		localStorage.setItem('Theme', themeName)
-		$themeConfig = themeName
+		$themeConfig = themeName as ThemeOptions
 	}
 </script>
 
@@ -37,6 +34,13 @@
 </OptionSection>
 
 <style>
+	p {
+		padding: 0.5rem 1rem;
+		color: var(--primary-color);
+
+		transition: color 500ms linear;
+	}
+
 	preferred-theme-section {
 		display: flex;
 		justify-content: space-evenly;

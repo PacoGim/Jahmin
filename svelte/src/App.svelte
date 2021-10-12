@@ -4,7 +4,7 @@
 
 	import { onMount } from 'svelte'
 	import { syncDbVersionIPC } from './service/ipc.service'
-	import { appTitle, themeToEnable } from './store/final.store'
+	import { appTitle } from './store/final.store'
 	import { handleContextMenuEvent } from './service/contextMenu.service'
 	import IpcController from './controllers/IpcController.svelte'
 
@@ -16,20 +16,21 @@
 	import { nextSong } from './functions/nextSong.fn'
 	import previousSongFn from './functions/previousSong.fn'
 	import Modal from './components/Modal.svelte'
-	import themeHandlerFn from './functions/themeHandler.fn'
-
-	$: {
-		// Sets the proper theme with Dark as default
-		document.body.setAttribute('theme', $themeToEnable || 'Dark')
-	}
+	import { runThemeHandler } from './service/themeHandler.service'
 
 	onMount(() => {
-		themeHandlerFn()
+		runThemeHandler()
 
 		syncDbVersionIPC()
 
+		// To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Far after app is done loading).
+		setTimeout(() => {
+			document.documentElement.style.setProperty('--theme-transition-duration', '500ms')
+		}, 2000)
+
+		// Prevents scroll with spacebar.
 		window.onkeydown = function (e) {
-			return !(e.code == 'Space' && e.target == document.body)
+			return !(e.code === 'Space' && e.target === document.body)
 		}
 
 		window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
@@ -76,4 +77,8 @@
 <SearchLayout />
 
 <style>
+
+	input{
+
+	}
 </style>

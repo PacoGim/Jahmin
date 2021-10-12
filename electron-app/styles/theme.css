@@ -1,0 +1,18 @@
+body {
+	--color-bg-1: var(--theme-bg-1);
+	--color-bg-2: var(--theme-bg-2);
+	--color-fg-1: var(--theme-fg-1);
+	--color-hl-1: #58a6ff;
+}
+
+body[theme='Light'] {
+	--theme-fg-1: #24292e;
+	--theme-bg-1: #ffffff;
+	--theme-bg-2: #f7f7f7;
+}
+
+body[theme='Dark'] {
+	--theme-fg-1: #c9d1d9;
+	--theme-bg-1: #1c2128;
+	--theme-bg-2: #161b22;
+}

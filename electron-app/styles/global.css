@@ -6,10 +6,6 @@
 }
 
 :root {
-	/* --high-color: #fff;
-	--mid-color: #808080;
-	--low-color: #000000; */
-
 	--volume-level: 0px;
 
 	--button-size: 1.25rem;
@@ -23,17 +19,10 @@
 
 	/* --song-list-svlt-height: 150px; */
 
-	--primary-color: #eae6d9;
-	--secondary-color: #1d1c23;
-	--dark-theme-highlight: #00bfff;
-	/* color: #f5cc63; */
-	/* --dark-theme-highlight: #ff7f50; */
-
-	--primary-light-color: #8899a8;
-	--secondary-light-color: #e4e6e7;
-
 	/* Min 100 Mid 450 Max 1000 */
 	--default-weight: 300;
+
+	--theme-transition-duration: 0ms;
 }
 
 .nav-icon {
@@ -55,12 +44,15 @@ html {
 }
 
 body {
-	/* color: #fff; */
-	color: var(--primary-color);
-	background-color: var(--secondary-color);
+	color: var(--color-fg-1);
+	background-color: var(--color-bg-1);
 	height: 100%;
 	display: block;
 	font-variation-settings: 'wght' var(--default-weight);
+
+	transition-property: color background-color;
+	transition-duration: var(--theme-transition-duration);
+	transition-timing-function: linear;
 }
 
 .layout {
@@ -70,9 +62,11 @@ body {
 	left: 0;
 	height: calc(100% - 64px);
 	width: calc(100% - 64px);
-	background-color: var(--secondary-color);
+	background-color: var(--color-bg-1);
 	overflow: hidden;
 	z-index: 10;
+
+	transition: background-color var(--theme-transition-duration) linear;
 }
 
 *::-webkit-scrollbar {
@@ -121,7 +115,7 @@ tag-edit select {
 	width: 100%;
 
 	text-align: center;
-	color: #eae6d9;
+	color: var(--color-fg-1);
 	width: calc(100% - 2rem);
 
 	outline: none;
@@ -130,11 +124,18 @@ tag-edit select {
 
 	font-family: inherit;
 
-	background-color: rgba(255, 255, 255, 0.15);
+	background-color: var(--color-bg-1);
 	padding: 0.25rem 0.3rem;
 	border-radius: 5px;
 	border: none;
 	font-size: 0.9rem;
+}
+
+tag-edit input,
+tag-edit select {
+	transition-property: color background-color;
+	transition-duration: var(--theme-transition-duration);
+	transition-timing-function: linear;
 }
 
 button:focus {

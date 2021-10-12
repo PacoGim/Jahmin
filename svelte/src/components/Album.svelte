@@ -73,6 +73,7 @@
 	}
 
 	album {
+		color: #fff;
 		position: relative;
 		display: grid;
 

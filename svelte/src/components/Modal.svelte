@@ -18,8 +18,7 @@
 
 <style>
 	modal-svelte {
-
-    --modal-border-radius:4px;
+		--modal-border-radius: 4px;
 
 		position: fixed;
 		top: 0;
@@ -41,13 +40,14 @@
 	}
 
 	modal-content {
-		background-color: #fff;
+		background-color: var(--secondary-color);
+		color:var(--primary-color);
 		width: 33%;
 		height: max-content;
 		display: block;
 
 		border-radius: var(--modal-border-radius);
-    border-top-right-radius: 8px; /* Prevents close button "overlap" */
+		border-top-right-radius: 8px; /* Prevents close button "overlap" */
 
 		padding: 1rem;
 
@@ -55,25 +55,24 @@
 	}
 
 	modal-content modal-close {
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
 		top: 0;
 		right: 0;
 		position: absolute;
 		font-variation-settings: 'wght' 500;
 
-    border-top-right-radius: var(--modal-border-radius);
+		border-top-right-radius: var(--modal-border-radius);
 
-    font-size: 1.2rem;
-    cursor: pointer;
-    height: 2rem;
-    width: 2rem;
+		font-size: 1.2rem;
+		cursor: pointer;
+		height: 2rem;
+		width: 2rem;
 
-    color: #fff;
-    background-color: #000;
+		color: #fff;
+		background-color: #000;
 	}
 
 	modal-content modal-title {
