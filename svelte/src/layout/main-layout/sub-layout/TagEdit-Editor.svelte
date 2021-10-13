@@ -42,7 +42,7 @@
 		<warning title={warningMessage} style={warningMessage === undefined ? 'display:none' : ''}>(❗)</warning>
 
 		{#if showUndo}
-			<img class="undoIcon" on:click={() => dispatch('undoChange')} src="./img/undo-arrow-svgrepo-com.svg" alt="" />
+			<img class="undo-icon" on:click={() => dispatch('undoChange')} src="./img/undo-arrow-svgrepo-com.svg" alt="" />
 		{/if}
 	</tag-name>
 	{#if ['text', 'number'].includes(type)}
@@ -88,7 +88,7 @@
 		cursor: help;
 	}
 
-	tag-edit tag-name img.undoIcon {
+	tag-edit tag-name img.undo-icon {
 		cursor: pointer;
 		height: 0.9rem;
 		filter: invert(1);

@@ -49,7 +49,7 @@
 			starRating = 0
 			starRatingTemp = 0
 		}}
-		class="delete-star {klass}"
+		class="delete-star {klass} starFilter"
 		src="./img/star/star-delete.svg"
 		alt=""
 	/>
@@ -59,7 +59,7 @@
 			MouseLeave -> When the user leaves, sets the star rating with the value of the temporary star rating.
 		-->
 	<img
-		class="star {klass}"
+		class="star starFilter {klass}"
 		on:mouseleave={() => (starRating = starRatingTemp)}
 		on:click={() => (starRatingTemp = starRating)}
 		on:mousemove={e => setStarRating(e)}
@@ -73,10 +73,13 @@
 	on:click={() => {
 		starRatingTemp = 0
 		dispatch('undoChange')
-	}}>Undo Rating <img class="undoIcon" src="./img/undo-arrow-svgrepo-com.svg" alt="" /></button
+	}}>Undo Rating <img class="undo-icon" src="./img/undo-arrow-svgrepo-com.svg" alt="" /></button
 >
 
 <style>
+	:global(img.starFilter.tag-edit-star) {
+		filter: var(--filter-hl);
+	}
 	stars {
 		display: flex;
 		align-items: center;

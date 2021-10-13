@@ -15,7 +15,6 @@
 	import EqualizerController from './controllers/EqualizerController.svelte'
 	import { nextSong } from './functions/nextSong.fn'
 	import previousSongFn from './functions/previousSong.fn'
-	import Modal from './components/Modal.svelte'
 	import { runThemeHandler } from './service/themeHandler.service'
 
 	onMount(() => {
@@ -63,10 +62,6 @@
 	<title>{$appTitle}</title>
 </svelte:head>
 
-<!-- <Modal title="Rename Equalizer Preset">
-	<input slot="body" type="text" placeholder="Equalizer new name" />
-</Modal> -->
-
 <PlayerController />
 <ConfigController />
 <IpcController />
@@ -75,10 +70,3 @@
 <MainLayout />
 <ConfigLayout />
 <SearchLayout />
-
-<style>
-
-	input{
-
-	}
-</style>

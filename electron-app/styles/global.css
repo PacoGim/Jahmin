@@ -50,9 +50,14 @@ body {
 	display: block;
 	font-variation-settings: 'wght' var(--default-weight);
 
-	transition-property: color background-color;
+	transition-property: color, background-color;
 	transition-duration: var(--theme-transition-duration);
 	transition-timing-function: linear;
+}
+
+p-center{
+	text-align: center;
+	display: block;
 }
 
 .layout {

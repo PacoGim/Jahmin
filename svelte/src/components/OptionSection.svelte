@@ -28,6 +28,6 @@
 		font-size: 1.75rem;
 		font-variation-settings: 'wght' calc(var(--default-weight) - 150);
 
-		border-bottom: 1px white solid;
+		border-bottom: 1px var(--color-fg-1) solid;
 	}
 </style>

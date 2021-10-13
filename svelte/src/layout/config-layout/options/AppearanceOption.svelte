@@ -51,7 +51,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		border: 1px #fff solid;
+		border: 1px var(--color-fg-1) solid;
 		padding: 1rem;
 
 		border-radius: 5px;
@@ -68,7 +68,7 @@
 	}
 
 	theme-card[data-selected='true'] theme-name {
-		box-shadow: inset 0 -1px 0 #fff;
+		box-shadow: inset 0 -1px 0 var(--color-fg-1);
 	}
 
 	theme-card theme-gradient {

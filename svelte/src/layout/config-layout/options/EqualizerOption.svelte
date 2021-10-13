@@ -1,10 +1,15 @@
 <script lang="ts">
+	import Prompt from '../../../components/Prompt.svelte'
+
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
 	import { equalizerProfiles, selectedEqId, equalizer } from '../../../store/equalizer.store'
 	import type { EqualizerType } from '../../../types/equalizer.type'
 
 	let isEqualizerEnabled = true
+	let showModal = false
+
+	let data
 
 	// let audioFiltersCopy: EqualizerType = $selectedEq
 	let equalizerName = ''
@@ -37,8 +42,8 @@
 	}
 
 	function renameEq(id: string, name: string) {
-		// let value = window.prompt(`Enter new name for profile ${name}:`)
-		// console.log(value)
+		data = { id, name, inputValue: name }
+		showModal = true
 	}
 
 	function deleteEq(id: string, name: string) {
@@ -50,23 +55,28 @@
 	}
 
 	function toggleEq() {}
+
+	function handleRenameResponse(event) {
+		console.log(event.detail)
+		showModal = false
+	}
 </script>
 
 <OptionSection title="Equalizer">
 	<equalizer-section slot="body">
-		<p>Saved Equalizers</p>
+		<p-center>Saved Equalizers</p-center>
 		<equalizer-list>
 			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
 					<equalizer-name on:click={() => ($selectedEqId = eq.id)}>{eq.name}</equalizer-name>
 					<equalizer-rename on:click={() => renameEq(eq.id, eq.name)}
-						>Rename <EditIcon style="height:1rem;width:auto;fill:#fff;" /></equalizer-rename
+						>Rename <EditIcon style="height:1rem;width:auto;fill:var(--color-fg-1);" /></equalizer-rename
 					>
 					<equalizer-delete on:click={() => deleteEq(eq.id, eq.name)}>Delete X</equalizer-delete>
 				</equalizer-field>
 			{/each}
 		</equalizer-list>
-		<p>{equalizerName}</p>
+		<selected-equalizer-name>{equalizerName}</selected-equalizer-name>
 		<audio-filters>
 			{#each objectToArray($equalizer) as equalizer, index (index)}
 				<audio-filter-range>
@@ -91,6 +101,16 @@
 	</equalizer-section>
 </OptionSection>
 
+<Prompt
+	title="Rename Equalizer Preset"
+	placeholder="Equalizer new name"
+	{data}
+	confirmButtonText="Rename"
+	{showModal}
+	on:close={() => (showModal = false)}
+	on:response={event => handleRenameResponse(event)}
+/>
+
 <style>
 	equalizer-list {
 		width: fit-content;
@@ -99,6 +119,7 @@
 		overflow-y: scroll;
 		width: 33%;
 		margin: 0 auto;
+		margin-top: 1rem;
 	}
 	equalizer-list equalizer-field {
 		cursor: pointer;
@@ -119,22 +140,53 @@
 	}
 
 	equalizer-list equalizer-field equalizer-rename {
+		display: flex;
 		padding: 0.25rem 0.5rem;
 		height: inherit;
 		margin-right: 1rem;
+
+		font-size: 0.85rem;
+		font-variation-settings: 'wght' 450;
+	}
+
+	:global(equalizer-list equalizer-field equalizer-rename svg) {
+		margin-left: 0.25rem;
 	}
 
 	equalizer-list equalizer-field equalizer-rename:hover {
-		background-color: cornflowerblue;
+		background-color: var(--color-hl-1);
 	}
 
 	equalizer-list equalizer-field equalizer-delete {
 		margin-right: 1rem;
 		padding: 0.25rem 0.5rem;
+
+		font-size: 0.85rem;
+		font-variation-settings: 'wght' 500;
 	}
 
 	equalizer-list equalizer-field equalizer-delete:hover {
 		background-color: crimson;
+	}
+
+	selected-equalizer-name {
+		margin: 1rem 0;
+		display: block;
+		text-align: center;
+	}
+
+	audio-filter-range eq-input-container {
+		margin: 1rem 0;
+	}
+
+	audio-filter-range filter-frequency {
+		font-size: 0.9rem;
+		font-variation-settings: 'wght' 450;
+	}
+
+	audio-filter-range filter-gain {
+		font-size: 0.9rem;
+		font-variation-settings: 'wght' 450;
 	}
 
 	button {
@@ -144,7 +196,7 @@
 		background-color: crimson;
 	}
 	button.active {
-		background-color: cornflowerblue;
+		background-color: var(--color-hl-1);
 	}
 	audio-filters {
 		display: flex;
@@ -167,7 +219,9 @@
 		height: var(--bar-height);
 	}
 
-	input {
+	input[type='range'] {
+		cursor: pointer;
+		border-radius: 50px;
 		width: var(--bar-height);
 		height: var(--bar-width);
 		transform-origin: calc(var(--bar-height) / 2) calc(var(--bar-height) / 2);
@@ -175,17 +229,18 @@
 
 		-webkit-appearance: none;
 
-		background: #000;
 		outline: none;
-		border: 1px solid lawngreen;
+
+		background-color: hsl(0, 0%, 90%);
 	}
 
-	input::-webkit-slider-thumb {
+	input[type='range']::-webkit-slider-thumb {
+		border-radius: 50px;
 		-webkit-appearance: none;
 		width: 16px;
 		height: 16px;
-		background: #000;
 		outline: none;
-		border: 1px solid lawngreen;
+		background-color: hsl(0, 0%, 50%);
+		border: 1px solid hsl(0, 0%, 50%);
 	}
 </style>

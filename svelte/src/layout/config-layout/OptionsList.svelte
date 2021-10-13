@@ -11,7 +11,7 @@
 	}
 
 	onMount(() => {
-		selectedOption = 'Appearance'
+		selectedOption = 'Equalizer'
 	})
 </script>
 
