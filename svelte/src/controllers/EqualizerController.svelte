@@ -78,6 +78,12 @@
 				let equalizerFound = result.find(x => x.id === $equalizerIdConfig)
 
 				if (equalizerFound) {
+					$equalizerProfiles = $equalizerProfiles.sort((a, b) => a.name.localeCompare(b.name))
+
+					// Moves the previously used equalizer to the top of the list.
+					let index = $equalizerProfiles.findIndex(x => x.id === equalizerFound.id)
+					$equalizerProfiles.unshift($equalizerProfiles.splice(index, 1)[0])
+
 					$selectedEqId = equalizerFound.id
 				} else {
 					let defaultEqualizerFound = result.find(x => x.id === 'default')

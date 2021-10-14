@@ -4,12 +4,25 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
 	import { equalizerProfiles, selectedEqId, equalizer } from '../../../store/equalizer.store'
-	import type { EqualizerType } from '../../../types/equalizer.type'
+	import { PromptTasks } from '../../../types/promptState.type'
 
-	let isEqualizerEnabled = true
-	let showModal = false
+	import type { PromptStateType } from '../../../types/promptState.type'
+	import generateId from '../../../functions/generateId.fn'
 
-	let data
+	let showPrompt = false
+
+	let promptState: PromptStateType = {
+		title: '',
+		placeholder: '',
+		confirmButtonText: '',
+		cancelButtonText: '',
+		task: PromptTasks.None,
+		data: {}
+	}
+
+	let isEqualizerOn = true
+
+	let isEqualizerDirty = false
 
 	// let audioFiltersCopy: EqualizerType = $selectedEq
 	let equalizerName = ''
@@ -17,6 +30,26 @@
 	$: {
 		$selectedEqId
 		equalizerName = getEqualizerName()
+	}
+
+	$: {
+		$equalizer
+		checkIfEqualizerChanged()
+	}
+
+	function checkIfEqualizerChanged() {
+		let isChanged = false
+		let equalizerSelected = $equalizerProfiles.find(x => x.id === $selectedEqId)
+
+		if (equalizerSelected === undefined) return
+
+		for (let i in $equalizer) {
+			if ($equalizer[i].gain.value !== equalizerSelected.values.find(x => x.frequency === Number(i)).gain) {
+				isChanged = true
+			}
+		}
+
+		isEqualizerDirty = isChanged
 	}
 
 	function gainChange(evt: Event, frequency: number) {
@@ -42,8 +75,16 @@
 	}
 
 	function renameEq(id: string, name: string) {
-		data = { id, name, inputValue: name }
-		showModal = true
+		promptState = {
+			title: 'Rename Equalizer Preset',
+			placeholder: 'Equalizer new name',
+			confirmButtonText: 'Rename',
+			cancelButtonText: 'Cancel',
+			task: PromptTasks.Rename,
+			data: { id, name, inputValue: name }
+		}
+
+		showPrompt = true
 	}
 
 	function deleteEq(id: string, name: string) {
@@ -54,12 +95,49 @@
 		}
 	}
 
-	function toggleEq() {}
+	function toggleEq() {
+		if (isEqualizerOn === true) {
+			// Turn off
+			isEqualizerOn = false
+
+			for (let i in $equalizer) {
+				$equalizer[i].gain.value = 0
+			}
+		} else {
+			// Turn on
+			isEqualizerOn = true
+
+			let equalizerSelected = $equalizerProfiles.find(x => x.id === $selectedEqId)
+			for (let i in $equalizer) {
+				$equalizer[i].gain.value = equalizerSelected.values.find(x => x.frequency === Number(i)).gain
+			}
+		}
+	}
 
 	function handleRenameResponse(event) {
 		console.log(event.detail)
-		showModal = false
+		showPrompt = false
 	}
+
+	function changeProfile(id: string) {
+		$selectedEqId = id
+		isEqualizerOn = true
+	}
+
+	function saveEqualizerAs() {
+		promptState = {
+			title: 'Enter Equalizer Name',
+			placeholder: 'Equalizer name',
+			confirmButtonText: 'Save As',
+			cancelButtonText: 'Cancel',
+			task: PromptTasks.SaveAs,
+			data: { id: generateId(), name: '', inputValue: '' }
+		}
+
+		showPrompt = true
+	}
+	function updateEqualizer() {}
+	function resetEqualizer() {}
 </script>
 
 <OptionSection title="Equalizer">
@@ -68,7 +146,7 @@
 		<equalizer-list>
 			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
-					<equalizer-name on:click={() => ($selectedEqId = eq.id)}>{eq.name}</equalizer-name>
+					<equalizer-name on:click={() => changeProfile(eq.id)}>{eq.name}</equalizer-name>
 					<equalizer-rename on:click={() => renameEq(eq.id, eq.name)}
 						>Rename <EditIcon style="height:1rem;width:auto;fill:var(--color-fg-1);" /></equalizer-rename
 					>
@@ -76,7 +154,7 @@
 				</equalizer-field>
 			{/each}
 		</equalizer-list>
-		<selected-equalizer-name>{equalizerName}</selected-equalizer-name>
+		<selected-equalizer-name>{equalizerName} {isEqualizerDirty && isEqualizerOn ? '•' : ''}</selected-equalizer-name>
 		<audio-filters>
 			{#each objectToArray($equalizer) as equalizer, index (index)}
 				<audio-filter-range>
@@ -88,28 +166,24 @@
 							max="10"
 							step="1"
 							value={equalizer.gain.value}
-							on:input={evt => {
-								gainChange(evt, equalizer.frequency.value)
-							}}
+							on:input={evt => gainChange(evt, equalizer.frequency.value)}
+							disabled={!isEqualizerOn}
 						/>
 					</eq-input-container>
 					<filter-gain>{equalizer.gain.value} dB</filter-gain>
 				</audio-filter-range>
 			{/each}
 		</audio-filters>
-		<button class={isEqualizerEnabled ? 'active' : 'not-active'} on:click={() => toggleEq()}>Toggle EQ</button>
+		<buttons>
+			<button class={isEqualizerOn ? 'active' : 'not-active'} on:click={() => toggleEq()}>Toggle EQ</button>
+			<button on:click={() => resetEqualizer()}>Reset</button>
+			<button on:click={() => saveEqualizerAs()}>Save as...</button>
+			<button on:click={() => updateEqualizer()}>Update</button>
+		</buttons>
 	</equalizer-section>
 </OptionSection>
 
-<Prompt
-	title="Rename Equalizer Preset"
-	placeholder="Equalizer new name"
-	{data}
-	confirmButtonText="Rename"
-	{showModal}
-	on:close={() => (showModal = false)}
-	on:response={event => handleRenameResponse(event)}
-/>
+<Prompt {promptState} {showPrompt} on:close={() => (showPrompt = false)} on:response={event => handleRenameResponse(event)} />
 
 <style>
 	equalizer-list {
@@ -179,6 +253,13 @@
 		margin: 1rem 0;
 	}
 
+	audio-filter-range eq-input-container input:disabled {
+		cursor: not-allowed;
+	}
+	audio-filter-range eq-input-container input[type='range']:disabled::-webkit-slider-thumb {
+		background-color: crimson;
+	}
+
 	audio-filter-range filter-frequency {
 		font-size: 0.9rem;
 		font-variation-settings: 'wght' 450;
@@ -189,20 +270,21 @@
 		font-variation-settings: 'wght' 450;
 	}
 
-	button {
+	buttons button {
 		color: #fff;
+		background-color: var(--color-hl-1);
 	}
 	button.not-active {
 		background-color: crimson;
 	}
 	button.active {
-		background-color: var(--color-hl-1);
 	}
 	audio-filters {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
 		margin: 0 auto;
+		margin-bottom: 1rem;
 		width: max-content;
 	}
 	audio-filter-range {
@@ -213,7 +295,7 @@
 	}
 
 	eq-input-container {
-		--bar-width: 20px;
+		--bar-width: 10px;
 		--bar-height: 250px;
 		width: var(--bar-width);
 		height: var(--bar-height);
@@ -240,7 +322,7 @@
 		width: 16px;
 		height: 16px;
 		outline: none;
-		background-color: hsl(0, 0%, 50%);
-		border: 1px solid hsl(0, 0%, 50%);
+		background-color: var(--color-hl-1);
+		border: 2px solid hsl(0, 0%, 90%);
 	}
 </style>

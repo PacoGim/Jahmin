@@ -1,32 +1,39 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte'
+	import type { PromptStateType } from '../types/promptState.type'
 
 	const dispatch = createEventDispatcher()
 
-	export let showModal
-	export let title = ''
-	export let cancelButtonText = 'Cancel'
-	export let confirmButtonText = 'Cancel'
-	export let placeholder
+	export let showPrompt = false
 
-	export let data
+	export let promptState: PromptStateType
 
 	let inputValue = ''
 
 	$: {
-		if (data?.inputValue) setInputValueFromData()
+		promptState
+		setInputValueFromData()
 	}
 
 	function setInputValueFromData() {
-		inputValue = data.inputValue
+		inputValue = promptState?.data?.inputValue || ''
 	}
 
 	function closeModal() {
 		dispatch('close')
+
+		// setTimeout(() => (inputValue = ''), 500)
 	}
 
 	function confirmModal() {
-		dispatch('response', Object.assign(data, { response: inputValue }))
+		let returnData = {
+			task: promptState.task,
+			data: Object.assign(promptState.data, { response: inputValue })
+		}
+
+		dispatch('response', returnData)
+
+		// setTimeout(() => (inputValue = ''), 500)
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {
@@ -46,16 +53,22 @@
 	}
 </script>
 
-<prompt-svelte show={showModal} on:click={e => handleOutsidePromptClick(e)}>
+<prompt-svelte show={showPrompt} on:click={e => handleOutsidePromptClick(e)}>
 	<prompt-content>
 		<prompt-close on:click={() => closeModal()}>x</prompt-close>
-		<prompt-title>{title}</prompt-title>
+		<prompt-title>{promptState.title}</prompt-title>
 		<prompt-body>
-			<input slot="body" type="text" {placeholder} bind:value={inputValue} on:keypress={evt => handleInputKeypress(evt)} />
+			<input
+				slot="body"
+				type="text"
+				placeholder={promptState.placeholder}
+				bind:value={inputValue}
+				on:keypress={evt => handleInputKeypress(evt)}
+			/>
 		</prompt-body>
 		<prompt-footer>
-			<prompt-cancel class="prompt-button" on:click={() => closeModal()}>{cancelButtonText}</prompt-cancel>
-			<prompt-confirm class="prompt-button" on:click={() => confirmModal()}>{confirmButtonText}</prompt-confirm>
+			<prompt-cancel class="prompt-button" on:click={() => closeModal()}>{promptState.cancelButtonText}</prompt-cancel>
+			<prompt-confirm class="prompt-button" on:click={() => confirmModal()}>{promptState.confirmButtonText}</prompt-confirm>
 		</prompt-footer>
 	</prompt-content>
 </prompt-svelte>
