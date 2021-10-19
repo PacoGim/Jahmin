@@ -6,19 +6,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getEqualizers = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const toml_1 = __importDefault(require("@iarna/toml"));
 const __1 = require("..");
+const equalizerFile_service_1 = __importDefault(require("./equalizerFile.service"));
 function getEqualizers() {
     let eqFolderPath = path_1.default.join(__1.appDataPath(), 'eq');
     let equalizerPaths = fs_1.default.readdirSync(eqFolderPath);
     let equalizers = [];
     if (!fs_1.default.existsSync(eqFolderPath)) {
         fs_1.default.mkdirSync(eqFolderPath);
-        fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, 'default.toml'), toml_1.default.stringify(defaultEqualizer));
+        fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, 'default.txt'), equalizerFile_service_1.default.stringify(defaultEqualizer));
     }
     equalizerPaths.forEach(filePath => {
         if (filePath !== '.DS_Store') {
-            equalizers.push(toml_1.default.parse(fs_1.default.readFileSync(path_1.default.join(eqFolderPath, filePath), { encoding: 'utf8' })));
+            equalizers.push(equalizerFile_service_1.default.parse(fs_1.default.readFileSync(path_1.default.join(eqFolderPath, filePath), { encoding: 'utf8' })));
         }
     });
     if (equalizers.length === 0) {

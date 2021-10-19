@@ -17,14 +17,17 @@ import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 import Fuse from 'fuse.js'
-import { getEqualizers } from './getEqualizers.service'
+import { getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
 
-	ipcMain.handle('stream-audio', async (evt, path) => {
-		// console.log(path)
-		// return fs.createReadStream(path)
+	ipcMain.handle('rename-equalizer', async (evt, eqId, newName) => {
+		return renameEqualizer(eqId, newName)
+	})
+
+	ipcMain.handle('update-equalizer-values', async (evt, eqId, newValues) => {
+		return updateEqualizerValues(eqId, newValues)
 	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {

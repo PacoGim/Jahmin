@@ -31,12 +31,14 @@ const storage_service_1 = require("./storage.service");
 const contextMenu_service_1 = require("./contextMenu.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 const fuse_js_1 = __importDefault(require("fuse.js"));
-const getEqualizers_service_1 = require("./getEqualizers.service");
+const equalizer_service_1 = require("./equalizer.service");
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => contextMenu_service_1.loadContextMenu(event, menuToOpen, parameters));
-    electron_1.ipcMain.handle('stream-audio', (evt, path) => __awaiter(this, void 0, void 0, function* () {
-        // console.log(path)
-        // return fs.createReadStream(path)
+    electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
+        return equalizer_service_1.renameEqualizer(eqId, newName);
+    }));
+    electron_1.ipcMain.handle('update-equalizer-values', (evt, eqId, newValues) => __awaiter(this, void 0, void 0, function* () {
+        return equalizer_service_1.updateEqualizerValues(eqId, newValues);
     }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();
@@ -65,7 +67,7 @@ function loadIPC() {
         return result;
     }));
     electron_1.ipcMain.handle('get-equalizers', (evt) => __awaiter(this, void 0, void 0, function* () {
-        return getEqualizers_service_1.getEqualizers();
+        return equalizer_service_1.getEqualizers();
     }));
     electron_1.ipcMain.handle('save-peaks', (evt, sourceFile, peaks) => __awaiter(this, void 0, void 0, function* () {
         peaks_1.savePeaks(sourceFile, peaks);

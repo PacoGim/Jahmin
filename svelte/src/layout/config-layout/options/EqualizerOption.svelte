@@ -8,6 +8,7 @@
 
 	import type { PromptStateType } from '../../../types/promptState.type'
 	import generateId from '../../../functions/generateId.fn'
+	import { renameEqualizerIPC, updateEqualizerValuesIPC } from '../../../service/ipc.service'
 
 	let showPrompt = false
 
@@ -87,13 +88,7 @@
 		showPrompt = true
 	}
 
-	function deleteEq(id: string, name: string) {
-		if (confirm(`Do you really want to delete profile ${name}`)) {
-			console.log('To delete')
-		} else {
-			console.log('Dont delete')
-		}
-	}
+	function deleteEq(id: string, name: string) {}
 
 	function toggleEq() {
 		if (isEqualizerOn === true) {
@@ -115,7 +110,20 @@
 	}
 
 	function handleRenameResponse(event) {
-		console.log(event.detail)
+		let eqId = event.detail.data.id
+		let newName = event.detail.data.response
+
+		renameEqualizerIPC(eqId, newName).then(isEqualizerRenamed => {
+			if (isEqualizerRenamed) {
+				let equalizerFound = $equalizerProfiles.find(x => x.id === eqId)
+
+				if (equalizerFound) {
+					equalizerFound.name = newName
+					$equalizerProfiles = $equalizerProfiles
+				}
+			}
+		})
+
 		showPrompt = false
 	}
 
@@ -136,7 +144,26 @@
 
 		showPrompt = true
 	}
-	function updateEqualizer() {}
+
+	function updateEqualizer() {
+		let equalizerFound = $equalizerProfiles.find(x => x.id === $selectedEqId)
+
+		let newValues = objectToArray($equalizer).map(x => {
+			return {
+				frequency: x.frequency.value,
+				gain: x.gain.value
+			}
+		})
+
+		updateEqualizerValuesIPC(equalizerFound.id, newValues).then(isEqualizerUpdated => {
+			if (isEqualizerUpdated) {
+				equalizerFound.values = newValues
+				$equalizerProfiles = $equalizerProfiles
+				isEqualizerDirty = false
+			}
+		})
+	}
+
 	function resetEqualizer() {}
 </script>
 
@@ -162,8 +189,8 @@
 					<eq-input-container>
 						<input
 							type="range"
-							min="-10"
-							max="10"
+							min="-8"
+							max="8"
 							step="1"
 							value={equalizer.gain.value}
 							on:input={evt => gainChange(evt, equalizer.frequency.value)}
@@ -240,7 +267,7 @@
 	}
 
 	equalizer-list equalizer-field equalizer-delete:hover {
-		background-color: crimson;
+		background-color: #dc143c;
 	}
 
 	selected-equalizer-name {
@@ -257,17 +284,17 @@
 		cursor: not-allowed;
 	}
 	audio-filter-range eq-input-container input[type='range']:disabled::-webkit-slider-thumb {
-		background-color: crimson;
+		background-color: #dc143c;
 	}
 
 	audio-filter-range filter-frequency {
 		font-size: 0.9rem;
-		font-variation-settings: 'wght' 450;
+		font-variation-settings: 'wght' 500;
 	}
 
 	audio-filter-range filter-gain {
 		font-size: 0.9rem;
-		font-variation-settings: 'wght' 450;
+		font-variation-settings: 'wght' 500;
 	}
 
 	buttons button {
@@ -275,7 +302,7 @@
 		background-color: var(--color-hl-1);
 	}
 	button.not-active {
-		background-color: crimson;
+		background-color: #dc143c;
 	}
 	button.active {
 	}
@@ -314,6 +341,8 @@
 		outline: none;
 
 		background-color: hsl(0, 0%, 90%);
+
+		box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25); /* x | y | blur | spread | color */
 	}
 
 	input[type='range']::-webkit-slider-thumb {
@@ -323,6 +352,6 @@
 		height: 16px;
 		outline: none;
 		background-color: var(--color-hl-1);
-		border: 2px solid hsl(0, 0%, 90%);
+		box-shadow: 0px 0px 0px 5px hsl(0, 0%, 90%), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 	}
 </style>

@@ -25,6 +25,22 @@ export function getEqualizersIPC(): Promise<EqualizerProfileType[]> {
 	})
 }
 
+export function renameEqualizerIPC(eqId: string, newName: string): Promise<boolean> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('rename-equalizer', eqId, newName).then(result => {
+			resolve(result)
+		})
+	})
+}
+
+export function updateEqualizerValuesIPC(eqId: string, newValues: any): Promise<boolean> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('update-equalizer-values', eqId, newValues).then(result => {
+			resolve(result)
+		})
+	})
+}
+
 export function getTagEditProgressIPC(): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		if (!isGetTagEditProgressRunning) {

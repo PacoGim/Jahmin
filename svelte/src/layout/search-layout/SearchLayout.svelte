@@ -206,7 +206,7 @@
 	}
 
 	filter-selector filter-check[selected='false'] {
-		background-color: crimson;
+		background-color: #dc143c;
 	}
 
 	search-grid {

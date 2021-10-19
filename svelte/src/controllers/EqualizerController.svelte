@@ -73,6 +73,7 @@
 	function getAudioFilters(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			getEqualizersIPC().then(result => {
+
 				$equalizerProfiles = result
 
 				let equalizerFound = result.find(x => x.id === $equalizerIdConfig)

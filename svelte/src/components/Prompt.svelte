@@ -186,7 +186,7 @@
 	}
 
 	prompt-content prompt-footer prompt-cancel {
-		background-color: crimson;
+		background-color: #dc143c;
 	}
 
 	input {
