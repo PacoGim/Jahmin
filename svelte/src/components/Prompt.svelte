@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte'
+	import { keypress } from '../store/final.store'
 	import type { PromptStateType } from '../types/promptState.type'
 
 	const dispatch = createEventDispatcher()
@@ -8,7 +9,21 @@
 
 	export let promptState: PromptStateType
 
+	let promptElement = undefined
+
 	let inputValue = ''
+
+	$: {
+		if (showPrompt === true) {
+			if (promptElement === undefined) {
+				promptElement = document.querySelector('prompt-svelte input') as HTMLInputElement
+			}
+
+			promptElement.focus()
+		}
+	}
+
+	$: if ($keypress === 'Escape' && showPrompt === true) closeModal()
 
 	$: {
 		promptState
@@ -21,8 +36,6 @@
 
 	function closeModal() {
 		dispatch('close')
-
-		// setTimeout(() => (inputValue = ''), 500)
 	}
 
 	function confirmModal() {
@@ -32,8 +45,6 @@
 		}
 
 		dispatch('response', returnData)
-
-		// setTimeout(() => (inputValue = ''), 500)
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {

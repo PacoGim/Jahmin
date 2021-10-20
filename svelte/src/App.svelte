@@ -4,7 +4,7 @@
 
 	import { onMount } from 'svelte'
 	import { syncDbVersionIPC } from './service/ipc.service'
-	import { appTitle } from './store/final.store'
+	import { appTitle, keypress } from './store/final.store'
 	import { handleContextMenuEvent } from './service/contextMenu.service'
 	import IpcController from './controllers/IpcController.svelte'
 
@@ -26,6 +26,13 @@
 		setTimeout(() => {
 			document.documentElement.style.setProperty('--theme-transition-duration', '500ms')
 		}, 2000)
+
+		window.addEventListener('keyup', evt => {
+			$keypress = evt.key
+
+			// Resets the keypress value
+			setTimeout(() => ($keypress = undefined), 1)
+		})
 
 		// Prevents scroll with spacebar.
 		window.onkeydown = function (e) {

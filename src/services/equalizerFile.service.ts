@@ -1,17 +1,8 @@
-type EqualizerFileObject = {
-	id: string
-	name: string
-	values: {
-		frequency: number
-		gain: number
-	}[]
-	filePath?:string
-}
+import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
 
 function parse(data: string) {
-	let equalizer: EqualizerFileObject = {
+	let equalizer: EqualizerFileObjectType = {
 		id: '',
-		name: '',
 		values: []
 	}
 
@@ -19,9 +10,7 @@ function parse(data: string) {
 		let key = entry.split(' ')[0]
 		let value = entry.substring(entry.indexOf(' ') + 1)
 
-		if (key === 'name') {
-			equalizer.name = value
-		} else if (key === 'id') {
+		if (key === 'id') {
 			equalizer.id = value
 		} else if (key === 'value') {
 			let splittedFrequency = value.split('=')
@@ -35,11 +24,10 @@ function parse(data: string) {
 	return equalizer
 }
 
-function stringify(data: EqualizerFileObject) {
+function stringify(data: EqualizerFileObjectType) {
 	let finalString = ''
 
 	finalString += `id ${data.id}\n`
-	finalString += `name ${data.name}\n`
 
 	data.values.forEach(value => (finalString += `value ${value.frequency}=${value.gain}\n`))
 

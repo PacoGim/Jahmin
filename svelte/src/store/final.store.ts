@@ -52,3 +52,5 @@ export let triggerScrollToSongEvent: Writable<number> = writable(0)
 export let layoutToShow: Writable<'Main' | 'Search' | 'Config'> = writable('Config')
 
 export let playerElement: Writable<HTMLAudioElement> = writable(undefined)
+
+export let keypress: Writable<string> = writable(undefined)

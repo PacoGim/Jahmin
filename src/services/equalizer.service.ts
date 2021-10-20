@@ -3,29 +3,34 @@ import fs from 'fs'
 
 import { appDataPath } from '..'
 import EqualizerFile from './equalizerFile.service'
+import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
+import { ReturnMessageType } from '../types/returnMessage.type'
 
 const eqFolderPath = path.join(appDataPath(), 'eq')
 
 export function getEqualizers() {
 	let equalizerFilePaths = fs.readdirSync(eqFolderPath)
+	let defaultEqualizerPath = path.join(eqFolderPath, 'default.txt')
 	let equalizers: any[] = []
 
 	if (!fs.existsSync(eqFolderPath)) {
 		fs.mkdirSync(eqFolderPath)
-		fs.writeFileSync(path.join(eqFolderPath, 'default.txt'), EqualizerFile.stringify(defaultEqualizer))
+	}
+
+	if (!fs.existsSync(defaultEqualizerPath)) {
+		fs.writeFileSync(defaultEqualizerPath, EqualizerFile.stringify(defaultEqualizer))
+		equalizers.push(defaultEqualizer)
 	}
 
 	equalizerFilePaths.forEach(filePath => {
 		if (filePath !== '.DS_Store') {
 			let equalizerObject = EqualizerFile.parse(fs.readFileSync(path.join(eqFolderPath, filePath), { encoding: 'utf8' }))
-			equalizerObject.filePath = filePath
+
+			equalizerObject.name = filePath.split('.')[0]
+
 			equalizers.push(equalizerObject)
 		}
 	})
-
-	if (equalizers.length === 0) {
-		equalizers.push(defaultEqualizer)
-	}
 
 	return equalizers
 }
@@ -64,7 +69,33 @@ export function updateEqualizerValues(eqId: string, newValues: string) {
 	}
 }
 
-let defaultEqualizer = {
+export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessageType {
+	if (newProfile.name === '') {
+		newProfile.name = 'Noname'
+	}
+
+	if (!fs.existsSync(path.join(eqFolderPath, `${newProfile.name}.txt`))) {
+		try {
+			fs.writeFileSync(path.join(eqFolderPath, `${newProfile.name}.txt`), EqualizerFile.stringify(newProfile))
+
+			return {
+				code: 'OK'
+			}
+		} catch (error: any) {
+			return {
+				code: 'EX',
+				message: error
+			}
+		}
+	} else {
+		return {
+			code: 'EXISTS',
+			message: 'Profile name already exists.'
+		}
+	}
+}
+
+let defaultEqualizer: EqualizerFileObjectType = {
 	id: 'default',
 	name: 'Default',
 	values: [

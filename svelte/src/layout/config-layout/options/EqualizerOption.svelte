@@ -8,7 +8,8 @@
 
 	import type { PromptStateType } from '../../../types/promptState.type'
 	import generateId from '../../../functions/generateId.fn'
-	import { renameEqualizerIPC, updateEqualizerValuesIPC } from '../../../service/ipc.service'
+	import { addNewEqualizerProfileIPC, renameEqualizerIPC, updateEqualizerValuesIPC } from '../../../service/ipc.service'
+	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
 
 	let showPrompt = false
 
@@ -25,7 +26,6 @@
 
 	let isEqualizerDirty = false
 
-	// let audioFiltersCopy: EqualizerType = $selectedEq
 	let equalizerName = ''
 
 	$: {
@@ -102,33 +102,68 @@
 			// Turn on
 			isEqualizerOn = true
 
-			let equalizerSelected = $equalizerProfiles.find(x => x.id === $selectedEqId)
-			for (let i in $equalizer) {
-				$equalizer[i].gain.value = equalizerSelected.values.find(x => x.frequency === Number(i)).gain
-			}
+			applyEqualizerProfile($selectedEqId)
 		}
 	}
 
-	function handleRenameResponse(event) {
+	function applyEqualizerProfile(id: string) {
+		let equalizerSelected = $equalizerProfiles.find(x => x.id === id)
+
+		for (let i in $equalizer) {
+			$equalizer[i].gain.value = equalizerSelected.values.find(x => x.frequency === Number(i)).gain
+		}
+	}
+
+	function handlePromptResponse(event) {
 		let eqId = event.detail.data.id
 		let newName = event.detail.data.response
 
-		renameEqualizerIPC(eqId, newName).then(isEqualizerRenamed => {
-			if (isEqualizerRenamed) {
-				let equalizerFound = $equalizerProfiles.find(x => x.id === eqId)
-
-				if (equalizerFound) {
-					equalizerFound.name = newName
-					$equalizerProfiles = $equalizerProfiles
-				}
+		if (event.detail.task === 'SaveAs') {
+			let newEqualizerProfile: EqualizerFileObjectType = {
+				id: eqId,
+				name: newName,
+				values: []
 			}
-		})
 
-		showPrompt = false
+			for (let i in $equalizer) {
+				newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: $equalizer[i].gain.value })
+			}
+
+			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
+				if (result.code === 'EXISTS') {
+					// TODO Show notification that profile name exists
+					console.log(result.message)
+				} else if (result.code === 'OK') {
+					$equalizerProfiles.unshift(newEqualizerProfile)
+
+					$equalizerProfiles = $equalizerProfiles
+					$selectedEqId = newEqualizerProfile.id
+
+					showPrompt = false
+				}
+			})
+		} else if (event.detail.task === 'Rename') {
+			renameEqualizerIPC(eqId, newName).then(isEqualizerRenamed => {
+				if (isEqualizerRenamed) {
+					let equalizerFound = $equalizerProfiles.find(x => x.id === eqId)
+
+					if (equalizerFound) {
+						equalizerFound.name = newName
+						$equalizerProfiles = $equalizerProfiles
+					}
+				}
+
+				showPrompt = false
+			})
+		}
 	}
 
 	function changeProfile(id: string) {
-		$selectedEqId = id
+		if (isEqualizerOn === false && $selectedEqId === id) {
+			resetEqualizer()
+		} else {
+			$selectedEqId = id
+		}
 		isEqualizerOn = true
 	}
 
@@ -164,7 +199,9 @@
 		})
 	}
 
-	function resetEqualizer() {}
+	function resetEqualizer() {
+		applyEqualizerProfile($selectedEqId)
+	}
 </script>
 
 <OptionSection title="Equalizer">
@@ -173,7 +210,7 @@
 		<equalizer-list>
 			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
-					<equalizer-name on:click={() => changeProfile(eq.id)}>{eq.name}</equalizer-name>
+					<equalizer-name on:click={() => changeProfile(eq.id)}>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name>
 					<equalizer-rename on:click={() => renameEq(eq.id, eq.name)}
 						>Rename <EditIcon style="height:1rem;width:auto;fill:var(--color-fg-1);" /></equalizer-rename
 					>
@@ -203,14 +240,14 @@
 		</audio-filters>
 		<buttons>
 			<button class={isEqualizerOn ? 'active' : 'not-active'} on:click={() => toggleEq()}>Toggle EQ</button>
-			<button on:click={() => resetEqualizer()}>Reset</button>
+			<button on:click={() => resetEqualizer()} disabled={!isEqualizerDirty}>Reset</button>
 			<button on:click={() => saveEqualizerAs()}>Save as...</button>
-			<button on:click={() => updateEqualizer()}>Update</button>
+			<button on:click={() => updateEqualizer()} disabled={!isEqualizerDirty}>Update</button>
 		</buttons>
 	</equalizer-section>
 </OptionSection>
 
-<Prompt {promptState} {showPrompt} on:close={() => (showPrompt = false)} on:response={event => handleRenameResponse(event)} />
+<Prompt {promptState} {showPrompt} on:close={() => (showPrompt = false)} on:response={event => handlePromptResponse(event)} />
 
 <style>
 	equalizer-list {
@@ -300,12 +337,19 @@
 	buttons button {
 		color: #fff;
 		background-color: var(--color-hl-1);
+
+		transition: background-color 300ms linear;
 	}
-	button.not-active {
+	buttons button.not-active {
 		background-color: #dc143c;
 	}
-	button.active {
+	buttons button:disabled {
+		cursor: not-allowed;
+		background-color: hsl(228, 15%, 49%);
+		/* background-color: hsl(0, 0%, 50%); */
+		/* text-shadow: 0 0 10px #000; */
 	}
+
 	audio-filters {
 		display: flex;
 		flex-direction: row;

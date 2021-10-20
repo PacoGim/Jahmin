@@ -3,16 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function parse(data) {
     let equalizer = {
         id: '',
-        name: '',
         values: []
     };
     data.split('\n').forEach((entry) => {
         let key = entry.split(' ')[0];
         let value = entry.substring(entry.indexOf(' ') + 1);
-        if (key === 'name') {
-            equalizer.name = value;
-        }
-        else if (key === 'id') {
+        if (key === 'id') {
             equalizer.id = value;
         }
         else if (key === 'value') {
@@ -28,7 +24,6 @@ function parse(data) {
 function stringify(data) {
     let finalString = '';
     finalString += `id ${data.id}\n`;
-    finalString += `name ${data.name}\n`;
     data.values.forEach(value => (finalString += `value ${value.frequency}=${value.gain}\n`));
     return finalString;
 }

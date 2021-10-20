@@ -40,6 +40,9 @@ function loadIPC() {
     electron_1.ipcMain.handle('update-equalizer-values', (evt, eqId, newValues) => __awaiter(this, void 0, void 0, function* () {
         return equalizer_service_1.updateEqualizerValues(eqId, newValues);
     }));
+    electron_1.ipcMain.handle('add-new-equalizer-profile', (evt, newProfile) => __awaiter(this, void 0, void 0, function* () {
+        return equalizer_service_1.addEqualizer(newProfile);
+    }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = config_service_1.getConfig();
         let grouping = config['order']['grouping'] || [];

@@ -5,6 +5,7 @@ import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { EqualizerType } from '../types/equalizer.type'
 import type { EqualizerProfileType } from '../types/equalizerProfile.type'
+import type { ReturnMessageType } from '../types/returnMessage.type'
 import type { SongFuzzySearchType, SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
@@ -36,6 +37,14 @@ export function renameEqualizerIPC(eqId: string, newName: string): Promise<boole
 export function updateEqualizerValuesIPC(eqId: string, newValues: any): Promise<boolean> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('update-equalizer-values', eqId, newValues).then(result => {
+			resolve(result)
+		})
+	})
+}
+
+export function addNewEqualizerProfileIPC(newProfile:EqualizerProfileType): Promise<ReturnMessageType> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('add-new-equalizer-profile', newProfile).then(result => {
 			resolve(result)
 		})
 	})

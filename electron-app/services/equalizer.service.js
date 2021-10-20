@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateEqualizerValues = exports.renameEqualizer = exports.getEqualizers = void 0;
+exports.addEqualizer = exports.updateEqualizerValues = exports.renameEqualizer = exports.getEqualizers = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const __1 = require("..");
@@ -11,21 +11,22 @@ const equalizerFile_service_1 = __importDefault(require("./equalizerFile.service
 const eqFolderPath = path_1.default.join(__1.appDataPath(), 'eq');
 function getEqualizers() {
     let equalizerFilePaths = fs_1.default.readdirSync(eqFolderPath);
+    let defaultEqualizerPath = path_1.default.join(eqFolderPath, 'default.txt');
     let equalizers = [];
     if (!fs_1.default.existsSync(eqFolderPath)) {
         fs_1.default.mkdirSync(eqFolderPath);
-        fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, 'default.txt'), equalizerFile_service_1.default.stringify(defaultEqualizer));
+    }
+    if (!fs_1.default.existsSync(defaultEqualizerPath)) {
+        fs_1.default.writeFileSync(defaultEqualizerPath, equalizerFile_service_1.default.stringify(defaultEqualizer));
+        equalizers.push(defaultEqualizer);
     }
     equalizerFilePaths.forEach(filePath => {
         if (filePath !== '.DS_Store') {
             let equalizerObject = equalizerFile_service_1.default.parse(fs_1.default.readFileSync(path_1.default.join(eqFolderPath, filePath), { encoding: 'utf8' }));
-            equalizerObject.filePath = filePath;
+            equalizerObject.name = filePath.split('.')[0];
             equalizers.push(equalizerObject);
         }
     });
-    if (equalizers.length === 0) {
-        equalizers.push(defaultEqualizer);
-    }
     return equalizers;
 }
 exports.getEqualizers = getEqualizers;
@@ -59,6 +60,32 @@ function updateEqualizerValues(eqId, newValues) {
     }
 }
 exports.updateEqualizerValues = updateEqualizerValues;
+function addEqualizer(newProfile) {
+    if (newProfile.name === '') {
+        newProfile.name = 'Noname';
+    }
+    if (!fs_1.default.existsSync(path_1.default.join(eqFolderPath, `${newProfile.name}.txt`))) {
+        try {
+            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${newProfile.name}.txt`), equalizerFile_service_1.default.stringify(newProfile));
+            return {
+                code: 'OK'
+            };
+        }
+        catch (error) {
+            return {
+                code: 'EX',
+                message: error
+            };
+        }
+    }
+    else {
+        return {
+            code: 'EXISTS',
+            message: 'Profile name already exists.'
+        };
+    }
+}
+exports.addEqualizer = addEqualizer;
 let defaultEqualizer = {
     id: 'default',
     name: 'Default',

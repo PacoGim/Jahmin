@@ -17,7 +17,8 @@ import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 import Fuse from 'fuse.js'
-import { getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
+import { addEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
+import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -28,6 +29,10 @@ export function loadIPC() {
 
 	ipcMain.handle('update-equalizer-values', async (evt, eqId, newValues) => {
 		return updateEqualizerValues(eqId, newValues)
+	})
+
+	ipcMain.handle('add-new-equalizer-profile', async (evt, newProfile: EqualizerFileObjectType) => {
+		return addEqualizer(newProfile)
 	})
 
 	ipcMain.handle('get-order', async (evt, arg) => {
