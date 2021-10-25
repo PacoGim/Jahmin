@@ -23,7 +23,7 @@
 		}
 	}
 
-	$: if ($keypress === 'Escape' && showPrompt === true) closeModal()
+	$: if ($keypress === 'Escape' && showPrompt === true) closePrompt()
 
 	$: {
 		promptState
@@ -34,11 +34,11 @@
 		inputValue = promptState?.data?.inputValue || ''
 	}
 
-	function closeModal() {
+	function closePrompt() {
 		dispatch('close')
 	}
 
-	function confirmModal() {
+	function confirmPrompt() {
 		let returnData = {
 			task: promptState.task,
 			data: Object.assign(promptState.data, { response: inputValue })
@@ -48,25 +48,25 @@
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {
-		let doCloseModal = true
+		let doClosePrompt = true
 
 		e.composedPath().forEach((element: HTMLElement) => {
 			if (element.tagName === 'PROMPT-CONTENT') {
-				doCloseModal = false
+				doClosePrompt = false
 			}
 		})
 
-		if (doCloseModal) closeModal()
+		if (doClosePrompt) closePrompt()
 	}
 
 	function handleInputKeypress(evt: KeyboardEvent) {
-		if (evt.key === 'Enter') confirmModal()
+		if (evt.key === 'Enter') confirmPrompt()
 	}
 </script>
 
 <prompt-svelte show={showPrompt} on:click={e => handleOutsidePromptClick(e)}>
 	<prompt-content>
-		<prompt-close on:click={() => closeModal()}>x</prompt-close>
+		<prompt-close on:click={() => closePrompt()}>x</prompt-close>
 		<prompt-title>{promptState.title}</prompt-title>
 		<prompt-body>
 			<input
@@ -78,8 +78,8 @@
 			/>
 		</prompt-body>
 		<prompt-footer>
-			<prompt-cancel class="prompt-button" on:click={() => closeModal()}>{promptState.cancelButtonText}</prompt-cancel>
-			<prompt-confirm class="prompt-button" on:click={() => confirmModal()}>{promptState.confirmButtonText}</prompt-confirm>
+			<prompt-cancel class="prompt-button" on:click={() => closePrompt()}>{promptState.cancelButtonText}</prompt-cancel>
+			<prompt-confirm class="prompt-button" on:click={() => confirmPrompt()}>{promptState.confirmButtonText}</prompt-confirm>
 		</prompt-footer>
 	</prompt-content>
 </prompt-svelte>
@@ -197,7 +197,7 @@
 	}
 
 	prompt-content prompt-footer prompt-cancel {
-		background-color: #dc143c;
+		background-color: #b3092b;
 	}
 
 	input {

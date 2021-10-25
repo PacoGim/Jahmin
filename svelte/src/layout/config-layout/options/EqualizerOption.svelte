@@ -10,8 +10,13 @@
 	import generateId from '../../../functions/generateId.fn'
 	import { addNewEqualizerProfileIPC, renameEqualizerIPC, updateEqualizerValuesIPC } from '../../../service/ipc.service'
 	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
+	import Confirm from '../../../components/Confirm.svelte'
+	import type { ConfirmStateType } from '../../../types/confirmState.type'
+
+	import iziToast from 'izitoast'
 
 	let showPrompt = false
+	let showConfirm = false
 
 	let promptState: PromptStateType = {
 		title: '',
@@ -19,6 +24,12 @@
 		confirmButtonText: '',
 		cancelButtonText: '',
 		task: PromptTasks.None,
+		data: {}
+	}
+
+	let confirmState: ConfirmStateType = {
+		title: '',
+		textToConfirm: '',
 		data: {}
 	}
 
@@ -88,7 +99,23 @@
 		showPrompt = true
 	}
 
-	function deleteEq(id: string, name: string) {}
+	function deleteEq(id: string, name: string) {
+		if (id === 'default') {
+			return iziToast.error({
+				message: "Default profile can't be deleted"
+			})
+		}
+
+		confirmState = {
+			textToConfirm: `Delete equalizer ${name}?`,
+			title: 'Delete Equalizer',
+			data: {
+				id
+			}
+		}
+
+		showConfirm = true
+	}
 
 	function toggleEq() {
 		if (isEqualizerOn === true) {
@@ -114,7 +141,7 @@
 		}
 	}
 
-	function handlePromptResponse(event) {
+	function handlePromptResponse(event: CustomEvent) {
 		let eqId = event.detail.data.id
 		let newName = event.detail.data.response
 
@@ -131,8 +158,9 @@
 
 			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
 				if (result.code === 'EXISTS') {
-					// TODO Show notification that profile name exists
-					console.log(result.message)
+					iziToast.error({
+						message: `Name ${newName} already exists.`
+					})
 				} else if (result.code === 'OK') {
 					$equalizerProfiles.unshift(newEqualizerProfile)
 
@@ -143,18 +171,36 @@
 				}
 			})
 		} else if (event.detail.task === 'Rename') {
-			renameEqualizerIPC(eqId, newName).then(isEqualizerRenamed => {
-				if (isEqualizerRenamed) {
+			renameEqualizerIPC(eqId, newName).then(result => {
+				if (result.code === 'OK') {
 					let equalizerFound = $equalizerProfiles.find(x => x.id === eqId)
 
 					if (equalizerFound) {
 						equalizerFound.name = newName
 						$equalizerProfiles = $equalizerProfiles
 					}
-				}
 
-				showPrompt = false
+					iziToast.success({
+						message: `Equalizer renamed to "${newName}"`
+					})
+
+					showPrompt = false
+				} else if (result.code === 'EXISTS') {
+					iziToast.error({
+						message: `Name ${newName} already exists.`
+					})
+				}
 			})
+		}
+	}
+
+	function handleConfirmResponse(event: CustomEvent) {
+		showConfirm = false
+
+		let equalizerId = event?.detail?.id
+
+		if (equalizerId) {
+			console.log(equalizerId)
 		}
 	}
 
@@ -195,6 +241,10 @@
 				equalizerFound.values = newValues
 				$equalizerProfiles = $equalizerProfiles
 				isEqualizerDirty = false
+
+				iziToast.success({
+					message: 'Equalizer Updated'
+				})
 			}
 		})
 	}
@@ -240,7 +290,7 @@
 		</audio-filters>
 		<buttons>
 			<button class={isEqualizerOn ? 'active' : 'not-active'} on:click={() => toggleEq()}>Toggle EQ</button>
-			<button on:click={() => resetEqualizer()} disabled={!isEqualizerDirty}>Reset</button>
+			<button on:click={() => resetEqualizer()} disabled={isEqualizerDirty === false || isEqualizerOn === false}>Reset</button>
 			<button on:click={() => saveEqualizerAs()}>Save as...</button>
 			<button on:click={() => updateEqualizer()} disabled={!isEqualizerDirty}>Update</button>
 		</buttons>
@@ -248,6 +298,12 @@
 </OptionSection>
 
 <Prompt {promptState} {showPrompt} on:close={() => (showPrompt = false)} on:response={event => handlePromptResponse(event)} />
+<Confirm
+	{confirmState}
+	{showConfirm}
+	on:close={() => (showConfirm = false)}
+	on:response={event => handleConfirmResponse(event)}
+/>
 
 <style>
 	equalizer-list {
@@ -304,7 +360,7 @@
 	}
 
 	equalizer-list equalizer-field equalizer-delete:hover {
-		background-color: #dc143c;
+		background-color: #b3092b;
 	}
 
 	selected-equalizer-name {
@@ -321,7 +377,7 @@
 		cursor: not-allowed;
 	}
 	audio-filter-range eq-input-container input[type='range']:disabled::-webkit-slider-thumb {
-		background-color: #dc143c;
+		background-color: #b3092b;
 	}
 
 	audio-filter-range filter-frequency {
@@ -341,7 +397,7 @@
 		transition: background-color 300ms linear;
 	}
 	buttons button.not-active {
-		background-color: #dc143c;
+		background-color: #b3092b;
 	}
 	buttons button:disabled {
 		cursor: not-allowed;

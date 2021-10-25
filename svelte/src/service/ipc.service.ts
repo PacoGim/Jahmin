@@ -26,7 +26,7 @@ export function getEqualizersIPC(): Promise<EqualizerProfileType[]> {
 	})
 }
 
-export function renameEqualizerIPC(eqId: string, newName: string): Promise<boolean> {
+export function renameEqualizerIPC(eqId: string, newName: string): Promise<ReturnMessageType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('rename-equalizer', eqId, newName).then(result => {
 			resolve(result)

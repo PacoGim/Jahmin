@@ -35,35 +35,55 @@ export function getEqualizers() {
 	return equalizers
 }
 
-export function renameEqualizer(eqId: string, newName: string) {
+export function renameEqualizer(eqId: string, newName: string): ReturnMessageType {
 	let equalizers = getEqualizers()
 	let foundEq = equalizers.find(x => x.id === eqId)
 
 	if (foundEq) {
-		foundEq.name = newName
+		let newNamePath = path.join(eqFolderPath, `${newName}.txt`)
+		let oldNamePath = path.join(eqFolderPath, `${foundEq.name}.txt`)
+
+		if (fs.existsSync(newNamePath)) {
+			return {
+				code: 'EXISTS',
+				message: 'Profile name already exists.'
+			}
+		}
 
 		try {
-			fs.writeFileSync(path.join(eqFolderPath, foundEq.filePath), EqualizerFile.stringify(foundEq))
+			fs.renameSync(oldNamePath, newNamePath)
 
-			return true
-		} catch (error) {
-			return false
+			return {
+				code: 'OK'
+			}
+		} catch (error: any) {
+			return {
+				code: 'EX',
+				message: error
+			}
+		}
+	}else{
+		return {
+			code: 'NOT_FOUND',
+			message: 'Equalizer not found.'
 		}
 	}
 }
 
 export function updateEqualizerValues(eqId: string, newValues: string) {
 	let equalizers = getEqualizers()
+
 	let foundEq = equalizers.find(x => x.id === eqId)
 
 	if (foundEq) {
 		foundEq.values = newValues
 
 		try {
-			fs.writeFileSync(path.join(eqFolderPath, foundEq.filePath), EqualizerFile.stringify(foundEq))
+			fs.writeFileSync(path.join(eqFolderPath, `${foundEq.name}.txt`), EqualizerFile.stringify(foundEq))
 
 			return true
 		} catch (error) {
+			console.log(error)
 			return false
 		}
 	}

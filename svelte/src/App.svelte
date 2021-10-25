@@ -17,7 +17,11 @@
 	import previousSongFn from './functions/previousSong.fn'
 	import { runThemeHandler } from './service/themeHandler.service'
 
+	import iziToast from 'izitoast'
+
 	onMount(() => {
+		iziToast.settings({ position: 'topRight' })
+
 		runThemeHandler()
 
 		syncDbVersionIPC()

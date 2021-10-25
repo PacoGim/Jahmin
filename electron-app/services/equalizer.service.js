@@ -34,14 +34,32 @@ function renameEqualizer(eqId, newName) {
     let equalizers = getEqualizers();
     let foundEq = equalizers.find(x => x.id === eqId);
     if (foundEq) {
-        foundEq.name = newName;
+        let newNamePath = path_1.default.join(eqFolderPath, `${newName}.txt`);
+        let oldNamePath = path_1.default.join(eqFolderPath, `${foundEq.name}.txt`);
+        if (fs_1.default.existsSync(newNamePath)) {
+            return {
+                code: 'EXISTS',
+                message: 'Profile name already exists.'
+            };
+        }
         try {
-            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, foundEq.filePath), equalizerFile_service_1.default.stringify(foundEq));
-            return true;
+            fs_1.default.renameSync(oldNamePath, newNamePath);
+            return {
+                code: 'OK'
+            };
         }
         catch (error) {
-            return false;
+            return {
+                code: 'EX',
+                message: error
+            };
         }
+    }
+    else {
+        return {
+            code: 'NOT_FOUND',
+            message: 'Equalizer not found.'
+        };
     }
 }
 exports.renameEqualizer = renameEqualizer;
@@ -51,10 +69,11 @@ function updateEqualizerValues(eqId, newValues) {
     if (foundEq) {
         foundEq.values = newValues;
         try {
-            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, foundEq.filePath), equalizerFile_service_1.default.stringify(foundEq));
+            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${foundEq.name}.txt`), equalizerFile_service_1.default.stringify(foundEq));
             return true;
         }
         catch (error) {
+            console.log(error);
             return false;
         }
     }
