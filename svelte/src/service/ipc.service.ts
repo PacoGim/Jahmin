@@ -34,6 +34,18 @@ export function renameEqualizerIPC(eqId: string, newName: string): Promise<Retur
 	})
 }
 
+export function showEqualizerFolderIPC() {
+	ipcRenderer.invoke('show-equalizer-folder')
+}
+
+export function deleteEqualizerIPC(eqId: string): Promise<ReturnMessageType> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('delete-equalizer', eqId).then(result => {
+			resolve(result)
+		})
+	})
+}
+
 export function updateEqualizerValuesIPC(eqId: string, newValues: any): Promise<boolean> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('update-equalizer-values', eqId, newValues).then(result => {
@@ -42,7 +54,7 @@ export function updateEqualizerValuesIPC(eqId: string, newValues: any): Promise<
 	})
 }
 
-export function addNewEqualizerProfileIPC(newProfile:EqualizerProfileType): Promise<ReturnMessageType> {
+export function addNewEqualizerProfileIPC(newProfile: EqualizerProfileType): Promise<ReturnMessageType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('add-new-equalizer-profile', newProfile).then(result => {
 			resolve(result)

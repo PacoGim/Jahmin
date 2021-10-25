@@ -8,9 +8,13 @@ import { ReturnMessageType } from '../types/returnMessage.type'
 
 const eqFolderPath = path.join(appDataPath(), 'eq')
 
+export function getEqFolderPath() {
+	return eqFolderPath
+}
+
 export function getEqualizers() {
 	let equalizerFilePaths = fs.readdirSync(eqFolderPath)
-	let defaultEqualizerPath = path.join(eqFolderPath, 'default.txt')
+	let defaultEqualizerPath = path.join(eqFolderPath, 'Default.txt')
 	let equalizers: any[] = []
 
 	if (!fs.existsSync(eqFolderPath)) {
@@ -62,7 +66,7 @@ export function renameEqualizer(eqId: string, newName: string): ReturnMessageTyp
 				message: error
 			}
 		}
-	}else{
+	} else {
 		return {
 			code: 'NOT_FOUND',
 			message: 'Equalizer not found.'
@@ -115,8 +119,43 @@ export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessage
 	}
 }
 
+export function deleteEqualizer(eqId: string): ReturnMessageType {
+	let equalizers = getEqualizers()
+
+	let foundEq = equalizers.find(x => x.id === eqId)
+
+	if (foundEq) {
+		let eqPath = path.join(eqFolderPath, `${foundEq.name}.txt`)
+
+		if (fs.existsSync(eqPath)) {
+			try {
+				fs.unlinkSync(eqPath)
+
+				return {
+					code: 'OK'
+				}
+			} catch (error: any) {
+				return {
+					code: 'EX',
+					message: error
+				}
+			}
+		} else {
+			return {
+				code: 'NOT_FOUND',
+				message: 'Equalizer not found.'
+			}
+		}
+	} else {
+		return {
+			code: 'NOT_FOUND',
+			message: 'Equalizer not found.'
+		}
+	}
+}
+
 let defaultEqualizer: EqualizerFileObjectType = {
-	id: 'default',
+	id: 'Default',
 	name: 'Default',
 	values: [
 		{ frequency: 32, gain: 0 },

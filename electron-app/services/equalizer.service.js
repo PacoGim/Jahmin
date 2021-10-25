@@ -3,15 +3,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addEqualizer = exports.updateEqualizerValues = exports.renameEqualizer = exports.getEqualizers = void 0;
+exports.deleteEqualizer = exports.addEqualizer = exports.updateEqualizerValues = exports.renameEqualizer = exports.getEqualizers = exports.getEqFolderPath = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const __1 = require("..");
 const equalizerFile_service_1 = __importDefault(require("./equalizerFile.service"));
 const eqFolderPath = path_1.default.join(__1.appDataPath(), 'eq');
+function getEqFolderPath() {
+    return eqFolderPath;
+}
+exports.getEqFolderPath = getEqFolderPath;
 function getEqualizers() {
     let equalizerFilePaths = fs_1.default.readdirSync(eqFolderPath);
-    let defaultEqualizerPath = path_1.default.join(eqFolderPath, 'default.txt');
+    let defaultEqualizerPath = path_1.default.join(eqFolderPath, 'Default.txt');
     let equalizers = [];
     if (!fs_1.default.existsSync(eqFolderPath)) {
         fs_1.default.mkdirSync(eqFolderPath);
@@ -105,8 +109,42 @@ function addEqualizer(newProfile) {
     }
 }
 exports.addEqualizer = addEqualizer;
+function deleteEqualizer(eqId) {
+    let equalizers = getEqualizers();
+    let foundEq = equalizers.find(x => x.id === eqId);
+    if (foundEq) {
+        let eqPath = path_1.default.join(eqFolderPath, `${foundEq.name}.txt`);
+        if (fs_1.default.existsSync(eqPath)) {
+            try {
+                fs_1.default.unlinkSync(eqPath);
+                return {
+                    code: 'OK'
+                };
+            }
+            catch (error) {
+                return {
+                    code: 'EX',
+                    message: error
+                };
+            }
+        }
+        else {
+            return {
+                code: 'NOT_FOUND',
+                message: 'Equalizer not found.'
+            };
+        }
+    }
+    else {
+        return {
+            code: 'NOT_FOUND',
+            message: 'Equalizer not found.'
+        };
+    }
+}
+exports.deleteEqualizer = deleteEqualizer;
 let defaultEqualizer = {
-    id: 'default',
+    id: 'Default',
     name: 'Default',
     values: [
         { frequency: 32, gain: 0 },

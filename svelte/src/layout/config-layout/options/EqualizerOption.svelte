@@ -8,12 +8,22 @@
 
 	import type { PromptStateType } from '../../../types/promptState.type'
 	import generateId from '../../../functions/generateId.fn'
-	import { addNewEqualizerProfileIPC, renameEqualizerIPC, updateEqualizerValuesIPC } from '../../../service/ipc.service'
+	import {
+		addNewEqualizerProfileIPC,
+		deleteEqualizerIPC,
+		showEqualizerFolderIPC,
+		renameEqualizerIPC,
+		updateEqualizerValuesIPC
+	} from '../../../service/ipc.service'
 	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
 	import Confirm from '../../../components/Confirm.svelte'
 	import type { ConfirmStateType } from '../../../types/confirmState.type'
 
 	import iziToast from 'izitoast'
+
+	let isEqualizerOn = true
+	let isEqualizerDirty = false
+	let equalizerName = ''
 
 	let showPrompt = false
 	let showConfirm = false
@@ -32,12 +42,6 @@
 		textToConfirm: '',
 		data: {}
 	}
-
-	let isEqualizerOn = true
-
-	let isEqualizerDirty = false
-
-	let equalizerName = ''
 
 	$: {
 		$selectedEqId
@@ -100,7 +104,7 @@
 	}
 
 	function deleteEq(id: string, name: string) {
-		if (id === 'default') {
+		if (id === 'Default') {
 			return iziToast.error({
 				message: "Default profile can't be deleted"
 			})
@@ -145,6 +149,7 @@
 		let eqId = event.detail.data.id
 		let newName = event.detail.data.response
 
+		// Save As
 		if (event.detail.task === 'SaveAs') {
 			let newEqualizerProfile: EqualizerFileObjectType = {
 				id: eqId,
@@ -170,6 +175,7 @@
 					showPrompt = false
 				}
 			})
+			// Rename
 		} else if (event.detail.task === 'Rename') {
 			renameEqualizerIPC(eqId, newName).then(result => {
 				if (result.code === 'OK') {
@@ -200,7 +206,23 @@
 		let equalizerId = event?.detail?.id
 
 		if (equalizerId) {
-			console.log(equalizerId)
+			deleteEqualizerIPC(equalizerId).then(result => {
+				if (result.code === 'OK') {
+					let indexToDelete = $equalizerProfiles.findIndex(x => x.id === equalizerId)
+
+					$equalizerProfiles.splice(indexToDelete, 1)
+
+					$equalizerProfiles = $equalizerProfiles
+
+					if ($selectedEqId === equalizerId) {
+						$selectedEqId = 'Default'
+					}
+
+					iziToast.success({
+						message: 'Equalizer successfully deleted.'
+					})
+				}
+			})
 		}
 	}
 
@@ -289,6 +311,7 @@
 			{/each}
 		</audio-filters>
 		<buttons>
+			<button on:click={() => showEqualizerFolderIPC()}>Show Folder</button>
 			<button class={isEqualizerOn ? 'active' : 'not-active'} on:click={() => toggleEq()}>Toggle EQ</button>
 			<button on:click={() => resetEqualizer()} disabled={isEqualizerDirty === false || isEqualizerOn === false}>Reset</button>
 			<button on:click={() => saveEqualizerAs()}>Save as...</button>

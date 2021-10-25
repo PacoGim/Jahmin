@@ -87,7 +87,7 @@
 
 					$selectedEqId = equalizerFound.id
 				} else {
-					let defaultEqualizerFound = result.find(x => x.id === 'default')
+					let defaultEqualizerFound = result.find(x => x.id === 'Default')
 					if (defaultEqualizerFound) {
 						$selectedEqId = defaultEqualizerFound.id
 					}

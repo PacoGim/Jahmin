@@ -32,10 +32,14 @@ const contextMenu_service_1 = require("./contextMenu.service");
 const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 const fuse_js_1 = __importDefault(require("fuse.js"));
 const equalizer_service_1 = require("./equalizer.service");
+const common_1 = require("electron/common");
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => contextMenu_service_1.loadContextMenu(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
         return equalizer_service_1.renameEqualizer(eqId, newName);
+    }));
+    electron_1.ipcMain.handle('delete-equalizer', (evt, eqId) => __awaiter(this, void 0, void 0, function* () {
+        return equalizer_service_1.deleteEqualizer(eqId);
     }));
     electron_1.ipcMain.handle('update-equalizer-values', (evt, eqId, newValues) => __awaiter(this, void 0, void 0, function* () {
         return equalizer_service_1.updateEqualizerValues(eqId, newValues);
@@ -93,6 +97,9 @@ function loadIPC() {
         console.log('Open Config File');
         // shell.showItemInFolder(configFilePath)
         return;
+    });
+    electron_1.ipcMain.handle('show-equalizer-folder', () => {
+        common_1.shell.openPath(equalizer_service_1.getEqFolderPath());
     });
     electron_1.ipcMain.handle('get-albums', (evt, groupBy, groupByValue) => __awaiter(this, void 0, void 0, function* () {
         let docs = storage_service_1.getStorageMap();

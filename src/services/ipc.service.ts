@@ -17,14 +17,26 @@ import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 import Fuse from 'fuse.js'
-import { addEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
+import {
+	addEqualizer,
+	deleteEqualizer,
+	getEqFolderPath,
+	getEqualizers,
+	renameEqualizer,
+	updateEqualizerValues
+} from './equalizer.service'
 import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
+import { shell } from 'electron/common'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
 
 	ipcMain.handle('rename-equalizer', async (evt, eqId, newName) => {
 		return renameEqualizer(eqId, newName)
+	})
+
+	ipcMain.handle('delete-equalizer', async (evt, eqId) => {
+		return deleteEqualizer(eqId)
 	})
 
 	ipcMain.handle('update-equalizer-values', async (evt, eqId, newValues) => {
@@ -99,6 +111,10 @@ export function loadIPC() {
 		console.log('Open Config File')
 		// shell.showItemInFolder(configFilePath)
 		return
+	})
+
+	ipcMain.handle('show-equalizer-folder', () => {
+		shell.openPath(getEqFolderPath())
 	})
 
 	ipcMain.handle('get-albums', async (evt, groupBy, groupByValue) => {
