@@ -6,111 +6,46 @@
 
 	import { equalizerProfiles, selectedEqId, equalizer, isEqualizerDirty } from '../../../store/equalizer.store'
 
-	import { PromptTasks } from '../../../types/promptState.type'
-
-	import type { PromptStateType } from '../../../types/promptState.type'
 	import generateId from '../../../functions/generateId.fn'
 
 	import {
 		addNewEqualizerProfileIPC,
 		deleteEqualizerIPC,
 		showEqualizerFolderIPC,
-		renameEqualizerIPC,
+		renameEqualizerIPC
 	} from '../../../service/ipc.service'
 
 	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
 	import Confirm from '../../../components/Confirm.svelte'
-	import type { ConfirmStateType } from '../../../types/confirmState.type'
 
 	import notify from '../../../service/notify.service'
 	import EqualizerService from '../../../svelte-service/EqualizerService.svelte'
 	import { objectToArray } from '../../../service/index.service'
 
 	let equalizerService
+	let promptComponent
+	let confirmComponent
 
 	let isEqualizerOn = true
 	let equalizerName = ''
 
-	let showPrompt = false
-	let showConfirm = false
-
-	let promptState: PromptStateType = {
-		title: '',
-		placeholder: '',
-		confirmButtonText: '',
-		cancelButtonText: '',
-		task: PromptTasks.None,
-		data: {}
-	}
-
-	let confirmState: ConfirmStateType = {
-		title: '',
-		textToConfirm: '',
-		data: {}
-	}
-
 	$: if ($selectedEqId) equalizerName = equalizerService.getEqualizerName($selectedEqId)
 
-	function renameEq(id: string, name: string) {
-		promptState = {
+	function renameEq(eqId: string, name: string) {
+		let promptState = {
 			title: 'Rename Equalizer Preset',
 			placeholder: 'Equalizer new name',
 			confirmButtonText: 'Rename',
 			cancelButtonText: 'Cancel',
-			task: PromptTasks.Rename,
-			data: { id, name, inputValue: name }
+			data: { eqId, inputValue: name }
 		}
 
-		showPrompt = true
-	}
+		promptComponent.showPrompt(promptState).then(promptResult => {
+			let newName = promptResult.data.result
 
-	function deleteEq(id: string, name: string) {
-		if (id === 'Default') {
-			return notify.error("Default profile can't be deleted")
-		}
-
-		confirmState = {
-			textToConfirm: `Delete equalizer "${name}"?`,
-			title: 'Delete Equalizer',
-			data: {
-				id
-			}
-		}
-
-		showConfirm = true
-	}
-
-	function handlePromptResponse(event: CustomEvent) {
-		let eqId = event.detail.data.id
-		let newName = event.detail.data.response
-
-		// Save As
-		if (event.detail.task === 'SaveAs') {
-			let newEqualizerProfile: EqualizerFileObjectType = {
-				id: eqId,
-				name: newName,
-				values: []
-			}
-
-			for (let i in $equalizer) {
-				newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: $equalizer[i].gain.value })
-			}
-
-			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
-				if (result.code === 'EXISTS') {
-					notify.error(`Name ${newName} already exists.`)
-				} else if (result.code === 'OK') {
-					$equalizerProfiles.unshift(newEqualizerProfile)
-
-					$equalizerProfiles = $equalizerProfiles
-					$selectedEqId = newEqualizerProfile.id
-
-					showPrompt = false
-				}
-			})
-			// Rename
-		} else if (event.detail.task === 'Rename') {
 			renameEqualizerIPC(eqId, newName).then(result => {
+				promptComponent.closePrompt()
+
 				if (result.code === 'OK') {
 					let equalizerFound = $equalizerProfiles.find(x => x.id === eqId)
 
@@ -120,50 +55,88 @@
 					}
 
 					notify.success(`Equalizer renamed to "${newName}"`)
-
-					showPrompt = false
 				} else if (result.code === 'EXISTS') {
 					notify.error(`Name ${newName} already exists.`)
+
+					// Reruns the fn to reopen the prompt.
+					renameEq(eqId, name)
 				}
 			})
-		}
+		})
 	}
 
-	function handleConfirmResponse(event: CustomEvent) {
-		showConfirm = false
+	function deleteEq(id: string, name: string) {
+		if (id === 'Default') {
+			return notify.error("Default profile can't be deleted")
+		}
 
-		let equalizerId = event?.detail?.id
+		let confirmState = {
+			textToConfirm: `Delete equalizer "${name}"?`,
+			title: 'Delete Equalizer',
+			data: {
+				id
+			}
+		}
 
-		if (equalizerId) {
-			deleteEqualizerIPC(equalizerId).then(result => {
-				if (result.code === 'OK') {
-					let indexToDelete = $equalizerProfiles.findIndex(x => x.id === equalizerId)
+		confirmComponent.showConfirm(confirmState).then(result => {
+			confirmComponent.closeConfirm()
 
-					$equalizerProfiles.splice(indexToDelete, 1)
+			let equalizerId = result.id
 
-					$equalizerProfiles = $equalizerProfiles
+			if (equalizerId) {
+				deleteEqualizerIPC(equalizerId).then(result => {
+					if (result.code === 'OK') {
+						let indexToDelete = $equalizerProfiles.findIndex(x => x.id === equalizerId)
 
-					if ($selectedEqId === equalizerId) {
-						$selectedEqId = 'Default'
+						$equalizerProfiles.splice(indexToDelete, 1)
+
+						$equalizerProfiles = $equalizerProfiles
+
+						if ($selectedEqId === equalizerId) {
+							$selectedEqId = 'Default'
+						}
+
+						notify.success('Equalizer successfully deleted.')
 					}
-
-					notify.success('Equalizer successfully deleted.')
-				}
-			})
-		}
+				})
+			}
+		})
 	}
 
-	function saveEqualizerAs() {
-		promptState = {
+	function saveEqualizerAs(newName: string = '') {
+		let promptState = {
 			title: 'Enter Equalizer Name',
 			placeholder: 'Equalizer name',
 			confirmButtonText: 'Save As',
 			cancelButtonText: 'Cancel',
-			task: PromptTasks.SaveAs,
-			data: { id: generateId(), name: '', inputValue: '' }
+			data: { id: generateId(), inputValue: newName }
 		}
 
-		showPrompt = true
+		promptComponent.showPrompt(promptState).then(promptResult => {
+			promptComponent.closePrompt()
+
+			let newEqualizerProfile: EqualizerFileObjectType = {
+				id: promptResult.data.id,
+				name: promptResult.data.result,
+				values: []
+			}
+
+			for (let i in $equalizer) {
+				newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: $equalizer[i].gain.value })
+			}
+
+			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
+				if (result.code === 'EXISTS') {
+					notify.error(`Name ${newEqualizerProfile.name} already exists.`)
+					saveEqualizerAs(newEqualizerProfile.name)
+				} else if (result.code === 'OK') {
+					$equalizerProfiles.unshift(newEqualizerProfile)
+
+					$equalizerProfiles = $equalizerProfiles
+					$selectedEqId = newEqualizerProfile.id
+				}
+			})
+		})
 	}
 </script>
 
@@ -216,14 +189,8 @@
 	</equalizer-section>
 </OptionSection>
 
-<Prompt {promptState} {showPrompt} on:close={() => (showPrompt = false)} on:response={event => handlePromptResponse(event)} />
-<Confirm
-	{confirmState}
-	{showConfirm}
-	on:close={() => (showConfirm = false)}
-	on:response={event => handleConfirmResponse(event)}
-/>
-
+<Confirm bind:this={confirmComponent} />
+<Prompt bind:this={promptComponent} />
 <EqualizerService bind:this={equalizerService} />
 
 <style>

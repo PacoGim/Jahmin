@@ -1,20 +1,25 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte'
 	import { keypress } from '../store/final.store'
 	import type { PromptStateType } from '../types/promptState.type'
 
-	const dispatch = createEventDispatcher()
+	let isPromptVisible = false
 
-	export let showPrompt = false
-
-	export let promptState: PromptStateType
+	let promptState: PromptStateType = {
+		title: '',
+		cancelButtonText: '',
+		confirmButtonText: '',
+		data: {},
+		placeholder: ''
+	}
 
 	let promptElement = undefined
 
 	let inputValue = ''
 
+	let deferredPromise = undefined
+
 	$: {
-		if (showPrompt === true) {
+		if (isPromptVisible === true) {
 			if (promptElement === undefined) {
 				promptElement = document.querySelector('prompt-svelte input') as HTMLInputElement
 			}
@@ -23,28 +28,36 @@
 		}
 	}
 
-	$: if ($keypress === 'Escape' && showPrompt === true) closePrompt()
+	$: if ($keypress === 'Escape' && isPromptVisible === true) closePrompt()
 
 	$: {
 		promptState
 		setInputValueFromData()
 	}
 
+	export function showPrompt(newState: PromptStateType) {
+		return new Promise((resolve, reject) => {
+			promptState = newState
+
+			deferredPromise = resolve
+
+			isPromptVisible = true
+		})
+	}
+
+	export function closePrompt() {
+		deferredPromise = undefined
+		isPromptVisible = false
+	}
+
 	function setInputValueFromData() {
 		inputValue = promptState?.data?.inputValue || ''
 	}
 
-	function closePrompt() {
-		dispatch('close')
-	}
-
 	function confirmPrompt() {
-		let returnData = {
-			task: promptState.task,
-			data: Object.assign(promptState.data, { response: inputValue })
-		}
-
-		dispatch('response', returnData)
+		deferredPromise({
+			data: Object.assign(promptState.data, { result: inputValue })
+		})
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {
@@ -64,7 +77,7 @@
 	}
 </script>
 
-<prompt-svelte show={showPrompt} on:click={e => handleOutsidePromptClick(e)}>
+<prompt-svelte show={isPromptVisible} on:click={e => handleOutsidePromptClick(e)}>
 	<prompt-content>
 		<prompt-close on:click={() => closePrompt()}>x</prompt-close>
 		<prompt-title>{promptState.title}</prompt-title>

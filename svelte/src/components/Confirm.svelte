@@ -1,24 +1,36 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte'
 	import { keypress } from '../store/final.store'
 	import type { ConfirmStateType } from '../types/confirmState.type'
 
-	const dispatch = createEventDispatcher()
+	let isConfirmVisible = false
+	let confirmState: ConfirmStateType = {
+		data: {},
+		textToConfirm: '',
+		title: ''
+	}
 
-	export let showConfirm = false
-	export let confirmState: ConfirmStateType
+	let deferredPromise = undefined
 
-	$: if ($keypress === 'Escape' && showConfirm === true) closeConfirm()
-	$: if ($keypress === 'Enter' && showConfirm === true) confirmConfirm()
+	$: if ($keypress === 'Escape' && isConfirmVisible === true) closeConfirm()
+	$: if ($keypress === 'Enter' && isConfirmVisible === true) confirmConfirm()
 
-	function closeConfirm() {
-		dispatch('close')
+	export function showConfirm(newState: ConfirmStateType) {
+		return new Promise((resolve, reject) => {
+			confirmState = newState
+
+			deferredPromise = resolve
+
+			isConfirmVisible = true
+		})
+	}
+
+	export function closeConfirm() {
+		deferredPromise = undefined
+		isConfirmVisible = false
 	}
 
 	function confirmConfirm() {
-		dispatch('response', {
-			id: confirmState.data.id
-		})
+		deferredPromise({ id: confirmState.data.id })
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {
@@ -34,7 +46,7 @@
 	}
 </script>
 
-<confirm-svelte show={showConfirm} on:click={e => handleOutsidePromptClick(e)}>
+<confirm-svelte show={isConfirmVisible} on:click={e => handleOutsidePromptClick(e)}>
 	<confirm-content>
 		<confirm-close on:click={() => closeConfirm()}>x</confirm-close>
 		<confirm-title>{confirmState.title}</confirm-title>
