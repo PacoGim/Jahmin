@@ -19,7 +19,7 @@
 	import Confirm from '../../../components/Confirm.svelte'
 	import type { ConfirmStateType } from '../../../types/confirmState.type'
 
-	import iziToast from 'izitoast'
+	import notify from '../../../service/notify.service'
 
 	let isEqualizerOn = true
 	let isEqualizerDirty = false
@@ -105,13 +105,11 @@
 
 	function deleteEq(id: string, name: string) {
 		if (id === 'Default') {
-			return iziToast.error({
-				message: "Default profile can't be deleted"
-			})
+			return notify.error("Default profile can't be deleted")
 		}
 
 		confirmState = {
-			textToConfirm: `Delete equalizer ${name}?`,
+			textToConfirm: `Delete equalizer "${name}"?`,
 			title: 'Delete Equalizer',
 			data: {
 				id
@@ -163,9 +161,7 @@
 
 			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
 				if (result.code === 'EXISTS') {
-					iziToast.error({
-						message: `Name ${newName} already exists.`
-					})
+					notify.error(`Name ${newName} already exists.`)
 				} else if (result.code === 'OK') {
 					$equalizerProfiles.unshift(newEqualizerProfile)
 
@@ -186,15 +182,11 @@
 						$equalizerProfiles = $equalizerProfiles
 					}
 
-					iziToast.success({
-						message: `Equalizer renamed to "${newName}"`
-					})
+					notify.success(`Equalizer renamed to "${newName}"`)
 
 					showPrompt = false
 				} else if (result.code === 'EXISTS') {
-					iziToast.error({
-						message: `Name ${newName} already exists.`
-					})
+					notify.error(`Name ${newName} already exists.`)
 				}
 			})
 		}
@@ -218,9 +210,7 @@
 						$selectedEqId = 'Default'
 					}
 
-					iziToast.success({
-						message: 'Equalizer successfully deleted.'
-					})
+					notify.success('Equalizer successfully deleted.')
 				}
 			})
 		}
@@ -264,9 +254,7 @@
 				$equalizerProfiles = $equalizerProfiles
 				isEqualizerDirty = false
 
-				iziToast.success({
-					message: 'Equalizer Updated'
-				})
+				notify.success('Equalizer Updated')
 			}
 		})
 	}
@@ -275,7 +263,6 @@
 		applyEqualizerProfile($selectedEqId)
 	}
 </script>
-
 <OptionSection title="Equalizer">
 	<equalizer-section slot="body">
 		<p-center>Saved Equalizers</p-center>
@@ -383,7 +370,7 @@
 	}
 
 	equalizer-list equalizer-field equalizer-delete:hover {
-		background-color: #b3092b;
+		background-color: var(--color-hl-2);
 	}
 
 	selected-equalizer-name {
@@ -400,7 +387,7 @@
 		cursor: not-allowed;
 	}
 	audio-filter-range eq-input-container input[type='range']:disabled::-webkit-slider-thumb {
-		background-color: #b3092b;
+		background-color: var(--color-hl-2);
 	}
 
 	audio-filter-range filter-frequency {
@@ -420,7 +407,7 @@
 		transition: background-color 300ms linear;
 	}
 	buttons button.not-active {
-		background-color: #b3092b;
+		background-color: var(--color-hl-2);
 	}
 	buttons button:disabled {
 		cursor: not-allowed;

@@ -197,7 +197,7 @@
 	}
 
 	prompt-content prompt-footer prompt-cancel {
-		background-color: #b3092b;
+		background-color: var(--color-hl-2);
 	}
 
 	input {
