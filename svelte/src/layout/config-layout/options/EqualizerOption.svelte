@@ -3,26 +3,32 @@
 
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
-	import { equalizerProfiles, selectedEqId, equalizer } from '../../../store/equalizer.store'
+
+	import { equalizerProfiles, selectedEqId, equalizer, isEqualizerDirty } from '../../../store/equalizer.store'
+
 	import { PromptTasks } from '../../../types/promptState.type'
 
 	import type { PromptStateType } from '../../../types/promptState.type'
 	import generateId from '../../../functions/generateId.fn'
+
 	import {
 		addNewEqualizerProfileIPC,
 		deleteEqualizerIPC,
 		showEqualizerFolderIPC,
 		renameEqualizerIPC,
-		updateEqualizerValuesIPC
 	} from '../../../service/ipc.service'
+
 	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
 	import Confirm from '../../../components/Confirm.svelte'
 	import type { ConfirmStateType } from '../../../types/confirmState.type'
 
 	import notify from '../../../service/notify.service'
+	import EqualizerService from '../../../svelte-service/EqualizerService.svelte'
+	import { objectToArray } from '../../../service/index.service'
+
+	let equalizerService
 
 	let isEqualizerOn = true
-	let isEqualizerDirty = false
 	let equalizerName = ''
 
 	let showPrompt = false
@@ -43,52 +49,7 @@
 		data: {}
 	}
 
-	$: {
-		$selectedEqId
-		equalizerName = getEqualizerName()
-	}
-
-	$: {
-		$equalizer
-		checkIfEqualizerChanged()
-	}
-
-	function checkIfEqualizerChanged() {
-		let isChanged = false
-		let equalizerSelected = $equalizerProfiles.find(x => x.id === $selectedEqId)
-
-		if (equalizerSelected === undefined) return
-
-		for (let i in $equalizer) {
-			if ($equalizer[i].gain.value !== equalizerSelected.values.find(x => x.frequency === Number(i)).gain) {
-				isChanged = true
-			}
-		}
-
-		isEqualizerDirty = isChanged
-	}
-
-	function gainChange(evt: Event, frequency: number) {
-		const target = evt.target as HTMLInputElement
-		const value = Number(target.value)
-
-		$equalizer[frequency].gain.value = value
-	}
-
-	function getEqualizerName(): string {
-		let equalizerProfileFound = $equalizerProfiles.find(x => x.id === $selectedEqId)
-		if (equalizerProfileFound) {
-			return equalizerProfileFound?.name || 'No Name'
-		}
-	}
-
-	function objectToArray(inObject: object) {
-		let tempArray = []
-		for (const key in inObject) {
-			tempArray.push(inObject[key])
-		}
-		return tempArray
-	}
+	$: if ($selectedEqId) equalizerName = equalizerService.getEqualizerName($selectedEqId)
 
 	function renameEq(id: string, name: string) {
 		promptState = {
@@ -117,30 +78,6 @@
 		}
 
 		showConfirm = true
-	}
-
-	function toggleEq() {
-		if (isEqualizerOn === true) {
-			// Turn off
-			isEqualizerOn = false
-
-			for (let i in $equalizer) {
-				$equalizer[i].gain.value = 0
-			}
-		} else {
-			// Turn on
-			isEqualizerOn = true
-
-			applyEqualizerProfile($selectedEqId)
-		}
-	}
-
-	function applyEqualizerProfile(id: string) {
-		let equalizerSelected = $equalizerProfiles.find(x => x.id === id)
-
-		for (let i in $equalizer) {
-			$equalizer[i].gain.value = equalizerSelected.values.find(x => x.frequency === Number(i)).gain
-		}
 	}
 
 	function handlePromptResponse(event: CustomEvent) {
@@ -216,15 +153,6 @@
 		}
 	}
 
-	function changeProfile(id: string) {
-		if (isEqualizerOn === false && $selectedEqId === id) {
-			resetEqualizer()
-		} else {
-			$selectedEqId = id
-		}
-		isEqualizerOn = true
-	}
-
 	function saveEqualizerAs() {
 		promptState = {
 			title: 'Enter Equalizer Name',
@@ -237,39 +165,17 @@
 
 		showPrompt = true
 	}
-
-	function updateEqualizer() {
-		let equalizerFound = $equalizerProfiles.find(x => x.id === $selectedEqId)
-
-		let newValues = objectToArray($equalizer).map(x => {
-			return {
-				frequency: x.frequency.value,
-				gain: x.gain.value
-			}
-		})
-
-		updateEqualizerValuesIPC(equalizerFound.id, newValues).then(isEqualizerUpdated => {
-			if (isEqualizerUpdated) {
-				equalizerFound.values = newValues
-				$equalizerProfiles = $equalizerProfiles
-				isEqualizerDirty = false
-
-				notify.success('Equalizer Updated')
-			}
-		})
-	}
-
-	function resetEqualizer() {
-		applyEqualizerProfile($selectedEqId)
-	}
 </script>
+
 <OptionSection title="Equalizer">
 	<equalizer-section slot="body">
 		<p-center>Saved Equalizers</p-center>
 		<equalizer-list>
 			{#each $equalizerProfiles as eq (eq.id)}
 				<equalizer-field id="eq-{eq.id}">
-					<equalizer-name on:click={() => changeProfile(eq.id)}>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name>
+					<equalizer-name on:click={() => equalizerService.changeProfile(eq.id)}
+						>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
+					>
 					<equalizer-rename on:click={() => renameEq(eq.id, eq.name)}
 						>Rename <EditIcon style="height:1rem;width:auto;fill:var(--color-fg-1);" /></equalizer-rename
 					>
@@ -277,7 +183,7 @@
 				</equalizer-field>
 			{/each}
 		</equalizer-list>
-		<selected-equalizer-name>{equalizerName} {isEqualizerDirty && isEqualizerOn ? '•' : ''}</selected-equalizer-name>
+		<selected-equalizer-name>{equalizerName} {$isEqualizerDirty && isEqualizerOn ? '•' : ''}</selected-equalizer-name>
 		<audio-filters>
 			{#each objectToArray($equalizer) as equalizer, index (index)}
 				<audio-filter-range>
@@ -289,7 +195,7 @@
 							max="8"
 							step="1"
 							value={equalizer.gain.value}
-							on:input={evt => gainChange(evt, equalizer.frequency.value)}
+							on:input={evt => equalizerService.gainChange(evt, equalizer.frequency.value)}
 							disabled={!isEqualizerOn}
 						/>
 					</eq-input-container>
@@ -299,10 +205,13 @@
 		</audio-filters>
 		<buttons>
 			<button on:click={() => showEqualizerFolderIPC()}>Show Folder</button>
-			<button class={isEqualizerOn ? 'active' : 'not-active'} on:click={() => toggleEq()}>Toggle EQ</button>
-			<button on:click={() => resetEqualizer()} disabled={isEqualizerDirty === false || isEqualizerOn === false}>Reset</button>
+			<button class={isEqualizerOn ? 'active' : 'not-active'} on:click={() => equalizerService.toggleEq()}>Toggle EQ</button>
+			<button
+				on:click={() => equalizerService.resetEqualizer()}
+				disabled={$isEqualizerDirty === false || isEqualizerOn === false}>Reset</button
+			>
 			<button on:click={() => saveEqualizerAs()}>Save as...</button>
-			<button on:click={() => updateEqualizer()} disabled={!isEqualizerDirty}>Update</button>
+			<button on:click={() => equalizerService.updateEqualizer()} disabled={!$isEqualizerDirty}>Update</button>
 		</buttons>
 	</equalizer-section>
 </OptionSection>
@@ -314,6 +223,8 @@
 	on:close={() => (showConfirm = false)}
 	on:response={event => handleConfirmResponse(event)}
 />
+
+<EqualizerService bind:this={equalizerService} />
 
 <style>
 	equalizer-list {

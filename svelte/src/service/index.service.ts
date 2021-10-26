@@ -9,3 +9,11 @@ export function cutWord(word, maxLength) {
 		return word
 	}
 }
+
+export function objectToArray(inObject: object) {
+	let tempArray = []
+	for (const key in inObject) {
+		tempArray.push(inObject[key])
+	}
+	return tempArray
+}
