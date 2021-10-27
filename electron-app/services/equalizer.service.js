@@ -8,6 +8,7 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const __1 = require("..");
 const equalizerFile_service_1 = __importDefault(require("./equalizerFile.service"));
+const fileExistsWithCaseSync_fn_1 = __importDefault(require("../functions/fileExistsWithCaseSync.fn"));
 const eqFolderPath = path_1.default.join(__1.appDataPath(), 'eq');
 function getEqFolderPath() {
     return eqFolderPath;
@@ -40,7 +41,7 @@ function renameEqualizer(eqId, newName) {
     if (foundEq) {
         let newNamePath = path_1.default.join(eqFolderPath, `${newName}.txt`);
         let oldNamePath = path_1.default.join(eqFolderPath, `${foundEq.name}.txt`);
-        if (fs_1.default.existsSync(newNamePath)) {
+        if (fileExistsWithCaseSync_fn_1.default(newNamePath)) {
             return {
                 code: 'EXISTS',
                 message: 'Profile name already exists.'

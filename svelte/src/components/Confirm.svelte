@@ -175,29 +175,4 @@
 	confirm-content confirm-footer confirm-cancel {
 		background-color: var(--color-hl-2);
 	}
-
-	input {
-		display: block;
-		/* height: 1rem; */
-		font-size: 1rem;
-		font-family: inherit;
-		background-color: var(--color-bg-2);
-		color: var(--color-fg-1);
-		border: none;
-		width: 100%;
-		padding: 0.5rem 1rem;
-
-		border-radius: 4px 4px 0 0;
-
-		border-bottom: 2px var(--color-fg-1) solid;
-
-		transition-property: background-color, color, border-bottom;
-		transition-duration: var(--theme-transition-duration), var(--theme-transition-duration), 300ms;
-		transition-timing-function: linear;
-	}
-
-	input:active,
-	input:focus {
-		border-bottom: 2px var(--color-hl-1) solid;
-	}
 </style>

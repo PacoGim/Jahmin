@@ -5,6 +5,7 @@ import { appDataPath } from '..'
 import EqualizerFile from './equalizerFile.service'
 import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
 import { ReturnMessageType } from '../types/returnMessage.type'
+import fileExistsWithCaseSync from '../functions/fileExistsWithCaseSync.fn'
 
 const eqFolderPath = path.join(appDataPath(), 'eq')
 
@@ -47,7 +48,7 @@ export function renameEqualizer(eqId: string, newName: string): ReturnMessageTyp
 		let newNamePath = path.join(eqFolderPath, `${newName}.txt`)
 		let oldNamePath = path.join(eqFolderPath, `${foundEq.name}.txt`)
 
-		if (fs.existsSync(newNamePath)) {
+		if (fileExistsWithCaseSync(newNamePath)) {
 			return {
 				code: 'EXISTS',
 				message: 'Profile name already exists.'

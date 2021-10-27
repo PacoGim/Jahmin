@@ -1,5 +1,5 @@
 <script>
-	export let title
+	export let title = ''
 </script>
 
 <section>
@@ -12,14 +12,7 @@
 		display: flex;
 		flex-direction: column;
 		padding: 1rem;
-		/* width: 100%; */
 	}
-
-	/* slot {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	} */
 
 	section-title {
 		margin-bottom: 2rem;
@@ -30,4 +23,9 @@
 
 		border-bottom: 1px var(--color-fg-1) solid;
 	}
+
+	section-title:empty{
+		border-bottom: none;
+	}
+
 </style>

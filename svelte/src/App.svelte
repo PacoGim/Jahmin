@@ -11,13 +11,17 @@
 	import MainLayout from './layout/main-layout/MainLayout.svelte'
 	import ConfigLayout from './layout/config-layout/ConfigLayout.svelte'
 	import SearchLayout from './layout/search-layout/SearchLayout.svelte'
-	import generateId from './functions/generateId.fn'
 	import EqualizerController from './controllers/EqualizerController.svelte'
 	import { nextSong } from './functions/nextSong.fn'
 	import previousSongFn from './functions/previousSong.fn'
 	import { runThemeHandler } from './service/themeHandler.service'
 
 	import iziToast from 'izitoast'
+
+	import EqualizerService from './svelte-service/EqualizerService.svelte'
+	import { confirmService, equalizerService, promptService } from './store/service.store'
+	import Prompt from './components/Prompt.svelte'
+	import Confirm from './components/Confirm.svelte'
 
 	onMount(() => {
 		iziToast.settings({ position: 'topRight' })
@@ -81,3 +85,7 @@
 <MainLayout />
 <ConfigLayout />
 <SearchLayout />
+
+<EqualizerService bind:this={$equalizerService} />
+<Prompt bind:this={$promptService} />
+<Confirm bind:this={$confirmService} />

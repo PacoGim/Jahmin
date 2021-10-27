@@ -4,6 +4,7 @@
 	import notify from '../service/notify.service'
 
 	import { equalizer, equalizerProfiles, selectedEqId, isEqualizerDirty, isEqualizerOn } from '../store/equalizer.store'
+	import type { EqualizerProfileType, EqualizerProfileValuesType } from '../types/equalizerProfile.type'
 
 	$: {
 		$equalizer
@@ -54,31 +55,38 @@
 		}
 	}
 
+	let tempEq: EqualizerProfileValuesType[] = []
+
 	export function toggleEq() {
 		if ($isEqualizerOn === true) {
 			// Turn off
 			$isEqualizerOn = false
 
+			tempEq = []
+
 			for (let i in $equalizer) {
+				tempEq.push({
+					frequency: Number(i),
+					gain: $equalizer[i].gain.value
+				})
+
 				$equalizer[i].gain.value = 0
 			}
 		} else {
 			// Turn on
 			$isEqualizerOn = true
 
-			applyEqualizerProfile($selectedEqId)
+			applyEqualizerProfile(tempEq)
 		}
 	}
 
 	export function resetEqualizer() {
-		applyEqualizerProfile($selectedEqId)
+		applyEqualizerProfile($equalizerProfiles.find(x => x.id === $selectedEqId).values)
 	}
 
-	function applyEqualizerProfile(id: string) {
-		let equalizerSelected = $equalizerProfiles.find(x => x.id === id)
-
+	function applyEqualizerProfile(values: EqualizerProfileValuesType[]) {
 		for (let i in $equalizer) {
-			$equalizer[i].gain.value = equalizerSelected.values.find(x => x.frequency === Number(i)).gain
+			$equalizer[i].gain.value = values.find(x => x.frequency === Number(i)).gain
 		}
 	}
 

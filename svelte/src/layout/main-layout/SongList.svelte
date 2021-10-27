@@ -170,7 +170,6 @@
 
 	// Manages to "scroll" to the proper song on demand.
 	function setScrollAmountFromSong(songId) {
-		console.log(songId)
 		let songIndex = $songListStore.findIndex(song => song.ID === songId)
 		let differenceAmount = Math.floor(SONG_AMOUNT / 2)
 
