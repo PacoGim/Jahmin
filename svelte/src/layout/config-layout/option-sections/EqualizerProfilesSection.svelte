@@ -1,10 +1,13 @@
 <script lang="ts">
+	import generateId from '../../../functions/generateId.fn'
+
 	import EditIcon from '../../../icons/EditIcon.svelte'
-	import { deleteEqualizerIPC, renameEqualizerIPC } from '../../../service/ipc.service'
+	import { addNewEqualizerProfileIPC, deleteEqualizerIPC, renameEqualizerIPC } from '../../../service/ipc.service'
 	import notify from '../../../service/notify.service'
 
-	import { equalizerProfiles, selectedEqId } from '../../../store/equalizer.store'
+	import { equalizer, equalizerProfiles, selectedEqId } from '../../../store/equalizer.store'
 	import { confirmService, equalizerService, promptService } from '../../../store/service.store'
+	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
 
 	function renameEq(eqId: string, name: string) {
 		if (eqId === 'Default') {
@@ -81,6 +84,42 @@
 			}
 		})
 	}
+
+	function addNewProfile(newName: string = '') {
+		let promptState = {
+			title: 'New Profile Name',
+			placeholder: 'Enter new profile name',
+			confirmButtonText: 'Confirm',
+			cancelButtonText: 'Cancel',
+			data: { id: generateId(), inputValue: newName }
+		}
+
+		$promptService.showPrompt(promptState).then(promptResult => {
+			$promptService.closePrompt()
+
+			let newEqualizerProfile: EqualizerFileObjectType = {
+				id: promptResult.data.id,
+				name: promptResult.data.result,
+				values: []
+			}
+
+			for (let i in $equalizer) {
+				newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: 0 })
+			}
+
+			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
+				if (result.code === 'EXISTS') {
+					notify.error(`Name ${newEqualizerProfile.name} already exists.`)
+					addNewProfile(newEqualizerProfile.name)
+				} else if (result.code === 'OK') {
+					$equalizerProfiles.unshift(newEqualizerProfile)
+
+					$equalizerProfiles = $equalizerProfiles
+					$selectedEqId = newEqualizerProfile.id
+				}
+			})
+		})
+	}
 </script>
 
 <equalizer-profiles-section>
@@ -95,6 +134,7 @@
 			<equalizer-delete on:click={() => deleteEq(eq.id, eq.name)}>Delete X</equalizer-delete>
 		</equalizer-field>
 	{/each}
+	<button on:click={() => addNewProfile()}>Add new profile</button>
 </equalizer-profiles-section>
 
 <style>
