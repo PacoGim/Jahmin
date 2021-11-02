@@ -115,7 +115,6 @@
 				.then(() => {
 					navigator.mediaSession.playbackState = 'playing'
 
-
 					$songPlayingIdStore = songToPlay.ID
 
 					localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)

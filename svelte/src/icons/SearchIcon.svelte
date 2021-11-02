@@ -1,35 +1,6 @@
 <script>
-	export let isActive = false
+	export let style
 </script>
 
-<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg
-	class="nav-icon"
-	version="1.1"
-	xmlns="http://www.w3.org/2000/svg"
-	xmlns:xlink="http://www.w3.org/1999/xlink"
-	x="0px"
-	y="0px"
-	width="24px"
-	height="24px"
-	viewBox="0 0 24 24"
-	style="{isActive ? 'fill:var(--color-hl-1);' : 'fill:var(--color-fg-1);'}overflow:visible;enable-background:new 0 0 474.82 496;"
-	xml:space="preserve"
->
-	<style type="text/css">
-		.search-icon {
-			fill-opacity: 0;
-		}
-	</style>
-	<defs />
-	<g>
-		<g>
-			<rect class="search-icon" width="24" height="24" />
-			<path
-				d="M20.71,19.29l-3.4-3.39C18.41,14.5,19,12.78,19,11c0-4.42-3.58-8-8-8s-8,3.58-8,8s3.58,8,8,8c1.78,0,3.5-0.59,4.9-1.69
-			l3.39,3.4c0.39,0.39,1.02,0.39,1.41,0.01c0,0,0,0,0.01-0.01C21.1,20.32,21.1,19.69,20.71,19.29
-			C20.71,19.29,20.71,19.29,20.71,19.29z M5,11c0-3.31,2.69-6,6-6s6,2.69,6,6s-2.69,6-6,6S5,14.31,5,11z"
-			/>
-		</g>
-	</g>
-</svg>
+<!-- Imported from https://remixicon.com/ -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {style}><path fill="none" d="M0 0h24v24H0z"/><path d="M18.031 16.617l4.283 4.282-1.415 1.415-4.282-4.283A8.96 8.96 0 0 1 11 20c-4.968 0-9-4.032-9-9s4.032-9 9-9 9 4.032 9 9a8.96 8.96 0 0 1-1.969 5.617zm-5.853-9.44a4 4 0 1 0 2.646 2.646 2 2 0 1 1-2.646-2.647z"/></svg>

@@ -1,5 +1,10 @@
 <script lang="ts">
 	import generateId from '../../../functions/generateId.fn'
+	import RefreshIcon from '../../../icons/RefreshIcon.svelte'
+	import SaveIcon from '../../../icons/SaveIcon.svelte'
+	import ToggleOffIcon from '../../../icons/ToggleOffIcon.svelte'
+	import ToggleOnIcon from '../../../icons/ToggleOnIcon.svelte'
+	import UpdateIcon from '../../../icons/UpdateIcon.svelte'
 
 	import { addNewEqualizerProfileIPC, showEqualizerFolderIPC } from '../../../service/ipc.service'
 	import notify from '../../../service/notify.service'
@@ -45,27 +50,52 @@
 </script>
 
 <equalizer-buttons-section>
-	<button class={$isEqualizerOn ? 'active' : 'not-active'} on:click={() => $equalizerService.toggleEq()}>Toggle EQ</button>
-	<button on:click={() => $equalizerService.resetEqualizer()} disabled={$isEqualizerDirty === false || $isEqualizerOn === false}
-		>Reset</button
+	<button class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}" on:click={() => $equalizerService.toggleEq()}>
+		{#if $isEqualizerOn === true}
+			<ToggleOnIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+		{:else}
+			<ToggleOffIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+		{/if}
+
+		Toggle EQ
+	</button>
+	<button
+		class="resetEqButton"
+		on:click={() => $equalizerService.resetEqualizer()}
+		disabled={$isEqualizerDirty === false || $isEqualizerOn === false}
 	>
-	<button on:click={() => saveEqualizerAs()} disabled={$isEqualizerOn === false}>Save as...</button>
-	<button on:click={() => $equalizerService.updateEqualizer()} disabled={!$isEqualizerDirty}>Update</button>
-	<button on:click={() => showEqualizerFolderIPC()}>Show Folder</button>
+		<RefreshIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+		Reset
+	</button>
+	<button on:click={() => saveEqualizerAs()} disabled={$isEqualizerOn === false}>
+		<SaveIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+		Save as...
+	</button>
+	<button on:click={() => $equalizerService.updateEqualizer()} disabled={!$isEqualizerDirty}>
+		<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+		Update
+	</button>
+	<!-- <button on:click={() => showEqualizerFolderIPC()}>Show Folder</button> -->
 </equalizer-buttons-section>
 
 <style>
-	equalizer-buttons-section button {
-		color: #fff;
-		background-color: var(--color-hl-1);
+	equalizer-buttons-section {
+		display: flex;
+		margin: 0 auto;
+	}
 
+	equalizer-buttons-section button {
+		display: flex;
+		align-items: center;
+		margin: 0 0.25rem;
 		transition: background-color 300ms linear;
 	}
-	equalizer-buttons-section button.not-active {
-		background-color: var(--color-hl-2);
+
+	equalizer-buttons-section button.toggleEqButton {
+		margin-right: 4rem;
 	}
-	equalizer-buttons-section button:disabled {
-		cursor: not-allowed;
-		background-color: #6a7290;
+
+	equalizer-buttons-section button.resetEqButton {
+		margin-right: 4rem;
 	}
 </style>

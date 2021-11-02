@@ -1,4 +1,6 @@
 <script lang="ts">
+	import CheckIcon from '../icons/CheckIcon.svelte'
+	import DeleteIcon from '../icons/DeleteIcon.svelte'
 	import { keypress } from '../store/final.store'
 	import type { PromptStateType } from '../types/promptState.type'
 
@@ -91,8 +93,14 @@
 			/>
 		</prompt-body>
 		<prompt-footer>
-			<prompt-cancel class="prompt-button" on:click={() => closePrompt()}>{promptState.cancelButtonText}</prompt-cancel>
-			<prompt-confirm class="prompt-button" on:click={() => confirmPrompt()}>{promptState.confirmButtonText}</prompt-confirm>
+			<prompt-cancel class="prompt-button" on:click={() => closePrompt()}>
+				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+				{promptState.cancelButtonText}
+			</prompt-cancel>
+			<prompt-confirm class="prompt-button" on:click={() => confirmPrompt()}>
+				<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+				{promptState.confirmButtonText}
+			</prompt-confirm>
 		</prompt-footer>
 	</prompt-content>
 </prompt-svelte>
@@ -189,16 +197,17 @@
 	}
 
 	prompt-content prompt-footer {
-		display: block;
+		display: flex;
 		margin-left: auto;
 		width: max-content;
 	}
 
 	prompt-content prompt-footer *.prompt-button {
+		display: flex;
+		align-items: center;
 		font-size: 0.85rem;
 		font-variation-settings: 'wght' 500;
 		cursor: pointer;
-		display: inline-block;
 		padding: 0.25rem 0.5rem;
 		border-radius: 4px;
 	}

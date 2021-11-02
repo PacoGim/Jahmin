@@ -264,7 +264,12 @@
 		grid-template-columns: auto max-content;
 		z-index: 2;
 
-		/* transition: all 1000ms ease-in-out; */
+
+
+		border: 4px var(--high-color) solid;
+		border-bottom: none;
+
+		transition: border 300ms linear;
 	}
 
 	song-list {
@@ -276,6 +281,7 @@
 		/* min-height: auto; */
 
 		/* transition: all 1000ms ease-in-out; */
+
 	}
 
 	song-list-scroll-bar {

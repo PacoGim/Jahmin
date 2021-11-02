@@ -1,5 +1,7 @@
 <script lang="ts">
 	import generateId from '../../../functions/generateId.fn'
+	import AddIcon from '../../../icons/AddIcon.svelte'
+	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
 	import EditIcon from '../../../icons/EditIcon.svelte'
 	import { addNewEqualizerProfileIPC, deleteEqualizerIPC, renameEqualizerIPC } from '../../../service/ipc.service'
@@ -128,21 +130,28 @@
 			<equalizer-name on:click={() => $equalizerService.changeProfile(eq.id)}
 				>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
 			>
-			<equalizer-rename on:click={() => renameEq(eq.id, eq.name)}
-				>Rename <EditIcon style="height:1rem;width:auto;fill:var(--color-fg-1);" /></equalizer-rename
-			>
-			<equalizer-delete on:click={() => deleteEq(eq.id, eq.name)}>Delete X</equalizer-delete>
+			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.id, eq.name)}>
+				<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+				Rename
+			</equalizer-rename>
+			<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.id, eq.name)}>
+				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+				Delete
+			</equalizer-delete>
 		</equalizer-field>
 	{/each}
-	<button on:click={() => addNewProfile()}>Add new profile</button>
 </equalizer-profiles-section>
+<button class="addProfile" on:click={() => addNewProfile()}
+	><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
+>
 
 <style>
 	equalizer-profiles-section {
 		width: fit-content;
 		max-height: 10rem;
+		min-height: 10rem;
 		display: block;
-		overflow-y: scroll;
+		overflow-y: auto;
 		width: 33%;
 		margin: 0 auto;
 		margin-top: 1rem;
@@ -158,14 +167,7 @@
 		transition: background-color 150ms ease-in-out;
 	}
 
-	equalizer-profiles-section equalizer-field:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-	}
-	equalizer-profiles-section equalizer-field equalizer-name {
-		padding: 0.25rem 0.5rem;
-	}
-
-	equalizer-profiles-section equalizer-field equalizer-rename {
+	equalizer-profiles-section equalizer-field *.eqProfileButton {
 		display: flex;
 		padding: 0.25rem 0.5rem;
 		height: inherit;
@@ -175,23 +177,25 @@
 		font-variation-settings: 'wght' 450;
 	}
 
-	:global(equalizer-profiles-section equalizer-field equalizer-rename svg) {
-		margin-left: 0.25rem;
+	equalizer-profiles-section equalizer-field:hover {
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+	equalizer-profiles-section equalizer-field equalizer-name {
+		padding: 0.25rem 0.5rem;
 	}
 
 	equalizer-profiles-section equalizer-field equalizer-rename:hover {
 		background-color: var(--color-hl-1);
 	}
 
-	equalizer-profiles-section equalizer-field equalizer-delete {
-		margin-right: 1rem;
-		padding: 0.25rem 0.5rem;
-
-		font-size: 0.85rem;
-		font-variation-settings: 'wght' 500;
-	}
-
 	equalizer-profiles-section equalizer-field equalizer-delete:hover {
 		background-color: var(--color-hl-2);
+	}
+
+	button.addProfile {
+		display: flex;
+		align-items: center;
+		max-width: fit-content;
+		margin: 1rem auto 0 auto;
 	}
 </style>

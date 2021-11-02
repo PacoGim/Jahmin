@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { playingSongStore } from '../../store/final.store'
+	import type { SongType } from '../../types/song.type'
 
-	let playingSong = {
-		Album: '',
-		Artist: '',
-		Title: ''
-	}
+	let playingSong: SongType = undefined
 
 	$: {
 		if ($playingSongStore) {
@@ -15,7 +12,9 @@
 </script>
 
 <song-info-svlt>
-	<p>{playingSong.Title}</p>
+	{#if playingSong}
+		<p>{playingSong.Title}</p>
+	{/if}
 </song-info-svlt>
 
 <style>
@@ -23,7 +22,11 @@
 		background-color: var(--high-color);
 		color: var(--low-color);
 		grid-area: song-info-svlt;
-    text-align: right;
+		text-align: right;
+
+		transition-property: background-color, color;
+		transition-duration: 300ms;
+		transition-timing-function: ease-in-out;
 	}
 
 	p {

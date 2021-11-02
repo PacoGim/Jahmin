@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AlbumInfo from './AlbumInfo.svelte'
 	import ArtGrid from './ArtGrid.svelte'
 	import Grouping from './Grouping.svelte'
 	import Navigation from './Navigation.svelte'
@@ -18,6 +19,7 @@
 	<TagEdit />
 	<SongInfo />
 	<SongListBackground />
+	<AlbumInfo />
 </main-layout>
 
 <style>
@@ -30,6 +32,6 @@
 		grid-template-areas:
 			'navigation-svlt grouping-svlt art-grid-svlt tag-edit-svlt'
 			'navigation-svlt grouping-svlt song-list-svlt tag-edit-svlt'
-			'song-info-svlt song-info-svlt player-svlt tag-edit-svlt';
+			'song-info-svlt song-info-svlt player-svlt album-info-svlt';
 	}
 </style>

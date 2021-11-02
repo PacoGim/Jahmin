@@ -8,14 +8,26 @@
 
 <navigation-svlt class="dark-theme">
 	<nav-button on:click={() => ($layoutToShow = 'Main')}>
-		<HomeIcon isActive={$layoutToShow === 'Main'} />
+		<HomeIcon
+			style="{$layoutToShow === 'Main'
+				? 'fill:var(--color-hl-1)'
+				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
+		/>
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Search')}>
-		<SearchIcon isActive={$layoutToShow === 'Search'} />
+		<SearchIcon
+			style="{$layoutToShow === 'Search'
+				? 'fill:var(--color-hl-1)'
+				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
+		/>
 	</nav-button>
 	<separator />
 	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
-		<CogIcon isActive={$layoutToShow === 'Config'} />
+		<CogIcon
+			style="{$layoutToShow === 'Config'
+				? 'fill:var(--color-hl-1)'
+				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
+		/>
 	</nav-button>
 </navigation-svlt>
 
