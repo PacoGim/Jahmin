@@ -2,9 +2,15 @@
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { albumCoverArtMapStore, songListStore } from '../store/final.store'
+	import { albumCoverArtMapStore, songAmount, songListStore } from '../store/final.store'
 
 	onMount(() => {
+		ipcRenderer.on('show-song-amount', (event, data) => {
+			$songAmount = data
+
+			//TODO: Save to config
+		})
+
 		ipcRenderer.on('sort-songs', (event, data) => {
 			localStorage.setItem(
 				'sorting',

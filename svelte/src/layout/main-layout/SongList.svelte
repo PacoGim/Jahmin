@@ -8,7 +8,7 @@
 		songListStore,
 		selectedSongsStore,
 		triggerScrollToSongEvent,
-		playingSongStore
+		songAmount
 	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
@@ -18,14 +18,15 @@
 	let lastSelectedSong = 0
 	let isScrollAtBottom = false
 	let isScrollAtTop = false
-	const SONG_AMOUNT = 8
 
-	// Keeps track of the max size of the song list element.
-	let maxSongListHeight = 0
+	$: {
+		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height
+		$songAmount
+		applySongListHeightChange()
+	}
 
 	$: {
 		$songListStore
-		setMaxSongListHeight()
 		trimSongsArray()
 	}
 
@@ -56,35 +57,36 @@
 		trimSongsArray()
 	}
 
-	function setScroll(value: number) {
-		scrollAmount = value
+	function applySongListHeightChange() {
+		// Keep temporarily the previous scroll amount
+		let tempScroll = scrollAmount
+
+		// Sets the scroll to 0 to go back up the list to calculate new height and be visually appealing to the user.
+		setScroll(0)
+
+		// In order to trim the array of songs these two variables need to be set to false.
+		isScrollAtBottom = false
+		isScrollAtTop = false
+
+		// Then it trims the array
+		trimSongsArray()
+
+		// Resets the height of song list, gets detected by the observer the new height is recalculated.
+		document.documentElement.style.setProperty('--song-list-svlt-height', '0px')
+
+		// Resets the scroll for convinience.
+		setTimeout(() => setScroll(tempScroll), 1)
 	}
 
-	function setMaxSongListHeight() {
-		// This allows, based on the SONG_AMOUNT set by user or the default value, to dynamically keep the biggest auto sizing of the element allowing to have song lists with very few songs to fit properly on the same element with a lot of songs. It prevents jumps if the list of songs is too small after a big list of songs.
-
-		/*
-				| Song 1 |		->			| Song 1 |
-				| Song 2 |		->			| Song 2 |
-				| Song 3 |		->			| 			 |
-				| Song 4 |		->			| 			 |
-		*/
-
-		let songList = document.querySelector('song-list')
-
-		if (songList) {
-			if (songList.clientHeight > maxSongListHeight) {
-				maxSongListHeight = songList.clientHeight
-				document.documentElement.style.setProperty('--song-list-svlt-height', `${songList.clientHeight}px`)
-			}
-		}
+	function setScroll(value: number) {
+		scrollAmount = value
 	}
 
 	function trimSongsArray() {
 		if (isScrollAtBottom === false && isScrollAtTop === false) {
 			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
 			// 2º Slice: Keep songs from 0 to the set amount.
-			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, SONG_AMOUNT)
+			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, $songAmount)
 		}
 
 		setScrollProgress()
@@ -149,29 +151,23 @@
 
 	let isMouseDownInScroll = false
 
-	onMount(() => {
-		// Set an approximate value on how high would the song list container be to prevent
-		document.documentElement.style.setProperty('--song-list-svlt-height', `${SONG_AMOUNT * 30}px`)
+	function detectSongListHeightChange() {
+		// Element to observe
+		var elementToObserve = document.querySelector('song-list')
 
-		scrollBarHandler()
+		// https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+		// Detects DOM changes in song list element.
+		new MutationObserver(mutationsList => {
+			let elementChanged = mutationsList[0].target as HTMLElement
 
-		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
-
-		setTimeout(() => {
-			setScrollAmountFromSong(lastPlayedSongId)
-		}, 250)
-	})
-
-	/*
-			User clicks on image
-			sets proper category
-			scrolls to song
-	*/
+			document.documentElement.style.setProperty('--song-list-svlt-height', `${elementChanged.clientHeight}px`)
+		}).observe(elementToObserve, { characterData: false, childList: true, attributes: false })
+	}
 
 	// Manages to "scroll" to the proper song on demand.
 	function setScrollAmountFromSong(songId) {
 		let songIndex = $songListStore.findIndex(song => song.ID === songId)
-		let differenceAmount = Math.floor(SONG_AMOUNT / 2)
+		let differenceAmount = Math.floor($songAmount / 2)
 
 		if (songIndex !== -1) {
 			if (songIndex < differenceAmount) {
@@ -241,6 +237,18 @@
 		// If the user click on the scrollbar, calls setScrollAmountBar.
 		songListScrollBar.addEventListener('click', evt => setScrollAmountBar(songListScrollBar, evt))
 	}
+
+	onMount(() => {
+		detectSongListHeightChange()
+
+		scrollBarHandler()
+
+		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
+
+		setTimeout(() => {
+			setScrollAmountFromSong(lastPlayedSongId)
+		}, 250)
+	})
 </script>
 
 <song-list-svlt on:mousewheel={e => scrollContainer(e)} on:click={e => selectSongs(e)}>
@@ -264,12 +272,10 @@
 		grid-template-columns: auto max-content;
 		z-index: 2;
 
+		/* border: 4px var(--high-color) solid; */
+		/* border-bottom: none; */
 
-
-		border: 4px var(--high-color) solid;
-		border-bottom: none;
-
-		transition: border 300ms linear;
+		/* transition: border 300ms linear; */
 	}
 
 	song-list {
@@ -281,7 +287,6 @@
 		/* min-height: auto; */
 
 		/* transition: all 1000ms ease-in-out; */
-
 	}
 
 	song-list-scroll-bar {

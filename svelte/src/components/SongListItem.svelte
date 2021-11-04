@@ -3,7 +3,14 @@
 
 	import type { SongType } from '../types/song.type'
 
-	import { albumPlayingIdStore, isPlaying, selectedAlbumId, selectedSongsStore, songPlayingIdStore } from '../store/final.store'
+	import {
+		albumPlayingIdStore,
+		isPlaying,
+		selectedAlbumId,
+		selectedSongsStore,
+		songListItemElement,
+		songPlayingIdStore
+	} from '../store/final.store'
 
 	import Star from './Star.svelte'
 	import parseDuration from '../functions/parseDuration.fn'
@@ -35,6 +42,10 @@
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 
 		$songPlayingIdStore = lastPlayedSongId
+
+		if ($songListItemElement === undefined) {
+			$songListItemElement = document.querySelector('song-list-item')
+		}
 
 		// if (lastPlayedSongId === song.ID) {
 		// let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
@@ -73,7 +84,7 @@
 			<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
 		{:else if tag.name === 'Title'}
 			<SongTag
-				data='{song[tag.name]} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}'
+				data="{song[tag.name]} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
 				customStyle="display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;overflow:hidden;max-height:22px;"
 				tagName={tag.name}
 				align={tag?.align?.toLowerCase()}

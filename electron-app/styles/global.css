@@ -15,9 +15,9 @@
 	--waveform-opacity: 1;
 	--waveform-transition-duration: 150ms;
 
-	--progress-bar-fill: 50%;
+	--song-list-svlt-height: 0px;
 
-	/* --song-list-svlt-height: 150px; */
+	--progress-bar-fill: 50%;
 
 	/* Min 100 Mid 450 Max 1000 */
 	--default-weight: 300;

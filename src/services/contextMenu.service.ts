@@ -9,8 +9,8 @@ export function loadContextMenu(event: any, menuToOpen: string, data: any) {
 
 	if (menuToOpen === 'AlbumContextMenu') {
 		template = getAlbumContextMenuTemplate(data)
-	} else if (menuToOpen === 'SongContextMenu') {
-		template = getSongContextMenuTemplate(data)
+	} else if (menuToOpen === 'SongListContextMenu') {
+		template = getSongListContextMenuTemplate(data)
 	}
 
 	const menu = Menu.buildFromTemplate(template)
@@ -18,7 +18,7 @@ export function loadContextMenu(event: any, menuToOpen: string, data: any) {
 	menu.popup(BrowserWindow.fromWebContents(event.sender))
 }
 
-function getSongContextMenuTemplate(data: any) {
+function getSongListContextMenuTemplate(data: any) {
 	let template: MenuItemConstructorOptions[] = []
 
 	template.push({
@@ -26,6 +26,12 @@ function getSongContextMenuTemplate(data: any) {
 		click: () => {
 			console.log('Cool')
 		}
+	})
+
+	template.push({
+		label: 'Songs to Show',
+		type: 'submenu',
+		submenu: getSongAmountMenu()
 	})
 
 	template.push({
@@ -39,6 +45,21 @@ function getSongContextMenuTemplate(data: any) {
 	})
 
 	return template
+}
+
+function getSongAmountMenu() {
+	let submenu: MenuItemConstructorOptions[] = []
+
+	Array.from({ length: 9 }, (x, i) => i + 4).forEach(value => {
+		submenu.push({
+			label: value.toString(),
+			click: (menuItem, browserWindow, event) => {
+				sendSongAmoutToShowToRenderer(browserWindow, value)
+			}
+		})
+	})
+
+	return submenu
 }
 
 function getSortMenu() {
@@ -68,7 +89,7 @@ function getSortMenu() {
 		'Disc #'
 	]
 
-	options.forEach((option) => {
+	options.forEach(option => {
 		submenu.push({
 			label: option,
 			type: 'submenu',
@@ -92,6 +113,9 @@ function getSortMenu() {
 	return submenu
 }
 
+function sendSongAmoutToShowToRenderer(browserWindow: BrowserWindow | undefined, songAmount: number) {
+	browserWindow?.webContents.send('show-song-amount', songAmount)
+}
 function sendSortingToRenderer(browserWindow: BrowserWindow | undefined, tag: string, order: number) {
 	browserWindow?.webContents.send('sort-songs', {
 		tag,
@@ -121,7 +145,7 @@ function getAlbumContextMenuTemplate(data: any) {
 		label: `Reload Album Cover`,
 		click: (menuItem, browserWindow, event) => {
 			if (album) {
-				getAlbumCover(album.RootDir, false, true).then((result) => {
+				getAlbumCover(album.RootDir, false, true).then(result => {
 					browserWindow?.webContents.send('new-cover', {
 						success: result !== undefined,
 						id: album?.ID,

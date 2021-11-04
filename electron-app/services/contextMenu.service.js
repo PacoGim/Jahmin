@@ -10,21 +10,26 @@ function loadContextMenu(event, menuToOpen, data) {
     if (menuToOpen === 'AlbumContextMenu') {
         template = getAlbumContextMenuTemplate(data);
     }
-    else if (menuToOpen === 'SongContextMenu') {
-        template = getSongContextMenuTemplate(data);
+    else if (menuToOpen === 'SongListContextMenu') {
+        template = getSongListContextMenuTemplate(data);
     }
     const menu = electron_1.Menu.buildFromTemplate(template);
     //@ts-expect-error
     menu.popup(electron_1.BrowserWindow.fromWebContents(event.sender));
 }
 exports.loadContextMenu = loadContextMenu;
-function getSongContextMenuTemplate(data) {
+function getSongListContextMenuTemplate(data) {
     let template = [];
     template.push({
         label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
         click: () => {
             console.log('Cool');
         }
+    });
+    template.push({
+        label: 'Songs to Show',
+        type: 'submenu',
+        submenu: getSongAmountMenu()
     });
     template.push({
         type: 'separator'
@@ -35,6 +40,18 @@ function getSongContextMenuTemplate(data) {
         submenu: getSortMenu()
     });
     return template;
+}
+function getSongAmountMenu() {
+    let submenu = [];
+    Array.from({ length: 9 }, (x, i) => i + 4).forEach(value => {
+        submenu.push({
+            label: value.toString(),
+            click: (menuItem, browserWindow, event) => {
+                sendSongAmoutToShowToRenderer(browserWindow, value);
+            }
+        });
+    });
+    return submenu;
 }
 function getSortMenu() {
     let submenu = [];
@@ -61,7 +78,7 @@ function getSortMenu() {
         'Comment',
         'Disc #'
     ];
-    options.forEach((option) => {
+    options.forEach(option => {
         submenu.push({
             label: option,
             type: 'submenu',
@@ -82,6 +99,9 @@ function getSortMenu() {
         });
     });
     return submenu;
+}
+function sendSongAmoutToShowToRenderer(browserWindow, songAmount) {
+    browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('show-song-amount', songAmount);
 }
 function sendSortingToRenderer(browserWindow, tag, order) {
     browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('sort-songs', {
@@ -108,7 +128,7 @@ function getAlbumContextMenuTemplate(data) {
         label: `Reload Album Cover`,
         click: (menuItem, browserWindow, event) => {
             if (album) {
-                albumArt_service_1.getAlbumCover(album.RootDir, false, true).then((result) => {
+                albumArt_service_1.getAlbumCover(album.RootDir, false, true).then(result => {
                     browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('new-cover', {
                         success: result !== undefined,
                         id: album === null || album === void 0 ? void 0 : album.ID,

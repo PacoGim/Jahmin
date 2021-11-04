@@ -54,3 +54,7 @@ export let layoutToShow: Writable<'Main' | 'Search' | 'Config'> = writable('Main
 export let playerElement: Writable<HTMLAudioElement> = writable(undefined)
 
 export let keypress: Writable<string> = writable(undefined)
+
+export let songAmount: Writable<number> = writable(8)
+
+export let songListItemElement: Writable<HTMLElement> = writable(undefined)

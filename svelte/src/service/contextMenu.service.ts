@@ -23,7 +23,7 @@ export function handleContextMenuEvent(e: MouseEvent) {
 		selectedAlbumId.subscribe((_) => (albumId = _))()
 		selectedSongsStore.subscribe((_) => (songs = _))()
 
-		showContextMenuIPC('SongContextMenu', {
+		showContextMenuIPC('SongListContextMenu', {
 			albumId,
 			songs
 		})
