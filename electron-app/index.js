@@ -56,8 +56,8 @@ function loadOptions(config) {
             enableRemoteModule: true
         }
     };
-    if (config['bounds'] !== undefined) {
-        const bounds = config['bounds'];
+    if (config.bounds !== undefined) {
+        const bounds = config.bounds;
         const area = electron_1.screen.getDisplayMatching(bounds).workArea;
         if (bounds.x >= area.x &&
             bounds.y >= area.y &&
@@ -74,9 +74,6 @@ function loadOptions(config) {
             options.height = bounds.height;
             options.width = bounds.width;
         }
-    }
-    else {
-        console.log('No Config');
     }
     return options;
 }
@@ -106,21 +103,6 @@ exports.getMainWindow = getMainWindow;
     //@ts-expect-error
     menu.popup(BrowserWindow.fromWebContents(event.sender))
 }) */
-// loadContextMenu(ipcMain,shell)
-electron_1.app
-    .whenReady()
-    .then(() => {
-    electron_1.globalShortcut.register('F7', () => {
-        console.log('MediaPlayPause');
-    });
-    electron_1.globalShortcut.register('MediaNextTrack', () => {
-        console.log('MediaNextTrack');
-    });
-    electron_1.globalShortcut.register('MediaPreviousTrack', () => {
-        console.log('MediaPreviousTrack');
-    });
-    createMainWindow();
-});
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();
@@ -135,7 +117,6 @@ electron_1.app.on('before-quit', () => {
 // process.on('exit',()=>{
 // })
 electron_1.app.on('activate', () => {
-    // console.log(app.getPath('appData'))
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {
         createMainWindow();
     }

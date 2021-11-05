@@ -18,7 +18,6 @@ function getGenre(doc, extension) {
         return genre;
     }
     catch (error) {
-        console.log(doc);
         return '';
     }
 }

@@ -17,7 +17,6 @@ export function getGenre(doc: any, extension: string) {
 		return genre
 
 	} catch (error) {
-		console.log(doc)
 		return ''
 	}
 }

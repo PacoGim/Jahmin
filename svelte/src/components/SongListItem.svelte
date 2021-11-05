@@ -64,7 +64,6 @@
 	}
 
 	function setStar(starChangeEvent) {
-		// console.log(song.SourceFile, starChangeEvent.detail.starRating)
 		editTagsIPC([song.SourceFile], {
 			Rating: starChangeEvent.detail.starRating
 		})

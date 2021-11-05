@@ -33,7 +33,6 @@ function getComment(doc, extension) {
         }
     }
     catch (error) {
-        console.log(doc);
         return '';
     }
 }

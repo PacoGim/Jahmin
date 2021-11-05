@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { updateSongProgress,playerElement } from '../../../store/final.store'
+	import { updateSongProgress, playerElement } from '../../../store/final.store'
 	// import { playbackCursor, playbackStore } from '../store/final.store'
 	import type { SongType } from '../../../types/song.type'
 	// import { setWaveSource } from '../service/waveform.service'
@@ -11,29 +11,6 @@
 
 	let isMouseDown = false
 	let isMouseIn = false
-
-	// let isPlaybackCursorFirstAssign = true
-
-	// let playingSongId = undefined
-	/*
-	$: {
-		if (isPlaybackCursorFirstAssign === true) isPlaybackCursorFirstAssign = false
-		else {
-			$playbackCursor
-			getWaveform($playbackCursor[0])
-		}
-	}
-
-	async function getWaveform(index: number) {
-		let song = $playbackStore?.[index]
-
-		if (song.ID === playingSongId) return
-
-		playingSongId = song.ID
-
-		setWaveSource(song.SourceFile, song.Duration)
-	}
-	*/
 
 	onMount(() => {
 		hookPlayerProgressEvents()
@@ -139,8 +116,7 @@
 	player-progress progress-foreground {
 		grid-area: 1/1/1/1;
 		z-index: 1;
-		/* opacity: 0.5; */
-		/* background-color: var(--high-color); */
+		background-color: rgba(0,0,0,0.1);
 
 		width: 0;
 		min-width: var(--song-time);
@@ -150,11 +126,8 @@
 		transition-timing-function: linear;
 		height: 100%;
 
-		border-radius: var(--player-progress-border-radius);
-
-		/* backdrop-filter: invert(1); */
-		mix-blend-mode: difference;
-		border-right: 4px solid rgb(128,128,128);
+		box-shadow: 1px 0px 5px 0px rgba(0,0,0,.25),inset -1px 0px 5px 0px rgba(0,0,0,.25);
+		border-right: 2px solid #fff;
 	}
 
 	player-progress #waveform-data {

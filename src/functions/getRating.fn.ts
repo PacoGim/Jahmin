@@ -27,7 +27,6 @@ export function getRating(doc: any, extension: string) {
 			return 'Not Defined'
 		}
 	} catch (error) {
-		console.log(doc)
 		return ''
 	}
 }

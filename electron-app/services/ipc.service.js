@@ -48,9 +48,10 @@ function loadIPC() {
         return equalizer_service_1.addEqualizer(newProfile);
     }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
         let config = config_service_1.getConfig();
-        let grouping = config['order']['grouping'] || [];
-        let filtering = config['order']['filtering'] || [];
+        let grouping = ((_a = config.order) === null || _a === void 0 ? void 0 : _a.grouping) || [];
+        let filtering = ((_b = config.order) === null || _b === void 0 ? void 0 : _b.filtering) || [];
         let result = songFilter_service_1.orderSongs(arg, grouping, filtering);
         result = result.map(value => ({
             id: nanoid(),
@@ -94,7 +95,6 @@ function loadIPC() {
         return config_service_1.saveConfig(newConfig);
     });
     electron_1.ipcMain.handle('open-config', () => {
-        console.log('Open Config File');
         // shell.showItemInFolder(configFilePath)
         return;
     });

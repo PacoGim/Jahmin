@@ -33,7 +33,10 @@ function getConfig() {
         config = getDefaultConfigFile();
     }
     if (((_a = config === null || config === void 0 ? void 0 : config['order']) === null || _a === void 0 ? void 0 : _a['grouping']) === undefined || ((_c = (_b = config === null || config === void 0 ? void 0 : config['order']) === null || _b === void 0 ? void 0 : _b['grouping']) === null || _c === void 0 ? void 0 : _c.length) === 0) {
-        config['order']['grouping'] = ['Extension', 'Genre', 'AlbumArtist', 'Album'];
+        config.order = {
+            grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
+            filtering: []
+        };
     }
     return config;
 }
@@ -60,6 +63,8 @@ function getDefaultConfigFile() {
             dimension: 128
         },
         groupOnlyByFolder: false,
-        theme: config_type_1.ThemeOptions.Auto
+        userOptions: {
+            theme: config_type_1.ThemeOptions.Auto
+        }
     };
 }

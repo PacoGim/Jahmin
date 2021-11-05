@@ -21,7 +21,6 @@ export function getComment(doc: any, extension: string) {
 			return comment
 		}
 	} catch (error) {
-		console.log(doc)
 		return ''
 	}
 }

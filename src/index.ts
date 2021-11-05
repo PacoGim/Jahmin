@@ -55,8 +55,8 @@ function loadOptions(config: ConfigType) {
 		}
 	}
 
-	if (config['bounds'] !== undefined) {
-		const bounds = config['bounds']
+	if (config.bounds !== undefined) {
+		const bounds = config.bounds
 
 		const area = screen.getDisplayMatching(bounds).workArea
 
@@ -77,8 +77,6 @@ function loadOptions(config: ConfigType) {
 			options.height = bounds.height
 			options.width = bounds.width
 		}
-	} else {
-		console.log('No Config')
 	}
 
 	return options
@@ -111,27 +109,6 @@ export function getMainWindow() {
 	menu.popup(BrowserWindow.fromWebContents(event.sender))
 }) */
 
-// loadContextMenu(ipcMain,shell)
-
-app
-	.whenReady()
-	.then(() => {
-    globalShortcut.register('F7', () => {
-      console.log('MediaPlayPause');
-    });
-
-    globalShortcut.register('MediaNextTrack', () => {
-      console.log('MediaNextTrack');
-    });
-
-    globalShortcut.register('MediaPreviousTrack', () => {
-      console.log('MediaPreviousTrack');
-    });
-
-		createMainWindow()
-	})
-
-
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit()
@@ -149,7 +126,6 @@ app.on('before-quit', () => {
 // })
 
 app.on('activate', () => {
-	// console.log(app.getPath('appData'))
 	if (BrowserWindow.getAllWindows().length === 0) {
 		createMainWindow()
 	}

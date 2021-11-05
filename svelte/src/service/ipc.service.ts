@@ -3,6 +3,7 @@ const { ipcRenderer } = require('electron')
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
+import type { ConfigType } from '../types/config.type'
 import type { EqualizerType } from '../types/equalizer.type'
 import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../types/returnMessage.type'
@@ -93,15 +94,6 @@ export function getTasksToSyncIPC(): Promise<any[]> {
 	})
 }
 
-export function streamAudio(path: string): Promise<string[]> {
-	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('stream-audio', path).then(result => {
-			// console.log(result)
-			// resolve(result)
-		})
-	})
-}
-
 export function getOrderIPC(index: number): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-order', index).then(result => {
@@ -150,7 +142,7 @@ export function getPeaksIPC(sourceFile: string) {
 	})
 }
 
-export function saveConfig(newConfig: object) {
+export function saveConfig(newConfig: ConfigType) {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('save-config', newConfig).then(result => {
 			resolve(result)
@@ -169,37 +161,6 @@ export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any
 		})
 	})
 }
-
-/*
-	Show Songs ONLY by folders (For tagging by folder purpose) after selecting options, reload app.
-*/
-/*
-export function getAlbumsIPC(): Promise<void> {
-	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-albums').then((result) => {
-			result = result.sort((a, b) => String(a[sortBy]).localeCompare(String(b[sortBy])))
-
-			albums.set(result)
-			resolve()
-			// When the results arrive, recursive call to wait for the eventual new filtering.
-			getAlbumsIPC()
-		})
-	})
-}
-
-export function getAllAlbumsIPC(): Promise<void> {
-	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-all-albums').then((result) => {
-			result = result.sort((a, b) => String(a['FolderName']).localeCompare(String(b['FolderName'])))
-			console.log(result)
-
-			albums.set(result)
-			resolve()
-		})
-	})
-}
-
-*/
 
 export function getCoverIPC(rootDir) {
 	return new Promise((resolve, reject) => {
@@ -246,29 +207,6 @@ export function getChangesProgressIPC() {
 export function showContextMenuIPC(menuToOpen, parameters) {
 	ipcRenderer.send('show-context-menu', menuToOpen, parameters)
 }
-
-// export function getDatabaseVersionIPC() {
-// 	return new Promise((resolve, reject) => {
-// 		ipcRenderer.invoke('get-database-version').then((result) => {
-// 			setTimeout(() => {
-// 				getDatabaseVersionIPC()
-// 			}, 10000)
-
-// 			let storeVersion
-
-// 			dbVersion.subscribe((value) => {
-// 				storeVersion = value
-// 			})()
-
-// 			if (result !== 0 && result !== storeVersion) {
-// 				console.log('New Version: ', result)
-// 				dbVersion.set(result)
-// 			}
-
-// 			resolve(result)
-// 		})
-// 	})
-// }
 
 export function syncDbVersionIPC() {
 	let storeDbVersion = undefined

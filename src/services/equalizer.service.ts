@@ -88,7 +88,6 @@ export function updateEqualizerValues(eqId: string, newValues: string) {
 
 			return true
 		} catch (error) {
-			console.log(error)
 			return false
 		}
 	}

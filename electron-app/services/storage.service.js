@@ -101,7 +101,6 @@ function insertData(songData) {
 }
 let fuzzyArray = [];
 function consolidateStorage() {
-    console.log('Consolidating...');
     if (!fs_1.default.existsSync(STORAGE_PATH)) {
         fs_1.default.mkdirSync(STORAGE_PATH);
     }

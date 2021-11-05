@@ -23,7 +23,7 @@ function getSongListContextMenuTemplate(data) {
     template.push({
         label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
         click: () => {
-            console.log('Cool');
+            //TODO Disable songs
         }
     });
     template.push({
@@ -59,7 +59,6 @@ function getSortMenu() {
         label: 'Add Sorting',
         click: () => {
             //TODO Add sorting option
-            console.log('Add Sorting');
         }
     });
     let options = [

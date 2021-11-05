@@ -9,7 +9,6 @@ function getComposer(doc) {
         return composer;
     }
     catch (error) {
-        console.log(doc);
         return '';
     }
 }

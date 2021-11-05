@@ -1,12 +1,17 @@
 export type ConfigType = {
 	bounds?: BoundsType
 	rootDirectories?: string[]
-	order: OrderType
-	art: ArtType
-	groupOnlyByFolder: boolean
+	order?: OrderType
+	art?: ArtType
+	groupOnlyByFolder?: boolean
 	songListTags?: any[]
+	userOptions?: UserOptionsType
+}
+
+type UserOptionsType = {
+	theme?: ThemeOptions
 	equalizerId?: string
-	theme: ThemeOptions
+	songAmount?: number
 }
 
 export enum ThemeOptions {

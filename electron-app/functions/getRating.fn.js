@@ -40,7 +40,6 @@ function getRating(doc, extension) {
         }
     }
     catch (error) {
-        console.log(doc);
         return '';
     }
 }

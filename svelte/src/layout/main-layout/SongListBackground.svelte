@@ -6,12 +6,9 @@
 
 	$: {
 		// Loads cover if Cover Art map (If image updated) or Selected Album changes.
-		// console.log($selectedAlbumId)
 
 		// Get Cover Art from Map.
 		let coverArt = $albumCoverArtMapStore.get($selectedAlbumId)
-
-		// console.log(coverArt)
 
 		// If Found
 		if (coverArt) {

@@ -51,7 +51,6 @@ export async function setWaveSource(sourceFile: string, albumId: string, duratio
 			document.documentElement.style.setProperty('--waveform-opacity', '1')
 		} else {
 			waveSurfer.on('redraw', () => {
-				console.log('Redrawing')
 				document.documentElement.style.setProperty('--waveform-opacity', '1')
 
 				waveSurfer.exportPCM(512, undefined, true, undefined).then((newPeaks) => {

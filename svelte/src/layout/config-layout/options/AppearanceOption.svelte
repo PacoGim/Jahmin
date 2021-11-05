@@ -6,7 +6,9 @@
 
 	function saveThemeToConfig(themeName: string) {
 		saveConfig({
-			theme: themeName
+			userOptions: {
+				theme: themeName as ThemeOptions
+			}
 		})
 
 		localStorage.setItem('Theme', themeName)
@@ -34,13 +36,6 @@
 </OptionSection>
 
 <style>
-	p {
-		padding: 0.5rem 1rem;
-		color: var(--primary-color);
-
-		transition: color 500ms linear;
-	}
-
 	preferred-theme-section {
 		display: flex;
 		justify-content: space-evenly;

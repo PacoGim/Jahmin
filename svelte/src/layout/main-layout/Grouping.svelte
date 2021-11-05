@@ -34,7 +34,6 @@
 	}
 
 	function setPlayingSongGroupingValue() {
-		console.log($triggerGroupingChangeEvent)
 		selectedGroupByValue = $triggerGroupingChangeEvent
 	}
 

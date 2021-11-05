@@ -62,16 +62,6 @@ export function orderSongs(index: number, grouping: string[], filtering: string[
 				} else if (song[groupBy]) {
 					return song[groupBy] === filterBy
 				}
-
-				// if (['null', null].includes(filterBy)) {
-				// 	return true
-				// } else if (['Unknown', '', undefined, 'undefined'].includes(filterBy)) {
-				// 	// console.log(song['groupBy'])
-				// 	// return song[groupBy] === undefined
-				// 	return ['Unknown', '', undefined, 'undefined'].includes(song[groupBy])
-				// } else {
-				// 	return song[groupBy] === filterBy
-				// }
 			})
 		}
 	}

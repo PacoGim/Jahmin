@@ -49,8 +49,8 @@ export function loadIPC() {
 
 	ipcMain.handle('get-order', async (evt, arg) => {
 		let config = getConfig()
-		let grouping = config['order']['grouping'] || []
-		let filtering = config['order']['filtering'] || []
+		let grouping = config.order?.grouping || []
+		let filtering = config.order?.filtering || []
 		let result: any[] = orderSongs(arg, grouping, filtering)
 
 		result = result.map(value => ({
@@ -108,7 +108,7 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('open-config', () => {
-		console.log('Open Config File')
+
 		// shell.showItemInFolder(configFilePath)
 		return
 	})

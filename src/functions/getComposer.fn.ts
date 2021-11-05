@@ -5,7 +5,6 @@ export function getComposer(doc: any) {
 		return composer
 
 	} catch (error) {
-		console.log(doc)
 		return ''
 	}
 }

@@ -78,7 +78,6 @@ function updateEqualizerValues(eqId, newValues) {
             return true;
         }
         catch (error) {
-            console.log(error);
             return false;
         }
     }

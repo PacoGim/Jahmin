@@ -32,7 +32,10 @@ export function getConfig(): ConfigType {
 	}
 
 	if (config?.['order']?.['grouping'] === undefined || config?.['order']?.['grouping']?.length === 0) {
-		config['order']['grouping'] = ['Extension', 'Genre', 'AlbumArtist', 'Album']
+		config.order = {
+			grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
+			filtering: []
+		}
 	}
 
 	return config
@@ -51,7 +54,7 @@ export function saveConfig(newConfig: any) {
 	}
 }
 
-function getDefaultConfigFile() {
+function getDefaultConfigFile(): ConfigType {
 	return {
 		order: {
 			grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
@@ -61,6 +64,8 @@ function getDefaultConfigFile() {
 			dimension: 128
 		},
 		groupOnlyByFolder: false,
-		theme: ThemeOptions.Auto
+		userOptions: {
+			theme: ThemeOptions.Auto
+		}
 	}
 }

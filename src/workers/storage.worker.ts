@@ -23,9 +23,6 @@ type WorkType = {
 parentPort?.on('message', ({ type, data, appDataPath }: WorkType) => {
 	if (appDataPath && storagePath === undefined) storagePath = path.join(appDataPath, 'storage')
 
-	// console.log(type, data)
-
-	// if (type === 'insert' || type === 'delete' || type === 'update') {
 	workQueue.push({
 		type,
 		data
@@ -35,7 +32,6 @@ parentPort?.on('message', ({ type, data, appDataPath }: WorkType) => {
 		isWorkQueueuIterating = true
 		iterateWorkQueue()
 	}
-	// }
 })
 
 function iterateWorkQueue() {
@@ -43,7 +39,6 @@ function iterateWorkQueue() {
 
 	if (work) {
 		if (['insert', 'update'].includes(work.type)) {
-			// console.log(work)
 			insert(work.data).then(() => {
 				// Tell to storage service to insert to song map
 				parentPort?.postMessage({
@@ -132,14 +127,7 @@ function insert(data: TagType) {
 
 		if (rootFolder === undefined) {
 			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
 			console.log(rootFolder)
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
-			console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!')
 			return resolve('')
 		}
 

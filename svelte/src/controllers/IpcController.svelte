@@ -2,13 +2,18 @@
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
+	import { saveConfig } from '../service/ipc.service'
 	import { albumCoverArtMapStore, songAmount, songListStore } from '../store/final.store'
 
 	onMount(() => {
 		ipcRenderer.on('show-song-amount', (event, data) => {
 			$songAmount = data
 
-			//TODO: Save to config
+			saveConfig({
+				userOptions: {
+					songAmount: data
+				}
+			})
 		})
 
 		ipcRenderer.on('sort-songs', (event, data) => {

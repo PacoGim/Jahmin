@@ -27,9 +27,7 @@ let exifToolWriteWorker = (_a = worker_service_1.getWorker('exifToolWrite')) ===
 });
 function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
-        console.log(newTags);
         newTags = normalizeNewTags(newTags);
-        console.log(newTags);
         tagWriteDeferredPromise = resolve;
         exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.postMessage({ filePath, newTags });
     });
@@ -155,7 +153,7 @@ function getDate(dateString) {
     }
 }
 function getTrack(...trackValues) {
-    let numberedTrackFound = trackValues.find((i) => typeof i === 'number');
+    let numberedTrackFound = trackValues.find(i => typeof i === 'number');
     if (numberedTrackFound) {
         return numberedTrackFound;
     }

@@ -120,7 +120,6 @@ function insertData(songData: SongType) {
 let fuzzyArray: (string | undefined)[] = []
 
 function consolidateStorage() {
-	console.log('Consolidating...')
 	if (!fs.existsSync(STORAGE_PATH)) {
 		fs.mkdirSync(STORAGE_PATH)
 	}

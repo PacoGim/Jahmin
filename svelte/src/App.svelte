@@ -54,9 +54,8 @@
 		})
 
 		navigator.mediaSession.setActionHandler('nexttrack', function () {
-			nextSong()
-			// console.log('Next Track')
 			// User hit "Previous Track" key.
+			nextSong()
 		})
 
 		let audio = document.querySelector('audio')

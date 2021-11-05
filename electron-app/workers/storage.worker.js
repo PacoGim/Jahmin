@@ -15,8 +15,6 @@ let storesMap = new Map();
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', ({ type, data, appDataPath }) => {
     if (appDataPath && storagePath === undefined)
         storagePath = path_1.default.join(appDataPath, 'storage');
-    // console.log(type, data)
-    // if (type === 'insert' || type === 'delete' || type === 'update') {
     workQueue.push({
         type,
         data
@@ -25,13 +23,11 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
         isWorkQueueuIterating = true;
         iterateWorkQueue();
     }
-    // }
 });
 function iterateWorkQueue() {
     let work = workQueue.shift();
     if (work) {
         if (['insert', 'update'].includes(work.type)) {
-            // console.log(work)
             insert(work.data).then(() => {
                 // Tell to storage service to insert to song map
                 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
@@ -111,14 +107,7 @@ function insert(data) {
         let rootFolder = (_a = data.SourceFile) === null || _a === void 0 ? void 0 : _a.split('/').slice(0, -1).join('/');
         if (rootFolder === undefined) {
             console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
             console.log(rootFolder);
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
-            console.log('!!!!!!!!!!!!!! NO ROOT FOLDER !!!!!!!!!!!!!!!!');
             return resolve('');
         }
         let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');

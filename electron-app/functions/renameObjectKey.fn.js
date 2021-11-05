@@ -6,8 +6,5 @@ function renameObjectKey(object, originalKey, newKey) {
         object[newKey] = object[originalKey];
         delete object[originalKey];
     }
-    else {
-        console.log(`Orignal Key "${originalKey}" not found in object.`);
-    }
 }
 exports.renameObjectKey = renameObjectKey;

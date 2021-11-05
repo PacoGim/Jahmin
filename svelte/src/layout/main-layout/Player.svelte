@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { SongType } from '../../types/song.type'
-
 	import { onMount } from 'svelte'
 
 	import NextButton from './sub-layout/NextButton.svelte'
@@ -18,6 +16,7 @@
 	import { setWaveSource } from '../../service/waveform.service'
 	import CoverArt from '../../components/CoverArt.svelte'
 	import { context, source } from '../../store/equalizer.store'
+	import type { SongType } from '../../types/song.type'
 
 	let progress: number = 0
 
@@ -27,8 +26,6 @@
 	let rootDir = ''
 
 	let player: HTMLAudioElement = undefined
-
-	let playingInterval: NodeJS.Timeout = undefined
 
 	let songTime = {
 		currentTime: '00:00',
@@ -135,7 +132,6 @@
 	}
 
 	function preLoadNextSong(playbackCursor: [number, boolean]) {
-		console.log('Preload')
 		let nextSong = playbackCursor[0] + 1
 		let songs = $playbackStore
 		let songToPlay = songs[nextSong]
@@ -168,7 +164,6 @@
 
 	onMount(() => {
 		player = document.querySelector('audio')
-		// console.log(player)
 	})
 
 	function stopPlayer() {
@@ -189,44 +184,37 @@
 				})
 				.catch(err => {
 					//TODO Alert user that song is not found and offer a way to remove from DB.
-					console.log('OOPS', err)
 				})
 		})
 	}
 
-	function startInterval() {
-		$isPlaying = true
+	function durationChanged(e) {
+		// Rounds to 2 decimals.
+		progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
 
-		clearInterval(playingInterval)
+		document.documentElement.style.setProperty('--song-time', `${progress}%`)
 
-		playingInterval = setInterval(() => {
-			// Rounds to 2 decimals.
-			progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
+		songTime = {
+			currentTime: parseDuration(player.currentTime),
+			duration: parseDuration(currentSong['Duration']),
+			timeLeft: parseDuration(currentSong['Duration'] - player.currentTime)
+		}
 
-			document.documentElement.style.setProperty('--song-time', `${progress}%`)
-
-			songTime = {
-				currentTime: parseDuration(player.currentTime),
-				duration: parseDuration(currentSong['Duration']),
-				timeLeft: parseDuration(currentSong['Duration'] - player.currentTime)
-			}
-
-			navigator.mediaSession.setPositionState({
-				duration: currentSong.Duration,
-				playbackRate: 1,
-				position: 0
-			})
-		}, 100)
-	}
-
-	function stopInterval() {
-		// console.log('Stop')
-		$isPlaying = false
-		clearInterval(playingInterval)
+		navigator.mediaSession.setPositionState({
+			duration: currentSong.Duration,
+			playbackRate: 1,
+			position: 0
+		})
 	}
 </script>
 
-<audio controls={true} on:play={() => startInterval()} on:pause={() => stopInterval()} on:ended={() => nextSong()}>
+<audio
+	controls={true}
+	on:pause={() => ($isPlaying = false)}
+	on:play={() => ($isPlaying = true)}
+	on:timeupdate={e => durationChanged(e)}
+	on:ended={() => nextSong()}
+>
 	<track kind="captions" />
 </audio>
 

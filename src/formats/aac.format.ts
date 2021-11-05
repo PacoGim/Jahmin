@@ -16,9 +16,7 @@ let exifToolWriteWorker: any = getWorker('exifToolWrite')?.on('message', (respon
 
 export function writeAacTags(filePath: string, newTags: any) {
 	return new Promise((resolve, reject) => {
-		console.log(newTags)
 		newTags = normalizeNewTags(newTags)
-		console.log(newTags)
 
 		tagWriteDeferredPromise = resolve
 
@@ -163,7 +161,7 @@ type DateType = {
 }
 
 function getTrack(...trackValues: [string | number]) {
-	let numberedTrackFound = trackValues.find((i) => typeof i === 'number')
+	let numberedTrackFound = trackValues.find(i => typeof i === 'number')
 
 	if (numberedTrackFound) {
 		return numberedTrackFound

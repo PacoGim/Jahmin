@@ -4,8 +4,10 @@ exports.getTrackNumber = void 0;
 function getTrackNumber(doc, extension) {
     let trackNumber = undefined;
     if (extension === 'm4a') {
-        console.log(doc);
-        trackNumber = doc['native']['iTunes'].filter((i) => i['id'] === 'aART').map((i) => i['value']).join('\\\\');
+        trackNumber = doc['native']['iTunes']
+            .filter((i) => i['id'] === 'aART')
+            .map((i) => i['value'])
+            .join('\\\\');
         if (trackNumber)
             return trackNumber;
     }

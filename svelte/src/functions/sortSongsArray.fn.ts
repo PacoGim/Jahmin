@@ -8,7 +8,6 @@ export default (songs, tag, order) => {
 	}
 
 	if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
-		// console.log(data)
 		if (order === 1) {
 			songs = songs.sort((a, b) => a[tag].localeCompare(b[tag], undefined, { numeric: true }))
 		} else {
