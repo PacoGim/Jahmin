@@ -13,6 +13,7 @@ import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
 import fileExistsWithCaseSync from '../functions/fileExistsWithCaseSync.fn'
+import { hash } from '../functions/hashString.fn'
 
 const TOTAL_CPUS = cpus().length
 
@@ -46,7 +47,7 @@ function processQueue() {
 
 		// This part goes to Storage Worker TS
 		if (task !== undefined && ['insert', 'update'].includes(task.type)) {
-			getTags(task).then((tags) => {
+			getTags(task).then(tags => {
 				storageWorker?.postMessage({
 					type: task.type,
 					data: tags,
@@ -66,14 +67,12 @@ function processQueue() {
 			processesRunning[processIndex] = false
 
 			// And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
-			if (processesRunning.every((process) => process === false)) {
+			if (processesRunning.every(process => process === false)) {
 				isQueueRunning = false
 			}
 		}
 	}
 }
-
-
 
 export function reloadAlbumData(albumId: string) {
 	//IMPORTANT Fix issue when deleting songs? Or when updating
@@ -96,14 +95,14 @@ export function reloadAlbumData(albumId: string) {
 	// Gets all song in folder.
 	let rootDirSongs = fs
 		.readdirSync(rootDir)
-		.filter((file) => isAudioFile(file))
-		.map((file) => path.join(rootDir || '', file))
+		.filter(file => isAudioFile(file))
+		.map(file => path.join(rootDir || '', file))
 
 	// Filters all song present in DB but NOT in folder in another array.
-	let songToRemove = album?.Songs.filter((song) => !rootDirSongs?.includes(song.SourceFile))
+	let songToRemove = album?.Songs.filter(song => !rootDirSongs?.includes(song.SourceFile))
 
 	if (songToRemove && songToRemove?.length > 0) {
-		songToRemove.forEach((song) => {
+		songToRemove.forEach(song => {
 			storageWorker?.postMessage({
 				type: 'delete',
 				data: song.SourceFile,
@@ -113,12 +112,12 @@ export function reloadAlbumData(albumId: string) {
 	}
 
 	// Check changes between local songs and DB song by comparing last modified time.
-	rootDirSongs.forEach((songPath) => {
-		let dbSong = album?.Songs.find((song) => song.SourceFile === songPath)
+	rootDirSongs.forEach(songPath => {
+		let dbSong = album?.Songs.find(song => song.SourceFile === songPath)
 
 		// If song found in db and local song modified time is bigger than db song.
 		if (dbSong && fs.statSync(dbSong?.SourceFile).mtimeMs > dbSong?.LastModified!) {
-			getTags({ path: dbSong.SourceFile }).then((tags) => {
+			getTags({ path: dbSong.SourceFile }).then(tags => {
 				storageWorker?.postMessage({
 					type: 'update',
 					data: tags,
@@ -134,13 +133,13 @@ function getTags(task: any) {
 		let extension = task.path.split('.').pop().toLowerCase()
 
 		if (extension === 'opus') {
-			getOpusTags(task.path).then((tags) => resolve(tags))
+			getOpusTags(task.path).then(tags => resolve(tags))
 		} else if (extension === 'mp3') {
-			getMp3Tags(task.path).then((tags) => resolve(tags))
+			getMp3Tags(task.path).then(tags => resolve(tags))
 		} else if (extension === 'flac') {
-			getFlacTags(task.path).then((tags) => resolve(tags))
+			getFlacTags(task.path).then(tags => resolve(tags))
 		} else if (extension === 'm4a') {
-			getAacTags(task.path).then((tags) => resolve(tags))
+			getAacTags(task.path).then(tags => resolve(tags))
 		} else {
 			resolve('')
 		}
@@ -159,11 +158,43 @@ export function getTaskQueueLength() {
 	return taskQueue.length
 }
 
+let audioFolders: string[] = []
+
 export function watchFolders(rootDirectories: string[]) {
 	watcher = watch(rootDirectories, {
 		awaitWriteFinish: true,
 		ignored: '**/*.DS_Store'
 	})
+
+	watcher.on('addDir', (path: string) => {
+		fs.readdir(path, (err, files) => {
+			if (err) {
+				return
+			} else {
+				if (files.find(file => isAudioFile(file))) {
+					audioFolders.unshift(path)
+				}
+			}
+		})
+	})
+
+	watcher.on('ready', () => {
+		console.log('Done')
+		console.log(audioFolders.length)
+
+		// console.log(audioFolders[0],fs.statSync(audioFolders[0]).mtimeMs)
+
+		/*audioFolders.forEach(folder => {
+			console.log(folder, fs.statSync(folder).mtimeMs)
+		}) */
+
+		/*
+			/Volumes/Maxtor/Music/Alternative/Life is Strange;1623421251000\n
+			/Volumes/Maxtor/Music/Alternative/Low Roar - Bones;1635965930000\n
+		*/
+	})
+
+	/*
 
 	watcher.on('add', (path) => {
 		// For every file found, check if is a available audio format and add to list.
@@ -184,9 +215,9 @@ export function watchFolders(rootDirectories: string[]) {
 		}
 	})
 
-	/* watcher.on('all', (event, path) => {
+	watcher.on('all', (event, path) => {
 		console.log(event, path)
-	}) */
+	})
 
 	watcher.on('ready', () => {
 		// When watcher is done getting files, any new files added afterwards are detected here.
@@ -198,15 +229,17 @@ export function watchFolders(rootDirectories: string[]) {
 
 		filterNewSongs()
 	})
+
+	*/
 }
 
 function filterNewSongs() {
 	return new Promise((resolve, reject) => {
 		let worker = getWorker('songFilter') as Worker
-		let collection = getStorageMapToArray().map((song) => song.SourceFile)
+		let collection = getStorageMapToArray().map(song => song.SourceFile)
 
 		worker.on('message', (data: string[]) => {
-			data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
+			data.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
 			killWorker('songFilter')
 			resolve(null)
 		})

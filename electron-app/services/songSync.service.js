@@ -38,7 +38,7 @@ function processQueue() {
         let task = taskQueue.shift();
         // This part goes to Storage Worker TS
         if (task !== undefined && ['insert', 'update'].includes(task.type)) {
-            getTags(task).then((tags) => {
+            getTags(task).then(tags => {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                     type: task.type,
                     data: tags,
@@ -59,7 +59,7 @@ function processQueue() {
             // If no task left then sets its own process as false.
             processesRunning[processIndex] = false;
             // And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
-            if (processesRunning.every((process) => process === false)) {
+            if (processesRunning.every(process => process === false)) {
                 isQueueRunning = false;
             }
         }
@@ -83,12 +83,12 @@ function reloadAlbumData(albumId) {
     // Gets all song in folder.
     let rootDirSongs = fs_1.default
         .readdirSync(rootDir)
-        .filter((file) => isAudioFile(file))
-        .map((file) => path_1.default.join(rootDir || '', file));
+        .filter(file => isAudioFile(file))
+        .map(file => path_1.default.join(rootDir || '', file));
     // Filters all song present in DB but NOT in folder in another array.
-    let songToRemove = album === null || album === void 0 ? void 0 : album.Songs.filter((song) => !(rootDirSongs === null || rootDirSongs === void 0 ? void 0 : rootDirSongs.includes(song.SourceFile)));
+    let songToRemove = album === null || album === void 0 ? void 0 : album.Songs.filter(song => !(rootDirSongs === null || rootDirSongs === void 0 ? void 0 : rootDirSongs.includes(song.SourceFile)));
     if (songToRemove && (songToRemove === null || songToRemove === void 0 ? void 0 : songToRemove.length) > 0) {
-        songToRemove.forEach((song) => {
+        songToRemove.forEach(song => {
             storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                 type: 'delete',
                 data: song.SourceFile,
@@ -97,11 +97,11 @@ function reloadAlbumData(albumId) {
         });
     }
     // Check changes between local songs and DB song by comparing last modified time.
-    rootDirSongs.forEach((songPath) => {
-        let dbSong = album === null || album === void 0 ? void 0 : album.Songs.find((song) => song.SourceFile === songPath);
+    rootDirSongs.forEach(songPath => {
+        let dbSong = album === null || album === void 0 ? void 0 : album.Songs.find(song => song.SourceFile === songPath);
         // If song found in db and local song modified time is bigger than db song.
         if (dbSong && fs_1.default.statSync(dbSong === null || dbSong === void 0 ? void 0 : dbSong.SourceFile).mtimeMs > (dbSong === null || dbSong === void 0 ? void 0 : dbSong.LastModified)) {
-            getTags({ path: dbSong.SourceFile }).then((tags) => {
+            getTags({ path: dbSong.SourceFile }).then(tags => {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                     type: 'update',
                     data: tags,
@@ -116,16 +116,16 @@ function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();
         if (extension === 'opus') {
-            opus_format_1.getOpusTags(task.path).then((tags) => resolve(tags));
+            opus_format_1.getOpusTags(task.path).then(tags => resolve(tags));
         }
         else if (extension === 'mp3') {
-            mp3_format_1.getMp3Tags(task.path).then((tags) => resolve(tags));
+            mp3_format_1.getMp3Tags(task.path).then(tags => resolve(tags));
         }
         else if (extension === 'flac') {
-            flac_format_1.getFlacTags(task.path).then((tags) => resolve(tags));
+            flac_format_1.getFlacTags(task.path).then(tags => resolve(tags));
         }
         else if (extension === 'm4a') {
-            aac_format_1.getAacTags(task.path).then((tags) => resolve(tags));
+            aac_format_1.getAacTags(task.path).then(tags => resolve(tags));
         }
         else {
             resolve('');
@@ -142,47 +142,81 @@ function getTaskQueueLength() {
     return taskQueue.length;
 }
 exports.getTaskQueueLength = getTaskQueueLength;
+let audioFolders = [];
 function watchFolders(rootDirectories) {
     watcher = chokidar_1.watch(rootDirectories, {
         awaitWriteFinish: true,
         ignored: '**/*.DS_Store'
     });
+    watcher.on('addDir', (path) => {
+        fs_1.default.readdir(path, (err, files) => {
+            if (err) {
+                return;
+            }
+            else {
+                if (files.find(file => isAudioFile(file))) {
+                    audioFolders.unshift(path);
+                }
+            }
+        });
+    });
+    watcher.on('ready', () => {
+        console.log('Done');
+        console.log(audioFolders.length);
+        // console.log(audioFolders[0],fs.statSync(audioFolders[0]).mtimeMs)
+        /*audioFolders.forEach(folder => {
+            console.log(folder, fs.statSync(folder).mtimeMs)
+        }) */
+        /*
+            /Volumes/Maxtor/Music/Alternative/Life is Strange;1623421251000\n
+            /Volumes/Maxtor/Music/Alternative/Low Roar - Bones;1635965930000\n
+        */
+    });
+    /*
+
     watcher.on('add', (path) => {
         // For every file found, check if is a available audio format and add to list.
         if (isAudioFile(path)) {
-            songsFound.push(path);
+            songsFound.push(path)
         }
-    });
+    })
+
     watcher.on('change', (path) => {
         if (isAudioFile(path)) {
-            addToTaskQueue(path, 'update');
+            addToTaskQueue(path, 'update')
         }
-    });
+    })
+
     watcher.on('unlink', (path) => {
         if (isAudioFile(path)) {
-            addToTaskQueue(path, 'delete');
+            addToTaskQueue(path, 'delete')
         }
-    });
-    /* watcher.on('all', (event, path) => {
+    })
+
+    watcher.on('all', (event, path) => {
         console.log(event, path)
-    }) */
+    })
+
     watcher.on('ready', () => {
         // When watcher is done getting files, any new files added afterwards are detected here.
         watcher.on('add', (path) => {
             if (isAudioFile(path)) {
-                addToTaskQueue(path, 'insert');
+                addToTaskQueue(path, 'insert')
             }
-        });
-        filterNewSongs();
-    });
+        })
+
+        filterNewSongs()
+    })
+
+    */
 }
 exports.watchFolders = watchFolders;
 function filterNewSongs() {
     return new Promise((resolve, reject) => {
         let worker = worker_service_1.getWorker('songFilter');
-        let collection = storage_service_1.getStorageMapToArray().map((song) => song.SourceFile);
+        let collection = storage_service_1.getStorageMapToArray().map(song => song.SourceFile);
         worker.on('message', (data) => {
-            data.forEach((songPath) => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
+            data.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
             worker_service_1.killWorker('songFilter');
             resolve(null);
         });

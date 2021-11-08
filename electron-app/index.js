@@ -48,7 +48,7 @@ function loadOptions(config) {
         y: 0,
         width: 800,
         height: 800,
-        backgroundColor: '#000000',
+        backgroundColor: '#111',
         webPreferences: {
             nodeIntegration: true,
             worldSafeExecuteJavaScript: true,
@@ -103,6 +103,7 @@ exports.getMainWindow = getMainWindow;
     //@ts-expect-error
     menu.popup(BrowserWindow.fromWebContents(event.sender))
 }) */
+electron_1.app.on('ready', createMainWindow);
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();

@@ -29,7 +29,6 @@ async function createMainWindow() {
 
 	browserWindow.webContents.openDevTools()
 	browserWindow.loadFile('index.html')
-
 	// Gets the storage data from files and creates a map.
 	initStorage()
 
@@ -46,7 +45,7 @@ function loadOptions(config: ConfigType) {
 		y: 0,
 		width: 800,
 		height: 800,
-		backgroundColor: '#000000',
+		backgroundColor: '#111',
 		webPreferences: {
 			nodeIntegration: true,
 			worldSafeExecuteJavaScript: true,
@@ -108,6 +107,8 @@ export function getMainWindow() {
 	//@ts-expect-error
 	menu.popup(BrowserWindow.fromWebContents(event.sender))
 }) */
+
+app.on('ready', createMainWindow)
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
