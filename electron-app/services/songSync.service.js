@@ -19,6 +19,8 @@ const fileExistsWithCaseSync_fn_1 = __importDefault(require("../functions/fileEx
 const TOTAL_CPUS = os_1.cpus().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
+let directoryIndex;
+readDirectoryIndexFile().then(data => (directoryIndex = data));
 function getRootDirFolderWatcher() {
     return watcher;
 }
@@ -143,6 +145,7 @@ function getTaskQueueLength() {
 }
 exports.getTaskQueueLength = getTaskQueueLength;
 let audioFolders = [];
+let modifiedAudioFolders = [];
 function watchFolders(rootDirectories) {
     watcher = chokidar_1.watch(rootDirectories, {
         awaitWriteFinish: true,
@@ -155,22 +158,31 @@ function watchFolders(rootDirectories) {
             }
             else {
                 if (files.find(file => isAudioFile(file))) {
-                    audioFolders.unshift(path);
+                    audioFolders.push(path);
                 }
             }
         });
     });
     watcher.on('ready', () => {
-        console.log('Done');
-        console.log(audioFolders.length);
-        // console.log(audioFolders[0],fs.statSync(audioFolders[0]).mtimeMs)
-        /*audioFolders.forEach(folder => {
-            console.log(folder, fs.statSync(folder).mtimeMs)
-        }) */
-        /*
-            /Volumes/Maxtor/Music/Alternative/Life is Strange;1623421251000\n
-            /Volumes/Maxtor/Music/Alternative/Low Roar - Bones;1635965930000\n
-        */
+        // Sort folders alphabetically.
+        audioFolders = audioFolders.sort((a, b) => a.localeCompare(b));
+        // For each folder path.
+        audioFolders.forEach(folder => {
+            // If folder is found in the index.
+            if (directoryIndex[folder] !== undefined) {
+                // If time discrepancy is found, then add to modifiedAudioFolders and add to directoryIndex.
+                if (fs_1.default.statSync(folder).mtimeMs > directoryIndex[folder]) {
+                    modifiedAudioFolders.push(folder);
+                    directoryIndex[folder] = fs_1.default.statSync(folder).mtimeMs;
+                }
+            }
+            else {
+                // New directories found.
+                directoryIndex[folder] = fs_1.default.statSync(folder).mtimeMs;
+            }
+        });
+        // Save directoryIndex to disk.
+        saveDirectoryIndexFile();
     });
     /*
 
@@ -197,6 +209,7 @@ function watchFolders(rootDirectories) {
         console.log(event, path)
     })
 
+
     watcher.on('ready', () => {
         // When watcher is done getting files, any new files added afterwards are detected here.
         watcher.on('add', (path) => {
@@ -207,7 +220,6 @@ function watchFolders(rootDirectories) {
 
         filterNewSongs()
     })
-
     */
 }
 exports.watchFolders = watchFolders;
@@ -235,6 +247,39 @@ function addToTaskQueue(path, type) {
         isQueueRunning = true;
         processQueue();
     }
+}
+function saveDirectoryIndexFile() {
+    let filePath = path_1.default.join(__1.appDataPath(), 'directoryIndex.json');
+    fs_1.default.writeFile(filePath, JSON.stringify(directoryIndex, undefined, 2), err => {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+function readDirectoryIndexFile() {
+    return new Promise((resolve, reject) => {
+        let filePath = path_1.default.join(__1.appDataPath(), 'directoryIndex.json');
+        if (fs_1.default.existsSync(filePath)) {
+            fs_1.default.readFile(filePath, 'utf8', (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(JSON.parse(data));
+                }
+            });
+        }
+        else {
+            fs_1.default.writeFile(filePath, JSON.stringify({}), err => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve({});
+                }
+            });
+        }
+    });
 }
 function isAudioFile(path) {
     return EXTENSIONS.includes(path.split('.').pop() || '');

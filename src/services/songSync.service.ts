@@ -21,6 +21,10 @@ let watcher: FSWatcher
 
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
 
+let directoryIndex: any
+
+readDirectoryIndexFile().then(data => (directoryIndex = data))
+
 export function getRootDirFolderWatcher() {
 	return watcher
 }
@@ -159,6 +163,7 @@ export function getTaskQueueLength() {
 }
 
 let audioFolders: string[] = []
+let modifiedAudioFolders: string[] = []
 
 export function watchFolders(rootDirectories: string[]) {
 	watcher = watch(rootDirectories, {
@@ -172,26 +177,33 @@ export function watchFolders(rootDirectories: string[]) {
 				return
 			} else {
 				if (files.find(file => isAudioFile(file))) {
-					audioFolders.unshift(path)
+					audioFolders.push(path)
 				}
 			}
 		})
 	})
 
 	watcher.on('ready', () => {
-		console.log('Done')
-		console.log(audioFolders.length)
+		// Sort folders alphabetically.
+		audioFolders = audioFolders.sort((a, b) => a.localeCompare(b))
 
-		// console.log(audioFolders[0],fs.statSync(audioFolders[0]).mtimeMs)
+		// For each folder path.
+		audioFolders.forEach(folder => {
+			// If folder is found in the index.
+			if (directoryIndex[folder] !== undefined) {
+				// If time discrepancy is found, then add to modifiedAudioFolders and add to directoryIndex.
+				if (fs.statSync(folder).mtimeMs > directoryIndex[folder]) {
+					modifiedAudioFolders.push(folder)
+					directoryIndex[folder] = fs.statSync(folder).mtimeMs
+				}
+			} else {
+				// New directories found.
+				directoryIndex[folder] = fs.statSync(folder).mtimeMs
+			}
+		})
 
-		/*audioFolders.forEach(folder => {
-			console.log(folder, fs.statSync(folder).mtimeMs)
-		}) */
-
-		/*
-			/Volumes/Maxtor/Music/Alternative/Life is Strange;1623421251000\n
-			/Volumes/Maxtor/Music/Alternative/Low Roar - Bones;1635965930000\n
-		*/
+		// Save directoryIndex to disk.
+		saveDirectoryIndexFile()
 	})
 
 	/*
@@ -219,6 +231,7 @@ export function watchFolders(rootDirectories: string[]) {
 		console.log(event, path)
 	})
 
+
 	watcher.on('ready', () => {
 		// When watcher is done getting files, any new files added afterwards are detected here.
 		watcher.on('add', (path) => {
@@ -229,7 +242,6 @@ export function watchFolders(rootDirectories: string[]) {
 
 		filterNewSongs()
 	})
-
 	*/
 }
 
@@ -261,6 +273,39 @@ function addToTaskQueue(path: string, type: string) {
 		isQueueRunning = true
 		processQueue()
 	}
+}
+
+function saveDirectoryIndexFile() {
+	let filePath = path.join(appDataPath(), 'directoryIndex.json')
+	fs.writeFile(filePath, JSON.stringify(directoryIndex, undefined, 2), err => {
+		if (err) {
+			console.log(err)
+		}
+	})
+}
+
+function readDirectoryIndexFile(): Promise<Object> {
+	return new Promise((resolve, reject) => {
+		let filePath = path.join(appDataPath(), 'directoryIndex.json')
+
+		if (fs.existsSync(filePath)) {
+			fs.readFile(filePath, 'utf8', (err, data) => {
+				if (err) {
+					reject(err)
+				} else {
+					resolve(JSON.parse(data))
+				}
+			})
+		} else {
+			fs.writeFile(filePath, JSON.stringify({}), err => {
+				if (err) {
+					reject(err)
+				} else {
+					resolve({})
+				}
+			})
+		}
+	})
 }
 
 function isAudioFile(path: string) {
