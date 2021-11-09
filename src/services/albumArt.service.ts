@@ -7,6 +7,7 @@ import { appDataPath } from '..'
 import { mkdirSync } from 'original-fs'
 import { getConfig } from './config.service'
 import { hash } from '../functions/hashString.fn'
+import { sendWebContents } from './sendWebContents.service'
 
 export function getAlbumCover(
 	rootDir: string,
@@ -20,10 +21,10 @@ export function getAlbumCover(
 		const validNames = ['cover', 'folder', 'front', 'art', 'album']
 
 		if (forceImage === true) {
-			validFormats = validFormats.filter((format) => !videoFormats.includes(format))
+			validFormats = validFormats.filter(format => !videoFormats.includes(format))
 		}
 
-		const allowedNames = validNames.map((name) => validFormats.map((ext) => `${name}.${ext}`)).flat()
+		const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat()
 
 		let rootDirHashed = hash(rootDir, 'text') as string
 		let config = getConfig()
@@ -42,8 +43,8 @@ export function getAlbumCover(
 
 		let allowedMediaFiles = fs
 			.readdirSync(rootDir)
-			.filter((file) => allowedNames.includes(file.toLowerCase()))
-			.map((file) => path.join(rootDir, file))
+			.filter(file => allowedNames.includes(file.toLowerCase()))
+			.map(file => path.join(rootDir, file))
 			.sort((a, b) => {
 				// Gets the priority from the index of the valid formats above.
 				// mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.
@@ -65,36 +66,41 @@ export function getAlbumCover(
 			resolve({ fileType: 'image', filePath: preferredArt })
 
 			if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
-				compressImage(preferredArt, artDirPath, artFilePath)
+				compressImage(preferredArt, artDirPath, artFilePath).then(artPath => {
+					sendWebContents('new-cover', {
+						success: true,
+						id: rootDirHashed,
+						filePath: artPath,
+						fileType: 'image'
+					})
+				})
 			}
 		}
 	})
 }
 
-function compressImage(filePath: string, artDirPath: string, artPath: string) {
-	let config = getConfig()
-	let dimension = config?.art?.dimension || 128
+function compressImage(filePath: string, artDirPath: string, artPath: string): Promise<string> {
+	return new Promise((resolve, reject) => {
+		let config = getConfig()
+		let dimension = config?.art?.dimension || 128
 
-	if (!fs.existsSync(artDirPath)) {
-		mkdirSync(artDirPath, { recursive: true })
-	}
+		if (!fs.existsSync(artDirPath)) {
+			mkdirSync(artDirPath, { recursive: true })
+		}
 
-	// let data = {
-	// 	filePath,
-	// 	dimension,
-	// 	artPath
-	// }
-
-	// sharpWorker?.postMessage(data)
-	sharp(filePath)
-		.resize({
-			height: dimension * 2,
-			width: dimension * 2
-		})
-		.webp({
-			quality: 85
-		})
-		.toFile(artPath)
+		sharp(filePath)
+			.resize({
+				height: dimension * 2,
+				width: dimension * 2
+			})
+			.webp({
+				quality: 85
+			})
+			.toFile(artPath)
+			.then(() => {
+				resolve(artPath)
+			})
+	})
 }
 
 function getExtension(data: string) {

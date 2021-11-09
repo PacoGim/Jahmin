@@ -1,22 +1,20 @@
-import { Worker, parentPort } from 'worker_threads'
+import { parentPort } from 'worker_threads'
 
 type FilterSongData = {
 	dbSongs: string[]
-	foundSongs: string[]
+	userSongs: string[]
 }
 
 parentPort?.on('message', (data: FilterSongData) => {
-	let { foundSongs, dbSongs } = data
-	let newSongs: string[] = []
+	let { userSongs, dbSongs } = data
 
-	foundSongs.forEach((song) => {
-		if (dbSongs.indexOf(song) === -1) {
-			newSongs.push(song)
-		}
+	let songsToAdd = userSongs
+		.filter(song => !dbSongs.includes(song))
+		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+	let songsToDelete = dbSongs.filter(song => !userSongs.includes(song))
+
+	parentPort?.postMessage({
+		songsToAdd,
+		songsToDelete
 	})
-
-	// Sorts all songs to start adding them in alphabetical order.
-	newSongs = newSongs.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-
-	parentPort?.postMessage(newSongs)
 })

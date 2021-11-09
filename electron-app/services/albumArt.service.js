@@ -11,6 +11,7 @@ const __1 = require("..");
 const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
+const sendWebContents_service_1 = require("./sendWebContents.service");
 function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
     return new Promise((resolve, reject) => {
         var _a;
@@ -19,9 +20,9 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
         const videoFormats = ['mp4', 'webm'];
         const validNames = ['cover', 'folder', 'front', 'art', 'album'];
         if (forceImage === true) {
-            validFormats = validFormats.filter((format) => !videoFormats.includes(format));
+            validFormats = validFormats.filter(format => !videoFormats.includes(format));
         }
-        const allowedNames = validNames.map((name) => validFormats.map((ext) => `${name}.${ext}`)).flat();
+        const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
         let rootDirHashed = hashString_fn_1.hash(rootDir, 'text');
         let config = config_service_1.getConfig();
         let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
@@ -36,8 +37,8 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
         }
         let allowedMediaFiles = fs_1.default
             .readdirSync(rootDir)
-            .filter((file) => allowedNames.includes(file.toLowerCase()))
-            .map((file) => path_1.default.join(rootDir, file))
+            .filter(file => allowedNames.includes(file.toLowerCase()))
+            .map(file => path_1.default.join(rootDir, file))
             .sort((a, b) => {
             // Gets the priority from the index of the valid formats above.
             // mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.
@@ -55,34 +56,40 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
         else {
             resolve({ fileType: 'image', filePath: preferredArt });
             if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
-                compressImage(preferredArt, artDirPath, artFilePath);
+                compressImage(preferredArt, artDirPath, artFilePath).then(artPath => {
+                    sendWebContents_service_1.sendWebContents('new-cover', {
+                        success: true,
+                        id: rootDirHashed,
+                        filePath: artPath,
+                        fileType: 'image'
+                    });
+                });
             }
         }
     });
 }
 exports.getAlbumCover = getAlbumCover;
 function compressImage(filePath, artDirPath, artPath) {
-    var _a;
-    let config = config_service_1.getConfig();
-    let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
-    if (!fs_1.default.existsSync(artDirPath)) {
-        original_fs_1.mkdirSync(artDirPath, { recursive: true });
-    }
-    // let data = {
-    // 	filePath,
-    // 	dimension,
-    // 	artPath
-    // }
-    // sharpWorker?.postMessage(data)
-    sharp_1.default(filePath)
-        .resize({
-        height: dimension * 2,
-        width: dimension * 2
-    })
-        .webp({
-        quality: 85
-    })
-        .toFile(artPath);
+    return new Promise((resolve, reject) => {
+        var _a;
+        let config = config_service_1.getConfig();
+        let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
+        if (!fs_1.default.existsSync(artDirPath)) {
+            original_fs_1.mkdirSync(artDirPath, { recursive: true });
+        }
+        sharp_1.default(filePath)
+            .resize({
+            height: dimension * 2,
+            width: dimension * 2
+        })
+            .webp({
+            quality: 85
+        })
+            .toFile(artPath)
+            .then(() => {
+            resolve(artPath);
+        });
+    });
 }
 function getExtension(data) {
     return data.split('.').pop() || '';

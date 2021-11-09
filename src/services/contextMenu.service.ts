@@ -1,6 +1,7 @@
 import { shell, Menu, BrowserWindow } from 'electron'
 import { MenuItemConstructorOptions } from 'electron/main'
 import { getAlbumCover } from './albumArt.service'
+import { sendWebContents } from './sendWebContents.service'
 import { reloadAlbumData } from './songSync.service'
 import { getStorageMap } from './storage.service'
 
@@ -53,8 +54,8 @@ function getSongAmountMenu() {
 	Array.from({ length: 9 }, (x, i) => i + 4).forEach(value => {
 		submenu.push({
 			label: value.toString(),
-			click: (menuItem, browserWindow, event) => {
-				sendSongAmoutToShowToRenderer(browserWindow, value)
+			click: () => {
+				sendWebContents('show-song-amount', value)
 			}
 		})
 	})
@@ -95,14 +96,20 @@ function getSortMenu() {
 			submenu: [
 				{
 					label: 'Asc (A->Z)',
-					click: (menuItem, browserWindow, event) => {
-						sendSortingToRenderer(browserWindow, option, 1)
+					click: () => {
+						sendWebContents('sort-songs', {
+							tag: option,
+							order: 1
+						})
 					}
 				},
 				{
 					label: 'Desc (Z->A)',
-					click: (menuItem, browserWindow, event) => {
-						sendSortingToRenderer(browserWindow, option, -1)
+					click: () => {
+						sendWebContents('sort-songs', {
+							tag: option,
+							order: -1
+						})
 					}
 				}
 			]
@@ -110,16 +117,6 @@ function getSortMenu() {
 	})
 
 	return submenu
-}
-
-function sendSongAmoutToShowToRenderer(browserWindow: BrowserWindow | undefined, songAmount: number) {
-	browserWindow?.webContents.send('show-song-amount', songAmount)
-}
-function sendSortingToRenderer(browserWindow: BrowserWindow | undefined, tag: string, order: number) {
-	browserWindow?.webContents.send('sort-songs', {
-		tag,
-		order
-	})
 }
 
 function getAlbumContextMenuTemplate(data: any) {
@@ -142,10 +139,10 @@ function getAlbumContextMenuTemplate(data: any) {
 
 	template.push({
 		label: `Reload Album Cover`,
-		click: (menuItem, browserWindow, event) => {
+		click: () => {
 			if (album) {
 				getAlbumCover(album.RootDir, false, true).then(result => {
-					browserWindow?.webContents.send('new-cover', {
+					sendWebContents('new-cover', {
 						success: result !== undefined,
 						id: album?.ID,
 						filePath: result?.filePath,

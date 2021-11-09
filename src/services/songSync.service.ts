@@ -13,7 +13,6 @@ import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
 import fileExistsWithCaseSync from '../functions/fileExistsWithCaseSync.fn'
-import { hash } from '../functions/hashString.fn'
 
 const TOTAL_CPUS = cpus().length
 
@@ -21,21 +20,21 @@ let watcher: FSWatcher
 
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
 
-let directoryIndex: any
-
-readDirectoryIndexFile().then(data => (directoryIndex = data))
-
-export function getRootDirFolderWatcher() {
-	return watcher
-}
-
-// export let taskQueue: any[] = []
-
-let isQueueRunning = false
-
 let storageWorker = getWorker('storage')
 
+let isQueueRunning = false
 let taskQueue: any[] = []
+let audioFolders: string[] = []
+
+export let maxTaskQueueLength: number = 0
+
+export async function watchFolders(rootDirectories: string[]) {
+	let audioFolders = getAllAudioFolders(rootDirectories)
+
+	let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b))
+
+	filterSongs(audioFiles)
+}
 
 // Splits excecution based on the amount of cpus.
 function processQueue() {
@@ -78,6 +77,185 @@ function processQueue() {
 	}
 }
 
+function getTags(task: any) {
+	return new Promise((resolve, reject) => {
+		let extension = task.path.split('.').pop().toLowerCase()
+
+		if (extension === 'opus') {
+			getOpusTags(task.path).then(tags => resolve(tags))
+		} else if (extension === 'mp3') {
+			getMp3Tags(task.path).then(tags => resolve(tags))
+		} else if (extension === 'flac') {
+			getFlacTags(task.path).then(tags => resolve(tags))
+		} else if (extension === 'm4a') {
+			getAacTags(task.path).then(tags => resolve(tags))
+		} else {
+			resolve('')
+		}
+	})
+}
+
+export function watchFoldersTemp(rootDirectories: string[]) {
+	watcher = watch(rootDirectories, {
+		awaitWriteFinish: true,
+		ignored: ['**/*.DS_Store']
+	})
+
+	console.time('watchFolders')
+
+	watcher.on('addDir', (path: string) => {
+		fs.readdir(path, (err, files) => {
+			if (err) {
+				return
+			} else {
+				if (files.find(file => isAudioFile(file))) {
+					audioFolders.push(path)
+				}
+			}
+		})
+	})
+
+	watcher.on('add', (path: string) => {
+		// console.log(path)
+	})
+
+	/*
+
+	watcher.on('add', (path) => {
+		// For every file found, check if is a available audio format and add to list.
+		if (isAudioFile(path)) {
+			songsFound.push(path)
+		}
+	})
+
+	watcher.on('change', (path) => {
+		if (isAudioFile(path)) {
+			addToTaskQueue(path, 'update')
+		}
+	})
+
+	watcher.on('unlink', (path) => {
+		if (isAudioFile(path)) {
+			addToTaskQueue(path, 'delete')
+		}
+	})
+
+	watcher.on('all', (event, path) => {
+		console.log(event, path)
+	})
+
+
+	watcher.on('ready', () => {
+		// When watcher is done getting files, any new files added afterwards are detected here.
+		watcher.on('add', (path) => {
+			if (isAudioFile(path)) {
+				addToTaskQueue(path, 'insert')
+			}
+		})
+
+		filterNewSongs()
+	})
+	*/
+}
+
+function filterSongs(audioFilesFound: string[] = []) {
+	return new Promise((resolve, reject) => {
+		let worker = getWorker('songFilter') as Worker
+		let collection = getStorageMapToArray().map(song => song.SourceFile)
+
+		worker.on('message', (data: { songsToAdd: string[]; songsToDelete: string[] }) => {
+			data.songsToDelete.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')))
+			data.songsToAdd.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')))
+
+			killWorker('songFilter')
+			resolve(null)
+		})
+
+		worker.postMessage({
+			dbSongs: collection,
+			userSongs: audioFilesFound
+		})
+	})
+}
+
+function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update' | 'deleteFolder') {
+	if (type === 'delete') {
+		taskQueue.unshift({
+			path: path,
+			type: type
+		})
+	} else {
+		taskQueue.push({
+			type,
+			path
+		})
+	}
+
+	if (isQueueRunning === false) {
+		isQueueRunning = true
+		processQueue()
+	}
+}
+
+function getAllAudioFilesInFolders(rootDirectories: string[]) {
+	let allFiles: string[] = []
+
+	rootDirectories.forEach(rootDirectory => {
+		let files = fs.readdirSync(rootDirectory)
+
+		files.forEach(file => {
+			let filePath = path.join(rootDirectory, file)
+
+			if (isAudioFile(file)) {
+				allFiles.push(filePath)
+			} else if (fs.statSync(filePath).isDirectory()) {
+				allFiles = allFiles.concat(getAllAudioFilesInFolders([filePath]))
+			}
+		})
+	})
+
+	return allFiles
+}
+
+function getAllAudioFolders(rootDirectories: string[]) {
+	let folders: string[] = []
+
+	rootDirectories.forEach(rootDirectory => {
+		let files = fs.readdirSync(rootDirectory)
+
+		files.forEach(file => {
+			let filePath = path.join(rootDirectory, file)
+
+			if (fs.statSync(filePath).isDirectory()) {
+				if (fs.readdirSync(filePath).find(file => isAudioFile(file))) {
+					folders.push(filePath)
+				}
+
+				folders = folders.concat(getAllAudioFolders([filePath]))
+			}
+		})
+	})
+
+	return folders
+}
+
+function isAudioFile(path: string) {
+	return EXTENSIONS.includes(path.split('.').pop() || '')
+}
+
+export function getRootDirFolderWatcher() {
+	return watcher
+}
+
+export function getMaxTaskQueueLength() {
+	return maxTaskQueueLength
+}
+
+export function getTaskQueueLength() {
+	return taskQueue.length
+}
+
+/********************** On Lookout **********************/
 export function reloadAlbumData(albumId: string) {
 	//IMPORTANT Fix issue when deleting songs? Or when updating
 	// Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
@@ -130,184 +308,4 @@ export function reloadAlbumData(albumId: string) {
 			})
 		}
 	})
-}
-
-function getTags(task: any) {
-	return new Promise((resolve, reject) => {
-		let extension = task.path.split('.').pop().toLowerCase()
-
-		if (extension === 'opus') {
-			getOpusTags(task.path).then(tags => resolve(tags))
-		} else if (extension === 'mp3') {
-			getMp3Tags(task.path).then(tags => resolve(tags))
-		} else if (extension === 'flac') {
-			getFlacTags(task.path).then(tags => resolve(tags))
-		} else if (extension === 'm4a') {
-			getAacTags(task.path).then(tags => resolve(tags))
-		} else {
-			resolve('')
-		}
-	})
-}
-
-let songsFound: string[] = []
-
-export let maxTaskQueueLength: number = 0
-
-export function getMaxTaskQueueLength() {
-	return maxTaskQueueLength
-}
-
-export function getTaskQueueLength() {
-	return taskQueue.length
-}
-
-let audioFolders: string[] = []
-let modifiedAudioFolders: string[] = []
-
-export function watchFolders(rootDirectories: string[]) {
-	watcher = watch(rootDirectories, {
-		awaitWriteFinish: true,
-		ignored: '**/*.DS_Store'
-	})
-
-	watcher.on('addDir', (path: string) => {
-		fs.readdir(path, (err, files) => {
-			if (err) {
-				return
-			} else {
-				if (files.find(file => isAudioFile(file))) {
-					audioFolders.push(path)
-				}
-			}
-		})
-	})
-
-	watcher.on('ready', () => {
-		// Sort folders alphabetically.
-		audioFolders = audioFolders.sort((a, b) => a.localeCompare(b))
-
-		// For each folder path.
-		audioFolders.forEach(folder => {
-			// If folder is found in the index.
-			if (directoryIndex[folder] !== undefined) {
-				// If time discrepancy is found, then add to modifiedAudioFolders and add to directoryIndex.
-				if (fs.statSync(folder).mtimeMs > directoryIndex[folder]) {
-					modifiedAudioFolders.push(folder)
-					directoryIndex[folder] = fs.statSync(folder).mtimeMs
-				}
-			} else {
-				// New directories found.
-				directoryIndex[folder] = fs.statSync(folder).mtimeMs
-			}
-		})
-
-		// Save directoryIndex to disk.
-		saveDirectoryIndexFile()
-	})
-
-	/*
-
-	watcher.on('add', (path) => {
-		// For every file found, check if is a available audio format and add to list.
-		if (isAudioFile(path)) {
-			songsFound.push(path)
-		}
-	})
-
-	watcher.on('change', (path) => {
-		if (isAudioFile(path)) {
-			addToTaskQueue(path, 'update')
-		}
-	})
-
-	watcher.on('unlink', (path) => {
-		if (isAudioFile(path)) {
-			addToTaskQueue(path, 'delete')
-		}
-	})
-
-	watcher.on('all', (event, path) => {
-		console.log(event, path)
-	})
-
-
-	watcher.on('ready', () => {
-		// When watcher is done getting files, any new files added afterwards are detected here.
-		watcher.on('add', (path) => {
-			if (isAudioFile(path)) {
-				addToTaskQueue(path, 'insert')
-			}
-		})
-
-		filterNewSongs()
-	})
-	*/
-}
-
-function filterNewSongs() {
-	return new Promise((resolve, reject) => {
-		let worker = getWorker('songFilter') as Worker
-		let collection = getStorageMapToArray().map(song => song.SourceFile)
-
-		worker.on('message', (data: string[]) => {
-			data.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
-			killWorker('songFilter')
-			resolve(null)
-		})
-
-		worker.postMessage({
-			dbSongs: collection,
-			foundSongs: songsFound
-		})
-	})
-}
-
-function addToTaskQueue(path: string, type: string) {
-	taskQueue.push({
-		type,
-		path
-	})
-
-	if (isQueueRunning === false) {
-		isQueueRunning = true
-		processQueue()
-	}
-}
-
-function saveDirectoryIndexFile() {
-	let filePath = path.join(appDataPath(), 'directoryIndex.json')
-	fs.writeFile(filePath, JSON.stringify(directoryIndex, undefined, 2), err => {
-		if (err) {
-			console.log(err)
-		}
-	})
-}
-
-function readDirectoryIndexFile(): Promise<Object> {
-	return new Promise((resolve, reject) => {
-		let filePath = path.join(appDataPath(), 'directoryIndex.json')
-
-		if (fs.existsSync(filePath)) {
-			fs.readFile(filePath, 'utf8', (err, data) => {
-				if (err) {
-					reject(err)
-				} else {
-					resolve(JSON.parse(data))
-				}
-			})
-		} else {
-			fs.writeFile(filePath, JSON.stringify({}), err => {
-				if (err) {
-					reject(err)
-				} else {
-					resolve({})
-				}
-			})
-		}
-	})
-}
-
-function isAudioFile(path: string) {
-	return EXTENSIONS.includes(path.split('.').pop() || '')
 }

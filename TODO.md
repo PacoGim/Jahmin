@@ -1,5 +1,6 @@
 ## TODO
-* Add a played counter
+* Fix issue where when modifiying song array the list doesn't refresh.
+* Add a played counter.
 * Weird background image flickering when clicking on different album.
 * When clicking on album it does not add it to tag edit.
 * SongList reactive statement seems to react twice?

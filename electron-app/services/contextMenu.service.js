@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadContextMenu = void 0;
 const electron_1 = require("electron");
 const albumArt_service_1 = require("./albumArt.service");
+const sendWebContents_service_1 = require("./sendWebContents.service");
 const songSync_service_1 = require("./songSync.service");
 const storage_service_1 = require("./storage.service");
 function loadContextMenu(event, menuToOpen, data) {
@@ -46,8 +47,8 @@ function getSongAmountMenu() {
     Array.from({ length: 9 }, (x, i) => i + 4).forEach(value => {
         submenu.push({
             label: value.toString(),
-            click: (menuItem, browserWindow, event) => {
-                sendSongAmoutToShowToRenderer(browserWindow, value);
+            click: () => {
+                sendWebContents_service_1.sendWebContents('show-song-amount', value);
             }
         });
     });
@@ -84,29 +85,26 @@ function getSortMenu() {
             submenu: [
                 {
                     label: 'Asc (A->Z)',
-                    click: (menuItem, browserWindow, event) => {
-                        sendSortingToRenderer(browserWindow, option, 1);
+                    click: () => {
+                        sendWebContents_service_1.sendWebContents('sort-songs', {
+                            tag: option,
+                            order: 1
+                        });
                     }
                 },
                 {
                     label: 'Desc (Z->A)',
-                    click: (menuItem, browserWindow, event) => {
-                        sendSortingToRenderer(browserWindow, option, -1);
+                    click: () => {
+                        sendWebContents_service_1.sendWebContents('sort-songs', {
+                            tag: option,
+                            order: -1
+                        });
                     }
                 }
             ]
         });
     });
     return submenu;
-}
-function sendSongAmoutToShowToRenderer(browserWindow, songAmount) {
-    browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('show-song-amount', songAmount);
-}
-function sendSortingToRenderer(browserWindow, tag, order) {
-    browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('sort-songs', {
-        tag,
-        order
-    });
 }
 function getAlbumContextMenuTemplate(data) {
     let album = storage_service_1.getStorageMap().get(data.albumId);
@@ -125,10 +123,10 @@ function getAlbumContextMenuTemplate(data) {
     });
     template.push({
         label: `Reload Album Cover`,
-        click: (menuItem, browserWindow, event) => {
+        click: () => {
             if (album) {
                 albumArt_service_1.getAlbumCover(album.RootDir, false, true).then(result => {
-                    browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.webContents.send('new-cover', {
+                    sendWebContents_service_1.sendWebContents('new-cover', {
                         success: result !== undefined,
                         id: album === null || album === void 0 ? void 0 : album.ID,
                         filePath: result === null || result === void 0 ? void 0 : result.filePath,
