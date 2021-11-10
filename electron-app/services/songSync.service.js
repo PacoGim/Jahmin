@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchFoldersTemp = exports.watchFolders = exports.maxTaskQueueLength = void 0;
+exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
@@ -24,7 +24,6 @@ const opus_format_1 = require("../formats/opus.format");
 const mp3_format_1 = require("../formats/mp3.format");
 const flac_format_1 = require("../formats/flac.format");
 const aac_format_1 = require("../formats/aac.format");
-const fileExistsWithCaseSync_fn_1 = __importDefault(require("../functions/fileExistsWithCaseSync.fn"));
 const TOTAL_CPUS = os_1.cpus().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
@@ -38,9 +37,36 @@ function watchFolders(rootDirectories) {
         let audioFolders = getAllAudioFolders(rootDirectories);
         let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b));
         filterSongs(audioFiles);
+        startChokidarWatch(rootDirectories);
     });
 }
 exports.watchFolders = watchFolders;
+function startChokidarWatch(rootDirectories) {
+    watcher = chokidar_1.watch(rootDirectories, {
+        awaitWriteFinish: true
+    });
+    watcher.on('ready', () => {
+        watcher.on('add', path => {
+            console.log(path, 'added');
+            if (isAudioFile(path)) {
+                addToTaskQueue(path, 'insert');
+            }
+        });
+        watcher.on('change', (path) => {
+            console.log(path, 'changed');
+            if (isAudioFile(path)) {
+                addToTaskQueue(path, 'update');
+            }
+        });
+        watcher.on('unlink', (path) => {
+            console.log(path, 'unlink');
+            if (isAudioFile(path)) {
+                addToTaskQueue(path, 'delete');
+            }
+        });
+    });
+}
+exports.startChokidarWatch = startChokidarWatch;
 // Splits excecution based on the amount of cpus.
 function processQueue() {
     // Creates an array with the length from cpus amount and map it to true.
@@ -99,75 +125,19 @@ function getTags(task) {
         }
     });
 }
-function watchFoldersTemp(rootDirectories) {
-    watcher = chokidar_1.watch(rootDirectories, {
-        awaitWriteFinish: true,
-        ignored: ['**/*.DS_Store']
-    });
-    console.time('watchFolders');
-    watcher.on('addDir', (path) => {
-        fs_1.default.readdir(path, (err, files) => {
-            if (err) {
-                return;
-            }
-            else {
-                if (files.find(file => isAudioFile(file))) {
-                    audioFolders.push(path);
-                }
-            }
-        });
-    });
-    watcher.on('add', (path) => {
-        // console.log(path)
-    });
-    /*
-
-    watcher.on('add', (path) => {
-        // For every file found, check if is a available audio format and add to list.
-        if (isAudioFile(path)) {
-            songsFound.push(path)
-        }
-    })
-
-    watcher.on('change', (path) => {
-        if (isAudioFile(path)) {
-            addToTaskQueue(path, 'update')
-        }
-    })
-
-    watcher.on('unlink', (path) => {
-        if (isAudioFile(path)) {
-            addToTaskQueue(path, 'delete')
-        }
-    })
-
-    watcher.on('all', (event, path) => {
-        console.log(event, path)
-    })
-
-
-    watcher.on('ready', () => {
-        // When watcher is done getting files, any new files added afterwards are detected here.
-        watcher.on('add', (path) => {
-            if (isAudioFile(path)) {
-                addToTaskQueue(path, 'insert')
-            }
-        })
-
-        filterNewSongs()
-    })
-    */
-}
-exports.watchFoldersTemp = watchFoldersTemp;
 function filterSongs(audioFilesFound = []) {
     return new Promise((resolve, reject) => {
         let worker = worker_service_1.getWorker('songFilter');
         let collection = storage_service_1.getStorageMapToArray().map(song => song.SourceFile);
         worker.on('message', (data) => {
-            data.songsToDelete.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')));
-            data.songsToAdd.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
-            worker_service_1.killWorker('songFilter');
-            resolve(null);
+            if (data.type === 'songsToAdd') {
+                data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
+            }
+            if (data.type === 'songsToDelete') {
+                data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')));
+                worker_service_1.killWorker('songFilter');
+                resolve(null);
+            }
         });
         worker.postMessage({
             dbSongs: collection,
@@ -240,38 +210,16 @@ function getTaskQueueLength() {
     return taskQueue.length;
 }
 exports.getTaskQueueLength = getTaskQueueLength;
-/********************** On Lookout **********************/
 function reloadAlbumData(albumId) {
-    //IMPORTANT Fix issue when deleting songs? Or when updating
-    // Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
     let album = storage_service_1.getStorageMap().get(albumId);
     let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
     if (rootDir === undefined)
         return;
-    if (fileExistsWithCaseSync_fn_1.default(rootDir) === false) {
-        storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
-            type: 'deleteFolder',
-            data: rootDir,
-            appDataPath: __1.appDataPath()
-        });
-        return;
-    }
     // Gets all song in folder.
     let rootDirSongs = fs_1.default
         .readdirSync(rootDir)
         .filter(file => isAudioFile(file))
         .map(file => path_1.default.join(rootDir || '', file));
-    // Filters all song present in DB but NOT in folder in another array.
-    let songToRemove = album === null || album === void 0 ? void 0 : album.Songs.filter(song => !(rootDirSongs === null || rootDirSongs === void 0 ? void 0 : rootDirSongs.includes(song.SourceFile)));
-    if (songToRemove && (songToRemove === null || songToRemove === void 0 ? void 0 : songToRemove.length) > 0) {
-        songToRemove.forEach(song => {
-            storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
-                type: 'delete',
-                data: song.SourceFile,
-                appDataPath: __1.appDataPath()
-            });
-        });
-    }
     // Check changes between local songs and DB song by comparing last modified time.
     rootDirSongs.forEach(songPath => {
         let dbSong = album === null || album === void 0 ? void 0 : album.Songs.find(song => song.SourceFile === songPath);

@@ -45,7 +45,7 @@ function loadOptions(config: ConfigType) {
 		y: 0,
 		width: 800,
 		height: 800,
-		backgroundColor: '#111',
+		backgroundColor: '#1c2128',
 		webPreferences: {
 			nodeIntegration: true,
 			worldSafeExecuteJavaScript: true,
@@ -84,29 +84,6 @@ function loadOptions(config: ConfigType) {
 export function getMainWindow() {
 	return browserWindow
 }
-
-/* ipcMain.on('show-context-menu', (event, menuToOpen, parameters = {}) => {
-	let template: any = []
-
-	parameters = JSON.parse(parameters)
-
-	if (menuToOpen === 'AlbumContextMenu') {
-		let album = getStorageMap().get(parameters.albumId)
-
-		template = [
-			{
-				label: `Open ${album?.Name || ''} Folder`,
-				click: () => {
-					shell.showItemInFolder(album?.RootDir || '')
-				}
-			}
-		]
-	}
-
-	const menu = Menu.buildFromTemplate(template)
-	//@ts-expect-error
-	menu.popup(BrowserWindow.fromWebContents(event.sender))
-}) */
 
 app.on('ready', createMainWindow)
 

@@ -11,10 +11,16 @@ parentPort?.on('message', (data: FilterSongData) => {
 	let songsToAdd = userSongs
 		.filter(song => !dbSongs.includes(song))
 		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+	parentPort?.postMessage({
+		type: 'songsToAdd',
+		songs: songsToAdd
+	})
+
 	let songsToDelete = dbSongs.filter(song => !userSongs.includes(song))
 
 	parentPort?.postMessage({
-		songsToAdd,
-		songsToDelete
+		type: 'songsToDelete',
+		songs: songsToDelete
 	})
 })

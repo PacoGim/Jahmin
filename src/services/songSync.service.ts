@@ -12,7 +12,6 @@ import { getOpusTags } from '../formats/opus.format'
 import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
-import fileExistsWithCaseSync from '../functions/fileExistsWithCaseSync.fn'
 
 const TOTAL_CPUS = cpus().length
 
@@ -34,6 +33,37 @@ export async function watchFolders(rootDirectories: string[]) {
 	let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b))
 
 	filterSongs(audioFiles)
+
+	startChokidarWatch(rootDirectories)
+}
+
+export function startChokidarWatch(rootDirectories: string[]) {
+	watcher = watch(rootDirectories, {
+		awaitWriteFinish: true
+	})
+
+	watcher.on('ready', () => {
+		watcher.on('add', path => {
+			console.log(path, 'added')
+			if (isAudioFile(path)) {
+				addToTaskQueue(path, 'insert')
+			}
+		})
+
+		watcher.on('change', (path: string) => {
+			console.log(path, 'changed')
+			if (isAudioFile(path)) {
+				addToTaskQueue(path, 'update')
+			}
+		})
+
+		watcher.on('unlink', (path: string) => {
+			console.log(path, 'unlink')
+			if (isAudioFile(path)) {
+				addToTaskQueue(path, 'delete')
+			}
+		})
+	})
 }
 
 // Splits excecution based on the amount of cpus.
@@ -95,80 +125,21 @@ function getTags(task: any) {
 	})
 }
 
-export function watchFoldersTemp(rootDirectories: string[]) {
-	watcher = watch(rootDirectories, {
-		awaitWriteFinish: true,
-		ignored: ['**/*.DS_Store']
-	})
-
-	console.time('watchFolders')
-
-	watcher.on('addDir', (path: string) => {
-		fs.readdir(path, (err, files) => {
-			if (err) {
-				return
-			} else {
-				if (files.find(file => isAudioFile(file))) {
-					audioFolders.push(path)
-				}
-			}
-		})
-	})
-
-	watcher.on('add', (path: string) => {
-		// console.log(path)
-	})
-
-	/*
-
-	watcher.on('add', (path) => {
-		// For every file found, check if is a available audio format and add to list.
-		if (isAudioFile(path)) {
-			songsFound.push(path)
-		}
-	})
-
-	watcher.on('change', (path) => {
-		if (isAudioFile(path)) {
-			addToTaskQueue(path, 'update')
-		}
-	})
-
-	watcher.on('unlink', (path) => {
-		if (isAudioFile(path)) {
-			addToTaskQueue(path, 'delete')
-		}
-	})
-
-	watcher.on('all', (event, path) => {
-		console.log(event, path)
-	})
-
-
-	watcher.on('ready', () => {
-		// When watcher is done getting files, any new files added afterwards are detected here.
-		watcher.on('add', (path) => {
-			if (isAudioFile(path)) {
-				addToTaskQueue(path, 'insert')
-			}
-		})
-
-		filterNewSongs()
-	})
-	*/
-}
-
 function filterSongs(audioFilesFound: string[] = []) {
 	return new Promise((resolve, reject) => {
 		let worker = getWorker('songFilter') as Worker
 		let collection = getStorageMapToArray().map(song => song.SourceFile)
 
-		worker.on('message', (data: { songsToAdd: string[]; songsToDelete: string[] }) => {
-			data.songsToDelete.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')))
-			data.songsToAdd.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')))
+		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
+			if (data.type === 'songsToAdd') {
+				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')))
+			}
 
-			killWorker('songFilter')
-			resolve(null)
+			if (data.type === 'songsToDelete') {
+				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')))
+				killWorker('songFilter')
+				resolve(null)
+			}
 		})
 
 		worker.postMessage({
@@ -255,43 +226,17 @@ export function getTaskQueueLength() {
 	return taskQueue.length
 }
 
-/********************** On Lookout **********************/
 export function reloadAlbumData(albumId: string) {
-	//IMPORTANT Fix issue when deleting songs? Or when updating
-	// Trashed Some Songs -> Renumbered -> Renamed = Song list only had 2 songs
 	let album = getStorageMap().get(albumId)
 	let rootDir = album?.RootDir
 
 	if (rootDir === undefined) return
-
-	if (fileExistsWithCaseSync(rootDir) === false) {
-		storageWorker?.postMessage({
-			type: 'deleteFolder',
-			data: rootDir,
-			appDataPath: appDataPath()
-		})
-
-		return
-	}
 
 	// Gets all song in folder.
 	let rootDirSongs = fs
 		.readdirSync(rootDir)
 		.filter(file => isAudioFile(file))
 		.map(file => path.join(rootDir || '', file))
-
-	// Filters all song present in DB but NOT in folder in another array.
-	let songToRemove = album?.Songs.filter(song => !rootDirSongs?.includes(song.SourceFile))
-
-	if (songToRemove && songToRemove?.length > 0) {
-		songToRemove.forEach(song => {
-			storageWorker?.postMessage({
-				type: 'delete',
-				data: song.SourceFile,
-				appDataPath: appDataPath()
-			})
-		})
-	}
 
 	// Check changes between local songs and DB song by comparing last modified time.
 	rootDirSongs.forEach(songPath => {

@@ -22,6 +22,18 @@ export function loadContextMenu(event: any, menuToOpen: string, data: any) {
 function getSongListContextMenuTemplate(data: any) {
 	let template: MenuItemConstructorOptions[] = []
 
+	if (data.songs.length === 1) {
+		let album = getStorageMap().get(data.albumId)
+		let song = album?.Songs.find(x => x.ID === data.songs[0])
+
+		template.push({
+			label: `Show File`,
+			click: () => {
+				shell.showItemInFolder(song?.SourceFile || '')
+			}
+		})
+	}
+
 	template.push({
 		label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
 		click: () => {
@@ -124,7 +136,7 @@ function getAlbumContextMenuTemplate(data: any) {
 	let template: MenuItemConstructorOptions[] = []
 
 	template.push({
-		label: `Show ${album?.Name || ''} Folder`,
+		label: `Show Folder`,
 		click: () => {
 			shell.openPath(album?.RootDir || '')
 		}

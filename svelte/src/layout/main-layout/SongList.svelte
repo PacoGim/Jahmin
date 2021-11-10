@@ -20,6 +20,11 @@
 	let isScrollAtTop = false
 
 	$: {
+		$songListStore
+		// console.log($songListStore)
+	}
+
+	$: {
 		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height
 		$songAmount
 		applySongListHeightChange()
@@ -86,7 +91,8 @@
 		if (isScrollAtBottom === false && isScrollAtTop === false) {
 			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
 			// 2º Slice: Keep songs from 0 to the set amount.
-			songsTrimmed = $songListStore.slice(scrollAmount).slice(0, $songAmount)
+
+			songsTrimmed = [...$songListStore.slice(scrollAmount).slice(0, $songAmount)]
 		}
 
 		setScrollProgress()

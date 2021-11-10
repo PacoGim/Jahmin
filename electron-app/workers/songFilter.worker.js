@@ -6,9 +6,13 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
     let songsToAdd = userSongs
         .filter(song => !dbSongs.includes(song))
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
+        type: 'songsToAdd',
+        songs: songsToAdd
+    });
     let songsToDelete = dbSongs.filter(song => !userSongs.includes(song));
     worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
-        songsToAdd,
-        songsToDelete
+        type: 'songsToDelete',
+        songs: songsToDelete
     });
 });

@@ -5,7 +5,6 @@
 
 	import {
 		albumPlayingIdStore,
-		isPlaying,
 		selectedAlbumId,
 		selectedSongsStore,
 		songListItemElement,
@@ -13,7 +12,6 @@
 	} from '../store/final.store'
 
 	import Star from './Star.svelte'
-	import parseDuration from '../functions/parseDuration.fn'
 	import { editTagsIPC } from '../service/ipc.service'
 	import { songListTagsConfig } from '../store/config.store'
 	import SongTag from './SongTag.svelte'
@@ -23,6 +21,7 @@
 	export let index: number
 
 	let isSongPlaying = $songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
+	let isDisabled = false
 	let gridStyle = ''
 
 	$: {
@@ -46,13 +45,6 @@
 		if ($songListItemElement === undefined) {
 			$songListItemElement = document.querySelector('song-list-item')
 		}
-
-		// if (lastPlayedSongId === song.ID) {
-		// let songEl = document.querySelector(`#${CSS.escape(String(lastPlayedSongId))}`)
-		// if (songEl) {
-		// 	songEl.scrollIntoView({ block: 'center' })
-		// }
-		// }
 	})
 
 	function setDynamicArtists() {
@@ -73,8 +65,9 @@
 <song-list-item
 	id={song.ID}
 	{index}
-	style="grid-template-columns:{isSongPlaying === true ? 'max-content' : ''}{gridStyle};"
+	style="grid-template-columns:{isDisabled === true || isSongPlaying === true ? 'max-content' : ''}{gridStyle};"
 	class="
+	{isDisabled === true ? 'disabled' : ''}
 	{isSongPlaying === true ? 'playing' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
@@ -95,10 +88,6 @@
 </song-list-item>
 
 <style>
-	song-list-item.playing::before {
-		content: '▶ ';
-		font-size: 0.75rem;
-	}
 	song-list-item {
 		position: relative;
 		cursor: pointer;
@@ -130,5 +119,27 @@
 	}
 	song-list-item.selected {
 		background-color: rgba(255, 255, 255, 0.15);
+	}
+
+	song-list-item.disabled {
+		background: repeating-linear-gradient(
+			45deg,
+			rgba(255, 255, 255, 0),
+			rgba(255, 255, 255, 0) 10px,
+			rgba(255, 255, 255, 0.1) 10px,
+			rgba(255, 255, 255, 0.1) 20px
+		);
+	}
+
+	song-list-item.disabled::before {
+		content: '🚫 ';
+		filter: grayscale(1) brightness(1000);
+
+		font-size: 0.75rem;
+	}
+
+	song-list-item.playing::before {
+		content: '▶ ';
+		font-size: 0.75rem;
 	}
 </style>

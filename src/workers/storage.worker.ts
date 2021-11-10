@@ -77,19 +77,9 @@ function deleteFolder(rootFolder: string) {
 		let rootFolderId = hash(rootFolder!, 'text') as string
 		let store = storesMap.get(rootFolderId)
 
-		if (!store) {
-			store = loadStore(rootFolderId)
-			/* 			let storeConfig: { name: string; cwd?: string } = {
-				name: rootFolderId
-			}
+		if (!store) store = loadStore(rootFolderId)
 
-			if (storagePath) storeConfig.cwd = storagePath
-
-			store = new Store(storeConfig)
-			storesMap.set(rootFolderId, store) */
-		}
-
-		store.clear()
+		fs.unlink(store.path, () => {})
 
 		resolve('')
 	})
@@ -103,19 +93,14 @@ function deleteData(path: string) {
 
 		let store = storesMap.get(rootFolderId)
 
-		if (!store) {
-			store = loadStore(rootFolderId)
-			/* 			let storeConfig: { name: string; cwd?: string } = {
-				name: rootFolderId
-			}
-
-			if (storagePath) storeConfig.cwd = storagePath
-
-			store = new Store(storeConfig)
-			storesMap.set(rootFolderId, store) */
-		}
+		if (!store) store = loadStore(rootFolderId)
 
 		store.delete(songId)
+
+		if (store.size === 0) {
+			deleteFolder(rootFolder)
+		}
+
 		updateStorageVersion()
 		resolve('')
 	})

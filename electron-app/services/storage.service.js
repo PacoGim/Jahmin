@@ -48,13 +48,11 @@ function deleteData(songPath) {
     let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
     if (mappedData && songs) {
         songs = songs.filter(song => song.ID !== songId);
+        mappedData.Songs = songs;
+        storageMap.set(rootDir, mappedData);
         // If all songs removed from drive, then, delete the album and all data from map.
         if (songs.length === 0) {
             storageMap.delete(rootDir);
-        }
-        else {
-            mappedData.Songs = songs;
-            storageMap.set(rootDir, mappedData);
         }
         if (dbVersionResolve !== undefined)
             dbVersionResolve(new Date().getTime());

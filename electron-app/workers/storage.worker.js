@@ -64,18 +64,9 @@ function deleteFolder(rootFolder) {
     return new Promise((resolve, reject) => {
         let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
         let store = storesMap.get(rootFolderId);
-        if (!store) {
+        if (!store)
             store = loadStore(rootFolderId);
-            /* 			let storeConfig: { name: string; cwd?: string } = {
-                name: rootFolderId
-            }
-
-            if (storagePath) storeConfig.cwd = storagePath
-
-            store = new Store(storeConfig)
-            storesMap.set(rootFolderId, store) */
-        }
-        store.clear();
+        fs_1.default.unlink(store.path, () => { });
         resolve('');
     });
 }
@@ -85,18 +76,12 @@ function deleteData(path) {
         let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
         let songId = String(hashString_fn_1.hash(path, 'number'));
         let store = storesMap.get(rootFolderId);
-        if (!store) {
+        if (!store)
             store = loadStore(rootFolderId);
-            /* 			let storeConfig: { name: string; cwd?: string } = {
-                name: rootFolderId
-            }
-
-            if (storagePath) storeConfig.cwd = storagePath
-
-            store = new Store(storeConfig)
-            storesMap.set(rootFolderId, store) */
-        }
         store.delete(songId);
+        if (store.size === 0) {
+            deleteFolder(rootFolder);
+        }
         updateStorageVersion();
         resolve('');
     });

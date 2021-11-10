@@ -21,6 +21,16 @@ function loadContextMenu(event, menuToOpen, data) {
 exports.loadContextMenu = loadContextMenu;
 function getSongListContextMenuTemplate(data) {
     let template = [];
+    if (data.songs.length === 1) {
+        let album = storage_service_1.getStorageMap().get(data.albumId);
+        let song = album === null || album === void 0 ? void 0 : album.Songs.find(x => x.ID === data.songs[0]);
+        template.push({
+            label: `Show File`,
+            click: () => {
+                electron_1.shell.showItemInFolder((song === null || song === void 0 ? void 0 : song.SourceFile) || '');
+            }
+        });
+    }
     template.push({
         label: `Disable Song${data.songs.length > 1 ? 's' : ''}`,
         click: () => {
@@ -110,7 +120,7 @@ function getAlbumContextMenuTemplate(data) {
     let album = storage_service_1.getStorageMap().get(data.albumId);
     let template = [];
     template.push({
-        label: `Show ${(album === null || album === void 0 ? void 0 : album.Name) || ''} Folder`,
+        label: `Show Folder`,
         click: () => {
             electron_1.shell.openPath((album === null || album === void 0 ? void 0 : album.RootDir) || '');
         }

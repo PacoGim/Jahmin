@@ -106,6 +106,7 @@
 
 		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
 		navigator.mediaSession.playbackState = 'paused'
+
 		if (playNow === true) {
 			player
 				.play()
@@ -124,7 +125,9 @@
 						preLoadNextSong(playbackCursor)
 					}, 2000)
 				})
-				.catch(err => {})
+				.catch(err => {
+					nextSong()
+				})
 		} else {
 			player.pause()
 			navigator.mediaSession.playbackState = 'paused'

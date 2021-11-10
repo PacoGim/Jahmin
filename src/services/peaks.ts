@@ -28,9 +28,9 @@ export function getPeaks(sourceFile: string): Promise<number[] | undefined> {
 
 		let peaksFile = fs.readFileSync(peaksFilePath, 'utf-8')
 
-		let hash = getSourceFileHash(sourceFile)
+		// let hash = getSourceFileHash(sourceFile)
 
-		let peaksFileHash = peaksFile.split('\n')[0]
+		// let peaksFileHash = peaksFile.split('\n')[0]
 		let peaks = peaksFile.split('\n')[1]
 
 		resolve(JSON.parse(peaks))
