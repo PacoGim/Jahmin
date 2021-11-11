@@ -20,7 +20,6 @@ const string_hash_1 = __importDefault(require("string-hash"));
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
-const mm = require('music-metadata');
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise = undefined;
 let ffmpegDeferredPromiseId;
@@ -54,6 +53,9 @@ mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.on('message', data 
 function getOpusTags(filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (!fs_1.default.existsSync(filePath)) {
+                return reject('File not found');
+            }
             const METADATA = yield new Promise((resolve, reject) => {
                 mmDeferredPromises.set(filePath, resolve);
                 mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.postMessage(filePath);
@@ -63,28 +65,34 @@ function getOpusTags(filePath) {
                 Extension: 'opus',
                 SourceFile: filePath
             };
-            const STATS = fs_1.default.statSync(filePath);
-            let nativeTags = mergeNatives(METADATA.native);
-            let dateParsed = getDate(String(nativeTags.DATE));
-            tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUM) || '';
-            tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUMARTIST) || '';
-            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ARTIST) || '';
-            tags.Comment = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DESCRIPTION) || (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMMENT) || '';
-            tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMPOSER) || '';
-            tags.Date_Year = dateParsed.year || 0;
-            tags.Date_Month = dateParsed.month || 0;
-            tags.Date_Day = dateParsed.day || 0;
-            tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DISCNUMBER) || 0;
-            tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.GENRE) || '';
-            tags.Rating = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.RATING) || 0;
-            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || '';
-            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || 0;
-            tags.BitRate = METADATA.format.bitrate / 1000;
-            tags.Duration = Math.trunc(METADATA.format.duration);
-            tags.LastModified = STATS.mtimeMs;
-            tags.SampleRate = METADATA.format.sampleRate;
-            tags.Size = STATS.size;
-            resolve(tags);
+            fs_1.default.stat(filePath, (err, stats) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (stats) {
+                    let nativeTags = mergeNatives(METADATA.native);
+                    let dateParsed = getDate(String(nativeTags.DATE));
+                    tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUM) || '';
+                    tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ALBUMARTIST) || '';
+                    tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.ARTIST) || '';
+                    tags.Comment = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DESCRIPTION) || (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMMENT) || '';
+                    tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMPOSER) || '';
+                    tags.Date_Year = dateParsed.year || 0;
+                    tags.Date_Month = dateParsed.month || 0;
+                    tags.Date_Day = dateParsed.day || 0;
+                    tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.DISCNUMBER) || 0;
+                    tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.GENRE) || '';
+                    tags.Rating = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.RATING) || 0;
+                    tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || '';
+                    tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || 0;
+                    tags.BitRate = METADATA.format.bitrate / 1000;
+                    tags.Duration = Math.trunc(METADATA.format.duration);
+                    tags.LastModified = stats.mtimeMs;
+                    tags.SampleRate = METADATA.format.sampleRate;
+                    tags.Size = stats.size;
+                    resolve(tags);
+                }
+            });
         }));
     });
 }

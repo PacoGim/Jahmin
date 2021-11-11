@@ -9,6 +9,7 @@ import { AlbumType } from '../types/album.type'
 import { hash } from '../functions/hashString.fn'
 import { SongType } from '../types/song.type'
 import { getWorker } from './worker.service'
+import generateId from '../functions/generateId.fn'
 
 const STORAGE_PATH = path.join(appDataPath(), 'storage')
 const STORAGE_VERSION_FILE_PATH = path.join(STORAGE_PATH, 'version')
@@ -33,6 +34,8 @@ worker?.on('message', message => {
 	} else if (message.type === 'deleteFolder') {
 		deleteFolder(message.data)
 	}
+
+	updateStorageVersion()
 })
 
 function deleteFolder(rootDir: string) {
@@ -42,7 +45,7 @@ function deleteFolder(rootDir: string) {
 
 	if (mappedData) {
 		storageMap.delete(rootId)
-		if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+		if (dbVersionResolve !== undefined) dbVersionResolve(generateId())
 	}
 }
 
@@ -66,7 +69,7 @@ function deleteData(songPath: string) {
 			storageMap.delete(rootDir)
 		}
 
-		if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+		if (dbVersionResolve !== undefined) dbVersionResolve(generateId())
 	}
 }
 
@@ -89,7 +92,7 @@ function updateData(songData: SongType) {
 		mappedData.Songs = songs
 		storageMap.set(rootDir, mappedData)
 
-		if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+		if (dbVersionResolve !== undefined) dbVersionResolve(generateId())
 	}
 }
 
@@ -114,7 +117,7 @@ function insertData(songData: SongType) {
 		})
 	}
 
-	if (dbVersionResolve !== undefined) dbVersionResolve(new Date().getTime())
+	if (dbVersionResolve !== undefined) dbVersionResolve(generateId())
 }
 
 let fuzzyArray: (string | undefined)[] = []
@@ -176,11 +179,11 @@ export function getStorageMapToArray() {
 	return array
 }
 
-export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<number> {
+export function getNewPromiseDbVersion(rendererDbVersion: string): Promise<string> {
 	let dbFileTimeStamp = getStorageVersion()
 
 	// If the db version changed while going back and forth Main <-> Renderer
-	if (dbFileTimeStamp > rendererDbVersion) {
+	if (rendererDbVersion !== dbFileTimeStamp) {
 		return new Promise(resolve => resolve(dbFileTimeStamp))
 	} else {
 		// If didn't change, wait for a change to happen.
@@ -188,20 +191,8 @@ export function getNewPromiseDbVersion(rendererDbVersion: number): Promise<numbe
 	}
 }
 
-/*
-function watchVersionFile() {
-	if (!fs.existsSync(STORAGE_VERSION_FILE_PATH)) {
-		fs.writeFileSync(STORAGE_VERSION_FILE_PATH, '0')
-	}
-
-	watcher = chokidar.watch(path.join(STORAGE_PATH, 'version')).on('change', () => {
-		dbVersionResolve(getStorageVersion())
-	})
-}
-*/
-
-export function updateStorageVersion() {
-	fs.writeFileSync(STORAGE_VERSION_FILE_PATH, String(new Date().getTime()))
+function updateStorageVersion() {
+	fs.writeFileSync(STORAGE_VERSION_FILE_PATH, generateId(), { encoding: 'utf-8' })
 }
 
 export function killStorageWatcher() {
@@ -212,14 +203,13 @@ export function killStorageWatcher() {
 
 export function initStorage() {
 	consolidateStorage()
-	// watchVersionFile()
 }
 
 function getStorageVersion() {
 	try {
-		return Number(fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }))
+		return fs.readFileSync(path.join(STORAGE_PATH, 'version'), { encoding: 'utf8' })
 	} catch (error) {
-		return 0
+		return ''
 	}
 }
 

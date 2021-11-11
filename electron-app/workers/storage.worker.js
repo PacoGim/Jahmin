@@ -82,7 +82,6 @@ function deleteData(path) {
         if (store.size === 0) {
             deleteFolder(rootFolder);
         }
-        updateStorageVersion();
         resolve('');
     });
 }
@@ -100,17 +99,8 @@ function insert(data) {
         let store = storesMap.get(rootFolderId);
         if (!store) {
             store = loadStore(rootFolderId);
-            /* 			let storeConfig: { name: string; cwd?: string } = {
-                name: rootFolderId
-            }
-
-            if (storagePath) storeConfig.cwd = storagePath
-
-            store = new Store(storeConfig)
-            storesMap.set(rootFolderId, store) */
         }
         store.set(songId, data);
-        updateStorageVersion();
         resolve('');
     });
 }
@@ -124,9 +114,4 @@ function loadStore(rootFolderId) {
     store = new electron_store_1.default(storeConfig);
     storesMap.set(rootFolderId, store);
     return store;
-}
-function updateStorageVersion() {
-    if (storagePath) {
-        fs_1.default.writeFileSync(path_1.default.join(storagePath, 'version'), String(new Date().getTime()));
-    }
 }

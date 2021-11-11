@@ -12,6 +12,7 @@ import { getOpusTags } from '../formats/opus.format'
 import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
+import { SongType } from '../types/song.type'
 
 const TOTAL_CPUS = cpus().length
 
@@ -23,7 +24,6 @@ let storageWorker = getWorker('storage')
 
 let isQueueRunning = false
 let taskQueue: any[] = []
-let audioFolders: string[] = []
 
 export let maxTaskQueueLength: number = 0
 
@@ -39,26 +39,24 @@ export async function watchFolders(rootDirectories: string[]) {
 
 export function startChokidarWatch(rootDirectories: string[]) {
 	watcher = watch(rootDirectories, {
-		awaitWriteFinish: true
+		awaitWriteFinish: true,
+		ignored: '**/*.DS_Store'
 	})
 
 	watcher.on('ready', () => {
 		watcher.on('add', path => {
-			console.log(path, 'added')
 			if (isAudioFile(path)) {
 				addToTaskQueue(path, 'insert')
 			}
 		})
 
 		watcher.on('change', (path: string) => {
-			console.log(path, 'changed')
 			if (isAudioFile(path)) {
 				addToTaskQueue(path, 'update')
 			}
 		})
 
 		watcher.on('unlink', (path: string) => {
-			console.log(path, 'unlink')
 			if (isAudioFile(path)) {
 				addToTaskQueue(path, 'delete')
 			}
@@ -78,16 +76,21 @@ function processQueue() {
 	function getTask(processIndex: number) {
 		let task = taskQueue.shift()
 
-		// This part goes to Storage Worker TS
+		// This part works with Storage Worker TS
 		if (task !== undefined && ['insert', 'update'].includes(task.type)) {
-			getTags(task).then(tags => {
-				storageWorker?.postMessage({
-					type: task.type,
-					data: tags,
-					appDataPath: appDataPath()
+			getTags(task)
+				.then(tags => {
+					storageWorker?.postMessage({
+						type: task.type,
+						data: tags,
+						appDataPath: appDataPath()
+					})
+
+					getTask(processIndex)
 				})
-				getTask(processIndex)
-			})
+				.catch(err => {
+					getTask(processIndex)
+				})
 		} else if (task !== undefined && ['delete'].includes(task.type)) {
 			storageWorker?.postMessage({
 				type: task.type,
@@ -107,20 +110,28 @@ function processQueue() {
 	}
 }
 
-function getTags(task: any) {
+function getTags(task: any): Promise<SongType | null> {
 	return new Promise((resolve, reject) => {
 		let extension = task.path.split('.').pop().toLowerCase()
 
 		if (extension === 'opus') {
-			getOpusTags(task.path).then(tags => resolve(tags))
+			getOpusTags(task.path)
+				.then(tags => resolve(tags))
+				.catch(err => reject(err))
 		} else if (extension === 'mp3') {
-			getMp3Tags(task.path).then(tags => resolve(tags))
+			getMp3Tags(task.path)
+				.then(tags => resolve(tags))
+				.catch(err => reject(err))
 		} else if (extension === 'flac') {
-			getFlacTags(task.path).then(tags => resolve(tags))
+			getFlacTags(task.path)
+				.then(tags => resolve(tags))
+				.catch(err => reject(err))
 		} else if (extension === 'm4a') {
-			getAacTags(task.path).then(tags => resolve(tags))
+			getAacTags(task.path)
+				.then(tags => resolve(tags))
+				.catch(err => reject(err))
 		} else {
-			resolve('')
+			resolve(null)
 		}
 	})
 }
@@ -179,7 +190,7 @@ function getAllAudioFilesInFolders(rootDirectories: string[]) {
 
 			if (isAudioFile(file)) {
 				allFiles.push(filePath)
-			} else if (fs.statSync(filePath).isDirectory()) {
+			} else if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
 				allFiles = allFiles.concat(getAllAudioFilesInFolders([filePath]))
 			}
 		})
@@ -197,7 +208,7 @@ function getAllAudioFolders(rootDirectories: string[]) {
 		files.forEach(file => {
 			let filePath = path.join(rootDirectory, file)
 
-			if (fs.statSync(filePath).isDirectory()) {
+			if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
 				if (fs.readdirSync(filePath).find(file => isAudioFile(file))) {
 					folders.push(filePath)
 				}
@@ -244,13 +255,17 @@ export function reloadAlbumData(albumId: string) {
 
 		// If song found in db and local song modified time is bigger than db song.
 		if (dbSong && fs.statSync(dbSong?.SourceFile).mtimeMs > dbSong?.LastModified!) {
-			getTags({ path: dbSong.SourceFile }).then(tags => {
-				storageWorker?.postMessage({
-					type: 'update',
-					data: tags,
-					appDataPath: appDataPath()
+			getTags({ path: dbSong.SourceFile })
+				.then(tags => {
+					storageWorker?.postMessage({
+						type: 'update',
+						data: tags,
+						appDataPath: appDataPath()
+					})
 				})
-			})
+				.catch(err => {
+					console.error(err)
+				})
 		}
 	})
 }

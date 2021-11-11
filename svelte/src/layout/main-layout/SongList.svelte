@@ -2,13 +2,14 @@
 	import { onMount } from 'svelte'
 
 	import SongListItem from '../../components/SongListItem.svelte'
+	import { songAmountConfig } from '../../store/config.store'
 
 	import {
 		selectedAlbumId,
 		songListStore,
 		selectedSongsStore,
 		triggerScrollToSongEvent,
-		songAmount
+		dbVersion
 	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
@@ -20,13 +21,14 @@
 	let isScrollAtTop = false
 
 	$: {
-		$songListStore
-		// console.log($songListStore)
+		// Trim song array when the db version changes.
+		$dbVersion
+		trimSongsArray()
 	}
 
 	$: {
-		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height
-		$songAmount
+		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height.
+		$songAmountConfig
 		applySongListHeightChange()
 	}
 
@@ -69,7 +71,7 @@
 		// Sets the scroll to 0 to go back up the list to calculate new height and be visually appealing to the user.
 		setScroll(0)
 
-		// In order to trim the array of songs these two variables need to be set to false.
+		// In order to force trim the array of songs these two variables need to be set to false.
 		isScrollAtBottom = false
 		isScrollAtTop = false
 
@@ -88,11 +90,20 @@
 	}
 
 	function trimSongsArray() {
+		// This check prevents trimming the array indefinetly and for no reason. Once it reached either end the list is already trimmed.
 		if (isScrollAtBottom === false && isScrollAtTop === false) {
+			let tempScroll = scrollAmount
+
 			// 1º Slice: Slice array from scrollAmount to end. Cuts from array songs already scrolled.
 			// 2º Slice: Keep songs from 0 to the set amount.
+			songsTrimmed = [...$songListStore.slice(scrollAmount).slice(0, $songAmountConfig)]
 
-			songsTrimmed = [...$songListStore.slice(scrollAmount).slice(0, $songAmount)]
+			// If the list is empty (no songs) it sets the scroll to 0. In the case of user deleting songs.
+			if (songsTrimmed.length === 0) {
+				setTimeout(() => setScroll(0), 1)
+			} else {
+				setScroll(tempScroll)
+			}
 		}
 
 		setScrollProgress()
@@ -173,7 +184,7 @@
 	// Manages to "scroll" to the proper song on demand.
 	function setScrollAmountFromSong(songId) {
 		let songIndex = $songListStore.findIndex(song => song.ID === songId)
-		let differenceAmount = Math.floor($songAmount / 2)
+		let differenceAmount = Math.floor($songAmountConfig / 2)
 
 		if (songIndex !== -1) {
 			if (songIndex < differenceAmount) {

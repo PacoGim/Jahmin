@@ -11,7 +11,6 @@
 	let selectedGroupBy = localStorage.getItem('GroupBy')
 	let selectedGroupByValue = localStorage.getItem('GroupByValue')
 
-	// let selection = selectedGroupByValue
 	let groups = []
 
 	let firstSelectedGroupByAssign = true

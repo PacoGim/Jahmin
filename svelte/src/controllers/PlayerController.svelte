@@ -38,7 +38,7 @@
 		if (firstDbVersionAssign === true) {
 			firstDbVersionAssign = false
 		} else {
-			if ($dbVersion !== 0) {
+			if ($dbVersion !== '') {
 				getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
 
 				// Refills the current album selected songs to add them as they are found.

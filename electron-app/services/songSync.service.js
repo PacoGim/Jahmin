@@ -30,7 +30,6 @@ const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
 let storageWorker = worker_service_1.getWorker('storage');
 let isQueueRunning = false;
 let taskQueue = [];
-let audioFolders = [];
 exports.maxTaskQueueLength = 0;
 function watchFolders(rootDirectories) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -43,23 +42,21 @@ function watchFolders(rootDirectories) {
 exports.watchFolders = watchFolders;
 function startChokidarWatch(rootDirectories) {
     watcher = chokidar_1.watch(rootDirectories, {
-        awaitWriteFinish: true
+        awaitWriteFinish: true,
+        ignored: '**/*.DS_Store'
     });
     watcher.on('ready', () => {
         watcher.on('add', path => {
-            console.log(path, 'added');
             if (isAudioFile(path)) {
                 addToTaskQueue(path, 'insert');
             }
         });
         watcher.on('change', (path) => {
-            console.log(path, 'changed');
             if (isAudioFile(path)) {
                 addToTaskQueue(path, 'update');
             }
         });
         watcher.on('unlink', (path) => {
-            console.log(path, 'unlink');
             if (isAudioFile(path)) {
                 addToTaskQueue(path, 'delete');
             }
@@ -76,14 +73,18 @@ function processQueue() {
     // Shifts a task from array and gets the tags.
     function getTask(processIndex) {
         let task = taskQueue.shift();
-        // This part goes to Storage Worker TS
+        // This part works with Storage Worker TS
         if (task !== undefined && ['insert', 'update'].includes(task.type)) {
-            getTags(task).then(tags => {
+            getTags(task)
+                .then(tags => {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                     type: task.type,
                     data: tags,
                     appDataPath: __1.appDataPath()
                 });
+                getTask(processIndex);
+            })
+                .catch(err => {
                 getTask(processIndex);
             });
         }
@@ -109,19 +110,27 @@ function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();
         if (extension === 'opus') {
-            opus_format_1.getOpusTags(task.path).then(tags => resolve(tags));
+            opus_format_1.getOpusTags(task.path)
+                .then(tags => resolve(tags))
+                .catch(err => reject(err));
         }
         else if (extension === 'mp3') {
-            mp3_format_1.getMp3Tags(task.path).then(tags => resolve(tags));
+            mp3_format_1.getMp3Tags(task.path)
+                .then(tags => resolve(tags))
+                .catch(err => reject(err));
         }
         else if (extension === 'flac') {
-            flac_format_1.getFlacTags(task.path).then(tags => resolve(tags));
+            flac_format_1.getFlacTags(task.path)
+                .then(tags => resolve(tags))
+                .catch(err => reject(err));
         }
         else if (extension === 'm4a') {
-            aac_format_1.getAacTags(task.path).then(tags => resolve(tags));
+            aac_format_1.getAacTags(task.path)
+                .then(tags => resolve(tags))
+                .catch(err => reject(err));
         }
         else {
-            resolve('');
+            resolve(null);
         }
     });
 }
@@ -172,7 +181,7 @@ function getAllAudioFilesInFolders(rootDirectories) {
             if (isAudioFile(file)) {
                 allFiles.push(filePath);
             }
-            else if (fs_1.default.statSync(filePath).isDirectory()) {
+            else if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).isDirectory()) {
                 allFiles = allFiles.concat(getAllAudioFilesInFolders([filePath]));
             }
         });
@@ -185,7 +194,7 @@ function getAllAudioFolders(rootDirectories) {
         let files = fs_1.default.readdirSync(rootDirectory);
         files.forEach(file => {
             let filePath = path_1.default.join(rootDirectory, file);
-            if (fs_1.default.statSync(filePath).isDirectory()) {
+            if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).isDirectory()) {
                 if (fs_1.default.readdirSync(filePath).find(file => isAudioFile(file))) {
                     folders.push(filePath);
                 }
@@ -225,12 +234,16 @@ function reloadAlbumData(albumId) {
         let dbSong = album === null || album === void 0 ? void 0 : album.Songs.find(song => song.SourceFile === songPath);
         // If song found in db and local song modified time is bigger than db song.
         if (dbSong && fs_1.default.statSync(dbSong === null || dbSong === void 0 ? void 0 : dbSong.SourceFile).mtimeMs > (dbSong === null || dbSong === void 0 ? void 0 : dbSong.LastModified)) {
-            getTags({ path: dbSong.SourceFile }).then(tags => {
+            getTags({ path: dbSong.SourceFile })
+                .then(tags => {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                     type: 'update',
                     data: tags,
                     appDataPath: __1.appDataPath()
                 });
+            })
+                .catch(err => {
+                console.error(err);
             });
         }
     });

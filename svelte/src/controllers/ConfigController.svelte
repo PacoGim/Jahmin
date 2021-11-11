@@ -2,69 +2,39 @@
 	import { onMount } from 'svelte'
 
 	import { getConfigIPC } from '../service/ipc.service'
-	import { albumArtSizeConfig, songListTagsConfig, equalizerIdConfig, themeConfig } from '../store/config.store'
+	import {
+		albumArtSizeConfig,
+		songListTagsConfig,
+		equalizerIdConfig,
+		themeConfig,
+		songAmountConfig
+	} from '../store/config.store'
+
 	import type { ConfigType } from '../types/config.type'
+
+	import { setItemToLocalStorage, getItemFromLocalStorage } from '../functions/asyncLocalStorage.fn'
 
 	onMount(() => {
 		getConfigIPC().then((config: ConfigType) => {
-			syncConfigLocalStorage(config)
+			$themeConfig = syncConfigLocalStorage('Theme', config.userOptions.theme)
+			$equalizerIdConfig = syncConfigLocalStorage('EqualizerId', config.userOptions.equalizerId)
+			$albumArtSizeConfig = syncConfigLocalStorage('AlbumArtSize', String(config.art.dimension))
+			$songListTagsConfig = syncConfigLocalStorage('SongListTags', config.songListTags)
+			$songAmountConfig = syncConfigLocalStorage('SongAmount', config.userOptions.songAmount)
 		})
 	})
 
-	function syncConfigLocalStorage(config: ConfigType) {
-		syncArtSize(config)
-		syncSongListTags(config)
-		syncEqualizerId(config)
-		syncTheme(config)
-	}
+	function syncConfigLocalStorage(key: string, value: any) {
+		getItemFromLocalStorage(key).then((item: any) => {
+			if (item) {
+				if (item !== value) {
+					setItemToLocalStorage(key, value)
+				}
+			} else {
+				setItemToLocalStorage(key, value)
+			}
+		})
 
-	function syncTheme(config: ConfigType) {
-		let themeConfigFile = config?.theme
-
-		let themeLS = localStorage.getItem('Theme')
-
-		if (themeConfigFile !== undefined && themeConfigFile !== themeLS) {
-			$themeConfig = themeConfigFile
-			localStorage.setItem('Theme', themeConfigFile)
-		}
-	}
-
-	function syncEqualizerId(config: ConfigType) {
-		let equalizerIdConfigFile = config?.equalizerId
-
-		let equalizerIdLS = localStorage.getItem('EqualizerId')
-
-		if (equalizerIdConfigFile !== undefined && equalizerIdConfigFile !== equalizerIdLS) {
-			$equalizerIdConfig = equalizerIdConfigFile
-			localStorage.setItem('EqualizerId', equalizerIdConfigFile)
-		}
-	}
-
-	function syncArtSize(config: ConfigType) {
-		// Gets the data from config file
-		let artSizeConfigFile = String(config?.art?.dimension)
-
-		// Gets the data from local storage
-		let artSizeLS = localStorage.getItem('AlbumArtSize')
-
-		// If the data from config file is defined and does not match the local storage
-		if (artSizeConfigFile !== undefined && artSizeConfigFile !== artSizeLS) {
-			// Update the config store with the config from file
-			$albumArtSizeConfig = artSizeConfigFile
-
-			// Update the local storage with the config from file
-			localStorage.setItem('AlbumArtSize', artSizeConfigFile)
-		}
-	}
-
-	function syncSongListTags(config: ConfigType) {
-		let songListTagsConfigFile = config?.songListTags
-
-		let songListTagsLS = JSON.parse(localStorage.getItem('SongListTags'))
-
-		if (songListTagsConfigFile !== undefined && songListTagsConfigFile !== songListTagsLS) {
-			$songListTagsConfig = songListTagsConfigFile
-			localStorage.setItem('SongListTags', JSON.stringify(songListTagsConfigFile))
-		}
+		return value
 	}
 </script>

@@ -3,12 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStorageMap = exports.initStorage = exports.killStorageWatcher = exports.updateStorageVersion = exports.getNewPromiseDbVersion = exports.getStorageMapToArray = exports.getFuzzyList = void 0;
+exports.getStorageMap = exports.initStorage = exports.killStorageWatcher = exports.getNewPromiseDbVersion = exports.getStorageMapToArray = exports.getFuzzyList = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const __1 = require("..");
 const hashString_fn_1 = require("../functions/hashString.fn");
 const worker_service_1 = require("./worker.service");
+const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const STORAGE_PATH = path_1.default.join(__1.appDataPath(), 'storage');
 const STORAGE_VERSION_FILE_PATH = path_1.default.join(STORAGE_PATH, 'version');
 let storageMap = new Map();
@@ -30,6 +31,7 @@ worker === null || worker === void 0 ? void 0 : worker.on('message', message => 
     else if (message.type === 'deleteFolder') {
         deleteFolder(message.data);
     }
+    updateStorageVersion();
 });
 function deleteFolder(rootDir) {
     let rootId = hashString_fn_1.hash(rootDir, 'text');
@@ -37,7 +39,7 @@ function deleteFolder(rootDir) {
     if (mappedData) {
         storageMap.delete(rootId);
         if (dbVersionResolve !== undefined)
-            dbVersionResolve(new Date().getTime());
+            dbVersionResolve(generateId_fn_1.default());
     }
 }
 function deleteData(songPath) {
@@ -55,7 +57,7 @@ function deleteData(songPath) {
             storageMap.delete(rootDir);
         }
         if (dbVersionResolve !== undefined)
-            dbVersionResolve(new Date().getTime());
+            dbVersionResolve(generateId_fn_1.default());
     }
 }
 function updateData(songData) {
@@ -73,7 +75,7 @@ function updateData(songData) {
         mappedData.Songs = songs;
         storageMap.set(rootDir, mappedData);
         if (dbVersionResolve !== undefined)
-            dbVersionResolve(new Date().getTime());
+            dbVersionResolve(generateId_fn_1.default());
     }
 }
 function insertData(songData) {
@@ -95,7 +97,7 @@ function insertData(songData) {
         });
     }
     if (dbVersionResolve !== undefined)
-        dbVersionResolve(new Date().getTime());
+        dbVersionResolve(generateId_fn_1.default());
 }
 let fuzzyArray = [];
 function consolidateStorage() {
@@ -150,7 +152,7 @@ exports.getStorageMapToArray = getStorageMapToArray;
 function getNewPromiseDbVersion(rendererDbVersion) {
     let dbFileTimeStamp = getStorageVersion();
     // If the db version changed while going back and forth Main <-> Renderer
-    if (dbFileTimeStamp > rendererDbVersion) {
+    if (rendererDbVersion !== dbFileTimeStamp) {
         return new Promise(resolve => resolve(dbFileTimeStamp));
     }
     else {
@@ -159,21 +161,9 @@ function getNewPromiseDbVersion(rendererDbVersion) {
     }
 }
 exports.getNewPromiseDbVersion = getNewPromiseDbVersion;
-/*
-function watchVersionFile() {
-    if (!fs.existsSync(STORAGE_VERSION_FILE_PATH)) {
-        fs.writeFileSync(STORAGE_VERSION_FILE_PATH, '0')
-    }
-
-    watcher = chokidar.watch(path.join(STORAGE_PATH, 'version')).on('change', () => {
-        dbVersionResolve(getStorageVersion())
-    })
-}
-*/
 function updateStorageVersion() {
-    fs_1.default.writeFileSync(STORAGE_VERSION_FILE_PATH, String(new Date().getTime()));
+    fs_1.default.writeFileSync(STORAGE_VERSION_FILE_PATH, generateId_fn_1.default(), { encoding: 'utf-8' });
 }
-exports.updateStorageVersion = updateStorageVersion;
 function killStorageWatcher() {
     if (watcher) {
         watcher.close();
@@ -182,15 +172,14 @@ function killStorageWatcher() {
 exports.killStorageWatcher = killStorageWatcher;
 function initStorage() {
     consolidateStorage();
-    // watchVersionFile()
 }
 exports.initStorage = initStorage;
 function getStorageVersion() {
     try {
-        return Number(fs_1.default.readFileSync(path_1.default.join(STORAGE_PATH, 'version'), { encoding: 'utf8' }));
+        return fs_1.default.readFileSync(path_1.default.join(STORAGE_PATH, 'version'), { encoding: 'utf8' });
     }
     catch (error) {
-        return 0;
+        return '';
     }
 }
 function getStorageMap() {

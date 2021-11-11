@@ -9,8 +9,6 @@ import { SongType } from '../types/song.type'
 
 let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
-const mm = require('music-metadata')
-
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise: any = undefined
 let ffmpegDeferredPromiseId: string
@@ -51,6 +49,10 @@ mmWorker?.on('message', data => {
 
 export async function getOpusTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
+		if (!fs.existsSync(filePath)) {
+			return reject('File not found')
+		}
+
 		const METADATA: any = await new Promise((resolve, reject) => {
 			mmDeferredPromises.set(filePath, resolve)
 			mmWorker?.postMessage(filePath)
@@ -62,32 +64,39 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 			SourceFile: filePath
 		}
 
-		const STATS = fs.statSync(filePath)
-		let nativeTags: OpusTagType = mergeNatives(METADATA.native)
+		fs.stat(filePath, (err, stats) => {
+			if (err) {
+				return reject(err)
+			}
 
-		let dateParsed = getDate(String(nativeTags.DATE))
+			if (stats) {
+				let nativeTags: OpusTagType = mergeNatives(METADATA.native)
 
-		tags.Album = nativeTags?.ALBUM || ''
-		tags.AlbumArtist = nativeTags?.ALBUMARTIST || ''
-		tags.Artist = nativeTags?.ARTIST || ''
-		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || ''
-		tags.Composer = nativeTags?.COMPOSER || ''
-		tags.Date_Year = dateParsed.year || 0
-		tags.Date_Month = dateParsed.month || 0
-		tags.Date_Day = dateParsed.day || 0
-		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || 0
-		tags.Genre = nativeTags?.GENRE || ''
-		tags.Rating = Number(nativeTags?.RATING) || 0
-		tags.Title = nativeTags?.TITLE || ''
-		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
+				let dateParsed = getDate(String(nativeTags.DATE))
 
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
-		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = METADATA.format.sampleRate
-		tags.Size = STATS.size
+				tags.Album = nativeTags?.ALBUM || ''
+				tags.AlbumArtist = nativeTags?.ALBUMARTIST || ''
+				tags.Artist = nativeTags?.ARTIST || ''
+				tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || ''
+				tags.Composer = nativeTags?.COMPOSER || ''
+				tags.Date_Year = dateParsed.year || 0
+				tags.Date_Month = dateParsed.month || 0
+				tags.Date_Day = dateParsed.day || 0
+				tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || 0
+				tags.Genre = nativeTags?.GENRE || ''
+				tags.Rating = Number(nativeTags?.RATING) || 0
+				tags.Title = nativeTags?.TITLE || ''
+				tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
 
-		resolve(tags)
+				tags.BitRate = METADATA.format.bitrate / 1000
+				tags.Duration = Math.trunc(METADATA.format.duration)
+				tags.LastModified = stats.mtimeMs
+				tags.SampleRate = METADATA.format.sampleRate
+				tags.Size = stats.size
+
+				resolve(tags)
+			}
+		})
 	})
 }
 

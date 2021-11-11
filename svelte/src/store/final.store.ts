@@ -36,7 +36,7 @@ export let albumCoverArtMapStore: Writable<Map<string | number, CoverArtType>> =
 
 export let appTitle: Writable<string> = writable('Jahmin')
 
-export let dbVersion: Writable<number> = writable(0)
+export let dbVersion: Writable<string> = writable('')
 
 export let updateSongProgress: Writable<number> = writable(-1)
 
@@ -54,7 +54,5 @@ export let layoutToShow: Writable<'Main' | 'Search' | 'Config'> = writable('Main
 export let playerElement: Writable<HTMLAudioElement> = writable(undefined)
 
 export let keypress: Writable<string> = writable(undefined)
-
-export let songAmount: Writable<number> = writable(8)
 
 export let songListItemElement: Writable<HTMLElement> = writable(undefined)

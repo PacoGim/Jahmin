@@ -3,11 +3,12 @@
 	import { onMount } from 'svelte'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { saveConfig } from '../service/ipc.service'
-	import { albumCoverArtMapStore, songAmount, songListStore } from '../store/final.store'
+	import { songAmountConfig } from '../store/config.store'
+	import { albumCoverArtMapStore, songListStore } from '../store/final.store'
 
 	onMount(() => {
 		ipcRenderer.on('show-song-amount', (event, data) => {
-			$songAmount = data
+			$songAmountConfig = data
 
 			saveConfig({
 				userOptions: {

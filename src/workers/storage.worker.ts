@@ -101,7 +101,6 @@ function deleteData(path: string) {
 			deleteFolder(rootFolder)
 		}
 
-		updateStorageVersion()
 		resolve('')
 	})
 }
@@ -123,18 +122,9 @@ function insert(data: TagType) {
 
 		if (!store) {
 			store = loadStore(rootFolderId)
-			/* 			let storeConfig: { name: string; cwd?: string } = {
-				name: rootFolderId
-			}
-
-			if (storagePath) storeConfig.cwd = storagePath
-
-			store = new Store(storeConfig)
-			storesMap.set(rootFolderId, store) */
 		}
 
 		store.set(songId, data)
-		updateStorageVersion()
 		resolve('')
 	})
 }
@@ -152,10 +142,4 @@ function loadStore(rootFolderId: string) {
 	storesMap.set(rootFolderId, store)
 
 	return store
-}
-
-function updateStorageVersion() {
-	if (storagePath) {
-		fs.writeFileSync(path.join(storagePath, 'version'), String(new Date().getTime()))
-	}
 }
