@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getCoverIPC } from '../service/ipc.service'
+	import { getCoverIPC } from '../services/ipc.service'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	// import { playback, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'

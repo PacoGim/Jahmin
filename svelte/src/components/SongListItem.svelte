@@ -12,7 +12,7 @@
 	} from '../store/final.store'
 
 	import Star from './Star.svelte'
-	import { editTagsIPC } from '../service/ipc.service'
+	import { editTagsIPC } from '../services/ipc.service'
 	import { songListTagsConfig } from '../store/config.store'
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'

@@ -1,27 +1,30 @@
 <script lang="ts">
-	import ConfigController from './controllers/ConfigController.svelte'
-	import PlayerController from './controllers/PlayerController.svelte'
-
 	import { onMount } from 'svelte'
-	import { syncDbVersionIPC } from './service/ipc.service'
 	import { appTitle, keypress } from './store/final.store'
-	import { handleContextMenuEvent } from './service/contextMenu.service'
-	import IpcController from './controllers/IpcController.svelte'
 
-	import MainLayout from './layout/main-layout/MainLayout.svelte'
-	import ConfigLayout from './layout/config-layout/ConfigLayout.svelte'
-	import SearchLayout from './layout/search-layout/SearchLayout.svelte'
-	import EqualizerController from './controllers/EqualizerController.svelte'
+	import MainLayout from './layouts/main/MainLayout.svelte'
+	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
+	import SearchLayout from './layouts/search/SearchLayout.svelte'
+
 	import { nextSong } from './functions/nextSong.fn'
 	import previousSongFn from './functions/previousSong.fn'
-	import { runThemeHandler } from './service/themeHandler.service'
+
+	import { runThemeHandler } from './services/themeHandler.service'
+	import { syncDbVersionIPC } from './services/ipc.service'
+	import { handleContextMenuEvent } from './services/contextMenu.service'
 
 	import iziToast from 'izitoast'
 
-	import EqualizerService from './svelte-service/EqualizerService.svelte'
 	import { confirmService, equalizerService, promptService } from './store/service.store'
-	import Prompt from './components/Prompt.svelte'
-	import Confirm from './components/Confirm.svelte'
+
+	import PlayerMiddleware from './middleware/PlayerMiddleware.svelte'
+	import ConfigMiddleware from './middleware/ConfigMiddleware.svelte'
+	import IpcMiddleware from './middleware/IpcMiddleware.svelte'
+	import EqualizerMiddleware from './middleware/EqualizerMiddleware.svelte'
+
+	import EqualizerService from './svelte-services/EqualizerService.svelte'
+	import PromptService from './svelte-services/PromptService.svelte'
+	import ConfirmService from './svelte-services/ConfirmService.svelte'
 
 	onMount(() => {
 		iziToast.settings({ position: 'topRight' })
@@ -76,15 +79,15 @@
 	<title>{$appTitle}</title>
 </svelte:head>
 
-<PlayerController />
-<ConfigController />
-<IpcController />
-<EqualizerController />
+<PlayerMiddleware />
+<ConfigMiddleware />
+<IpcMiddleware />
+<EqualizerMiddleware />
 
 <MainLayout />
 <ConfigLayout />
 <SearchLayout />
 
 <EqualizerService bind:this={$equalizerService} />
-<Prompt bind:this={$promptService} />
-<Confirm bind:this={$confirmService} />
+<PromptService bind:this={$promptService} />
+<ConfirmService bind:this={$confirmService} />

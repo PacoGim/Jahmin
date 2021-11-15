@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 	import { hash } from '../functions/hashString.fn'
 	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
-	import { getCoverIPC } from '../service/ipc.service'
+	import { getCoverIPC } from '../services/ipc.service'
 	import { albumCoverArtMapStore } from '../store/final.store'
 	import type { CoverArtType } from '../types/coverArt.type'
 
