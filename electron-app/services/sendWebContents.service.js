@@ -5,7 +5,7 @@ const __1 = require("..");
 let browserWindow;
 function sendWebContents(channel, data) {
     if (browserWindow === undefined) {
-        browserWindow = __1.getMainWindow();
+        browserWindow = (0, __1.getMainWindow)();
     }
     browserWindow.webContents.send(channel, data);
 }

@@ -13,31 +13,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMainWindow = exports.appDataPath = void 0;
-// import { exec } from 'child_process'
 const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
 const appDataPath = () => path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
 exports.appDataPath = appDataPath;
 const config_service_1 = require("./services/config.service");
 const worker_service_1 = require("./services/worker.service");
-worker_service_1.initWorkers();
+(0, worker_service_1.initWorkers)();
 const ipc_service_1 = require("./services/ipc.service");
-ipc_service_1.loadIPC();
+(0, ipc_service_1.loadIPC)();
 const storage_service_1 = require("./services/storage.service");
 const songSync_service_1 = require("./services/songSync.service");
 let browserWindow;
 function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {
-        const config = config_service_1.getConfig();
+        const config = (0, config_service_1.getConfig)();
         // Create the browser window.
         browserWindow = new electron_1.BrowserWindow(loadOptions(config));
         browserWindow.webContents.openDevTools();
         browserWindow.loadFile('index.html');
         // Gets the storage data from files and creates a map.
-        storage_service_1.initStorage();
+        (0, storage_service_1.initStorage)();
         // Watches the given root folder.
         if (config === null || config === void 0 ? void 0 : config.rootDirectories)
-            songSync_service_1.watchFolders(config.rootDirectories);
+            (0, songSync_service_1.watchFolders)(config.rootDirectories);
         browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow));
     });
 }
@@ -89,9 +88,9 @@ electron_1.app.on('window-all-closed', () => {
 });
 electron_1.app.on('before-quit', () => {
     var _a;
-    worker_service_1.killAllWorkers();
-    storage_service_1.killStorageWatcher();
-    (_a = songSync_service_1.getRootDirFolderWatcher()) === null || _a === void 0 ? void 0 : _a.close();
+    (0, worker_service_1.killAllWorkers)();
+    (0, storage_service_1.killStorageWatcher)();
+    (_a = (0, songSync_service_1.getRootDirFolderWatcher)()) === null || _a === void 0 ? void 0 : _a.close();
 });
 // process.on('exit',()=>{
 // })
@@ -105,7 +104,7 @@ function saveWindowBounds(window) {
     if (saveConfigDebounce)
         clearTimeout(saveConfigDebounce);
     saveConfigDebounce = setTimeout(() => {
-        config_service_1.saveConfig({
+        (0, config_service_1.saveConfig)({
             bounds: {
                 x: window.getPosition()[0],
                 y: window.getPosition()[1],

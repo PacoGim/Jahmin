@@ -29,30 +29,30 @@ const tagEdit_service_1 = require("./tagEdit.service");
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 const storage_service_1 = require("./storage.service");
 const contextMenu_service_1 = require("./contextMenu.service");
-const nanoid = nanoid_1.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
+const nanoid = (0, nanoid_1.customAlphabet)('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 const fuse_js_1 = __importDefault(require("fuse.js"));
 const equalizer_service_1 = require("./equalizer.service");
 const common_1 = require("electron/common");
 function loadIPC() {
-    electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => contextMenu_service_1.loadContextMenu(event, menuToOpen, parameters));
+    electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_service_1.loadContextMenu)(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
-        return equalizer_service_1.renameEqualizer(eqId, newName);
+        return (0, equalizer_service_1.renameEqualizer)(eqId, newName);
     }));
     electron_1.ipcMain.handle('delete-equalizer', (evt, eqId) => __awaiter(this, void 0, void 0, function* () {
-        return equalizer_service_1.deleteEqualizer(eqId);
+        return (0, equalizer_service_1.deleteEqualizer)(eqId);
     }));
     electron_1.ipcMain.handle('update-equalizer-values', (evt, eqId, newValues) => __awaiter(this, void 0, void 0, function* () {
-        return equalizer_service_1.updateEqualizerValues(eqId, newValues);
+        return (0, equalizer_service_1.updateEqualizerValues)(eqId, newValues);
     }));
     electron_1.ipcMain.handle('add-new-equalizer-profile', (evt, newProfile) => __awaiter(this, void 0, void 0, function* () {
-        return equalizer_service_1.addEqualizer(newProfile);
+        return (0, equalizer_service_1.addEqualizer)(newProfile);
     }));
     electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
-        let config = config_service_1.getConfig();
+        let config = (0, config_service_1.getConfig)();
         let grouping = ((_a = config.order) === null || _a === void 0 ? void 0 : _a.grouping) || [];
         let filtering = ((_b = config.order) === null || _b === void 0 ? void 0 : _b.filtering) || [];
-        let result = songFilter_service_1.orderSongs(arg, grouping, filtering);
+        let result = (0, songFilter_service_1.orderSongs)(arg, grouping, filtering);
         result = result.map(value => ({
             id: nanoid(),
             value
@@ -60,7 +60,7 @@ function loadIPC() {
         return result;
     }));
     electron_1.ipcMain.handle('get-config', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
-        let config = config_service_1.getConfig();
+        let config = (0, config_service_1.getConfig)();
         return config;
     }));
     electron_1.ipcMain.handle('search', (evt, searchString, keys) => __awaiter(this, void 0, void 0, function* () {
@@ -68,41 +68,41 @@ function loadIPC() {
             keys.splice(keys.indexOf('Album Artist'), 1);
             keys.push('AlbumArtist');
         }
-        const fuse = new fuse_js_1.default(storage_service_1.getStorageMapToArray(), {
+        const fuse = new fuse_js_1.default((0, storage_service_1.getStorageMapToArray)(), {
             keys
         });
         let result = fuse.search(searchString, { limit: 20 });
         return result;
     }));
     electron_1.ipcMain.handle('get-equalizers', (evt) => __awaiter(this, void 0, void 0, function* () {
-        return equalizer_service_1.getEqualizers();
+        return (0, equalizer_service_1.getEqualizers)();
     }));
     electron_1.ipcMain.handle('save-peaks', (evt, sourceFile, peaks) => __awaiter(this, void 0, void 0, function* () {
-        peaks_1.savePeaks(sourceFile, peaks);
+        (0, peaks_1.savePeaks)(sourceFile, peaks);
         return '';
     }));
     electron_1.ipcMain.handle('edit-tags', (evt, songList, newTags) => __awaiter(this, void 0, void 0, function* () {
-        tagEdit_service_1.tagEdit(songList, newTags);
+        (0, tagEdit_service_1.tagEdit)(songList, newTags);
         return '';
     }));
     electron_1.ipcMain.handle('get-peaks', (evt, sourceFile) => __awaiter(this, void 0, void 0, function* () {
-        return yield peaks_1.getPeaks(sourceFile);
+        return yield (0, peaks_1.getPeaks)(sourceFile);
     }));
     electron_1.ipcMain.handle('get-grouping', (evt, valueToGroupBy) => __awaiter(this, void 0, void 0, function* () {
-        return groupSong_fn_1.groupSongs(valueToGroupBy);
+        return (0, groupSong_fn_1.groupSongs)(valueToGroupBy);
     }));
     electron_1.ipcMain.handle('save-config', (evt, newConfig) => {
-        return config_service_1.saveConfig(newConfig);
+        return (0, config_service_1.saveConfig)(newConfig);
     });
     electron_1.ipcMain.handle('open-config', () => {
         // shell.showItemInFolder(configFilePath)
         return;
     });
     electron_1.ipcMain.handle('show-equalizer-folder', () => {
-        common_1.shell.openPath(equalizer_service_1.getEqFolderPath());
+        common_1.shell.openPath((0, equalizer_service_1.getEqFolderPath)());
     });
     electron_1.ipcMain.handle('get-albums', (evt, groupBy, groupByValue) => __awaiter(this, void 0, void 0, function* () {
-        let docs = storage_service_1.getStorageMap();
+        let docs = (0, storage_service_1.getStorageMap)();
         let groupedSongs = [];
         docs.forEach(doc => {
             doc.Songs.forEach(song => {
@@ -111,7 +111,7 @@ function loadIPC() {
                     let foundAlbum = groupedSongs.find(i => i['RootDir'] === rootDir);
                     if (!foundAlbum) {
                         groupedSongs.push({
-                            ID: hashString_fn_1.hash(rootDir),
+                            ID: (0, hashString_fn_1.hash)(rootDir),
                             RootDir: rootDir,
                             AlbumArtist: song.AlbumArtist,
                             Name: song.Album
@@ -123,25 +123,25 @@ function loadIPC() {
         return groupedSongs;
     }));
     electron_1.ipcMain.handle('get-album', (evt, albumID) => {
-        return storage_service_1.getStorageMap().get(albumID);
+        return (0, storage_service_1.getStorageMap)().get(albumID);
     });
     electron_1.ipcMain.handle('get-cover', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
-        return yield albumArt_service_1.getAlbumCover(rootDir);
+        return yield (0, albumArt_service_1.getAlbumCover)(rootDir);
     }));
     electron_1.ipcMain.handle('get-album-colors', (evt, imageId) => __awaiter(this, void 0, void 0, function* () {
-        return yield getAlbumColors_fn_1.getAlbumColors(imageId);
+        return yield (0, getAlbumColors_fn_1.getAlbumColors)(imageId);
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
-        return yield storage_service_1.getNewPromiseDbVersion(value);
+        return yield (0, storage_service_1.getNewPromiseDbVersion)(value);
     }));
     electron_1.ipcMain.handle('get-changes-progress', (evt) => __awaiter(this, void 0, void 0, function* () {
         return {
-            total: songSync_service_1.getMaxTaskQueueLength(),
-            current: songSync_service_1.getTaskQueueLength()
+            total: (0, songSync_service_1.getMaxTaskQueueLength)(),
+            current: (0, songSync_service_1.getTaskQueueLength)()
         };
     }));
     electron_1.ipcMain.handle('get-tag-edit-progress', () => {
-        return tagEdit_service_1.getTagEditProgress();
+        return (0, tagEdit_service_1.getTagEditProgress)();
     });
 }
 exports.loadIPC = loadIPC;

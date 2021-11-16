@@ -9,7 +9,7 @@ const fs_1 = __importDefault(require("fs"));
 const xxhashjs_1 = require("xxhashjs");
 const __1 = require("..");
 const hashString_fn_1 = require("../functions/hashString.fn");
-const PEAKS_DIR = path_1.default.join(__1.appDataPath(), 'peaks');
+const PEAKS_DIR = path_1.default.join((0, __1.appDataPath)(), 'peaks');
 function savePeaks(sourceFile, peaks) {
     if (!fs_1.default.existsSync(PEAKS_DIR)) {
         fs_1.default.mkdirSync(PEAKS_DIR);
@@ -33,8 +33,8 @@ function getPeaks(sourceFile) {
 }
 exports.getPeaks = getPeaks;
 function getSourceFileHash(sourceFile) {
-    return xxhashjs_1.h32().update(fs_1.default.readFileSync(sourceFile)).digest().toString(36);
+    return (0, xxhashjs_1.h32)().update(fs_1.default.readFileSync(sourceFile)).digest().toString(36);
 }
 function getPeakFilePath(sourceFile) {
-    return path_1.default.join(PEAKS_DIR, `${hashString_fn_1.hash(sourceFile, 'number')}.txt`);
+    return path_1.default.join(PEAKS_DIR, `${(0, hashString_fn_1.hash)(sourceFile, 'number')}.txt`);
 }

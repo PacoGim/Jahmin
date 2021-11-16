@@ -7,10 +7,10 @@ exports.hash = void 0;
 const string_hash_1 = __importDefault(require("string-hash"));
 function hash(stringToHash, format = 'text') {
     if (format === 'text') {
-        return string_hash_1.default(stringToHash).toString(36);
+        return (0, string_hash_1.default)(stringToHash).toString(36);
     }
     else {
-        return string_hash_1.default(stringToHash);
+        return (0, string_hash_1.default)(stringToHash);
     }
 }
 exports.hash = hash;

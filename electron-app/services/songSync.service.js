@@ -24,10 +24,10 @@ const opus_format_1 = require("../formats/opus.format");
 const mp3_format_1 = require("../formats/mp3.format");
 const flac_format_1 = require("../formats/flac.format");
 const aac_format_1 = require("../formats/aac.format");
-const TOTAL_CPUS = os_1.cpus().length;
+const TOTAL_CPUS = (0, os_1.cpus)().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
-let storageWorker = worker_service_1.getWorker('storage');
+let storageWorker = (0, worker_service_1.getWorker)('storage');
 let isQueueRunning = false;
 let taskQueue = [];
 exports.maxTaskQueueLength = 0;
@@ -41,7 +41,7 @@ function watchFolders(rootDirectories) {
 }
 exports.watchFolders = watchFolders;
 function startChokidarWatch(rootDirectories) {
-    watcher = chokidar_1.watch(rootDirectories, {
+    watcher = (0, chokidar_1.watch)(rootDirectories, {
         awaitWriteFinish: true,
         ignored: '**/*.DS_Store'
     });
@@ -80,7 +80,7 @@ function processQueue() {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                     type: task.type,
                     data: tags,
-                    appDataPath: __1.appDataPath()
+                    appDataPath: (0, __1.appDataPath)()
                 });
                 getTask(processIndex);
             })
@@ -92,7 +92,7 @@ function processQueue() {
             storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                 type: task.type,
                 data: task.path,
-                appDataPath: __1.appDataPath()
+                appDataPath: (0, __1.appDataPath)()
             });
             getTask(processIndex);
         }
@@ -110,22 +110,22 @@ function getTags(task) {
     return new Promise((resolve, reject) => {
         let extension = task.path.split('.').pop().toLowerCase();
         if (extension === 'opus') {
-            opus_format_1.getOpusTags(task.path)
+            (0, opus_format_1.getOpusTags)(task.path)
                 .then(tags => resolve(tags))
                 .catch(err => reject(err));
         }
         else if (extension === 'mp3') {
-            mp3_format_1.getMp3Tags(task.path)
+            (0, mp3_format_1.getMp3Tags)(task.path)
                 .then(tags => resolve(tags))
                 .catch(err => reject(err));
         }
         else if (extension === 'flac') {
-            flac_format_1.getFlacTags(task.path)
+            (0, flac_format_1.getFlacTags)(task.path)
                 .then(tags => resolve(tags))
                 .catch(err => reject(err));
         }
         else if (extension === 'm4a') {
-            aac_format_1.getAacTags(task.path)
+            (0, aac_format_1.getAacTags)(task.path)
                 .then(tags => resolve(tags))
                 .catch(err => reject(err));
         }
@@ -136,15 +136,15 @@ function getTags(task) {
 }
 function filterSongs(audioFilesFound = []) {
     return new Promise((resolve, reject) => {
-        let worker = worker_service_1.getWorker('songFilter');
-        let collection = storage_service_1.getStorageMapToArray().map(song => song.SourceFile);
+        let worker = (0, worker_service_1.getWorker)('songFilter');
+        let collection = (0, storage_service_1.getStorageMapToArray)().map(song => song.SourceFile);
         worker.on('message', (data) => {
             if (data.type === 'songsToAdd') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
             }
             if (data.type === 'songsToDelete') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')));
-                worker_service_1.killWorker('songFilter');
+                (0, worker_service_1.killWorker)('songFilter');
                 resolve(null);
             }
         });
@@ -220,7 +220,7 @@ function getTaskQueueLength() {
 }
 exports.getTaskQueueLength = getTaskQueueLength;
 function reloadAlbumData(albumId) {
-    let album = storage_service_1.getStorageMap().get(albumId);
+    let album = (0, storage_service_1.getStorageMap)().get(albumId);
     let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
     if (rootDir === undefined)
         return;
@@ -239,7 +239,7 @@ function reloadAlbumData(albumId) {
                 storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
                     type: 'update',
                     data: tags,
-                    appDataPath: __1.appDataPath()
+                    appDataPath: (0, __1.appDataPath)()
                 });
             })
                 .catch(err => {

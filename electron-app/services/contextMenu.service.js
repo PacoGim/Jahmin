@@ -22,7 +22,7 @@ exports.loadContextMenu = loadContextMenu;
 function getSongListContextMenuTemplate(data) {
     let template = [];
     if (data.songs.length === 1) {
-        let album = storage_service_1.getStorageMap().get(data.albumId);
+        let album = (0, storage_service_1.getStorageMap)().get(data.albumId);
         let song = album === null || album === void 0 ? void 0 : album.Songs.find(x => x.ID === data.songs[0]);
         template.push({
             label: `Show File`,
@@ -58,7 +58,7 @@ function getSongAmountMenu() {
         submenu.push({
             label: value.toString(),
             click: () => {
-                sendWebContents_service_1.sendWebContents('show-song-amount', value);
+                (0, sendWebContents_service_1.sendWebContents)('show-song-amount', value);
             }
         });
     });
@@ -96,7 +96,7 @@ function getSortMenu() {
                 {
                     label: 'Asc (A->Z)',
                     click: () => {
-                        sendWebContents_service_1.sendWebContents('sort-songs', {
+                        (0, sendWebContents_service_1.sendWebContents)('sort-songs', {
                             tag: option,
                             order: 1
                         });
@@ -105,7 +105,7 @@ function getSortMenu() {
                 {
                     label: 'Desc (Z->A)',
                     click: () => {
-                        sendWebContents_service_1.sendWebContents('sort-songs', {
+                        (0, sendWebContents_service_1.sendWebContents)('sort-songs', {
                             tag: option,
                             order: -1
                         });
@@ -117,7 +117,7 @@ function getSortMenu() {
     return submenu;
 }
 function getAlbumContextMenuTemplate(data) {
-    let album = storage_service_1.getStorageMap().get(data.albumId);
+    let album = (0, storage_service_1.getStorageMap)().get(data.albumId);
     let template = [];
     template.push({
         label: `Show Folder`,
@@ -128,15 +128,15 @@ function getAlbumContextMenuTemplate(data) {
     template.push({
         label: `Reload Album Data`,
         click: () => {
-            songSync_service_1.reloadAlbumData(data.albumId);
+            (0, songSync_service_1.reloadAlbumData)(data.albumId);
         }
     });
     template.push({
         label: `Reload Album Cover`,
         click: () => {
             if (album) {
-                albumArt_service_1.getAlbumCover(album.RootDir, false, true).then(result => {
-                    sendWebContents_service_1.sendWebContents('new-cover', {
+                (0, albumArt_service_1.getAlbumCover)(album.RootDir, false, true).then(result => {
+                    (0, sendWebContents_service_1.sendWebContents)('new-cover', {
                         success: result !== undefined,
                         id: album === null || album === void 0 ? void 0 : album.ID,
                         filePath: result === null || result === void 0 ? void 0 : result.filePath,

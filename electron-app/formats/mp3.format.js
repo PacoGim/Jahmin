@@ -20,7 +20,7 @@ const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 /********************** Write Mp3 Tags **********************/
 let tagWriteDeferredPromise = undefined;
-let nodeId3Worker = (_a = worker_service_1.getWorker('nodeID3')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
+let nodeId3Worker = (_a = (0, worker_service_1.getWorker)('nodeID3')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
     tagWriteDeferredPromise(response);
 });
 function writeMp3Tags(filePath, newTags) {
@@ -32,7 +32,7 @@ function writeMp3Tags(filePath, newTags) {
 }
 exports.writeMp3Tags = writeMp3Tags;
 /********************** Get Mp3 Tags **********************/
-let worker = worker_service_1.getWorker('musicMetadata');
+let worker = (0, worker_service_1.getWorker)('musicMetadata');
 let deferredPromise = new Map();
 worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
     if (deferredPromise.has(data.filePath)) {
@@ -49,7 +49,7 @@ function getMp3Tags(filePath) {
                 worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
             });
             let tags = {
-                ID: string_hash_1.default(filePath),
+                ID: (0, string_hash_1.default)(filePath),
                 Extension: 'mp3',
                 SourceFile: filePath
             };
@@ -81,23 +81,23 @@ function getMp3Tags(filePath) {
 exports.getMp3Tags = getMp3Tags;
 function normalizeNewTags(newTags) {
     if (newTags.Title)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Title', 'TIT2');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Title', 'TIT2');
     if (newTags.Track)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Track', 'TRCK');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Track', 'TRCK');
     if (newTags.Album)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Album', 'TALB');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Album', 'TALB');
     if (newTags.AlbumArtist)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'AlbumArtist', 'TPE2');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'AlbumArtist', 'TPE2');
     if (newTags.Artist)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Artist', 'TPE1');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Artist', 'TPE1');
     if (newTags.Composer)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Composer', 'TCOM');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Composer', 'TCOM');
     if (newTags.DiscNumber)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'DiscNumber', 'TPOS');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'DiscNumber', 'TPOS');
     if (newTags.Genre)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Genre', 'TCON');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Genre', 'TCON');
     if (newTags.Comment)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Comment', 'comment');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Comment', 'comment');
     if (newTags.comment) {
         newTags.comment = {
             language: 'eng',

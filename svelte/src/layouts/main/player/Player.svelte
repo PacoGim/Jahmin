@@ -6,7 +6,7 @@
 	import PlayButton from './components/PlayButton.svelte'
 	import PlayerProgress from './components/PlayerProgress.svelte'
 	import PlayerVolumeBar from './components/PlayerVolumeBar.svelte'
-	import CoverArt from '../../../components/CoverArt.svelte';
+	import CoverArt from '../../../components/CoverArt.svelte'
 
 	import type { SongType } from '../../../types/song.type'
 
@@ -41,6 +41,14 @@
 		currentTime: '00:00',
 		duration: '00:00',
 		timeLeft: '00:00'
+	}
+
+	$: {
+		if ($isPlaying) {
+			navigator.mediaSession.playbackState = 'playing'
+		} else {
+			navigator.mediaSession.playbackState = 'paused'
+		}
 	}
 
 	$: {
@@ -106,23 +114,15 @@
 
 		navigator.mediaSession.metadata = new MediaMetadata({
 			title: songToPlay.Title,
-			artist: songToPlay.AlbumArtist,
-			album: songToPlay.Album
+			artist: songToPlay.Album
 		})
 
-		navigator.mediaSession.metadata.album = songToPlay.Album
-		navigator.mediaSession.metadata.artist = songToPlay.Artist
-		navigator.mediaSession.metadata.title = songToPlay.Title
-
 		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
-		navigator.mediaSession.playbackState = 'paused'
 
 		if (playNow === true) {
 			player
 				.play()
 				.then(() => {
-					navigator.mediaSession.playbackState = 'playing'
-
 					$songPlayingIdStore = songToPlay.ID
 
 					localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
@@ -140,7 +140,6 @@
 				})
 		} else {
 			player.pause()
-			navigator.mediaSession.playbackState = 'paused'
 		}
 	}
 
@@ -212,12 +211,6 @@
 			duration: parseDuration(currentSong['Duration']),
 			timeLeft: parseDuration(currentSong['Duration'] - player.currentTime)
 		}
-
-		navigator.mediaSession.setPositionState({
-			duration: currentSong.Duration,
-			playbackRate: 1,
-			position: 0
-		})
 	}
 </script>
 

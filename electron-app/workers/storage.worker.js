@@ -62,7 +62,7 @@ function iterateWorkQueue() {
 }
 function deleteFolder(rootFolder) {
     return new Promise((resolve, reject) => {
-        let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
+        let rootFolderId = (0, hashString_fn_1.hash)(rootFolder, 'text');
         let store = storesMap.get(rootFolderId);
         if (!store)
             store = loadStore(rootFolderId);
@@ -73,8 +73,8 @@ function deleteFolder(rootFolder) {
 function deleteData(path) {
     return new Promise((resolve, reject) => {
         let rootFolder = path === null || path === void 0 ? void 0 : path.split('/').slice(0, -1).join('/');
-        let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
-        let songId = String(hashString_fn_1.hash(path, 'number'));
+        let rootFolderId = (0, hashString_fn_1.hash)(rootFolder, 'text');
+        let songId = String((0, hashString_fn_1.hash)(path, 'number'));
         let store = storesMap.get(rootFolderId);
         if (!store)
             store = loadStore(rootFolderId);
@@ -94,8 +94,8 @@ function insert(data) {
             console.log(rootFolder);
             return resolve('');
         }
-        let rootFolderId = hashString_fn_1.hash(rootFolder, 'text');
-        let songId = String(hashString_fn_1.hash(data.SourceFile, 'number'));
+        let rootFolderId = (0, hashString_fn_1.hash)(rootFolder, 'text');
+        let songId = String((0, hashString_fn_1.hash)(data.SourceFile, 'number'));
         let store = storesMap.get(rootFolderId);
         if (!store) {
             store = loadStore(rootFolderId);

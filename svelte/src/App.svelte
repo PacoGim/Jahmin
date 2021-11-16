@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, keypress } from './store/final.store'
+	import { appTitle, keypress, playerElement } from './store/final.store'
 
 	import MainLayout from './layouts/main/MainLayout.svelte'
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
@@ -52,6 +52,14 @@
 
 		window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
 
+		navigator.mediaSession.setActionHandler('play', () => {
+			$playerElement.play()
+		})
+
+		navigator.mediaSession.setActionHandler('pause', () => {
+			$playerElement.pause()
+		})
+
 		navigator.mediaSession.setActionHandler('previoustrack', function () {
 			previousSongFn()
 		})
@@ -59,18 +67,6 @@
 		navigator.mediaSession.setActionHandler('nexttrack', function () {
 			// User hit "Previous Track" key.
 			nextSong()
-		})
-
-		let audio = document.querySelector('audio')
-
-		navigator.mediaSession.setActionHandler('seekbackward', evt => {
-			// User clicked "Seek Backward" media notification icon.
-			audio.currentTime = Math.max(audio.currentTime, 0)
-		})
-
-		navigator.mediaSession.setActionHandler('seekforward', evt => {
-			// User clicked "Seek Forward" media notification icon.
-			audio.currentTime = Math.min(audio.currentTime, audio.duration)
 		})
 	})
 </script>

@@ -19,7 +19,7 @@ let songToEditQueue = [];
 let maxQueueLength = 0;
 let isQueueRunning = false;
 function tagEdit(songList, newTags) {
-    songList.forEach((sourceFile) => songToEditQueue.push({ sourceFile, newTags }));
+    songList.forEach(sourceFile => songToEditQueue.push({ sourceFile, newTags }));
     if (maxQueueLength < songToEditQueue.length) {
         maxQueueLength = songToEditQueue.length;
     }
@@ -40,16 +40,16 @@ function processQueue() {
         //IMPORTANT Do something if error
         switch (extension) {
             case 'm4a':
-                result = yield aac_format_1.writeAacTags(task.sourceFile, task.newTags);
+                result = yield (0, aac_format_1.writeAacTags)(task.sourceFile, task.newTags);
                 break;
             case 'flac':
-                result = yield flac_format_1.writeFlacTags(task.sourceFile, task.newTags);
+                result = yield (0, flac_format_1.writeFlacTags)(task.sourceFile, task.newTags);
                 break;
             case 'opus':
-                result = yield opus_format_1.writeOpusTags(task.sourceFile, task.newTags);
+                result = yield (0, opus_format_1.writeOpusTags)(task.sourceFile, task.newTags);
                 break;
             case 'mp3':
-                result = yield mp3_format_1.writeMp3Tags(task.sourceFile, task.newTags);
+                result = yield (0, mp3_format_1.writeMp3Tags)(task.sourceFile, task.newTags);
                 break;
             default:
                 break;

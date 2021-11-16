@@ -6,7 +6,7 @@ const storage_service_1 = require("./storage.service");
 // import { getCollection } from './loki.service.bak'
 function orderSongs(index, grouping, filtering) {
     // Retrieves the songs from DB.
-    let songs = storage_service_1.getStorageMapToArray();
+    let songs = (0, storage_service_1.getStorageMapToArray)();
     // Array returned at the end of the whole process of filtering.
     let tempArray = [];
     // Array to be filtered again and again.
@@ -24,10 +24,10 @@ function orderSongs(index, grouping, filtering) {
                 // Filters one last time to remove the last chosen filter, otherwise, the array would countain ALL the songs with the last selected filter for the album grouping. Only if a last grouping was selected.
                 if (filtering[i] !== null) {
                     let lastFilter = filteredArray.filter((song) => song[grouping[i]] === filtering[i]);
-                    albumFiltering_service_1.setAlbumArray(lastFilter);
+                    (0, albumFiltering_service_1.setAlbumArray)(lastFilter);
                 }
                 else {
-                    albumFiltering_service_1.setAlbumArray(filteredArray);
+                    (0, albumFiltering_service_1.setAlbumArray)(filteredArray);
                 }
             }
             filteredArray.forEach((song) => {

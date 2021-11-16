@@ -1,5 +1,5 @@
-import { ExifTool } from 'exiftool-vendored'
-const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
+// import { ExifTool } from 'exiftool-vendored'
+// const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 import fs from 'fs'
 import stringHash from 'string-hash'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'

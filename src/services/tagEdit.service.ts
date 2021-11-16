@@ -10,7 +10,7 @@ let maxQueueLength = 0
 let isQueueRunning = false
 
 export function tagEdit(songList: string[], newTags: object) {
-	songList.forEach((sourceFile) => songToEditQueue.push({ sourceFile, newTags }))
+	songList.forEach(sourceFile => songToEditQueue.push({ sourceFile, newTags }))
 
 	if (maxQueueLength < songToEditQueue.length) {
 		maxQueueLength = songToEditQueue.length

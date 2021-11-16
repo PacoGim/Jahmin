@@ -1,8 +1,6 @@
-import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import stringHash from 'string-hash'
-import trash from 'trash'
 import generateId from '../functions/generateId.fn'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { getWorker } from '../services/worker.service'
@@ -12,7 +10,7 @@ import { SongType } from '../types/song.type'
 
 let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
 
-const mm = require('music-metadata')
+// const mm = require('music-metadata')
 
 /********************** Write Flac Tags **********************/
 let ffmpegDeferredPromise: any = undefined
@@ -20,8 +18,10 @@ let ffmpegDeferredPromiseId: string
 
 const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) => {
 	if (response.id === ffmpegDeferredPromiseId) {
-		await trash(response.filePath)
-		fs.renameSync(response.tempFileName, response.filePath)
+		if (fs.existsSync(response.tempFileName)) {
+			fs.unlinkSync(response.filePath)
+			fs.renameSync(response.tempFileName, response.filePath)
+		}
 		ffmpegDeferredPromise(response.status)
 	}
 })

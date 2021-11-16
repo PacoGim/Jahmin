@@ -15,7 +15,7 @@ function setAlbumArray(newAlbumArray) {
         let foundAlbum = newArray.find((i) => i['RootDir'] === rootDir);
         if (!foundAlbum) {
             newArray.push({
-                ID: hashString_fn_1.hash(rootDir),
+                ID: (0, hashString_fn_1.hash)(rootDir),
                 Name: song['Album'],
                 RootDir: rootDir,
                 AlbumArtist: song['AlbumArtist'],

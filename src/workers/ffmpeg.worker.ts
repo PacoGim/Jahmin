@@ -1,18 +1,18 @@
 import { parentPort } from 'worker_threads'
-import { exec } from 'child_process'
+import { spawn } from 'child_process'
 
-parentPort?.on('message', (message) => {
+parentPort?.on('message', message => {
 	let { id, filePath, tempFileName, command } = message
 
 	let status = -1
 
-	exec(command, (error, stdout, stderr) => {
-		if (error) status = -1
-
-		if (stdout || stderr) {
+	spawn(command, [], { shell: true }).on('close', code => {
+		if (code === 0) {
 			status = 1
+		} else {
+			status = 0
 		}
-	}).on('close', () => {
+
 		parentPort?.postMessage({ id, filePath, tempFileName, status })
 	})
 })

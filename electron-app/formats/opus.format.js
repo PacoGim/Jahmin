@@ -23,17 +23,19 @@ let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmp
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise = undefined;
 let ffmpegDeferredPromiseId;
-const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
+const ffmpegWorker = (_a = (0, worker_service_1.getWorker)('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
     if (response.id === ffmpegDeferredPromiseId) {
-        fs_1.default.unlinkSync(response.filePath);
-        fs_1.default.renameSync(response.tempFileName, response.filePath);
+        if (fs_1.default.existsSync(response.tempFileName)) {
+            fs_1.default.unlinkSync(response.filePath);
+            fs_1.default.renameSync(response.tempFileName, response.filePath);
+        }
         ffmpegDeferredPromise(response.status);
     }
 }));
 function writeOpusTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         ffmpegDeferredPromise = resolve;
-        ffmpegDeferredPromiseId = generateId_fn_1.default();
+        ffmpegDeferredPromiseId = (0, generateId_fn_1.default)();
         let ffmpegString = objectToFfmpegString(newTags);
         let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
         let command = `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`;
@@ -42,7 +44,7 @@ function writeOpusTags(filePath, newTags) {
 }
 exports.writeOpusTags = writeOpusTags;
 /********************** Get Opus Tags **********************/
-let mmWorker = worker_service_1.getWorker('musicMetadata');
+let mmWorker = (0, worker_service_1.getWorker)('musicMetadata');
 let mmDeferredPromises = new Map();
 mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.on('message', data => {
     if (mmDeferredPromises.has(data.filePath)) {
@@ -61,7 +63,7 @@ function getOpusTags(filePath) {
                 mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.postMessage(filePath);
             });
             let tags = {
-                ID: string_hash_1.default(filePath),
+                ID: (0, string_hash_1.default)(filePath),
                 Extension: 'opus',
                 SourceFile: filePath
             };

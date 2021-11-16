@@ -17,26 +17,27 @@ exports.getFlacTags = exports.writeFlacTags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
-const trash_1 = __importDefault(require("trash"));
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
-const mm = require('music-metadata');
+// const mm = require('music-metadata')
 /********************** Write Flac Tags **********************/
 let ffmpegDeferredPromise = undefined;
 let ffmpegDeferredPromiseId;
-const ffmpegWorker = (_a = worker_service_1.getWorker('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
+const ffmpegWorker = (_a = (0, worker_service_1.getWorker)('ffmpeg')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
     if (response.id === ffmpegDeferredPromiseId) {
-        yield trash_1.default(response.filePath);
-        fs_1.default.renameSync(response.tempFileName, response.filePath);
+        if (fs_1.default.existsSync(response.tempFileName)) {
+            fs_1.default.unlinkSync(response.filePath);
+            fs_1.default.renameSync(response.tempFileName, response.filePath);
+        }
         ffmpegDeferredPromise(response.status);
     }
 }));
 function writeFlacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         ffmpegDeferredPromise = resolve;
-        ffmpegDeferredPromiseId = generateId_fn_1.default();
+        ffmpegDeferredPromiseId = (0, generateId_fn_1.default)();
         let ffmpegString = objectToFfmpegString(newTags);
         let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac');
         let command = `"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`;
@@ -61,7 +62,7 @@ exports.writeFlacTags = writeFlacTags;
     })
 } */
 /********************** Get Flac Tags **********************/
-let worker = worker_service_1.getWorker('musicMetadata');
+let worker = (0, worker_service_1.getWorker)('musicMetadata');
 let deferredPromise = new Map();
 worker === null || worker === void 0 ? void 0 : worker.on('message', data => {
     if (deferredPromise.has(data.filePath)) {
@@ -77,7 +78,7 @@ function getFlacTags(filePath) {
                 worker === null || worker === void 0 ? void 0 : worker.postMessage(filePath);
             });
             let tags = {
-                ID: string_hash_1.default(filePath),
+                ID: (0, string_hash_1.default)(filePath),
                 Extension: 'flac',
                 SourceFile: filePath
             };
@@ -169,9 +170,9 @@ function getDate(dateString) {
 function objectToFfmpegString(newTags) {
     let finalString = '';
     if (newTags.DiscNumber)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'DiscNumber', 'disc');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'DiscNumber', 'disc');
     if (newTags.AlbumArtist)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'AlbumArtist', 'Album_Artist');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'AlbumArtist', 'Album_Artist');
     if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
         newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`;
         delete newTags.Date_Year;

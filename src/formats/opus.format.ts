@@ -15,8 +15,10 @@ let ffmpegDeferredPromiseId: string
 
 const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) => {
 	if (response.id === ffmpegDeferredPromiseId) {
-		fs.unlinkSync(response.filePath)
-		fs.renameSync(response.tempFileName, response.filePath)
+		if (fs.existsSync(response.tempFileName)) {
+			fs.unlinkSync(response.filePath)
+			fs.renameSync(response.tempFileName, response.filePath)
+		}
 		ffmpegDeferredPromise(response.status)
 	}
 })

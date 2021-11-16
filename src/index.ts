@@ -1,4 +1,3 @@
-// import { exec } from 'child_process'
 import { app, BrowserWindow, ipcMain, screen, shell, globalShortcut } from 'electron'
 
 import path from 'path'

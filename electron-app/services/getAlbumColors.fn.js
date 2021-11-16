@@ -23,17 +23,17 @@ let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', '
 function getAlbumColors(imageId) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         var _a;
-        let rootDir = (_a = storage_service_1.getStorageMap().get(imageId)) === null || _a === void 0 ? void 0 : _a.RootDir;
+        let rootDir = (_a = (0, storage_service_1.getStorageMap)().get(imageId)) === null || _a === void 0 ? void 0 : _a.RootDir;
         if (!rootDir) {
             return resolve(undefined);
         }
-        const image = yield albumArt_service_1.getAlbumCover(rootDir, true);
+        const image = yield (0, albumArt_service_1.getAlbumCover)(rootDir, true);
         if (image === undefined) {
             return resolve(undefined);
         }
         // let config = getConfig()
         // let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
-        sharp_1.default(image.filePath)
+        (0, sharp_1.default)(image.filePath)
             .resize(1, 1)
             .raw()
             .toBuffer((err, buffer) => {
@@ -47,9 +47,9 @@ function getAlbumColors(imageId) {
                 });
             }
             let hexColor = buffer.toString('hex').substring(0, 6);
-            let hslColorObject = color_type_1.ColorTypeShell();
+            let hslColorObject = (0, color_type_1.ColorTypeShell)();
             const difference = 20;
-            let hslColor = hex_to_hsl_1.default(hexColor);
+            let hslColor = (0, hex_to_hsl_1.default)(hexColor);
             hslColorObject.hue = hslColor[0];
             hslColorObject.saturation = hslColor[1];
             hslColorObject.lightnessBase = hslColor[2];

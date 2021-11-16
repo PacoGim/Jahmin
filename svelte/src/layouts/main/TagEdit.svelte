@@ -4,7 +4,7 @@
 
 	import Star from '../../components/Star.svelte'
 
-	import TagEditEditor from './tag-edit/TagEdit-Editor.svelte';
+	import TagEditEditor from './tag-edit/TagEdit-Editor.svelte'
 
 	import { getEmptyTagList } from '../../functions/getEmptyTagList.fn'
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
@@ -44,6 +44,14 @@
 		})
 	})
 
+	function formatDate(date: Date) {
+		let month = date.getMonth() + 1
+		let day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
+		let year = date.getFullYear()
+
+		return `${year}/${month}/${day}`
+	}
+
 	function checkNewTags() {
 		enableButtons = false
 		newTags = {}
@@ -73,7 +81,7 @@
 		// If no songs selected, edit full array. Otherwise edit only selected songs.
 		selectedSongs.length === 0
 			? (songsToEdit = songList)
-			: (songsToEdit = songList.filter((song) => selectedSongs.includes(song.ID)))
+			: (songsToEdit = songList.filter(song => selectedSongs.includes(song.ID)))
 	}
 
 	function groupSongs(songsToEdit: SongType[]) {
@@ -116,11 +124,11 @@
 	function updateSongs() {
 		if (enableButtons === true) {
 			editTagsIPC(
-				songsToEdit.map((song) => song.SourceFile),
+				songsToEdit.map(song => song.SourceFile),
 				newTags
 			)
 
-			getTagEditProgressIPC().then((result) => console.log(result))
+			getTagEditProgressIPC().then(result => console.log(result))
 		}
 	}
 </script>

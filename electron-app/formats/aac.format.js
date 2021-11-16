@@ -14,15 +14,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAacTags = exports.writeAacTags = void 0;
-const exiftool_vendored_1 = require("exiftool-vendored");
-const exiftool = new exiftool_vendored_1.ExifTool({ taskTimeoutMillis: 5000 });
+// import { ExifTool } from 'exiftool-vendored'
+// const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
 /********************** Write Aac Tags **********************/
 let tagWriteDeferredPromise = undefined;
-let exifToolWriteWorker = (_a = worker_service_1.getWorker('exifToolWrite')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
+let exifToolWriteWorker = (_a = (0, worker_service_1.getWorker)('exifToolWrite')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
     tagWriteDeferredPromise(response);
 });
 function writeAacTags(filePath, newTags) {
@@ -39,7 +39,7 @@ let tagReadDeferredPromises = new Map();
 function getAacTags(filePath) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         if (exifToolReadWorker === undefined) {
-            exifToolReadWorker = worker_service_1.getWorker('exifToolRead');
+            exifToolReadWorker = (0, worker_service_1.getWorker)('exifToolRead');
             exifToolReadWorker === null || exifToolReadWorker === void 0 ? void 0 : exifToolReadWorker.on('message', (response) => {
                 tagReadDeferredPromises.get(response.filePath)(response.metadata);
                 tagReadDeferredPromises.delete(response.filePath);
@@ -52,7 +52,7 @@ function getAacTags(filePath) {
         const STATS = fs_1.default.statSync(filePath);
         let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));
         resolve({
-            ID: string_hash_1.default(filePath),
+            ID: (0, string_hash_1.default)(filePath),
             Extension: METADATA.FileTypeExtension,
             SourceFile: METADATA.SourceFile || '',
             Album: METADATA.Album || '',
@@ -81,11 +81,11 @@ function getAacTags(filePath) {
 exports.getAacTags = getAacTags;
 function normalizeNewTags(newTags) {
     if (newTags.DiscNumber !== undefined)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'DiscNumber', 'DiskNumber');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'DiscNumber', 'DiskNumber');
     if (newTags.Track !== undefined)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Track', 'TrackNumber');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Track', 'TrackNumber');
     if (newTags.Rating !== undefined)
-        renameObjectKey_fn_1.renameObjectKey(newTags, 'Rating', 'RatingPercent');
+        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Rating', 'RatingPercent');
     if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
         newTags.AllDates = `${newTags.Date_Year || '0000'} ${newTags.Date_Month || '00'} ${newTags.Date_Day || '00'}`;
         if (newTags.Date_Year && newTags.Date_Month) {

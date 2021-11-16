@@ -10,14 +10,14 @@ const __1 = require("..");
 const hashString_fn_1 = require("../functions/hashString.fn");
 const worker_service_1 = require("./worker.service");
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
-const STORAGE_PATH = path_1.default.join(__1.appDataPath(), 'storage');
+const STORAGE_PATH = path_1.default.join((0, __1.appDataPath)(), 'storage');
 const STORAGE_VERSION_FILE_PATH = path_1.default.join(STORAGE_PATH, 'version');
 let storageMap = new Map();
 // let storageVersion: number
 // Deferred Promise, when set (from anywhere), will resolve getNewPromiseDbVersion
 let dbVersionResolve = undefined;
 let watcher;
-let worker = worker_service_1.getWorker('storage');
+let worker = (0, worker_service_1.getWorker)('storage');
 worker === null || worker === void 0 ? void 0 : worker.on('message', message => {
     if (message.type === 'insert') {
         insertData(message.data);
@@ -34,18 +34,18 @@ worker === null || worker === void 0 ? void 0 : worker.on('message', message => 
     updateStorageVersion();
 });
 function deleteFolder(rootDir) {
-    let rootId = hashString_fn_1.hash(rootDir, 'text');
+    let rootId = (0, hashString_fn_1.hash)(rootDir, 'text');
     let mappedData = storageMap.get(rootId);
     if (mappedData) {
         storageMap.delete(rootId);
         if (dbVersionResolve !== undefined)
-            dbVersionResolve(generateId_fn_1.default());
+            dbVersionResolve((0, generateId_fn_1.default)());
     }
 }
 function deleteData(songPath) {
     let rootDir = songPath.split('/').slice(0, -1).join('/');
-    let rootId = hashString_fn_1.hash(rootDir, 'text');
-    let songId = hashString_fn_1.hash(songPath, 'number');
+    let rootId = (0, hashString_fn_1.hash)(rootDir, 'text');
+    let songId = (0, hashString_fn_1.hash)(songPath, 'number');
     let mappedData = storageMap.get(rootId);
     let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
     if (mappedData && songs) {
@@ -57,7 +57,7 @@ function deleteData(songPath) {
             storageMap.delete(rootDir);
         }
         if (dbVersionResolve !== undefined)
-            dbVersionResolve(generateId_fn_1.default());
+            dbVersionResolve((0, generateId_fn_1.default)());
     }
 }
 function updateData(songData) {
@@ -65,8 +65,8 @@ function updateData(songData) {
         return;
     }
     let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
-    let rootId = hashString_fn_1.hash(rootDir, 'text');
-    let songId = hashString_fn_1.hash(songData.SourceFile, 'number');
+    let rootId = (0, hashString_fn_1.hash)(rootDir, 'text');
+    let songId = (0, hashString_fn_1.hash)(songData.SourceFile, 'number');
     let mappedData = storageMap.get(rootId);
     let songs = mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs;
     if (mappedData && songs) {
@@ -75,7 +75,7 @@ function updateData(songData) {
         mappedData.Songs = songs;
         storageMap.set(rootDir, mappedData);
         if (dbVersionResolve !== undefined)
-            dbVersionResolve(generateId_fn_1.default());
+            dbVersionResolve((0, generateId_fn_1.default)());
     }
 }
 function insertData(songData) {
@@ -83,7 +83,7 @@ function insertData(songData) {
         return;
     }
     let rootDir = songData.SourceFile.split('/').slice(0, -1).join('/');
-    let rootId = hashString_fn_1.hash(rootDir, 'text');
+    let rootId = (0, hashString_fn_1.hash)(rootDir, 'text');
     let mappedData = storageMap.get(rootId);
     if (mappedData) {
         mappedData === null || mappedData === void 0 ? void 0 : mappedData.Songs.push(songData);
@@ -97,7 +97,7 @@ function insertData(songData) {
         });
     }
     if (dbVersionResolve !== undefined)
-        dbVersionResolve(generateId_fn_1.default());
+        dbVersionResolve((0, generateId_fn_1.default)());
 }
 let fuzzyArray = [];
 function consolidateStorage() {
@@ -117,7 +117,7 @@ function consolidateStorage() {
         for (let songId in fileData) {
             let song = fileData[songId];
             let rootDir = song.SourceFile.split('/').slice(0, -1).join('/');
-            let rootId = hashString_fn_1.hash(rootDir, 'text');
+            let rootId = (0, hashString_fn_1.hash)(rootDir, 'text');
             let data = storageMap.get(rootId);
             if (data) {
                 if (!data.Songs.find(i => i.ID === song.ID)) {
@@ -162,7 +162,7 @@ function getNewPromiseDbVersion(rendererDbVersion) {
 }
 exports.getNewPromiseDbVersion = getNewPromiseDbVersion;
 function updateStorageVersion() {
-    fs_1.default.writeFileSync(STORAGE_VERSION_FILE_PATH, generateId_fn_1.default(), { encoding: 'utf-8' });
+    fs_1.default.writeFileSync(STORAGE_VERSION_FILE_PATH, (0, generateId_fn_1.default)(), { encoding: 'utf-8' });
 }
 function killStorageWatcher() {
     if (watcher) {

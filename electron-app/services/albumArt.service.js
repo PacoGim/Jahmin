@@ -23,10 +23,10 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
             validFormats = validFormats.filter(format => !videoFormats.includes(format));
         }
         const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
-        let rootDirHashed = hashString_fn_1.hash(rootDir, 'text');
-        let config = config_service_1.getConfig();
+        let rootDirHashed = (0, hashString_fn_1.hash)(rootDir, 'text');
+        let config = (0, config_service_1.getConfig)();
         let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
-        let artDirPath = path_1.default.join(__1.appDataPath(), 'art', String(dimension));
+        let artDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(dimension));
         let artFilePath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
         // If exists resolve right now the already compressed IMAGE ART
         if (forceNewImage === false && fs_1.default.existsSync(artFilePath)) {
@@ -57,7 +57,7 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
             resolve({ fileType: 'image', filePath: preferredArt });
             if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
                 compressImage(preferredArt, artDirPath, artFilePath).then(artPath => {
-                    sendWebContents_service_1.sendWebContents('new-cover', {
+                    (0, sendWebContents_service_1.sendWebContents)('new-cover', {
                         success: true,
                         id: rootDirHashed,
                         filePath: artPath,
@@ -72,12 +72,12 @@ exports.getAlbumCover = getAlbumCover;
 function compressImage(filePath, artDirPath, artPath) {
     return new Promise((resolve, reject) => {
         var _a;
-        let config = config_service_1.getConfig();
+        let config = (0, config_service_1.getConfig)();
         let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
         if (!fs_1.default.existsSync(artDirPath)) {
-            original_fs_1.mkdirSync(artDirPath, { recursive: true });
+            (0, original_fs_1.mkdirSync)(artDirPath, { recursive: true });
         }
-        sharp_1.default(filePath)
+        (0, sharp_1.default)(filePath)
             .resize({
             height: dimension * 2,
             width: dimension * 2
