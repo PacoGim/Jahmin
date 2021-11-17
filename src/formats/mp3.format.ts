@@ -30,7 +30,7 @@ let worker = getWorker('musicMetadata')
 
 let deferredPromise: Map<string, any> = new Map<string, any>()
 
-worker?.on('message', (data) => {
+worker?.on('message', data => {
 	if (deferredPromise.has(data.filePath)) {
 		deferredPromise.get(data.filePath)(data.metadata)
 		deferredPromise.delete(data.filePath)
@@ -55,24 +55,24 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 
 		let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
 
-		tags.Album = nativeTags?.TALB || ''
-		tags.AlbumArtist = nativeTags?.TPE2 || ''
-		tags.Artist = nativeTags?.TPE1 || ''
-		tags.Comment = nativeTags?.COMM?.text || ''
-		tags.Composer = nativeTags?.TCOM || ''
+		tags.Album = nativeTags?.TALB || null
+		tags.AlbumArtist = nativeTags?.TPE2 || null
+		tags.Artist = nativeTags?.TPE1 || null
+		tags.Comment = nativeTags?.COMM?.text || null
+		tags.Composer = nativeTags?.TCOM || null
 		tags.Date_Year = dateParsed.year || null
 		tags.Date_Month = dateParsed.month || null
 		tags.Date_Day = dateParsed.day || null
 		tags.DiscNumber = Number(nativeTags?.TPOS) || null
-		tags.Genre = nativeTags?.TCON || ''
-		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || 0
-		tags.Title = nativeTags?.TIT2 || ''
-		tags.Track = Number(nativeTags?.TRCK) || 0
+		tags.Genre = nativeTags?.TCON || null
+		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || null
+		tags.Title = nativeTags?.TIT2 || null
+		tags.Track = Number(nativeTags?.TRCK) || null
 
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
+		tags.BitRate = METADATA.format.bitrate / 1000 || null
+		tags.Duration = Math.trunc(METADATA.format.duration) || null
 		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = METADATA.format.sampleRate
+		tags.SampleRate = METADATA.format.sampleRate || null
 		tags.Size = STATS.size
 
 		resolve(tags)

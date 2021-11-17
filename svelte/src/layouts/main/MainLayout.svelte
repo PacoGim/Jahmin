@@ -28,7 +28,7 @@
 		overflow-y: hidden;
 		display: grid;
 		grid-template-columns: 64px auto 3fr 256px;
-		grid-template-rows: 2fr minmax(auto, var(--song-list-svlt-height)) 64px;
+		grid-template-rows: auto minmax(auto, var(--song-list-svlt-height)) 64px;
 		grid-template-areas:
 			'navigation-svlt grouping-svlt art-grid-svlt tag-edit-svlt'
 			'navigation-svlt grouping-svlt song-list-svlt tag-edit-svlt'

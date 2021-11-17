@@ -130,7 +130,7 @@ svg.player-button {
 	fill: var(--low-color);
 }
 
-tag-edit input,
+/* tag-edit input,
 tag-edit textarea,
 tag-edit select {
 	width: 100%;
@@ -157,4 +157,4 @@ tag-edit select {
 	transition-property: color background-color;
 	transition-duration: var(--theme-transition-duration);
 	transition-timing-function: linear;
-}
+} */

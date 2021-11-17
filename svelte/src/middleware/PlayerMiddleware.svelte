@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-import { getAlbumColors } from '../functions/getAlbumColors.fn';
+	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import { hash } from '../functions/hashString.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
@@ -37,14 +37,20 @@ import { getAlbumColors } from '../functions/getAlbumColors.fn';
 		if (firstDbVersionAssign === true) {
 			firstDbVersionAssign = false
 		} else {
-			if ($dbVersion !== '') {
-				getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
+			syncDBSongs()
+		}
+	}
 
-				// Refills the current album selected songs to add them as they are found.
-				getAlbumIPC($selectedAlbumId).then(result => {
+	function syncDBSongs() {
+		if ($dbVersion !== '') {
+			getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
+
+			// Refills the current album selected songs to add them as they are found.
+			getAlbumIPC($selectedAlbumId).then(result => {
+				if (result.Songs.length !== $songListStore.length) {
 					$songListStore = result.Songs
-				})
-			}
+				}
+			})
 		}
 	}
 
@@ -99,11 +105,13 @@ import { getAlbumColors } from '../functions/getAlbumColors.fn';
 					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
 				} else if (evt.type === 'click') {
 					// Prevents resetting array if album unchanged.
-
 					if ($selectedAlbumId !== ALBUM_ID) {
 						$selectedAlbumId = ALBUM_ID
 						$songListStore = result.Songs
 					}
+
+					// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
+					$selectedSongsStore = []
 				}
 			})
 		}

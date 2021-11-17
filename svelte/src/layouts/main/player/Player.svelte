@@ -204,6 +204,8 @@
 		// Rounds to 2 decimals.
 		progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
 
+		progress = progress >= 100 ? 100 : progress
+
 		document.documentElement.style.setProperty('--song-time', `${progress}%`)
 
 		songTime = {

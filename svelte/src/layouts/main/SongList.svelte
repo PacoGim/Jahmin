@@ -8,8 +8,7 @@
 		selectedAlbumId,
 		songListStore,
 		selectedSongsStore,
-		triggerScrollToSongEvent,
-		dbVersion
+		triggerScrollToSongEvent
 	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
@@ -20,11 +19,11 @@
 	let isScrollAtBottom = false
 	let isScrollAtTop = false
 
-	$: {
+	/*$: {
 		// Trim song array when the db version changes.
 		$dbVersion
 		trimSongsArray()
-	}
+	}*/
 
 	$: {
 		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height.

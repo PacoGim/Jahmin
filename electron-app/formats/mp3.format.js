@@ -34,7 +34,7 @@ exports.writeMp3Tags = writeMp3Tags;
 /********************** Get Mp3 Tags **********************/
 let worker = (0, worker_service_1.getWorker)('musicMetadata');
 let deferredPromise = new Map();
-worker === null || worker === void 0 ? void 0 : worker.on('message', (data) => {
+worker === null || worker === void 0 ? void 0 : worker.on('message', data => {
     if (deferredPromise.has(data.filePath)) {
         deferredPromise.get(data.filePath)(data.metadata);
         deferredPromise.delete(data.filePath);
@@ -56,23 +56,23 @@ function getMp3Tags(filePath) {
             const STATS = fs_1.default.statSync(filePath);
             let nativeTags = mergeNatives(METADATA.native);
             let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER));
-            tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TALB) || '';
-            tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE2) || '';
-            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE1) || '';
-            tags.Comment = ((_a = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMM) === null || _a === void 0 ? void 0 : _a.text) || '';
-            tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCOM) || '';
+            tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TALB) || null;
+            tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE2) || null;
+            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE1) || null;
+            tags.Comment = ((_a = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMM) === null || _a === void 0 ? void 0 : _a.text) || null;
+            tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCOM) || null;
             tags.Date_Year = dateParsed.year || null;
             tags.Date_Month = dateParsed.month || null;
             tags.Date_Day = dateParsed.day || null;
             tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPOS) || null;
-            tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCON) || '';
-            tags.Rating = convertRating('Jahmin', (_b = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.POPM) === null || _b === void 0 ? void 0 : _b.rating) || 0;
-            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2) || '';
-            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || 0;
-            tags.BitRate = METADATA.format.bitrate / 1000;
-            tags.Duration = Math.trunc(METADATA.format.duration);
+            tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCON) || null;
+            tags.Rating = convertRating('Jahmin', (_b = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.POPM) === null || _b === void 0 ? void 0 : _b.rating) || null;
+            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2) || null;
+            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || null;
+            tags.BitRate = METADATA.format.bitrate / 1000 || null;
+            tags.Duration = Math.trunc(METADATA.format.duration) || null;
             tags.LastModified = STATS.mtimeMs;
-            tags.SampleRate = METADATA.format.sampleRate;
+            tags.SampleRate = METADATA.format.sampleRate || null;
             tags.Size = STATS.size;
             resolve(tags);
         }));

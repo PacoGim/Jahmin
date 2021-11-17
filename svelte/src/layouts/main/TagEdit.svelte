@@ -1,317 +1,156 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
-	import CoverArt from '../../components/CoverArt.svelte'
-
-	import Star from '../../components/Star.svelte'
-
-	import TagEditEditor from './tag-edit/TagEdit-Editor.svelte'
-
-	import { getEmptyTagList } from '../../functions/getEmptyTagList.fn'
-	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
-	import { editTagsIPC, getTagEditProgressIPC } from '../../services/ipc.service'
-
 	import { selectedSongsStore, songListStore } from '../../store/final.store'
+	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
+
 	import type { SongType } from '../../types/song.type'
+	import Star from '../../components/Star.svelte'
+	import { onMount } from 'svelte'
 
 	let songsToEdit: SongType[] = []
-	let tagList = getEmptyTagList()
-	let enableButtons = false
+	let groupedTags: SongType = {}
+	let bindingTags: SongType = {}
 	let newTags: any = {}
-	let rootDir = ''
 
 	$: {
-		if ($songListStore.length > 0) {
-			rootDir = $songListStore[0].SourceFile.split('/').slice(0, -1).join('/')
-		}
+		$songListStore
+		$selectedSongsStore
+		setupSongs()
 	}
 
-	$: getSelectedSongs($selectedSongsStore, $songListStore)
-
-	$: if (songsToEdit.length !== 0) groupSongs(songsToEdit)
+	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
 	$: {
-		tagList
-		if (songsToEdit.length !== 0) checkNewTags()
+		console.log(newTags)
 	}
 
-	onMount(() => {
-		document.addEventListener('keypress', ({ key }) => {
-			if (key === 'Enter') {
-				if (document.activeElement.parentElement.tagName === 'TAG-EDIT') {
-					updateSongs()
-				}
-			}
-		})
-	})
-
-	function formatDate(date: Date) {
-		let month = date.getMonth() + 1
-		let day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate()
-		let year = date.getFullYear()
-
-		return `${year}/${month}/${day}`
-	}
-
-	function checkNewTags() {
-		enableButtons = false
-		newTags = {}
-
-		for (let tagName in tagList) {
-			if (tagList[tagName].value !== tagList[tagName].bind) {
-				if (['Date_Year', 'Date_Month', 'Date_Day'].includes(tagName)) {
-					newTags.Date_Year = Number(tagList.Date_Year.bind)
-					newTags.Date_Month = Number(tagList.Date_Month.bind)
-					newTags.Date_Day = Number(tagList.Date_Day.bind)
-				} else {
-					newTags[tagName] = tagList[tagName].bind
-				}
-			}
-		}
-
-		if (!isEmptyObject(newTags)) {
-			enableButtons = true
-		} else {
-			enableButtons = false
-		}
-	}
-
-	function getSelectedSongs(selectedSongs: number[], songList: SongType[]) {
-		if (songList.length <= 0) return
-
-		// If no songs selected, edit full array. Otherwise edit only selected songs.
-		selectedSongs.length === 0
-			? (songsToEdit = songList)
-			: (songsToEdit = songList.filter(song => selectedSongs.includes(song.ID)))
-	}
-
-	function groupSongs(songsToEdit: SongType[]) {
-		let firstSong = songsToEdit[0]
-
-		// Sets up the tag lists with all the tags from the first song.
-		for (let tagName in firstSong) {
-			if (tagList[tagName]) {
-				tagList[tagName].value = firstSong[tagName]
-			}
-		}
-
-		for (let song of songsToEdit) {
-			for (let tagName in song) {
-				if (tagList[tagName] && tagList[tagName].value !== song[tagName]) {
-					tagList[tagName].value = '-'
-				}
-			}
-		}
-
-		for (let tagName in tagList) {
-			tagList[tagName].bind = tagList[tagName].value
-		}
+	function setupSongs() {
+		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
+		groupedTags = groupSongsByValues(songsToEdit)
+		bindingTags = Object.assign({}, groupedTags)
 	}
 
 	function setStar(starChangeEvent) {
-		tagList.Rating.bind = starChangeEvent.detail.starRating
+		bindingTags.Rating = starChangeEvent.detail.starRating
 	}
 
-	function undoChange(tagName) {
-		tagList[tagName].bind = tagList[tagName].value
-	}
+	function resizeTextArea(evt: Event, type: 'expand' | 'collapse') {
+		let textAreaElement = evt.target as HTMLTextAreaElement
 
-	function undoAllChanges() {
-		for (let tagName in tagList) {
-			tagList[tagName].bind = tagList[tagName].value
+		if (textAreaElement) {
+			if (type === 'expand') {
+				textAreaElement.style.minHeight = textAreaElement.scrollHeight + 'px'
+			} else if (type === 'collapse') {
+				textAreaElement.style.minHeight = '0px'
+			}
 		}
 	}
 
-	function updateSongs() {
-		if (enableButtons === true) {
-			editTagsIPC(
-				songsToEdit.map(song => song.SourceFile),
-				newTags
-			)
+	onMount(() => {
+		let textAreaElements = document.querySelector('tag-edit-svlt').querySelectorAll('textarea')
 
-			getTagEditProgressIPC().then(result => console.log(result))
-		}
-	}
+		textAreaElements.forEach(element => {
+			element.rows = 1
+			element.addEventListener('mouseleave', evt => resizeTextArea(evt, 'collapse'))
+			element.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
+			element.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
+		})
+	})
 </script>
 
 <tag-edit-svlt>
-	<component-name>Songs Editing: {songsToEdit.length}</component-name>
+	<p>Song Edit: {songsToEdit.length}</p>
 
-	<TagEditEditor
-		tagName="Title"
-		on:undoChange={() => undoChange('Title')}
-		type="text"
-		bind:value={tagList.Title.bind}
-		showUndo={tagList.Title.bind !== tagList.Title.value}
-	/>
+	<tag-title>
+		<p>Title</p>
+		<textarea bind:value={bindingTags.Title} />
+	</tag-title>
 
-	<TagEditEditor
-		tagName="Album"
-		on:undoChange={() => undoChange('Album')}
-		type="text"
-		bind:value={tagList.Album.bind}
-		showUndo={tagList.Album.bind !== tagList.Album.value}
-	/>
+	<tag-album>
+		<p>Album</p>
+		<textarea bind:value={bindingTags.Album} />
+	</tag-album>
 
-	<track-disc-tag-editor>
-		<TagEditEditor
-			tagName="Track #"
-			on:undoChange={() => undoChange('Track')}
-			warningMessage={tagList.Track.value === '.'
-				? 'It is not recommended to edit the track number of multiple songs at once.'
-				: undefined}
-			type="number"
-			bind:value={tagList.Track.bind}
-			showUndo={tagList.Track.bind !== tagList.Track.value}
-		/>
+	<tag-track>
+		<p>Track #</p>
+		<textarea bind:value={bindingTags.Track} />
+	</tag-track>
 
-		<TagEditEditor
-			tagName="Disc #"
-			on:undoChange={() => undoChange('DiscNumber')}
-			type="number"
-			bind:value={tagList.DiscNumber.bind}
-			showUndo={tagList.DiscNumber.bind !== tagList.DiscNumber.value}
-		/>
-	</track-disc-tag-editor>
+	<tag-disc>
+		<p>Disc #</p>
+		<textarea bind:value={bindingTags.DiscNumber} />
+	</tag-disc>
 
-	<TagEditEditor
-		tagName="Artist"
-		on:undoChange={() => undoChange('Artist')}
-		type="textarea"
-		bind:value={tagList.Artist.bind}
-		showUndo={tagList.Artist.bind !== tagList.Artist.value}
-	/>
+	<tag-artist>
+		<p>Artist</p>
+		<textarea bind:value={bindingTags.Artist} />
+	</tag-artist>
 
-	<TagEditEditor
-		tagName="Album Artist"
-		on:undoChange={() => undoChange('AlbumArtist')}
-		type="textarea"
-		bind:value={tagList.AlbumArtist.bind}
-		showUndo={tagList.AlbumArtist.bind !== tagList.AlbumArtist.value}
-	/>
+	<tag-album-artist>
+		<p>Album Artist</p>
+		<textarea bind:value={bindingTags.AlbumArtist} />
+	</tag-album-artist>
 
-	<TagEditEditor
-		tagName="Genre"
-		on:undoChange={() => undoChange('Genre')}
-		type="text"
-		bind:value={tagList.Genre.bind}
-		showUndo={tagList.Genre.bind !== tagList.Genre.value}
-	/>
+	<tag-genre>
+		<p>Genre</p>
+		<textarea bind:value={bindingTags.Genre} />
+	</tag-genre>
 
-	<TagEditEditor
-		tagName="Composer"
-		on:undoChange={() => undoChange('Composer')}
-		type="text"
-		bind:value={tagList.Composer.bind}
-		showUndo={tagList.Composer.bind !== tagList.Composer.value}
-	/>
+	<tag-composer>
+		<p>Composer</p>
+		<textarea bind:value={bindingTags.Composer} />
+	</tag-composer>
 
-	<TagEditEditor
-		tagName="Comment"
-		on:undoChange={() => undoChange('Comment')}
-		type="textarea"
-		bind:value={tagList.Comment.bind}
-		showUndo={tagList.Comment.bind !== tagList.Comment.value}
-	/>
+	<tag-comment>
+		<p>Comment</p>
+		<textarea bind:value={bindingTags.Comment} />
+	</tag-comment>
 
-	<date-tag-editor>
-		<TagEditEditor
-			tagName="Year"
-			on:undoChange={() => undoChange('Date_Year')}
-			type="number"
-			bind:value={tagList.Date_Year.bind}
-			showUndo={tagList.Date_Year.bind !== tagList.Date_Year.value}
-		/>
-		<TagEditEditor
-			tagName="Month"
-			on:undoChange={() => undoChange('Date_Month')}
-			type="number"
-			bind:value={tagList.Date_Month.bind}
-			showUndo={tagList.Date_Month.bind !== tagList.Date_Month.value}
-		/>
-		<TagEditEditor
-			tagName="Day"
-			on:undoChange={() => undoChange('Date_Day')}
-			type="number"
-			bind:value={tagList.Date_Day.bind}
-			showUndo={tagList.Date_Day.bind !== tagList.Date_Day.value}
-		/>
-	</date-tag-editor>
+	<tag-data-year>
+		<p>Year</p>
+		<textarea bind:value={bindingTags.Date_Year} />
+	</tag-data-year>
 
-	<Star
-		on:starChange={setStar}
-		on:undoChange={() => undoChange('Rating')}
-		songRating={Number(tagList.Rating.bind)}
-		hook="tag-edit-svlt"
-		klass="tag-edit-star"
-		showUndo={tagList.Rating.bind !== tagList.Rating.value}
-	/>
+	<tag-date-month>
+		<p>Month</p>
+		<textarea bind:value={bindingTags.Date_Month} />
+	</tag-date-month>
 
-	<CoverArt klass="TagEdit" {rootDir} style="height:auto;width:100%;" type="forceLoad" />
+	<tag-date-day>
+		<p>Day</p>
+		<textarea bind:value={bindingTags.Date_Day} />
+	</tag-date-day>
 
-	<button-group>
-		<button on:click={updateSongs} class="update-button {enableButtons ? '' : 'disabled'}">Update</button>
-		<button on:click={undoAllChanges} class="cancel-button {enableButtons ? '' : 'disabled'}">Cancel</button>
-	</button-group>
+	<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
 </tag-edit-svlt>
 
 <style>
 	tag-edit-svlt {
-		overflow-y: overlay;
+		/* overflow-y: overlay; */
+		display: grid;
+		/* height: 100%; */
+
 		background-color: var(--color-bg-2);
 
-		transition: background-color var(--theme-transition-duration) linear;
-	}
-
-	button-group {
-		display: flex;
-		justify-content: space-evenly;
-	}
-
-	button-group button {
-		color: #fff;
-
-		transition-property: background-color color;
-		transition-duration: 300ms;
-		transition-timing-function: linear;
-	}
-
-	button-group button.update-button {
-		background-color: hsl(213, 85%, 60%);
-	}
-
-	button-group button.cancel-button {
-		background-color: hsl(349, 85%, 60%);
-	}
-
-	button-group button.disabled {
-		cursor: not-allowed;
-		background-color: #d5d5d5;
-		color: #3c3c3c;
-	}
-
-	date-tag-editor {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-	}
-
-	track-disc-tag-editor {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-	}
-
-	tag-edit-svlt {
 		grid-area: tag-edit-svlt;
 
-		display: flex;
-		flex-direction: column;
+		transition: background-color var(--theme-transition-duration) linear;
 	}
 
-	component-name {
-		text-align: center;
-		padding: 0.5rem;
-		background-color: var(--color-bg-1);
-		margin-bottom: 0.5rem;
+	textarea {
+		min-height: 0px;
+		overflow-y: hidden;
+		resize: none;
 
-		transition: background-color var(--theme-transition-duration) linear;
+		font-family: 'RobotoFlex';
+
+		width: 100%;
+
+		transition-property: min-height, color, background-color;
+		transition-duration: 300ms, var(--theme-transition-duration), var(--theme-transition-duration);
+		transition-timing-function: ease-in-out, linear, linear;
+	}
+
+	textarea:focus {
+		outline: none;
 	}
 </style>

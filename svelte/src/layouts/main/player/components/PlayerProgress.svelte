@@ -34,12 +34,12 @@
 		playerProgress.addEventListener('mouseup', () => (isMouseDown = false))
 
 		playerProgress.addEventListener('mousemove', evt => {
-			if (isMouseDown && isMouseIn) applyProgressChange(evt)
+			if (isMouseDown && isMouseIn) applyProgressChange(evt as MouseEvent)
 		})
 
-		playerProgress.addEventListener('click', evt => applyProgressChange(evt))
+		playerProgress.addEventListener('click', evt => applyProgressChange(evt as MouseEvent))
 
-		function applyProgressChange(evt: Event) {
+		function applyProgressChange(evt: MouseEvent) {
 			if (song === undefined) return
 
 			$playerElement.pause()
@@ -48,8 +48,15 @@
 
 			let playerWidth = playerProgress.scrollWidth
 
-			//@ts-expect-error
 			let selectedPercent = Math.ceil((100 / playerWidth) * evt.offsetX)
+
+			if (selectedPercent <= 0) {
+				selectedPercent = 0
+			}
+
+			if (selectedPercent > 100) {
+				selectedPercent = 100
+			}
 
 			let songPercentTime = song.Duration / (100 / selectedPercent)
 
@@ -122,7 +129,7 @@
 		min-width: var(--song-time);
 
 		transition-property: min-width, background-color;
-		transition-duration: 100ms, 300ms;
+		transition-duration: 250ms, 300ms;
 		transition-timing-function: linear;
 		height: 100%;
 

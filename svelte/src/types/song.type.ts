@@ -1,6 +1,6 @@
 export type SongType = {
 	[index: string]: string | number | undefined
-	ID: number
+	ID?: number
 	Album?: string // Modifiable
 	AlbumArtist?: string // Modifiable
 	Artist?: string // Modifiable
@@ -12,9 +12,9 @@ export type SongType = {
 	Rating?: number // Modifiable
 	Comment?: string // Modifiable
 	DiscNumber?: number // Modifiable
-	Date_Year: number | undefined // Modifiable
-	Date_Month: number | undefined // Modifiable
-	Date_Day: number | undefined // Modifiable
+	Date_Year?: number | undefined // Modifiable
+	Date_Month?: number | undefined // Modifiable
+	Date_Day?: number | undefined // Modifiable
 	SourceFile?: string
 	Extension?: string
 	Size?: number

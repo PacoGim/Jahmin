@@ -48,6 +48,11 @@
 	})
 
 	function setDynamicArtists() {
+		if (!song?.AlbumArtist || !song?.Artist) {
+			song.DynamicArtists = ''
+			return
+		}
+
 		let splitArtists = song.Artist.split('//').filter(artist => !song.AlbumArtist.includes(artist))
 
 		if (splitArtists.length > 0) {

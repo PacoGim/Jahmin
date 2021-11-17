@@ -87,25 +87,25 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 
 		let dateParsed = getDate(String(nativeTags.DATE))
 
-		tags.Album = nativeTags?.ALBUM || ''
-		tags.AlbumArtist = nativeTags?.ALBUMARTIST || ''
-		tags.Artist = nativeTags?.ARTIST || ''
-		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || ''
-		tags.Composer = nativeTags?.COMPOSER || ''
-		tags.Date_Year = dateParsed.year || 0
-		tags.Date_Month = dateParsed.month || 0
-		tags.Date_Day = dateParsed.day || 0
-		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || 0
-		tags.Genre = nativeTags?.GENRE || ''
-		tags.Rating = Number(nativeTags?.RATING) || 0
-		tags.Title = nativeTags?.TITLE || ''
-		tags.Track = Number(nativeTags?.TRACKNUMBER) || 0
+		tags.Album = nativeTags?.ALBUM || null
+		tags.AlbumArtist = nativeTags?.ALBUMARTIST || null
+		tags.Artist = nativeTags?.ARTIST || null
+		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || null
+		tags.Composer = nativeTags?.COMPOSER || null
+		tags.Date_Year = dateParsed.year || null
+		tags.Date_Month = dateParsed.month || null
+		tags.Date_Day = dateParsed.day || null
+		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
+		tags.Genre = nativeTags?.GENRE || null
+		tags.Rating = Number(nativeTags?.RATING) || null
+		tags.Title = nativeTags?.TITLE || null
+		tags.Track = Number(nativeTags?.TRACKNUMBER) || null
 
-		tags.BitDepth = METADATA.format.bitsPerSample
-		tags.BitRate = METADATA.format.bitrate / 1000
-		tags.Duration = Math.trunc(METADATA.format.duration)
+		tags.BitDepth = METADATA.format.bitsPerSample || null
+		tags.BitRate = METADATA.format.bitrate / 1000 || null
+		tags.Duration = Math.trunc(METADATA.format.duration) || null
 		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = METADATA.format.sampleRate
+		tags.SampleRate = METADATA.format.sampleRate || null
 		tags.Size = STATS.size
 
 		resolve(tags)

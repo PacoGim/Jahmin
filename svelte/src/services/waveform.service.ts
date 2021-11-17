@@ -19,7 +19,7 @@ function getNewWaveSurfer(color: string) {
 		responsive: true,
 		hideScrollbar: true,
 		barWidth: 1,
-		barGap: 0,
+		barGap: null,
 		barMinHeight: 1 / 3
 	})
 
