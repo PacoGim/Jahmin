@@ -107,15 +107,18 @@
 	}
 
 	stars.tag-edit-star {
-		margin: 0 auto 0.5rem auto;
+		grid-area: star;
+		justify-self: center;
+		/* width: 100%; */
+		/* margin: 0 auto 0.5rem auto; */
 	}
 
 	img.tag-edit-star {
-		height: 2rem;
+		height: 1.5rem;
 	}
 	img.tag-edit-star.delete-star {
 		opacity: 0.5;
-		height: 1.8rem;
+		height: 1.25rem;
 	}
 
 	img.delete-star {

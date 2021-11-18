@@ -68,7 +68,7 @@
 		display: block;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0, 0, 0, 0.33);
+		background-color: rgba(0, 0, 0, 0.25);
 		backdrop-filter: blur(100px);
 		/* z-index: 2; */
 	}
