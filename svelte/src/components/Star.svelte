@@ -43,7 +43,7 @@
 	}
 </script>
 
-<stars on:click={dispatch('starChange', { starRating: starRating * 10 })} class={klass}>
+<stars on:click={dispatch('starChange', { rating: starRating * 10 })} class={klass}>
 	<img
 		on:click={() => {
 			starRating = 0
@@ -68,13 +68,13 @@
 	/>
 </stars>
 
-<button
+<!-- <button
 	class="{klass} {showUndo ? 'show-undo' : ''}"
 	on:click={() => {
 		starRatingTemp = 0
 		dispatch('undoChange')
-	}}>Undo Rating <img class="undo-icon" src="./img/undo-arrow-svgrepo-com.svg" alt="" /></button
->
+	}}>Undo Rating</button
+> -->
 
 <style>
 	:global(img.starFilter.tag-edit-star) {

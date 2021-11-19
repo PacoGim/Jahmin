@@ -11,11 +11,6 @@
 	let groupedTags: SongType = {}
 	let bindingTags: SongType = {}
 
-	let undoIconStyle = `
-			fill:var(--color-fg-1);
-			height:1rem;
-		`
-
 	let newTags: any = {}
 
 	$: {
@@ -37,7 +32,7 @@
 	}
 
 	function setStar(starChangeEvent) {
-		bindingTags.Rating = starChangeEvent.detail.starRating
+		bindingTags.Rating = starChangeEvent.detail.rating
 	}
 
 	function resizeTextArea(evt: Event, type: 'expand' | 'collapse') {
@@ -52,43 +47,74 @@
 		}
 	}
 
-	function forceNumberInput(evt: Event) {
-		let inputElement = evt.target as HTMLInputElement
+	function forceNumberInput(element: HTMLElement) {
+		let dataSet = element.dataset
+		let bindingTagData = bindingTags[dataSet.tag] as string
 
-		if (inputElement && inputElement.value.length > 0) {
-			inputElement.value = inputElement.value.replace(/[^0-9]/g, '')
-		}
+		bindingTags[dataSet.tag] = bindingTagData.replace(/[^0-9]/g, '')
 	}
 
-	function checkInput(evt: Event) {
+	function checkInput(evt: Event, parentElement: HTMLElement) {
 		let inputElement = evt.target as HTMLInputElement
 		let inputValue = inputElement.value
-		let data = inputElement.dataset
+		let data = parentElement.dataset
 
 		if (inputValue === '' && groupedTags[data.tag] === null) {
 			bindingTags[data.tag] = null
+		}
+
+		if (bindingTags[data.tag] !== groupedTags[data.tag]) {
+			setUndoIconVisibility(data.tag, true)
+		} else {
+			setUndoIconVisibility(data.tag, false)
 		}
 	}
 
 	function undoTagModification(tag: string) {
 		bindingTags[tag] = groupedTags[tag]
+		setUndoIconVisibility(tag, false)
+	}
+
+	function setUndoIconVisibility(query: string, isVisible: boolean) {
+		let undoIconElement = document.querySelector(`svg[data-tag="${query}"]`) as HTMLElement
+
+		if (undoIconElement) {
+			undoIconElement.style.visibility = isVisible ? 'visible' : 'hidden'
+		}
+	}
+
+	function hookUpEventListeners() {
+		let tagContainerElements = document.querySelectorAll('tag-edit-svlt tag-container') as NodeListOf<HTMLElement>
+
+		tagContainerElements.forEach(tagContainerElement => {
+			let textAreaElement = tagContainerElement.querySelector('textarea') as HTMLTextAreaElement
+			let undoIconElement = tagContainerElement.querySelector('tag-name svg') as HTMLElement
+			let dataSet = tagContainerElement.dataset
+
+			if (dataSet.type === 'number') {
+				// textAreaElement.addEventListener('input', evt => forceNumberInput(evt))
+				textAreaElement.addEventListener('input', evt => forceNumberInput(tagContainerElement))
+			}
+
+			textAreaElement.spellcheck = false
+			textAreaElement.rows = 1
+			textAreaElement.addEventListener('mouseleave', evt => resizeTextArea(evt, 'collapse'))
+			textAreaElement.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
+			textAreaElement.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
+			textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
+
+			undoIconElement.setAttribute('data-tag', dataSet.tag)
+			undoIconElement.style.visibility = 'hidden'
+			undoIconElement.addEventListener('click', evt => undoTagModification(dataSet.tag))
+		})
+	}
+
+	function sendNewTags() {
+		console.log(newTags)
 	}
 
 	onMount(() => {
-		let textAreaElements = document.querySelector('tag-edit-svlt').querySelectorAll('textarea')
-		let numberTextAreaElements = document.querySelector('tag-edit-svlt').querySelectorAll('textarea[data-type="number"]')
-
-		numberTextAreaElements.forEach(element => {
-			element.addEventListener('input', evt => forceNumberInput(evt))
-		})
-
-		textAreaElements.forEach(element => {
-			element.rows = 1
-			element.addEventListener('mouseleave', evt => resizeTextArea(evt, 'collapse'))
-			element.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
-			element.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
-			element.addEventListener('input', evt => checkInput(evt))
-		})
+		hookUpEventListeners()
 	})
 </script>
 
@@ -97,71 +123,65 @@
 		>Song{songsToEdit.length > 1 ? 's' : ''} Edit{songsToEdit.length > 0 ? 'ing' : ''}: {songsToEdit.length}</songs-to-edit
 	>
 
-	<tag-title class="tag-container">
-		<tag-name
-			>Title {#if bindingTags.Title !== groupedTags.Title}
-				<undo-container on:click={() => undoTagModification('Title')}>
-					<UndoIcon style={undoIconStyle} />
-				</undo-container>
-			{/if}</tag-name
-		>
-		<textarea data-tag="Title" bind:value={bindingTags.Title} />
-	</tag-title>
+	<tag-container data-tag="Title">
+		<tag-name>Title <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Title} />
+	</tag-container>
 
-	<tag-album class="tag-container">
-		<tag-name>Album</tag-name>
-		<textarea data-tag="Album" bind:value={bindingTags.Album} />
-	</tag-album>
+	<tag-container data-tag="Album">
+		<tag-name>Album <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Album} />
+	</tag-container>
 
-	<tag-track class="tag-container">
-		<tag-name>Track #</tag-name>
-		<textarea data-tag="Track" data-type="number" bind:value={bindingTags.Track} />
-	</tag-track>
+	<tag-container data-tag="Track" data-type="number">
+		<tag-name>Track # <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Track} />
+	</tag-container>
 
-	<tag-disc class="tag-container">
-		<tag-name>Disc #</tag-name>
-		<textarea data-tag="DiscNumber" data-type="number" bind:value={bindingTags.DiscNumber} />
-	</tag-disc>
+	<tag-container data-tag="DiscNumber" data-type="number">
+		<tag-name>Disc # <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.DiscNumber} />
+	</tag-container>
 
-	<tag-artist class="tag-container">
-		<tag-name>Artist</tag-name>
-		<textarea data-tag="Artist" bind:value={bindingTags.Artist} />
-	</tag-artist>
+	<tag-container data-tag="Artist">
+		<tag-name>Artist <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Artist} />
+	</tag-container>
 
-	<tag-album-artist class="tag-container">
-		<tag-name>Album Artist</tag-name>
-		<textarea data-tag="AlbumArtist" bind:value={bindingTags.AlbumArtist} />
-	</tag-album-artist>
+	<tag-container data-tag="AlbumArtist">
+		<tag-name>Album Artist <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.AlbumArtist} />
+	</tag-container>
 
-	<tag-genre class="tag-container">
-		<tag-name>Genre</tag-name>
-		<textarea data-tag="Genre" bind:value={bindingTags.Genre} />
-	</tag-genre>
+	<tag-container data-tag="Genre">
+		<tag-name>Genre <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Genre} />
+	</tag-container>
 
-	<tag-composer class="tag-container">
-		<tag-name>Composer</tag-name>
-		<textarea data-tag="Composer" bind:value={bindingTags.Composer} />
-	</tag-composer>
+	<tag-container data-tag="Composer">
+		<tag-name>Composer <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Composer} />
+	</tag-container>
 
-	<tag-comment class="tag-container">
-		<tag-name>Comment</tag-name>
-		<textarea data-tag="Comment" bind:value={bindingTags.Comment} />
-	</tag-comment>
+	<tag-container data-tag="Comment">
+		<tag-name>Comment <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Comment} />
+	</tag-container>
 
-	<tag-date-year class="tag-container">
-		<tag-name>Year</tag-name>
-		<textarea data-tag="Date_Year" data-type="number" bind:value={bindingTags.Date_Year} />
-	</tag-date-year>
+	<tag-container data-tag="Date_Year" data-type="number">
+		<tag-name>Year <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Date_Year} />
+	</tag-container>
 
-	<tag-date-month class="tag-container">
-		<tag-name>Month</tag-name>
-		<textarea data-tag="Date_Month" data-type="number" bind:value={bindingTags.Date_Month} />
-	</tag-date-month>
+	<tag-container data-tag="Date_Month" data-type="number">
+		<tag-name>Month <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Date_Month} />
+	</tag-container>
 
-	<tag-date-day class="tag-container">
-		<tag-name>Day</tag-name>
-		<textarea data-tag="Date_Day" data-type="number" bind:value={bindingTags.Date_Day} />
-	</tag-date-day>
+	<tag-container data-tag="Date_Day" data-type="number">
+		<tag-name>Day <UndoIcon /> </tag-name>
+		<textarea bind:value={bindingTags.Date_Day} />
+	</tag-container>
 
 	<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
 </tag-edit-svlt>
@@ -194,7 +214,7 @@
 		transition: background-color var(--theme-transition-duration) linear;
 	}
 
-	tag-edit-svlt > *.tag-container {
+	tag-edit-svlt tag-container {
 		font-size: 0.9rem;
 		margin-bottom: 0.5rem;
 
@@ -203,7 +223,7 @@
 		transition: box-shadow 300ms linear;
 	}
 
-	tag-edit-svlt > songs-to-edit {
+	tag-edit-svlt songs-to-edit {
 		display: block;
 		text-align: center;
 
@@ -212,7 +232,7 @@
 		margin-bottom: 0.5rem;
 	}
 
-	tag-edit-svlt > *.tag-container tag-name {
+	tag-edit-svlt tag-container tag-name {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -226,12 +246,7 @@
 		transition: color 300ms linear;
 	}
 
-	tag-edit-svlt > *.tag-container tag-name undo-container {
-		cursor: pointer;
-		display: flex;
-	}
-
-	tag-edit-svlt > *.tag-container textarea {
+	tag-edit-svlt tag-container textarea {
 		font-size: inherit;
 		padding: 0.5rem 1rem;
 
@@ -252,11 +267,11 @@
 		transition-timing-function: ease-in-out, linear, linear, linear;
 	}
 
-	tag-edit-svlt > *.tag-container textarea:focus {
+	tag-edit-svlt > tag-container textarea:focus {
 		outline: none;
 	}
 
-	tag-edit-svlt > *.tag-container:focus-within {
+	tag-edit-svlt > tag-container:focus-within {
 		box-shadow: 0px 3px 0px 0px var(--color-hl-1);
 	}
 
@@ -264,46 +279,55 @@
 		grid-area: songs-to-edit;
 	}
 
-	tag-title {
+	tag-container[data-tag='Title'] {
 		grid-area: tag-title;
 	}
 
-	tag-album {
+	tag-container[data-tag='Album'] {
 		grid-area: tag-album;
 	}
-	tag-track {
+	tag-container[data-tag='Track'] {
 		grid-area: tag-track;
 		margin-right: 0.25rem;
 	}
-	tag-disc {
+
+	tag-container[data-tag='DiscNumber'] {
 		grid-area: tag-disc;
 		margin-left: 0.25rem;
 	}
-	tag-artist {
+
+	tag-container[data-tag='Artist'] {
 		grid-area: tag-artist;
 	}
-	tag-album-artist {
+
+	tag-container[data-tag='AlbumArtist'] {
 		grid-area: tag-album-artist;
 	}
-	tag-genre {
+
+	tag-container[data-tag='Genre'] {
 		grid-area: tag-genre;
 	}
-	tag-composer {
+
+	tag-container[data-tag='Composer'] {
 		grid-area: tag-composer;
 	}
-	tag-comment {
+
+	tag-container[data-tag='Comment'] {
 		grid-area: tag-comment;
 	}
-	tag-date-year {
+
+	tag-container[data-tag='Date_Year'] {
 		grid-area: tag-date-year;
 		margin-right: 0.25rem;
 	}
-	tag-date-month {
+
+	tag-container[data-tag='Date_Month'] {
 		grid-area: tag-date-month;
 		margin-right: 0.25rem;
 		margin-left: 0.25rem;
 	}
-	tag-date-day {
+
+	tag-container[data-tag='Date_Day'] {
 		grid-area: tag-date-day;
 		margin-left: 0.25rem;
 	}
