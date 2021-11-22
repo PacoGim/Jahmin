@@ -4,12 +4,7 @@
 	import SongListItem from '../../components/SongListItem.svelte'
 	import { songAmountConfig } from '../../store/config.store'
 
-	import {
-		selectedAlbumId,
-		songListStore,
-		selectedSongsStore,
-		triggerScrollToSongEvent
-	} from '../../store/final.store'
+	import { selectedAlbumId, songListStore, selectedSongsStore, triggerScrollToSongEvent } from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
@@ -175,8 +170,9 @@
 		// Detects DOM changes in song list element.
 		new MutationObserver(mutationsList => {
 			let elementChanged = mutationsList[0].target as HTMLElement
+			let elementHeight = elementChanged.clientHeight
 
-			document.documentElement.style.setProperty('--song-list-svlt-height', `${elementChanged.clientHeight}px`)
+			document.documentElement.style.setProperty('--song-list-svlt-height', `${elementHeight}px`)
 		}).observe(elementToObserve, { characterData: false, childList: true, attributes: false })
 	}
 

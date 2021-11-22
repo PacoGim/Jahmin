@@ -8,6 +8,8 @@ export let songListTagsConfig: Writable<SelectedTagType[]> = writable(getSongLis
 export let equalizerIdConfig: Writable<string> = writable(localStorage.getItem('EqualizerId'))
 export let themeConfig: Writable<ThemeOptions> = writable(localStorage.getItem('Theme') as ThemeOptions)
 export let songAmountConfig: Writable<number> = writable(Number(localStorage.getItem('SongAmount')))
+export let groupByConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupBy')))
+export let groupByValuesConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupByValues')))
 
 function getSongListTagsConfig() {
 	let songListTagsLS = localStorage.getItem('SongListTags')

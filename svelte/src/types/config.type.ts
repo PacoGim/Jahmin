@@ -1,7 +1,7 @@
 export type ConfigType = {
 	bounds?: BoundsType
 	rootDirectories?: string[]
-	order?: OrderType
+	group?: GroupType
 	art?: ArtType
 	groupOnlyByFolder?: boolean
 	songListTags?: any[]
@@ -24,9 +24,9 @@ type ArtType = {
 	dimension: number
 }
 
-type OrderType = {
-	grouping: string[]
-	filtering: string[]
+type GroupType = {
+	groupBy: string[]
+	groupByValues: string[]
 }
 
 type BoundsType = {

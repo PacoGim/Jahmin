@@ -15,14 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadIPC = void 0;
 const electron_1 = require("electron");
 const config_service_1 = require("./config.service");
-// import { getCollectionMap, getNewPromiseDbVersion } from './loki.service.bak'
-const songFilter_service_1 = require("./songFilter.service");
 const albumArt_service_1 = require("./albumArt.service");
 const getAlbumColors_fn_1 = require("./getAlbumColors.fn");
 const nanoid_1 = require("nanoid");
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 const hashString_fn_1 = require("../functions/hashString.fn");
-const groupSong_fn_1 = require("../functions/groupSong.fn");
 const songSync_service_1 = require("./songSync.service");
 const peaks_1 = require("./peaks");
 const tagEdit_service_1 = require("./tagEdit.service");
@@ -33,6 +30,7 @@ const nanoid = (0, nanoid_1.customAlphabet)('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefgh
 const fuse_js_1 = __importDefault(require("fuse.js"));
 const equalizer_service_1 = require("./equalizer.service");
 const common_1 = require("electron/common");
+const songGroup_service_1 = require("./songGroup.service");
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_service_1.loadContextMenu)(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
@@ -47,18 +45,20 @@ function loadIPC() {
     electron_1.ipcMain.handle('add-new-equalizer-profile', (evt, newProfile) => __awaiter(this, void 0, void 0, function* () {
         return (0, equalizer_service_1.addEqualizer)(newProfile);
     }));
-    electron_1.ipcMain.handle('get-order', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
-        let config = (0, config_service_1.getConfig)();
-        let grouping = ((_a = config.order) === null || _a === void 0 ? void 0 : _a.grouping) || [];
-        let filtering = ((_b = config.order) === null || _b === void 0 ? void 0 : _b.filtering) || [];
-        let result = (0, songFilter_service_1.orderSongs)(arg, grouping, filtering);
-        result = result.map(value => ({
-            id: nanoid(),
-            value
-        }));
-        return result;
+    electron_1.ipcMain.handle('group-songs', (evt, groups, groupValues) => __awaiter(this, void 0, void 0, function* () {
+        return (0, songGroup_service_1.groupSongs)(groups, groupValues);
     }));
+    // ipcMain.handle('get-order', async (evt, arg) => {
+    // 	let config = getConfig()
+    // 	let grouping = config.order?.grouping || []
+    // 	let filtering = config.order?.filtering || []
+    // 	let result: any[] = orderSongs(arg, grouping, filtering)
+    // 	result = result.map(value => ({
+    // 		id: nanoid(),
+    // 		value
+    // 	}))
+    // 	return result
+    // })
     electron_1.ipcMain.handle('get-config', (evt, arg) => __awaiter(this, void 0, void 0, function* () {
         let config = (0, config_service_1.getConfig)();
         return config;
@@ -88,9 +88,9 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-peaks', (evt, sourceFile) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, peaks_1.getPeaks)(sourceFile);
     }));
-    electron_1.ipcMain.handle('get-grouping', (evt, valueToGroupBy) => __awaiter(this, void 0, void 0, function* () {
-        return (0, groupSong_fn_1.groupSongs)(valueToGroupBy);
-    }));
+    // ipcMain.handle('get-grouping', async (evt, valueToGroupBy) => {
+    // 	return groupSongs(valueToGroupBy)
+    // })
     electron_1.ipcMain.handle('save-config', (evt, newConfig) => {
         return (0, config_service_1.saveConfig)(newConfig);
     });

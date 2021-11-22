@@ -7,7 +7,6 @@ import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
-import { groupSongs } from '../functions/groupSong.fn'
 import { getMaxTaskQueueLength, getTaskQueueLength } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
@@ -27,6 +26,7 @@ import {
 } from './equalizer.service'
 import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
 import { shell } from 'electron/common'
+import { groupSongs } from './songGroup.service'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -47,19 +47,23 @@ export function loadIPC() {
 		return addEqualizer(newProfile)
 	})
 
-	ipcMain.handle('get-order', async (evt, arg) => {
-		let config = getConfig()
-		let grouping = config.order?.grouping || []
-		let filtering = config.order?.filtering || []
-		let result: any[] = orderSongs(arg, grouping, filtering)
-
-		result = result.map(value => ({
-			id: nanoid(),
-			value
-		}))
-
-		return result
+	ipcMain.handle('group-songs', async (evt, groups: string[], groupValues: string[]) => {
+		return groupSongs(groups, groupValues)
 	})
+
+	// ipcMain.handle('get-order', async (evt, arg) => {
+	// 	let config = getConfig()
+	// 	let grouping = config.order?.grouping || []
+	// 	let filtering = config.order?.filtering || []
+	// 	let result: any[] = orderSongs(arg, grouping, filtering)
+
+	// 	result = result.map(value => ({
+	// 		id: nanoid(),
+	// 		value
+	// 	}))
+
+	// 	return result
+	// })
 
 	ipcMain.handle('get-config', async (evt, arg) => {
 		let config = getConfig()
@@ -99,16 +103,15 @@ export function loadIPC() {
 		return await getPeaks(sourceFile)
 	})
 
-	ipcMain.handle('get-grouping', async (evt, valueToGroupBy) => {
-		return groupSongs(valueToGroupBy)
-	})
+	// ipcMain.handle('get-grouping', async (evt, valueToGroupBy) => {
+	// 	return groupSongs(valueToGroupBy)
+	// })
 
 	ipcMain.handle('save-config', (evt, newConfig) => {
 		return saveConfig(newConfig)
 	})
 
 	ipcMain.handle('open-config', () => {
-
 		// shell.showItemInFolder(configFilePath)
 		return
 	})

@@ -1,5 +1,4 @@
 import { ConfigType, ThemeOptions } from '../types/config.type'
-import TOML from '@iarna/toml'
 
 import fs from 'fs'
 import path from 'path'
@@ -8,7 +7,7 @@ import deepmerge from 'deepmerge'
 import { appDataPath } from '..'
 
 const getConfigPathFile = () => {
-	const configFileName = 'config.toml'
+	const configFileName = 'config.json'
 	const configFilePath = path.join(appDataPath(), configFileName)
 
 	if (!fs.existsSync(appDataPath())) {
@@ -23,7 +22,7 @@ export function getConfig(): ConfigType {
 
 	if (fs.existsSync(getConfigPathFile())) {
 		try {
-			config = TOML.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
+			config = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
 		} catch (error) {
 			config = getDefaultConfigFile()
 		}
@@ -31,11 +30,36 @@ export function getConfig(): ConfigType {
 		config = getDefaultConfigFile()
 	}
 
-	if (config?.['order']?.['grouping'] === undefined || config?.['order']?.['grouping']?.length === 0) {
-		config.order = {
-			grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
-			filtering: []
+	if (config?.group?.groupBy === undefined || config?.group?.groupBy?.length === 0) {
+		config.group = {
+			groupBy: ['Extension', 'Genre', 'Album Artist', 'Album'], // TODO Keep only Genre.
+			groupByValues: []
 		}
+	}
+
+	if (config?.songListTags === undefined || config?.songListTags?.length === 0) {
+		config.songListTags = [
+			{
+				align: 'Left',
+				name: 'Track',
+				size: 'Collapse'
+			},
+			{
+				align: 'Left',
+				name: 'Title',
+				size: 'Expand'
+			},
+			{
+				align: 'Left',
+				name: 'Rating',
+				size: 'Collapse'
+			},
+			{
+				align: 'Left',
+				name: 'Duration',
+				size: 'Collapse'
+			}
+		]
 	}
 
 	return config
@@ -47,7 +71,7 @@ export function saveConfig(newConfig: any) {
 	config = deepmerge(config, newConfig, { arrayMerge: (destinationArray: any[], sourceArray: any[]) => sourceArray })
 
 	try {
-		fs.writeFileSync(getConfigPathFile(), TOML.stringify(config))
+		fs.writeFileSync(getConfigPathFile(), JSON.stringify(config, null, 2))
 		return config
 	} catch (error) {
 		return false
@@ -56,9 +80,9 @@ export function saveConfig(newConfig: any) {
 
 function getDefaultConfigFile(): ConfigType {
 	return {
-		order: {
-			grouping: ['Extension', 'Genre', 'AlbumArtist', 'Album'],
-			filtering: []
+		group: {
+			groupBy: ['Genre'],
+			groupByValues: []
 		},
 		art: {
 			dimension: 128
@@ -66,6 +90,28 @@ function getDefaultConfigFile(): ConfigType {
 		groupOnlyByFolder: false,
 		userOptions: {
 			theme: ThemeOptions.Auto
-		}
+		},
+		songListTags: [
+			{
+				align: 'Left',
+				name: 'Track',
+				size: 'Collapse'
+			},
+			{
+				align: 'Left',
+				name: 'Title',
+				size: 'Expand'
+			},
+			{
+				align: 'Left',
+				name: 'Rating',
+				size: 'Collapse'
+			},
+			{
+				align: 'Left',
+				name: 'Duration',
+				size: 'Collapse'
+			}
+		]
 	}
 }

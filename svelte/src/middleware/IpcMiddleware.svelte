@@ -4,9 +4,14 @@
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { saveConfig } from '../services/ipc.service'
 	import { songAmountConfig } from '../store/config.store'
-	import { albumCoverArtMapStore, songListStore } from '../store/final.store'
+	import { albumCoverArtMapStore, selectedGroups, songListStore } from '../store/final.store'
 
 	onMount(() => {
+		ipcRenderer.on('group-songs', (event, group) => {
+			// console.log(group.data)
+			$selectedGroups[group.index] = group.data
+		})
+
 		ipcRenderer.on('show-song-amount', (event, data) => {
 			$songAmountConfig = data
 

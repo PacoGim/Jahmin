@@ -56,3 +56,6 @@ export let playerElement: Writable<HTMLAudioElement> = writable(undefined)
 export let keypress: Writable<string> = writable(undefined)
 
 export let songListItemElement: Writable<HTMLElement> = writable(undefined)
+
+/********************** Song Group **********************/
+export let selectedGroups: Writable<any> = writable([])

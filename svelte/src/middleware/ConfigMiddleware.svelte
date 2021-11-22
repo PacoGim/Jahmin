@@ -7,7 +7,9 @@
 		songListTagsConfig,
 		equalizerIdConfig,
 		themeConfig,
-		songAmountConfig
+		songAmountConfig,
+		groupByConfig,
+		groupByValuesConfig
 	} from '../store/config.store'
 
 	import type { ConfigType } from '../types/config.type'
@@ -21,6 +23,8 @@
 			$albumArtSizeConfig = syncConfigLocalStorage('AlbumArtSize', String(config.art.dimension))
 			$songListTagsConfig = syncConfigLocalStorage('SongListTags', config.songListTags)
 			$songAmountConfig = syncConfigLocalStorage('SongAmount', config.userOptions.songAmount)
+			$groupByConfig = syncConfigLocalStorage('GroupBy', config.group.groupBy)
+			$groupByValuesConfig = syncConfigLocalStorage('GroupByValues', config.group.groupByValues)
 		})
 	})
 
