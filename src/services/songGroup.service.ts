@@ -1,3 +1,4 @@
+import { hash } from '../functions/hashString.fn'
 import { SongType } from '../types/song.type'
 import { sendWebContents } from './sendWebContents.service'
 import { getStorageMapToArray } from './storage.service'
@@ -13,54 +14,43 @@ export function groupSongs(groups: string[], groupValues: string[]) {
 }
 
 function runGroupSongs(songs: SongType[], groups: string[], groupValues: string[], index: number) {
-	// console.log(groups, groupValues, index)
-	// console.log(groups[index], groupValues[index], index)
+	let filteredSongs: SongType[] = []
+	let groupedValues: any[] = []
+	let groupedAlbums: any[] = []
 
-	// songs = songs.slice(0, 10)
-
-	/*
-    Row 1 Since is the first row, we can just distinct Year since it is not based of the previous selected value.
-    1999
-    2000
-    • 2001
-    2002
-
-    Row 2 Show songs with year 2001 and group extensions
-    mp3 from 2001
-    • flac from 2001
-    opus from 2001
-
-    Row 3
-    Electronic flacs from 2001
-    Rap flacs from 2001
-    • Alternative flacs from 2001
-
-    Send all songs/albums that match all previous selections.
-    -> Songs from 2001, that are flac format, and have a genre of Alternative.
-  */
-
-	let groupedSongs: SongType[] = []
-
+	/********************** First Index **********************/
+	// For the first index there is no need to filter the songs.
 	if (index === 0) {
+		// Group songs by value.
+		let firstIndexGroupedSongs = Array.from(new Set(songs.map(song => song[groups[index]])))
+
+		// If too many values, slice the array to prevent performance issues.
+		if (firstIndexGroupedSongs.length > 500) {
+			firstIndexGroupedSongs = firstIndexGroupedSongs.slice(0, 500)
+
+			sendWebContents('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` })
+		}
+
+		// Sort array.
+		firstIndexGroupedSongs = firstIndexGroupedSongs.sort((a, b) => {
+			return String(a).localeCompare(String(b), undefined, { numeric: true })
+		})
+
+		// Send result to renderer.
 		sendWebContents('group-songs', {
 			index,
-			data: Array.from(new Set(songs.map(song => song[groups[index]])))
+			data: firstIndexGroupedSongs
 		})
 
 		return
 	}
 
-	// groupedSongs=groupSongsByValue(songs: SongType[], groups: string[], groupValues: string[], index: number)
+	/********************** Song Filtering **********************/
+	// Filter out all songs by value.
+	filteredSongs = filterSongsByValue(songs, groups, groupValues, index)
 
-	// console.log(groups, groupValues)
-
-	groupedSongs = groupSongsByValue(songs, groups, groupValues, index)
-
-	// console.log(groupedSongs)
-
-	let groupedValues: any[] = []
-
-	groupedSongs.forEach(song => {
+	// Group unique values.
+	filteredSongs.forEach(song => {
 		let value = song[groups[index]]
 
 		if (!groupedValues.includes(value)) {
@@ -68,23 +58,124 @@ function runGroupSongs(songs: SongType[], groups: string[], groupValues: string[
 		}
 	})
 
-	// console.log(groupedSongs)
+	// If too many values, slice the array to prevent performance issues.
+	if (groupedValues.length > 500) {
+		groupedValues = groupedValues.slice(0, 500)
+
+		sendWebContents('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` })
+	}
+
+	// Send result to renderer.
 	sendWebContents('group-songs', {
 		index,
-		// data: groupedSongs
-		data: groupedValues
+		data: groupedValues.sort((a, b) => {
+			if (a && b) {
+				return a.toLowerCase().localeCompare(b.toLowerCase(), { numeric: true })
+			} else {
+				return false
+			}
+		})
 	})
+
+	/********************** Album Grouping **********************/
+
+	// If last index, group unique albums.
+	if (index === groups.length - 1) {
+		// Keep all songs that match the last group value even if undefined.
+		filteredSongs = filteredSongs.filter(song => {
+			if (groupValues[index] === undefined || groupValues[index] === 'undefined') {
+				return true
+			}
+			if (song[groups[index]] === groupValues[index]) {
+				return true
+			} else {
+				return false
+			}
+		})
+
+		// Group unique albums.
+		filteredSongs.forEach(song => {
+			let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/')
+			let foundAlbum = groupedAlbums.find(i => i['RootDir'] === rootDir)
+
+			if (!foundAlbum) {
+				groupedAlbums.push({
+					ID: hash(rootDir),
+					Name: song.Album,
+					RootDir: rootDir,
+					AlbumArtist: song.AlbumArtist,
+					DynamicAlbumArtist: getAllAlbumArtists(groupedAlbums, song.Album),
+					Songs: [song]
+				})
+			} else {
+				foundAlbum['Songs'].push(song)
+			}
+		})
+
+		sendWebContents('albums-grouped', groupedAlbums)
+	}
 }
 
-function groupSongsByValue(songs: SongType[], groups: string[], groupValues: string[], index: number) {
-	let groupedSongs: SongType[] = songs
+// Iterates through every song of an album to get every single artist, then sorts them by the amount of songs done by artist, the more an artist has songs the firstest it will be in the array.
+function getAllAlbumArtists(songArray: any[], album: string | undefined | null) {
+	let artistsCount: any[] = []
+	let artistsConcat: any[] = []
+	let artistsSorted: string = ''
+
+	songArray.forEach(song => {
+		if (song['Album'] === album) {
+			let artists = splitArtists(song['Artist'])
+
+			if (artists.length > 0) {
+				artistsConcat.push(...artists)
+			} else {
+				artistsConcat = artists
+			}
+		}
+	})
+
+	artistsConcat.forEach(artist => {
+		let foundArtist = artistsCount.find(i => i['Artist'] === artist)
+
+		if (foundArtist) {
+			foundArtist['Count']++
+		} else {
+			artistsCount.push({
+				Artist: artist,
+				Count: 0
+			})
+		}
+	})
+
+	artistsCount = artistsCount.sort((a, b) => b['Count'] - a['Count'])
+	artistsSorted = artistsCount.map(a => a['Artist']).join(', ')
+
+	return artistsSorted
+}
+
+function splitArtists(artists: string) {
+	if (artists) {
+		let artistSplit: string[] = []
+
+		if (typeof artists === 'string') {
+			artistSplit = artists.split(', ')
+			artistSplit = artists.split(',')
+		}
+
+		return artistSplit
+	}
+	return []
+}
+
+function filterSongsByValue(songs: SongType[], groups: string[], groupValues: string[], index: number) {
+	let filteredSongs: SongType[] = songs
 
 	groups.forEach((group, groupIndex) => {
 		if (groupIndex >= index) {
 			return
 		}
 
-		groupedSongs = groupedSongs.filter(song => {
+		filteredSongs = filteredSongs.filter(song => {
 			if (groupValues[groupIndex] === undefined || groupValues[groupIndex] === 'undefined') {
 				return true
 			}
@@ -97,7 +188,7 @@ function groupSongsByValue(songs: SongType[], groups: string[], groupValues: str
 		})
 	})
 
-	return groupedSongs
+	return filteredSongs
 }
 
 function normalizeGroupNames(groups: string[]) {

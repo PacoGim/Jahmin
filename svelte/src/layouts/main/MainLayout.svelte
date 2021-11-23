@@ -7,8 +7,9 @@
 	import SongInfo from './SongInfo.svelte'
 	import SongList from './SongList.svelte'
 	import SongListBackground from './SongListBackground.svelte'
+	import StatusBar from './StatusBar.svelte'
 	import TagEdit from './TagEdit.svelte'
-import TagGroup from './TagGroup.svelte';
+	import TagGroup from './TagGroup.svelte'
 </script>
 
 <main-layout>
@@ -18,9 +19,10 @@ import TagGroup from './TagGroup.svelte';
 	<Player />
 	<SongList />
 	<TagEdit />
-	<SongInfo />
+	<!-- <SongInfo /> -->
 	<SongListBackground />
-	<AlbumInfo />
+	<!-- <AlbumInfo /> -->
+	<StatusBar />
 </main-layout>
 
 <style>
@@ -29,10 +31,12 @@ import TagGroup from './TagGroup.svelte';
 		overflow-y: hidden;
 		display: grid;
 		grid-template-columns: 64px auto 3fr 256px;
-		grid-template-rows: auto minmax(auto, var(--song-list-svlt-height)) 64px;
+		grid-template-rows: auto minmax(auto, var(--song-list-svlt-height)) 64px 24px;
+		/* grid-template-rows: auto var(--song-list-svlt-height) 64px; */
 		grid-template-areas:
 			'navigation-svlt tag-group-svlt art-grid-svlt tag-edit-svlt'
 			'navigation-svlt tag-group-svlt song-list-svlt tag-edit-svlt'
-			'song-info-svlt song-info-svlt player-svlt album-info-svlt';
+			'navigation-svlt player-svlt player-svlt player-svlt'
+			'statusbar-svlt statusbar-svlt statusbar-svlt statusbar-svlt';
 	}
 </style>

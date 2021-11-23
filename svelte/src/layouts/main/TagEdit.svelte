@@ -79,7 +79,8 @@
 		let undoIconElement = document.querySelector(`svg[data-tag="${query}"]`) as HTMLElement
 
 		if (undoIconElement) {
-			undoIconElement.style.visibility = isVisible ? 'visible' : 'hidden'
+			undoIconElement.style.opacity = isVisible ? '1' : '0'
+			undoIconElement.style.pointerEvents = isVisible ? 'all' : 'none'
 		}
 	}
 
@@ -92,7 +93,6 @@
 			let dataSet = tagContainerElement.dataset
 
 			if (dataSet.type === 'number') {
-				// textAreaElement.addEventListener('input', evt => forceNumberInput(evt))
 				textAreaElement.addEventListener('input', evt => forceNumberInput(tagContainerElement))
 			}
 
@@ -104,7 +104,11 @@
 			textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
 
 			undoIconElement.setAttribute('data-tag', dataSet.tag)
-			undoIconElement.style.visibility = 'hidden'
+			undoIconElement.style.position = 'absolute'
+			undoIconElement.style.right = '0'
+			undoIconElement.style.transform = 'translateX(calc(1rem + 2px))'
+			undoIconElement.style.opacity = '0'
+
 			undoIconElement.addEventListener('click', evt => undoTagModification(dataSet.tag))
 		})
 	}
@@ -215,7 +219,11 @@
 	}
 
 	tag-edit-svlt tag-container {
-		font-size: 0.9rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		font-size: .9rem;
 		margin-bottom: 0.5rem;
 
 		box-shadow: 0px 3px 0px 0px var(--color-fg-1);
@@ -233,9 +241,9 @@
 	}
 
 	tag-edit-svlt tag-container tag-name {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		position: relative;
+
+		width: max-content;
 
 		color: var(--color-fg-1);
 
@@ -248,7 +256,7 @@
 
 	tag-edit-svlt tag-container textarea {
 		font-size: inherit;
-		padding: 0.5rem 1rem;
+		padding: 0.33rem;
 
 		color: var(--color-fg-1);
 		background-color: rgba(128, 128, 128, 0.2);

@@ -4,7 +4,13 @@
 	import SongListItem from '../../components/SongListItem.svelte'
 	import { songAmountConfig } from '../../store/config.store'
 
-	import { selectedAlbumId, songListStore, selectedSongsStore, triggerScrollToSongEvent } from '../../store/final.store'
+	import {
+		selectedAlbumId,
+		songListStore,
+		selectedSongsStore,
+		triggerScrollToSongEvent,
+		dbVersion
+	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
@@ -14,11 +20,11 @@
 	let isScrollAtBottom = false
 	let isScrollAtTop = false
 
-	/*$: {
+	/* 	$: {
 		// Trim song array when the db version changes.
 		$dbVersion
 		trimSongsArray()
-	}*/
+	} */
 
 	$: {
 		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height.
@@ -94,7 +100,7 @@
 
 			// If the list is empty (no songs) it sets the scroll to 0. In the case of user deleting songs.
 			if (songsTrimmed.length === 0) {
-				setTimeout(() => setScroll(0), 1)
+				setTimeout(() => setScroll(0))
 			} else {
 				setScroll(tempScroll)
 			}
@@ -141,7 +147,6 @@
 
 	function scrollContainer(e: WheelEvent) {
 		setScroll(scrollAmount + Math.sign(e.deltaY))
-
 		// Stops scrolling beyond arrays end and always keeps one element visible.
 		if (scrollAmount === $songListStore.length) {
 			setScroll($songListStore.length - 1)
@@ -172,6 +177,8 @@
 			let elementChanged = mutationsList[0].target as HTMLElement
 			let elementHeight = elementChanged.clientHeight
 
+			// elementHeight=256
+
 			document.documentElement.style.setProperty('--song-list-svlt-height', `${elementHeight}px`)
 		}).observe(elementToObserve, { characterData: false, childList: true, attributes: false })
 	}
@@ -179,6 +186,7 @@
 	// Manages to "scroll" to the proper song on demand.
 	function setScrollAmountFromSong(songId) {
 		let songIndex = $songListStore.findIndex(song => song.ID === songId)
+
 		let differenceAmount = Math.floor($songAmountConfig / 2)
 
 		if (songIndex !== -1) {

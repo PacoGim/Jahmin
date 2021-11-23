@@ -18,7 +18,7 @@ const getConfigPathFile = () => {
     return configFilePath;
 };
 function getConfig() {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     let config;
     if (fs_1.default.existsSync(getConfigPathFile())) {
         try {
@@ -32,34 +32,13 @@ function getConfig() {
         config = getDefaultConfigFile();
     }
     if (((_a = config === null || config === void 0 ? void 0 : config.group) === null || _a === void 0 ? void 0 : _a.groupBy) === undefined || ((_c = (_b = config === null || config === void 0 ? void 0 : config.group) === null || _b === void 0 ? void 0 : _b.groupBy) === null || _c === void 0 ? void 0 : _c.length) === 0) {
-        config.group = {
-            groupBy: ['Extension', 'Genre', 'Album Artist', 'Album'],
-            groupByValues: []
-        };
+        config.group = getDefaultConfigFile().group;
     }
     if ((config === null || config === void 0 ? void 0 : config.songListTags) === undefined || ((_d = config === null || config === void 0 ? void 0 : config.songListTags) === null || _d === void 0 ? void 0 : _d.length) === 0) {
-        config.songListTags = [
-            {
-                align: 'Left',
-                name: 'Track',
-                size: 'Collapse'
-            },
-            {
-                align: 'Left',
-                name: 'Title',
-                size: 'Expand'
-            },
-            {
-                align: 'Left',
-                name: 'Rating',
-                size: 'Collapse'
-            },
-            {
-                align: 'Left',
-                name: 'Duration',
-                size: 'Collapse'
-            }
-        ];
+        config.songListTags = getDefaultConfigFile().songListTags;
+    }
+    if (((_e = config === null || config === void 0 ? void 0 : config.userOptions) === null || _e === void 0 ? void 0 : _e.songAmount) === undefined) {
+        config.userOptions = getDefaultConfigFile().userOptions;
     }
     return config;
 }
@@ -87,6 +66,7 @@ function getDefaultConfigFile() {
         },
         groupOnlyByFolder: false,
         userOptions: {
+            songAmount: 8,
             theme: config_type_1.ThemeOptions.Auto
         },
         songListTags: [

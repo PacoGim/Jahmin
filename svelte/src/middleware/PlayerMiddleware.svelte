@@ -4,7 +4,8 @@
 	import { hash } from '../functions/hashString.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
-	import { getAlbumIPC, getAlbumsIPC } from '../services/ipc.service'
+	import { getAlbumIPC, getAlbumsIPC, saveConfig } from '../services/ipc.service'
+	import { groupByConfig, groupByValuesConfig } from '../store/config.store'
 
 	import {
 		albumListStore,
@@ -43,7 +44,7 @@
 
 	function syncDBSongs() {
 		if ($dbVersion !== '') {
-			getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
+			// getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
 
 			// Refills the current album selected songs to add them as they are found.
 			getAlbumIPC($selectedAlbumId).then(result => {
@@ -55,7 +56,7 @@
 	}
 
 	function getAlbums(groupBy: string, groupByValue: string) {
-		getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
+		// getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
 	}
 
 	onMount(() => {
@@ -103,6 +104,7 @@
 			getAlbumIPC(ALBUM_ID).then(result => {
 				if (evt.type === 'dblclick') {
 					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
+					saveGroupingConfig()
 				} else if (evt.type === 'click') {
 					// Prevents resetting array if album unchanged.
 					if ($selectedAlbumId !== ALBUM_ID) {
@@ -123,6 +125,8 @@
 				getAlbumIPC($selectedAlbumId).then(result => {
 					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID, true)
 				})
+
+				saveGroupingConfig()
 			}
 
 			if (evt.type === 'contextmenu') {
@@ -145,5 +149,15 @@
 				scrollToAlbumFn(albumID)
 			}
 		}
+	}
+
+	function saveGroupingConfig() {
+		// Saves the grouping
+		saveConfig({
+			group: {
+				groupBy: $groupByConfig,
+				groupByValues: $groupByValuesConfig
+			}
+		})
 	}
 </script>

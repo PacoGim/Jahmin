@@ -3,12 +3,24 @@
 	import { onMount } from 'svelte'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { saveConfig } from '../services/ipc.service'
+	import notifyService from '../services/notify.service'
 	import { songAmountConfig } from '../store/config.store'
-	import { albumCoverArtMapStore, selectedGroups, songListStore } from '../store/final.store'
+	import { albumCoverArtMapStore, albumListStore, selectedGroups, songListStore } from '../store/final.store'
 
 	onMount(() => {
+		ipcRenderer.on('albums-grouped', (event, albumsGrouped) => {
+			$albumListStore = albumsGrouped
+		})
+
+		ipcRenderer.on('notify', (event, data) => {
+			if (data.type === 'error') {
+				notifyService.error(data.message)
+			} else {
+				notifyService.success(data.message)
+			}
+		})
+
 		ipcRenderer.on('group-songs', (event, group) => {
-			// console.log(group.data)
 			$selectedGroups[group.index] = group.data
 		})
 

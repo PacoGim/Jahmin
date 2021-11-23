@@ -10,5 +10,9 @@
 		fill: var(--color-fg-1);
 		height: 1rem;
 		cursor: pointer;
+		opacity: 0;
+		pointer-events: none;
+
+		transition: opacity 300ms ease-in-out;
 	}
 </style>

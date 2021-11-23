@@ -81,7 +81,7 @@ p-center {
 	position: fixed;
 	top: 0;
 	left: 0;
-	height: calc(100% - 64px);
+	height: calc(100% - 64px - 24px);
 	width: calc(100% - 64px);
 	background-color: var(--color-bg-1);
 	overflow: hidden;

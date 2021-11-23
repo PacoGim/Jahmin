@@ -31,35 +31,15 @@ export function getConfig(): ConfigType {
 	}
 
 	if (config?.group?.groupBy === undefined || config?.group?.groupBy?.length === 0) {
-		config.group = {
-			groupBy: ['Extension', 'Genre', 'Album Artist', 'Album'], // TODO Keep only Genre.
-			groupByValues: []
-		}
+		config.group = getDefaultConfigFile().group
 	}
 
 	if (config?.songListTags === undefined || config?.songListTags?.length === 0) {
-		config.songListTags = [
-			{
-				align: 'Left',
-				name: 'Track',
-				size: 'Collapse'
-			},
-			{
-				align: 'Left',
-				name: 'Title',
-				size: 'Expand'
-			},
-			{
-				align: 'Left',
-				name: 'Rating',
-				size: 'Collapse'
-			},
-			{
-				align: 'Left',
-				name: 'Duration',
-				size: 'Collapse'
-			}
-		]
+		config.songListTags = getDefaultConfigFile().songListTags
+	}
+
+	if (config?.userOptions?.songAmount === undefined) {
+		config.userOptions = getDefaultConfigFile().userOptions
 	}
 
 	return config
@@ -89,6 +69,7 @@ function getDefaultConfigFile(): ConfigType {
 		},
 		groupOnlyByFolder: false,
 		userOptions: {
+			songAmount: 8,
 			theme: ThemeOptions.Auto
 		},
 		songListTags: [
