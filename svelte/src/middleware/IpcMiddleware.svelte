@@ -1,15 +1,32 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
+
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { saveConfig } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
-	import { songAmountConfig } from '../store/config.store'
+	import { groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
 	import { albumCoverArtMapStore, albumListStore, selectedGroups, songListStore } from '../store/final.store'
+	import type { AlbumType } from '../types/album.type'
 
 	onMount(() => {
-		ipcRenderer.on('albums-grouped', (event, albumsGrouped) => {
-			$albumListStore = albumsGrouped
+		ipcRenderer.on('new-group', (event, newGroup) => {
+			$groupByConfig[newGroup.index] = newGroup.groupName
+			$groupByValuesConfig[newGroup.index] = 'undefined'
+
+			saveConfig({
+				group: {
+					groupBy: $groupByConfig,
+					groupByValues: $groupByValuesConfig
+				}
+			})
+		})
+
+		ipcRenderer.on('albums-grouped', (event, albumsGrouped: AlbumType[]) => {
+			// Sort the albums
+			$albumListStore = albumsGrouped.sort((a, b) => a.RootDir.localeCompare(b.RootDir, undefined, { numeric: true }))
+
+			// $albumListStore = albumsGrouped
 		})
 
 		ipcRenderer.on('notify', (event, data) => {

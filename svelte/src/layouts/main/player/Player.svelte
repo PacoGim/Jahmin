@@ -27,8 +27,6 @@
 	import { nextSong } from '../../../functions/nextSong.fn'
 
 	import { setWaveSource } from '../../../services/waveform.service'
-	import { saveConfig } from '../../../services/ipc.service'
-	import { groupByConfig, groupByValuesConfig } from '../../../store/config.store'
 
 	let progress: number = 0
 

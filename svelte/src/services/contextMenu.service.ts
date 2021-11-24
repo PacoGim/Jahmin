@@ -20,12 +20,26 @@ export function handleContextMenuEvent(e: MouseEvent) {
 		let albumId
 		let songs
 
-		selectedAlbumId.subscribe((_) => (albumId = _))()
-		selectedSongsStore.subscribe((_) => (songs = _))()
+		selectedAlbumId.subscribe(_ => (albumId = _))()
+		selectedSongsStore.subscribe(_ => (songs = _))()
 
 		showContextMenuIPC('SongListContextMenu', {
 			albumId,
 			songs
+		})
+	}
+
+	if (pathsName.includes('GROUP-NAME')) {
+		let groupNameElement: HTMLElement = e
+			.composedPath()
+			.find((path: HTMLElement) => path.tagName === 'GROUP-NAME') as HTMLElement
+
+		let groupName = groupNameElement.dataset.name
+		let index = groupNameElement.dataset.index
+
+		showContextMenuIPC('GroupNameContextMenu', {
+			groupName,
+			index
 		})
 	}
 }

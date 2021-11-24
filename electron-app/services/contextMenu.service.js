@@ -14,11 +14,36 @@ function loadContextMenu(event, menuToOpen, data) {
     else if (menuToOpen === 'SongListContextMenu') {
         template = getSongListContextMenuTemplate(data);
     }
+    else if (menuToOpen === 'GroupNameContextMenu') {
+        template = getGroupNameContextMenuTemplate(data);
+    }
     const menu = electron_1.Menu.buildFromTemplate(template);
     //@ts-expect-error
     menu.popup(electron_1.BrowserWindow.fromWebContents(event.sender));
 }
 exports.loadContextMenu = loadContextMenu;
+function getGroupNameContextMenuTemplate(data) {
+    let groupName = data.groupName;
+    let index = data.index;
+    let template = [];
+    let tags = ['Album', 'Artist', 'Track', 'Title', 'Genre', 'Composer', 'Year', 'Disc #', 'Extension'];
+    // Removes the current tag from the list.
+    tags.splice(tags.indexOf(groupName), 1);
+    // Then adds the current tag to the begining of  the list.
+    tags.unshift(groupName);
+    tags.forEach(tag => {
+        template.push({
+            label: `${groupName === tag ? '•' : ''} ${tag}`,
+            click: () => {
+                (0, sendWebContents_service_1.sendWebContents)('new-group', {
+                    index,
+                    groupName: tag
+                });
+            }
+        });
+    });
+    return template;
+}
 function getSongListContextMenuTemplate(data) {
     let template = [];
     if (data.songs.length === 1) {

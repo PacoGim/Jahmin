@@ -15,7 +15,6 @@ exports.groupSongs = groupSongs;
 function runGroupSongs(songs, groups, groupValues, index) {
     let filteredSongs = [];
     let groupedValues = [];
-    let groupedAlbums = [];
     /********************** First Index **********************/
     // For the first index there is no need to filter the songs.
     if (index === 0) {
@@ -35,6 +34,7 @@ function runGroupSongs(songs, groups, groupValues, index) {
             index,
             data: firstIndexGroupedSongs
         });
+        (0, sendWebContents_service_1.sendWebContents)('albums-grouped', groupAlbums(songs, groups, groupValues, index));
         return;
     }
     /********************** Song Filtering **********************/
@@ -57,7 +57,9 @@ function runGroupSongs(songs, groups, groupValues, index) {
         index,
         data: groupedValues.sort((a, b) => {
             if (a && b) {
-                return a.toLowerCase().localeCompare(b.toLowerCase(), { numeric: true });
+                a = String(a).toLowerCase();
+                b = String(b).toLowerCase();
+                return a.localeCompare(b, undefined, { numeric: true });
             }
             else {
                 return false;
@@ -67,38 +69,43 @@ function runGroupSongs(songs, groups, groupValues, index) {
     /********************** Album Grouping **********************/
     // If last index, group unique albums.
     if (index === groups.length - 1) {
-        // Keep all songs that match the last group value even if undefined.
-        filteredSongs = filteredSongs.filter(song => {
-            if (groupValues[index] === undefined || groupValues[index] === 'undefined') {
-                return true;
-            }
-            if (song[groups[index]] === groupValues[index]) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        });
-        // Group unique albums.
-        filteredSongs.forEach(song => {
-            let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/');
-            let foundAlbum = groupedAlbums.find(i => i['RootDir'] === rootDir);
-            if (!foundAlbum) {
-                groupedAlbums.push({
-                    ID: (0, hashString_fn_1.hash)(rootDir),
-                    Name: song.Album,
-                    RootDir: rootDir,
-                    AlbumArtist: song.AlbumArtist,
-                    DynamicAlbumArtist: getAllAlbumArtists(groupedAlbums, song.Album),
-                    Songs: [song]
-                });
-            }
-            else {
-                foundAlbum['Songs'].push(song);
-            }
-        });
-        (0, sendWebContents_service_1.sendWebContents)('albums-grouped', groupedAlbums);
+        (0, sendWebContents_service_1.sendWebContents)('albums-grouped', groupAlbums(filteredSongs, groups, groupValues, index));
     }
+}
+function groupAlbums(filteredSongs, groups, groupValues, index) {
+    let groupedAlbums = [];
+    // Keep all songs that match the last group value even if undefined.
+    filteredSongs = filteredSongs.filter(song => {
+        if (groupValues[index] === undefined || groupValues[index] === 'undefined') {
+            return true;
+        }
+        if (song[groups[index]] === groupValues[index]) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+    // Group unique albums.
+    filteredSongs.forEach(song => {
+        let rootDir = song['SourceFile'].split('/').slice(0, -1).join('/');
+        let foundAlbum = groupedAlbums.find(i => i['RootDir'] === rootDir);
+        if (!foundAlbum) {
+            groupedAlbums.push({
+                ID: (0, hashString_fn_1.hash)(rootDir),
+                Name: song.Album,
+                RootDir: rootDir,
+                AlbumArtist: song.AlbumArtist,
+                DynamicAlbumArtist: getAllAlbumArtists(groupedAlbums, song.Album),
+                Songs: [song]
+            });
+        }
+        else {
+            foundAlbum['Songs'].push(song);
+        }
+    });
+    return groupedAlbums;
+    // sendWebContents('albums-grouped', groupedAlbums)
 }
 // Iterates through every song of an album to get every single artist, then sorts them by the amount of songs done by artist, the more an artist has songs the firstest it will be in the array.
 function getAllAlbumArtists(songArray, album) {
@@ -168,6 +175,10 @@ function normalizeGroupNames(groups) {
         switch (group) {
             case 'Album Artist':
                 return 'AlbumArtist';
+            case 'Disc #':
+                return 'DiscNumber';
+            case 'Year':
+                return 'Date_Year';
             default:
                 return group;
         }

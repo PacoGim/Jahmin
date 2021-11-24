@@ -3,7 +3,7 @@
 
 	const dispatch = createEventDispatcher()
 
-	let options = ['Appearance', 'Equalizer', 'Art Grid', 'Song List', 'Song Info', 'Volume']
+	let options = ['Appearance', 'Groups', 'Equalizer', 'Art Grid', 'Song List', 'Song Info', 'Volume']
 	let selectedOption
 
 	$: {
@@ -11,7 +11,7 @@
 	}
 
 	onMount(() => {
-		selectedOption = 'Equalizer'
+		selectedOption = 'Groups'
 	})
 </script>
 
@@ -26,7 +26,15 @@
 
 <style>
 	option-radio {
-		display: block;
+		/* display: block; */
+
+		display: flex;
+		align-items: center;
+		padding: 0.25rem 0.5rem;
+		background-color: var(--color-bg-2);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+
+		margin: 0.1rem 0.05rem;
 	}
 
 	option-radio label {
@@ -35,6 +43,18 @@
 
 	option-radio input {
 		display: none;
+	}
+
+	option-radio input + label::before {
+		content: '•';
+		opacity: 0;
+		margin-right: 0.5rem;
+	}
+
+	option-radio input:checked + label::before {
+		content: '•';
+		opacity: 1;
+		margin-right: 0.5rem;
 	}
 
 	options-list {
