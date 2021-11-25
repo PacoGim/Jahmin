@@ -1,63 +1,67 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte'
+	import { selectedOption } from '../../store/final.store'
 
-	const dispatch = createEventDispatcher()
-
-	let options = ['Appearance', 'Groups', 'Equalizer', 'Art Grid', 'Song List', 'Song Info', 'Volume']
-	let selectedOption
-
-	$: {
-		dispatch('optionSelected', selectedOption)
-	}
-
-	onMount(() => {
-		selectedOption = 'Groups'
-	})
+	let options = [
+		{
+			name: 'Art Grid',
+			sections: [
+				{
+					name: 'Set Art Size'
+				},
+				{
+					name: 'Set Grid Gap'
+				}
+			]
+		},
+		{
+			name: 'Equalizer',
+			sections: [
+				{
+					name: 'Profiles'
+				},
+				{
+					name: 'Configuration'
+				}
+			]
+		}
+	]
 </script>
 
-<options-list>
+<option-list>
 	{#each options as option, index (index)}
-		<option-radio>
-			<input id="option-radio-{option}" type="radio" bind:group={selectedOption} value={option} />
-			<label for="option-radio-{option}">{option}</label>
-		</option-radio>
+		<option-container>
+			<option-name on:click={() => ($selectedOption = option.name)}>{option.name}</option-name>
+			{#if option.sections}
+				{#each option.sections as section, index (index)}
+					<option-section>{section.name}</option-section>
+				{/each}
+			{/if}
+		</option-container>
 	{/each}
-</options-list>
+</option-list>
 
 <style>
-	option-radio {
-		/* display: block; */
-
-		display: flex;
-		align-items: center;
-		padding: 0.25rem 0.5rem;
-		background-color: var(--color-bg-2);
-		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
-
-		margin: 0.1rem 0.05rem;
+	option-list {
+		padding: 0.25rem;
+		grid-area: options-list;
 	}
 
-	option-radio label {
+	option-container {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 0.5rem;
+	}
+
+	option-name {
+		font-size: 1rem;
+		margin-bottom: 0.25rem;
 		cursor: pointer;
 	}
 
-	option-radio input {
-		display: none;
-	}
-
-	option-radio input + label::before {
-		content: '•';
-		opacity: 0;
-		margin-right: 0.5rem;
-	}
-
-	option-radio input:checked + label::before {
-		content: '•';
-		opacity: 1;
-		margin-right: 0.5rem;
-	}
-
-	options-list {
-		grid-area: options-list;
+	option-section {
+		cursor: pointer;
+		font-size: 0.9rem;
+		margin-left: 1rem;
+		margin-bottom: 0.25rem;
 	}
 </style>

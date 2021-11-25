@@ -23,7 +23,7 @@
 	$: {
 		if (isPromptVisible === true) {
 			if (promptElement === undefined) {
-				promptElement = document.querySelector('prompt-svelte input') as HTMLInputElement
+				promptElement = document.querySelector('prompt-svlt input') as HTMLInputElement
 			}
 
 			promptElement.focus()
@@ -79,7 +79,7 @@
 	}
 </script>
 
-<prompt-svelte show={isPromptVisible} on:click={e => handleOutsidePromptClick(e)}>
+<prompt-svlt show={isPromptVisible} on:click={e => handleOutsidePromptClick(e)}>
 	<prompt-content>
 		<prompt-close on:click={() => closePrompt()}>x</prompt-close>
 		<prompt-title>{promptState.title}</prompt-title>
@@ -103,10 +103,10 @@
 			</prompt-confirm>
 		</prompt-footer>
 	</prompt-content>
-</prompt-svelte>
+</prompt-svlt>
 
 <style>
-	prompt-svelte {
+	prompt-svlt {
 		--prompt-border-radius: 4px;
 
 		position: fixed;
@@ -128,12 +128,12 @@
 		transition: opacity 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
-	prompt-svelte[show='false'] {
+	prompt-svlt[show='false'] {
 		pointer-events: none;
 		opacity: 0;
 	}
 
-	prompt-svelte[show='true'] {
+	prompt-svlt[show='true'] {
 		pointer-events: all;
 		opacity: 1;
 	}
@@ -155,11 +155,11 @@
 		transition: transform 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
-	prompt-svelte[show='false'] prompt-content {
+	prompt-svlt[show='false'] prompt-content {
 		transform: scale(0);
 	}
 
-	prompt-svelte[show='true'] prompt-content {
+	prompt-svlt[show='true'] prompt-content {
 		/* transform: scale(0); */
 		transform: scale(1);
 	}

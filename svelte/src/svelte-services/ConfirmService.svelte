@@ -50,7 +50,7 @@
 	}
 </script>
 
-<confirm-svelte show={isConfirmVisible} on:click={e => handleOutsidePromptClick(e)}>
+<confirm-svlt show={isConfirmVisible} on:click={e => handleOutsidePromptClick(e)}>
 	<confirm-content>
 		<confirm-close on:click={() => closeConfirm()}>x</confirm-close>
 		<confirm-title>{confirmState.title}</confirm-title>
@@ -68,10 +68,10 @@
 			</confirm-confirm>
 		</confirm-footer>
 	</confirm-content>
-</confirm-svelte>
+</confirm-svlt>
 
 <style>
-	confirm-svelte {
+	confirm-svlt {
 		--confirm-border-radius: 4px;
 
 		position: fixed;
@@ -93,12 +93,12 @@
 		transition: opacity 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
-	confirm-svelte[show='false'] {
+	confirm-svlt[show='false'] {
 		pointer-events: none;
 		opacity: 0;
 	}
 
-	confirm-svelte[show='true'] {
+	confirm-svlt[show='true'] {
 		pointer-events: all;
 		opacity: 1;
 	}
@@ -120,11 +120,11 @@
 		transition: transform 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
-	confirm-svelte[show='false'] confirm-content {
+	confirm-svlt[show='false'] confirm-content {
 		transform: scale(0);
 	}
 
-	confirm-svelte[show='true'] confirm-content {
+	confirm-svlt[show='true'] confirm-content {
 		/* transform: scale(0); */
 		transform: scale(1);
 	}

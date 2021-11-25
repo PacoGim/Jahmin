@@ -71,16 +71,17 @@
 				$albumCoverArtMapStore = $albumCoverArtMapStore
 			} else {
 				coverType = 'not found'
+				coverSrc = './img/compact-disc.svg'
 			}
 		})
 	}
 </script>
 
-<cover-art {style}>
+<cover-art data-loaded={coverSrc === undefined ? 'false' : 'true'} {style}>
 	{#if coverType === undefined && showPlaceholder === true}
 		<img src="./img/audio.svg" class="loader" alt="" />
 	{/if}
-	{#if coverType === 'not found' && showPlaceholder === true}<img src="./img/compact-disc.svg" class="notFound" alt="" />{/if}
+	{#if coverType === 'not found' && showPlaceholder === true}<img src={coverSrc} class="notFound" alt="" />{/if}
 	{#if coverType === 'image'}<img class={klass} src={coverSrc} alt="" />{/if}
 	{#if coverType === 'video'}
 		<video class={klass} autoplay loop>
@@ -96,6 +97,18 @@
 		grid-column: 1;
 		grid-row: 1;
 		display: block;
+
+		transform: scale(1);
+
+		transition: transform 300ms cubic-bezier(0.5, 0.5, 0.265, 1.5);
+	}
+
+	cover-art[data-loaded='true'] {
+		transform: scale(1);
+	}
+
+	cover-art[data-loaded='false'] {
+		transform: scale(0);
 	}
 
 	video {

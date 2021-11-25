@@ -15,7 +15,7 @@
 
 	import iziToast from 'izitoast'
 
-	import { confirmService, equalizerService, promptService } from './store/service.store'
+	import { confirmService, equalizerService, promptService, rangeInputService } from './store/service.store'
 
 	import PlayerMiddleware from './middleware/PlayerMiddleware.svelte'
 	import ConfigMiddleware from './middleware/ConfigMiddleware.svelte'
@@ -25,6 +25,7 @@
 	import EqualizerService from './svelte-services/EqualizerService.svelte'
 	import PromptService from './svelte-services/PromptService.svelte'
 	import ConfirmService from './svelte-services/ConfirmService.svelte'
+	import RangeInputService from './svelte-services/RangeInputService.svelte'
 
 	onMount(() => {
 		iziToast.settings({ position: 'topRight' })
@@ -87,3 +88,4 @@
 <EqualizerService bind:this={$equalizerService} />
 <PromptService bind:this={$promptService} />
 <ConfirmService bind:this={$confirmService} />
+<RangeInputService bind:this={$rangeInputService} />
