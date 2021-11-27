@@ -157,11 +157,11 @@ function getAlbumContextMenuTemplate(data) {
         }
     });
     template.push({
-        label: `Reload Album Cover`,
+        label: `Reload Album Art`,
         click: () => {
             if (album) {
-                (0, albumArt_service_1.getAlbumCover)(album.RootDir, false, true).then(result => {
-                    (0, sendWebContents_service_1.sendWebContents)('new-cover', {
+                (0, albumArt_service_1.getAlbumArt)(album.RootDir, false, true).then(result => {
+                    (0, sendWebContents_service_1.sendWebContents)('new-art', {
                         success: result !== undefined,
                         id: album === null || album === void 0 ? void 0 : album.ID,
                         filePath: result === null || result === void 0 ? void 0 : result.filePath,

@@ -1,44 +1,44 @@
 <script lang="ts">
-	import { albumCoverArtMapStore, selectedAlbumId } from '../../store/final.store'
+	import { albumArtMapStore, selectedAlbumId } from '../../store/final.store'
 
-	let previousCoverArtVersion = undefined
-	let previousCoverArtId = undefined
+	let previousArtVersion = undefined
+	let previousArtId = undefined
 
 	$: {
-		// Loads cover if Cover Art map (If image updated) or Selected Album changes.
+		// Loads art if Art map (If image updated) or Selected Album changes.
 
-		// Get Cover Art from Map.
-		let coverArt = $albumCoverArtMapStore.get($selectedAlbumId)
+		// Get Art from Map.
+		let albumArt = $albumArtMapStore.get($selectedAlbumId)
 
 		// If Found
-		if (coverArt) {
+		if (albumArt) {
 			// Checks if the previous id changed.
-			if (previousCoverArtId !== $selectedAlbumId) {
+			if (previousArtId !== $selectedAlbumId) {
 				// If changed it updates both id and version.
-				previousCoverArtId = $selectedAlbumId
-				previousCoverArtVersion = coverArt.version
+				previousArtId = $selectedAlbumId
+				previousArtVersion = albumArt.version
 
-				// If a cover is available, load it.
+				// If a art is available, load it.
 
-				loadCover(coverArt.filePath)
+				loadArt(albumArt.filePath)
 
-				// Checks if a new version of the album cover is available
-			} else if (coverArt.version !== previousCoverArtVersion) {
-				// Updates the cover version.
-				previousCoverArtVersion = coverArt.version
+				// Checks if a new version of the album art is available
+			} else if (albumArt.version !== previousArtVersion) {
+				// Updates the art version.
+				previousArtVersion = albumArt.version
 
-				loadCover(coverArt.filePath)
+				loadArt(albumArt.filePath)
 			}
 		}
 	}
 
 	// Takes a file path and loads it to the bg image style property.
-	function loadCover(coverArtPath) {
-		if (coverArtPath) {
+	function loadArt(artPath) {
+		if (artPath) {
 			let $el = document.querySelector('song-list-background-svlt')
 
 			if ($el) {
-				$el.setAttribute('style', `background-image: url('${coverArtPath}');`)
+				$el.setAttribute('style', `background-image: url('${artPath}');`)
 			}
 		}
 	}
@@ -55,7 +55,7 @@
 		pointer-events: none;
 
 		/* background-image: url('/Users/fran/Library/Application Support/Jahmin/art/192/dn8dyp.webp'); */
-		/* background-size: cover; */
+		/* background-size: art; */
 		background-repeat: no-repeat;
 		background-size: 100% 100%;
 		z-index: 1;

@@ -1,6 +1,6 @@
 import { writable, Writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
-import type { CoverArtType } from '../types/coverArt.type'
+import type { AlbumArtType } from '../types/albumArt.type'
 import type { SongType } from '../types/song.type'
 
 export let selectedGroupByStore: Writable<string> = writable('')
@@ -32,7 +32,7 @@ export let selectedAlbumId: Writable<string> = writable(undefined)
 
 export let selectedSongsStore: Writable<number[]> = writable([])
 
-export let albumCoverArtMapStore: Writable<Map<string | number, CoverArtType>> = writable(new Map<string, CoverArtType>())
+export let albumArtMapStore: Writable<Map<string | number, AlbumArtType>> = writable(new Map<string, AlbumArtType>())
 
 export let appTitle: Writable<string> = writable('Jahmin')
 
@@ -49,14 +49,16 @@ export let triggerGroupingChangeEvent: Writable<string> = writable('')
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Main' | 'Search' | 'Config'> = writable('Config')
+export let layoutToShow: Writable<'Main' | 'Search' | 'Config'> = writable('Main')
 export let selectedOption: Writable<
 	'Appearance' | 'Groups' | 'Equalizer' | 'Art Grid' | 'Song List' | 'Song Info' | 'Volume' | string
 > = writable('Art Grid')
 
 export let playerElement: Writable<HTMLAudioElement> = writable(undefined)
 
-export let keypress: Writable<string> = writable(undefined)
+/********************** Keyboard Events **********************/
+export let keyUp: Writable<string> = writable(undefined)
+export let keyDown	: Writable<string> = writable(undefined)
 
 export let songListItemElement: Writable<HTMLElement> = writable(undefined)
 

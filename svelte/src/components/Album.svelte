@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getCoverIPC } from '../services/ipc.service'
+	import { getArtIPC } from '../services/ipc.service'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	// import { playback, selectedAlbum } from '../store/player.store'
 	import type { AlbumType } from '../types/album.type'
 	import { albumPlayingIdStore, selectedAlbumId } from '../store/final.store'
-	import CoverArt from './CoverArt.svelte'
+	import AlbumArt from './AlbumArt.svelte'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 
 	export let album: AlbumType
 	// export let index
-	let coverType = undefined
-	let coverSrc = undefined /* Image Source URL */
+	let artType = undefined
+	let artSrc = undefined /* Image Source URL */
 
 	onMount(() => {
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
@@ -21,13 +21,13 @@
 		}
 	})
 
-	// function fetchAlbumCover() {
-	// 	getCoverIPC(album['RootDir']).then((result) => {
+	// function fetchAlbumArt() {
+	// 	getArtIPC(album['RootDir']).then((result) => {
 	// 		if (result !== null) {
-	// 			coverSrc = result['filePath']
-	// 			coverType = result['fileType']
+	// 			artSrc = result['filePath']
+	// 			artType = result['fileType']
 	// 		} else {
-	// 			coverType = 'not found'
+	// 			artType = 'not found'
 	// 		}
 	// 	})
 	// }
@@ -35,8 +35,8 @@
 	// function addIntersectionObserver() {
 	// 	new IntersectionObserver(
 	// 		(entries) => {
-	// 			if (entries[0].isIntersecting === true && coverSrc === undefined) {
-	// 				fetchAlbumCover()
+	// 			if (entries[0].isIntersecting === true && artSrc === undefined) {
+	// 				fetchAlbumArt()
 	// 			}
 	// 		},
 	// 		{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
@@ -50,7 +50,7 @@
 </script>
 
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
-	<CoverArt klass="Album" rootDir={album.RootDir} style="height:inherit;width:inherit;cursor:pointer;" type="observe" />
+	<AlbumArt klass="Album" rootDir={album.RootDir} style="height:inherit;width:inherit;cursor:pointer;" type="observe" />
 
 	<overlay-gradient />
 
@@ -83,10 +83,10 @@
 
 		margin: 1rem;
 		cursor: pointer;
-		height: var(--cover-dimension);
-		width: var(--cover-dimension);
-		max-width: var(--cover-dimension);
-		max-height: var(--cover-dimension);
+		height: var(--art-dimension);
+		width: var(--art-dimension);
+		max-width: var(--art-dimension);
+		max-height: var(--art-dimension);
 		z-index: 10;
 	}
 
@@ -146,6 +146,6 @@
 		text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
-		max-width: calc(var(--cover-dimension) - 1.5rem);
+		max-width: calc(var(--art-dimension) - 1.5rem);
 	}
 </style>

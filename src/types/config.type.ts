@@ -2,7 +2,7 @@ export type ConfigType = {
 	bounds?: BoundsType
 	rootDirectories?: string[]
 	group?: GroupType
-	art?: ArtType
+	art?: AlbumArtType
 	groupOnlyByFolder?: boolean
 	songListTags?: any[]
 	userOptions?: UserOptionsType
@@ -20,7 +20,7 @@ export enum ThemeOptions {
 	Light = 'Light'
 }
 
-type ArtType = {
+type AlbumArtType = {
 	dimension: number
 }
 

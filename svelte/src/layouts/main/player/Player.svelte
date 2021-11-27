@@ -6,7 +6,7 @@
 	import PlayButton from './components/PlayButton.svelte'
 	import PlayerProgress from './components/PlayerProgress.svelte'
 	import PlayerVolumeBar from './components/PlayerVolumeBar.svelte'
-	import CoverArt from '../../../components/CoverArt.svelte'
+	import AlbumArt from '../../../components/AlbumArt.svelte'
 
 	import type { SongType } from '../../../types/song.type'
 
@@ -229,7 +229,7 @@
 </audio>
 
 <player-svlt>
-	<CoverArt klass="Player" {rootDir} style="height:64px;width:auto;cursor:pointer" type="forceLoad" />
+	<AlbumArt klass="Player" {rootDir} style="height:64px;width:64px;cursor:pointer" type="forceLoad" />
 
 	<player-buttons>
 		<PreviousButton />

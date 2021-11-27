@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron')
 
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-import { albumCoverArtMapStore, dbVersion } from '../store/final.store'
+import { albumArtMapStore, dbVersion } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { ConfigType } from '../types/config.type'
 import type { EqualizerType } from '../types/equalizer.type'
@@ -170,9 +170,9 @@ export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any
 	})
 }
 
-export function getCoverIPC(rootDir) {
+export function getArtIPC(rootDir) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-cover', rootDir).then(result => {
+		ipcRenderer.invoke('get-art', rootDir).then(result => {
 			resolve(result)
 		})
 	})

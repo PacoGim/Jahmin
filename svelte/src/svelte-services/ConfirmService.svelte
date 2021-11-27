@@ -3,7 +3,7 @@
 
 	import DeleteIcon from '../icons/DeleteIcon.svelte'
 
-	import { keypress } from '../store/final.store'
+	import { keyUp } from '../store/final.store'
 	import type { ConfirmStateType } from '../types/confirmState.type'
 
 	let isConfirmVisible = false
@@ -15,8 +15,8 @@
 
 	let deferredPromise = undefined
 
-	$: if ($keypress === 'Escape' && isConfirmVisible === true) closeConfirm()
-	$: if ($keypress === 'Enter' && isConfirmVisible === true) confirmConfirm()
+	$: if ($keyUp === 'Escape' && isConfirmVisible === true) closeConfirm()
+	$: if ($keyUp === 'Enter' && isConfirmVisible === true) confirmConfirm()
 
 	export function showConfirm(newState: ConfirmStateType) {
 		return new Promise((resolve, reject) => {

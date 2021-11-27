@@ -9,11 +9,11 @@ import { getConfig } from './config.service'
 import { hash } from '../functions/hashString.fn'
 import { sendWebContents } from './sendWebContents.service'
 
-export function getAlbumCover(
+export function getAlbumArt(
 	rootDir: string,
 	forceImage: boolean = false,
 	forceNewImage: boolean = false
-): Promise<{ fileType: string; filePath: string } | undefined> {
+): Promise<{ fileType: string; filePath: string; isNew: boolean } | undefined> {
 	return new Promise((resolve, reject) => {
 		let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg']
 		const notCompress = ['mp4', 'webm', 'apng', 'gif']
@@ -34,7 +34,7 @@ export function getAlbumCover(
 
 		// If exists resolve right now the already compressed IMAGE ART
 		if (forceNewImage === false && fs.existsSync(artFilePath)) {
-			return resolve({ fileType: 'image', filePath: artFilePath })
+			return resolve({ fileType: 'image', filePath: artFilePath, isNew: false })
 		}
 
 		if (fs.existsSync(rootDir) === false) {
@@ -61,13 +61,14 @@ export function getAlbumCover(
 		let preferredArt = allowedMediaFiles[0]
 
 		if (videoFormats.includes(getExtension(preferredArt))) {
-			resolve({ fileType: 'video', filePath: preferredArt })
+			// Resolves the best image/video found first, then it will be compressed and sent to renderer.
+			resolve({ fileType: 'video', filePath: preferredArt, isNew: true })
 		} else {
-			resolve({ fileType: 'image', filePath: preferredArt })
+			resolve({ fileType: 'image', filePath: preferredArt, isNew: true })
 
 			if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
 				compressImage(preferredArt, artDirPath, artFilePath).then(artPath => {
-					sendWebContents('new-cover', {
+					sendWebContents('new-art', {
 						success: true,
 						id: rootDirHashed,
 						filePath: artPath,

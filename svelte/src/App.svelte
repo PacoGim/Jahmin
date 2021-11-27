@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, keypress, playerElement } from './store/final.store'
+	import { appTitle, keyDown, keyUp, playerElement } from './store/final.store'
 
 	import MainLayout from './layouts/main/MainLayout.svelte'
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
@@ -40,10 +40,17 @@
 		}, 2000)
 
 		window.addEventListener('keyup', evt => {
-			$keypress = evt.key
+			$keyUp = evt.key
 
 			// Resets the keypress value
-			setTimeout(() => ($keypress = undefined), 1)
+			setTimeout(() => {
+				$keyUp = undefined
+				$keyDown = undefined
+			}, 1)
+		})
+
+		window.addEventListener('keydown', evt => {
+			$keyDown = evt.key
 		})
 
 		// Prevents scroll with spacebar.

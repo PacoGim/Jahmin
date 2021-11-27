@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import CoverArt from '../../components/CoverArt.svelte'
+	import AlbumArt from '../../components/AlbumArt.svelte'
 
 	import Star from '../../components/Star.svelte'
 
@@ -246,7 +246,7 @@
 		showUndo={tagList.Rating.bind !== tagList.Rating.value}
 	/>
 
-	<CoverArt klass="TagEdit" {rootDir} style="height:auto;width:100%;" type="forceLoad" />
+	<AlbumArt klass="TagEdit" {rootDir} style="height:auto;width:100%;" type="forceLoad" />
 
 	<button-group>
 		<button on:click={updateSongs} class="update-button {enableButtons ? '' : 'disabled'}">Update</button>

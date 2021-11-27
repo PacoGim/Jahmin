@@ -7,7 +7,7 @@ import { ColorType, ColorTypeShell } from '../types/color.type'
 
 //@ts-expect-error
 import hexToHsl from 'hex-to-hsl'
-import { getAlbumCover } from './albumArt.service'
+import { getAlbumArt } from './albumArt.service'
 import { getStorageMap } from './storage.service'
 
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
@@ -20,7 +20,7 @@ export function getAlbumColors(imageId: string): Promise<ColorType | undefined> 
 			return resolve(undefined)
 		}
 
-		const image = await getAlbumCover(rootDir, true)
+		const image = await getAlbumArt(rootDir, true)
 
 		if (image === undefined) {
 			return resolve(undefined)

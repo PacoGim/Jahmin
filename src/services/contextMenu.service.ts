@@ -1,6 +1,6 @@
 import { shell, Menu, BrowserWindow } from 'electron'
 import { MenuItemConstructorOptions } from 'electron/main'
-import { getAlbumCover } from './albumArt.service'
+import { getAlbumArt } from './albumArt.service'
 import { sendWebContents } from './sendWebContents.service'
 import { reloadAlbumData } from './songSync.service'
 import { getStorageMap } from './storage.service'
@@ -180,11 +180,11 @@ function getAlbumContextMenuTemplate(data: any) {
 	})
 
 	template.push({
-		label: `Reload Album Cover`,
+		label: `Reload Album Art`,
 		click: () => {
 			if (album) {
-				getAlbumCover(album.RootDir, false, true).then(result => {
-					sendWebContents('new-cover', {
+				getAlbumArt(album.RootDir, false, true).then(result => {
+					sendWebContents('new-art', {
 						success: result !== undefined,
 						id: album?.ID,
 						filePath: result?.filePath,

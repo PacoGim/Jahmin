@@ -1,32 +1,32 @@
-import { albumCoverArtMapStore } from '../store/final.store'
+import { albumArtMapStore } from '../store/final.store'
 import { hash } from './hashString.fn'
 
 export function addIntersectionObserver(rootDir: string) {
 	return new Promise((resolve, reject) => {
-		let coverArtObserver: IntersectionObserver
+		let artObserver: IntersectionObserver
 
 		let albumId = hash(rootDir, 'text')
 
-		coverArtObserver = new IntersectionObserver(
+		artObserver = new IntersectionObserver(
 			(entries) => {
 				if (entries[0].isIntersecting === true) {
-					let albumCoverArtMap
+					let albumArtMap
 
-					albumCoverArtMapStore.subscribe((_) => (albumCoverArtMap = _))()
+					albumArtMapStore.subscribe((_) => (albumArtMap = _))()
 
-					const ALBUM_COVER_ART_DATA = albumCoverArtMap.get(albumId)
+					const ALBUM_ART_DATA = albumArtMap.get(albumId)
 
-					// "Closes" the Cover Art Observer to avoid unnecessary checks.
-					coverArtObserver.disconnect()
+					// "Closes" the Art Observer to avoid unnecessary checks.
+					artObserver.disconnect()
 
-					if (ALBUM_COVER_ART_DATA) {
+					if (ALBUM_ART_DATA) {
 						resolve({
-							status: 'cover-found',
-							data: ALBUM_COVER_ART_DATA
+							status: 'art-found',
+							data: ALBUM_ART_DATA
 						})
 					} else {
 						resolve({
-							status: 'cover-not-found'
+							status: 'art-not-found'
 						})
 					}
 				}
@@ -34,6 +34,6 @@ export function addIntersectionObserver(rootDir: string) {
 			{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '100% 0px 100% 0px' }
 		)
 
-		coverArtObserver.observe(document.querySelector(`art-grid-svlt > #${CSS.escape(String(albumId))}`))
+		artObserver.observe(document.querySelector(`art-grid-svlt > #${CSS.escape(String(albumId))}`))
 	})
 }

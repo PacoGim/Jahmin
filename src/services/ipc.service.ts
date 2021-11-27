@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
 // import { getCollectionMap, getNewPromiseDbVersion } from './loki.service.bak'
 import { orderSongs } from './songFilter.service'
-import { getAlbumCover } from './albumArt.service'
+import { getAlbumArt } from './albumArt.service'
 import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
@@ -150,8 +150,8 @@ export function loadIPC() {
 		return getStorageMap().get(albumID)
 	})
 
-	ipcMain.handle('get-cover', async (evt, rootDir) => {
-		return await getAlbumCover(rootDir)
+	ipcMain.handle('get-art', async (evt, rootDir) => {
+		return await getAlbumArt(rootDir)
 	})
 
 	ipcMain.handle('get-album-colors', async (evt, imageId) => {

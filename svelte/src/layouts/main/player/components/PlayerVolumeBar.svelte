@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { playerElement } from '../../../../store/final.store'
+	import { keyDown, playerElement } from '../../../../store/final.store'
 
 	let volume: number = 0
-
-	let isShiftKeyDown = false
 
 	let isPlayerLoaded = false
 
@@ -52,14 +50,10 @@
 
 <volume-bar>
 	<input
-		on:keydown={evt => {
-			if (evt['key'] === 'Shift') isShiftKeyDown = true
-		}}
-		on:keyup={() => (isShiftKeyDown = false)}
 		type="range"
 		min="0"
 		max="100"
-		step={isShiftKeyDown ? '5' : '1'}
+		step={$keyDown==='Shift' ? '5' : '1'}
 		bind:value={volume}
 	/>
 	<background />

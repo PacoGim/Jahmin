@@ -6,7 +6,7 @@
 	import { saveConfig } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
-	import { albumCoverArtMapStore, albumListStore, selectedGroups, songListStore } from '../store/final.store'
+	import { albumArtMapStore, albumListStore, selectedGroups, songListStore } from '../store/final.store'
 	import type { AlbumType } from '../types/album.type'
 
 	onMount(() => {
@@ -63,14 +63,15 @@
 			$songListStore = sortSongsArrayFn($songListStore, data.tag, data.order)
 		})
 
-		ipcRenderer.on('new-cover', (event, data) => {
+		ipcRenderer.on('new-art', (event, data) => {
 			if (data.success === true) {
-				$albumCoverArtMapStore.set(data.id, {
+				$albumArtMapStore.set(data.id, {
 					version: Date.now(),
 					filePath: data.filePath,
-					fileType: data.fileType
+					fileType: data.fileType,
+					isNew: true
 				})
-				$albumCoverArtMapStore = $albumCoverArtMapStore
+				$albumArtMapStore = $albumArtMapStore
 			}
 		})
 	})

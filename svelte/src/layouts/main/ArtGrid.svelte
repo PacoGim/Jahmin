@@ -6,7 +6,7 @@
 	import { albumListStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
 
 	// If the album art size has been set in the store.
-	$: if ($albumArtSizeConfig) document.documentElement.style.setProperty('--cover-dimension', `${$albumArtSizeConfig}px`)
+	$: if ($albumArtSizeConfig) document.documentElement.style.setProperty('--art-dimension', `${$albumArtSizeConfig}px`)
 
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.

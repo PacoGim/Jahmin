@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAlbumCover = void 0;
+exports.getAlbumArt = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const sharp_1 = __importDefault(require("sharp"));
@@ -12,7 +12,7 @@ const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
 const sendWebContents_service_1 = require("./sendWebContents.service");
-function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
+function getAlbumArt(rootDir, forceImage = false, forceNewImage = false) {
     return new Promise((resolve, reject) => {
         var _a;
         let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg'];
@@ -30,7 +30,7 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
         let artFilePath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
         // If exists resolve right now the already compressed IMAGE ART
         if (forceNewImage === false && fs_1.default.existsSync(artFilePath)) {
-            return resolve({ fileType: 'image', filePath: artFilePath });
+            return resolve({ fileType: 'image', filePath: artFilePath, isNew: false });
         }
         if (fs_1.default.existsSync(rootDir) === false) {
             return resolve(undefined);
@@ -51,13 +51,14 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
         }
         let preferredArt = allowedMediaFiles[0];
         if (videoFormats.includes(getExtension(preferredArt))) {
-            resolve({ fileType: 'video', filePath: preferredArt });
+            // Resolves the best image/video found first, then it will be compressed and sent to renderer.
+            resolve({ fileType: 'video', filePath: preferredArt, isNew: true });
         }
         else {
-            resolve({ fileType: 'image', filePath: preferredArt });
+            resolve({ fileType: 'image', filePath: preferredArt, isNew: true });
             if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
                 compressImage(preferredArt, artDirPath, artFilePath).then(artPath => {
-                    (0, sendWebContents_service_1.sendWebContents)('new-cover', {
+                    (0, sendWebContents_service_1.sendWebContents)('new-art', {
                         success: true,
                         id: rootDirHashed,
                         filePath: artPath,
@@ -68,7 +69,7 @@ function getAlbumCover(rootDir, forceImage = false, forceNewImage = false) {
         }
     });
 }
-exports.getAlbumCover = getAlbumCover;
+exports.getAlbumArt = getAlbumArt;
 function compressImage(filePath, artDirPath, artPath) {
     return new Promise((resolve, reject) => {
         var _a;

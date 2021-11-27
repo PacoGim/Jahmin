@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import CoverArt from '../../components/CoverArt.svelte'
+	import AlbumArt from '../../components/AlbumArt.svelte'
 	import generateId from '../../functions/generateId.fn'
 
 	import { hash } from '../../functions/hashString.fn'
@@ -93,7 +93,7 @@
 	</filter-selector>
 	<search-grid>
 		<grid-row>
-			<!-- ↓ Album Cover ↓ -->
+			<!-- ↓ Album Art ↓ -->
 			<grid-value />
 			<grid-value>Title</grid-value>
 			<grid-value>Album</grid-value>
@@ -108,7 +108,7 @@
 				}}
 			>
 				<grid-value>
-					<CoverArt
+					<AlbumArt
 						klass="Search"
 						rootDir={getRootDir(song.item.SourceFile)}
 						style="height:3rem;width:3rem;cursor:pointer;"

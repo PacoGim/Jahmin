@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CheckIcon from '../icons/CheckIcon.svelte'
 	import DeleteIcon from '../icons/DeleteIcon.svelte'
-	import { keypress } from '../store/final.store'
+	import { keyUp } from '../store/final.store'
 	import type { PromptStateType } from '../types/promptState.type'
 
 	let isPromptVisible = false
@@ -30,7 +30,7 @@
 		}
 	}
 
-	$: if ($keypress === 'Escape' && isPromptVisible === true) closePrompt()
+	$: if ($keyUp === 'Escape' && isPromptVisible === true) closePrompt()
 
 	$: {
 		promptState

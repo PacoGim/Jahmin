@@ -27,7 +27,7 @@ function getAlbumColors(imageId) {
         if (!rootDir) {
             return resolve(undefined);
         }
-        const image = yield (0, albumArt_service_1.getAlbumCover)(rootDir, true);
+        const image = yield (0, albumArt_service_1.getAlbumArt)(rootDir, true);
         if (image === undefined) {
             return resolve(undefined);
         }
