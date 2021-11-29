@@ -22,7 +22,7 @@
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
 	<AlbumArt
 		id={generateId()}
-		albumId={hash(album?.RootDir)}
+		albumId={album.ID}
 		observe={true}
 		style="height:inherit;width:inherit;cursor:pointer;"
 	/>

@@ -35,7 +35,6 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false, forceNewIm
         let artFilePath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
         // If exists resolve right now the already compressed IMAGE ART
         if (forceNewImage === false && fs_1.default.existsSync(artFilePath)) {
-            // return resolve({ fileType: 'image', filePath: artFilePath, isNew: false })
             return (0, sendWebContents_service_1.sendWebContents)('new-art', {
                 artSize,
                 success: true,
@@ -61,12 +60,16 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false, forceNewIm
             return aExtension - bExtension;
         });
         if (allowedMediaFiles.length === 0) {
+            (0, sendWebContents_service_1.sendWebContents)('new-art', {
+                artSize,
+                success: false,
+                elementId
+            });
             return resolve(undefined);
         }
         let preferredArtPath = allowedMediaFiles[0];
         if (videoFormats.includes(getExtension(preferredArtPath))) {
             // Resolves the best image/video found first, then it will be compressed and sent to renderer.
-            // resolve({ fileType: 'video', filePath: preferredArtPath, isNew: true })
             (0, sendWebContents_service_1.sendWebContents)('new-art', {
                 artSize,
                 success: true,
@@ -77,7 +80,6 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false, forceNewIm
             });
         }
         else {
-            // resolve({ fileType: 'image', filePath: preferredArtPath, isNew: true })
             (0, sendWebContents_service_1.sendWebContents)('new-art', {
                 artSize,
                 success: true,

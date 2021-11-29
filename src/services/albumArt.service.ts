@@ -43,7 +43,6 @@ export function getAlbumArt(
 
 		// If exists resolve right now the already compressed IMAGE ART
 		if (forceNewImage === false && fs.existsSync(artFilePath)) {
-			// return resolve({ fileType: 'image', filePath: artFilePath, isNew: false })
 			return sendWebContents('new-art', {
 				artSize,
 				success: true,
@@ -73,6 +72,11 @@ export function getAlbumArt(
 			})
 
 		if (allowedMediaFiles.length === 0) {
+			sendWebContents('new-art', {
+				artSize,
+				success: false,
+				elementId
+			})
 			return resolve(undefined)
 		}
 
@@ -80,7 +84,6 @@ export function getAlbumArt(
 
 		if (videoFormats.includes(getExtension(preferredArtPath))) {
 			// Resolves the best image/video found first, then it will be compressed and sent to renderer.
-			// resolve({ fileType: 'video', filePath: preferredArtPath, isNew: true })
 			sendWebContents('new-art', {
 				artSize,
 				success: true,
@@ -90,7 +93,6 @@ export function getAlbumArt(
 				elementId
 			})
 		} else {
-			// resolve({ fileType: 'image', filePath: preferredArtPath, isNew: true })
 			sendWebContents('new-art', {
 				artSize,
 				success: true,

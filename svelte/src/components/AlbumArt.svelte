@@ -62,12 +62,17 @@
 		transition: transform 300ms cubic-bezier(0.5, 0.5, 0.265, 1.5);
 	}
 
+	art-svlt[data-type='unfound'] video,
 	art-svlt[data-type='image'] video {
 		display: none;
 	}
 
 	art-svlt[data-type='video'] img {
 		display: none;
+	}
+
+	body[theme='Dark'] art-svlt[data-type='unfound'] img {
+		filter: invert(1);
 	}
 
 	art-svlt[data-loaded='true'] {

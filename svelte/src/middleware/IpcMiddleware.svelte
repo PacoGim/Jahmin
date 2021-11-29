@@ -97,6 +97,13 @@
 				}
 
 				$albumArtMapStore = $albumArtMapStore.set(data.id, artData)
+			} else {
+				let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
+				let elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
+
+				elementSrc.setAttribute('src', './img/disc-line.svg')
+				element.setAttribute('data-loaded', 'true')
+				element.setAttribute('data-type', 'unfound')
 			}
 		})
 	})
