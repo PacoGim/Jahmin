@@ -20,11 +20,16 @@ export function getAlbumColors(imageId: string): Promise<ColorType | undefined> 
 			return resolve(undefined)
 		}
 
-		const image = await getAlbumArt(rootDir, true)
+		return
+		// TODO: Changes this logic to a simpler one.
+		const image = await getAlbumArt(rootDir, null,null, true)
+
+		console.log(image)
 
 		if (image === undefined) {
 			return resolve(undefined)
 		}
+
 
 		// let config = getConfig()
 		// let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)

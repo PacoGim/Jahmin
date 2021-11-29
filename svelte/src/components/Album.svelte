@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getArtIPC } from '../services/ipc.service'
-	import { setNewPlayback } from '../functions/setNewPlayback.fn'
-	// import { playback, selectedAlbum } from '../store/player.store'
+
 	import type { AlbumType } from '../types/album.type'
-	import { albumPlayingIdStore, selectedAlbumId } from '../store/final.store'
+	import { selectedAlbumId } from '../store/final.store'
 	import AlbumArt from './AlbumArt.svelte'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
+	import generateId from '../functions/generateId.fn'
+	import { hash } from '../functions/hashString.fn'
 
 	export let album: AlbumType
-	// export let index
-	let artType = undefined
-	let artSrc = undefined /* Image Source URL */
 
 	onMount(() => {
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
@@ -20,37 +17,15 @@
 			scrollToAlbumFn(album.ID)
 		}
 	})
-
-	// function fetchAlbumArt() {
-	// 	getArtIPC(album['RootDir']).then((result) => {
-	// 		if (result !== null) {
-	// 			artSrc = result['filePath']
-	// 			artType = result['fileType']
-	// 		} else {
-	// 			artType = 'not found'
-	// 		}
-	// 	})
-	// }
-
-	// function addIntersectionObserver() {
-	// 	new IntersectionObserver(
-	// 		(entries) => {
-	// 			if (entries[0].isIntersecting === true && artSrc === undefined) {
-	// 				fetchAlbumArt()
-	// 			}
-	// 		},
-	// 		{ root: document.querySelector(`art-grid-svlt`), threshold: 0, rootMargin: '0px 0px 50% 0px' }
-	// 	).observe(document.querySelector(`art-grid-svlt > #${CSS.escape(album['Id'])}`))
-	// }
-
-	/*
-	on:dblclick={(evt) => prepareAlbum(evt)}
-	on:click={(evt) => prepareAlbum(evt)}
-*/
 </script>
 
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
-	<AlbumArt klass="Album" rootDir={album.RootDir} style="height:inherit;width:inherit;cursor:pointer;" type="observe" />
+	<AlbumArt
+		id={generateId()}
+		albumId={hash(album?.RootDir)}
+		observe={true}
+		style="height:inherit;width:inherit;cursor:pointer;"
+	/>
 
 	<overlay-gradient />
 
@@ -87,7 +62,6 @@
 		width: var(--art-dimension);
 		max-width: var(--art-dimension);
 		max-height: var(--art-dimension);
-		z-index: 10;
 	}
 
 	album:hover overlay-gradient {
@@ -111,6 +85,8 @@
 		opacity: 0;
 
 		transition: opacity 250ms ease-in-out;
+
+		z-index: 1;
 	}
 
 	album-details {
@@ -120,6 +96,7 @@
 		align-self: end;
 		text-align: center;
 		transition: opacity 250ms ease-in-out;
+		z-index: 2;
 	}
 
 	album-details album-name {

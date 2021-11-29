@@ -150,8 +150,8 @@ export function loadIPC() {
 		return getStorageMap().get(albumID)
 	})
 
-	ipcMain.handle('get-art', async (evt, rootDir) => {
-		return await getAlbumArt(rootDir)
+	ipcMain.handle('get-art', async (evt, albumId, artSize, elementId) => {
+		getAlbumArt(albumId, artSize, elementId)
 	})
 
 	ipcMain.handle('get-album-colors', async (evt, imageId) => {

@@ -27,7 +27,10 @@ function getAlbumColors(imageId) {
         if (!rootDir) {
             return resolve(undefined);
         }
-        const image = yield (0, albumArt_service_1.getAlbumArt)(rootDir, true);
+        return;
+        // TODO: Changes this logic to a simpler one.
+        const image = yield (0, albumArt_service_1.getAlbumArt)(rootDir, null, null, true);
+        console.log(image);
         if (image === undefined) {
             return resolve(undefined);
         }

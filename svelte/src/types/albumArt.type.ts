@@ -1,6 +1,7 @@
 export type AlbumArtType = {
-	version: number
-	filePath: string
-	fileType: string
-	isNew?:boolean
+	version?: number
+	artSize?: number
+	data?: AlbumArtDataType
 }
+
+type AlbumArtDataType = { filePath: string; fileType: string; isNew?: boolean }

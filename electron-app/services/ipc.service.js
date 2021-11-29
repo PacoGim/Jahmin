@@ -125,8 +125,8 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-album', (evt, albumID) => {
         return (0, storage_service_1.getStorageMap)().get(albumID);
     });
-    electron_1.ipcMain.handle('get-art', (evt, rootDir) => __awaiter(this, void 0, void 0, function* () {
-        return yield (0, albumArt_service_1.getAlbumArt)(rootDir);
+    electron_1.ipcMain.handle('get-art', (evt, albumId, artSize, elementId) => __awaiter(this, void 0, void 0, function* () {
+        (0, albumArt_service_1.getAlbumArt)(albumId, artSize, elementId);
     }));
     electron_1.ipcMain.handle('get-album-colors', (evt, imageId) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, getAlbumColors_fn_1.getAlbumColors)(imageId);

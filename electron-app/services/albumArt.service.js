@@ -12,33 +12,47 @@ const original_fs_1 = require("original-fs");
 const config_service_1 = require("./config.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
 const sendWebContents_service_1 = require("./sendWebContents.service");
-function getAlbumArt(rootDir, forceImage = false, forceNewImage = false) {
+const storage_service_1 = require("./storage.service");
+function getAlbumArt(albumId, artSize, elementId, forceImage = false, forceNewImage = false) {
     return new Promise((resolve, reject) => {
         var _a;
         let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg'];
         const notCompress = ['mp4', 'webm', 'apng', 'gif'];
         const videoFormats = ['mp4', 'webm'];
         const validNames = ['cover', 'folder', 'front', 'art', 'album'];
+        let album = (0, storage_service_1.getStorageMap)().get(albumId);
+        if (!album) {
+            return resolve(undefined);
+        }
         if (forceImage === true) {
             validFormats = validFormats.filter(format => !videoFormats.includes(format));
         }
         const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
-        let rootDirHashed = (0, hashString_fn_1.hash)(rootDir, 'text');
+        let rootDirHashed = (0, hashString_fn_1.hash)(album.RootDir, 'text');
         let config = (0, config_service_1.getConfig)();
-        let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
+        let dimension = artSize || ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
         let artDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(dimension));
         let artFilePath = path_1.default.join(artDirPath, rootDirHashed) + '.webp';
         // If exists resolve right now the already compressed IMAGE ART
         if (forceNewImage === false && fs_1.default.existsSync(artFilePath)) {
-            return resolve({ fileType: 'image', filePath: artFilePath, isNew: false });
+            // return resolve({ fileType: 'image', filePath: artFilePath, isNew: false })
+            return (0, sendWebContents_service_1.sendWebContents)('new-art', {
+                artSize,
+                success: true,
+                id: rootDirHashed,
+                filePath: artFilePath,
+                fileType: 'image',
+                elementId
+            });
         }
-        if (fs_1.default.existsSync(rootDir) === false) {
+        if (fs_1.default.existsSync(album.RootDir) === false) {
             return resolve(undefined);
         }
         let allowedMediaFiles = fs_1.default
-            .readdirSync(rootDir)
+            .readdirSync(album.RootDir)
             .filter(file => allowedNames.includes(file.toLowerCase()))
-            .map(file => path_1.default.join(rootDir, file))
+            //@ts-ignore
+            .map(file => path_1.default.join(album.RootDir, file))
             .sort((a, b) => {
             // Gets the priority from the index of the valid formats above.
             // mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.
@@ -49,20 +63,38 @@ function getAlbumArt(rootDir, forceImage = false, forceNewImage = false) {
         if (allowedMediaFiles.length === 0) {
             return resolve(undefined);
         }
-        let preferredArt = allowedMediaFiles[0];
-        if (videoFormats.includes(getExtension(preferredArt))) {
+        let preferredArtPath = allowedMediaFiles[0];
+        if (videoFormats.includes(getExtension(preferredArtPath))) {
             // Resolves the best image/video found first, then it will be compressed and sent to renderer.
-            resolve({ fileType: 'video', filePath: preferredArt, isNew: true });
+            // resolve({ fileType: 'video', filePath: preferredArtPath, isNew: true })
+            (0, sendWebContents_service_1.sendWebContents)('new-art', {
+                artSize,
+                success: true,
+                id: rootDirHashed,
+                filePath: preferredArtPath,
+                fileType: 'video',
+                elementId
+            });
         }
         else {
-            resolve({ fileType: 'image', filePath: preferredArt, isNew: true });
-            if (forceImage === false && !notCompress.includes(getExtension(preferredArt))) {
-                compressImage(preferredArt, artDirPath, artFilePath).then(artPath => {
+            // resolve({ fileType: 'image', filePath: preferredArtPath, isNew: true })
+            (0, sendWebContents_service_1.sendWebContents)('new-art', {
+                artSize,
+                success: true,
+                id: rootDirHashed,
+                filePath: preferredArtPath,
+                fileType: 'image',
+                elementId
+            });
+            if (forceImage === false && !notCompress.includes(getExtension(preferredArtPath))) {
+                compressImage(dimension, preferredArtPath, artDirPath, artFilePath).then(artPath => {
                     (0, sendWebContents_service_1.sendWebContents)('new-art', {
+                        artSize,
                         success: true,
                         id: rootDirHashed,
                         filePath: artPath,
-                        fileType: 'image'
+                        fileType: 'image',
+                        elementId
                     });
                 });
             }
@@ -70,11 +102,8 @@ function getAlbumArt(rootDir, forceImage = false, forceNewImage = false) {
     });
 }
 exports.getAlbumArt = getAlbumArt;
-function compressImage(filePath, artDirPath, artPath) {
+function compressImage(dimension, filePath, artDirPath, artPath) {
     return new Promise((resolve, reject) => {
-        var _a;
-        let config = (0, config_service_1.getConfig)();
-        let dimension = ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
         if (!fs_1.default.existsSync(artDirPath)) {
             (0, original_fs_1.mkdirSync)(artDirPath, { recursive: true });
         }
@@ -89,6 +118,12 @@ function compressImage(filePath, artDirPath, artPath) {
             .toFile(artPath)
             .then(() => {
             resolve(artPath);
+        })
+            .catch(err => {
+            console.log('----------');
+            console.log(err);
+            console.log(filePath);
+            console.log('----------');
         });
     });
 }

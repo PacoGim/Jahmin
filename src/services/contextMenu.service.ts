@@ -183,14 +183,14 @@ function getAlbumContextMenuTemplate(data: any) {
 		label: `Reload Album Art`,
 		click: () => {
 			if (album) {
-				getAlbumArt(album.RootDir, false, true).then(result => {
+		/* 		getAlbumArt(album.RootDir, null,null, false, true).then(result => {
 					sendWebContents('new-art', {
 						success: result !== undefined,
 						id: album?.ID,
 						filePath: result?.filePath,
 						fileType: result?.fileType
 					})
-				})
+				}) */
 			}
 		}
 	})

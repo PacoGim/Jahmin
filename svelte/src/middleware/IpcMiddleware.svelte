@@ -65,13 +65,38 @@
 
 		ipcRenderer.on('new-art', (event, data) => {
 			if (data.success === true) {
-				$albumArtMapStore.set(data.id, {
-					version: Date.now(),
+				let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
+
+				let elementSrc
+
+				if (data.fileType === 'image') {
+					elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
+				} else if (data.fileType === 'video') {
+					elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > video`) as HTMLVideoElement
+				}
+
+				if (element && elementSrc) {
+					elementSrc.setAttribute('src', data.filePath)
+					element.setAttribute('data-loaded', 'true')
+					element.setAttribute('data-type', data.fileType)
+				}
+
+				let artMapObject = $albumArtMapStore.get(data.id)
+
+				let artData = {
+					version: Date.now()
+				}
+
+				artData[data.artSize] = {
 					filePath: data.filePath,
-					fileType: data.fileType,
-					isNew: true
-				})
-				$albumArtMapStore = $albumArtMapStore
+					fileType: data.fileType
+				}
+
+				if (artMapObject) {
+					artData = Object.assign(artMapObject, artData)
+				}
+
+				$albumArtMapStore = $albumArtMapStore.set(data.id, artData)
 			}
 		})
 	})

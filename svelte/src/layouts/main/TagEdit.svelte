@@ -22,7 +22,7 @@
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
 	$: {
-		console.log(newTags)
+		// console.log(newTags)
 	}
 
 	function setupSongs() {

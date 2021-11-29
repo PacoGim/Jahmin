@@ -41,14 +41,19 @@ import { hash } from '../../../functions/hashString.fn';
 				dimension: newArtSize
 			}
 		}).then(() => {
-			$albumListStore.forEach(album => {
-				getArtIPC(album.RootDir).then((result: AlbumArtType) => {
-					if (result?.isNew === false) {
-						$albumArtMapStore = $albumArtMapStore.set(hash(album.RootDir), {
+		$albumListStore.forEach(album => {
+				getArtIPC(album.RootDir,newArtSize).then((result: AlbumArtType) => {
+
+					// console.log(result)
+
+					if (result?.data?.isNew === false) {
+
+						// console.log(result)
+						/*$albumArtMapStore = $albumArtMapStore.set(hash(album.RootDir), {
 							version: Date.now(),
 							filePath: result.filePath,
 							fileType: result.fileType
-						})
+						}) */
 
 
 						// $albumArtMapStore = $albumArtMapStore
@@ -60,7 +65,7 @@ import { hash } from '../../../functions/hashString.fn';
 
 	onMount(() => {
 		setTimeout(() => {
-			setArtSize()
+			// setArtSize()
 		}, 500)
 	})
 </script>

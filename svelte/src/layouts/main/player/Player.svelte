@@ -27,6 +27,8 @@
 	import { nextSong } from '../../../functions/nextSong.fn'
 
 	import { setWaveSource } from '../../../services/waveform.service'
+	import generateId from '../../../functions/generateId.fn'
+	import { hash } from '../../../functions/hashString.fn'
 
 	let progress: number = 0
 
@@ -88,6 +90,10 @@
 
 		if (songToPlay === undefined) return
 
+		// rootDir = undefined
+
+		// setTimeout(() => (rootDir = songToPlay.SourceFile.split('/').slice(0, -1).join('/')), 1)
+
 		rootDir = songToPlay.SourceFile.split('/').slice(0, -1).join('/')
 
 		if (songToPlay?.ID === nextSongPreloaded?.Id) {
@@ -134,8 +140,6 @@
 					preLoadNextSongDebounce = setTimeout(() => {
 						preLoadNextSong(playbackCursor)
 					}, 2000)
-
-
 				})
 				.catch(err => {
 					nextSong()
@@ -229,7 +233,9 @@
 </audio>
 
 <player-svlt>
-	<AlbumArt klass="Player" {rootDir} style="height:64px;width:64px;cursor:pointer" type="forceLoad" />
+	{#if rootDir}
+		<AlbumArt id={generateId()} albumId={hash(rootDir)} observe={false} style="height:64px;width:64px;cursor:pointer" />
+	{/if}
 
 	<player-buttons>
 		<PreviousButton />

@@ -109,6 +109,7 @@
 			>
 				<grid-value>
 					<AlbumArt
+						id={generateId()}
 						klass="Search"
 						rootDir={getRootDir(song.item.SourceFile)}
 						style="height:3rem;width:3rem;cursor:pointer;"
