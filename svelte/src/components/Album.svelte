@@ -6,7 +6,6 @@
 	import AlbumArt from './AlbumArt.svelte'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import generateId from '../functions/generateId.fn'
-	import { hash } from '../functions/hashString.fn'
 
 	export let album: AlbumType
 

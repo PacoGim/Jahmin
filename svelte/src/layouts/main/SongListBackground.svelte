@@ -8,28 +8,35 @@
 		// Loads art if Art map (If image updated) or Selected Album changes.
 
 		// Get Art from Map.
-		let albumArt = $albumArtMapStore.get($selectedAlbumId)
+		let albumArt: any = $albumArtMapStore.get($selectedAlbumId)
 
 		// If Found
-		if (albumArt) {
+		if (albumArt?.image !== undefined) {
 			// Checks if the previous id changed.
 			if (previousArtId !== $selectedAlbumId) {
+				let maxValueKey = Math.max(...filterNumbersFromArray(Object.keys(albumArt.image)))
+
 				// If changed it updates both id and version.
 				previousArtId = $selectedAlbumId
 				previousArtVersion = albumArt.version
 
 				// If a art is available, load it.
-
-				loadArt(albumArt.filePath)
+				loadArt(albumArt.image[maxValueKey].filePath)
 
 				// Checks if a new version of the album art is available
 			} else if (albumArt.version !== previousArtVersion) {
+				let maxValueKey = Math.max(...filterNumbersFromArray(Object.keys(albumArt.image)))
+
 				// Updates the art version.
 				previousArtVersion = albumArt.version
 
-				loadArt(albumArt.filePath)
+				loadArt(albumArt.image[maxValueKey].filePath)
 			}
 		}
+	}
+
+	function filterNumbersFromArray(array: any[]): number[] {
+		return array.map(item => Number(item)).filter(item => !isNaN(item))
 	}
 
 	// Takes a file path and loads it to the bg image style property.

@@ -48,6 +48,7 @@ function startChokidarWatch(rootDirectories) {
     watcher.on('ready', () => {
         watcher.on('add', path => {
             if (isAudioFile(path)) {
+                console.log(path);
                 addToTaskQueue(path, 'insert');
             }
         });

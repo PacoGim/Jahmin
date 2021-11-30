@@ -63,48 +63,62 @@
 			$songListStore = sortSongsArrayFn($songListStore, data.tag, data.order)
 		})
 
-		ipcRenderer.on('new-art', (event, data) => {
-			if (data.success === true) {
-				let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
+		ipcRenderer.on('new-art', (event, data) => handleNewArt(data))
+	})
 
-				let elementSrc
+	function handleNewArt(data) {
+		if (data.success === true) {
+			let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
 
-				if (data.fileType === 'image') {
-					elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
-				} else if (data.fileType === 'video') {
-					elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > video`) as HTMLVideoElement
+			let elementSrc
+
+			if (data.fileType === 'image') {
+				elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
+			} else if (data.fileType === 'video') {
+				elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > video`) as HTMLVideoElement
+			}
+
+			if (element && elementSrc) {
+				let elementDataType = element.getAttribute('data-type')
+				let elementAlbumId = element.dataset.albumId
+
+				if (elementAlbumId === undefined) {
+					element.setAttribute('data-album-id', data.albumId)
 				}
 
-				if (element && elementSrc) {
-					elementSrc.setAttribute('src', data.filePath)
-					element.setAttribute('data-loaded', 'true')
+				if (!(elementDataType === 'video' && elementAlbumId === data.albumId)) {
 					element.setAttribute('data-type', data.fileType)
+					elementSrc.setAttribute('src', data.artInputPath)
+					element.setAttribute('data-loaded', 'true')
 				}
+			}
 
-				let artMapObject = $albumArtMapStore.get(data.id)
+			let artMapObject = $albumArtMapStore.get(data.id)
 
-				let artData = {
-					version: Date.now()
+			let artData = {
+				version: Date.now()
+			}
+
+			artData[data.fileType] = {
+				[data.artSize]: {
+					filePath: data.artInputPath
 				}
+			}
 
-				artData[data.artSize] = {
-					filePath: data.filePath,
-					fileType: data.fileType
-				}
+			if (artMapObject) {
+				artData = Object.assign(artMapObject, artData)
+			}
 
-				if (artMapObject) {
-					artData = Object.assign(artMapObject, artData)
-				}
+			$albumArtMapStore = $albumArtMapStore.set(data.id, artData)
+		} else {
+			let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
+			let elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
 
-				$albumArtMapStore = $albumArtMapStore.set(data.id, artData)
-			} else {
-				let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
-				let elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
-
+			if (elementSrc && element) {
 				elementSrc.setAttribute('src', './img/disc-line.svg')
 				element.setAttribute('data-loaded', 'true')
 				element.setAttribute('data-type', 'unfound')
 			}
-		})
-	})
+		}
+	}
 </script>

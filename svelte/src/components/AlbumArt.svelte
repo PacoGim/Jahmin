@@ -20,7 +20,7 @@
 
 		let artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 
-		element.setAttribute('data-albumId', albumId)
+		element.setAttribute('data-album-id', albumId)
 
 		if (observe === true) {
 			addIntersectionObserver(albumId, id, artSize)
@@ -34,7 +34,7 @@
 		if (element !== undefined && element.dataset.albumid !== newAlbumId) {
 			let artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 
-			element.setAttribute('data-albumId', newAlbumId)
+			element.setAttribute('data-album-id', newAlbumId)
 
 			getArtIPC(albumId, artSize, element.id)
 		}
@@ -85,16 +85,5 @@
 
 	art-svlt > * {
 		height: 100%;
-	}
-
-	img.loader {
-		padding: 5rem;
-	}
-
-	img.notFound {
-		border-width: 10px;
-		border-color: #fff #ccc #ccc #fff;
-		border-style: solid;
-		padding: 2rem;
 	}
 </style>

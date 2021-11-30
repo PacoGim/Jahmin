@@ -20,23 +20,20 @@ const hex_to_hsl_1 = __importDefault(require("hex-to-hsl"));
 const albumArt_service_1 = require("./albumArt.service");
 const storage_service_1 = require("./storage.service");
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
-function getAlbumColors(imageId) {
+const notCompress = ['mp4', 'webm', 'apng', 'gif'];
+function getAlbumColors(albumId) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        let rootDir = (_a = (0, storage_service_1.getStorageMap)().get(imageId)) === null || _a === void 0 ? void 0 : _a.RootDir;
-        if (!rootDir) {
+        let album = (0, storage_service_1.getStorageMap)().get(albumId);
+        if (!album) {
             return resolve(undefined);
         }
-        return;
         // TODO: Changes this logic to a simpler one.
-        const image = yield (0, albumArt_service_1.getAlbumArt)(rootDir, null, null, true);
-        console.log(image);
-        if (image === undefined) {
+        const imagePaths = (0, albumArt_service_1.getAllowedFiles)(album).filter(file => !notCompress.includes(getExtension(file)));
+        if (imagePaths === undefined) {
             return resolve(undefined);
         }
-        // let config = getConfig()
-        // let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
-        (0, sharp_1.default)(image.filePath)
+        const imagePath = imagePaths[0];
+        (0, sharp_1.default)(imagePath)
             .resize(1, 1)
             .raw()
             .toBuffer((err, buffer) => {
@@ -75,3 +72,6 @@ function getAlbumColors(imageId) {
     }));
 }
 exports.getAlbumColors = getAlbumColors;
+function getExtension(data) {
+    return data.split('.').pop() || '';
+}

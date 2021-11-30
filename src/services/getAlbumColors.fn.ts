@@ -7,34 +7,31 @@ import { ColorType, ColorTypeShell } from '../types/color.type'
 
 //@ts-expect-error
 import hexToHsl from 'hex-to-hsl'
-import { getAlbumArt } from './albumArt.service'
+import { getAlbumArt, getAllowedFiles } from './albumArt.service'
 import { getStorageMap } from './storage.service'
 
 let values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-export function getAlbumColors(imageId: string): Promise<ColorType | undefined> {
+const notCompress = ['mp4', 'webm', 'apng', 'gif']
+
+export function getAlbumColors(albumId: string): Promise<ColorType | undefined> {
 	return new Promise(async (resolve, reject) => {
-		let rootDir = getStorageMap().get(imageId)?.RootDir
+		let album = getStorageMap().get(albumId)
 
-		if (!rootDir) {
+		if (!album) {
 			return resolve(undefined)
 		}
 
-		return
 		// TODO: Changes this logic to a simpler one.
-		const image = await getAlbumArt(rootDir, null,null, true)
+		const imagePaths = getAllowedFiles(album).filter(file => !notCompress.includes(getExtension(file)))
 
-		console.log(image)
-
-		if (image === undefined) {
+		if (imagePaths === undefined) {
 			return resolve(undefined)
 		}
 
+		const imagePath = imagePaths[0]
 
-		// let config = getConfig()
-		// let imagePath = path.join(appDataPath(), '/art', String(config?.['art']?.['dimension']), `${imageId}.webp`)
-
-		sharp(image.filePath)
+		sharp(imagePath)
 			.resize(1, 1)
 			.raw()
 			.toBuffer((err, buffer) => {
@@ -77,4 +74,8 @@ export function getAlbumColors(imageId: string): Promise<ColorType | undefined> 
 				resolve(hslColorObject)
 			})
 	})
+}
+
+function getExtension(data: string) {
+	return data.split('.').pop() || ''
 }

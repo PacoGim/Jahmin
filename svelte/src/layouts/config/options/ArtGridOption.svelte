@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte'
 
 	import OptionSection from '../../../components/OptionSection.svelte'
-import { hash } from '../../../functions/hashString.fn';
 	import { getArtIPC, saveConfig } from '../../../services/ipc.service'
 	import { albumArtSizeConfig } from '../../../store/config.store'
 	import { albumArtMapStore, albumListStore, layoutToShow } from '../../../store/final.store'
@@ -41,31 +40,17 @@ import { hash } from '../../../functions/hashString.fn';
 				dimension: newArtSize
 			}
 		}).then(() => {
-		$albumListStore.forEach(album => {
-				getArtIPC(album.RootDir,newArtSize).then((result: AlbumArtType) => {
+			$albumListStore.forEach(album => {
+				let elementId = document.querySelector(`[data-album-id="${album.ID}"]`).id
 
-					// console.log(result)
-
-					if (result?.data?.isNew === false) {
-
-						// console.log(result)
-						/*$albumArtMapStore = $albumArtMapStore.set(hash(album.RootDir), {
-							version: Date.now(),
-							filePath: result.filePath,
-							fileType: result.fileType
-						}) */
-
-
-						// $albumArtMapStore = $albumArtMapStore
-					}
-				})
+				getArtIPC(album.ID, newArtSize, elementId)
 			})
 		})
 	}
 
 	onMount(() => {
 		setTimeout(() => {
-			// setArtSize()
+			setArtSize()
 		}, 500)
 	})
 </script>
