@@ -3,13 +3,14 @@ import parseJson from '../functions/parseJson'
 import type { ThemeOptions } from '../types/config.type'
 import type { SelectedTagType } from '../types/selectedTag.type'
 
-export let albumArtSizeConfig: Writable<string> = writable(localStorage.getItem('AlbumArtSize'))
+export let artSizeConfig: Writable<number> = writable(Number(localStorage.getItem('AlbumArtSize')))
 export let songListTagsConfig: Writable<SelectedTagType[]> = writable(getSongListTagsConfig())
 export let equalizerIdConfig: Writable<string> = writable(localStorage.getItem('EqualizerId'))
 export let themeConfig: Writable<ThemeOptions> = writable(localStorage.getItem('Theme') as ThemeOptions)
 export let songAmountConfig: Writable<number> = writable(Number(localStorage.getItem('SongAmount')))
 export let groupByConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupBy')))
 export let groupByValuesConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupByValues')))
+export let gridGapConfig: Writable<number> = writable(Number(localStorage.getItem('GridGap')))
 
 function getSongListTagsConfig() {
 	let songListTagsLS = localStorage.getItem('SongListTags')

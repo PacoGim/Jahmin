@@ -18,7 +18,7 @@ const getConfigPathFile = () => {
     return configFilePath;
 };
 function getConfig() {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     let config;
     if (fs_1.default.existsSync(getConfigPathFile())) {
         try {
@@ -37,8 +37,22 @@ function getConfig() {
     if ((config === null || config === void 0 ? void 0 : config.songListTags) === undefined || ((_d = config === null || config === void 0 ? void 0 : config.songListTags) === null || _d === void 0 ? void 0 : _d.length) === 0) {
         config.songListTags = getDefaultConfigFile().songListTags;
     }
-    if (((_e = config === null || config === void 0 ? void 0 : config.userOptions) === null || _e === void 0 ? void 0 : _e.songAmount) === undefined) {
+    if ((config === null || config === void 0 ? void 0 : config.userOptions) === undefined) {
         config.userOptions = getDefaultConfigFile().userOptions;
+    }
+    else {
+        if (((_e = config === null || config === void 0 ? void 0 : config.userOptions) === null || _e === void 0 ? void 0 : _e.songAmount) === undefined) {
+            config.userOptions.songAmount = (_f = getDefaultConfigFile().userOptions) === null || _f === void 0 ? void 0 : _f.songAmount;
+        }
+        if (((_g = config === null || config === void 0 ? void 0 : config.userOptions) === null || _g === void 0 ? void 0 : _g.artSize) === undefined) {
+            config.userOptions.artSize = (_h = getDefaultConfigFile().userOptions) === null || _h === void 0 ? void 0 : _h.artSize;
+        }
+        if (((_j = config === null || config === void 0 ? void 0 : config.userOptions) === null || _j === void 0 ? void 0 : _j.gridGap) === undefined) {
+            config.userOptions.gridGap = (_k = getDefaultConfigFile().userOptions) === null || _k === void 0 ? void 0 : _k.gridGap;
+        }
+        if (((_l = config === null || config === void 0 ? void 0 : config.userOptions) === null || _l === void 0 ? void 0 : _l.theme) === undefined) {
+            config.userOptions.theme = (_m = getDefaultConfigFile().userOptions) === null || _m === void 0 ? void 0 : _m.theme;
+        }
     }
     return config;
 }
@@ -61,13 +75,12 @@ function getDefaultConfigFile() {
             groupBy: ['Genre'],
             groupByValues: []
         },
-        art: {
-            dimension: 128
-        },
         groupOnlyByFolder: false,
         userOptions: {
             songAmount: 8,
-            theme: config_type_1.ThemeOptions.Auto
+            theme: config_type_1.ThemeOptions.Auto,
+            artSize: 128,
+            gridGap: 16
         },
         songListTags: [
             {

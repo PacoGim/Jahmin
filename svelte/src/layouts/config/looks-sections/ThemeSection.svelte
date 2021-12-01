@@ -2,6 +2,7 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import { saveConfig } from '../../../services/ipc.service'
 	import { themeConfig } from '../../../store/config.store'
+	import { selectedOptionSection } from '../../../store/final.store'
 	import type { ThemeOptions } from '../../../types/config.type'
 
 	function saveThemeToConfig(themeName: string) {
@@ -16,8 +17,8 @@
 	}
 </script>
 
-<OptionSection title="Preferred Theme">
-	<preferred-theme-section slot="body">
+<OptionSection title="Theme">
+	<theme-section slot="body">
 		<theme-card data-selected={$themeConfig === 'Auto'} on:click={() => saveThemeToConfig('Auto')}>
 			<theme-gradient class="auto" />
 			<theme-name>System Default</theme-name>
@@ -32,11 +33,11 @@
 			<theme-gradient class="dark" />
 			<theme-name>Dark</theme-name>
 		</theme-card>
-	</preferred-theme-section>
+	</theme-section>
 </OptionSection>
 
 <style>
-	preferred-theme-section {
+	theme-section {
 		display: flex;
 		justify-content: space-evenly;
 	}

@@ -38,8 +38,24 @@ export function getConfig(): ConfigType {
 		config.songListTags = getDefaultConfigFile().songListTags
 	}
 
-	if (config?.userOptions?.songAmount === undefined) {
+	if (config?.userOptions === undefined) {
 		config.userOptions = getDefaultConfigFile().userOptions
+	} else {
+		if (config?.userOptions?.songAmount === undefined) {
+			config.userOptions.songAmount = getDefaultConfigFile().userOptions?.songAmount
+		}
+
+		if (config?.userOptions?.artSize === undefined) {
+			config.userOptions.artSize = getDefaultConfigFile().userOptions?.artSize
+		}
+
+		if (config?.userOptions?.gridGap === undefined) {
+			config.userOptions.gridGap = getDefaultConfigFile().userOptions?.gridGap
+		}
+
+		if (config?.userOptions?.theme === undefined) {
+			config.userOptions.theme = getDefaultConfigFile().userOptions?.theme
+		}
 	}
 
 	return config
@@ -64,13 +80,12 @@ function getDefaultConfigFile(): ConfigType {
 			groupBy: ['Genre'],
 			groupByValues: []
 		},
-		art: {
-			dimension: 128
-		},
 		groupOnlyByFolder: false,
 		userOptions: {
 			songAmount: 8,
-			theme: ThemeOptions.Auto
+			theme: ThemeOptions.Auto,
+			artSize: 128,
+			gridGap: 16
 		},
 		songListTags: [
 			{

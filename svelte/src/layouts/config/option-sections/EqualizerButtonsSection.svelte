@@ -75,7 +75,6 @@
 		<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		Update
 	</button>
-	<!-- <button on:click={() => showEqualizerFolderIPC()}>Show Folder</button> -->
 </equalizer-buttons-section>
 
 <style>

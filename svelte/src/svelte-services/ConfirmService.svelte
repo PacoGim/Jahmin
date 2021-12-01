@@ -58,14 +58,14 @@
 			{confirmState.textToConfirm}
 		</confirm-body>
 		<confirm-footer>
-			<confirm-cancel class="confirm-button" on:click={() => closeConfirm()}>
+			<button class="cancel" on:click={() => closeConfirm()}>
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				Cancel
-			</confirm-cancel>
-			<confirm-confirm class="confirm-button" on:click={() => confirmConfirm()}>
+			</button>
+			<button class="confirm" on:click={() => confirmConfirm()}>
 				<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				Confirm
-			</confirm-confirm>
+			</button>
 		</confirm-footer>
 	</confirm-content>
 </confirm-svlt>
@@ -166,24 +166,13 @@
 		margin-left: auto;
 		width: max-content;
 	}
-
-	confirm-content confirm-footer *.confirm-button {
-		display: flex;
-		align-items: center;
-		font-size: 0.85rem;
-		font-variation-settings: 'wght' 500;
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-	}
-
-	confirm-content confirm-footer confirm-confirm {
+	confirm-content confirm-footer button.confirm {
 		margin-left: 1rem;
 
 		background-color: var(--color-hl-1);
 	}
 
-	confirm-content confirm-footer confirm-cancel {
+	confirm-content confirm-footer button.cancel {
 		background-color: var(--color-hl-2);
 	}
 </style>

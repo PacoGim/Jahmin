@@ -3,13 +3,14 @@
 
 	import { getConfigIPC } from '../services/ipc.service'
 	import {
-		albumArtSizeConfig,
+		artSizeConfig,
 		songListTagsConfig,
 		equalizerIdConfig,
 		themeConfig,
 		songAmountConfig,
 		groupByConfig,
-		groupByValuesConfig
+		groupByValuesConfig,
+		gridGapConfig
 	} from '../store/config.store'
 
 	import type { ConfigType } from '../types/config.type'
@@ -20,11 +21,12 @@
 		getConfigIPC().then((config: ConfigType) => {
 			$themeConfig = syncConfigLocalStorage('Theme', config.userOptions.theme)
 			$equalizerIdConfig = syncConfigLocalStorage('EqualizerId', config.userOptions.equalizerId)
-			$albumArtSizeConfig = syncConfigLocalStorage('AlbumArtSize', String(config.art.dimension))
+			$artSizeConfig = syncConfigLocalStorage('AlbumArtSize', String(config.userOptions.artSize))
 			$songListTagsConfig = syncConfigLocalStorage('SongListTags', config.songListTags)
 			$songAmountConfig = syncConfigLocalStorage('SongAmount', config.userOptions.songAmount)
 			$groupByConfig = syncConfigLocalStorage('GroupBy', config.group.groupBy)
 			$groupByValuesConfig = syncConfigLocalStorage('GroupByValues', config.group.groupByValues)
+			$gridGapConfig = syncConfigLocalStorage('GridGap', config.userOptions.gridGap)
 		})
 	})
 

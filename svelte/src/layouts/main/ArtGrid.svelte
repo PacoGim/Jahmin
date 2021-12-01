@@ -2,11 +2,12 @@
 	import { onMount } from 'svelte'
 
 	import Album from '../../components/Album.svelte'
-	import { albumArtSizeConfig } from '../../store/config.store'
+	import { artSizeConfig, gridGapConfig } from '../../store/config.store'
 	import { albumListStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
 
 	// If the album art size has been set in the store.
-	$: if ($albumArtSizeConfig) document.documentElement.style.setProperty('--art-dimension', `${$albumArtSizeConfig}px`)
+	$: if ($artSizeConfig !== undefined) document.documentElement.style.setProperty('--art-dimension', `${$artSizeConfig}px`)
+	$: if ($gridGapConfig !== undefined) document.documentElement.style.setProperty('--grid-gap', `${$gridGapConfig}px`)
 
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
@@ -28,7 +29,7 @@
 
 <style>
 	art-grid-svlt {
-		padding: 1rem;
+		padding: var(--grid-gap);
 
 		overflow-y: auto;
 		overflow-x: hidden;

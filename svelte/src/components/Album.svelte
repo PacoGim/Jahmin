@@ -19,12 +19,7 @@
 </script>
 
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
-	<AlbumArt
-		id={generateId()}
-		albumId={album.ID}
-		observe={true}
-		style="height:inherit;width:inherit;cursor:pointer;"
-	/>
+	<AlbumArt id={generateId()} albumId={album.ID} observe={true} style="height:inherit;width:inherit;cursor:pointer;" />
 
 	<overlay-gradient />
 
@@ -44,9 +39,12 @@
 <style>
 	album.selected {
 		box-shadow: 0 0 10px 5px #ffffff, 0 0 0 5px rgba(255, 255, 255, 0.5);
+		z-index: 1;
 	}
 
 	album {
+		margin: var(--grid-gap);
+
 		color: #fff;
 		position: relative;
 		display: grid;
@@ -55,7 +53,6 @@
 
 		transition: box-shadow 300ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
 
-		margin: 1rem;
 		cursor: pointer;
 		height: var(--art-dimension);
 		width: var(--art-dimension);

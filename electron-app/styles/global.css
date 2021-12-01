@@ -10,8 +10,6 @@
 
 	--button-size: 1.25rem;
 
-	--art-grid-gap: 1rem;
-
 	--waveform-opacity: 1;
 	--waveform-transition-duration: 150ms;
 
@@ -61,6 +59,8 @@ button {
 	align-items: center;
 	font-size: 0.85rem;
 	font-variation-settings: 'wght' 500;
+
+	transition: background-color 300ms linear;
 }
 
 button.not-active {

@@ -256,7 +256,7 @@
 
 	tag-edit-svlt tag-container textarea {
 		font-size: inherit;
-		padding: 0.33rem 0.45rem;
+		padding: 0.5rem .65rem;
 
 		color: var(--color-fg-1);
 		background-color: rgba(128, 128, 128, 0.2);

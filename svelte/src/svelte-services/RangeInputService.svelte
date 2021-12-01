@@ -9,7 +9,7 @@
 
 	let isRangeInputVisible = false
 
-	let rangeInputValue
+	let rangeInputValue = 0
 
 	let rangeInputState: InputRangeStateType = {
 		title: '',
@@ -51,7 +51,7 @@
 		isRangeInputVisible = true
 	}
 
-	function closeRangeInput() {
+	export function closeRangeInput() {
 		// If User did NOT change value then set it to previous value.
 		if (rangeInputValue !== rangeInputState.value) {
 			rangeInputState.onCancel(rangeInputState.value)
@@ -63,11 +63,16 @@
 	function confirmRangeInput() {
 		rangeInputState.value = rangeInputValue
 		rangeInputState.onConfirm(rangeInputValue)
+		isRangeInputVisible = false
 	}
 </script>
 
 <range-input-svlt show={isRangeInputVisible}>
 	<range-input-container>
+		<range-input-input-title>
+			{rangeInputState.title}
+		</range-input-input-title>
+
 		<input
 			type="range"
 			min={rangeInputState.min}
@@ -75,18 +80,23 @@
 			step={$keyDown === 'Shift' ? rangeInputState.minStep : rangeInputState.step}
 			bind:value={rangeInputValue}
 		/>
-		<p>{rangeInputValue} px</p>
 
-		<range-input-cancel class="input-range-button" on:click={() => closeRangeInput()}>
-			<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-			{rangeInputState.cancelButtonText}
-		</range-input-cancel>
-		<range-input-confirm class="input-range-button" on:click={() => confirmRangeInput()}>
-			<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-			{rangeInputState.confirmButtonText}
-		</range-input-confirm>
-	</range-input-container>
-</range-input-svlt>
+		<range-input-steps-info>Hold <shift-button>⇧ Shift</shift-button> to be more accurate</range-input-steps-info>
+
+		<range-input-value>{rangeInputValue} px</range-input-value>
+
+		<range-input-buttons>
+			<button class="cancel" on:click={() => closeRangeInput()}>
+				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+				{rangeInputState.cancelButtonText}
+			</button>
+			<button class="confirm" disabled={rangeInputValue === rangeInputState.value} on:click={() => confirmRangeInput()}>
+				<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+				{rangeInputState.confirmButtonText}
+			</button>
+		</range-input-buttons>
+	</range-input-container></range-input-svlt
+>
 
 <style>
 	range-input-svlt {
@@ -102,16 +112,13 @@
 		pointer-events: none;
 	}
 
-	range-input-svlt[show='false'] {
-		opacity: 0;
-	}
-
 	range-input-svlt[show='false'] range-input-container {
 		pointer-events: none;
+		transform: scale(0);
 	}
 
 	range-input-svlt[show='true'] {
-		opacity: 1;
+		transform: scale(1);
 	}
 
 	range-input-svlt[show='true'] range-input-container {
@@ -119,7 +126,21 @@
 	}
 
 	range-input-container {
+		margin-top: 1rem;
+		border-radius: 8px;
+		padding: 1rem;
 		background-color: var(--color-bg-2);
+
+		box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.5);
+
+		transition: transform 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	}
+
+	range-input-input-title {
+		display: block;
+		text-align: center;
+		font-variation-settings: 'wght' calc(var(--default-weight) + 150);
+		margin-bottom: 1rem;
 	}
 
 	range-input-container input {
@@ -148,21 +169,36 @@
 		box-shadow: 0px 0px 0px 5px hsl(0, 0%, 90%), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 	}
 
-	.input-range-button {
+	range-input-steps-info {
+		margin-top: 0.75rem;
+		display: block;
+		font-size: 0.8rem;
+		text-align: center;
+	}
+
+	range-input-steps-info shift-button {
+		padding: 0.2rem 0.3rem;
+		padding-left: 0.2rem; /* Padding left added to compensate the arrow blank space around. */
+		border: 1px solid var(--color-fg-1);
+		border-radius: 3px;
+		font-size: 0.75rem;
+	}
+
+	range-input-value {
+		display: block;
+		margin: 1rem 0;
+		width: 100%;
+		text-align: center;
+		font-size: 0.9rem;
+		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+	}
+
+	range-input-buttons {
 		display: flex;
-		align-items: center;
-		font-size: 0.85rem;
-		font-variation-settings: 'wght' 500;
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
+		justify-content: space-between;
 	}
 
-	range-input-confirm {
-		background-color: var(--color-hl-1);
-	}
-
-	range-input-cancel {
+	range-input-buttons button.cancel {
 		background-color: var(--color-hl-2);
 	}
 </style>

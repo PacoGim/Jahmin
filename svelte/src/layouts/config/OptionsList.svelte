@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { selectedOption } from '../../store/final.store'
+	import { selectedOption, selectedOptionSection } from '../../store/final.store'
 
 	let options = [
 		{
-			name: 'Art Grid',
+			name: 'Looks',
 			sections: [
 				{
-					name: 'Set Art Size'
+					name: 'Theme'
 				},
 				{
-					name: 'Set Grid Gap'
+					name: 'Art Grid'
 				}
 			]
 		},
@@ -30,10 +30,12 @@
 <option-list>
 	{#each options as option, index (index)}
 		<option-container>
-			<option-name on:click={() => ($selectedOption = option.name)}>{option.name}</option-name>
+			<option-name class={$selectedOption === option.name ? 'selected' : null} on:click={() => ($selectedOption = option.name)}
+				>{option.name}</option-name
+			>
 			{#if option.sections}
 				{#each option.sections as section, index (index)}
-					<option-section>{section.name}</option-section>
+					<option-section class={$selectedOptionSection === section.name ? 'selected' : null}>{section.name}</option-section>
 				{/each}
 			{/if}
 		</option-container>
@@ -57,11 +59,18 @@
 		margin-bottom: 0.25rem;
 		cursor: pointer;
 	}
+	option-name.selected {
+		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
+	}
 
 	option-section {
 		cursor: pointer;
 		font-size: 0.9rem;
 		margin-left: 1rem;
 		margin-bottom: 0.25rem;
+	}
+
+	option-section.selected {
+		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 	}
 </style>

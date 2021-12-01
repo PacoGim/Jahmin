@@ -93,14 +93,14 @@
 			/>
 		</prompt-body>
 		<prompt-footer>
-			<prompt-cancel class="prompt-button" on:click={() => closePrompt()}>
+			<button class="cancel" on:click={() => closePrompt()}>
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{promptState.cancelButtonText}
-			</prompt-cancel>
-			<prompt-confirm class="prompt-button" on:click={() => confirmPrompt()}>
+			</button>
+			<button class="confirm" on:click={() => confirmPrompt()}>
 				<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{promptState.confirmButtonText}
-			</prompt-confirm>
+			</button>
 		</prompt-footer>
 	</prompt-content>
 </prompt-svlt>
@@ -202,23 +202,11 @@
 		width: max-content;
 	}
 
-	prompt-content prompt-footer *.prompt-button {
-		display: flex;
-		align-items: center;
-		font-size: 0.85rem;
-		font-variation-settings: 'wght' 500;
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-	}
-
-	prompt-content prompt-footer prompt-confirm {
+	prompt-content prompt-footer button.confirm {
 		margin-left: 1rem;
-
-		background-color: var(--color-hl-1);
 	}
 
-	prompt-content prompt-footer prompt-cancel {
+	prompt-content prompt-footer button.cancel {
 		background-color: var(--color-hl-2);
 	}
 
