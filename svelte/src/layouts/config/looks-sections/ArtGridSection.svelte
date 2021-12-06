@@ -6,7 +6,7 @@
 	import { rangeInputService } from '../../../store/service.store'
 
 	function setArtSize() {
-		$layoutToShow = 'Main'
+		$layoutToShow = 'Home'
 
 		$rangeInputService.showRangeInput({
 			title: 'Art Size',
@@ -37,16 +37,14 @@
 				artSize: newArtSize
 			}
 		}).then(() => {
-			$albumListStore.forEach(album => {
-				let elementId = document.querySelector(`[data-album-id="${album.ID}"]`).id
-
-				getArtIPC(album.ID, newArtSize, elementId)
+			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
+				getArtIPC(artElement.dataset.albumId, newArtSize, artElement.id)
 			})
 		})
 	}
 
 	function setGridGapSize() {
-		$layoutToShow = 'Main'
+		$layoutToShow = 'Home'
 
 		$rangeInputService.showRangeInput({
 			title: 'Art Grid Gap',
@@ -66,8 +64,6 @@
 						gridGap: newGridGap
 					}
 				})
-
-				$layoutToShow = 'Config'
 			},
 			onCancel: previousGridGapValue => {
 				$gridGapConfig = previousGridGapValue

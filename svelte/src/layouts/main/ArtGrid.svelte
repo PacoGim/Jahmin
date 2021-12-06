@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 
 	import Album from '../../components/Album.svelte'
+	import scrollToAlbumFn from '../../functions/scrollToAlbum.fn'
 	import { artSizeConfig, gridGapConfig } from '../../store/config.store'
 	import { albumListStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
 
@@ -13,11 +14,11 @@
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
 		selectedGroupByStore.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
-		})
+		})()
 
 		selectedGroupByValueStore.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
-		})
+		})()
 	})
 </script>
 

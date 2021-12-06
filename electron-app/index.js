@@ -24,7 +24,12 @@ const ipc_service_1 = require("./services/ipc.service");
 (0, ipc_service_1.loadIPC)();
 const storage_service_1 = require("./services/storage.service");
 const songSync_service_1 = require("./services/songSync.service");
+const chokidar_1 = __importDefault(require("chokidar"));
 let browserWindow;
+// Watches for changes in svelte build folder and reloads the window. Kinda hot reload-ish. Works Great!
+chokidar_1.default.watch(path_1.default.join(__dirname, './build/bundle.js')).on('change', path => {
+    getMainWindow().reload();
+});
 function createMainWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         const config = (0, config_service_1.getConfig)();

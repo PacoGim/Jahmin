@@ -86,14 +86,18 @@
 					element.setAttribute('data-album-id', data.albumId)
 				}
 
+
 				if (!(elementDataType === 'video' && elementAlbumId === data.albumId)) {
+
+					// TODO
+
 					element.setAttribute('data-type', data.fileType)
 					elementSrc.setAttribute('src', data.artInputPath)
 					element.setAttribute('data-loaded', 'true')
 				}
 			}
 
-			let artMapObject = $albumArtMapStore.get(data.id)
+			let artMapObject = $albumArtMapStore.get(data.albumId)
 
 			let artData = {
 				version: Date.now()
@@ -109,7 +113,7 @@
 				artData = Object.assign(artMapObject, artData)
 			}
 
-			$albumArtMapStore = $albumArtMapStore.set(data.id, artData)
+			$albumArtMapStore = $albumArtMapStore.set(data.albumId, artData)
 		} else {
 			let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
 			let elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement

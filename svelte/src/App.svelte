@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, keyDown, keyUp, playerElement } from './store/final.store'
+	import { appTitle, keyDown, keyUp, layoutToShow, playerElement } from './store/final.store'
 
-	import MainLayout from './layouts/main/MainLayout.svelte'
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import SearchLayout from './layouts/search/SearchLayout.svelte'
 
@@ -10,7 +9,7 @@
 	import previousSongFn from './functions/previousSong.fn'
 
 	import { runThemeHandler } from './services/themeHandler.service'
-	import { syncDbVersionIPC } from './services/ipc.service'
+	import {  syncDbVersionIPC } from './services/ipc.service'
 	import { handleContextMenuEvent } from './services/contextMenu.service'
 
 	import iziToast from 'izitoast'
@@ -26,6 +25,10 @@
 	import PromptService from './svelte-services/PromptService.svelte'
 	import ConfirmService from './svelte-services/ConfirmService.svelte'
 	import RangeInputService from './svelte-services/RangeInputService.svelte'
+	import StatusBar from './layouts/StatusBar.svelte'
+	import Navigation from './layouts/Navigation.svelte'
+	import Player from './layouts/Player.svelte'
+	import HomeLayout from './layouts/main/HomeLayout.svelte'
 
 	onMount(() => {
 		iziToast.settings({ position: 'topRight' })
@@ -83,16 +86,48 @@
 	<title>{$appTitle}</title>
 </svelte:head>
 
-<PlayerMiddleware />
 <ConfigMiddleware />
+<PlayerMiddleware />
 <IpcMiddleware />
 <EqualizerMiddleware />
 
-<MainLayout />
-<ConfigLayout />
-<SearchLayout />
+<main-app>
+	<Navigation />
+	<Player />
+	<StatusBar />
+	<current-window-svlt>
+		{#if $layoutToShow === 'Home'}
+			<HomeLayout />
+		{:else if $layoutToShow === 'Config'}
+			<ConfigLayout />
+		{:else if $layoutToShow === 'Search'}
+			<SearchLayout />
+		{/if}
+	</current-window-svlt>
+</main-app>
 
 <EqualizerService bind:this={$equalizerService} />
 <PromptService bind:this={$promptService} />
 <ConfirmService bind:this={$confirmService} />
 <RangeInputService bind:this={$rangeInputService} />
+
+<style>
+	main-app {
+		display: grid;
+
+		height: 100vh;
+
+		grid-template-columns: 64px auto;
+		grid-template-rows: auto 64px 24px;
+
+		grid-template-areas:
+			'navigation-svlt current-window-svlt'
+			'navigation-svlt player-svlt'
+			'statusbar-svlt statusbar-svlt';
+	}
+
+	main-app > current-window-svlt {
+		grid-area: current-window-svlt;
+		height: calc(100vh - 64px - 24px);
+	}
+</style>

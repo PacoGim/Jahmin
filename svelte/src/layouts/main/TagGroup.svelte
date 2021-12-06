@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
-	import { groupSongsIPC, saveConfig } from '../../services/ipc.service'
+	import { groupSongsIPC } from '../../services/ipc.service'
 	import { groupByConfig, groupByValuesConfig } from '../../store/config.store'
 	import { selectedGroups } from '../../store/final.store'
 

@@ -4,7 +4,9 @@
 	let previousArtVersion = undefined
 	let previousArtId = undefined
 
-	$: {
+	$: $selectedAlbumId, $albumArtMapStore, setArt()
+
+	function setArt() {
 		// Loads art if Art map (If image updated) or Selected Album changes.
 
 		// Get Art from Map.

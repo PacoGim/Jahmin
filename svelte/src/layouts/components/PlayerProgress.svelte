@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import { playerElement, updateSongProgress } from '../../../../store/final.store'
+	import { playerElement, updateSongProgress } from '../../store/final.store'
 
-	import type { SongType } from '../../../../types/song.type'
+	import type { SongType } from '../../types/song.type'
 
 	export let song: SongType
 

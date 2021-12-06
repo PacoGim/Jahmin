@@ -35,7 +35,7 @@
 	}
 
 	function setRangeInputValueBind(state: InputRangeStateType) {
-		if (state?.value) {
+		if (state?.value !== undefined) {
 			rangeInputValue = state.value
 		}
 	}

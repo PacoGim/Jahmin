@@ -49,7 +49,7 @@ export let triggerGroupingChangeEvent: Writable<string> = writable('')
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Main' | 'Search' | 'Config'> = writable('Config')
+export let layoutToShow: Writable<'Home' | 'Search' | 'Config'> = writable('Home')
 export let selectedOption: Writable<
 	'Appearance' | 'Groups' | 'Equalizer' | 'Art Grid' | 'Song List' | 'Song Info' | 'Volume' | string
 > = writable('Looks')

@@ -82,15 +82,7 @@ p-center {
 }
 
 .layout {
-	margin-left: 64px;
-	position: fixed;
-	top: 0;
-	left: 0;
-	height: calc(100% - 64px - 24px);
-	width: calc(100% - 64px);
-	background-color: var(--color-bg-1);
-	overflow: hidden;
-	z-index: 10;
+	height: inherit;
 
 	transition: background-color var(--theme-transition-duration) linear;
 }

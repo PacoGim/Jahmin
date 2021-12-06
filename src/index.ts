@@ -12,13 +12,19 @@ initWorkers()
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 
-import { getStorageMap, initStorage, killStorageWatcher } from './services/storage.service'
+import { initStorage, killStorageWatcher } from './services/storage.service'
 
 import { getRootDirFolderWatcher, watchFolders } from './services/songSync.service'
 import { ConfigType } from './types/config.type'
-import { loadContextMenu } from './services/contextMenu.service'
+
+import chokidar from 'chokidar'
 
 let browserWindow: BrowserWindow
+
+// Watches for changes in svelte build folder and reloads the window. Kinda hot reload-ish. Works Great!
+chokidar.watch(path.join(__dirname, './build/bundle.js')).on('change', path => {
+	getMainWindow().reload()
+})
 
 async function createMainWindow() {
 	const config = getConfig()

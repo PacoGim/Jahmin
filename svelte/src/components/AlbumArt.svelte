@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
 	import { getArtIPC } from '../services/ipc.service'
+	import { artSizeConfig, songAmountConfig } from '../store/config.store'
 
 	export let style
 	export let id

@@ -1,15 +1,16 @@
 <script lang="ts">
-	import CogIcon from '../../icons/CogIcon.svelte'
-	import HomeIcon from '../../icons/HomeIcon.svelte'
-	import SearchIcon from '../../icons/SearchIcon.svelte'
+	import CogIcon from '../icons/CogIcon.svelte'
 
-	import { layoutToShow } from '../../store/final.store'
+	import HomeIcon from '../icons/HomeIcon.svelte'
+	import SearchIcon from '../icons/SearchIcon.svelte'
+
+	import { layoutToShow } from '../store/final.store'
 </script>
 
 <navigation-svlt class="dark-theme">
-	<nav-button on:click={() => ($layoutToShow = 'Main')}>
+	<nav-button on:click={() => ($layoutToShow = 'Home')}>
 		<HomeIcon
-			style="{$layoutToShow === 'Main'
+			style="{$layoutToShow === 'Home'
 				? 'fill:var(--color-hl-1)'
 				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
 		/>

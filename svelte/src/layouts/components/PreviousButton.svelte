@@ -1,5 +1,5 @@
 <script lang="ts">
-	import previousSongFn from '../../../../functions/previousSong.fn'
+	import previousSongFn from '../../functions/previousSong.fn'
 </script>
 
 <svg

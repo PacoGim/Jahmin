@@ -44,7 +44,7 @@
 
 		$triggerGroupingChangeEvent = String(song[localStorage.getItem('GroupBy')])
 
-		$layoutToShow = 'Main'
+		$layoutToShow = 'Home'
 
 		setTimeout(() => {
 			scrollToAlbumFn(albumID)
@@ -75,7 +75,7 @@
 	})
 </script>
 
-<search-layout class="layout" style="display:{$layoutToShow === 'Search' ? 'grid' : 'none'}">
+<search-layout class="layout">
 	<h1>Search Song</h1>
 	<p>Press Enter or Search Button to search</p>
 	<search-input>

@@ -44,7 +44,7 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false) {
             validFormats = validFormats.filter(format => !videoFormats.includes(format));
         }
         let config = (0, config_service_1.getConfig)();
-        let dimension = artSize || ((_a = config === null || config === void 0 ? void 0 : config.art) === null || _a === void 0 ? void 0 : _a.dimension) || 128;
+        let dimension = artSize || ((_a = config === null || config === void 0 ? void 0 : config.userOptions) === null || _a === void 0 ? void 0 : _a.artSize) || 128;
         let artOutputDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(dimension));
         let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
         // If exists resolve right now the already compressed IMAGE ART
@@ -52,7 +52,7 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false) {
             return (0, sendWebContents_service_1.sendWebContents)('new-art', {
                 artSize,
                 success: true,
-                id: albumId,
+                albumId,
                 artInputPath: artOutputPath,
                 fileType: 'image',
                 elementId

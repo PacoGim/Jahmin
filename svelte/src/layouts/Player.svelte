@@ -6,11 +6,11 @@
 	import PlayButton from './components/PlayButton.svelte'
 	import PlayerProgress from './components/PlayerProgress.svelte'
 	import PlayerVolumeBar from './components/PlayerVolumeBar.svelte'
-	import AlbumArt from '../../../components/AlbumArt.svelte'
+	import AlbumArt from '../components/AlbumArt.svelte'
 
-	import type { SongType } from '../../../types/song.type'
+	import type { SongType } from '../types/song.type'
 
-	import { context, source } from '../../../store/equalizer.store'
+	import { context, source } from '../store/equalizer.store'
 	import {
 		albumPlayingIdStore,
 		isPlaying,
@@ -20,15 +20,15 @@
 		playingSongStore,
 		songPlayingIdStore,
 		updateSongProgress
-	} from '../../../store/final.store'
+	} from '../store/final.store'
 
-	import parseDuration from '../../../functions/parseDuration.fn'
-	import { escapeString } from '../../../functions/escapeString.fn'
-	import { nextSong } from '../../../functions/nextSong.fn'
+	import parseDuration from '../functions/parseDuration.fn'
+	import { escapeString } from '../functions/escapeString.fn'
+	import { nextSong } from '../functions/nextSong.fn'
 
-	import { setWaveSource } from '../../../services/waveform.service'
-	import generateId from '../../../functions/generateId.fn'
-	import { hash } from '../../../functions/hashString.fn'
+	import { setWaveSource } from '../services/waveform.service'
+	import generateId from '../functions/generateId.fn'
+	import { hash } from '../functions/hashString.fn'
 
 	let progress: number = 0
 

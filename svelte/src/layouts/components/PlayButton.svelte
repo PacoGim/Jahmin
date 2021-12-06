@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isPlaying, playerElement } from '../../../../store/final.store'
+	import { isPlaying, playerElement } from '../../store/final.store'
 
 	let player = undefined
 

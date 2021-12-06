@@ -13,7 +13,9 @@
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 
 		if (album.ID === lastPlayedAlbumId) {
-			scrollToAlbumFn(album.ID)
+			setTimeout(() => {
+				scrollToAlbumFn(album.ID)
+			}, 100)
 		}
 	})
 </script>

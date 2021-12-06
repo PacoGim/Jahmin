@@ -4,13 +4,7 @@
 	import SongListItem from '../../components/SongListItem.svelte'
 	import { songAmountConfig } from '../../store/config.store'
 
-	import {
-		selectedAlbumId,
-		songListStore,
-		selectedSongsStore,
-		triggerScrollToSongEvent,
-		dbVersion
-	} from '../../store/final.store'
+	import { selectedAlbumId, songListStore, selectedSongsStore, triggerScrollToSongEvent } from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
@@ -20,11 +14,7 @@
 	let isScrollAtBottom = false
 	let isScrollAtTop = false
 
-	/* 	$: {
-		// Trim song array when the db version changes.
-		$dbVersion
-		trimSongsArray()
-	} */
+	let isMounting = true
 
 	$: {
 		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height.
@@ -65,6 +55,10 @@
 	}
 
 	function applySongListHeightChange() {
+		if (isMounting === true) return
+
+		console.log('applySongListHeightChange')
+
 		// Keep temporarily the previous scroll amount
 		let tempScroll = scrollAmount
 
@@ -169,18 +163,24 @@
 
 	function detectSongListHeightChange() {
 		// Element to observe
-		var elementToObserve = document.querySelector('song-list')
+		let elementToObserve = document.querySelector('song-list')
 
-		// https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-		// Detects DOM changes in song list element.
-		new MutationObserver(mutationsList => {
-			let elementChanged = mutationsList[0].target as HTMLElement
-			let elementHeight = elementChanged.clientHeight
+		if (elementToObserve) {
+			let elementHeight = elementToObserve.clientHeight
 
-			// elementHeight=256
+			if (elementHeight !== 0) {
+				document.documentElement.style.setProperty('--song-list-svlt-height', `${elementHeight}px`)
+			}
 
-			document.documentElement.style.setProperty('--song-list-svlt-height', `${elementHeight}px`)
-		}).observe(elementToObserve, { characterData: false, childList: true, attributes: false })
+			// https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+			// Detects DOM changes in song list element.
+			new MutationObserver(mutationsList => {
+				let mutatedElementChanged = mutationsList[0].target as HTMLElement
+				let mutatedElementHeight = mutatedElementChanged.clientHeight
+
+				document.documentElement.style.setProperty('--song-list-svlt-height', `${mutatedElementHeight}px`)
+			}).observe(elementToObserve, { characterData: false, childList: true, attributes: false })
+		}
 	}
 
 	// Manages to "scroll" to the proper song on demand.
@@ -259,6 +259,8 @@
 	}
 
 	onMount(() => {
+		isMounting = false
+
 		detectSongListHeightChange()
 
 		scrollBarHandler()

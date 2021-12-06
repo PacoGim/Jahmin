@@ -62,7 +62,7 @@ export function getAlbumArt(
 		}
 
 		let config = getConfig()
-		let dimension = artSize || config?.art?.dimension || 128
+		let dimension = artSize || config?.userOptions?.artSize || 128
 		let artOutputDirPath = path.join(appDataPath(), 'art', String(dimension))
 		let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
 
@@ -71,7 +71,7 @@ export function getAlbumArt(
 			return sendWebContents('new-art', {
 				artSize,
 				success: true,
-				id: albumId,
+				albumId,
 				artInputPath: artOutputPath,
 				fileType: 'image',
 				elementId

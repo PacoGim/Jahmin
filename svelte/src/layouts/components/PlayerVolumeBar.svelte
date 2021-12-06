@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { keyDown, playerElement } from '../../../../store/final.store'
+	import { keyDown, playerElement } from '../../store/final.store'
 
 	let volume: number = 0
 

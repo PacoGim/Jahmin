@@ -49,6 +49,7 @@
 			// Refills the current album selected songs to add them as they are found.
 			getAlbumIPC($selectedAlbumId).then(result => {
 				if (result.Songs.length !== $songListStore.length) {
+					console.log('Getting songs')
 					$songListStore = result.Songs
 				}
 			})
@@ -56,7 +57,7 @@
 	}
 
 	function getAlbums(groupBy: string, groupByValue: string) {
-		// getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
+		getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
 	}
 
 	onMount(() => {
