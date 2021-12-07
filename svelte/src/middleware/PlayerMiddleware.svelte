@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import { hash } from '../functions/hashString.fn'
+	import parseJson from '../functions/parseJson'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { getAlbumIPC, getAlbumsIPC, saveConfig } from '../services/ipc.service'
@@ -87,29 +88,27 @@
 		$elementMap = new Map<string, HTMLElement>()
 
 		evt.composedPath().forEach((element: HTMLElement) => {
-			$elementMap.set(element.tagName, element)
+			if (element.tagName) {
+				$elementMap.set(element.tagName.toLowerCase(), element)
+			}
 		})
 
-		const IMG_ELEMENT = $elementMap.get('IMG')
-		const ALBUM_ELEMENT = $elementMap.get('ALBUM')
-		const SONG_LIST_ITEM_ELEMENT = $elementMap.get('SONG-LIST-ITEM')
-		// const GROUPING_SVLT = $elementMap.get('GROUPING-SVLT')
-		// const SONG_LIST_ITEM_ELEMENT = $elementMap.get('SONG-LIST-ITEM')
-		// const ART_GRID_SVLT_SVLT = $elementMap.get('ART-GRID-SVLT')
-		// const SONG_LIST_SVLT = $elementMap.get('SONG-LIST-SVLT')
-		// const TAG_EDIT_SVLT = $elementMap.get('TAG-EDIT-SVLT')
+		const imgElement = $elementMap.get('img')
+		const albumElement = $elementMap.get('album')
+		const songListItemElement = $elementMap.get('song-list-item')
+		const playerElement = $elementMap.get('player-svlt')
 
-		if (ALBUM_ELEMENT) {
-			const ALBUM_ID = ALBUM_ELEMENT.getAttribute('id')
+		if (albumElement) {
+			const albumId = albumElement.getAttribute('id')
 
-			getAlbumIPC(ALBUM_ID).then(result => {
+			getAlbumIPC(albumId).then(result => {
 				if (evt.type === 'dblclick') {
-					setNewPlayback(ALBUM_ID, result.Songs, undefined, true)
+					setNewPlayback(albumId, result.Songs, undefined, true)
 					saveGroupingConfig()
 				} else if (evt.type === 'click') {
 					// Prevents resetting array if album unchanged.
-					if ($selectedAlbumId !== ALBUM_ID) {
-						$selectedAlbumId = ALBUM_ID
+					if ($selectedAlbumId !== albumId) {
+						$selectedAlbumId = albumId
 						$songListStore = result.Songs
 					}
 
@@ -119,36 +118,36 @@
 			})
 		}
 
-		if (SONG_LIST_ITEM_ELEMENT) {
-			const SONG_ID = Number(SONG_LIST_ITEM_ELEMENT.getAttribute('id'))
+		if (songListItemElement) {
+			const songId = Number(songListItemElement.getAttribute('id'))
 
 			if (evt.type === 'dblclick') {
 				getAlbumIPC($selectedAlbumId).then(result => {
-					setNewPlayback($selectedAlbumId, result.Songs, SONG_ID, true)
+					setNewPlayback($selectedAlbumId, result.Songs, songId, true)
 				})
 
 				saveGroupingConfig()
 			}
 
 			if (evt.type === 'contextmenu') {
-				if (!$selectedSongsStore.includes(SONG_ID)) {
-					$selectedSongsStore = [SONG_ID]
+				if (!$selectedSongsStore.includes(songId)) {
+					$selectedSongsStore = [songId]
 				}
 			}
 		}
 
-		if (IMG_ELEMENT) {
-			if (IMG_ELEMENT.classList.contains('Player')) {
-				let playingSong = $playingSongStore
-				let albumID = hash(playingSong.SourceFile.split('/').slice(0, -1).join('/'), 'text') as string
+		if (imgElement && playerElement) {
+			let playingSong = $playingSongStore
+			let albumID = imgElement.dataset.albumArtId
 
-				$selectedAlbumId = albumID
-				$songListStore = $playbackStore
-				$triggerGroupingChangeEvent = localStorage.getItem('GroupByValue')
-				$triggerScrollToSongEvent = playingSong.ID
-				$selectedSongsStore = [playingSong.ID]
-				scrollToAlbumFn(albumID)
-			}
+			$selectedAlbumId = albumID
+			$songListStore = $playbackStore
+
+			$triggerGroupingChangeEvent = parseJson(localStorage.getItem('GroupByValues'))
+
+			$triggerScrollToSongEvent = playingSong.ID
+			$selectedSongsStore = [playingSong.ID]
+			scrollToAlbumFn(albumID)
 		}
 	}
 

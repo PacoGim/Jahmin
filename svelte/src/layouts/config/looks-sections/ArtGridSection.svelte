@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OptionSection from '../../../components/OptionSection.svelte'
+	import isElementInViewportFn from '../../../functions/isElementInViewport.fn'
 	import { getArtIPC, saveConfig } from '../../../services/ipc.service'
 	import { artSizeConfig, gridGapConfig } from '../../../store/config.store'
 	import { albumListStore, layoutToShow, selectedOptionSection } from '../../../store/final.store'
@@ -38,7 +39,13 @@
 			}
 		}).then(() => {
 			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
-				getArtIPC(artElement.dataset.albumId, newArtSize, artElement.id)
+				if (isElementInViewportFn(artElement)) {
+					getArtIPC(artElement.dataset.albumId, newArtSize, artElement.id)
+				} else {
+					setTimeout(() => {
+						getArtIPC(artElement.dataset.albumId, newArtSize, artElement.id)
+					}, 1000)
+				}
 			})
 		})
 	}

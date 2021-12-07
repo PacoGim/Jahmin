@@ -43,7 +43,7 @@ export let updateSongProgress: Writable<number> = writable(-1)
 export let elementMap: Writable<Map<string, HTMLElement>> = writable(undefined)
 
 // PlayerController.svelte -> Grouping.svelte
-export let triggerGroupingChangeEvent: Writable<string> = writable('')
+export let triggerGroupingChangeEvent: Writable<string[]> = writable([])
 
 // PlayerController.svelte -> SongList.svelte
 export let triggerScrollToSongEvent: Writable<number> = writable(0)

@@ -2,7 +2,7 @@
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
 	import { groupSongsIPC } from '../../services/ipc.service'
 	import { groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { selectedGroups } from '../../store/final.store'
+	import { selectedGroups, triggerGroupingChangeEvent } from '../../store/final.store'
 
 	let isFirstGroupSongs = true
 
@@ -12,6 +12,15 @@
 			isFirstGroupSongs = false
 		} else {
 			runSongGroup()
+		}
+	}
+
+	$: {
+		if ($triggerGroupingChangeEvent.length > 0) {
+			$triggerGroupingChangeEvent.forEach((grouping, index) => {
+				setNewGroupValue(index, grouping)
+			})
+			$triggerGroupingChangeEvent = []
 		}
 	}
 

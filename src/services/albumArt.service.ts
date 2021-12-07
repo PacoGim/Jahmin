@@ -129,7 +129,7 @@ export function getAlbumArt(
 			})
 
 			if (forceImage === false && !notCompress.includes(getExtension(artInputPath))) {
-				compressImageQueue.push({
+				compressImageQueue.unshift({
 					albumId,
 					elementId,
 					dimension,

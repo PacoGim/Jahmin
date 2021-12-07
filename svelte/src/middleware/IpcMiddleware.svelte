@@ -1,6 +1,7 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
+	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { saveConfig } from '../services/ipc.service'
@@ -67,62 +68,24 @@
 	})
 
 	function handleNewArt(data) {
-		if (data.success === true) {
-			let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
+		setArtToSrcFn(data)
 
-			let elementSrc
+		let artMapObject = $albumArtMapStore.get(data.albumId)
 
-			if (data.fileType === 'image') {
-				elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
-			} else if (data.fileType === 'video') {
-				elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > video`) as HTMLVideoElement
-			}
+		let artData = {
+			version: Date.now()
+		}
 
-			if (element && elementSrc) {
-				let elementDataType = element.getAttribute('data-type')
-				let elementAlbumId = element.dataset.albumId
-
-				if (elementAlbumId === undefined) {
-					element.setAttribute('data-album-id', data.albumId)
-				}
-
-
-				if (!(elementDataType === 'video' && elementAlbumId === data.albumId)) {
-
-					// TODO
-
-					element.setAttribute('data-type', data.fileType)
-					elementSrc.setAttribute('src', data.artInputPath)
-					element.setAttribute('data-loaded', 'true')
-				}
-			}
-
-			let artMapObject = $albumArtMapStore.get(data.albumId)
-
-			let artData = {
-				version: Date.now()
-			}
-
-			artData[data.fileType] = {
-				[data.artSize]: {
-					filePath: data.artInputPath
-				}
-			}
-
-			if (artMapObject) {
-				artData = Object.assign(artMapObject, artData)
-			}
-
-			$albumArtMapStore = $albumArtMapStore.set(data.albumId, artData)
-		} else {
-			let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
-			let elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
-
-			if (elementSrc && element) {
-				elementSrc.setAttribute('src', './img/disc-line.svg')
-				element.setAttribute('data-loaded', 'true')
-				element.setAttribute('data-type', 'unfound')
+		artData[data.fileType] = {
+			[data.artSize]: {
+				filePath: data.artInputPath
 			}
 		}
+
+		if (artMapObject) {
+			artData = Object.assign(artMapObject, artData)
+		}
+
+		$albumArtMapStore = $albumArtMapStore.set(data.albumId, artData)
 	}
 </script>

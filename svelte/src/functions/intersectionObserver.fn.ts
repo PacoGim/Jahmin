@@ -1,5 +1,6 @@
 import { getArtIPC } from '../services/ipc.service'
 import { albumArtMapStore } from '../store/final.store'
+import setArtToSrcFn from './setArtToSrc.fn'
 
 export function addIntersectionObserver(albumId: string, elementId: string, artSize: number) {
 	let artObserver: IntersectionObserver
@@ -20,35 +21,20 @@ export function addIntersectionObserver(albumId: string, elementId: string, artS
 				albumArtData = albumArtData?.[artSize]
 
 				if (albumArtData) {
-					let element = document.querySelector(`#${CSS.escape(elementId)}`) as HTMLElement
-					let elementSrc
+					albumArtData.success = albumArtData.filePath !== undefined
 
-					if (artType === 'image') {
-						elementSrc = document.querySelector(`#${CSS.escape(elementId)} > img`) as HTMLImageElement
-					} else if (artType === 'video') {
-						elementSrc = document.querySelector(`#${CSS.escape(elementId)} > video`) as HTMLVideoElement
-					}
+					albumArtData.albumId = albumId
+					albumArtData.elementId = elementId
+					albumArtData.fileType = artType
+					albumArtData.artInputPath = albumArtData.filePath
 
-					if (element && elementSrc) {
-						let elementDataType = element.getAttribute('data-type')
-						let elementAlbumId = element.dataset.albumId
-
-						if (elementAlbumId === undefined) {
-							element.setAttribute('data-album-id', albumId)
-						}
-
-						if (!(elementDataType === 'video' && elementAlbumId === albumId)) {
-							element.setAttribute('data-type', artType)
-							elementSrc.setAttribute('src', albumArtData.filePath)
-							element.setAttribute('data-loaded', 'true')
-						}
-					}
+					setArtToSrcFn(albumArtData)
 				} else {
 					getArtIPC(albumId, artSize, elementId)
 				}
 
 				// "Closes" the Art Observer to avoid unnecessary checks.
-				// artObserver.disconnect()
+				artObserver.disconnect()
 			}
 		},
 		{ root: document.querySelector('art-grid-svlt'), threshold: 0, rootMargin: '200% 0px 200% 0px' }

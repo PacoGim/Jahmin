@@ -37,7 +37,7 @@
 
 			element.setAttribute('data-album-id', newAlbumId)
 
-			getArtIPC(albumId, artSize, element.id)
+			getArtIPC(newAlbumId, artSize, element.id)
 		}
 	}
 </script>
