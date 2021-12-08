@@ -26,12 +26,12 @@
 	<overlay-gradient />
 
 	<album-details>
-		<album-name>{album['Name']}</album-name>
+		<album-name>{album['Name'] || ''}</album-name>
 
 		{#if album['AlbumArtist'] !== undefined}
-			<album-artist>{album['AlbumArtist']}</album-artist>
+			<album-artist>{album['AlbumArtist'] || ''}</album-artist>
 		{:else if album['DynamicAlbumArtist'] !== undefined}
-			<album-artist>{album['DynamicAlbumArtist']}</album-artist>
+			<album-artist>{album['DynamicAlbumArtist'] || ''}</album-artist>
 		{:else}
 			<album-artist />
 		{/if}

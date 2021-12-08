@@ -38,24 +38,16 @@
 </script>
 
 <album-info-svlt>
-	<p>Playback</p>
 	<p>{totalDuration} (-{totalDurationLeft})</p>
 </album-info-svlt>
 
 <style>
 	album-info-svlt {
 		display: flex;
-		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 
-		background-color: var(--high-color);
-		color: var(--low-color);
 		grid-area: album-info-svlt;
-
-		transition-property: background-color, color;
-		transition-duration: 300ms;
-		transition-timing-function: ease-in-out;
 	}
 
 	p {

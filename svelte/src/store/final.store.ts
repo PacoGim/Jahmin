@@ -65,3 +65,5 @@ export let songListItemElement: Writable<HTMLElement> = writable(undefined)
 
 /********************** Song Group **********************/
 export let selectedGroups: Writable<any> = writable([])
+
+export let isAppIdle: Writable<boolean> = writable(false)

@@ -174,6 +174,12 @@ export function getArtIPC(albumId, artSize, elementId) {
 	ipcRenderer.invoke('get-art', albumId, artSize, elementId)
 }
 
+export function isFileExistIPC(filePath: string): Promise<boolean> {
+	return new Promise((resolve, reject) => {
+		resolve(ipcRenderer.invoke('is-file-exist', filePath))
+	})
+}
+
 export function getAlbumIPC(albumId: string): Promise<AlbumType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('get-album', albumId).then((result: AlbumType) => {

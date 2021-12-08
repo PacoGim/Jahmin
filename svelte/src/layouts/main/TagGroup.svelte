@@ -98,7 +98,7 @@
 	}
 
 	group-svlt group-name {
-		padding: 0.25rem 0.5rem;
+		padding: 0.25rem 0.75rem;
 
 		background-color: var(--color-bg-2);
 
@@ -112,9 +112,9 @@
 	group-value {
 		display: flex;
 		align-items: center;
-		padding: 0.25rem 0.5rem;
+		padding: 0.25rem 0.75rem;
 		background-color: var(--color-bg-2);
-		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+		font-variation-settings: 'wght' calc(var(--default-weight));
 
 		margin: 0.1rem 0.05rem;
 
@@ -124,17 +124,17 @@
 		min-height: 2rem;
 
 		text-overflow: ellipsis;
-
 		overflow: hidden;
 		white-space: nowrap;
 	}
 
 	group-value.selected {
-		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 	}
-
 	group-value.selected::before {
 		content: '•';
-		margin-right: 0.5rem;
+		position: absolute;
+
+		transform: translateX(-8px);
 	}
 </style>

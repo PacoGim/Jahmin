@@ -29,6 +29,7 @@
 	import { setWaveSource } from '../services/waveform.service'
 	import generateId from '../functions/generateId.fn'
 	import { hash } from '../functions/hashString.fn'
+	import { isFileExistIPC } from '../services/ipc.service'
 
 	let progress: number = 0
 
@@ -141,8 +142,12 @@
 						preLoadNextSong(playbackCursor)
 					}, 2000)
 				})
-				.catch(err => {
-					nextSong()
+				.catch(async err => {
+					if ((await isFileExistIPC(songToPlay.SourceFile)) === false) {
+
+						// If file does not exist, play next song.
+						nextSong()
+					}
 				})
 		} else {
 			player.pause()
@@ -201,6 +206,7 @@
 					resolve(arrayBuffer)
 				})
 				.catch(err => {
+					// console.log(err)
 					//TODO Alert user that song is not found and offer a way to remove from DB.
 				})
 		})

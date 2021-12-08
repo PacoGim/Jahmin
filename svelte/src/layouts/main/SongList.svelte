@@ -4,7 +4,15 @@
 	import SongListItem from '../../components/SongListItem.svelte'
 	import { songAmountConfig } from '../../store/config.store'
 
-	import { selectedAlbumId, songListStore, selectedSongsStore, triggerScrollToSongEvent } from '../../store/final.store'
+	import {
+		selectedAlbumId,
+		songListStore,
+		selectedSongsStore,
+		triggerScrollToSongEvent,
+		isAppIdle,
+		songPlayingIdStore,
+		albumPlayingIdStore
+	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
 	let songsTrimmed = []
@@ -15,6 +23,14 @@
 	let isScrollAtTop = false
 
 	let isMounting = true
+
+	$: {
+		// If there is a song playing AND app is idle AND the playing album is the same as the selected album, scroll to song.
+		// The purpose is to make sure the song is visible when the app is idle.
+		if ($songPlayingIdStore && $isAppIdle === true && $albumPlayingIdStore === $selectedAlbumId) {
+			setScrollAmountFromSong($songPlayingIdStore)
+		}
+	}
 
 	$: {
 		// If the user changes the song amount to show in the list of songs, detect new height and apply it to the custom variable --song-list-svlt-height.
@@ -57,8 +73,6 @@
 	function applySongListHeightChange() {
 		if (isMounting === true) return
 
-		console.log('applySongListHeightChange')
-
 		// Keep temporarily the previous scroll amount
 		let tempScroll = scrollAmount
 
@@ -80,6 +94,8 @@
 	}
 
 	function setScroll(value: number) {
+		value = Math.trunc(value)
+
 		scrollAmount = value
 	}
 

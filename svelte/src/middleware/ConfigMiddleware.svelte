@@ -27,6 +27,9 @@
 			$groupByConfig = syncConfigLocalStorage('GroupBy', config.group.groupBy)
 			$groupByValuesConfig = syncConfigLocalStorage('GroupByValues', config.group.groupByValues)
 			$gridGapConfig = syncConfigLocalStorage('GridGap', config.userOptions.gridGap)
+
+			document.documentElement.style.setProperty('--art-dimension', `${$artSizeConfig}px`)
+			document.documentElement.style.setProperty('--grid-gap', `${$gridGapConfig}px`)
 		})
 	})
 

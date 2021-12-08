@@ -15,6 +15,8 @@ import { getFuzzyList, getNewPromiseDbVersion, getStorageMap, getStorageMapToArr
 import { loadContextMenu } from './contextMenu.service'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
+import fs from 'fs'
+
 import Fuse from 'fuse.js'
 import {
 	addEqualizer,
@@ -144,6 +146,10 @@ export function loadIPC() {
 		})
 
 		return groupedSongs
+	})
+
+	ipcMain.handle('is-file-exist', (evt, filePath) => {
+		return fs.existsSync(filePath)
 	})
 
 	ipcMain.handle('get-album', (evt, albumID) => {

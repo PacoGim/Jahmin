@@ -27,6 +27,7 @@ const tagEdit_service_1 = require("./tagEdit.service");
 const storage_service_1 = require("./storage.service");
 const contextMenu_service_1 = require("./contextMenu.service");
 const nanoid = (0, nanoid_1.customAlphabet)('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
+const fs_1 = __importDefault(require("fs"));
 const fuse_js_1 = __importDefault(require("fuse.js"));
 const equalizer_service_1 = require("./equalizer.service");
 const common_1 = require("electron/common");
@@ -122,6 +123,9 @@ function loadIPC() {
         });
         return groupedSongs;
     }));
+    electron_1.ipcMain.handle('is-file-exist', (evt, filePath) => {
+        return fs_1.default.existsSync(filePath);
+    });
     electron_1.ipcMain.handle('get-album', (evt, albumID) => {
         return (0, storage_service_1.getStorageMap)().get(albumID);
     });

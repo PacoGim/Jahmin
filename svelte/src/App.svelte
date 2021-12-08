@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, keyDown, keyUp, layoutToShow, playerElement } from './store/final.store'
+	import { appTitle, isAppIdle, keyDown, keyUp, layoutToShow, playerElement } from './store/final.store'
 
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import SearchLayout from './layouts/search/SearchLayout.svelte'
@@ -9,7 +9,7 @@
 	import previousSongFn from './functions/previousSong.fn'
 
 	import { runThemeHandler } from './services/themeHandler.service'
-	import {  syncDbVersionIPC } from './services/ipc.service'
+	import { syncDbVersionIPC } from './services/ipc.service'
 	import { handleContextMenuEvent } from './services/contextMenu.service'
 
 	import iziToast from 'izitoast'
@@ -29,6 +29,8 @@
 	import Navigation from './layouts/Navigation.svelte'
 	import Player from './layouts/Player.svelte'
 	import HomeLayout from './layouts/main/HomeLayout.svelte'
+
+	let appIdleDebounce = getAppIdleDebounce()
 
 	onMount(() => {
 		iziToast.settings({ position: 'topRight' })
@@ -50,6 +52,14 @@
 				$keyUp = undefined
 				$keyDown = undefined
 			}, 1)
+		})
+
+		window.addEventListener('mouseover', () => {
+			$isAppIdle = false
+
+			clearTimeout(appIdleDebounce)
+
+			appIdleDebounce = getAppIdleDebounce()
 		})
 
 		window.addEventListener('keydown', evt => {
@@ -80,6 +90,12 @@
 			nextSong()
 		})
 	})
+
+	function getAppIdleDebounce() {
+		return setTimeout(() => {
+			$isAppIdle = true
+		}, 60000)
+	}
 </script>
 
 <svelte:head>
@@ -118,7 +134,7 @@
 		height: 100vh;
 
 		grid-template-columns: 64px auto;
-		grid-template-rows: auto 64px 24px;
+		grid-template-rows: auto 64px 32px;
 
 		grid-template-areas:
 			'navigation-svlt current-window-svlt'
@@ -128,6 +144,6 @@
 
 	main-app > current-window-svlt {
 		grid-area: current-window-svlt;
-		height: calc(100vh - 64px - 24px);
+		height: calc(100vh - 64px - 32px);
 	}
 </style>

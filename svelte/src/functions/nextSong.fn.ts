@@ -3,7 +3,7 @@ import { playbackCursor } from '../store/final.store'
 export function nextSong() {
 	let playbackCursorIndex = undefined
 
-	playbackCursor.subscribe((playbackCursorStore) => {
+	playbackCursor.subscribe(playbackCursorStore => {
 		playbackCursorIndex = playbackCursorStore[0]
 	})()
 

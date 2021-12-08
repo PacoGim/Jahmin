@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { playingSongStore } from '../store/final.store'
+	import type { SongType } from '../types/song.type'
+	import AlbumInfo from './main/AlbumInfo.svelte'
 
-	let currentSong = $playingSongStore
-	let songInfoElement = document.getElementById('song-info')
+	let currentSong: SongType = {
+		Track: 0,
+		Title: '',
+		Artist: ''
+	}
 
-
-	$: $playingSongStore, (currentSong = $playingSongStore)
-
-	$:{
-			console.log(songInfoElement)
+	$: {
+		if ($playingSongStore) {
+			currentSong = $playingSongStore
+		}
 	}
 
 	function fixNumber(num: number) {
@@ -17,30 +21,36 @@
 </script>
 
 <statusbar-svlt>
-	{#if currentSong}
-		<song-info>
-			<!-- svelte-ignore a11y-distracting-elements -->
-			<marquee scrollAmount="0">
-				<bold>{fixNumber(currentSong.Track)}</bold> <bold>{currentSong.Title}</bold> by <bold>{currentSong.Artist}</bold> from
-				<bold>{currentSong.Album}</bold>
-			</marquee>
-		</song-info>
-	{/if}
+	<queue-processes>
+		<span>Process</span>
+		<!-- Image Process -->
+		<!-- Song Add Process -->
+		<!-- Song Update Process -->
+	</queue-processes>
+	<song-info>
+		<bold>{fixNumber(currentSong.Track)}</bold> <bold>{currentSong.Title || ''}</bold> by
+		<bold>{currentSong.Artist || ''}</bold>
+	</song-info>
+	<AlbumInfo />
+	<playback-options>
+		<!-- Repeat -->
+		<!-- Shuffle -->
+		<!-- Etc -->
+		<span>playback options</span>
+	</playback-options>
 </statusbar-svlt>
 
 <style>
 	statusbar-svlt {
 		grid-area: statusbar-svlt;
+		display: grid;
 
-		display: flex;
 		align-items: center;
-		justify-content: center;
 
-		height: 24px;
+		grid-template-columns: 1fr 1fr 1fr auto;
+		grid-template-areas: 'queue-processes song-info album-info-svlt playback-options';
 
-		text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.33);
-
-		font-variation-settings: 'wght' calc(var(--default-weight) - 100);
+		height: 32px;
 
 		color: var(--high-color);
 		background-color: var(--low-color);
@@ -57,18 +67,28 @@
 		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 	}
 
-	song-info {
-		font-size: 0.9rem;
-		width: 25%;
+	queue-processes {
+		grid-area: queue-processes;
 	}
 
-	/* Move it (define the animation) */
-	@keyframes scroll-left {
-		0% {
-			transform: translateX(100%);
-		}
-		100% {
-			transform: translateX(-100%);
-		}
+	song-info {
+		grid-area: song-info;
+
+		font-size: 0.9rem;
+
+		text-align: center;
+		font-variation-settings: 'wght' calc(var(--default-weight) - 100);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	album-info {
+		grid-area: album-info;
+		text-align: center;
+	}
+
+	playback-options {
+		grid-area: playback-options;
 	}
 </style>

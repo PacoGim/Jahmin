@@ -1,4 +1,6 @@
 ## TODO
+* When scrolling sometimes the scroll goes back up.
+
 * Fix issue where when modifiying song array the list doesn't refresh.
 * Add a played counter.
 * Weird background image flickering when clicking on different album.
