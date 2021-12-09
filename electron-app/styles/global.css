@@ -21,6 +21,8 @@
 	--default-weight: 300;
 
 	--theme-transition-duration: 0ms;
+
+	--status-bar-color: #2c2c2c;
 }
 
 .nav-icon {
@@ -125,6 +127,10 @@ svg.player-button {
 	height: 100%;
 	width: auto;
 	fill: var(--low-color);
+}
+
+.tippy-box bold {
+	font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 }
 
 /* tag-edit input,

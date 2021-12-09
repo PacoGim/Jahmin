@@ -30,6 +30,10 @@
 	import Player from './layouts/Player.svelte'
 	import HomeLayout from './layouts/main/HomeLayout.svelte'
 
+	import 'tippy.js/dist/tippy.css'
+	import 'tippy.js/dist/svg-arrow.css';
+	import 'tippy.js/animations/scale-subtle.css';
+
 	let appIdleDebounce = getAppIdleDebounce()
 
 	onMount(() => {

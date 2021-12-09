@@ -67,3 +67,9 @@ export let songListItemElement: Writable<HTMLElement> = writable(undefined)
 export let selectedGroups: Writable<any> = writable([])
 
 export let isAppIdle: Writable<boolean> = writable(false)
+
+/********************** Queue Progress **********************/
+export let artCompressQueueProgress: Writable<{ maxLength: number; currentLength: number }> = writable({
+	maxLength: 0,
+	currentLength: 0
+})

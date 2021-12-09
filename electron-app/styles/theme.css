@@ -8,6 +8,15 @@ body {
 	--filter-hl: var(--theme-filter-hl);
 }
 
+.tippy-box[data-theme~='dynamic'] {
+	background-color: var(--low-color);
+	color: var(--high-color);
+}
+
+.tippy-box[data-theme~='dynamic'] > .tippy-svg-arrow {
+  fill: var(--low-color);
+}
+
 body[theme='Light'] {
 	--theme-fg-1: #24292e;
 	--theme-bg-1: #ffffff;

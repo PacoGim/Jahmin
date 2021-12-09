@@ -18,6 +18,10 @@ let compressImageQueue: {
 	artOutputPath: string
 }[] = []
 
+let sendArtQueueProgressInterval: NodeJS.Timeout | null = null
+
+let maxCompressImageQueueLength = 0
+
 let isQueueRuning = false
 
 let sharpWorker = getWorker('sharp')!
@@ -138,6 +142,10 @@ export function getAlbumArt(
 					artOutputPath
 				})
 
+				if (compressImageQueue.length > maxCompressImageQueueLength) {
+					maxCompressImageQueueLength = compressImageQueue.length
+				}
+
 				if (isQueueRuning === false) {
 					isQueueRuning = true
 					runQueue()
@@ -155,7 +163,24 @@ function runQueue() {
 		return
 	}
 
+	if (sendArtQueueProgressInterval === null) {
+		sendArtQueueProgressInterval = setInterval(sendArtQueueProgress, 1000)
+	}
+
 	sharpWorker.postMessage(task)
+}
+
+function sendArtQueueProgress() {
+	if (compressImageQueue.length === 0) {
+		clearInterval(sendArtQueueProgressInterval!)
+		sendArtQueueProgressInterval = null
+		maxCompressImageQueueLength = 0
+	}
+
+	sendWebContents('art-queue-progress', {
+		currentLength: compressImageQueue.length,
+		maxLength: maxCompressImageQueueLength
+	})
 }
 
 export function getAllowedFiles(album: AlbumType) {

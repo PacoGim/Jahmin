@@ -80,6 +80,8 @@
 		background: linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.5) 25%, rgba(0, 0, 0, 0) 50%);
 		height: inherit;
 		width: inherit;
+		max-height: inherit;
+		max-width: inherit;
 		opacity: 0;
 
 		transition: opacity 250ms ease-in-out;

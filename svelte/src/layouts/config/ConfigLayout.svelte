@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {  selectedOption } from '../../store/final.store'
-	import AppearanceOption from './looks-sections/ThemeSection.svelte'
+	import AppearanceOption from './looks-sections/ThemeConfig.svelte'
 
 	import EqualizerOption from './options/EqualizerOption.svelte'
 	import GroupsOption from './options/GroupsOption.svelte'

@@ -13,6 +13,8 @@ const storage_service_1 = require("./storage.service");
 const worker_service_1 = require("./worker.service");
 // Queue for image compression
 let compressImageQueue = [];
+let sendArtQueueProgressInterval = null;
+let maxCompressImageQueueLength = 0;
 let isQueueRuning = false;
 let sharpWorker = (0, worker_service_1.getWorker)('sharp');
 sharpWorker.on('message', data => {
@@ -111,6 +113,9 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false) {
                     artOutputDirPath,
                     artOutputPath
                 });
+                if (compressImageQueue.length > maxCompressImageQueueLength) {
+                    maxCompressImageQueueLength = compressImageQueue.length;
+                }
                 if (isQueueRuning === false) {
                     isQueueRuning = true;
                     runQueue();
@@ -126,7 +131,21 @@ function runQueue() {
         isQueueRuning = false;
         return;
     }
+    if (sendArtQueueProgressInterval === null) {
+        sendArtQueueProgressInterval = setInterval(sendArtQueueProgress, 1000);
+    }
     sharpWorker.postMessage(task);
+}
+function sendArtQueueProgress() {
+    if (compressImageQueue.length === 0) {
+        clearInterval(sendArtQueueProgressInterval);
+        sendArtQueueProgressInterval = null;
+        maxCompressImageQueueLength = 0;
+    }
+    (0, sendWebContents_service_1.sendWebContents)('art-queue-progress', {
+        currentLength: compressImageQueue.length,
+        maxLength: maxCompressImageQueueLength
+    });
 }
 function getAllowedFiles(album) {
     let allowedMediaFiles = fs_1.default

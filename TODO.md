@@ -1,5 +1,5 @@
 ## TODO
-* When scrolling sometimes the scroll goes back up.
+* Add Status bar color changer with possible "format" choice like rgb or hsl.
 
 * Fix issue where when modifiying song array the list doesn't refresh.
 * Add a played counter.

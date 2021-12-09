@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { playingSongStore } from '../store/final.store'
+	import { onMount } from 'svelte'
+	import generateId from '../functions/generateId.fn'
+	import ImageIcon from '../icons/ImageIcon.svelte'
+	import tippyService from '../services/tippy.service'
+
+	import { artCompressQueueProgress, playingSongStore } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 	import AlbumInfo from './main/AlbumInfo.svelte'
 
@@ -9,20 +14,35 @@
 		Artist: ''
 	}
 
+	let tippyId = generateId()
+
 	$: {
 		if ($playingSongStore) {
 			currentSong = $playingSongStore
+
+			tippyService(tippyId, null, {
+				content: `<bold>${fixNumber(currentSong.Track)}</bold> <bold>${currentSong.Title || ''}</bold> by
+		<bold>${currentSong.Artist || ''}</bold>`
+			})
 		}
 	}
 
 	function fixNumber(num: number) {
 		return num < 10 ? '0' + num : num
 	}
+
+	onMount(() => {
+		tippyService(tippyId, 'song-info', '')
+	})
 </script>
 
 <statusbar-svlt>
 	<queue-processes>
-		<span>Process</span>
+		<art-compress-queue>
+			<ImageIcon style="fill:var(--low-color);height: 20px;width: 20px;margin-right: .5rem;" />
+			<span>{$artCompressQueueProgress.currentLength}</span>/
+			<span>{$artCompressQueueProgress.maxLength}</span>
+		</art-compress-queue>
 		<!-- Image Process -->
 		<!-- Song Add Process -->
 		<!-- Song Update Process -->
@@ -54,6 +74,7 @@
 
 		color: var(--high-color);
 		background-color: var(--low-color);
+		/* background-color: var(--status-bar-color); */
 
 		transition-property: color, background-color;
 		transition-duration: 300ms;
@@ -69,6 +90,21 @@
 
 	queue-processes {
 		grid-area: queue-processes;
+
+		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
+	}
+
+	art-compress-queue {
+		color: var(--low-color);
+		display: flex;
+		align-items: center;
+
+		max-height: 32px;
+
+		background-color: var(--high-color);
+		width: max-content;
+
+		padding: 0.5rem;
 	}
 
 	song-info {
@@ -81,11 +117,6 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-	}
-
-	album-info {
-		grid-area: album-info;
-		text-align: center;
 	}
 
 	playback-options {

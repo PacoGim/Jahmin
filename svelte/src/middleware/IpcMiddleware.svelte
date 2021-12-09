@@ -7,7 +7,13 @@
 	import { saveConfig } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
-	import { albumArtMapStore, albumListStore, selectedGroups, songListStore } from '../store/final.store'
+	import {
+		albumArtMapStore,
+		albumListStore,
+		artCompressQueueProgress,
+		selectedGroups,
+		songListStore
+	} from '../store/final.store'
 	import type { AlbumType } from '../types/album.type'
 
 	onMount(() => {
@@ -65,6 +71,10 @@
 		})
 
 		ipcRenderer.on('new-art', (event, data) => handleNewArt(data))
+
+		ipcRenderer.on('art-queue-progress', (event, data) => {
+			$artCompressQueueProgress = data
+		})
 	})
 
 	function handleNewArt(data) {
