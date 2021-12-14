@@ -10,6 +10,9 @@
 				},
 				{
 					name: 'Art Grid'
+				},
+				{
+					name: 'Contrast Ratio'
 				}
 			]
 		},
@@ -21,6 +24,14 @@
 				},
 				{
 					name: 'Configuration'
+				}
+			]
+		},
+		{
+			name: 'Library',
+			sections: [
+				{
+					name: 'Directories'
 				}
 			]
 		}

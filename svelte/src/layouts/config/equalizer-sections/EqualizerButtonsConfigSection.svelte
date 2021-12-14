@@ -1,4 +1,6 @@
 <script lang="ts">
+	import OptionSection from '../../../components/OptionSection.svelte'
+
 	import generateId from '../../../functions/generateId.fn'
 	import RefreshIcon from '../../../icons/RefreshIcon.svelte'
 	import SaveIcon from '../../../icons/SaveIcon.svelte'
@@ -49,33 +51,35 @@
 	}
 </script>
 
-<equalizer-buttons-section>
-	<button class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}" on:click={() => $equalizerService.toggleEq()}>
-		{#if $isEqualizerOn === true}
-			<ToggleOnIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		{:else}
-			<ToggleOffIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		{/if}
+<OptionSection title="">
+	<equalizer-buttons-section slot="body">
+		<button class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}" on:click={() => $equalizerService.toggleEq()}>
+			{#if $isEqualizerOn === true}
+				<ToggleOnIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			{:else}
+				<ToggleOffIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			{/if}
 
-		Toggle EQ
-	</button>
-	<button
-		class="resetEqButton"
-		on:click={() => $equalizerService.resetEqualizer()}
-		disabled={$isEqualizerDirty === false || $isEqualizerOn === false}
-	>
-		<RefreshIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Reset
-	</button>
-	<button on:click={() => saveEqualizerAs()} disabled={$isEqualizerOn === false}>
-		<SaveIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Save as...
-	</button>
-	<button on:click={() => $equalizerService.updateEqualizer()} disabled={!$isEqualizerDirty}>
-		<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Update
-	</button>
-</equalizer-buttons-section>
+			Toggle EQ
+		</button>
+		<button
+			class="resetEqButton"
+			on:click={() => $equalizerService.resetEqualizer()}
+			disabled={$isEqualizerDirty === false || $isEqualizerOn === false}
+		>
+			<RefreshIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			Reset
+		</button>
+		<button on:click={() => saveEqualizerAs()} disabled={$isEqualizerOn === false}>
+			<SaveIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			Save as...
+		</button>
+		<button on:click={() => $equalizerService.updateEqualizer()} disabled={!$isEqualizerDirty}>
+			<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			Update
+		</button>
+	</equalizer-buttons-section>
+</OptionSection>
 
 <style>
 	equalizer-buttons-section {

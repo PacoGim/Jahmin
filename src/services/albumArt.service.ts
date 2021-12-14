@@ -18,7 +18,7 @@ let compressImageQueue: {
 	artOutputPath: string
 }[] = []
 
-let sendArtQueueProgressInterval: NodeJS.Timeout | null = null
+// let sendArtQueueProgressInterval: NodeJS.Timeout | null = null
 
 let maxCompressImageQueueLength = 0
 
@@ -148,6 +148,7 @@ export function getAlbumArt(
 
 				if (isQueueRuning === false) {
 					isQueueRuning = true
+					sendArtQueueProgress()
 					runQueue()
 				}
 			}
@@ -163,17 +164,11 @@ function runQueue() {
 		return
 	}
 
-	if (sendArtQueueProgressInterval === null) {
-		sendArtQueueProgressInterval = setInterval(sendArtQueueProgress, 1000)
-	}
-
 	sharpWorker.postMessage(task)
 }
 
-function sendArtQueueProgress() {
+export function sendArtQueueProgress() {
 	if (compressImageQueue.length === 0) {
-		clearInterval(sendArtQueueProgressInterval!)
-		sendArtQueueProgressInterval = null
 		maxCompressImageQueueLength = 0
 	}
 

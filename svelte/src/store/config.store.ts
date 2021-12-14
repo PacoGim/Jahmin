@@ -11,6 +11,7 @@ export let songAmountConfig: Writable<number> = writable(Number(localStorage.get
 export let groupByConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupBy')))
 export let groupByValuesConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupByValues')))
 export let gridGapConfig: Writable<number> = writable(Number(localStorage.getItem('GridGap')))
+export let contrastRatioConfig: Writable<number> = writable(Number(localStorage.getItem('ContrastRatio')))
 
 function getSongListTagsConfig() {
 	let songListTagsLS = localStorage.getItem('SongListTags')

@@ -13,6 +13,7 @@ type UserOptionsType = {
 	songAmount?: number
 	gridGap?: number
 	artSize?: number
+	contrastRatio?: number
 }
 
 export enum ThemeOptions {

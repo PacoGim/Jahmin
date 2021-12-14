@@ -1,10 +1,10 @@
 <script lang="ts">
-	import OptionSection from '../../../components/OptionSection.svelte'
-	import { saveConfig } from '../../../services/ipc.service'
-	import { songListTagsConfig } from '../../../store/config.store'
-	import type { SelectedTagNameType, SelectedTagType } from '../../../types/selectedTag.type'
-	import SongTag from '../../../components/SongTag.svelte'
-	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
+	import OptionSection from '../../components/OptionSection.svelte'
+	import { saveConfig } from '../../services/ipc.service'
+	import { songListTagsConfig } from '../../store/config.store'
+	import type { SelectedTagNameType, SelectedTagType } from '../../types/selectedTag.type'
+	import SongTag from '../../components/SongTag.svelte'
+	import tagToGridStyleFn from '../../functions/tagToGridStyle.fn'
 
 	let gridStyle = ''
 

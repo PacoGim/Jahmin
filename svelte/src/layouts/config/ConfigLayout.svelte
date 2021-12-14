@@ -1,6 +1,6 @@
 <script lang="ts">
-	import {  selectedOption } from '../../store/final.store'
-	import AppearanceOption from './looks-sections/ThemeConfig.svelte'
+	import { selectedOption } from '../../store/final.store'
+	import AppearanceOption from './looks-sections/LooksConfigSection.svelte'
 
 	import EqualizerOption from './options/EqualizerOption.svelte'
 	import GroupsOption from './options/GroupsOption.svelte'
@@ -9,6 +9,7 @@
 	import VolumeOption from './options/VolumeOption.svelte'
 	import OptionsList from './OptionsList.svelte'
 	import LooksOptions from './options/LooksOptions.svelte'
+	import LibraryOption from './options/LibraryOption.svelte'
 </script>
 
 <config-layout class="layout">
@@ -18,14 +19,8 @@
 			<LooksOptions />
 		{:else if $selectedOption === 'Equalizer'}
 			<EqualizerOption />
-		{:else if $selectedOption === 'Groups'}
-			<GroupsOption />
-		{:else if $selectedOption === 'Appearance'}
-			<AppearanceOption />
-		{:else if $selectedOption === 'Song Info'}
-			<SongInfoOption />
-		{:else if $selectedOption === 'Song List'}
-			<SongListOption />
+		{:else if $selectedOption === 'Library'}
+			<LibraryOption />
 		{:else if $selectedOption === 'Volume'}
 			<VolumeOption />
 		{/if}
@@ -42,5 +37,8 @@
 	}
 	config-layout selected-option {
 		grid-area: selected-option;
+
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 </style>

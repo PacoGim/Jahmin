@@ -132,8 +132,8 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-art', (evt, albumId, artSize, elementId) => __awaiter(this, void 0, void 0, function* () {
         (0, albumArt_service_1.getAlbumArt)(albumId, artSize, elementId);
     }));
-    electron_1.ipcMain.handle('get-album-colors', (evt, imageId) => __awaiter(this, void 0, void 0, function* () {
-        return yield (0, getAlbumColors_fn_1.getAlbumColors)(imageId);
+    electron_1.ipcMain.handle('get-album-colors', (evt, imageId, contrastRatio) => __awaiter(this, void 0, void 0, function* () {
+        return yield (0, getAlbumColors_fn_1.getAlbumColors)(imageId, contrastRatio);
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, storage_service_1.getNewPromiseDbVersion)(value);
@@ -146,6 +146,10 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('get-tag-edit-progress', () => {
         return (0, tagEdit_service_1.getTagEditProgress)();
+    });
+    electron_1.ipcMain.handle('send-new-art-queue-progress', () => {
+        (0, albumArt_service_1.sendArtQueueProgress)();
+        return true;
     });
 }
 exports.loadIPC = loadIPC;

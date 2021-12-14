@@ -41,6 +41,10 @@ export function getConfig(): ConfigType {
 	if (config?.userOptions === undefined) {
 		config.userOptions = getDefaultConfigFile().userOptions
 	} else {
+		if (config?.userOptions?.contrastRatio === undefined) {
+			config.userOptions.contrastRatio = getDefaultConfigFile().userOptions?.contrastRatio
+		}
+
 		if (config?.userOptions?.songAmount === undefined) {
 			config.userOptions.songAmount = getDefaultConfigFile().userOptions?.songAmount
 		}
@@ -85,7 +89,8 @@ function getDefaultConfigFile(): ConfigType {
 			songAmount: 8,
 			theme: ThemeOptions.Auto,
 			artSize: 128,
-			gridGap: 16
+			gridGap: 16,
+			contrastRatio: 4.5
 		},
 		songListTags: [
 			{

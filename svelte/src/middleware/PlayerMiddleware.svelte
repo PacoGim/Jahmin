@@ -152,6 +152,7 @@
 	}
 
 	function saveGroupingConfig() {
+		localStorage.setItem('GroupByValues', JSON.stringify($groupByValuesConfig))
 		// Saves the grouping
 		saveConfig({
 			group: {

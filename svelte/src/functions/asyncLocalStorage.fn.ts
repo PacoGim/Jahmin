@@ -1,7 +1,7 @@
 import isArray from './isArray.fn'
 import isJson from './isJson.fn'
 
-export function getItemFromLocalStorage(key: string): Promise<string> {
+export function getItemFromLocalStorage(key: string): Promise<string | number> {
 	return new Promise((resolve, reject) => {
 		const item = localStorage.getItem(key)
 		if (item) {
@@ -17,7 +17,7 @@ export function setItemToLocalStorage(key: string, value: string): Promise<void>
 		if (isJson(value) || isArray(value)) {
 			localStorage.setItem(key, JSON.stringify(value))
 		} else {
-			localStorage.setItem(key, value)
+			localStorage.setItem(key, String(value))
 		}
 
 		resolve()

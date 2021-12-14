@@ -170,6 +170,10 @@ export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any
 	})
 }
 
+export function sendNewArtQueueProgressIPC(): void {
+	ipcRenderer.invoke('send-new-art-queue-progress')
+}
+
 export function getArtIPC(albumId, artSize, elementId) {
 	ipcRenderer.invoke('get-art', albumId, artSize, elementId)
 }
@@ -198,9 +202,9 @@ export function getAlbumIPC(albumId: string): Promise<AlbumType> {
 	})
 }
 
-export function getAlbumColorsIPC(imageId) {
+export function getAlbumColorsIPC(albumId, contrastRatio) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-album-colors', imageId).then(result => {
+		ipcRenderer.invoke('get-album-colors', albumId, contrastRatio).then(result => {
 			resolve(result)
 		})
 	})

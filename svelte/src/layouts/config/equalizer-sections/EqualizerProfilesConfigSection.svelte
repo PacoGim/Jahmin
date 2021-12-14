@@ -1,4 +1,6 @@
 <script lang="ts">
+	import OptionSection from '../../../components/OptionSection.svelte'
+
 	import generateId from '../../../functions/generateId.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
@@ -124,29 +126,33 @@
 	}
 </script>
 
-<equalizer-profiles-section>
-	{#each $equalizerProfiles as eq (eq.id)}
-		<equalizer-field id="eq-{eq.id}">
-			<equalizer-name on:click={() => $equalizerService.changeProfile(eq.id)}
-				>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
-			>
-			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.id, eq.name)}>
-				<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-				Rename
-			</equalizer-rename>
-			<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.id, eq.name)}>
-				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-				Delete
-			</equalizer-delete>
-		</equalizer-field>
-	{/each}
-</equalizer-profiles-section>
-<button class="addProfile" on:click={() => addNewProfile()}
-	><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
->
+<OptionSection title="Equalizer Profiles">
+	<equalizer-profiles-section slot="body">
+		<equalizer-profiles>
+			{#each $equalizerProfiles as eq (eq.id)}
+				<equalizer-field id="eq-{eq.id}">
+					<equalizer-name on:click={() => $equalizerService.changeProfile(eq.id)}
+						>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
+					>
+					<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.id, eq.name)}>
+						<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+						Rename
+					</equalizer-rename>
+					<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.id, eq.name)}>
+						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+						Delete
+					</equalizer-delete>
+				</equalizer-field>
+			{/each}
+		</equalizer-profiles>
+		<button class="addProfile" on:click={() => addNewProfile()}
+			><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
+		>
+	</equalizer-profiles-section>
+</OptionSection>
 
 <style>
-	equalizer-profiles-section {
+	equalizer-profiles {
 		width: fit-content;
 		max-height: 10rem;
 		min-height: 10rem;
@@ -156,18 +162,18 @@
 		margin: 0 auto;
 		margin-top: 1rem;
 	}
-	equalizer-profiles-section equalizer-field {
+	equalizer-profiles equalizer-field {
 		cursor: pointer;
 		display: grid;
 		grid-template-columns: auto max-content max-content;
 		transition: background-color 150ms ease-in-out;
 	}
 
-	equalizer-profiles-section equalizer-field * {
+	equalizer-profiles equalizer-field * {
 		transition: background-color 150ms ease-in-out;
 	}
 
-	equalizer-profiles-section equalizer-field *.eqProfileButton {
+	equalizer-profiles equalizer-field *.eqProfileButton {
 		display: flex;
 		padding: 0.25rem 0.5rem;
 		height: inherit;
@@ -177,18 +183,18 @@
 		font-variation-settings: 'wght' 450;
 	}
 
-	equalizer-profiles-section equalizer-field:hover {
+	equalizer-profiles equalizer-field:hover {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
-	equalizer-profiles-section equalizer-field equalizer-name {
+	equalizer-profiles equalizer-field equalizer-name {
 		padding: 0.25rem 0.5rem;
 	}
 
-	equalizer-profiles-section equalizer-field equalizer-rename:hover {
+	equalizer-profiles equalizer-field equalizer-rename:hover {
 		background-color: var(--color-hl-1);
 	}
 
-	equalizer-profiles-section equalizer-field equalizer-delete:hover {
+	equalizer-profiles equalizer-field equalizer-delete:hover {
 		background-color: var(--color-hl-2);
 	}
 

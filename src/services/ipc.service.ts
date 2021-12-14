@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import { getConfig, saveConfig } from './config.service'
 // import { getCollectionMap, getNewPromiseDbVersion } from './loki.service.bak'
 import { orderSongs } from './songFilter.service'
-import { getAlbumArt } from './albumArt.service'
+import { getAlbumArt, sendArtQueueProgress } from './albumArt.service'
 import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
@@ -160,8 +160,8 @@ export function loadIPC() {
 		getAlbumArt(albumId, artSize, elementId)
 	})
 
-	ipcMain.handle('get-album-colors', async (evt, imageId) => {
-		return await getAlbumColors(imageId)
+	ipcMain.handle('get-album-colors', async (evt, imageId, contrastRatio) => {
+		return await getAlbumColors(imageId, contrastRatio)
 	})
 
 	ipcMain.handle('sync-db-version', async (evt, value) => {
@@ -177,5 +177,10 @@ export function loadIPC() {
 
 	ipcMain.handle('get-tag-edit-progress', () => {
 		return getTagEditProgress()
+	})
+
+	ipcMain.handle('send-new-art-queue-progress', () => {
+		sendArtQueueProgress()
+		return true
 	})
 }

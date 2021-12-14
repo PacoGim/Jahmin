@@ -1,34 +1,11 @@
 <script lang="ts">
-	import OptionSection from '../../../components/OptionSection.svelte'
-
-	import { selectedEqId, isEqualizerDirty, isEqualizerOn } from '../../../store/equalizer.store'
-
-	import EqualizerProfilesSection from '../option-sections/EqualizerProfilesSection.svelte'
-	import EqualizerSection from '../option-sections/EqualizerSection.svelte'
-	import EqualizerButtonsSection from '../option-sections/EqualizerButtonsSection.svelte'
-	import { equalizerService } from '../../../store/service.store'
-
-	let equalizerName = ''
-
-	$: equalizerName = getProfileNameFromId($selectedEqId)
-
-	function getProfileNameFromId(eqId: String) {
-		if ($equalizerService !== undefined) {
-			return $equalizerService.getEqualizerName(eqId)
-		} else {
-			return ''
-		}
-	}
+	import EqualizerProfilesSection from '../equalizer-sections/EqualizerProfilesConfigSection.svelte'
+	import EqualizerSection from '../equalizer-sections/EqualizerConfigSection.svelte'
+	import EqualizerButtonsSection from '../equalizer-sections/EqualizerButtonsConfigSection.svelte'
 </script>
 
-<OptionSection title="Equalizer Profiles">
-	<EqualizerProfilesSection slot="body" />
-</OptionSection>
+<EqualizerProfilesSection />
 
-<OptionSection title="Equalizer - {equalizerName} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
-	<EqualizerSection slot="body" />
-</OptionSection>
+<EqualizerSection />
 
-<OptionSection title="">
-	<EqualizerButtonsSection slot="body" />
-</OptionSection>
+<EqualizerButtonsSection />

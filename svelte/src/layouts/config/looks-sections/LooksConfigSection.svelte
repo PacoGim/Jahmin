@@ -2,7 +2,6 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import { saveConfig } from '../../../services/ipc.service'
 	import { themeConfig } from '../../../store/config.store'
-	import { selectedOptionSection } from '../../../store/final.store'
 	import type { ThemeOptions } from '../../../types/config.type'
 
 	function saveThemeToConfig(themeName: string) {

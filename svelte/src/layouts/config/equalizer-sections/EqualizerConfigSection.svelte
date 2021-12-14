@@ -1,28 +1,44 @@
 <script lang="ts">
+	import OptionSection from '../../../components/OptionSection.svelte'
+
 	import { objectToArray } from '../../../services/index.service'
-	import { equalizer, isEqualizerOn } from '../../../store/equalizer.store'
+	import { equalizer, isEqualizerDirty, isEqualizerOn, selectedEqId } from '../../../store/equalizer.store'
 	import { equalizerService } from '../../../store/service.store'
+
+	let equalizerName = ''
+
+	$: equalizerName = getProfileNameFromId($selectedEqId)
+
+	function getProfileNameFromId(eqId: String) {
+		if ($equalizerService !== undefined) {
+			return $equalizerService.getEqualizerName(eqId)
+		} else {
+			return ''
+		}
+	}
 </script>
 
-<equalizer-section>
-	{#each objectToArray($equalizer) as equalizer, index (index)}
-		<audio-filter-range>
-			<filter-frequency>{equalizer.frequency.value} Hz</filter-frequency>
-			<eq-input-container>
-				<input
-					type="range"
-					min="-8"
-					max="8"
-					step="1"
-					value={equalizer.gain.value}
-					on:input={evt => $equalizerService.gainChange(evt, equalizer.frequency.value)}
-					disabled={!$isEqualizerOn}
-				/>
-			</eq-input-container>
-			<filter-gain>{equalizer.gain.value} dB</filter-gain>
-		</audio-filter-range>
-	{/each}
-</equalizer-section>
+<OptionSection title="Equalizer - {equalizerName} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
+	<equalizer-section slot="body">
+		{#each objectToArray($equalizer) as equalizer, index (index)}
+			<audio-filter-range>
+				<filter-frequency>{equalizer.frequency.value} Hz</filter-frequency>
+				<eq-input-container>
+					<input
+						type="range"
+						min="-8"
+						max="8"
+						step="1"
+						value={equalizer.gain.value}
+						on:input={evt => $equalizerService.gainChange(evt, equalizer.frequency.value)}
+						disabled={!$isEqualizerOn}
+					/>
+				</eq-input-container>
+				<filter-gain>{equalizer.gain.value} dB</filter-gain>
+			</audio-filter-range>
+		{/each}
+	</equalizer-section>
+</OptionSection>
 
 <style>
 	equalizer-section {

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllowedFiles = exports.getAlbumArt = void 0;
+exports.getAllowedFiles = exports.sendArtQueueProgress = exports.getAlbumArt = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const __1 = require("..");
@@ -13,7 +13,7 @@ const storage_service_1 = require("./storage.service");
 const worker_service_1 = require("./worker.service");
 // Queue for image compression
 let compressImageQueue = [];
-let sendArtQueueProgressInterval = null;
+// let sendArtQueueProgressInterval: NodeJS.Timeout | null = null
 let maxCompressImageQueueLength = 0;
 let isQueueRuning = false;
 let sharpWorker = (0, worker_service_1.getWorker)('sharp');
@@ -118,6 +118,7 @@ function getAlbumArt(albumId, artSize, elementId, forceImage = false) {
                 }
                 if (isQueueRuning === false) {
                     isQueueRuning = true;
+                    sendArtQueueProgress();
                     runQueue();
                 }
             }
@@ -131,15 +132,10 @@ function runQueue() {
         isQueueRuning = false;
         return;
     }
-    if (sendArtQueueProgressInterval === null) {
-        sendArtQueueProgressInterval = setInterval(sendArtQueueProgress, 1000);
-    }
     sharpWorker.postMessage(task);
 }
 function sendArtQueueProgress() {
     if (compressImageQueue.length === 0) {
-        clearInterval(sendArtQueueProgressInterval);
-        sendArtQueueProgressInterval = null;
         maxCompressImageQueueLength = 0;
     }
     (0, sendWebContents_service_1.sendWebContents)('art-queue-progress', {
@@ -147,6 +143,7 @@ function sendArtQueueProgress() {
         maxLength: maxCompressImageQueueLength
     });
 }
+exports.sendArtQueueProgress = sendArtQueueProgress;
 function getAllowedFiles(album) {
     let allowedMediaFiles = fs_1.default
         .readdirSync(album.RootDir)

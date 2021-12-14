@@ -4,7 +4,7 @@
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { saveConfig } from '../services/ipc.service'
+	import { sendNewArtQueueProgressIPC, saveConfig } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
 	import {
@@ -74,6 +74,10 @@
 
 		ipcRenderer.on('art-queue-progress', (event, data) => {
 			$artCompressQueueProgress = data
+
+			setTimeout(() => {
+				sendNewArtQueueProgressIPC()
+			}, 1000)
 		})
 	})
 

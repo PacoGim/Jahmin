@@ -1,14 +1,13 @@
 <script lang="ts">
-	import ArtGridConfig from '../looks-sections/ArtGridConfig.svelte'
-	import StatusBarConfig from '../looks-sections/StatusBarConfig.svelte'
-	import ThemeConfig from '../looks-sections/ThemeConfig.svelte'
+	import ArtGridConfig from '../looks-sections/ArtGridConfigSection.svelte'
+	import ColorContrastConfig from '../looks-sections/ColorContrastConfigSection.svelte'
+	import ThemeConfig from '../looks-sections/LooksConfigSection.svelte'
 </script>
 
 <looks-options-svlt>
-	<options-name>Looks</options-name>
 	<ThemeConfig />
 	<ArtGridConfig />
-	<StatusBarConfig />
+	<ColorContrastConfig />
 </looks-options-svlt>
 
 <style>

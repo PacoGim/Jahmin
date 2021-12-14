@@ -74,7 +74,6 @@
 
 		color: var(--high-color);
 		background-color: var(--low-color);
-		/* background-color: var(--status-bar-color); */
 
 		transition-property: color, background-color;
 		transition-duration: 300ms;
