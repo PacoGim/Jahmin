@@ -1,10 +1,15 @@
 export type ConfigType = {
 	bounds?: BoundsType
-	rootDirectories?: string[]
+	directories: DirectoriesType
 	group?: GroupType
 	groupOnlyByFolder?: boolean
 	songListTags?: any[]
-	userOptions?: UserOptionsType
+	userOptions: UserOptionsType
+}
+
+type DirectoriesType = {
+	add: string[]
+	exclude: string[]
 }
 
 type UserOptionsType = {

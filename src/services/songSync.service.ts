@@ -16,7 +16,7 @@ import { SongType } from '../types/song.type'
 
 const TOTAL_CPUS = cpus().length
 
-let watcher: FSWatcher
+let watcher: FSWatcher | undefined
 
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
 
@@ -37,27 +37,34 @@ export async function watchFolders(rootDirectories: string[]) {
 	startChokidarWatch(rootDirectories)
 }
 
-export function startChokidarWatch(rootDirectories: string[]) {
+export function startChokidarWatch(rootDirectories: string[], excludeDirectories: string[] = []) {
+	if (watcher) {
+		watcher.close()
+		watcher = undefined
+	}
+
 	watcher = watch(rootDirectories, {
 		awaitWriteFinish: true,
 		ignored: '**/*.DS_Store'
 	})
 
+	watcher.unwatch(excludeDirectories)
+
 	watcher.on('ready', () => {
-		watcher.on('add', path => {
+		watcher!.on('add', path => {
 			if (isAudioFile(path)) {
 				console.log(path)
 				addToTaskQueue(path, 'insert')
 			}
 		})
 
-		watcher.on('change', (path: string) => {
+		watcher!.on('change', (path: string) => {
 			if (isAudioFile(path)) {
 				addToTaskQueue(path, 'update')
 			}
 		})
 
-		watcher.on('unlink', (path: string) => {
+		watcher!.on('unlink', (path: string) => {
 			if (isAudioFile(path)) {
 				addToTaskQueue(path, 'delete')
 			}

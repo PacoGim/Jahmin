@@ -32,6 +32,7 @@ const fuse_js_1 = __importDefault(require("fuse.js"));
 const equalizer_service_1 = require("./equalizer.service");
 const common_1 = require("electron/common");
 const songGroup_service_1 = require("./songGroup.service");
+const directoryHandler_service_1 = __importDefault(require("./directoryHandler.service"));
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_service_1.loadContextMenu)(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
@@ -150,6 +151,23 @@ function loadIPC() {
     electron_1.ipcMain.handle('send-new-art-queue-progress', () => {
         (0, albumArt_service_1.sendArtQueueProgress)();
         return true;
+    });
+    electron_1.ipcMain.handle('select-directories', (evt, type) => {
+        electron_1.dialog
+            .showOpenDialog({
+            properties: ['openDirectory', 'multiSelections']
+        })
+            .then(result => {
+            if (result.canceled === false) {
+                (0, directoryHandler_service_1.default)(result.filePaths, type);
+            }
+        })
+            .catch(err => {
+            console.log(err);
+        });
+    });
+    electron_1.ipcMain.handle('remove-directory', (evt, directory, type) => {
+        (0, directoryHandler_service_1.default)([directory], type);
     });
 }
 exports.loadIPC = loadIPC;

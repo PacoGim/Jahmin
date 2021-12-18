@@ -11,7 +11,8 @@
 		groupByConfig,
 		groupByValuesConfig,
 		gridGapConfig,
-		contrastRatioConfig
+		contrastRatioConfig,
+		directoriesConfig
 	} from '../store/config.store'
 
 	import type { ConfigType } from '../types/config.type'
@@ -30,6 +31,7 @@
 			$groupByValuesConfig = syncConfigLocalStorage('GroupByValues', config.group.groupByValues)
 			$gridGapConfig = syncConfigLocalStorage('GridGap', config.userOptions.gridGap)
 			$contrastRatioConfig = syncConfigLocalStorage('ContrastRatio', config.userOptions.contrastRatio)
+			$directoriesConfig = syncConfigLocalStorage('Directories', config.directories)
 
 			document.documentElement.style.setProperty('--art-dimension', `${$artSizeConfig}px`)
 			document.documentElement.style.setProperty('--grid-gap', `${$gridGapConfig}px`)

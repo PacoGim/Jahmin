@@ -40,11 +40,16 @@ function watchFolders(rootDirectories) {
     });
 }
 exports.watchFolders = watchFolders;
-function startChokidarWatch(rootDirectories) {
+function startChokidarWatch(rootDirectories, excludeDirectories = []) {
+    if (watcher) {
+        watcher.close();
+        watcher = undefined;
+    }
     watcher = (0, chokidar_1.watch)(rootDirectories, {
         awaitWriteFinish: true,
         ignored: '**/*.DS_Store'
     });
+    watcher.unwatch(excludeDirectories);
     watcher.on('ready', () => {
         watcher.on('add', path => {
             if (isAudioFile(path)) {

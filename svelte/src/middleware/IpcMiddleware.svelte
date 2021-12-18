@@ -6,7 +6,7 @@
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { sendNewArtQueueProgressIPC, saveConfig } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
-	import { groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
+	import { directoriesConfig, groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
 	import {
 		albumArtMapStore,
 		albumListStore,
@@ -71,6 +71,10 @@
 		})
 
 		ipcRenderer.on('new-art', (event, data) => handleNewArt(data))
+
+		ipcRenderer.on('selected-directories', (event, data) => {
+			$directoriesConfig = data
+		})
 
 		ipcRenderer.on('art-queue-progress', (event, data) => {
 			$artCompressQueueProgress = data

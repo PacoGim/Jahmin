@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, dialog } from 'electron'
 import { getConfig, saveConfig } from './config.service'
 // import { getCollectionMap, getNewPromiseDbVersion } from './loki.service.bak'
 import { orderSongs } from './songFilter.service'
@@ -29,6 +29,8 @@ import {
 import { EqualizerFileObjectType } from '../types/equalizerFileObject.type'
 import { shell } from 'electron/common'
 import { groupSongs } from './songGroup.service'
+import { sendWebContents } from './sendWebContents.service'
+import directoryHandlerService from './directoryHandler.service'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -182,5 +184,24 @@ export function loadIPC() {
 	ipcMain.handle('send-new-art-queue-progress', () => {
 		sendArtQueueProgress()
 		return true
+	})
+
+	ipcMain.handle('select-directories', (evt, type) => {
+		dialog
+			.showOpenDialog({
+				properties: ['openDirectory', 'multiSelections']
+			})
+			.then(result => {
+				if (result.canceled === false) {
+					directoryHandlerService(result.filePaths, type)
+				}
+			})
+			.catch(err => {
+				console.log(err)
+			})
+	})
+
+	ipcMain.handle('remove-directory', (evt, directory, type: 'remove-add' | 'remove-exclude') => {
+		directoryHandlerService([directory], type)
 	})
 }

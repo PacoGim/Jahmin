@@ -150,7 +150,7 @@ export function getPeaksIPC(sourceFile: string) {
 	})
 }
 
-export function saveConfig(newConfig: ConfigType) {
+export function saveConfig(newConfig: ConfigType | any) {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('save-config', newConfig).then(result => {
 			resolve(result)
@@ -216,6 +216,16 @@ export function getChangesProgressIPC() {
 			resolve(result)
 		})
 	})
+}
+
+export function selectDirectoriesIPC(type: 'add' | 'exclude') {
+	ipcRenderer.invoke('select-directories', type)
+	return
+}
+
+export function removeDirectoryIPC(directory: string, type: 'remove-add' | 'remove-exclude') {
+	ipcRenderer.invoke('remove-directory', directory, type)
+	return
 }
 
 export function showContextMenuIPC(menuToOpen, parameters) {

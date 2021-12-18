@@ -18,7 +18,7 @@ const getConfigPathFile = () => {
     return configFilePath;
 };
 function getConfig() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
     let config;
     if (fs_1.default.existsSync(getConfigPathFile())) {
         try {
@@ -56,6 +56,15 @@ function getConfig() {
         if (((_o = config === null || config === void 0 ? void 0 : config.userOptions) === null || _o === void 0 ? void 0 : _o.theme) === undefined) {
             config.userOptions.theme = (_p = getDefaultConfigFile().userOptions) === null || _p === void 0 ? void 0 : _p.theme;
         }
+        if ((config === null || config === void 0 ? void 0 : config.directories) === undefined) {
+            config.directories = getDefaultConfigFile().directories;
+        }
+        if (((_q = config === null || config === void 0 ? void 0 : config.directories) === null || _q === void 0 ? void 0 : _q.add) === undefined) {
+            config.directories.add = (_r = getDefaultConfigFile().directories) === null || _r === void 0 ? void 0 : _r.add;
+        }
+        if (((_s = config === null || config === void 0 ? void 0 : config.directories) === null || _s === void 0 ? void 0 : _s.exclude) === undefined) {
+            config.directories.exclude = (_t = getDefaultConfigFile().directories) === null || _t === void 0 ? void 0 : _t.exclude;
+        }
     }
     return config;
 }
@@ -77,6 +86,10 @@ function getDefaultConfigFile() {
         group: {
             groupBy: ['Genre'],
             groupByValues: []
+        },
+        directories: {
+            add: [],
+            exclude: []
         },
         groupOnlyByFolder: false,
         userOptions: {

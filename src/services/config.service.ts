@@ -60,6 +60,18 @@ export function getConfig(): ConfigType {
 		if (config?.userOptions?.theme === undefined) {
 			config.userOptions.theme = getDefaultConfigFile().userOptions?.theme
 		}
+
+		if (config?.directories === undefined) {
+			config.directories = getDefaultConfigFile().directories
+		}
+
+		if (config?.directories?.add === undefined) {
+			config.directories!.add = getDefaultConfigFile().directories?.add
+		}
+
+		if (config?.directories?.exclude === undefined) {
+			config.directories!.exclude = getDefaultConfigFile().directories?.exclude
+		}
 	}
 
 	return config
@@ -83,6 +95,10 @@ function getDefaultConfigFile(): ConfigType {
 		group: {
 			groupBy: ['Genre'],
 			groupByValues: []
+		},
+		directories: {
+			add: [],
+			exclude: []
 		},
 		groupOnlyByFolder: false,
 		userOptions: {
