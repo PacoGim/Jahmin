@@ -1,11 +1,15 @@
 <script lang="ts">
-	import { selectedSongsStore, songListStore } from '../../store/final.store'
+	import { selectedAlbumId, selectedSongsStore, songListStore } from '../../store/final.store'
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
 	import type { SongType } from '../../types/song.type'
 	import Star from '../../components/Star.svelte'
 	import { onMount } from 'svelte'
 	import UndoIcon from '../../icons/UndoIcon.svelte'
+	import AlbumArt from '../../components/AlbumArt.svelte'
+	import generateId from '../../functions/generateId.fn'
+	import UpdateIcon from '../../icons/UpdateIcon.svelte'
+	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 
 	let songsToEdit: SongType[] = []
 	let groupedTags: SongType = {}
@@ -21,10 +25,6 @@
 
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
-	$: {
-		// console.log(newTags)
-	}
-
 	function setupSongs() {
 		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
 		groupedTags = groupSongsByValues(songsToEdit)
@@ -32,7 +32,19 @@
 	}
 
 	function setStar(starChangeEvent) {
-		bindingTags.Rating = starChangeEvent.detail.rating
+		let newRating = starChangeEvent.detail.rating
+
+		bindingTags.Rating = newRating
+
+		if (newRating === '' && groupedTags['Rating'] === null) {
+			bindingTags['Rating'] = null
+		}
+
+		if (bindingTags['Rating'] !== groupedTags['Rating']) {
+			setUndoIconVisibility('Rating', true)
+		} else {
+			setUndoIconVisibility('Rating', false)
+		}
 	}
 
 	function resizeTextArea(evt: Event, type: 'expand' | 'collapse') {
@@ -89,32 +101,41 @@
 
 		tagContainerElements.forEach(tagContainerElement => {
 			let textAreaElement = tagContainerElement.querySelector('textarea') as HTMLTextAreaElement
-			let undoIconElement = tagContainerElement.querySelector('tag-name svg') as HTMLElement
+			let undoIconElement = tagContainerElement.querySelector('svg') as SVGElement
 			let dataSet = tagContainerElement.dataset
 
 			if (dataSet.type === 'number') {
 				textAreaElement.addEventListener('input', evt => forceNumberInput(tagContainerElement))
 			}
 
-			textAreaElement.spellcheck = false
-			textAreaElement.rows = 1
-			textAreaElement.addEventListener('mouseleave', evt => resizeTextArea(evt, 'collapse'))
-			textAreaElement.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
-			textAreaElement.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
-			textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
+			if (textAreaElement) {
+				textAreaElement.spellcheck = false
+				textAreaElement.rows = 1
+				textAreaElement.addEventListener('mouseleave', evt => resizeTextArea(evt, 'collapse'))
+				textAreaElement.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
+				textAreaElement.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
+				textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
+			}
 
-			undoIconElement.setAttribute('data-tag', dataSet.tag)
-			undoIconElement.style.position = 'absolute'
-			undoIconElement.style.right = '0'
-			undoIconElement.style.transform = 'translateX(calc(1rem + 2px))'
-			undoIconElement.style.opacity = '0'
-
-			undoIconElement.addEventListener('click', evt => undoTagModification(dataSet.tag))
+			if (undoIconElement) {
+				undoIconElement.setAttribute('data-tag', dataSet.tag)
+				undoIconElement.style.position = 'absolute'
+				undoIconElement.style.right = '0'
+				undoIconElement.style.transform = 'translateX(calc(1rem + 2px))'
+				undoIconElement.style.opacity = '0'
+				undoIconElement.addEventListener('click', evt => undoTagModification(dataSet.tag))
+			}
 		})
 	}
 
 	function sendNewTags() {
-		console.log(newTags)
+		console.log(newTags, songsToEdit)
+	}
+
+	function undoAllTags() {
+		for (let tag in bindingTags) {
+			undoTagModification(tag)
+		}
 	}
 
 	onMount(() => {
@@ -187,16 +208,47 @@
 		<textarea bind:value={bindingTags.Date_Day} />
 	</tag-container>
 
-	<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
+	<tag-container data-tag="Rating">
+		<tag-name>Rating <UndoIcon /> </tag-name>
+		<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
+	</tag-container>
+
+	<cover-container>
+		<AlbumArt
+			albumId={$selectedAlbumId}
+			id={generateId()}
+			style="height:100%; width:100%; position: absolute; top: 0; left: 0;"
+			observe={false}
+		/>
+	</cover-container>
+
+	<button-container>
+		<button class="danger" on:click={() => undoAllTags()} disabled={isEmptyObject(newTags)}>
+			<UndoIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;" />
+			Cancel
+		</button>
+		<button
+			class="info"
+			on:click={() => {
+				sendNewTags()
+			}}
+			disabled={isEmptyObject(newTags)}
+		>
+			<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			Update
+		</button>
+	</button-container>
 </tag-edit-svlt>
 
 <style>
 	tag-edit-svlt {
 		overflow-y: overlay;
 		display: grid;
-		height: max-content;
+		height: 100%;
 
-		margin: 0.5rem;
+		grid-template-rows: repeat(12, max-content) auto;
+
+		margin: 0 0.5rem;
 
 		background-color: var(--color-bg-1);
 
@@ -213,7 +265,9 @@
 			'tag-composer	tag-composer tag-composer'
 			'tag-comment	tag-comment tag-comment'
 			'tag-date-year tag-date-month tag-date-day'
-			'star star star';
+			'tag-rating tag-rating tag-rating'
+			'cover-container cover-container cover-container'
+			'button-container button-container button-container';
 
 		transition: background-color var(--theme-transition-duration) linear;
 	}
@@ -223,7 +277,7 @@
 		flex-direction: column;
 		align-items: center;
 
-		font-size: .9rem;
+		font-size: 0.9rem;
 		margin-bottom: 0.5rem;
 
 		box-shadow: 0px 3px 0px 0px var(--color-fg-1);
@@ -235,9 +289,11 @@
 		display: block;
 		text-align: center;
 
-		font-variation-settings: 'wght' calc(var(--default-weight) + 150);
+		font-size: 0.8rem;
 
-		margin-bottom: 0.5rem;
+		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+
+		margin: 0.5rem 0;
 	}
 
 	tag-edit-svlt tag-container tag-name {
@@ -256,7 +312,7 @@
 
 	tag-edit-svlt tag-container textarea {
 		font-size: inherit;
-		padding: 0.5rem .65rem;
+		padding: 0.5rem 0.65rem;
 
 		color: var(--color-fg-1);
 		background-color: rgba(128, 128, 128, 0.2);
@@ -338,5 +394,26 @@
 	tag-container[data-tag='Date_Day'] {
 		grid-area: tag-date-day;
 		margin-left: 0.25rem;
+	}
+
+	tag-container[data-tag='Rating'] {
+		grid-area: tag-rating;
+		box-shadow: none;
+	}
+
+	cover-container {
+		grid-area: cover-container;
+		width: 100%;
+		height: 0;
+		padding-top: 100%;
+		position: relative;
+	}
+
+	button-container {
+		grid-area: button-container;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-evenly;
+		align-items: center;
 	}
 </style>

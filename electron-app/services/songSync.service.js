@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
+exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
@@ -70,6 +70,18 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
     });
 }
 exports.startChokidarWatch = startChokidarWatch;
+function unwatchPaths(paths) {
+    if (watcher) {
+        paths.forEach(path => watcher.unwatch(path));
+    }
+}
+exports.unwatchPaths = unwatchPaths;
+function watchPaths(paths) {
+    if (watcher) {
+        paths.forEach(path => watcher.add(path));
+    }
+}
+exports.watchPaths = watchPaths;
 // Splits excecution based on the amount of cpus.
 function processQueue() {
     // Creates an array with the length from cpus amount and map it to true.

@@ -72,7 +72,22 @@ button.not-active {
 
 button:disabled {
 	cursor: not-allowed;
+}
+
+button.info {
+	background-color: var(--color-hl-1);
+}
+
+button.danger {
+	background-color: var(--color-hl-2);
+}
+
+button.info:disabled {
 	background-color: #6a7290;
+}
+
+button.danger:disabled {
+	background-color: #906a72;
 }
 
 button:focus {

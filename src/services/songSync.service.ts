@@ -72,6 +72,18 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 	})
 }
 
+export function unwatchPaths(paths: string[]) {
+	if (watcher) {
+		paths.forEach(path => watcher!.unwatch(path))
+	}
+}
+
+export function watchPaths(paths: string[]) {
+	if (watcher) {
+		paths.forEach(path => watcher!.add(path))
+	}
+}
+
 // Splits excecution based on the amount of cpus.
 function processQueue() {
 	// Creates an array with the length from cpus amount and map it to true.
