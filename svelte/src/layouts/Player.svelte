@@ -38,12 +38,17 @@
 
 	let rootDir = ''
 
-	let player: HTMLAudioElement = undefined
+	let mainAudioElement: HTMLAudioElement = undefined
+	let nextAudioElement: HTMLAudioElement = undefined
 
 	let songTime = {
 		currentTime: '00:00',
 		duration: '00:00',
 		timeLeft: '00:00'
+	}
+
+	$:{
+		console.log($playbackCursor)
 	}
 
 	$: {
@@ -55,15 +60,15 @@
 	}
 
 	$: {
-		if (player !== undefined && $context === undefined) {
+		if (mainAudioElement !== undefined && $context === undefined) {
 			$context = new window.AudioContext()
-			$source = $context.createMediaElementSource(player)
+			$source = $context.createMediaElementSource(mainAudioElement)
 		}
 	}
 
 	$: {
-		if (player !== undefined) {
-			$playerElement = player
+		if (mainAudioElement !== undefined) {
+			$playerElement = mainAudioElement
 		}
 	}
 
@@ -83,10 +88,12 @@
 	let preLoadNextSongDebounce: NodeJS.Timeout = undefined
 
 	async function playSong(playbackCursor: [number, boolean]) {
-		let indexToPlay = playbackCursor[0]
+		if (isNextAudioPlaying === true) {
+			return
+		}
+
 		let playNow = playbackCursor[1]
-		let songs = $playbackStore
-		let songToPlay = songs[indexToPlay]
+		let songToPlay = getSongToPlay(playbackCursor[0])
 		let url: string = undefined
 
 		if (songToPlay === undefined) return
@@ -102,13 +109,13 @@
 		} else if (songToPlay?.ID) {
 			url = escapeString(songToPlay['SourceFile'])
 		} else {
-			player.pause()
-			player.src = ''
+			mainAudioElement.pause()
+			mainAudioElement.src = ''
 			$isPlaying = false
 			return
 		}
 
-		player.src = url
+		mainAudioElement.src = url
 
 		currentSong = songToPlay
 		$playingSongStore = currentSong
@@ -127,31 +134,31 @@
 		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
 
 		if (playNow === true) {
-			player
+			mainAudioElement
 				.play()
 				.then(() => {
-					$songPlayingIdStore = songToPlay.ID
-
-					localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
-					localStorage.setItem('LastPlayedSongId', String(songToPlay.ID))
-					localStorage.setItem('LastPlayedSongIndex', String(indexToPlay))
-
-					clearTimeout(preLoadNextSongDebounce)
-
-					preLoadNextSongDebounce = setTimeout(() => {
-						preLoadNextSong(playbackCursor)
-					}, 2000)
+					// $songPlayingIdStore = songToPlay.ID
+					// localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
+					// localStorage.setItem('LastPlayedSongId', String(songToPlay.ID))
+					// localStorage.setItem('LastPlayedSongIndex', String(playbackCursor[0]))
+					// clearTimeout(preLoadNextSongDebounce)
+					// preLoadNextSongDebounce = setTimeout(() => {
+					// 	preLoadNextSong(playbackCursor)
+					// }, 2000)
 				})
 				.catch(async err => {
 					if ((await isFileExistIPC(songToPlay.SourceFile)) === false) {
-
 						// If file does not exist, play next song.
 						nextSong()
 					}
 				})
 		} else {
-			player.pause()
+			mainAudioElement.pause()
 		}
+	}
+
+	function getSongToPlay(index: number) {
+		return $playbackStore[index]
 	}
 
 	function preLoadNextSong(playbackCursor: [number, boolean]) {
@@ -186,17 +193,18 @@
 	}
 
 	onMount(() => {
-		player = document.querySelector('audio')
+		mainAudioElement = document.querySelector('audio#main')
+		nextAudioElement = document.querySelector('audio#next')
 	})
 
-	function stopPlayer() {
+	/* 	function stopPlayer() {
 		player.removeAttribute('src')
 		player.pause()
 		document.documentElement.style.setProperty('--song-time', `0%`)
 		$isPlaying = false
 
 		return
-	}
+	} */
 
 	function fetchSong(songPath: string): Promise<ArrayBuffer> {
 		return new Promise((resolve, reject) => {
@@ -214,27 +222,85 @@
 
 	function durationChanged(e) {
 		// Rounds to 2 decimals.
-		progress = Math.round(((100 / currentSong['Duration']) * player.currentTime + Number.EPSILON) * 100) / 100
+		progress = Math.round(((100 / currentSong['Duration']) * mainAudioElement.currentTime + Number.EPSILON) * 100) / 100
 
 		progress = progress >= 100 ? 100 : progress
 
 		document.documentElement.style.setProperty('--song-time', `${progress}%`)
 
 		songTime = {
-			currentTime: parseDuration(player.currentTime),
+			currentTime: parseDuration(mainAudioElement.currentTime),
 			duration: parseDuration(currentSong['Duration']),
-			timeLeft: parseDuration(currentSong['Duration'] - player.currentTime)
+			timeLeft: parseDuration(currentSong['Duration'] - mainAudioElement.currentTime)
+		}
+	}
+
+	let prePlayTime = 60000 / 1000
+
+	let isMainAudioPlaying = false
+	let isNextAudioPlaying = false
+
+	let isMainAudioSongPreloaded = false
+	let isNextAudioSongPreloaded = false
+
+	function mainAudioTimeUpdate() {
+		if (isNextAudioSongPreloaded === false && mainAudioElement.currentTime >= 2) {
+			isNextAudioSongPreloaded = true
+
+			let nextSongToPlay = getSongToPlay($playbackCursor[0] + 1)
+
+			console.log(nextSongToPlay)
+
+			nextAudioElement.src = escapeString(nextSongToPlay['SourceFile'])
+		}
+
+		if (isNextAudioPlaying === false && mainAudioElement.currentTime >= mainAudioElement.duration - prePlayTime) {
+			$playbackCursor = [$playbackCursor[0] + 1, false]
+			isNextAudioPlaying = true
+			isMainAudioPlaying = false
+			nextAudioElement.play()
+			isMainAudioSongPreloaded = false
+		}
+	}
+
+	function nextAudioTimeUpdate() {
+		if (isMainAudioSongPreloaded === false && nextAudioElement.currentTime >= 2) {
+			isMainAudioSongPreloaded = true
+
+			let nextSongToPlay = getSongToPlay($playbackCursor[0] + 1)
+
+			console.log(nextSongToPlay)
+
+			mainAudioElement.src = escapeString(nextSongToPlay['SourceFile'])
+		}
+
+		if (isMainAudioPlaying === false && nextAudioElement.currentTime >= nextAudioElement.duration - prePlayTime) {
+			$playbackCursor = [$playbackCursor[0] + 1, false]
+			isMainAudioPlaying = true
+			isNextAudioPlaying = false
+			mainAudioElement.play()
+			isNextAudioSongPreloaded = false
 		}
 	}
 </script>
 
 <audio
-	controls={true}
+	id="main"
 	on:pause={() => ($isPlaying = false)}
 	on:play={() => ($isPlaying = true)}
-	on:timeupdate={e => durationChanged(e)}
-	on:ended={() => nextSong()}
+	on:timeupdate={() => mainAudioTimeUpdate()}
 >
+	<!-- on:ended={() => nextSong()} -->
+	<track kind="captions" />
+</audio>
+
+<audio
+	id="next"
+	on:pause={() => ($isPlaying = false)}
+	on:play={() => ($isPlaying = true)}
+	on:timeupdate={() => nextAudioTimeUpdate()}
+>
+	<!-- on:ended={() => nextSong()} -->
 	<track kind="captions" />
 </audio>
 
