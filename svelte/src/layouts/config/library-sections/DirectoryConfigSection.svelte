@@ -13,7 +13,7 @@
 		<button
 			on:click={() => {
 				selectDirectoriesIPC('add')
-			}}>Open Directories</button
+			}}>Add Directories</button
 		>
 		<button
 			on:click={() => {

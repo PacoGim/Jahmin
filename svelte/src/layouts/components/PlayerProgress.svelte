@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import { playerElement, updateSongProgress } from '../../store/final.store'
+	import { currentAudioElement, updateSongProgress } from '../../store/final.store'
 
 	import type { SongType } from '../../types/song.type'
 
@@ -42,7 +42,7 @@
 		function applyProgressChange(evt: MouseEvent) {
 			if (song === undefined) return
 
-			$playerElement.pause()
+			$currentAudioElement.pause()
 
 			playerForeground.classList.add('not-smooth')
 
@@ -68,9 +68,9 @@
 			clearTimeout(pauseDebounce)
 
 			pauseDebounce = setTimeout(() => {
-				$playerElement.currentTime = songPercentTime
+				$currentAudioElement.currentTime = songPercentTime
 				playerForeground.classList.remove('not-smooth')
-				$playerElement.play()
+				$currentAudioElement.play()
 			}, 500)
 		}
 	}

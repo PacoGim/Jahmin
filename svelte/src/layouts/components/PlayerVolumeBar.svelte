@@ -1,31 +1,33 @@
 <script lang="ts">
-	import { keyDown, playerElement } from '../../store/final.store'
+	import { keyDown, mainAudioElement, nextAudioElement, playerElement } from '../../store/final.store'
 
-	let volume: number = 0
-
-	let isPlayerLoaded = false
+	let hasVolumeFromStorageLoaded: boolean = false
 
 	let saveVolumeDebounce: NodeJS.Timeout = undefined
 
-	$: {
-		if ($playerElement && isPlayerLoaded === false) {
-			isPlayerLoaded = true
-			loadLocalStorageVolume()
-		}
+	$: if (hasVolumeFromStorageLoaded === false && $mainAudioElement !== undefined && $nextAudioElement !== undefined) {
+		hasVolumeFromStorageLoaded = true
+		loadVolumeFromLocalStorage()
 	}
 
-	$: {
-		volume
-		if (isPlayerLoaded === true) {
-			volumeChange()
+	function loadVolumeFromLocalStorage() {
+		let volumeLS = Number(localStorage.getItem('volume') || NaN)
+
+		if (volumeLS === undefined || isNaN(volumeLS) || volumeLS > 1 || volumeLS < 0) {
+			volumeLS = 0.25
+			localStorage.setItem('volume', String(volumeLS))
 		}
+
+		setAudioElementVolume(volumeLS)
+		updateVolumeBarVisual(volumeLS)
 	}
 
-	function volumeChange() {
-		$playerElement.volume = volume / 100
-		let volumeBarWidth = document.querySelector('volume-bar').clientWidth
-		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
-		document.documentElement.style.setProperty('--volume-level', `${(volumeBarWidth - volumeThumbWidth) * (volume / 100)}px`)
+	function onVolumeInput(evt: Event) {
+		let volumeBarElement = evt.target as HTMLInputElement
+		let volume = Number(volumeBarElement.value)
+
+		setAudioElementVolume(volume)
+		updateVolumeBarVisual(volume)
 
 		clearTimeout(saveVolumeDebounce)
 
@@ -34,17 +36,21 @@
 		}, 1000)
 	}
 
-	function loadLocalStorageVolume() {
-		volume = Number(localStorage.getItem('volume') || NaN)
+	function setAudioElementVolume(newVolume: number) {
+		$mainAudioElement.volume = newVolume
+		$nextAudioElement.volume = newVolume
+	}
 
-		if (volume === undefined || isNaN(volume) || volume > 100) {
-			volume = 25
-			localStorage.setItem('volume', String(volume))
-		}
+	function updateVolumeBarVisual(newVolume: number) {
+		let volumeThumbElement = document.querySelector('volume-bar volume-thumb') as HTMLInputElement
 
-		$playerElement.volume = volume / 100
+		volumeThumbElement.innerHTML = String(Math.round(newVolume * 100))
 
-		volumeChange()
+		let volumeBarWidth = document.querySelector('volume-bar').clientWidth
+
+		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
+
+		document.documentElement.style.setProperty('--volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`)
 	}
 </script>
 
@@ -52,12 +58,14 @@
 	<input
 		type="range"
 		min="0"
-		max="100"
-		step={$keyDown==='Shift' ? '5' : '1'}
-		bind:value={volume}
+		max="1"
+		step={$keyDown === 'Shift' ? '0.05' : '0.01'}
+		on:input={evt => {
+			onVolumeInput(evt)
+		}}
 	/>
 	<background />
-	<volume-thumb>{Math.round(volume)}</volume-thumb>
+	<volume-thumb>0</volume-thumb>
 </volume-bar>
 
 <style>

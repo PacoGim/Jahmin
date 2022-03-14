@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, isAppIdle, keyDown, keyUp, layoutToShow, playerElement } from './store/final.store'
+	import { appTitle, isAppIdle, keyDown, keyUp, layoutToShow, currentAudioElement } from './store/final.store'
 
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import SearchLayout from './layouts/search/SearchLayout.svelte'
@@ -78,11 +78,11 @@
 		window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
 
 		navigator.mediaSession.setActionHandler('play', () => {
-			$playerElement.play()
+			$currentAudioElement.play()
 		})
 
 		navigator.mediaSession.setActionHandler('pause', () => {
-			$playerElement.pause()
+			$currentAudioElement.pause()
 		})
 
 		navigator.mediaSession.setActionHandler('previoustrack', function () {

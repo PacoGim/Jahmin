@@ -16,10 +16,12 @@
 		isPlaying,
 		playbackCursor,
 		playbackStore,
-		playerElement,
 		playingSongStore,
 		songPlayingIdStore,
-		updateSongProgress
+		updateSongProgress,
+		currentAudioElement,
+		mainAudioElement,
+		nextAudioElement
 	} from '../store/final.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
@@ -34,18 +36,24 @@
 	let progress: number = 0
 
 	let currentSong: SongType = undefined
-	let currentAudioElement: HTMLAudioElement = undefined
 
 	let rootDir = ''
-
-	let mainAudioElement: HTMLAudioElement = undefined
-	let nextAudioElement: HTMLAudioElement = undefined
 
 	let songTime = {
 		currentTime: '00:00',
 		duration: '00:00',
 		timeLeft: '00:00'
 	}
+
+	let prePlayTime = 250 / 1000
+
+	let isMainAudioPlaying = false
+	let isNextAudioPlaying = false
+
+	let isMainAudioSongPreloaded = false
+	let isNextAudioSongPreloaded = false
+
+	$: console.log($currentAudioElement)
 
 	$: {
 		if ($isPlaying) {
@@ -56,16 +64,14 @@
 	}
 
 	$: {
-		if (mainAudioElement !== undefined && $context === undefined) {
+		if ($mainAudioElement !== undefined && $context === undefined) {
 			$context = new window.AudioContext()
-			$source = $context.createMediaElementSource(mainAudioElement)
+			$source = $context.createMediaElementSource($mainAudioElement)
 		}
 	}
 
-	$: {
-		if (mainAudioElement !== undefined) {
-			$playerElement = mainAudioElement
-		}
+	$: if ($currentAudioElement === undefined && $mainAudioElement !== undefined) {
+		$currentAudioElement = $mainAudioElement
 	}
 
 	$: playSong($playbackCursor)
@@ -79,6 +85,10 @@
 				timeLeft: parseDuration(currentSong['Duration'] - $updateSongProgress)
 			}
 		}
+	}
+
+	function checkIfPlaying() {
+		$isPlaying = $mainAudioElement.paused === false || $nextAudioElement.paused === false
 	}
 
 	async function playSong(playbackCursor: [number, boolean]) {
@@ -107,25 +117,23 @@
 
 		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
 
+		$mainAudioElement.src = escapeString(songToPlay['SourceFile'])
+		isMainAudioPlaying = true
+
 		if (playbackCursor[1] === true) {
-			mainAudioElement.src = escapeString(songToPlay['SourceFile'])
+			$mainAudioElement.addEventListener('canplay', function handler() {
+				$nextAudioElement.src = ''
 
-			mainAudioElement.addEventListener('canplay', function handler() {
-				currentAudioElement = mainAudioElement
-
-				nextAudioElement.src = ''
-
-				isMainAudioPlaying = true
 				isNextAudioPlaying = false
-				currentAudioElement = mainAudioElement
-				mainAudioElement.play()
+				$currentAudioElement = $mainAudioElement
+				$mainAudioElement.play()
 				isNextAudioSongPreloaded = false
 
 				this.removeEventListener('canplay', handler)
 			})
 
 			// Play song and update data
-			// mainAudioElement.play()
+			// $mainAudioElement.play()
 			/*.catch(async err => {
 				if ((await isFileExistIPC(songToPlay.SourceFile)) === false) {
 					// If file does not exist, play next song.
@@ -145,52 +153,44 @@
 	}
 
 	onMount(() => {
-		mainAudioElement = document.querySelector('audio#main')
-		nextAudioElement = document.querySelector('audio#next')
+		$mainAudioElement = document.querySelector('audio#main')
+		$nextAudioElement = document.querySelector('audio#next')
 	})
 
 	function durationChanged() {
 		// Rounds to 2 decimals.
-		progress = Math.round(((100 / currentSong['Duration']) * currentAudioElement.currentTime + Number.EPSILON) * 100) / 100
+		progress = Math.round(((100 / currentSong['Duration']) * $currentAudioElement.currentTime + Number.EPSILON) * 100) / 100
 
 		progress = progress >= 100 ? 100 : progress
 
 		document.documentElement.style.setProperty('--song-time', `${progress}%`)
 
 		songTime = {
-			currentTime: parseDuration(currentAudioElement.currentTime),
+			currentTime: parseDuration($currentAudioElement.currentTime),
 			duration: parseDuration(currentSong['Duration']),
-			timeLeft: parseDuration(currentSong['Duration'] - currentAudioElement.currentTime)
+			timeLeft: parseDuration(currentSong['Duration'] - $currentAudioElement.currentTime)
 		}
 	}
-
-	let prePlayTime = 30000 / 1000
-
-	let isMainAudioPlaying = false
-	let isNextAudioPlaying = false
-
-	let isMainAudioSongPreloaded = false
-	let isNextAudioSongPreloaded = false
 
 	function mainAudioTimeUpdate() {
 		if (isMainAudioPlaying === true) {
 			durationChanged()
 		}
 
-		if (isNextAudioSongPreloaded === false && mainAudioElement.currentTime >= 2) {
+		if (isNextAudioSongPreloaded === false && $mainAudioElement.currentTime >= 2) {
 			isNextAudioSongPreloaded = true
 
 			let nextSongToPlay = getSongToPlay($playbackCursor[0] + 1)
 
-			nextAudioElement.src = escapeString(nextSongToPlay['SourceFile'])
+			$nextAudioElement.src = escapeString(nextSongToPlay['SourceFile'])
 		}
 
-		if (isNextAudioPlaying === false && mainAudioElement.currentTime >= mainAudioElement.duration - prePlayTime) {
+		if (isNextAudioPlaying === false && $mainAudioElement.currentTime >= $mainAudioElement.duration - prePlayTime) {
 			$playbackCursor = [$playbackCursor[0] + 1, false]
 			isNextAudioPlaying = true
 			isMainAudioPlaying = false
-			currentAudioElement = nextAudioElement
-			nextAudioElement.play()
+			$currentAudioElement = $nextAudioElement
+			$nextAudioElement.play()
 			isMainAudioSongPreloaded = false
 		}
 	}
@@ -200,34 +200,30 @@
 			durationChanged()
 		}
 
-		if (isMainAudioSongPreloaded === false && nextAudioElement.currentTime >= 2) {
+		if (isMainAudioSongPreloaded === false && $nextAudioElement.currentTime >= 2) {
 			isMainAudioSongPreloaded = true
 
 			let nextSongToPlay = getSongToPlay($playbackCursor[0] + 1)
 
-			mainAudioElement.src = escapeString(nextSongToPlay['SourceFile'])
+			$mainAudioElement.src = escapeString(nextSongToPlay['SourceFile'])
 		}
 
-		if (isMainAudioPlaying === false && nextAudioElement.currentTime >= nextAudioElement.duration - prePlayTime) {
+		if (isMainAudioPlaying === false && $nextAudioElement.currentTime >= $nextAudioElement.duration - prePlayTime) {
 			$playbackCursor = [$playbackCursor[0] + 1, false]
 			isMainAudioPlaying = true
 			isNextAudioPlaying = false
-			currentAudioElement = mainAudioElement
-			mainAudioElement.play()
+			$currentAudioElement = $mainAudioElement
+			$mainAudioElement.play()
 			isNextAudioSongPreloaded = false
 		}
 	}
 </script>
 
-<audio id="main" on:pause={() => ($isPlaying = false)} on:timeupdate={() => mainAudioTimeUpdate()}>
-	<!-- on:play={() => ($isPlaying = true)} -->
-	<!-- on:ended={() => nextSong()} -->
+<audio id="main" on:timeupdate={() => mainAudioTimeUpdate()} on:pause={() => checkIfPlaying()} on:play={() => checkIfPlaying()}>
 	<track kind="captions" />
 </audio>
 
-<audio id="next" on:pause={() => ($isPlaying = false)} on:timeupdate={() => nextAudioTimeUpdate()}>
-	<!-- on:play={() => ($isPlaying = true)} -->
-	<!-- on:ended={() => nextSong()} -->
+<audio id="next" on:timeupdate={() => nextAudioTimeUpdate()} on:pause={() => checkIfPlaying()} on:play={() => checkIfPlaying()}>
 	<track kind="captions" />
 </audio>
 

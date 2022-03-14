@@ -1,18 +1,12 @@
 <script lang="ts">
-	import { isPlaying, playerElement } from '../../store/final.store'
-
-	let player = undefined
+	import { isPlaying, currentAudioElement } from '../../store/final.store'
 
 	function togglePlay() {
-		if (player === undefined) {
-			playerElement.subscribe(value => (player = value))()
-		}
-
 		if ($isPlaying) {
-			player.pause()
+			$currentAudioElement.pause()
 		} else {
-			if (player.src !== '') {
-				player.play()
+			if ($currentAudioElement.src !== '') {
+				$currentAudioElement.play()
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-import { playbackCursor, playbackStore, playerElement } from '../store/final.store'
+import { playbackCursor, playbackStore, currentAudioElement } from '../store/final.store'
 
 let player = undefined
 
@@ -10,7 +10,7 @@ export default function () {
 	playbackStore.subscribe(value => (playbackStoreValue = value))()
 
 	if (player === undefined) {
-		playerElement.subscribe(value => (player = value))()
+		currentAudioElement.subscribe(value => (player = value))()
 	}
 
 	if (player.currentTime <= 2) {
