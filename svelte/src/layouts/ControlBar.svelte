@@ -11,6 +11,7 @@
 	import type { SongType } from '../types/song.type'
 
 	import { context, source } from '../store/equalizer.store'
+
 	import {
 		albumPlayingIdStore,
 		isPlaying,
@@ -32,6 +33,7 @@
 	import generateId from '../functions/generateId.fn'
 	import { hash } from '../functions/hashString.fn'
 	import { isFileExistIPC } from '../services/ipc.service'
+	import { currentPlayerTime } from '../store/player.store'
 
 	let progress: number = 0
 
@@ -53,39 +55,61 @@
 	let isMainAudioSongPreloaded = false
 	let isNextAudioSongPreloaded = false
 
-	$: console.log($currentAudioElement)
-
 	$: {
-		if ($isPlaying) {
-			navigator.mediaSession.playbackState = 'playing'
-		} else {
-			navigator.mediaSession.playbackState = 'paused'
+		if ($currentPlayerTime !== undefined) {
+			durationChanged($currentPlayerTime)
 		}
 	}
 
 	$: {
-		if ($mainAudioElement !== undefined && $context === undefined) {
-			$context = new window.AudioContext()
-			$source = $context.createMediaElementSource($mainAudioElement)
+		if ($playingSongStore !== undefined) {
+			currentSong = $playingSongStore
+
+			updateSongData(currentSong)
 		}
 	}
 
-	$: if ($currentAudioElement === undefined && $mainAudioElement !== undefined) {
-		$currentAudioElement = $mainAudioElement
-	}
-
-	$: playSong($playbackCursor)
-
-	$: {
-		// Updates the song time based of the user seeking in the player progress component.
-		if ($updateSongProgress !== -1) {
-			songTime = {
-				currentTime: parseDuration($updateSongProgress),
-				duration: parseDuration(currentSong['Duration']),
-				timeLeft: parseDuration(currentSong['Duration'] - $updateSongProgress)
-			}
+	function updateSongData(song: SongType) {
+		songTime = {
+			currentTime: parseDuration($currentPlayerTime),
+			duration: parseDuration(song.Duration),
+			timeLeft: parseDuration(song.Duration - $currentPlayerTime)
 		}
 	}
+
+	// $: console.log($currentAudioElement)
+
+	// $: {
+	// 	if ($isPlaying) {
+	// 		navigator.mediaSession.playbackState = 'playing'
+	// 	} else {
+	// 		navigator.mediaSession.playbackState = 'paused'
+	// 	}
+	// }
+
+	// $: {
+	// 	if ($mainAudioElement !== undefined && $context === undefined) {
+	// 		$context = new window.AudioContext()
+	// 		$source = $context.createMediaElementSource($mainAudioElement)
+	// 	}
+	// }
+
+	// $: if ($currentAudioElement === undefined && $mainAudioElement !== undefined) {
+	// 	$currentAudioElement = $mainAudioElement
+	// }
+
+	// $: playSong($playbackCursor)
+
+	// $: {
+	// 	// Updates the song time based of the user seeking in the player progress component.
+	// 	if ($updateSongProgress !== -1) {
+	// 		songTime = {
+	// 			currentTime: parseDuration($updateSongProgress),
+	// 			duration: parseDuration(currentSong['Duration']),
+	// 			timeLeft: parseDuration(currentSong['Duration'] - $updateSongProgress)
+	// 		}
+	// 	}
+	// }
 
 	function checkIfPlaying() {
 		$isPlaying = $mainAudioElement.paused === false || $nextAudioElement.paused === false
@@ -152,26 +176,23 @@
 		return $playbackStore[index]
 	}
 
-	onMount(() => {
-		$mainAudioElement = document.querySelector('audio#main')
-		$nextAudioElement = document.querySelector('audio#next')
-	})
+	function durationChanged(currentTime) {
+		let duration = $playingSongStore.Duration
 
-	function durationChanged() {
 		// Rounds to 2 decimals.
-		progress = Math.round(((100 / currentSong['Duration']) * $currentAudioElement.currentTime + Number.EPSILON) * 100) / 100
+		progress = Math.round(((100 / duration) * currentTime + Number.EPSILON) * 100) / 100
 
 		progress = progress >= 100 ? 100 : progress
 
 		document.documentElement.style.setProperty('--song-time', `${progress}%`)
 
 		songTime = {
-			currentTime: parseDuration($currentAudioElement.currentTime),
-			duration: parseDuration(currentSong['Duration']),
-			timeLeft: parseDuration(currentSong['Duration'] - $currentAudioElement.currentTime)
+			currentTime: parseDuration(currentTime),
+			duration: parseDuration(duration),
+			timeLeft: parseDuration(duration - currentTime)
 		}
 	}
-
+/*
 	function mainAudioTimeUpdate() {
 		if (isMainAudioPlaying === true) {
 			durationChanged()
@@ -217,17 +238,10 @@
 			isNextAudioSongPreloaded = false
 		}
 	}
+	 */
 </script>
 
-<audio id="main" on:timeupdate={() => mainAudioTimeUpdate()} on:pause={() => checkIfPlaying()} on:play={() => checkIfPlaying()}>
-	<track kind="captions" />
-</audio>
-
-<audio id="next" on:timeupdate={() => nextAudioTimeUpdate()} on:pause={() => checkIfPlaying()} on:play={() => checkIfPlaying()}>
-	<track kind="captions" />
-</audio>
-
-<player-svlt>
+<control-bar-svlt>
 	{#if rootDir}
 		<AlbumArt id={generateId()} albumId={hash(rootDir)} observe={false} style="height:64px;width:64px;cursor:pointer" />
 	{/if}
@@ -249,12 +263,12 @@
 	<song-time-left class="song-time">
 		-{songTime.timeLeft}
 	</song-time-left>
-</player-svlt>
+</control-bar-svlt>
 
 <style>
-	player-svlt {
+	control-bar-svlt {
 		z-index: 3;
-		grid-area: player-svlt;
+		grid-area: control-bar-svlt;
 		display: flex;
 		align-items: center;
 		background-color: var(--high-color);
@@ -263,13 +277,6 @@
 		transition-property: background-color, color;
 		transition-duration: 300ms;
 		transition-timing-function: ease-in-out;
-	}
-
-	audio {
-		display: none;
-		position: fixed;
-		top: 0;
-		left: 0;
 	}
 
 	player-buttons {

@@ -5,6 +5,7 @@
 
 	import {
 		albumPlayingIdStore,
+		playingSongStore,
 		selectedAlbumId,
 		selectedSongsStore,
 		songListItemElement,
@@ -20,12 +21,12 @@
 	export let song: SongType
 	export let index: number
 
-	let isSongPlaying = $songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
+	let isSongPlaying = $playingSongStore.ID === song.ID && $selectedAlbumId === $albumPlayingIdStore
 	let isDisabled = false
 	let gridStyle = ''
 
 	$: {
-		isSongPlaying = $songPlayingIdStore === song.ID && $selectedAlbumId === $albumPlayingIdStore
+		isSongPlaying = $playingSongStore.ID === song.ID && $selectedAlbumId === $albumPlayingIdStore
 	}
 
 	$: {
@@ -81,13 +82,13 @@
 			<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
 		{:else if tag.name === 'Title'}
 			<SongTag
-				data="{song[tag.name]||''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
+				data="{song[tag.name] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
 				customStyle="display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;overflow:hidden;max-height:22px;"
 				tagName={tag.name}
 				align={tag?.align?.toLowerCase()}
 			/>
 		{:else}
-			<SongTag data={song[tag.name]||''} tagName={tag.name} align={tag?.align?.toLowerCase()} />
+			<SongTag data={song[tag.name] || ''} tagName={tag.name} align={tag?.align?.toLowerCase()} />
 		{/if}
 	{/each}
 </song-list-item>

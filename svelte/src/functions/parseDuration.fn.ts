@@ -1,4 +1,8 @@
 export default function parseDuration(duration: number) {
+	if (duration === undefined || isNaN(duration)) {
+		return '00:00'
+	}
+
 	if (Math.sign(duration) === -1) {
 		return '-00:00'
 	}

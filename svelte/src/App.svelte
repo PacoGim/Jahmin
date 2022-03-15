@@ -25,14 +25,17 @@
 	import PromptService from './svelte-services/PromptService.svelte'
 	import ConfirmService from './svelte-services/ConfirmService.svelte'
 	import RangeInputService from './svelte-services/RangeInputService.svelte'
+
 	import StatusBar from './layouts/StatusBar.svelte'
 	import Navigation from './layouts/Navigation.svelte'
-	import Player from './layouts/Player.svelte'
+	import ControlBar from './layouts/ControlBar.svelte'
 	import HomeLayout from './layouts/main/HomeLayout.svelte'
 
 	import 'tippy.js/dist/tippy.css'
-	import 'tippy.js/dist/svg-arrow.css';
-	import 'tippy.js/animations/scale-subtle.css';
+	import 'tippy.js/dist/svg-arrow.css'
+	import 'tippy.js/animations/scale-subtle.css'
+	import AudioPlayer from './layouts/AudioPlayer.svelte'
+	import EventsHandlerMiddleware from './middleware/EventsHandlerMiddleware.svelte'
 
 	let appIdleDebounce = getAppIdleDebounce()
 
@@ -110,10 +113,13 @@
 <PlayerMiddleware />
 <IpcMiddleware />
 <EqualizerMiddleware />
+<EventsHandlerMiddleware />
+
+<AudioPlayer />
 
 <main-app>
 	<Navigation />
-	<Player />
+	<ControlBar />
 	<StatusBar />
 	<current-window-svlt>
 		{#if $layoutToShow === 'Home'}
@@ -142,7 +148,7 @@
 
 		grid-template-areas:
 			'navigation-svlt current-window-svlt'
-			'navigation-svlt player-svlt'
+			'navigation-svlt control-bar-svlt'
 			'statusbar-svlt statusbar-svlt';
 	}
 
