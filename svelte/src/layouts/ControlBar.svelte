@@ -22,7 +22,7 @@
 		updateSongProgress,
 		currentAudioElement,
 		mainAudioElement,
-		nextAudioElement
+		altAudioElement
 	} from '../store/final.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
@@ -112,7 +112,7 @@
 	// }
 
 	function checkIfPlaying() {
-		$isPlaying = $mainAudioElement.paused === false || $nextAudioElement.paused === false
+		$isPlaying = $mainAudioElement.paused === false || $altAudioElement.paused === false
 	}
 
 	async function playSong(playbackCursor: [number, boolean]) {
@@ -146,7 +146,7 @@
 
 		if (playbackCursor[1] === true) {
 			$mainAudioElement.addEventListener('canplay', function handler() {
-				$nextAudioElement.src = ''
+				$altAudioElement.src = ''
 
 				isNextAudioPlaying = false
 				$currentAudioElement = $mainAudioElement

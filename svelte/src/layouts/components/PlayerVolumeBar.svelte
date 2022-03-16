@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { keyDown, mainAudioElement, nextAudioElement, playerElement } from '../../store/final.store'
+	import { keyDown, mainAudioElement, altAudioElement } from '../../store/final.store'
 
 	let hasVolumeFromStorageLoaded: boolean = false
 
 	let saveVolumeDebounce: NodeJS.Timeout = undefined
 
-	$: if (hasVolumeFromStorageLoaded === false && $mainAudioElement !== undefined && $nextAudioElement !== undefined) {
+	$: if (hasVolumeFromStorageLoaded === false && $mainAudioElement !== undefined && $altAudioElement !== undefined) {
 		hasVolumeFromStorageLoaded = true
 		loadVolumeFromLocalStorage()
 	}
@@ -38,7 +38,7 @@
 
 	function setAudioElementVolume(newVolume: number) {
 		$mainAudioElement.volume = newVolume
-		$nextAudioElement.volume = newVolume
+		$altAudioElement.volume = newVolume
 	}
 
 	function updateVolumeBarVisual(newVolume: number) {

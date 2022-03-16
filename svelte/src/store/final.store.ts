@@ -56,7 +56,7 @@ export let selectedOption: Writable<
 export let selectedOptionSection: Writable<string> = writable('')
 
 export let mainAudioElement: Writable<HTMLAudioElement> = writable(undefined)
-export let nextAudioElement: Writable<HTMLAudioElement> = writable(undefined)
+export let altAudioElement: Writable<HTMLAudioElement> = writable(undefined)
 export let currentAudioElement: Writable<HTMLAudioElement> = writable(undefined)
 
 /********************** Keyboard Events **********************/
