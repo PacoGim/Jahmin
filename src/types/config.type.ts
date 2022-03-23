@@ -19,6 +19,7 @@ type UserOptionsType = {
 	gridGap?: number
 	artSize?: number
 	contrastRatio?: number
+	fontSize?: number
 }
 
 export enum ThemeOptions {

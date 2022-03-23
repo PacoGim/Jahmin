@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadContextMenu = void 0;
 const electron_1 = require("electron");
+const hashString_fn_1 = require("../functions/hashString.fn");
+const albumArt_service_1 = require("./albumArt.service");
+const config_service_1 = require("./config.service");
 const sendWebContents_service_1 = require("./sendWebContents.service");
 const songSync_service_1 = require("./songSync.service");
 const storage_service_1 = require("./storage.service");
@@ -159,14 +162,16 @@ function getAlbumContextMenuTemplate(data) {
         label: `Reload Album Art`,
         click: () => {
             if (album) {
+                let albumId = (0, hashString_fn_1.hash)(album.RootDir, 'text');
+                (0, albumArt_service_1.getAlbumArt)(albumId, (0, config_service_1.getConfig)().userOptions.artSize || 192, null, false, true);
                 /* 		getAlbumArt(album.RootDir, null,null, false, true).then(result => {
-                            sendWebContents('new-art', {
-                                success: result !== undefined,
-                                id: album?.ID,
-                                filePath: result?.filePath,
-                                fileType: result?.fileType
-                            })
-                        }) */
+                    sendWebContents('new-art', {
+                        success: result !== undefined,
+                        id: album?.ID,
+                        filePath: result?.filePath,
+                        fileType: result?.fileType
+                    })
+                }) */
             }
         }
     });

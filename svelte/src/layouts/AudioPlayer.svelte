@@ -1,18 +1,26 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { setWaveSource } from '../services/waveform.service'
+	import { context, sourceAltAudio, sourceMainAudio } from '../store/equalizer.store'
 
 	// Store
-	import { albumPlayingIdStore, mainAudioElement, altAudioElement, playbackStore, playingSongStore } from '../store/final.store'
+	import {
+		currentAudioElement,
+		albumPlayingIdStore,
+		mainAudioElement,
+		altAudioElement,
+		playbackStore,
+		playingSongStore
+	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
 
-	let currentAudioElement: HTMLAudioElement
+	// let currentAudioElement: HTMLAudioElement
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
 	// Default is 250ms -> (250ms / 1000ms = 0.25s).
-	const smoothTimeMs = 30000 / 1000
+	const smoothTimeMs = 250 / 1000
 
 	let audioElements = {
 		main: {
@@ -24,6 +32,18 @@
 			domElement: undefined,
 			isPlaying: false,
 			isPreloaded: false
+		}
+	}
+
+	$: {
+		if ($mainAudioElement !== undefined && $context === undefined) {
+			$context = new window.AudioContext()
+
+			// Source for the main audio element.
+			$sourceMainAudio = $context.createMediaElementSource($mainAudioElement)
+
+			// Source for the alt audio element.
+			$sourceAltAudio = $context.createMediaElementSource($altAudioElement)
 		}
 	}
 
@@ -60,8 +80,8 @@
 	}
 
 	function setCurrentAudioElement(audioElement: HTMLAudioElement) {
-		currentAudioElement = audioElement
-		currentAudioElement.addEventListener('timeupdate', handleTimeUpdate)
+		$currentAudioElement = audioElement
+		$currentAudioElement.addEventListener('timeupdate', handleTimeUpdate)
 	}
 
 	function handleTimeUpdate() {
@@ -73,7 +93,10 @@
 		const currentTime /* in seconds */ = this.currentTime
 		const duration /* in seconds */ = this.duration
 
-		$currentPlayerTime = currentTime
+		// Update time only if the current audio element is playing.
+		if (audioElements[this.id].isPlaying === true) {
+			$currentPlayerTime = currentTime
+		}
 
 		// If the current time is greater than one second, then the next audio element is preloaded.
 		if (currentTime > 1 && audioElements[altAudioName].isPreloaded === false) {

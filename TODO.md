@@ -1,5 +1,5 @@
 ## TODO
-* Fix player juggle.
+* Desaturate Range input service confirm button when not valid.
 * In song amount selector menu add a tick to the selected option.
 * Add a played counter.
 * Prevent user from updating until batch is done.

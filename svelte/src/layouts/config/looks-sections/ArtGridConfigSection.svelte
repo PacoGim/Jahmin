@@ -24,8 +24,8 @@
 			onConfirm: newArtSize => {
 				saveArtSize(newArtSize)
 			},
-			onCancel: newArtSize => {
-				saveArtSize(newArtSize)
+			onCancel: previousArtSize => {
+				saveArtSize(previousArtSize)
 				$layoutToShow = 'Config'
 			}
 		})

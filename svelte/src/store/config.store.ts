@@ -12,6 +12,7 @@ export let groupByConfig: Writable<string[]> = writable(parseJson(localStorage.g
 export let groupByValuesConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupByValues')))
 export let gridGapConfig: Writable<number> = writable(Number(localStorage.getItem('GridGap')))
 export let contrastRatioConfig: Writable<number> = writable(Number(localStorage.getItem('ContrastRatio')))
+export let fontSizeConfig: Writable<number> = writable(Number(localStorage.getItem('FontSize')))
 export let directoriesConfig: Writable<{ add: string[]; exclude: string[] }> = writable(
 	parseJson(localStorage.getItem('Directories'))
 )

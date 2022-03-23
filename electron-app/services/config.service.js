@@ -18,7 +18,7 @@ const getConfigPathFile = () => {
     return configFilePath;
 };
 function getConfig() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
     let config;
     if (fs_1.default.existsSync(getConfigPathFile())) {
         try {
@@ -44,26 +44,29 @@ function getConfig() {
         if (((_e = config === null || config === void 0 ? void 0 : config.userOptions) === null || _e === void 0 ? void 0 : _e.contrastRatio) === undefined) {
             config.userOptions.contrastRatio = (_f = getDefaultConfigFile().userOptions) === null || _f === void 0 ? void 0 : _f.contrastRatio;
         }
-        if (((_g = config === null || config === void 0 ? void 0 : config.userOptions) === null || _g === void 0 ? void 0 : _g.songAmount) === undefined) {
-            config.userOptions.songAmount = (_h = getDefaultConfigFile().userOptions) === null || _h === void 0 ? void 0 : _h.songAmount;
+        if (((_g = config === null || config === void 0 ? void 0 : config.userOptions) === null || _g === void 0 ? void 0 : _g.fontSize) === undefined) {
+            config.userOptions.fontSize = (_h = getDefaultConfigFile().userOptions) === null || _h === void 0 ? void 0 : _h.fontSize;
         }
-        if (((_j = config === null || config === void 0 ? void 0 : config.userOptions) === null || _j === void 0 ? void 0 : _j.artSize) === undefined) {
-            config.userOptions.artSize = (_k = getDefaultConfigFile().userOptions) === null || _k === void 0 ? void 0 : _k.artSize;
+        if (((_j = config === null || config === void 0 ? void 0 : config.userOptions) === null || _j === void 0 ? void 0 : _j.songAmount) === undefined) {
+            config.userOptions.songAmount = (_k = getDefaultConfigFile().userOptions) === null || _k === void 0 ? void 0 : _k.songAmount;
         }
-        if (((_l = config === null || config === void 0 ? void 0 : config.userOptions) === null || _l === void 0 ? void 0 : _l.gridGap) === undefined) {
-            config.userOptions.gridGap = (_m = getDefaultConfigFile().userOptions) === null || _m === void 0 ? void 0 : _m.gridGap;
+        if (((_l = config === null || config === void 0 ? void 0 : config.userOptions) === null || _l === void 0 ? void 0 : _l.artSize) === undefined) {
+            config.userOptions.artSize = (_m = getDefaultConfigFile().userOptions) === null || _m === void 0 ? void 0 : _m.artSize;
         }
-        if (((_o = config === null || config === void 0 ? void 0 : config.userOptions) === null || _o === void 0 ? void 0 : _o.theme) === undefined) {
-            config.userOptions.theme = (_p = getDefaultConfigFile().userOptions) === null || _p === void 0 ? void 0 : _p.theme;
+        if (((_o = config === null || config === void 0 ? void 0 : config.userOptions) === null || _o === void 0 ? void 0 : _o.gridGap) === undefined) {
+            config.userOptions.gridGap = (_p = getDefaultConfigFile().userOptions) === null || _p === void 0 ? void 0 : _p.gridGap;
+        }
+        if (((_q = config === null || config === void 0 ? void 0 : config.userOptions) === null || _q === void 0 ? void 0 : _q.theme) === undefined) {
+            config.userOptions.theme = (_r = getDefaultConfigFile().userOptions) === null || _r === void 0 ? void 0 : _r.theme;
         }
         if ((config === null || config === void 0 ? void 0 : config.directories) === undefined) {
             config.directories = getDefaultConfigFile().directories;
         }
-        if (((_q = config === null || config === void 0 ? void 0 : config.directories) === null || _q === void 0 ? void 0 : _q.add) === undefined) {
-            config.directories.add = (_r = getDefaultConfigFile().directories) === null || _r === void 0 ? void 0 : _r.add;
+        if (((_s = config === null || config === void 0 ? void 0 : config.directories) === null || _s === void 0 ? void 0 : _s.add) === undefined) {
+            config.directories.add = (_t = getDefaultConfigFile().directories) === null || _t === void 0 ? void 0 : _t.add;
         }
-        if (((_s = config === null || config === void 0 ? void 0 : config.directories) === null || _s === void 0 ? void 0 : _s.exclude) === undefined) {
-            config.directories.exclude = (_t = getDefaultConfigFile().directories) === null || _t === void 0 ? void 0 : _t.exclude;
+        if (((_u = config === null || config === void 0 ? void 0 : config.directories) === null || _u === void 0 ? void 0 : _u.exclude) === undefined) {
+            config.directories.exclude = (_v = getDefaultConfigFile().directories) === null || _v === void 0 ? void 0 : _v.exclude;
         }
     }
     return config;
@@ -97,7 +100,8 @@ function getDefaultConfigFile() {
             theme: config_type_1.ThemeOptions.Auto,
             artSize: 128,
             gridGap: 16,
-            contrastRatio: 4.5
+            contrastRatio: 4.5,
+            fontSize: 16
         },
         songListTags: [
             {

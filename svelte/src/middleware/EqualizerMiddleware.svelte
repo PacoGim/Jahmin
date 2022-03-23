@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { getEqualizersIPC, saveConfig } from '../services/ipc.service'
 	import { equalizerIdConfig } from '../store/config.store'
-	import { context, equalizerProfiles, selectedEqId, source, equalizer } from '../store/equalizer.store'
+	import {
+		context,
+		equalizerProfiles,
+		selectedEqId,
+		sourceMainAudio,
+		sourceAltAudio,
+		equalizer
+	} from '../store/equalizer.store'
 
 	let equalizerGainValues = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
 	let isFirstSelectedEqIdChange = true
@@ -24,9 +31,11 @@
 		}
 	}
 
+	// Loads the equalizer for both the main and alt audio player.
 	async function loadEqualizer(): Promise<void> {
 		return new Promise((resolve, reject) => {
-			let audioNode = undefined
+			let audioNodeMainAudio = undefined
+			let audioNodeAltAudio = undefined
 
 			for (const [index, equalizerGainValue] of equalizerGainValues.entries()) {
 				const biquadFilter = $context.createBiquadFilter()
@@ -36,13 +45,22 @@
 
 				$equalizer[equalizerGainValue] = biquadFilter
 
+				// Connects the equalizer filters to the audio node.
 				if (index === 0) {
-					audioNode = $source.connect(biquadFilter)
+					// If the index is 0, then the audio node is opened and ready from source.
+					audioNodeMainAudio = $sourceMainAudio.connect(biquadFilter)
+					audioNodeAltAudio = $sourceAltAudio.connect(biquadFilter)
 				} else if (index === equalizerGainValues.length - 1) {
-					audioNode = audioNode.connect(biquadFilter)
-					audioNode = audioNode.connect($context.destination)
+					// If the index is the last, then the audio node is closed and ready to be connected to the destination.
+					audioNodeMainAudio = audioNodeMainAudio.connect(biquadFilter)
+					audioNodeMainAudio = audioNodeMainAudio.connect($context.destination)
+
+					audioNodeAltAudio = audioNodeAltAudio.connect(biquadFilter)
+					audioNodeAltAudio = audioNodeAltAudio.connect($context.destination)
 				} else {
-					audioNode = audioNode.connect(biquadFilter)
+					// If the index is not 0 or the last, then the audio node is connected to the next filter.
+					audioNodeMainAudio = audioNodeMainAudio.connect(biquadFilter)
+					audioNodeAltAudio = audioNodeAltAudio.connect(biquadFilter)
 				}
 			}
 

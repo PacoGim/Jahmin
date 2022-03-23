@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import { currentAudioElement, updateSongProgress } from '../../store/final.store'
+	import { currentAudioElement, playingSongStore, updateSongProgress } from '../../store/final.store'
 
 	import type { SongType } from '../../types/song.type'
 

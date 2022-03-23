@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { groupSongsIPC } from '../../services/ipc.service'
-	import { groupByConfig, groupByValuesConfig } from '../../store/config.store'
+	import { fontSizeConfig, groupByConfig, groupByValuesConfig } from '../../store/config.store'
 
 	import ArtGrid from './ArtGrid.svelte'
 
@@ -9,6 +9,8 @@
 	import SongListBackground from './SongListBackground.svelte'
 	import TagEdit from './TagEdit.svelte'
 	import TagGroup from './TagGroup.svelte'
+
+	$: if ($fontSizeConfig !== undefined) document.documentElement.style.setProperty('--font-size', `${$fontSizeConfig}px`)
 
 	onMount(() => {
 		groupSongsIPC($groupByConfig, $groupByValuesConfig)

@@ -12,7 +12,8 @@
 		groupByValuesConfig,
 		gridGapConfig,
 		contrastRatioConfig,
-		directoriesConfig
+		directoriesConfig,
+		fontSizeConfig
 	} from '../store/config.store'
 
 	import type { ConfigType } from '../types/config.type'
@@ -27,10 +28,13 @@
 			$artSizeConfig = syncConfigLocalStorage('AlbumArtSize', config.userOptions.artSize)
 			$songListTagsConfig = syncConfigLocalStorage('SongListTags', config.songListTags)
 			$songAmountConfig = syncConfigLocalStorage('SongAmount', config.userOptions.songAmount)
+			$contrastRatioConfig = syncConfigLocalStorage('ContrastRatio', config.userOptions.contrastRatio)
+			$fontSizeConfig = syncConfigLocalStorage('FontSize', config.userOptions.fontSize)
+			$gridGapConfig = syncConfigLocalStorage('GridGap', config.userOptions.gridGap)
+
 			$groupByConfig = syncConfigLocalStorage('GroupBy', config.group.groupBy)
 			$groupByValuesConfig = syncConfigLocalStorage('GroupByValues', config.group.groupByValues)
-			$gridGapConfig = syncConfigLocalStorage('GridGap', config.userOptions.gridGap)
-			$contrastRatioConfig = syncConfigLocalStorage('ContrastRatio', config.userOptions.contrastRatio)
+
 			$directoriesConfig = syncConfigLocalStorage('Directories', config.directories)
 
 			document.documentElement.style.setProperty('--art-dimension', `${$artSizeConfig}px`)

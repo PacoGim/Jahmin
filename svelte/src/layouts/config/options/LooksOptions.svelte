@@ -1,10 +1,12 @@
 <script lang="ts">
 	import ArtGridConfig from '../looks-sections/ArtGridConfigSection.svelte'
 	import ColorContrastConfig from '../looks-sections/ColorContrastConfigSection.svelte'
+	import FontSizeConfigSection from '../looks-sections/FontSizeConfigSection.svelte'
 	import ThemeConfig from '../looks-sections/LooksConfigSection.svelte'
 </script>
 
 <looks-options-svlt>
+	<FontSizeConfigSection />
 	<ThemeConfig />
 	<ArtGridConfig />
 	<ColorContrastConfig />

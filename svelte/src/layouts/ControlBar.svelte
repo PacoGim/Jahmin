@@ -10,7 +10,7 @@
 
 	import type { SongType } from '../types/song.type'
 
-	import { context, source } from '../store/equalizer.store'
+	// import { context, source } from '../store/equalizer.store'
 
 	import {
 		albumPlayingIdStore,

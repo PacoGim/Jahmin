@@ -48,11 +48,21 @@ const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${e
 const notCompress = ['mp4', 'webm', 'apng', 'gif']
 const videoFormats = ['mp4', 'webm']
 
+/**
+ *
+ * @param albumId Stringified album root directory.
+ * @param artSize Size of the art to compress.
+ * @param elementId Id of the element if requiered (to know wich element requires the new image).
+ * @param forceImage Force getting an image and not video.
+ * @param forceNewCheck Ignores if an image already exists.
+ * @returns Promise<{success: boolean, filePath: string, fileType: string}>
+ */
 export function getAlbumArt(
 	albumId: string,
 	artSize: number | null,
 	elementId: string | null,
-	forceImage: boolean = false
+	forceImage: boolean = false,
+	forceNewCheck: boolean = false
 ): Promise<{ fileType: string; filePath: string; isNew: boolean } | undefined> {
 	return new Promise((resolve, reject) => {
 		let album = getStorageMap().get(albumId)
@@ -71,7 +81,7 @@ export function getAlbumArt(
 		let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
 
 		// If exists resolve right now the already compressed IMAGE ART
-		if (fs.existsSync(artOutputPath)) {
+		if (forceNewCheck === false && fs.existsSync(artOutputPath)) {
 			return sendWebContents('new-art', {
 				artSize,
 				success: true,

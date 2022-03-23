@@ -52,7 +52,7 @@ export let triggerScrollToSongEvent: Writable<number> = writable(0)
 export let layoutToShow: Writable<'Home' | 'Search' | 'Config'> = writable('Home')
 export let selectedOption: Writable<
 	'Appearance' | 'Library' | 'Groups' | 'Equalizer' | 'Art Grid' | 'Song List' | 'Song Info' | 'Volume' | string
-> = writable('Library')
+> = writable('Looks')
 export let selectedOptionSection: Writable<string> = writable('')
 
 export let mainAudioElement: Writable<HTMLAudioElement> = writable(undefined)
