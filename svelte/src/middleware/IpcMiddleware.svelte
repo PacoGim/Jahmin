@@ -4,7 +4,7 @@
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { sendNewArtQueueProgressIPC, saveConfig } from '../services/ipc.service'
+	import { sendNewArtQueueProgressIPC, saveConfig, compressAlbumArt } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { directoriesConfig, groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
 	import {
@@ -83,27 +83,46 @@
 				sendNewArtQueueProgressIPC()
 			}, 1000)
 		})
+
+		ipcRenderer.on('get-art-sizes', (event, data) => {
+			let artSizes = []
+
+			document.querySelectorAll(`art-svlt[data-albumid="${data.albumId}"]`).forEach((el: HTMLElement) => {
+				artSizes.push(el.dataset.artsize)
+			})
+
+			compressAlbumArt(data.albumId, artSizes, true)
+		})
 	})
 
 	function handleNewArt(data) {
-		setArtToSrcFn(data)
+		// console.log(data)
 
-		let artMapObject = $albumArtMapStore.get(data.albumId)
+		let element = document.querySelector(`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`)
 
-		let artData = {
-			version: Date.now()
-		}
+		let elementImg = element.querySelector('img')
 
-		artData[data.fileType] = {
-			[data.artSize]: {
-				filePath: data.artInputPath
-			}
-		}
+		elementImg.src = data.artPath
+		element.dataset.loaded = true
 
-		if (artMapObject) {
-			artData = Object.assign(artMapObject, artData)
-		}
+		// setArtToSrcFn(data)
 
-		$albumArtMapStore = $albumArtMapStore.set(data.albumId, artData)
+		// let artMapObject = $albumArtMapStore.get(data.albumId)
+
+		// let artData = {
+		// 	version: Date.now()
+		// }
+
+		// artData[data.fileType] = {
+		// 	[data.artSize]: {
+		// 		filePath: data.artInputPath
+		// 	}
+		// }
+
+		// if (artMapObject) {
+		// 	artData = Object.assign(artMapObject, artData)
+		// }
+
+		// $albumArtMapStore = $albumArtMapStore.set(data.albumId, artData)
 	}
 </script>

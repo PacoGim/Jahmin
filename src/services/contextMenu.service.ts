@@ -1,7 +1,7 @@
 import { shell, Menu, BrowserWindow } from 'electron'
 import { MenuItemConstructorOptions } from 'electron/main'
 import { hash } from '../functions/hashString.fn'
-import { getAlbumArt } from './albumArt.service'
+import { compressAlbumArt } from './albumArt.service'
 import { getConfig } from './config.service'
 import { sendWebContents } from './sendWebContents.service'
 import { reloadAlbumData } from './songSync.service'
@@ -184,19 +184,10 @@ function getAlbumContextMenuTemplate(data: any) {
 	template.push({
 		label: `Reload Album Art`,
 		click: () => {
-			if (album) {
-				let albumId = hash(album.RootDir, 'text') as string
-
-				getAlbumArt(albumId, getConfig().userOptions.artSize || 192, null, false, true)
-
-				/* 		getAlbumArt(album.RootDir, null,null, false, true).then(result => {
-					sendWebContents('new-art', {
-						success: result !== undefined,
-						id: album?.ID,
-						filePath: result?.filePath,
-						fileType: result?.fileType
-					})
-				}) */
+			if (data.albumId) {
+				sendWebContents('get-art-sizes', {
+					albumId: data.albumId
+				})
 			}
 		}
 	})

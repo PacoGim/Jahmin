@@ -1,7 +1,7 @@
 <script lang="ts">
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import isElementInViewportFn from '../../../functions/isElementInViewport.fn'
-	import { getArtIPC, saveConfig } from '../../../services/ipc.service'
+	import { compressAlbumArt, saveConfig } from '../../../services/ipc.service'
 	import { artSizeConfig, gridGapConfig } from '../../../store/config.store'
 	import { albumListStore, layoutToShow, selectedOptionSection } from '../../../store/final.store'
 	import { rangeInputService } from '../../../store/service.store'
@@ -40,10 +40,10 @@
 		}).then(() => {
 			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
 				if (isElementInViewportFn(artElement)) {
-					getArtIPC(artElement.dataset.albumId, newArtSize, artElement.id)
+					compressAlbumArt(artElement.dataset.albumId, newArtSize)
 				} else {
 					setTimeout(() => {
-						getArtIPC(artElement.dataset.albumId, newArtSize, artElement.id)
+						compressAlbumArt(artElement.dataset.albumId, newArtSize)
 					}, 1000)
 				}
 			})

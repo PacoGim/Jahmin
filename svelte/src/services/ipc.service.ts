@@ -174,8 +174,8 @@ export function sendNewArtQueueProgressIPC(): void {
 	ipcRenderer.invoke('send-new-art-queue-progress')
 }
 
-export function getArtIPC(albumId, artSize, elementId) {
-	ipcRenderer.invoke('get-art', albumId, artSize, elementId)
+export function compressAlbumArt(albumId, artSize, forceNewCheck: boolean) {
+	ipcRenderer.invoke('handle-art-compression', albumId, artSize, forceNewCheck)
 }
 
 export function isFileExistIPC(filePath: string): Promise<boolean> {

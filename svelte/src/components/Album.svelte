@@ -9,6 +9,10 @@
 
 	export let album: AlbumType
 
+	let artSize = 0
+
+	let element
+
 	onMount(() => {
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 
@@ -17,11 +21,13 @@
 				scrollToAlbumFn(album.ID)
 			}, 100)
 		}
+
+		artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 	})
 </script>
 
-<album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''}>
-	<AlbumArt id={generateId()} albumId={album.ID} observe={true} style="height:inherit;width:inherit;cursor:pointer;" />
+<album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''} bind:this={element}>
+	<AlbumArt albumId={album.ID} {artSize} observer="addObserver" style="height:inherit;width:inherit;cursor:pointer;" />
 
 	<overlay-gradient />
 

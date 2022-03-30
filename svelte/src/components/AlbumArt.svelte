@@ -1,34 +1,83 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
-	import { getArtIPC } from '../services/ipc.service'
+	import setArtToSrcFn from '../functions/setArtToSrc.fn'
+	import { compressAlbumArt } from '../services/ipc.service'
 	import { artSizeConfig, songAmountConfig } from '../store/config.store'
+	import { albumArtMapStore } from '../store/final.store'
 
 	export let style
-	export let id
 	export let albumId
-	export let observe = false
+	export let observer: 'addObserver' | '!addObserver' = '!addObserver'
 
 	let dataLoaded = false
+
+	let artVersion = 0
+
+	export let artSize = undefined
 
 	let artType = 'image'
 	let element: HTMLElement = undefined
 
+	let isFirstAssing = true
+
 	$: verifyAlbumId(albumId)
+	/*
+	$: {
+		$albumArtMapStore
+		checkIfNewImage()
+	}
+
+	function checkIfNewImage() {
+		let albumArtData = $albumArtMapStore.get(albumId)
+
+		if (albumArtData === undefined) {
+			return
+		}
+
+		if (isFirstAssing) {
+			isFirstAssing = false
+			artVersion = albumArtData.version
+			return
+		}
+
+		if (albumArtData?.version > artVersion) {
+			console.log(albumArtData)
+			// console.log(albumArtData?.version, artVersion)
+			// setArtToSrcFn(albumArtData.art, element)
+		}
+
+		// console.log('checkIfNewImage',albumId)
+	}
+ */
 
 	onMount(() => {
-		element = document.querySelector(`#${CSS.escape(id)}`) as HTMLElement
-
-		let artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
-
-		element.setAttribute('data-album-id', albumId)
-
-		if (observe === true) {
-			addIntersectionObserver(albumId, id, artSize)
-		} else {
-			getArtIPC(albumId, artSize, id)
-		}
+		// element = document.querySelector(`#${CSS.escape(id)}`) as HTMLElement
+		// artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
+		// element.setAttribute('data-album-id', albumId)
+		// if (observer === 'addObserver') {
+		// 	addIntersectionObserver(albumId, artSize)
+		// } else {
+		// 	getArtIPC(albumId, artSize)
+		// }
 	})
+
+	$: handleAlbumArt(albumId, artSize)
+
+	function handleAlbumArt(albumId, artSize) {
+		if (albumId === undefined || artSize === 0) {
+			return
+		}
+
+		if (observer === 'addObserver') {
+			addIntersectionObserver(element, albumId, artSize)
+		} else {
+			// console.log('Not observing', albumId, artSize)
+			// getArtIPC(albumId, artSize)
+		}
+
+		// console.log('foo', albumId, artSize)
+	}
 
 	// If the element albumId mismatches the component albumId, then get new cover.
 	function verifyAlbumId(newAlbumId: string) {
@@ -37,12 +86,20 @@
 
 			element.setAttribute('data-album-id', newAlbumId)
 
-			getArtIPC(newAlbumId, artSize, element.id)
+			// getArtIPC(newAlbumId, artSize, element.id)
+			// getArtIPC(newAlbumId, artSize)
 		}
 	}
 </script>
 
-<art-svlt {id} {style} data-type={artType} data-loaded={dataLoaded}>
+<art-svlt
+	data-albumId={albumId}
+	data-artSize={artSize}
+	data-type={artType}
+	data-loaded={dataLoaded}
+	bind:this={element}
+	{style}
+>
 	<img alt="" />
 
 	<video autoplay loop>

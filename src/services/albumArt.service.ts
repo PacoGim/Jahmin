@@ -48,122 +48,39 @@ const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${e
 const notCompress = ['mp4', 'webm', 'apng', 'gif']
 const videoFormats = ['mp4', 'webm']
 
-/**
- *
- * @param albumId Stringified album root directory.
- * @param artSize Size of the art to compress.
- * @param elementId Id of the element if requiered (to know wich element requires the new image).
- * @param forceImage Force getting an image and not video.
- * @param forceNewCheck Ignores if an image already exists.
- * @returns Promise<{success: boolean, filePath: string, fileType: string}>
- */
-export function getAlbumArt(
-	albumId: string,
-	artSize: number | null,
-	elementId: string | null,
-	forceImage: boolean = false,
-	forceNewCheck: boolean = false
-): Promise<{ fileType: string; filePath: string; isNew: boolean } | undefined> {
+export function compressAlbumArt(albumId: string, artSizes: number[], forceNewCheck: boolean) {
 	return new Promise((resolve, reject) => {
+		artSizes = filterNumbers(artSizes)
+
 		let album = getStorageMap().get(albumId)
 
-		if (!album) {
-			return resolve(undefined)
-		}
+		// If album is not found, return.
+		if (!album) return resolve(undefined)
 
-		if (forceImage === true) {
-			validFormats = validFormats.filter(format => !videoFormats.includes(format))
-		}
+		artSizes.forEach(artSize => {
+			let artOutputDirPath = path.join(appDataPath(), 'art', String(artSize))
+			let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
 
-		let config = getConfig()
-		let dimension = artSize || config?.userOptions?.artSize || 128
-		let artOutputDirPath = path.join(appDataPath(), 'art', String(dimension))
-		let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
-
-		// If exists resolve right now the already compressed IMAGE ART
-		if (forceNewCheck === false && fs.existsSync(artOutputPath)) {
-			return sendWebContents('new-art', {
-				artSize,
-				success: true,
-				albumId,
-				artInputPath: artOutputPath,
-				fileType: 'image',
-				elementId
-			})
-		}
-
-		if (fs.existsSync(album.RootDir) === false) {
-			return resolve(undefined)
-		}
-
-		let allowedMediaFiles = getAllowedFiles(album)
-
-		if (allowedMediaFiles.length === 0) {
-			sendWebContents('new-art', {
-				artSize,
-				success: false,
-				elementId
-			})
-			return resolve(undefined)
-		}
-
-		let artInputPath = allowedMediaFiles[0]
-
-		// Resolves the best image/video found first, then it will be compressed and sent to renderer.
-		if (videoFormats.includes(getExtension(artInputPath))) {
-			sendWebContents('new-art', {
-				artSize,
-				success: true,
-				albumId,
-				artInputPath,
-				fileType: 'video',
-				elementId
-			})
-
-			artInputPath = allowedMediaFiles.filter(file => !notCompress.includes(getExtension(file)))[0]
-
-			if (artInputPath !== undefined) {
-				sendWebContents('new-art', {
+			if (forceNewCheck === false && fs.existsSync(artOutputPath)) {
+				return sendWebContents('new-art', {
 					artSize,
 					success: true,
 					albumId,
-					artInputPath,
-					fileType: 'image',
-					elementId
+					artPath: artOutputPath,
+					fileType: 'image'
 				})
 			}
-		} else {
-			sendWebContents('new-art', {
-				artSize,
-				success: true,
-				albumId,
-				artInputPath,
-				fileType: 'image',
-				elementId
-			})
-
-			if (forceImage === false && !notCompress.includes(getExtension(artInputPath))) {
-				compressImageQueue.unshift({
-					albumId,
-					elementId,
-					dimension,
-					artInputPath,
-					artOutputDirPath,
-					artOutputPath
-				})
-
-				if (compressImageQueue.length > maxCompressImageQueueLength) {
-					maxCompressImageQueueLength = compressImageQueue.length
-				}
-
-				if (isQueueRuning === false) {
-					isQueueRuning = true
-					sendArtQueueProgress()
-					runQueue()
-				}
-			}
-		}
+		})
 	})
+}
+
+/**
+ * @param {number} arrayToFilter
+ * @returns Filtered array.
+ * @description Removes all sizes that are not numbers, then changes the type to number.
+ */
+function filterNumbers(arrayToFilter: any[]) {
+	return arrayToFilter.filter(value => !isNaN(Number(value))).map(value => Number(value))
 }
 
 function runQueue() {

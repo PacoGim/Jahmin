@@ -3,11 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllowedFiles = exports.sendArtQueueProgress = exports.getAlbumArt = void 0;
+exports.getAllowedFiles = exports.sendArtQueueProgress = exports.compressAlbumArt = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const __1 = require("..");
-const config_service_1 = require("./config.service");
 const sendWebContents_service_1 = require("./sendWebContents.service");
 const storage_service_1 = require("./storage.service");
 const worker_service_1 = require("./worker.service");
@@ -35,106 +34,37 @@ const validNames = ['cover', 'folder', 'front', 'art', 'album'];
 const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
 const notCompress = ['mp4', 'webm', 'apng', 'gif'];
 const videoFormats = ['mp4', 'webm'];
-/**
- *
- * @param albumId Stringified album root directory.
- * @param artSize Size of the art to compress.
- * @param elementId Id of the element if requiered (to know wich element requires the new image).
- * @param forceImage Force getting an image and not video.
- * @param forceNewCheck Ignores if an image already exists.
- * @returns Promise<{success: boolean, filePath: string, fileType: string}>
- */
-function getAlbumArt(albumId, artSize, elementId, forceImage = false, forceNewCheck = false) {
+function compressAlbumArt(albumId, artSizes, forceNewCheck) {
     return new Promise((resolve, reject) => {
-        var _a;
+        artSizes = filterNumbers(artSizes);
         let album = (0, storage_service_1.getStorageMap)().get(albumId);
-        if (!album) {
+        // If album is not found, return.
+        if (!album)
             return resolve(undefined);
-        }
-        if (forceImage === true) {
-            validFormats = validFormats.filter(format => !videoFormats.includes(format));
-        }
-        let config = (0, config_service_1.getConfig)();
-        let dimension = artSize || ((_a = config === null || config === void 0 ? void 0 : config.userOptions) === null || _a === void 0 ? void 0 : _a.artSize) || 128;
-        let artOutputDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(dimension));
-        let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
-        // If exists resolve right now the already compressed IMAGE ART
-        if (forceNewCheck === false && fs_1.default.existsSync(artOutputPath)) {
-            return (0, sendWebContents_service_1.sendWebContents)('new-art', {
-                artSize,
-                success: true,
-                albumId,
-                artInputPath: artOutputPath,
-                fileType: 'image',
-                elementId
-            });
-        }
-        if (fs_1.default.existsSync(album.RootDir) === false) {
-            return resolve(undefined);
-        }
-        let allowedMediaFiles = getAllowedFiles(album);
-        if (allowedMediaFiles.length === 0) {
-            (0, sendWebContents_service_1.sendWebContents)('new-art', {
-                artSize,
-                success: false,
-                elementId
-            });
-            return resolve(undefined);
-        }
-        let artInputPath = allowedMediaFiles[0];
-        // Resolves the best image/video found first, then it will be compressed and sent to renderer.
-        if (videoFormats.includes(getExtension(artInputPath))) {
-            (0, sendWebContents_service_1.sendWebContents)('new-art', {
-                artSize,
-                success: true,
-                albumId,
-                artInputPath,
-                fileType: 'video',
-                elementId
-            });
-            artInputPath = allowedMediaFiles.filter(file => !notCompress.includes(getExtension(file)))[0];
-            if (artInputPath !== undefined) {
-                (0, sendWebContents_service_1.sendWebContents)('new-art', {
+        artSizes.forEach(artSize => {
+            let artOutputDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(artSize));
+            let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
+            if (forceNewCheck === false && fs_1.default.existsSync(artOutputPath)) {
+                return (0, sendWebContents_service_1.sendWebContents)('new-art', {
                     artSize,
                     success: true,
                     albumId,
-                    artInputPath,
-                    fileType: 'image',
-                    elementId
+                    artPath: artOutputPath,
+                    fileType: 'image'
                 });
             }
-        }
-        else {
-            (0, sendWebContents_service_1.sendWebContents)('new-art', {
-                artSize,
-                success: true,
-                albumId,
-                artInputPath,
-                fileType: 'image',
-                elementId
-            });
-            if (forceImage === false && !notCompress.includes(getExtension(artInputPath))) {
-                compressImageQueue.unshift({
-                    albumId,
-                    elementId,
-                    dimension,
-                    artInputPath,
-                    artOutputDirPath,
-                    artOutputPath
-                });
-                if (compressImageQueue.length > maxCompressImageQueueLength) {
-                    maxCompressImageQueueLength = compressImageQueue.length;
-                }
-                if (isQueueRuning === false) {
-                    isQueueRuning = true;
-                    sendArtQueueProgress();
-                    runQueue();
-                }
-            }
-        }
+        });
     });
 }
-exports.getAlbumArt = getAlbumArt;
+exports.compressAlbumArt = compressAlbumArt;
+/**
+ * @param {number} arrayToFilter
+ * @returns Filtered array.
+ * @description Removes all sizes that are not numbers, then changes the type to number.
+ */
+function filterNumbers(arrayToFilter) {
+    return arrayToFilter.filter(value => !isNaN(Number(value))).map(value => Number(value));
+}
 function runQueue() {
     let task = compressImageQueue.shift();
     if (task === undefined) {

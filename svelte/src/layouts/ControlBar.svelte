@@ -192,7 +192,7 @@
 			timeLeft: parseDuration(duration - currentTime)
 		}
 	}
-/*
+	/*
 	function mainAudioTimeUpdate() {
 		if (isMainAudioPlaying === true) {
 			durationChanged()
@@ -239,12 +239,15 @@
 		}
 	}
 	 */
+
+	// let element
+	let artSize = 64
+
+	onMount(() => {})
 </script>
 
 <control-bar-svlt>
-	{#if rootDir}
-		<AlbumArt id={generateId()} albumId={hash(rootDir)} observe={false} style="height:64px;width:64px;cursor:pointer" />
-	{/if}
+	<AlbumArt albumId={$albumPlayingIdStore} {artSize} observer="!addObserver" style="height:64px;width:64px;cursor:pointer" />
 
 	<player-buttons>
 		<PreviousButton />

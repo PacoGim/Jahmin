@@ -138,8 +138,13 @@
 		}
 	}
 
+	let element
+	let artSize
+
 	onMount(() => {
 		hookUpEventListeners()
+
+		artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 	})
 </script>
 
@@ -213,12 +218,12 @@
 		<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
 	</tag-container>
 
-	<cover-container>
+	<cover-container bind:this={element}>
 		<AlbumArt
 			albumId={$selectedAlbumId}
-			id={generateId()}
+			{artSize}
 			style="height:100%; width:100%; position: absolute; top: 0; left: 0;"
-			observe={false}
+			observer={'!addObserver'}
 		/>
 	</cover-container>
 

@@ -2,7 +2,7 @@ import { ipcMain, dialog } from 'electron'
 import { getConfig, saveConfig } from './config.service'
 // import { getCollectionMap, getNewPromiseDbVersion } from './loki.service.bak'
 import { orderSongs } from './songFilter.service'
-import { getAlbumArt, sendArtQueueProgress } from './albumArt.service'
+import { compressAlbumArt, sendArtQueueProgress } from './albumArt.service'
 import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
@@ -157,9 +157,14 @@ export function loadIPC() {
 	ipcMain.handle('get-album', (evt, albumID) => {
 		return getStorageMap().get(albumID)
 	})
-
+	/*
 	ipcMain.handle('get-art', async (evt, albumId, artSize, elementId) => {
 		getAlbumArt(albumId, artSize, elementId)
+	})
+	 */
+
+	ipcMain.handle('handle-art-compression', async (evt, albumId, artSize) => {
+		compressAlbumArt(albumId, artSize, false )
 	})
 
 	ipcMain.handle('get-album-colors', async (evt, imageId, contrastRatio) => {
