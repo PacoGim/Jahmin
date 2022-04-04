@@ -1,6 +1,7 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
+	import generateId from '../functions/generateId.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
@@ -85,44 +86,47 @@
 		})
 
 		ipcRenderer.on('get-art-sizes', (event, data) => {
-			let artSizes = []
-
 			document.querySelectorAll(`art-svlt[data-albumid="${data.albumId}"]`).forEach((el: HTMLElement) => {
-				artSizes.push(el.dataset.artsize)
+				compressAlbumArt(data.albumId, el.dataset.artsize, true)
 			})
-
-			compressAlbumArt(data.albumId, artSizes, true)
 		})
 	})
 
 	function handleNewArt(data) {
-		// console.log(data)
+		if (data.success === false) {
+			let element: HTMLElement = document.querySelector(
+				`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
+			)
 
-		let element = document.querySelector(`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`)
+			element.querySelector('img').setAttribute('src', './img/disc-line.svg')
+			element.setAttribute('data-loaded', 'true')
+			element.setAttribute('data-type', 'unfound')
 
-		let elementImg = element.querySelector('img')
+			return
+		}
 
-		elementImg.src = data.artPath
-		element.dataset.loaded = true
+		setArtToSrcFn(data.albumId, data.artSize, data.artPath)
 
-		// setArtToSrcFn(data)
+		let albumArtData = $albumArtMapStore.get(data.albumId)
 
-		// let artMapObject = $albumArtMapStore.get(data.albumId)
+		let artData = {
+			artSize: data.artSize,
+			artPath: data.artPath,
+			artType: data.artType
+		}
 
-		// let artData = {
-		// 	version: Date.now()
-		// }
+		if (albumArtData) {
+			let artDataIndex = albumArtData.findIndex(art => art.artSize === data.artSize)
 
-		// artData[data.fileType] = {
-		// 	[data.artSize]: {
-		// 		filePath: data.artInputPath
-		// 	}
-		// }
+			if (artDataIndex !== -1) {
+				albumArtData[artDataIndex] = artData
+			} else {
+				albumArtData.push(artData)
+			}
+		} else {
+			albumArtData = [artData]
+		}
 
-		// if (artMapObject) {
-		// 	artData = Object.assign(artMapObject, artData)
-		// }
-
-		// $albumArtMapStore = $albumArtMapStore.set(data.albumId, artData)
+		$albumArtMapStore = $albumArtMapStore.set(data.albumId, albumArtData)
 	}
 </script>

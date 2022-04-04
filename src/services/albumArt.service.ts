@@ -11,7 +11,6 @@ import { AlbumType } from '../types/album.type'
 // Queue for image compression
 let compressImageQueue: {
 	albumId: string
-	elementId: string | null
 	dimension: number
 	artInputPath: string
 	artOutputDirPath: string
@@ -27,10 +26,10 @@ let isQueueRuning = false
 let sharpWorker = getWorker('sharp')!
 
 sharpWorker.on('message', data => {
-	data.artInputPath = data.artOutputPath
+	data.artPath = data.artOutputPath
 	data.success = true
 	data.artSize = data.dimension
-	data.fileType = 'image'
+	data.artType = 'image'
 	delete data.artOutputDirPath
 	delete data.artOutputPath
 	delete data.dimension
@@ -48,39 +47,97 @@ const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${e
 const notCompress = ['mp4', 'webm', 'apng', 'gif']
 const videoFormats = ['mp4', 'webm']
 
-export function compressAlbumArt(albumId: string, artSizes: number[], forceNewCheck: boolean) {
-	return new Promise((resolve, reject) => {
-		artSizes = filterNumbers(artSizes)
+export function compressAlbumArt(albumId: string, artSize: number, forceNewCheck: boolean) {
+	// If the art size is not a number, it can't compress the art so it returns.
+	if (isNaN(Number(artSize))) return
 
-		let album = getStorageMap().get(albumId)
+	let album = getStorageMap().get(albumId)
 
-		// If album is not found, return.
-		if (!album) return resolve(undefined)
+	// If album is not found, return.
+	if (album === undefined) return
 
-		artSizes.forEach(artSize => {
-			let artOutputDirPath = path.join(appDataPath(), 'art', String(artSize))
-			let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
+	let artOutputDirPath = path.join(appDataPath(), 'art', String(artSize))
+	let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
 
-			if (forceNewCheck === false && fs.existsSync(artOutputPath)) {
-				return sendWebContents('new-art', {
-					artSize,
-					success: true,
-					albumId,
-					artPath: artOutputPath,
-					fileType: 'image'
-				})
-			}
+	// Send image if already compressed and a forced new check is set to false.
+	if (forceNewCheck === false && fs.existsSync(artOutputPath)) {
+		return sendWebContents('new-art', {
+			artSize,
+			success: true,
+			albumId,
+			artPath: artOutputPath,
+			artType: 'image'
 		})
-	})
-}
+	}
 
-/**
- * @param {number} arrayToFilter
- * @returns Filtered array.
- * @description Removes all sizes that are not numbers, then changes the type to number.
- */
-function filterNumbers(arrayToFilter: any[]) {
-	return arrayToFilter.filter(value => !isNaN(Number(value))).map(value => Number(value))
+	// If album root directory is not found, return.
+	if (fs.existsSync(album.RootDir) === false) return
+
+	let allowedMediaFiles = getAllowedFiles(album)
+
+	if (allowedMediaFiles.length === 0) {
+		sendWebContents('new-art', {
+			artSize,
+			success: false,
+			albumId
+		})
+		return
+	}
+
+	let artInputPath = allowedMediaFiles[0]
+
+	// If video found.
+	if (videoFormats.includes(getExtension(artInputPath))) {
+		sendWebContents('new-art', {
+			artSize,
+			success: true,
+			albumId,
+			artPath: artInputPath,
+			artType: 'video'
+		})
+
+		// Finds a cover that is not a video to compress it.
+		artInputPath = allowedMediaFiles.filter(file => !notCompress.includes(getExtension(file)))[0]
+
+		if (artInputPath !== undefined) {
+			sendWebContents('new-art', {
+				artSize,
+				success: false,
+				albumId,
+				artPath: artInputPath,
+				artType: 'image'
+			})
+		}
+	} else {
+		// Send the first image found uncompressed.
+		sendWebContents('new-art', {
+			artSize,
+			success: true,
+			albumId,
+			artPath: artInputPath,
+			artType: 'image'
+		})
+
+		if (!notCompress.includes(getExtension(artInputPath))) {
+			compressImageQueue.unshift({
+				albumId,
+				dimension: artSize,
+				artInputPath,
+				artOutputDirPath,
+				artOutputPath
+			})
+
+			if (compressImageQueue.length > maxCompressImageQueueLength) {
+				maxCompressImageQueueLength = compressImageQueue.length
+			}
+
+			if (isQueueRuning === false) {
+				isQueueRuning = true
+				sendArtQueueProgress()
+				runQueue()
+			}
+		}
+	}
 }
 
 function runQueue() {
@@ -90,7 +147,6 @@ function runQueue() {
 		isQueueRuning = false
 		return
 	}
-
 	sharpWorker.postMessage(task)
 }
 
@@ -105,6 +161,7 @@ export function sendArtQueueProgress() {
 	})
 }
 
+// Returns all images sorted by priority.
 export function getAllowedFiles(album: AlbumType) {
 	let allowedMediaFiles = fs
 		.readdirSync(album.RootDir)

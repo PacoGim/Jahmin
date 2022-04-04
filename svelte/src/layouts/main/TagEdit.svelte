@@ -141,10 +141,15 @@
 	let element
 	let artSize
 
+	$: {
+		// When the element is defined in the DOM, calculate the size of the art.
+		if (element !== undefined) {
+			artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
+		}
+	}
+
 	onMount(() => {
 		hookUpEventListeners()
-
-		artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 	})
 </script>
 
@@ -223,7 +228,7 @@
 			albumId={$selectedAlbumId}
 			{artSize}
 			style="height:100%; width:100%; position: absolute; top: 0; left: 0;"
-			observer={'!addObserver'}
+			observer="!addObserver"
 		/>
 	</cover-container>
 

@@ -1,37 +1,21 @@
-export default function (data) {
-	if (data.success === true) {
-		let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
+export default function (albumId, artSize, artPath) {
+	return new Promise((resolve, reject) => {
+		let element: HTMLElement = document.querySelector(`art-svlt[data-albumid="${albumId}"][data-artsize="${artSize}"]`)
 
-		let elementSrcVideo = document.querySelector(`#${CSS.escape(data.elementId)} > video`) as HTMLVideoElement
-		let elementSrcImage = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
+		// If the image element is in the viewport then load the source.
+		if (element !== null) {
+			let elementImg = element.querySelector('img')
 
-		if (element) {
-			let elementAlbumId = element.dataset.albumId
+			// Adds image source and adds the current time to the url to prevent caching.
+			elementImg.src = `${artPath}?${Date.now()}`
+			element.dataset.loaded = String(true)
 
-			if (elementAlbumId === undefined) {
-				element.setAttribute('data-album-id', data.albumId)
-			}
+			resolve('loaded')
+		} else {
+			reject('element not found')
+			// console.log('No element found for albumId:', albumId, 'artSize:', artSize)
 
-			if (data.fileType === 'image' && data.albumId !== elementSrcVideo.dataset.albumArtId) {
-				element.setAttribute('data-type', 'image')
-				elementSrcImage.dataset.albumArtId = data.albumId
-				elementSrcImage.src = data.artInputPath
-				element.setAttribute('data-loaded', 'true')
-			} else if (data.fileType === 'video') {
-				element.setAttribute('data-type', 'video')
-				elementSrcVideo.dataset.albumArtId = data.albumId
-				elementSrcVideo.src = data.artInputPath
-				element.setAttribute('data-loaded', 'true')
-			}
+			// console.log('setArtToSrcFn', albumId, artSize, artPath)
 		}
-	} else {
-		let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
-		let elementSrc = document.querySelector(`#${CSS.escape(data.elementId)} > img`) as HTMLImageElement
-
-		if (elementSrc && element) {
-			elementSrc.setAttribute('src', './img/disc-line.svg')
-			element.setAttribute('data-loaded', 'true')
-			element.setAttribute('data-type', 'unfound')
-		}
-	}
+	})
 }

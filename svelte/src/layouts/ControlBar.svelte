@@ -75,6 +75,10 @@
 			duration: parseDuration(song.Duration),
 			timeLeft: parseDuration(song.Duration - $currentPlayerTime)
 		}
+
+		localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
+		localStorage.setItem('LastPlayedSongId', String(song.ID))
+		// localStorage.setItem('LastPlayedSongIndex', String(playbackCursor[0]))
 	}
 
 	// $: console.log($currentAudioElement)

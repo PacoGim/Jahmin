@@ -17,10 +17,10 @@ let maxCompressImageQueueLength = 0;
 let isQueueRuning = false;
 let sharpWorker = (0, worker_service_1.getWorker)('sharp');
 sharpWorker.on('message', data => {
-    data.artInputPath = data.artOutputPath;
+    data.artPath = data.artOutputPath;
     data.success = true;
     data.artSize = data.dimension;
-    data.fileType = 'image';
+    data.artType = 'image';
     delete data.artOutputDirPath;
     delete data.artOutputPath;
     delete data.dimension;
@@ -34,37 +34,89 @@ const validNames = ['cover', 'folder', 'front', 'art', 'album'];
 const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
 const notCompress = ['mp4', 'webm', 'apng', 'gif'];
 const videoFormats = ['mp4', 'webm'];
-function compressAlbumArt(albumId, artSizes, forceNewCheck) {
-    return new Promise((resolve, reject) => {
-        artSizes = filterNumbers(artSizes);
-        let album = (0, storage_service_1.getStorageMap)().get(albumId);
-        // If album is not found, return.
-        if (!album)
-            return resolve(undefined);
-        artSizes.forEach(artSize => {
-            let artOutputDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(artSize));
-            let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
-            if (forceNewCheck === false && fs_1.default.existsSync(artOutputPath)) {
-                return (0, sendWebContents_service_1.sendWebContents)('new-art', {
-                    artSize,
-                    success: true,
-                    albumId,
-                    artPath: artOutputPath,
-                    fileType: 'image'
-                });
-            }
+function compressAlbumArt(albumId, artSize, forceNewCheck) {
+    // If the art size is not a number, it can't compress the art so it returns.
+    if (isNaN(Number(artSize)))
+        return;
+    let album = (0, storage_service_1.getStorageMap)().get(albumId);
+    // If album is not found, return.
+    if (album === undefined)
+        return;
+    let artOutputDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(artSize));
+    let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
+    // Send image if already compressed and a forced new check is set to false.
+    if (forceNewCheck === false && fs_1.default.existsSync(artOutputPath)) {
+        return (0, sendWebContents_service_1.sendWebContents)('new-art', {
+            artSize,
+            success: true,
+            albumId,
+            artPath: artOutputPath,
+            artType: 'image'
         });
-    });
+    }
+    // If album root directory is not found, return.
+    if (fs_1.default.existsSync(album.RootDir) === false)
+        return;
+    let allowedMediaFiles = getAllowedFiles(album);
+    if (allowedMediaFiles.length === 0) {
+        (0, sendWebContents_service_1.sendWebContents)('new-art', {
+            artSize,
+            success: false,
+            albumId
+        });
+        return;
+    }
+    let artInputPath = allowedMediaFiles[0];
+    // If video found.
+    if (videoFormats.includes(getExtension(artInputPath))) {
+        (0, sendWebContents_service_1.sendWebContents)('new-art', {
+            artSize,
+            success: true,
+            albumId,
+            artPath: artInputPath,
+            artType: 'video'
+        });
+        // Finds a cover that is not a video to compress it.
+        artInputPath = allowedMediaFiles.filter(file => !notCompress.includes(getExtension(file)))[0];
+        if (artInputPath !== undefined) {
+            (0, sendWebContents_service_1.sendWebContents)('new-art', {
+                artSize,
+                success: false,
+                albumId,
+                artPath: artInputPath,
+                artType: 'image'
+            });
+        }
+    }
+    else {
+        // Send the first image found uncompressed.
+        (0, sendWebContents_service_1.sendWebContents)('new-art', {
+            artSize,
+            success: true,
+            albumId,
+            artPath: artInputPath,
+            artType: 'image'
+        });
+        if (!notCompress.includes(getExtension(artInputPath))) {
+            compressImageQueue.unshift({
+                albumId,
+                dimension: artSize,
+                artInputPath,
+                artOutputDirPath,
+                artOutputPath
+            });
+            if (compressImageQueue.length > maxCompressImageQueueLength) {
+                maxCompressImageQueueLength = compressImageQueue.length;
+            }
+            if (isQueueRuning === false) {
+                isQueueRuning = true;
+                sendArtQueueProgress();
+                runQueue();
+            }
+        }
+    }
 }
 exports.compressAlbumArt = compressAlbumArt;
-/**
- * @param {number} arrayToFilter
- * @returns Filtered array.
- * @description Removes all sizes that are not numbers, then changes the type to number.
- */
-function filterNumbers(arrayToFilter) {
-    return arrayToFilter.filter(value => !isNaN(Number(value))).map(value => Number(value));
-}
 function runQueue() {
     let task = compressImageQueue.shift();
     if (task === undefined) {
@@ -83,6 +135,7 @@ function sendArtQueueProgress() {
     });
 }
 exports.sendArtQueueProgress = sendArtQueueProgress;
+// Returns all images sorted by priority.
 function getAllowedFiles(album) {
     let allowedMediaFiles = fs_1.default
         .readdirSync(album.RootDir)

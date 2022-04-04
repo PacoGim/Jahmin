@@ -135,8 +135,8 @@ function loadIPC() {
         getAlbumArt(albumId, artSize, elementId)
     })
      */
-    electron_1.ipcMain.handle('handle-art-compression', (evt, albumId, artSize) => __awaiter(this, void 0, void 0, function* () {
-        (0, albumArt_service_1.compressAlbumArt)(albumId, artSize, false);
+    electron_1.ipcMain.handle('handle-art-compression', (evt, albumId, artSize, forceNewCheck) => __awaiter(this, void 0, void 0, function* () {
+        (0, albumArt_service_1.compressAlbumArt)(albumId, artSize, forceNewCheck);
     }));
     electron_1.ipcMain.handle('get-album-colors', (evt, imageId, contrastRatio) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, getAlbumColors_fn_1.getAlbumColors)(imageId, contrastRatio);

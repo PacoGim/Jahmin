@@ -12,7 +12,8 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
     if (!fs_1.default.existsSync(artOutputDirPath)) {
         (0, original_fs_1.mkdirSync)(artOutputDirPath, { recursive: true });
     }
-    (0, sharp_1.default)(artInputPath)
+    let file = (0, original_fs_1.readFileSync)(artInputPath);
+    (0, sharp_1.default)(file)
         .resize({
         height: dimension * 2,
         width: dimension * 2

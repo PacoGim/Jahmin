@@ -163,8 +163,8 @@ export function loadIPC() {
 	})
 	 */
 
-	ipcMain.handle('handle-art-compression', async (evt, albumId, artSize) => {
-		compressAlbumArt(albumId, artSize, false )
+	ipcMain.handle('handle-art-compression', async (evt, albumId, artSize, forceNewCheck) => {
+		compressAlbumArt(albumId, artSize, forceNewCheck)
 	})
 
 	ipcMain.handle('get-album-colors', async (evt, imageId, contrastRatio) => {

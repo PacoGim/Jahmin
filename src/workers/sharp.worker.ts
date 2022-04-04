@@ -1,7 +1,9 @@
 import sharp from 'sharp'
 import fs from 'fs'
 import { parentPort } from 'worker_threads'
-import { mkdirSync } from 'original-fs'
+import { mkdirSync, readFileSync } from 'original-fs'
+
+import spark from 'spark-md5'
 
 type DataType = {
 	id: string
@@ -20,7 +22,9 @@ parentPort?.on('message', (data: DataType) => {
 		mkdirSync(artOutputDirPath, { recursive: true })
 	}
 
-	sharp(artInputPath)
+	let file = readFileSync(artInputPath)
+
+	sharp(file)
 		.resize({
 			height: dimension * 2,
 			width: dimension * 2

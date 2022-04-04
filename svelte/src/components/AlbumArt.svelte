@@ -12,55 +12,12 @@
 
 	let dataLoaded = false
 
-	let artVersion = 0
-
 	export let artSize = undefined
 
 	let artType = 'image'
 	let element: HTMLElement = undefined
 
-	let isFirstAssing = true
-
-	$: verifyAlbumId(albumId)
-	/*
-	$: {
-		$albumArtMapStore
-		checkIfNewImage()
-	}
-
-	function checkIfNewImage() {
-		let albumArtData = $albumArtMapStore.get(albumId)
-
-		if (albumArtData === undefined) {
-			return
-		}
-
-		if (isFirstAssing) {
-			isFirstAssing = false
-			artVersion = albumArtData.version
-			return
-		}
-
-		if (albumArtData?.version > artVersion) {
-			console.log(albumArtData)
-			// console.log(albumArtData?.version, artVersion)
-			// setArtToSrcFn(albumArtData.art, element)
-		}
-
-		// console.log('checkIfNewImage',albumId)
-	}
- */
-
-	onMount(() => {
-		// element = document.querySelector(`#${CSS.escape(id)}`) as HTMLElement
-		// artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
-		// element.setAttribute('data-album-id', albumId)
-		// if (observer === 'addObserver') {
-		// 	addIntersectionObserver(albumId, artSize)
-		// } else {
-		// 	getArtIPC(albumId, artSize)
-		// }
-	})
+	onMount(() => {})
 
 	$: handleAlbumArt(albumId, artSize)
 
@@ -69,25 +26,22 @@
 			return
 		}
 
-		if (observer === 'addObserver') {
-			addIntersectionObserver(element, albumId, artSize)
+		let albumArtData = $albumArtMapStore.get(albumId)?.find(art => art.artSize === artSize)
+
+		if (albumArtData === undefined) {
+			if (observer === 'addObserver') {
+				addIntersectionObserver(element, albumId, artSize)
+			} else {
+				compressAlbumArt(albumId, artSize, false)
+			}
+
+			return
 		} else {
-			// console.log('Not observing', albumId, artSize)
-			// getArtIPC(albumId, artSize)
-		}
-
-		// console.log('foo', albumId, artSize)
-	}
-
-	// If the element albumId mismatches the component albumId, then get new cover.
-	function verifyAlbumId(newAlbumId: string) {
-		if (element !== undefined && element.dataset.albumid !== newAlbumId) {
-			let artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
-
-			element.setAttribute('data-album-id', newAlbumId)
-
-			// getArtIPC(newAlbumId, artSize, element.id)
-			// getArtIPC(newAlbumId, artSize)
+			setArtToSrcFn(albumId, albumArtData.artSize, albumArtData.artPath).catch(reason => {
+				setTimeout(() => {
+					handleAlbumArt(albumId, artSize)
+				}, 5)
+			})
 		}
 	}
 </script>
