@@ -30,7 +30,6 @@ function getAlbumColors(albumId, contrast) {
         if (!album) {
             return resolve(undefined);
         }
-        // TODO: Changes this logic to a simpler one.
         const imagePaths = (0, albumArt_service_1.getAllowedFiles)(album).filter(file => !notCompress.includes(getExtension(file)));
         if (imagePaths === undefined) {
             return resolve(undefined);

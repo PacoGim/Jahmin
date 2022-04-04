@@ -1,4 +1,4 @@
-import { compressAlbumArt } from '../services/ipc.service'
+import { compressAlbumArtIPC } from '../services/ipc.service'
 import { albumArtMapStore } from '../store/final.store'
 import setArtToSrcFn from './setArtToSrc.fn'
 
@@ -8,7 +8,7 @@ export function addIntersectionObserver(element: HTMLElement, albumId: string, a
 	artObserver = new IntersectionObserver(
 		entries => {
 			if (entries[0].isIntersecting === true) {
-				compressAlbumArt(albumId, artSize, false)
+				compressAlbumArtIPC(albumId, artSize, false)
 
 				// "Closes" the Art Observer to avoid unnecessary checks.
 				artObserver.disconnect()

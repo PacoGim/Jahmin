@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
-	import { compressAlbumArt } from '../services/ipc.service'
+	import { compressAlbumArtIPC } from '../services/ipc.service'
 	import { artSizeConfig, songAmountConfig } from '../store/config.store'
 	import { albumArtMapStore } from '../store/final.store'
 
@@ -32,12 +32,12 @@
 			if (observer === 'addObserver') {
 				addIntersectionObserver(element, albumId, artSize)
 			} else {
-				compressAlbumArt(albumId, artSize, false)
+				compressAlbumArtIPC(albumId, artSize, false)
 			}
 
 			return
 		} else {
-			setArtToSrcFn(albumId, albumArtData.artSize, albumArtData.artPath).catch(reason => {
+			setArtToSrcFn(albumId, albumArtData.artSize, albumArtData.artPath, albumArtData.artType).catch(reason => {
 				setTimeout(() => {
 					handleAlbumArt(albumId, artSize)
 				}, 5)

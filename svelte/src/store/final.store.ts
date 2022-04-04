@@ -84,3 +84,13 @@ export let artCompressQueueProgress: Writable<{ maxLength: number; currentLength
 	maxLength: 0,
 	currentLength: 0
 })
+
+export let songListBackgroundImage: Writable<{
+	albumId: string
+	artSize: number
+	artPath: string
+}> = writable({
+	albumId: '',
+	artSize: 0,
+	artPath: ''
+})

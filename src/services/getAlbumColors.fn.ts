@@ -23,7 +23,6 @@ export function getAlbumColors(albumId: string, contrast: number | undefined): P
 			return resolve(undefined)
 		}
 
-		// TODO: Changes this logic to a simpler one.
 		const imagePaths = getAllowedFiles(album).filter(file => !notCompress.includes(getExtension(file)))
 
 		if (imagePaths === undefined) {

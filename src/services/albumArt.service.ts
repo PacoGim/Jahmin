@@ -95,19 +95,6 @@ export function compressAlbumArt(albumId: string, artSize: number, forceNewCheck
 			artPath: artInputPath,
 			artType: 'video'
 		})
-
-		// Finds a cover that is not a video to compress it.
-		artInputPath = allowedMediaFiles.filter(file => !notCompress.includes(getExtension(file)))[0]
-
-		if (artInputPath !== undefined) {
-			sendWebContents('new-art', {
-				artSize,
-				success: false,
-				albumId,
-				artPath: artInputPath,
-				artType: 'image'
-			})
-		}
 	} else {
 		// Send the first image found uncompressed.
 		sendWebContents('new-art', {

@@ -1,84 +1,94 @@
 <script lang="ts">
-	import { albumArtMapStore, selectedAlbumId } from '../../store/final.store'
+	import { getFileHashIPC } from '../../services/ipc.service'
 
-	let previousArtVersion = undefined
-	let previousArtId = undefined
+	import { albumArtMapStore, selectedAlbumId, songListBackgroundImage } from '../../store/final.store'
 
-	$: $selectedAlbumId, $albumArtMapStore, setArt()
+	$: {
+		if ($selectedAlbumId !== undefined) setArt()
+	}
+
+	$: $songListBackgroundImage, setArt()
 
 	function setArt() {
-		// Loads art if Art map (If image updated) or Selected Album changes.
 
-		// Get Art from Map.
-		let albumArt: any = $albumArtMapStore.get($selectedAlbumId)
+		if ($songListBackgroundImage.albumId !== $selectedAlbumId) {
 
-		// If Found
-		if (albumArt?.image !== undefined) {
-			// Checks if the previous id changed.
-			if (previousArtId !== $selectedAlbumId) {
-				let maxValueKey = Math.max(...filterNumbersFromArray(Object.keys(albumArt.image)))
+			//
 
-				// If changed it updates both id and version.
-				previousArtId = $selectedAlbumId
-				previousArtVersion = albumArt.version
+		} else {
 
-				// If a art is available, load it.
-				loadArt(albumArt.image[maxValueKey].filePath)
 
-				// Checks if a new version of the album art is available
-			} else if (albumArt.version !== previousArtVersion) {
-				let maxValueKey = Math.max(...filterNumbersFromArray(Object.keys(albumArt.image)))
 
-				// Updates the art version.
-				previousArtVersion = albumArt.version
-
-				loadArt(albumArt.image[maxValueKey].filePath)
-			}
 		}
+
+		// loadArt(maxArtSizeData.artPath, maxArtSizeData.artType)
 	}
 
 	function filterNumbersFromArray(array: any[]): number[] {
 		return array.map(item => Number(item)).filter(item => !isNaN(item))
 	}
 
+	let imageTransitionDebounce = undefined
+
 	// Takes a file path and loads it to the bg image style property.
-	function loadArt(artPath) {
-		if (artPath) {
-			let $el = document.querySelector('song-list-background-svlt')
+	function loadArt(artPath, artType) {
+		if (artPath && artType) {
+			console.log(artPath, artType)
+
+			let $el = document.querySelector('song-list-background-svlt img')
 
 			if ($el) {
-				$el.setAttribute('style', `background-image: url('${artPath}');`)
+				$el.style.opacity = 0
+
+				clearTimeout(imageTransitionDebounce)
+
+				imageTransitionDebounce = setTimeout(() => {
+					$el.setAttribute('src', artPath)
+					$el.style.opacity = 1
+				}, 300)
 			}
 		}
 	}
 </script>
 
-<song-list-background-svlt />
+<song-list-background-svlt>
+	<backdrop />
+	<img alt="" />
+
+	<video autoplay loop>
+		<track kind="captions" />
+		<source />
+	</video>
+</song-list-background-svlt>
 
 <style>
+	song-list-background-svlt img,
+	song-list-background-svlt video {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+		z-index: 0;
+
+		transition: opacity 300ms linear;
+	}
+
+	song-list-background-svlt backdrop {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+		background-color: rgba(0, 0, 0, 0.25);
+		backdrop-filter: blur(100px);
+		z-index: 1;
+	}
 	song-list-background-svlt {
 		grid-area: song-list-svlt;
 		position: relative;
 		width: 100%;
 		height: 100%;
 		pointer-events: none;
-
-		/* background-image: url('/Users/fran/Library/Application Support/Jahmin/art/192/dn8dyp.webp'); */
-		/* background-size: art; */
-		background-repeat: no-repeat;
-		background-size: 100% 100%;
-		z-index: 1;
-
-		transition: background-image 300ms;
-	}
-
-	song-list-background-svlt::before {
-		content: '';
-		display: block;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.25);
-		backdrop-filter: blur(100px);
-		/* z-index: 2; */
 	}
 </style>

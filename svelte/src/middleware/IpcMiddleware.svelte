@@ -5,14 +5,16 @@
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { sendNewArtQueueProgressIPC, saveConfig, compressAlbumArt } from '../services/ipc.service'
+	import { sendNewArtQueueProgressIPC, saveConfig, compressAlbumArtIPC } from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { directoriesConfig, groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
 	import {
 		albumArtMapStore,
 		albumListStore,
 		artCompressQueueProgress,
+		selectedAlbumId,
 		selectedGroups,
+		songListBackgroundImage,
 		songListStore
 	} from '../store/final.store'
 	import type { AlbumType } from '../types/album.type'
@@ -87,7 +89,7 @@
 
 		ipcRenderer.on('get-art-sizes', (event, data) => {
 			document.querySelectorAll(`art-svlt[data-albumid="${data.albumId}"]`).forEach((el: HTMLElement) => {
-				compressAlbumArt(data.albumId, el.dataset.artsize, true)
+				compressAlbumArtIPC(data.albumId, el.dataset.artsize, true)
 			})
 		})
 	})
@@ -98,16 +100,30 @@
 				`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
 			)
 
-			element.querySelector('img').setAttribute('src', './img/disc-line.svg')
+			let videoElement: HTMLVideoElement = element.querySelector('video')
+			let imageElement: HTMLImageElement = element.querySelector('img')
+
+			videoElement.src = ''
+			imageElement.setAttribute('src', './img/disc-line.svg')
 			element.setAttribute('data-loaded', 'true')
 			element.setAttribute('data-type', 'unfound')
 
 			return
 		}
 
-		setArtToSrcFn(data.albumId, data.artSize, data.artPath)
+		setArtToSrcFn(data.albumId, data.artSize, data.artPath, data.artType)
 
 		let albumArtData = $albumArtMapStore.get(data.albumId)
+
+		if ($selectedAlbumId === data.albumId) {
+			if (data.artSize >= $songListBackgroundImage.artSize) {
+				$songListBackgroundImage = {
+					albumId: data.albumId,
+					artPath: data.artPath,
+					artSize: data.artSize
+				}
+			}
+		}
 
 		let artData = {
 			artSize: data.artSize,

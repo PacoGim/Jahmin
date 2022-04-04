@@ -76,17 +76,6 @@ function compressAlbumArt(albumId, artSize, forceNewCheck) {
             artPath: artInputPath,
             artType: 'video'
         });
-        // Finds a cover that is not a video to compress it.
-        artInputPath = allowedMediaFiles.filter(file => !notCompress.includes(getExtension(file)))[0];
-        if (artInputPath !== undefined) {
-            (0, sendWebContents_service_1.sendWebContents)('new-art', {
-                artSize,
-                success: false,
-                albumId,
-                artPath: artInputPath,
-                artType: 'image'
-            });
-        }
     }
     else {
         // Send the first image found uncompressed.

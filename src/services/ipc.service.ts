@@ -31,6 +31,7 @@ import { shell } from 'electron/common'
 import { groupSongs } from './songGroup.service'
 import { sendWebContents } from './sendWebContents.service'
 import directoryHandlerService from './directoryHandler.service'
+import hashFileFn from '../functions/hashFile.fn'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -162,6 +163,10 @@ export function loadIPC() {
 		getAlbumArt(albumId, artSize, elementId)
 	})
 	 */
+
+	ipcMain.handle('get-file-hash', async (evt, filePath) => {
+		return await hashFileFn(filePath)
+	})
 
 	ipcMain.handle('handle-art-compression', async (evt, albumId, artSize, forceNewCheck) => {
 		compressAlbumArt(albumId, artSize, forceNewCheck)

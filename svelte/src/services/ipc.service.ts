@@ -174,8 +174,14 @@ export function sendNewArtQueueProgressIPC(): void {
 	ipcRenderer.invoke('send-new-art-queue-progress')
 }
 
-export function compressAlbumArt(albumId, artSize, forceNewCheck: boolean) {
+export function compressAlbumArtIPC(albumId, artSize, forceNewCheck: boolean) {
 	ipcRenderer.invoke('handle-art-compression', albumId, artSize, forceNewCheck)
+}
+
+export function getFileHashIPC(filePath: string) {
+	return new Promise((resolve, reject) => {
+		resolve(ipcRenderer.invoke('get-file-hash', filePath))
+	})
 }
 
 export function isFileExistIPC(filePath: string): Promise<boolean> {

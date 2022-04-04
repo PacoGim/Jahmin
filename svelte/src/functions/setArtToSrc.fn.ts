@@ -1,21 +1,28 @@
-export default function (albumId, artSize, artPath) {
+export default function (albumId, artSize, artPath, artType) {
 	return new Promise((resolve, reject) => {
 		let element: HTMLElement = document.querySelector(`art-svlt[data-albumid="${albumId}"][data-artsize="${artSize}"]`)
 
 		// If the image element is in the viewport then load the source.
 		if (element !== null) {
-			let elementImg = element.querySelector('img')
+			let videoElement: HTMLVideoElement = element.querySelector('video')
+			let imageElement: HTMLImageElement = element.querySelector('img')
 
-			// Adds image source and adds the current time to the url to prevent caching.
-			elementImg.src = `${artPath}?${Date.now()}`
+			if (artType === 'video') {
+				element.dataset.type = 'video'
+				videoElement.src = `${artPath}?${Date.now()}`
+				imageElement.src = ''
+			} else if (artType === 'image') {
+				element.dataset.type = 'image'
+				// Adds image source and adds the current time to the url to prevent caching.
+				imageElement.src = `${artPath}?${Date.now()}`
+				videoElement.src = ''
+			}
+
 			element.dataset.loaded = String(true)
 
 			resolve('loaded')
 		} else {
 			reject('element not found')
-			// console.log('No element found for albumId:', albumId, 'artSize:', artSize)
-
-			// console.log('setArtToSrcFn', albumId, artSize, artPath)
 		}
 	})
 }
