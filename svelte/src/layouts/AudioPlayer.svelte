@@ -10,12 +10,11 @@
 		mainAudioElement,
 		altAudioElement,
 		playbackStore,
-		playingSongStore
+		playingSongStore,
+		isPlaying
 	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
-
-	// let currentAudioElement: HTMLAudioElement
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -49,7 +48,21 @@
 
 	$: playSong($songToPlayUrlStore)
 
+	$: {
+		if (audioElements) {
+			checkIfIsPlaying()
+		}
+	}
+
 	// Functions
+	function checkIfIsPlaying() {
+		if (audioElements.main.isPlaying === true || audioElements.alt.isPlaying === true) {
+			$isPlaying = true
+		} else {
+			$isPlaying = false
+		}
+	}
+
 	function playSong(songUrl: string | undefined) {
 		if (songUrl) {
 			$songToPlayUrlStore = undefined
@@ -74,8 +87,11 @@
 		}
 	}
 
+	let currentPlayingSong = ''
+
 	function updateCurrentSongData(song: SongType) {
 		$playingSongStore = song
+
 		setWaveSource(song.SourceFile, $albumPlayingIdStore, song.Duration)
 	}
 
@@ -128,12 +144,32 @@
 		}
 	}
 
+	function hookEventListeners() {
+		$mainAudioElement.addEventListener('pause', () => {
+			audioElements.main.isPlaying = false
+		})
+
+		$mainAudioElement.addEventListener('play', () => {
+			audioElements.main.isPlaying = true
+		})
+
+		$altAudioElement.addEventListener('pause', () => {
+			audioElements.alt.isPlaying = false
+		})
+
+		$altAudioElement.addEventListener('play', () => {
+			audioElements.alt.isPlaying = true
+		})
+	}
+
 	onMount(() => {
 		$mainAudioElement = document.querySelector('audio#main')
 		$altAudioElement = document.querySelector('audio#alt')
 
 		audioElements.main.domElement = $mainAudioElement
 		audioElements.alt.domElement = $altAudioElement
+
+		hookEventListeners()
 	})
 </script>
 

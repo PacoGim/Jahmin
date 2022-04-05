@@ -29,7 +29,15 @@ function getNewWaveSurfer(color: string) {
 	return waveSurfer
 }
 
+let lastSongSourceFile = ''
+
 export async function setWaveSource(sourceFile: string, albumId: string, duration: number) {
+	if (sourceFile === lastSongSourceFile) {
+		return
+	} else {
+		lastSongSourceFile = sourceFile
+	}
+
 	let peaks = await getPeaksIPC(sourceFile)
 	let color = await getAlbumColors(albumId)
 
@@ -53,7 +61,7 @@ export async function setWaveSource(sourceFile: string, albumId: string, duratio
 			waveSurfer.on('redraw', () => {
 				document.documentElement.style.setProperty('--waveform-opacity', '1')
 
-				waveSurfer.exportPCM(512, undefined, true, undefined).then(newPeaks => {
+				waveSurfer.exportPCM(1024, undefined, true, undefined).then(newPeaks => {
 					savePeaksIPC(sourceFile, newPeaks)
 				})
 			})

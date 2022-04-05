@@ -14,7 +14,6 @@
 		artCompressQueueProgress,
 		selectedAlbumId,
 		selectedGroups,
-		songListBackgroundImage,
 		songListStore
 	} from '../store/final.store'
 	import type { AlbumType } from '../types/album.type'
@@ -114,16 +113,6 @@
 		setArtToSrcFn(data.albumId, data.artSize, data.artPath, data.artType)
 
 		let albumArtData = $albumArtMapStore.get(data.albumId)
-
-		if ($selectedAlbumId === data.albumId) {
-			if (data.artSize >= $songListBackgroundImage.artSize) {
-				$songListBackgroundImage = {
-					albumId: data.albumId,
-					artPath: data.artPath,
-					artSize: data.artSize
-				}
-			}
-		}
 
 		let artData = {
 			artSize: data.artSize,

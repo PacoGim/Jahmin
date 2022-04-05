@@ -1,12 +1,15 @@
 <script lang="ts">
-	import { isPlaying, currentAudioElement } from '../../store/final.store'
+	import { isPlaying, currentAudioElement, playingSongStore } from '../../store/final.store'
+	import { songToPlayUrlStore } from '../../store/player.store'
 
 	function togglePlay() {
 		if ($isPlaying) {
 			$currentAudioElement.pause()
 		} else {
-			if ($currentAudioElement.src !== '') {
+			if ($currentAudioElement !== undefined && $currentAudioElement.src !== '') {
 				$currentAudioElement.play()
+			} else {
+				$songToPlayUrlStore = $playingSongStore.SourceFile
 			}
 		}
 	}
