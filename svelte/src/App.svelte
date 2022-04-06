@@ -5,7 +5,6 @@
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import SearchLayout from './layouts/search/SearchLayout.svelte'
 
-	import { nextSong } from './functions/nextSong.fn'
 	import previousSongFn from './functions/previousSong.fn'
 
 	import { runThemeHandler } from './services/themeHandler.service'
@@ -36,6 +35,7 @@
 	import 'tippy.js/animations/scale-subtle.css'
 	import AudioPlayer from './layouts/AudioPlayer.svelte'
 	import EventsHandlerMiddleware from './middleware/EventsHandlerMiddleware.svelte'
+	import nextSongFn from './functions/nextSong.fn'
 
 	let appIdleDebounce = getAppIdleDebounce()
 
@@ -94,7 +94,7 @@
 
 		navigator.mediaSession.setActionHandler('nexttrack', function () {
 			// User hit "Previous Track" key.
-			nextSong()
+			nextSongFn()
 		})
 	})
 

@@ -1,28 +1,36 @@
-import { playbackCursor, playbackStore, currentAudioElement } from '../store/final.store'
+import { playbackStore, currentAudioElement, playingSongStore, triggerScrollToSongEvent } from '../store/final.store'
+import { songToPlayUrlStore } from '../store/player.store'
+import type { SongType } from '../types/song.type'
 
-let player = undefined
+let currentAudioElementLocal: HTMLAudioElement = undefined
+
+let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
+	if (value !== undefined) {
+		currentAudioElementLocal = value
+
+		currentAudioElementSubscription()
+	}
+})
 
 export default function () {
-	let playbackCursorValue
-	let playbackStoreValue
+	let playbackStoreValue: SongType[]
+	let songPlayingLocal: SongType = undefined
 
-	playbackCursor.subscribe(value => (playbackCursorValue = value))()
 	playbackStore.subscribe(value => (playbackStoreValue = value))()
+	playingSongStore.subscribe(value => (songPlayingLocal = value))()
 
-	if (player === undefined) {
-		currentAudioElement.subscribe(value => (player = value))()
+	let currentSongIndex = playbackStoreValue.findIndex(song => song.ID === songPlayingLocal.ID)
+	let previousSongIndex = currentSongIndex - 1
+
+	let previousSong = playbackStoreValue[previousSongIndex]
+
+	if (previousSong === undefined && currentAudioElementLocal !== undefined) {
+		currentAudioElementLocal.currentTime = 0
 	}
 
-	if (player.currentTime <= 2) {
-		let playbackCursorIndex = playbackCursorValue[0]
-		let previousPlaybackCursorIndex = playbackCursorIndex - 1
-
-		let previousSong = playbackStoreValue[previousPlaybackCursorIndex]
-
-		if (previousSong) {
-			playbackCursor.set([previousPlaybackCursorIndex, true])
-		}
-	} else {
-		player.currentTime = 0
+	if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
+		songToPlayUrlStore.set(previousSong.SourceFile)
 	}
+
+	triggerScrollToSongEvent.set(previousSong.ID)
 }

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { nextSong } from '../../functions/nextSong.fn'
+	import nextSongFn from '../../functions/nextSong.fn'
 </script>
 
 <svg
 	class="player-button"
-	on:click={() => nextSong()}
+	on:click={() => nextSongFn()}
 	version="1.1"
 	id="Layer_1"
 	xmlns="http://www.w3.org/2000/svg"

@@ -67,7 +67,13 @@
 		if (songUrl) {
 			$songToPlayUrlStore = undefined
 
-			updateCurrentSongData($playbackStore.find(song => song.SourceFile === songUrl))
+			let song = $playbackStore.find(song => song.SourceFile === songUrl)
+
+			if (song === undefined) {
+				return
+			}
+
+			updateCurrentSongData(song)
 
 			setCurrentAudioElement($mainAudioElement)
 
@@ -78,7 +84,7 @@
 			$altAudioElement.src = ''
 
 			// Starts playing the song.
-			$mainAudioElement.play()
+			$mainAudioElement.play().catch(error => {})
 
 			audioElements.main.isPlaying = true
 			audioElements.main.isPreloaded = true
@@ -86,8 +92,6 @@
 			audioElements.alt.isPreloaded = false
 		}
 	}
-
-	let currentPlayingSong = ''
 
 	function updateCurrentSongData(song: SongType) {
 		$playingSongStore = song
@@ -125,7 +129,9 @@
 			// Gets the next song based of the current song index.
 			let nextSong = $playbackStore[currentSongIndex + 1]
 
-			audioElements[altAudioName].domElement.src = nextSong.SourceFile
+			if (nextSong !== undefined) {
+				audioElements[altAudioName].domElement.src = nextSong.SourceFile
+			}
 
 			//TODO: Check if song does not exist.
 		}
@@ -136,9 +142,13 @@
 			audioElements[this.id].isPlaying = false
 			audioElements[altAudioName].domElement.play()
 
-			updateCurrentSongData(
-				$playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
-			)
+			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
+
+			if (song === undefined) {
+				return
+			}
+
+			updateCurrentSongData(song)
 
 			setCurrentAudioElement(audioElements[altAudioName].domElement)
 		}

@@ -113,8 +113,9 @@
 
 		border-radius: 5px;
 
-		transition-property: font-variation-settings, box-shadow, background-color;
-		transition-duration: 250ms;
+		/* transition-property: font-variation-settings, box-shadow, background-color; */
+		transition-property: font-variation-settings, background-color;
+		transition-duration: 250ms, 500ms;
 		transition-timing-function: ease-in-out;
 	}
 
