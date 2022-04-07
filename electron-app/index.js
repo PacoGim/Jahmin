@@ -40,8 +40,8 @@ function createMainWindow() {
         // Gets the storage data from files and creates a map.
         (0, storage_service_1.initStorage)();
         // Watches the given root folder.
-        if (config === null || config === void 0 ? void 0 : config.rootDirectories)
-            (0, songSync_service_1.watchFolders)(config.rootDirectories);
+        if (config === null || config === void 0 ? void 0 : config.directories)
+            (0, songSync_service_1.watchFolders)(config.directories);
         browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow));
     });
 }

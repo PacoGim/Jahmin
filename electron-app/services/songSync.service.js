@@ -31,12 +31,24 @@ let storageWorker = (0, worker_service_1.getWorker)('storage');
 let isQueueRunning = false;
 let taskQueue = [];
 exports.maxTaskQueueLength = 0;
-function watchFolders(rootDirectories) {
+let foundPaths = [];
+function watchFolders(directories) {
     return __awaiter(this, void 0, void 0, function* () {
-        let audioFolders = getAllAudioFolders(rootDirectories);
-        let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b));
-        filterSongs(audioFiles);
-        startChokidarWatch(rootDirectories);
+        // console.log(directories)
+        /*
+        let audioFolders = getAllAudioFolders(directories.add)
+    
+        console.log(audioFolders)
+    
+        let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b))
+    
+        console.log(audioFiles)
+    
+        filterSongs(audioFiles)
+    
+        */
+        console.log('Watching folders...');
+        startChokidarWatch(directories.add, directories.exclude);
     });
 }
 exports.watchFolders = watchFolders;
@@ -50,11 +62,16 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
         ignored: '**/*.DS_Store'
     });
     watcher.unwatch(excludeDirectories);
+    watcher.on('add', (path) => {
+        foundPaths.push(path);
+    });
     watcher.on('ready', () => {
+        foundPaths = foundPaths.filter(path => isAudioFile(path));
+        console.log(foundPaths.length);
+        filterSongs(foundPaths);
         watcher.on('add', path => {
             if (isAudioFile(path)) {
-                console.log(path);
-                addToTaskQueue(path, 'insert');
+                // addToTaskQueue(path, 'insert')
             }
         });
         watcher.on('change', (path) => {
@@ -157,12 +174,13 @@ function filterSongs(audioFilesFound = []) {
         let worker = (0, worker_service_1.getWorker)('songFilter');
         let collection = (0, storage_service_1.getStorageMapToArray)().map(song => song.SourceFile);
         worker.on('message', (data) => {
+            console.log(data.type, ' : ', data.songs.length);
             if (data.type === 'songsToAdd') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
             }
             if (data.type === 'songsToDelete') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')));
-                (0, worker_service_1.killWorker)('songFilter');
+                // killWorker('songFilter')
                 resolve(null);
             }
         });

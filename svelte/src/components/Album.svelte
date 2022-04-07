@@ -96,6 +96,10 @@
 	}
 
 	album-details {
+		font-size: clamp(0.8rem, calc(var(--art-dimension) / 12), 1.2rem);
+
+		max-width: var(--art-dimension);
+
 		padding: 0.5rem 1rem;
 		display: flex;
 		flex-direction: column;
@@ -126,9 +130,28 @@
 	}
 
 	album-artist {
-		text-overflow: ellipsis;
+		/*text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
-		max-width: calc(var(--art-dimension) - 1.5rem);
+		max-width: calc(var(--art-dimension) - 1.5rem); */
+
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		/* max-width: calc(var(--art-dimension) - 1.5rem); */
+	}
+
+	album-name {
+		/* text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		max-width: calc(var(--art-dimension) - 1.5rem); */
+
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		/* max-width: calc(var(--art-dimension) - 1.5rem); */
 	}
 </style>

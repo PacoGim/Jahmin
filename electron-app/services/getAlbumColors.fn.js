@@ -35,6 +35,9 @@ function getAlbumColors(albumId, contrast) {
             return resolve(undefined);
         }
         const imagePath = imagePaths[0];
+        if (imagePath === undefined) {
+            return resolve(undefined);
+        }
         (0, sharp_1.default)(imagePath)
             .resize(1, 1)
             .raw()

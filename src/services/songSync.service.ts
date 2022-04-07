@@ -13,6 +13,7 @@ import { getMp3Tags } from '../formats/mp3.format'
 import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
 import { SongType } from '../types/song.type'
+import { ConfigType } from '../types/config.type'
 
 const TOTAL_CPUS = cpus().length
 
@@ -27,14 +28,25 @@ let taskQueue: any[] = []
 
 export let maxTaskQueueLength: number = 0
 
-export async function watchFolders(rootDirectories: string[]) {
-	let audioFolders = getAllAudioFolders(rootDirectories)
+let foundPaths: string[] = []
+
+export async function watchFolders(directories: ConfigType['directories']) {
+	// console.log(directories)
+	/*
+	let audioFolders = getAllAudioFolders(directories.add)
+
+	console.log(audioFolders)
 
 	let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b))
 
+	console.log(audioFiles)
+
 	filterSongs(audioFiles)
 
-	startChokidarWatch(rootDirectories)
+	*/
+
+	console.log('Watching folders...')
+	startChokidarWatch(directories.add, directories.exclude)
 }
 
 export function startChokidarWatch(rootDirectories: string[], excludeDirectories: string[] = []) {
@@ -50,11 +62,20 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 
 	watcher.unwatch(excludeDirectories)
 
+	watcher.on('add', (path: string) => {
+		foundPaths.push(path)
+	})
+
 	watcher.on('ready', () => {
+		foundPaths = foundPaths.filter(path => isAudioFile(path))
+
+		console.log(foundPaths.length)
+
+		filterSongs(foundPaths)
+
 		watcher!.on('add', path => {
 			if (isAudioFile(path)) {
-				console.log(path)
-				addToTaskQueue(path, 'insert')
+				// addToTaskQueue(path, 'insert')
 			}
 		})
 
@@ -162,13 +183,15 @@ function filterSongs(audioFilesFound: string[] = []) {
 		let collection = getStorageMapToArray().map(song => song.SourceFile)
 
 		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
+			console.log(data.type, ' : ', data.songs.length)
+
 			if (data.type === 'songsToAdd') {
 				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')))
 			}
 
 			if (data.type === 'songsToDelete') {
 				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')))
-				killWorker('songFilter')
+				// killWorker('songFilter')
 				resolve(null)
 			}
 		})

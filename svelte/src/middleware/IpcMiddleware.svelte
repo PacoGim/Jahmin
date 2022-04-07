@@ -81,6 +81,10 @@
 		ipcRenderer.on('art-queue-progress', (event, data) => {
 			$artCompressQueueProgress = data
 
+			if ($artCompressQueueProgress.currentLength === 0 && $artCompressQueueProgress.maxLength === 0) {
+				return
+			}
+
 			setTimeout(() => {
 				sendNewArtQueueProgressIPC()
 			}, 1000)
@@ -98,6 +102,8 @@
 			let element: HTMLElement = document.querySelector(
 				`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
 			)
+
+			if (!element) return
 
 			let videoElement: HTMLVideoElement = element.querySelector('video')
 			let imageElement: HTMLImageElement = element.querySelector('img')

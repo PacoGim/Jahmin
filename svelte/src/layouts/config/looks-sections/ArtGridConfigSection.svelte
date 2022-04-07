@@ -11,9 +11,9 @@
 
 		$rangeInputService.showRangeInput({
 			title: 'Art Size',
-			min: 32,
-			max: 512,
-			step: 16,
+			min: 64,
+			max: 256,
+			step: 8,
 			minStep: 1,
 			value: Number($artSizeConfig),
 			confirmButtonText: 'Confirm',
@@ -39,11 +39,12 @@
 			}
 		}).then(() => {
 			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
+				artElement.dataset.artsize = String(newArtSize)
 				if (isElementInViewportFn(artElement)) {
-					compressAlbumArtIPC(artElement.dataset.albumId, newArtSize)
+					compressAlbumArtIPC(artElement.dataset.albumid, newArtSize, false)
 				} else {
 					setTimeout(() => {
-						compressAlbumArtIPC(artElement.dataset.albumId, newArtSize)
+						compressAlbumArtIPC(artElement.dataset.albumid, newArtSize, false)
 					}, 1000)
 				}
 			})

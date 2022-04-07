@@ -31,6 +31,10 @@ export function getAlbumColors(albumId: string, contrast: number | undefined): P
 
 		const imagePath = imagePaths[0]
 
+		if (imagePath === undefined) {
+			return resolve(undefined)
+		}
+
 		sharp(imagePath)
 			.resize(1, 1)
 			.raw()

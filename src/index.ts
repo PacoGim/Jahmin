@@ -38,7 +38,7 @@ async function createMainWindow() {
 	initStorage()
 
 	// Watches the given root folder.
-	if (config?.rootDirectories) watchFolders(config.rootDirectories)
+	if (config?.directories) watchFolders(config.directories)
 
 	browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow))
 }

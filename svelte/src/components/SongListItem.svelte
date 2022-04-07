@@ -21,12 +21,12 @@
 	export let song: SongType
 	export let index: number
 
-	let isSongPlaying = $playingSongStore.ID === song.ID && $selectedAlbumId === $albumPlayingIdStore
+	let isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
 	let isDisabled = false
 	let gridStyle = ''
 
 	$: {
-		isSongPlaying = $playingSongStore.ID === song.ID && $selectedAlbumId === $albumPlayingIdStore
+		isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
 	}
 
 	$: {

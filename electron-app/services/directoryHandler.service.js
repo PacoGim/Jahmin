@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_service_1 = require("./config.service");
 const sendWebContents_service_1 = require("./sendWebContents.service");
+const songSync_service_1 = require("./songSync.service");
 function default_1(filePaths, type) {
     let config = (0, config_service_1.getConfig)();
     filePaths.forEach((filePath) => {
@@ -20,5 +21,6 @@ function default_1(filePaths, type) {
     });
     (0, config_service_1.saveConfig)(config);
     (0, sendWebContents_service_1.sendWebContents)('selected-directories', config.directories);
+    (0, songSync_service_1.watchFolders)(config.directories);
 }
 exports.default = default_1;
