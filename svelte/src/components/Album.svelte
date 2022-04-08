@@ -13,10 +13,6 @@
 
 	let element
 
-	$: {
-		console.log(album)
-	}
-
 	onMount(() => {
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 
@@ -31,7 +27,8 @@
 </script>
 
 <album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''} bind:this={element}>
-	<AlbumArt albumId={album.ID} {artSize} observer="addObserver" style="height:inherit;width:inherit;cursor:pointer;" />
+
+	<AlbumArt rootDir={album.RootDir} {artSize} observer="addObserver" style="height:inherit;width:inherit;cursor:pointer;" />
 
 	<overlay-gradient />
 

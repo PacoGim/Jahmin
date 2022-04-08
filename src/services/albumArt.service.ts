@@ -7,6 +7,7 @@ import { sendWebContents } from './sendWebContents.service'
 import { getStorageMap } from './storage.service'
 import { getWorker } from './worker.service'
 import { AlbumType } from '../types/album.type'
+import { hash } from '../functions/hashString.fn'
 
 // Queue for image compression
 let compressImageQueue: {
@@ -47,14 +48,16 @@ const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${e
 const notCompress = ['mp4', 'webm', 'apng', 'gif']
 const videoFormats = ['mp4', 'webm']
 
-export function compressAlbumArt(albumId: string, artSize: number, forceNewCheck: boolean) {
+export function compressAlbumArt(rootDir: string, artSize: number, forceNewCheck: boolean) {
+
 	// If the art size is not a number, it can't compress the art so it returns.
 	if (isNaN(Number(artSize))) return
 
-	let album = getStorageMap().get(albumId)
+	// let album = getStorageMap().get(albumId)
+	let albumId = hash(rootDir) as string
 
 	// If album is not found, return.
-	if (album === undefined) return
+	if (rootDir === undefined) return
 
 	let artOutputDirPath = path.join(appDataPath(), 'art', String(artSize))
 	let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
@@ -71,9 +74,9 @@ export function compressAlbumArt(albumId: string, artSize: number, forceNewCheck
 	}
 
 	// If album root directory is not found, return.
-	if (fs.existsSync(album.RootDir) === false) return
+	if (fs.existsSync(rootDir) === false) return
 
-	let allowedMediaFiles = getAllowedFiles(album)
+	let allowedMediaFiles = getAllowedFiles(rootDir)
 
 	if (allowedMediaFiles.length === 0) {
 		sendWebContents('new-art', {
@@ -149,11 +152,11 @@ export function sendArtQueueProgress() {
 }
 
 // Returns all images sorted by priority.
-export function getAllowedFiles(album: AlbumType) {
+export function getAllowedFiles(rootDir:string) {
 	let allowedMediaFiles = fs
-		.readdirSync(album.RootDir)
+		.readdirSync(rootDir)
 		.filter(file => allowedNames.includes(file.toLowerCase()))
-		.map(file => path.join(album!.RootDir, file))
+		.map(file => path.join(rootDir, file))
 		.sort((a, b) => {
 			// Gets the priority from the index of the valid formats above.
 			// mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.

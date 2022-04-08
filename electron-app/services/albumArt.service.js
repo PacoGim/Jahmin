@@ -8,8 +8,8 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const __1 = require("..");
 const sendWebContents_service_1 = require("./sendWebContents.service");
-const storage_service_1 = require("./storage.service");
 const worker_service_1 = require("./worker.service");
+const hashString_fn_1 = require("../functions/hashString.fn");
 // Queue for image compression
 let compressImageQueue = [];
 // let sendArtQueueProgressInterval: NodeJS.Timeout | null = null
@@ -34,13 +34,14 @@ const validNames = ['cover', 'folder', 'front', 'art', 'album'];
 const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
 const notCompress = ['mp4', 'webm', 'apng', 'gif'];
 const videoFormats = ['mp4', 'webm'];
-function compressAlbumArt(albumId, artSize, forceNewCheck) {
+function compressAlbumArt(rootDir, artSize, forceNewCheck) {
     // If the art size is not a number, it can't compress the art so it returns.
     if (isNaN(Number(artSize)))
         return;
-    let album = (0, storage_service_1.getStorageMap)().get(albumId);
+    // let album = getStorageMap().get(albumId)
+    let albumId = (0, hashString_fn_1.hash)(rootDir);
     // If album is not found, return.
-    if (album === undefined)
+    if (rootDir === undefined)
         return;
     let artOutputDirPath = path_1.default.join((0, __1.appDataPath)(), 'art', String(artSize));
     let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
@@ -55,9 +56,9 @@ function compressAlbumArt(albumId, artSize, forceNewCheck) {
         });
     }
     // If album root directory is not found, return.
-    if (fs_1.default.existsSync(album.RootDir) === false)
+    if (fs_1.default.existsSync(rootDir) === false)
         return;
-    let allowedMediaFiles = getAllowedFiles(album);
+    let allowedMediaFiles = getAllowedFiles(rootDir);
     if (allowedMediaFiles.length === 0) {
         (0, sendWebContents_service_1.sendWebContents)('new-art', {
             artSize,
@@ -125,11 +126,11 @@ function sendArtQueueProgress() {
 }
 exports.sendArtQueueProgress = sendArtQueueProgress;
 // Returns all images sorted by priority.
-function getAllowedFiles(album) {
+function getAllowedFiles(rootDir) {
     let allowedMediaFiles = fs_1.default
-        .readdirSync(album.RootDir)
+        .readdirSync(rootDir)
         .filter(file => allowedNames.includes(file.toLowerCase()))
-        .map(file => path_1.default.join(album.RootDir, file))
+        .map(file => path_1.default.join(rootDir, file))
         .sort((a, b) => {
         // Gets the priority from the index of the valid formats above.
         // mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.

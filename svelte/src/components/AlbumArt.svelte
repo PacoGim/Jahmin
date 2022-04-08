@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { hash } from '../functions/hashString.fn'
 	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 	import { compressAlbumArtIPC } from '../services/ipc.service'
@@ -7,32 +8,34 @@
 	import { albumArtMapStore } from '../store/final.store'
 
 	export let style
-	export let albumId
+	let albumId
 	export let observer: 'addObserver' | '!addObserver' = '!addObserver'
+	export let rootDir
+	export let artSize = undefined
 
 	let dataLoaded = false
-
-	export let artSize = undefined
 
 	let artType = 'image'
 	let element: HTMLElement = undefined
 
 	onMount(() => {})
 
-	$: handleAlbumArt(albumId, artSize)
+	$: handleAlbumArt(rootDir, artSize)
 
-	function handleAlbumArt(albumId, artSize) {
-		if (albumId === undefined || artSize === 0) {
+	function handleAlbumArt(rootDir, artSize) {
+		if (rootDir === undefined || artSize === 0) {
 			return
 		}
+
+		albumId = hash(rootDir) as string
 
 		let albumArtData = $albumArtMapStore.get(albumId)?.find(art => art.artSize === artSize)
 
 		if (albumArtData === undefined) {
 			if (observer === 'addObserver') {
-				addIntersectionObserver(element, albumId, artSize)
+				addIntersectionObserver(element, rootDir, artSize)
 			} else {
-				compressAlbumArtIPC(albumId, artSize, false)
+				compressAlbumArtIPC(rootDir, artSize, false)
 			}
 
 			return

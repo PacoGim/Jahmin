@@ -168,8 +168,8 @@ export function loadIPC() {
 		return await hashFileFn(filePath)
 	})
 
-	ipcMain.handle('handle-art-compression', async (evt, albumId, artSize, forceNewCheck) => {
-		compressAlbumArt(albumId, artSize, forceNewCheck)
+	ipcMain.handle('handle-art-compression', async (evt, rootDir, artSize, forceNewCheck) => {
+		compressAlbumArt(rootDir, artSize, forceNewCheck)
 	})
 
 	ipcMain.handle('get-album-colors', async (evt, imageId, contrastRatio) => {

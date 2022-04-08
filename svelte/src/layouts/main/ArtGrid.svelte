@@ -26,13 +26,16 @@
 		return new Promise((resolve, reject) => {
 			let albums = []
 			results.forEach(song => {
-				const albumId = hash(song.SourceFile.split('/').slice(0, -1).join('/'))
+				const rootDir = song.SourceFile.split('/').slice(0, -1).join('/')
+				const albumId = hash(rootDir)
 
 				let album = albums.find(album => album.ID === albumId)
 
 				if (album === undefined) {
 					album = {
 						ID: albumId,
+						RootDir: rootDir,
+						Name: song.Album || '',
 						Songs: []
 					}
 
@@ -80,8 +83,8 @@
 		height: 100%;
 		grid-area: art-grid-svlt;
 
-		/* 		display: flex;
+		display: flex;
 		flex-wrap: wrap;
-		align-content: flex-start; */
+		align-content: flex-start;
 	}
 </style>

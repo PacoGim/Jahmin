@@ -178,8 +178,8 @@ export function sendSongSyncQueueProgressIPC(): void {
 	ipcRenderer.invoke('send-song-sync-queue-progress')
 }
 
-export function compressAlbumArtIPC(albumId, artSize, forceNewCheck: boolean) {
-	ipcRenderer.invoke('handle-art-compression', albumId, artSize, forceNewCheck)
+export function compressAlbumArtIPC(rootDir, artSize, forceNewCheck: boolean) {
+	ipcRenderer.invoke('handle-art-compression', rootDir, artSize, forceNewCheck)
 }
 
 export function getFileHashIPC(filePath: string) {
