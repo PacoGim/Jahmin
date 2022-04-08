@@ -5,7 +5,12 @@
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { sendNewArtQueueProgressIPC, saveConfig, compressAlbumArtIPC } from '../services/ipc.service'
+	import {
+		sendNewArtQueueProgressIPC,
+		saveConfig,
+		compressAlbumArtIPC,
+		sendSongSyncQueueProgressIPC
+	} from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { directoriesConfig, groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
 	import {
@@ -14,8 +19,10 @@
 		artCompressQueueProgress,
 		selectedAlbumId,
 		selectedGroups,
-		songListStore
+		songListStore,
+		songSyncQueueProgress
 	} from '../store/final.store'
+	import { storageService } from '../store/service.store'
 	import type { AlbumType } from '../types/album.type'
 
 	onMount(() => {
@@ -78,6 +85,10 @@
 			$directoriesConfig = data
 		})
 
+		ipcRenderer.on('web-storage', (event, data) => {
+			$storageService.addSong(data.data)
+		})
+
 		ipcRenderer.on('art-queue-progress', (event, data) => {
 			$artCompressQueueProgress = data
 
@@ -87,6 +98,18 @@
 
 			setTimeout(() => {
 				sendNewArtQueueProgressIPC()
+			}, 1000)
+		})
+
+		ipcRenderer.on('song-sync-queue-progress', (event, data) => {
+			$songSyncQueueProgress = data
+
+			if ($songSyncQueueProgress.currentLength === 0 && $songSyncQueueProgress.maxLength === 0) {
+				return
+			}
+
+			setTimeout(() => {
+				sendSongSyncQueueProgressIPC()
 			}, 1000)
 		})
 
@@ -116,7 +139,9 @@
 			return
 		}
 
-		setArtToSrcFn(data.albumId, data.artSize, data.artPath, data.artType)
+		setArtToSrcFn(data.albumId, data.artSize, data.artPath, data.artType).catch(reason => {
+			console.log(reason)
+		})
 
 		let albumArtData = $albumArtMapStore.get(data.albumId)
 

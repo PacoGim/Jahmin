@@ -14,6 +14,7 @@ import { getFlacTags } from '../formats/flac.format'
 import { getAacTags } from '../formats/aac.format'
 import { SongType } from '../types/song.type'
 import { ConfigType } from '../types/config.type'
+import { sendWebContents } from './sendWebContents.service'
 
 const TOTAL_CPUS = cpus().length
 
@@ -31,22 +32,31 @@ export let maxTaskQueueLength: number = 0
 let foundPaths: string[] = []
 
 export async function watchFolders(directories: ConfigType['directories']) {
-	// console.log(directories)
-	/*
-	let audioFolders = getAllAudioFolders(directories.add)
+	taskQueue = []
+	maxTaskQueueLength = 0
 
-	console.log(audioFolders)
+	let filesInFolders = getAllFilesInFoldersDeep(directories.add)
 
-	let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b))
-
-	console.log(audioFiles)
+	let audioFiles = filesInFolders
+		.filter(path => isExcludedPaths(path, directories.exclude))
+		.filter(file => isAudioFile(file))
+		.sort((a, b) => a.localeCompare(b))
 
 	filterSongs(audioFiles)
+	// startChokidarWatch(directories.add, directories.exclude)
+}
 
-	*/
+function isExcludedPaths(path: string, excludedPaths: string[]) {
+	let isExcluded = false
 
-	console.log('Watching folders...')
-	startChokidarWatch(directories.add, directories.exclude)
+	for (let excludedPath of excludedPaths) {
+		if (path.includes(excludedPath)) {
+			isExcluded = true
+			break
+		}
+	}
+
+	return !isExcluded
 }
 
 export function startChokidarWatch(rootDirectories: string[], excludeDirectories: string[] = []) {
@@ -67,15 +77,9 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 	})
 
 	watcher.on('ready', () => {
-		foundPaths = foundPaths.filter(path => isAudioFile(path))
-
-		console.log(foundPaths.length)
-
-		filterSongs(foundPaths)
-
 		watcher!.on('add', path => {
 			if (isAudioFile(path)) {
-				// addToTaskQueue(path, 'insert')
+				addToTaskQueue(path, 'insert')
 			}
 		})
 
@@ -121,11 +125,15 @@ function processQueue() {
 		if (task !== undefined && ['insert', 'update'].includes(task.type)) {
 			getTags(task)
 				.then(tags => {
-					storageWorker?.postMessage({
+					sendWebContents('web-storage', {
+						type: task.type,
+						data: tags
+					})
+					/* 			storageWorker?.postMessage({
 						type: task.type,
 						data: tags,
 						appDataPath: appDataPath()
-					})
+					}) */
 
 					getTask(processIndex)
 				})
@@ -133,11 +141,15 @@ function processQueue() {
 					getTask(processIndex)
 				})
 		} else if (task !== undefined && ['delete'].includes(task.type)) {
-			storageWorker?.postMessage({
+			sendWebContents('web-storage', {
+				type: task.type,
+				path: task.path
+			})
+			/* 			storageWorker?.postMessage({
 				type: task.type,
 				data: task.path,
 				appDataPath: appDataPath()
-			})
+			}) */
 			getTask(processIndex)
 		} else {
 			// If no task left then sets its own process as false.
@@ -183,15 +195,12 @@ function filterSongs(audioFilesFound: string[] = []) {
 		let collection = getStorageMapToArray().map(song => song.SourceFile)
 
 		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
-			console.log(data.type, ' : ', data.songs.length)
-
 			if (data.type === 'songsToAdd') {
 				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')))
 			}
 
 			if (data.type === 'songsToDelete') {
 				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')))
-				// killWorker('songFilter')
 				resolve(null)
 			}
 		})
@@ -216,52 +225,46 @@ function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update' | 'de
 		})
 	}
 
+	if (taskQueue.length > maxTaskQueueLength) {
+		maxTaskQueueLength = taskQueue.length
+	}
+
 	if (isQueueRunning === false) {
 		isQueueRunning = true
+		sendSongSyncQueueProgress()
 		processQueue()
 	}
 }
 
-function getAllAudioFilesInFolders(rootDirectories: string[]) {
-	let allFiles: string[] = []
+export function sendSongSyncQueueProgress() {
+	if (taskQueue.length === 0) {
+		maxTaskQueueLength = 0
+	}
 
-	rootDirectories.forEach(rootDirectory => {
-		let files = fs.readdirSync(rootDirectory)
-
-		files.forEach(file => {
-			let filePath = path.join(rootDirectory, file)
-
-			if (isAudioFile(file)) {
-				allFiles.push(filePath)
-			} else if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-				allFiles = allFiles.concat(getAllAudioFilesInFolders([filePath]))
-			}
-		})
+	sendWebContents('song-sync-queue-progress', {
+		currentLength: taskQueue.length,
+		maxLength: maxTaskQueueLength
 	})
-
-	return allFiles
 }
 
-function getAllAudioFolders(rootDirectories: string[]) {
-	let folders: string[] = []
+function getAllFilesInFoldersDeep(rootDirectory: string[]) {
+	let allFiles: string[] = []
 
-	rootDirectories.forEach(rootDirectory => {
+	rootDirectory.forEach(rootDirectory => {
 		let files = fs.readdirSync(rootDirectory)
 
 		files.forEach(file => {
 			let filePath = path.join(rootDirectory, file)
 
 			if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-				if (fs.readdirSync(filePath).find(file => isAudioFile(file))) {
-					folders.push(filePath)
-				}
-
-				folders = folders.concat(getAllAudioFolders([filePath]))
+				allFiles = allFiles.concat(getAllFilesInFoldersDeep([filePath]))
+			} else {
+				allFiles.push(filePath)
 			}
 		})
 	})
 
-	return folders
+	return allFiles
 }
 
 function isAudioFile(path: string) {
@@ -300,11 +303,16 @@ export function reloadAlbumData(albumId: string) {
 		if (dbSong && fs.statSync(dbSong?.SourceFile).mtimeMs > dbSong?.LastModified!) {
 			getTags({ path: dbSong.SourceFile })
 				.then(tags => {
-					storageWorker?.postMessage({
+					sendWebContents('web-storage', {
+						type: 'update',
+						data: tags
+					})
+
+					/* 		storageWorker?.postMessage({
 						type: 'update',
 						data: tags,
 						appDataPath: appDataPath()
-					})
+					}) */
 				})
 				.catch(err => {
 					console.error(err)

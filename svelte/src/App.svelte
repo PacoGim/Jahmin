@@ -13,7 +13,7 @@
 
 	import iziToast from 'izitoast'
 
-	import { confirmService, equalizerService, promptService, rangeInputService } from './store/service.store'
+	import { confirmService, equalizerService, promptService, rangeInputService, storageService } from './store/service.store'
 
 	import PlayerMiddleware from './middleware/PlayerMiddleware.svelte'
 	import ConfigMiddleware from './middleware/ConfigMiddleware.svelte'
@@ -36,6 +36,7 @@
 	import AudioPlayer from './layouts/AudioPlayer.svelte'
 	import EventsHandlerMiddleware from './middleware/EventsHandlerMiddleware.svelte'
 	import nextSongFn from './functions/nextSong.fn'
+	import StorageService from './svelte-services/StorageService.svelte'
 
 	let appIdleDebounce = getAppIdleDebounce()
 
@@ -136,6 +137,7 @@
 <PromptService bind:this={$promptService} />
 <ConfirmService bind:this={$confirmService} />
 <RangeInputService bind:this={$rangeInputService} />
+<StorageService bind:this={$storageService} />
 
 <style>
 	main-app {

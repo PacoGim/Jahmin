@@ -84,3 +84,7 @@ export let artCompressQueueProgress: Writable<{ maxLength: number; currentLength
 	maxLength: 0,
 	currentLength: 0
 })
+export let songSyncQueueProgress: Writable<{ maxLength: number; currentLength: number }> = writable({
+	maxLength: 0,
+	currentLength: 0
+})

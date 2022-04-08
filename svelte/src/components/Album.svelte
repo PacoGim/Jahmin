@@ -13,6 +13,10 @@
 
 	let element
 
+	$: {
+		console.log(album)
+	}
+
 	onMount(() => {
 		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 

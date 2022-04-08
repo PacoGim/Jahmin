@@ -161,6 +161,10 @@ function loadIPC() {
         (0, albumArt_service_1.sendArtQueueProgress)();
         return true;
     });
+    electron_1.ipcMain.handle('send-song-sync-queue-progress', () => {
+        (0, songSync_service_1.sendSongSyncQueueProgress)();
+        return true;
+    });
     electron_1.ipcMain.handle('select-directories', (evt, type) => {
         electron_1.dialog
             .showOpenDialog({

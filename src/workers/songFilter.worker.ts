@@ -8,6 +8,8 @@ type FilterSongData = {
 parentPort?.on('message', (data: FilterSongData) => {
 	let { userSongs, dbSongs } = data
 
+	// console.log(data)
+
 	let songsToAdd = userSongs
 		.filter(song => !dbSongs.includes(song))
 		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))

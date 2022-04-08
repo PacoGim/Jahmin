@@ -174,6 +174,10 @@ export function sendNewArtQueueProgressIPC(): void {
 	ipcRenderer.invoke('send-new-art-queue-progress')
 }
 
+export function sendSongSyncQueueProgressIPC(): void {
+	ipcRenderer.invoke('send-song-sync-queue-progress')
+}
+
 export function compressAlbumArtIPC(albumId, artSize, forceNewCheck: boolean) {
 	ipcRenderer.invoke('handle-art-compression', albumId, artSize, forceNewCheck)
 }

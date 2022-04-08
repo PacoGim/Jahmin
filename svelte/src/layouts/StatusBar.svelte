@@ -4,7 +4,7 @@
 	import ImageIcon from '../icons/ImageIcon.svelte'
 	import tippyService from '../services/tippy.service'
 
-	import { artCompressQueueProgress, playingSongStore } from '../store/final.store'
+	import { artCompressQueueProgress, playingSongStore, songSyncQueueProgress } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 	import AlbumInfo from './main/AlbumInfo.svelte'
 
@@ -43,6 +43,11 @@
 			<span>{$artCompressQueueProgress.currentLength}</span>/
 			<span>{$artCompressQueueProgress.maxLength}</span>
 		</art-compress-queue>
+		<song-sync-queue>
+			<ImageIcon style="fill:var(--low-color);height: 20px;width: 20px;margin-right: .5rem;" />
+			<span>{$songSyncQueueProgress.currentLength}</span>/
+			<span>{$songSyncQueueProgress.maxLength}</span>
+		</song-sync-queue>
 		<!-- Image Process -->
 		<!-- Song Add Process -->
 		<!-- Song Update Process -->
@@ -90,10 +95,26 @@
 	queue-processes {
 		grid-area: queue-processes;
 
+		display: flex;
+
+
 		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 	}
 
 	art-compress-queue {
+		color: var(--low-color);
+		display: flex;
+		align-items: center;
+
+		max-height: 32px;
+
+		background-color: var(--high-color);
+		width: max-content;
+
+		padding: 0.5rem;
+	}
+
+	song-sync-queue {
 		color: var(--low-color);
 		display: flex;
 		align-items: center;

@@ -12,18 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
+exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.sendSongSyncQueueProgress = exports.watchPaths = exports.unwatchPaths = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const worker_service_1 = require("./worker.service");
-const __1 = require("..");
 const storage_service_1 = require("./storage.service");
 const opus_format_1 = require("../formats/opus.format");
 const mp3_format_1 = require("../formats/mp3.format");
 const flac_format_1 = require("../formats/flac.format");
 const aac_format_1 = require("../formats/aac.format");
+const sendWebContents_service_1 = require("./sendWebContents.service");
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
@@ -34,24 +34,28 @@ exports.maxTaskQueueLength = 0;
 let foundPaths = [];
 function watchFolders(directories) {
     return __awaiter(this, void 0, void 0, function* () {
-        // console.log(directories)
-        /*
-        let audioFolders = getAllAudioFolders(directories.add)
-    
-        console.log(audioFolders)
-    
-        let audioFiles = getAllAudioFilesInFolders(audioFolders).sort((a, b) => a.localeCompare(b))
-    
-        console.log(audioFiles)
-    
-        filterSongs(audioFiles)
-    
-        */
-        console.log('Watching folders...');
-        startChokidarWatch(directories.add, directories.exclude);
+        taskQueue = [];
+        exports.maxTaskQueueLength = 0;
+        let filesInFolders = getAllFilesInFoldersDeep(directories.add);
+        let audioFiles = filesInFolders
+            .filter(path => isExcludedPaths(path, directories.exclude))
+            .filter(file => isAudioFile(file))
+            .sort((a, b) => a.localeCompare(b));
+        filterSongs(audioFiles);
+        // startChokidarWatch(directories.add, directories.exclude)
     });
 }
 exports.watchFolders = watchFolders;
+function isExcludedPaths(path, excludedPaths) {
+    let isExcluded = false;
+    for (let excludedPath of excludedPaths) {
+        if (path.includes(excludedPath)) {
+            isExcluded = true;
+            break;
+        }
+    }
+    return !isExcluded;
+}
 function startChokidarWatch(rootDirectories, excludeDirectories = []) {
     if (watcher) {
         watcher.close();
@@ -66,12 +70,9 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
         foundPaths.push(path);
     });
     watcher.on('ready', () => {
-        foundPaths = foundPaths.filter(path => isAudioFile(path));
-        console.log(foundPaths.length);
-        filterSongs(foundPaths);
         watcher.on('add', path => {
             if (isAudioFile(path)) {
-                // addToTaskQueue(path, 'insert')
+                addToTaskQueue(path, 'insert');
             }
         });
         watcher.on('change', (path) => {
@@ -112,11 +113,15 @@ function processQueue() {
         if (task !== undefined && ['insert', 'update'].includes(task.type)) {
             getTags(task)
                 .then(tags => {
-                storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+                (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                    type: task.type,
+                    data: tags
+                });
+                /* 			storageWorker?.postMessage({
                     type: task.type,
                     data: tags,
-                    appDataPath: (0, __1.appDataPath)()
-                });
+                    appDataPath: appDataPath()
+                }) */
                 getTask(processIndex);
             })
                 .catch(err => {
@@ -124,11 +129,15 @@ function processQueue() {
             });
         }
         else if (task !== undefined && ['delete'].includes(task.type)) {
-            storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+            (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                type: task.type,
+                path: task.path
+            });
+            /* 			storageWorker?.postMessage({
                 type: task.type,
                 data: task.path,
-                appDataPath: (0, __1.appDataPath)()
-            });
+                appDataPath: appDataPath()
+            }) */
             getTask(processIndex);
         }
         else {
@@ -174,13 +183,11 @@ function filterSongs(audioFilesFound = []) {
         let worker = (0, worker_service_1.getWorker)('songFilter');
         let collection = (0, storage_service_1.getStorageMapToArray)().map(song => song.SourceFile);
         worker.on('message', (data) => {
-            console.log(data.type, ' : ', data.songs.length);
             if (data.type === 'songsToAdd') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
             }
             if (data.type === 'songsToDelete') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')));
-                // killWorker('songFilter')
                 resolve(null);
             }
         });
@@ -203,42 +210,40 @@ function addToTaskQueue(path, type) {
             path
         });
     }
+    if (taskQueue.length > exports.maxTaskQueueLength) {
+        exports.maxTaskQueueLength = taskQueue.length;
+    }
     if (isQueueRunning === false) {
         isQueueRunning = true;
+        sendSongSyncQueueProgress();
         processQueue();
     }
 }
-function getAllAudioFilesInFolders(rootDirectories) {
-    let allFiles = [];
-    rootDirectories.forEach(rootDirectory => {
-        let files = fs_1.default.readdirSync(rootDirectory);
-        files.forEach(file => {
-            let filePath = path_1.default.join(rootDirectory, file);
-            if (isAudioFile(file)) {
-                allFiles.push(filePath);
-            }
-            else if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).isDirectory()) {
-                allFiles = allFiles.concat(getAllAudioFilesInFolders([filePath]));
-            }
-        });
+function sendSongSyncQueueProgress() {
+    if (taskQueue.length === 0) {
+        exports.maxTaskQueueLength = 0;
+    }
+    (0, sendWebContents_service_1.sendWebContents)('song-sync-queue-progress', {
+        currentLength: taskQueue.length,
+        maxLength: exports.maxTaskQueueLength
     });
-    return allFiles;
 }
-function getAllAudioFolders(rootDirectories) {
-    let folders = [];
-    rootDirectories.forEach(rootDirectory => {
+exports.sendSongSyncQueueProgress = sendSongSyncQueueProgress;
+function getAllFilesInFoldersDeep(rootDirectory) {
+    let allFiles = [];
+    rootDirectory.forEach(rootDirectory => {
         let files = fs_1.default.readdirSync(rootDirectory);
         files.forEach(file => {
             let filePath = path_1.default.join(rootDirectory, file);
             if (fs_1.default.existsSync(filePath) && fs_1.default.statSync(filePath).isDirectory()) {
-                if (fs_1.default.readdirSync(filePath).find(file => isAudioFile(file))) {
-                    folders.push(filePath);
-                }
-                folders = folders.concat(getAllAudioFolders([filePath]));
+                allFiles = allFiles.concat(getAllFilesInFoldersDeep([filePath]));
+            }
+            else {
+                allFiles.push(filePath);
             }
         });
     });
-    return folders;
+    return allFiles;
 }
 function isAudioFile(path) {
     return EXTENSIONS.includes(path.split('.').pop() || '');
@@ -272,11 +277,15 @@ function reloadAlbumData(albumId) {
         if (dbSong && fs_1.default.statSync(dbSong === null || dbSong === void 0 ? void 0 : dbSong.SourceFile).mtimeMs > (dbSong === null || dbSong === void 0 ? void 0 : dbSong.LastModified)) {
             getTags({ path: dbSong.SourceFile })
                 .then(tags => {
-                storageWorker === null || storageWorker === void 0 ? void 0 : storageWorker.postMessage({
+                (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                    type: 'update',
+                    data: tags
+                });
+                /* 		storageWorker?.postMessage({
                     type: 'update',
                     data: tags,
-                    appDataPath: (0, __1.appDataPath)()
-                });
+                    appDataPath: appDataPath()
+                }) */
             })
                 .catch(err => {
                 console.error(err);

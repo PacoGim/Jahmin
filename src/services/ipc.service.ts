@@ -7,7 +7,7 @@ import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
-import { getMaxTaskQueueLength, getTaskQueueLength } from './songSync.service'
+import { getMaxTaskQueueLength, getTaskQueueLength, sendSongSyncQueueProgress } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
@@ -193,6 +193,11 @@ export function loadIPC() {
 
 	ipcMain.handle('send-new-art-queue-progress', () => {
 		sendArtQueueProgress()
+		return true
+	})
+
+	ipcMain.handle('send-song-sync-queue-progress', () => {
+		sendSongSyncQueueProgress()
 		return true
 	})
 
