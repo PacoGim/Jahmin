@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { db, getAlbumSongs } from '../db/db'
+	import { hash } from '../functions/hashString.fn'
 	import parseJson from '../functions/parseJson'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
@@ -15,6 +17,7 @@
 		triggerGroupingChangeEvent,
 		triggerScrollToSongEvent
 	} from '../store/final.store'
+	import type { SongType } from '../types/song.type'
 
 	function handleClickEvent(evt: MouseEvent) {
 		$elementMap = new Map<string, HTMLElement>()
@@ -49,24 +52,25 @@
 		}
 	}
 
-	function handleAlbumEvent(element: HTMLElement, evtType: string) {
-		const albumId = element.getAttribute('id')
+	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
+		const rootDir = element.getAttribute('rootDir')
+		const albumId = hash(rootDir) as string
 
-		getAlbumIPC(albumId).then(result => {
-			if (evtType === 'dblclick') {
-				setNewPlayback(albumId, result.Songs, undefined, true)
-				saveGroupingConfig()
-			} else if (evtType === 'click') {
-				// Prevents resetting array if album unchanged.
-				if ($selectedAlbumId !== albumId) {
-					$selectedAlbumId = albumId
-					$songListStore = result.Songs
-				}
+		let songs = await getAlbumSongs(rootDir)
 
-				// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
-				$selectedSongsStore = []
+		if (evtType === 'dblclick') {
+			setNewPlayback(albumId, songs, undefined, true)
+			saveGroupingConfig()
+		} else if (evtType === 'click') {
+			// Prevents resetting array if album unchanged.
+			if ($selectedAlbumId !== albumId) {
+				$selectedAlbumId = albumId
+				$songListStore = songs
 			}
-		})
+
+			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
+			$selectedSongsStore = []
+		}
 	}
 
 	function handleSongListItemEvent(element: HTMLElement, evtType: string) {

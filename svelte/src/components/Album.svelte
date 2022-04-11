@@ -26,7 +26,7 @@
 	})
 </script>
 
-<album id={album.ID} class={$selectedAlbumId === album?.ID ? 'selected' : ''} bind:this={element}>
+<album id={album.ID} rootDir={album.RootDir} class={$selectedAlbumId === album?.ID ? 'selected' : ''} bind:this={element}>
 
 	<AlbumArt rootDir={album.RootDir} {artSize} observer="addObserver" style="height:inherit;width:inherit;cursor:pointer;" />
 
