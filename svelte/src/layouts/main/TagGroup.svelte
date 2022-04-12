@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
-	import { groupSongsIPC } from '../../services/ipc.service'
+import { groupSongs } from '../../services/groupSongs.service';
 	import { groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { selectedGroups, triggerGroupingChangeEvent } from '../../store/final.store'
+	import { selectedGroupByValueStore, selectedGroups, triggerGroupingChangeEvent } from '../../store/final.store'
 
 	let isFirstGroupSongs = true
+
+	$:{
+		console.log($selectedGroups)
+	}
 
 	$: {
 		$groupByConfig
@@ -33,7 +37,8 @@
 			}
 		}
 
-		groupSongsIPC($groupByConfig, $groupByValuesConfig)
+		groupSongs($groupByConfig,$groupByValuesConfig)
+		// groupSongsIPC($groupByConfig, $groupByValuesConfig)
 	}
 
 	function setNewGroupValue(index, groupValue) {
@@ -45,7 +50,8 @@
 			}
 		}
 
-		groupSongsIPC($groupByConfig, $groupByValuesConfig)
+		groupSongs($groupByConfig,$groupByValuesConfig)
+		// groupSongsIPC($groupByConfig, $groupByValuesConfig)
 	}
 </script>
 

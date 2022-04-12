@@ -11,13 +11,13 @@ import type { SongFuzzySearchType, SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
 
-export function groupSongsIPC(groups: string[], groupValues: string[]): Promise<any> {
-	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('group-songs', groups, groupValues).then(result => {
-			resolve(result)
-		})
-	})
-}
+// export function groupSongsIPC(groups: string[], groupValues: string[]): Promise<any> {
+// 	return new Promise((resolve, reject) => {
+// 		ipcRenderer.invoke('group-songs', groups, groupValues).then(result => {
+// 			resolve(result)
+// 		})
+// 	})
+// }
 
 export function userSearchIPC(searchString: string, keys: string[]): Promise<SongFuzzySearchType[]> {
 	return new Promise((resolve, reject) => {
@@ -212,9 +212,9 @@ export function getAlbumIPC(albumId: string): Promise<AlbumType> {
 	})
 }
 
-export function getAlbumColorsIPC(albumId, contrastRatio) {
+export function getAlbumColorsIPC(rootDir, contrastRatio) {
 	return new Promise((resolve, reject) => {
-		ipcRenderer.invoke('get-album-colors', albumId, contrastRatio).then(result => {
+		ipcRenderer.invoke('get-album-colors', rootDir, contrastRatio).then(result => {
 			resolve(result)
 		})
 	})

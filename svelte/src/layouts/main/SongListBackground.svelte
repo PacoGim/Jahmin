@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { hash } from '../../functions/hashString.fn'
 
-	import { albumArtMapStore, selectedAlbumId } from '../../store/final.store'
+	import { albumArtMapStore, selectedAlbumDir, selectedAlbumId } from '../../store/final.store'
 
 	$: {
-		if ($selectedAlbumId !== undefined) setArt()
+		if ($selectedAlbumDir !== undefined) setArt()
 	}
 
 	let setArtRetryCounter = 0
@@ -27,7 +28,7 @@
 		}
 		// If the map is not empty
 
-		let albumArts = $albumArtMapStore.get($selectedAlbumId)
+		let albumArts = $albumArtMapStore.get(hash($selectedAlbumDir))
 
 		if (albumArts === undefined) {
 			loadArt(undefined, undefined)

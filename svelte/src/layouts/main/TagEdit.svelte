@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { selectedAlbumId, selectedSongsStore, songListStore } from '../../store/final.store'
+	import { selectedAlbumDir, selectedAlbumId, selectedSongsStore, songListStore } from '../../store/final.store'
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
 	import type { SongType } from '../../types/song.type'
@@ -225,7 +225,7 @@
 
 	<cover-container bind:this={element}>
 		<AlbumArt
-			albumId={$selectedAlbumId}
+			rootDir={$selectedAlbumDir}
 			{artSize}
 			style="height:100%; width:100%; position: absolute; top: 0; left: 0;"
 			observer="!addObserver"

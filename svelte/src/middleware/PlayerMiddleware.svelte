@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { getAlbumSongs } from '../db/db'
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { getAlbumIPC, getAlbumsIPC } from '../services/ipc.service'
@@ -7,6 +8,7 @@
 	import {
 		albumListStore,
 		dbVersion,
+		selectedAlbumDir,
 		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
@@ -52,19 +54,19 @@
 	}
 
 	function loadPreviousState() {
-		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
+		let lastPlayedDir = localStorage.getItem('LastPlayedDir')
 
-		getAlbumColors(lastPlayedAlbumId)
+		getAlbumColors(lastPlayedDir)
 
-		$selectedAlbumId = lastPlayedAlbumId
+		$selectedAlbumDir = lastPlayedDir
 
-		getAlbumIPC(lastPlayedAlbumId).then(result => {
-			$songListStore = result.Songs
+		getAlbumSongs(lastPlayedDir).then(songs => {
+			$songListStore = songs
 
-			setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongId, false)
-			// setNewPlayback(lastPlayedAlbumId, $songListStore, lastPlayedSongId, true)
+			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
 		})
+
 	}
 
 	onMount(() => {

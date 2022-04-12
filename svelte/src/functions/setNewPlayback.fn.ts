@@ -1,31 +1,32 @@
 import { getAlbumIPC } from '../services/ipc.service'
 import { setWaveSource } from '../services/waveform.service'
-import { albumPlayingIdStore, playbackCursor, playbackStore, playingSongStore } from '../store/final.store'
+import { albumPlayingIdStore, albumPlayingDirStore, playbackCursor, playbackStore, playingSongStore } from '../store/final.store'
 import { songToPlayUrlStore } from '../store/player.store'
 // import { playback, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 import { getAlbumColors } from './getAlbumColors.fn'
 
 export async function setNewPlayback(
-	albumId: string,
+	rootDir: string,
 	playbackSongs: SongType[],
 	songIdToPlay: number | undefined,
 	playNow: boolean
 ) {
+
 	// console.log(albumId, playbackSongs, songIdToPlay, playNow)
 
 	// let indexToPlay = playbackSongs.findIndex(song => song.ID === songIdToPlay)
 	let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0]
 
 	playingSongStore.set(songToPlay)
-	setWaveSource(songToPlay.SourceFile, albumId, songToPlay.Duration)
+	setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration)
 	// if (indexToPlay === -1) {
 	// 	indexToPlay = 0
 	// }
 
 	// let songToPlay= playbackSongs[songIdToPlay]
 
-	albumPlayingIdStore.set(albumId)
+	albumPlayingDirStore.set(rootDir)
 	playbackStore.set(playbackSongs)
 
 	if (playNow === true) {
@@ -33,7 +34,7 @@ export async function setNewPlayback(
 	}
 
 	// playbackCursor.set([indexToPlay, playNow])
-	getAlbumColors(albumId)
+	getAlbumColors(rootDir)
 }
 
 function fetchAlbum(albumId): Promise<SongType[]> {

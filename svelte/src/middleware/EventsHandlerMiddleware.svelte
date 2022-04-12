@@ -11,6 +11,7 @@
 		elementMap,
 		playbackStore,
 		playingSongStore,
+		selectedAlbumDir,
 		selectedAlbumId,
 		selectedSongsStore,
 		songListStore,
@@ -59,13 +60,14 @@
 		let songs = await getAlbumSongs(rootDir)
 
 		if (evtType === 'dblclick') {
-			setNewPlayback(albumId, songs, undefined, true)
+			setNewPlayback(rootDir, songs, undefined, true)
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
 			if ($selectedAlbumId !== albumId) {
 				$selectedAlbumId = albumId
 				$songListStore = songs
+				$selectedAlbumDir = rootDir
 			}
 
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.

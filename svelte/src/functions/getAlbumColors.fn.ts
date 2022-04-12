@@ -1,9 +1,9 @@
 import { getAlbumColorsIPC } from '../services/ipc.service'
 import type { ColorType } from '../types/color.type'
 
-export async function getAlbumColors(albumId: string, contrast=undefined): Promise<ColorType> {
+export async function getAlbumColors(rootDir: string, contrast=undefined): Promise<ColorType> {
 	return new Promise((resolve, reject) => {
-		getAlbumColorsIPC(albumId, contrast).then((color: ColorType) => {
+		getAlbumColorsIPC(rootDir, contrast).then((color: ColorType) => {
 			if (color === undefined) {
 				color = {
 					hue: 0,

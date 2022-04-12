@@ -31,7 +31,6 @@ const fs_1 = __importDefault(require("fs"));
 const fuse_js_1 = __importDefault(require("fuse.js"));
 const equalizer_service_1 = require("./equalizer.service");
 const common_1 = require("electron/common");
-const songGroup_service_1 = require("./songGroup.service");
 const directoryHandler_service_1 = __importDefault(require("./directoryHandler.service"));
 const hashFile_fn_1 = __importDefault(require("../functions/hashFile.fn"));
 function loadIPC() {
@@ -48,9 +47,9 @@ function loadIPC() {
     electron_1.ipcMain.handle('add-new-equalizer-profile', (evt, newProfile) => __awaiter(this, void 0, void 0, function* () {
         return (0, equalizer_service_1.addEqualizer)(newProfile);
     }));
-    electron_1.ipcMain.handle('group-songs', (evt, groups, groupValues) => __awaiter(this, void 0, void 0, function* () {
-        return (0, songGroup_service_1.groupSongs)(groups, groupValues);
-    }));
+    // ipcMain.handle('group-songs', async (evt, groups: string[], groupValues: string[]) => {
+    // 	return groupSongs(groups, groupValues)
+    // })
     // ipcMain.handle('get-order', async (evt, arg) => {
     // 	let config = getConfig()
     // 	let grouping = config.order?.grouping || []
@@ -142,8 +141,8 @@ function loadIPC() {
     electron_1.ipcMain.handle('handle-art-compression', (evt, rootDir, artSize, forceNewCheck) => __awaiter(this, void 0, void 0, function* () {
         (0, albumArt_service_1.compressAlbumArt)(rootDir, artSize, forceNewCheck);
     }));
-    electron_1.ipcMain.handle('get-album-colors', (evt, imageId, contrastRatio) => __awaiter(this, void 0, void 0, function* () {
-        return yield (0, getAlbumColors_fn_1.getAlbumColors)(imageId, contrastRatio);
+    electron_1.ipcMain.handle('get-album-colors', (evt, rootDir, contrastRatio) => __awaiter(this, void 0, void 0, function* () {
+        return yield (0, getAlbumColors_fn_1.getAlbumColors)(rootDir, contrastRatio);
     }));
     electron_1.ipcMain.handle('sync-db-version', (evt, value) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, storage_service_1.getNewPromiseDbVersion)(value);

@@ -11,19 +11,17 @@ const notCompress = ['mp4', 'webm', 'apng', 'gif']
 
 let previousContrastRatio: number | undefined = undefined
 
-export function getAlbumColors(albumId: string, contrast: number | undefined): Promise<ColorType | undefined> {
+export function getAlbumColors(rootDir: string, contrast: number | undefined): Promise<ColorType | undefined> {
 	return new Promise(async (resolve, reject) => {
 		if (contrast) {
 			contrastRatio = contrast
 		}
 
-		let album = getStorageMap().get(albumId)
-
-		if (!album) {
+		if (rootDir === undefined || rootDir === 'undefined') {
 			return resolve(undefined)
 		}
 
-		const imagePaths = getAllowedFiles(album).filter(file => !notCompress.includes(getExtension(file)))
+		const imagePaths = getAllowedFiles(rootDir).filter(file => !notCompress.includes(getExtension(file)))
 
 		if (imagePaths === undefined) {
 			return resolve(undefined)

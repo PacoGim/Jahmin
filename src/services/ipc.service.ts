@@ -52,9 +52,9 @@ export function loadIPC() {
 		return addEqualizer(newProfile)
 	})
 
-	ipcMain.handle('group-songs', async (evt, groups: string[], groupValues: string[]) => {
-		return groupSongs(groups, groupValues)
-	})
+	// ipcMain.handle('group-songs', async (evt, groups: string[], groupValues: string[]) => {
+	// 	return groupSongs(groups, groupValues)
+	// })
 
 	// ipcMain.handle('get-order', async (evt, arg) => {
 	// 	let config = getConfig()
@@ -172,8 +172,8 @@ export function loadIPC() {
 		compressAlbumArt(rootDir, artSize, forceNewCheck)
 	})
 
-	ipcMain.handle('get-album-colors', async (evt, imageId, contrastRatio) => {
-		return await getAlbumColors(imageId, contrastRatio)
+	ipcMain.handle('get-album-colors', async (evt, rootDir, contrastRatio) => {
+		return await getAlbumColors(rootDir, contrastRatio)
 	})
 
 	ipcMain.handle('sync-db-version', async (evt, value) => {

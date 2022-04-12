@@ -20,6 +20,7 @@ export let playbackCursor: Writable<[number, boolean]> = writable([0, false])
 
 // Id of the current album playing.
 export let albumPlayingIdStore: Writable<string> = writable(undefined)
+export let albumPlayingDirStore: Writable<string> = writable(undefined)
 
 export let songPlayingIdStore: Writable<number> = writable(undefined)
 
@@ -29,6 +30,7 @@ export let isPlaying: Writable<boolean> = writable(false)
 export let playingSongStore: Writable<SongType> = writable(undefined)
 
 export let selectedAlbumId: Writable<string> = writable(undefined)
+export let selectedAlbumDir: Writable<string> = writable(undefined)
 
 export let selectedSongsStore: Writable<number[]> = writable([])
 

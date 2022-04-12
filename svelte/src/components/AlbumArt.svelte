@@ -42,7 +42,7 @@
 		} else {
 			setArtToSrcFn(albumId, albumArtData.artSize, albumArtData.artPath, albumArtData.artType).catch(reason => {
 				setTimeout(() => {
-					handleAlbumArt(albumId, artSize)
+					handleAlbumArt(rootDir, artSize)
 				}, 5)
 			})
 		}

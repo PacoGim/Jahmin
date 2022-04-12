@@ -17,20 +17,18 @@ const sharp_1 = __importDefault(require("sharp"));
 const color_type_1 = require("../types/color.type");
 const albumArt_service_1 = require("./albumArt.service");
 const config_service_1 = require("./config.service");
-const storage_service_1 = require("./storage.service");
 let contrastRatio = (0, config_service_1.getConfig)().userOptions.contrastRatio;
 const notCompress = ['mp4', 'webm', 'apng', 'gif'];
 let previousContrastRatio = undefined;
-function getAlbumColors(albumId, contrast) {
+function getAlbumColors(rootDir, contrast) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         if (contrast) {
             contrastRatio = contrast;
         }
-        let album = (0, storage_service_1.getStorageMap)().get(albumId);
-        if (!album) {
+        if (rootDir === undefined || rootDir === 'undefined') {
             return resolve(undefined);
         }
-        const imagePaths = (0, albumArt_service_1.getAllowedFiles)(album).filter(file => !notCompress.includes(getExtension(file)));
+        const imagePaths = (0, albumArt_service_1.getAllowedFiles)(rootDir).filter(file => !notCompress.includes(getExtension(file)));
         if (imagePaths === undefined) {
             return resolve(undefined);
         }

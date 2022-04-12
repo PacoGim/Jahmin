@@ -22,7 +22,8 @@
 		updateSongProgress,
 		currentAudioElement,
 		mainAudioElement,
-		altAudioElement
+		altAudioElement,
+		albumPlayingDirStore
 	} from '../store/final.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
@@ -34,6 +35,7 @@
 	import { hash } from '../functions/hashString.fn'
 	import { isFileExistIPC } from '../services/ipc.service'
 	import { currentPlayerTime } from '../store/player.store'
+	import getDirectoryFn from '../functions/getDirectory.fn'
 
 	let progress: number = 0
 
@@ -78,6 +80,7 @@
 
 		localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
 		localStorage.setItem('LastPlayedSongId', String(song.ID))
+		localStorage.setItem('LastPlayedDir', String(getDirectoryFn(song.SourceFile)))
 		// localStorage.setItem('LastPlayedSongIndex', String(playbackCursor[0]))
 	}
 
@@ -171,9 +174,9 @@
 		}
 
 		$songPlayingIdStore = songToPlay.ID
-		localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
-		localStorage.setItem('LastPlayedSongId', String(songToPlay.ID))
-		localStorage.setItem('LastPlayedSongIndex', String(playbackCursor[0]))
+		// localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
+		// localStorage.setItem('LastPlayedSongId', String(songToPlay.ID))
+		// localStorage.setItem('LastPlayedSongIndex', String(playbackCursor[0]))
 	}
 
 	function getSongToPlay(index: number) {
@@ -251,7 +254,7 @@
 </script>
 
 <control-bar-svlt>
-	<AlbumArt albumId={$albumPlayingIdStore} {artSize} observer="!addObserver" style="height:64px;width:64px;cursor:pointer" />
+	<AlbumArt rootDir={$albumPlayingDirStore} {artSize} observer="!addObserver" style="height:64px;width:64px;cursor:pointer" />
 
 	<player-buttons>
 		<PreviousButton />

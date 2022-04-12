@@ -31,7 +31,7 @@ function getNewWaveSurfer(color: string) {
 
 let lastSongSourceFile = ''
 
-export async function setWaveSource(sourceFile: string, albumId: string, duration: number) {
+export async function setWaveSource(sourceFile: string, rootDir: string, duration: number) {
 	if (sourceFile === lastSongSourceFile) {
 		return
 	} else {
@@ -39,7 +39,7 @@ export async function setWaveSource(sourceFile: string, albumId: string, duratio
 	}
 
 	let peaks = await getPeaksIPC(sourceFile)
-	let color = await getAlbumColors(albumId)
+	let color = await getAlbumColors(rootDir)
 
 	document.documentElement.style.setProperty('--waveform-opacity', '0')
 
