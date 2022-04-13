@@ -64,8 +64,7 @@
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
-			if ($selectedAlbumId !== albumId) {
-				$selectedAlbumId = albumId
+			if ($selectedAlbumDir !== rootDir) {
 				$songListStore = songs
 				$selectedAlbumDir = rootDir
 			}

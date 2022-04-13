@@ -6,10 +6,6 @@ import { groupSongs } from '../../services/groupSongs.service';
 
 	let isFirstGroupSongs = true
 
-	$:{
-		console.log($selectedGroups)
-	}
-
 	$: {
 		$groupByConfig
 		if (isFirstGroupSongs === true) {

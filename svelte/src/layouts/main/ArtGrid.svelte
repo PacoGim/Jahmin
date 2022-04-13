@@ -6,21 +6,28 @@
 
 	import Album from '../../components/Album.svelte'
 	import scrollToAlbumFn from '../../functions/scrollToAlbum.fn'
-	import { artSizeConfig, gridGapConfig } from '../../store/config.store'
+	import { artSizeConfig, gridGapConfig, groupByConfig, groupByValuesConfig } from '../../store/config.store'
 	import { albumListStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
 	import { hash } from '../../functions/hashString.fn'
+
+	let albums
 
 	// If the album art size has been set in the store.
 	$: if ($artSizeConfig !== undefined) document.documentElement.style.setProperty('--art-dimension', `${$artSizeConfig}px`)
 	$: if ($gridGapConfig !== undefined) document.documentElement.style.setProperty('--grid-gap', `${$gridGapConfig}px`)
 
-	let groupBy = 'Genre'
-	let groupByValue = 'Alternative'
+	$: {
+		$groupByConfig
+		$groupByValuesConfig
+		runLiveQuery()
+	}
 
-	let albums = liveQuery(async () => {
-		let results = await db.songs.where(groupBy).equals(groupByValue).toArray()
-		return await groupSongs(results)
-	})
+	function runLiveQuery() {
+		albums = liveQuery(async () => {
+			let results = await db.songs.where($groupByConfig[0]).equals($groupByValuesConfig[0]).toArray()
+			return await groupSongs(results)
+		})
+	}
 
 	function groupSongs(results) {
 		return new Promise((resolve, reject) => {

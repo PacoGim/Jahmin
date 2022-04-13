@@ -53,8 +53,10 @@
 		<!-- Song Update Process -->
 	</queue-processes>
 	<song-info>
-		<bold>{fixNumber(currentSong.Track)}</bold> <bold>{currentSong.Title || ''}</bold> by
-		<bold>{currentSong.Artist || ''}</bold>
+		{#if currentSong?.Title !== ''}
+			<bold>{fixNumber(currentSong.Track)}</bold> <bold>{currentSong.Title || ''}</bold> by
+			<bold>{currentSong.Artist || ''}</bold>
+		{/if}
 	</song-info>
 	<AlbumInfo />
 	<playback-options>
@@ -96,7 +98,6 @@
 		grid-area: queue-processes;
 
 		display: flex;
-
 
 		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 	}

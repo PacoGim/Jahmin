@@ -293,8 +293,7 @@
 	<song-list>
 		{#if $songListStore !== undefined}
 			{#each songsTrimmed as song, index (song.ID)}
-				<!-- <p>{song}</p> -->
-			<!-- <SongListItem {song} {index} /> -->
+				<SongListItem {song} {index} />
 			{/each}
 		{/if}
 	</song-list>
