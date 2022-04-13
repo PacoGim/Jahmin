@@ -5,13 +5,13 @@
 	import { songAmountConfig } from '../../store/config.store'
 
 	import {
-		selectedAlbumId,
 		songListStore,
 		selectedSongsStore,
 		triggerScrollToSongEvent,
 		isAppIdle,
 		songPlayingIdStore,
-		albumPlayingIdStore
+		selectedAlbumDir,
+		albumPlayingDirStore
 	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
@@ -27,7 +27,7 @@
 	$: {
 		// If there is a song playing AND app is idle AND the playing album is the same as the selected album, scroll to song.
 		// The purpose is to make sure the song is visible when the app is idle.
-		if ($songPlayingIdStore && $isAppIdle === true && $albumPlayingIdStore === $selectedAlbumId) {
+		if ($songPlayingIdStore && $isAppIdle === true && $albumPlayingDirStore === $selectedAlbumDir) {
 			setScrollAmountFromSong($songPlayingIdStore)
 		}
 	}
@@ -45,7 +45,7 @@
 
 	$: {
 		// When new album selected, reset scroll to 0 (to be on top of scroll) and reset scroll edges checks.
-		$selectedAlbumId
+		$selectedAlbumDir
 		if (isSelectedAlbumIdFirstAssign) {
 			isSelectedAlbumIdFirstAssign = false
 		} else {

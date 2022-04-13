@@ -1,17 +1,19 @@
-export default (songs, tag, order) => {
+import type { SongType } from '../types/song.type'
+
+export default (songs: SongType[], tag, order) => {
 	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate'].includes(tag)) {
 		if (order === 1) {
-			songs = songs.sort((a, b) => a[tag] - b[tag])
+			songs = songs.sort((a, b) => Number(a[tag]) - Number(b[tag]))
 		} else {
-			songs = songs.sort((a, b) => b[tag] - a[tag])
+			songs = songs.sort((a, b) => Number(b[tag]) - Number(a[tag]))
 		}
 	}
 
 	if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
 		if (order === 1) {
-			songs = songs.sort((a, b) => a[tag].localeCompare(b[tag], undefined, { numeric: true }))
+			songs = songs.sort((a, b) => String(a[tag]).localeCompare(String(b[tag]), undefined, { numeric: true }))
 		} else {
-			songs = songs.sort((a, b) => b[tag].localeCompare(a[tag], undefined, { numeric: true }))
+			songs = songs.sort((a, b) => String(b[tag]).localeCompare(String(a[tag]), undefined, { numeric: true }))
 		}
 	}
 

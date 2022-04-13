@@ -5,6 +5,7 @@
 	import parseJson from '../functions/parseJson'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
+	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { getAlbumIPC, saveConfig } from '../services/ipc.service'
 	import { groupByConfig, groupByValuesConfig } from '../store/config.store'
 	import {
@@ -55,7 +56,6 @@
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		const rootDir = element.getAttribute('rootDir')
-		const albumId = hash(rootDir) as string
 
 		let songs = await getAlbumSongs(rootDir)
 
@@ -65,7 +65,9 @@
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
 			if ($selectedAlbumDir !== rootDir) {
-				$songListStore = songs
+				let sorting = JSON.parse(localStorage.getItem('sorting'))
+				$songListStore = sortSongsArrayFn(songs, sorting?.tag || 'Track', sorting?.order || 1)
+
 				$selectedAlbumDir = rootDir
 			}
 

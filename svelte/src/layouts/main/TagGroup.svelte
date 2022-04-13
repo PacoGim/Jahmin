@@ -2,9 +2,13 @@
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
 import { groupSongs } from '../../services/groupSongs.service';
 	import { groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { selectedGroupByValueStore, selectedGroups, triggerGroupingChangeEvent } from '../../store/final.store'
+	import { dbVersion, selectedGroupByValueStore, selectedGroups, triggerGroupingChangeEvent } from '../../store/final.store'
 
 	let isFirstGroupSongs = true
+
+	$:{
+		// console.log($dbVersion)
+	}
 
 	$: {
 		$groupByConfig
@@ -20,6 +24,7 @@ import { groupSongs } from '../../services/groupSongs.service';
 			$triggerGroupingChangeEvent.forEach((grouping, index) => {
 				setNewGroupValue(index, grouping)
 			})
+
 			$triggerGroupingChangeEvent = []
 		}
 	}
@@ -34,7 +39,6 @@ import { groupSongs } from '../../services/groupSongs.service';
 		}
 
 		groupSongs($groupByConfig,$groupByValuesConfig)
-		// groupSongsIPC($groupByConfig, $groupByValuesConfig)
 	}
 
 	function setNewGroupValue(index, groupValue) {
@@ -47,7 +51,6 @@ import { groupSongs } from '../../services/groupSongs.service';
 		}
 
 		groupSongs($groupByConfig,$groupByValuesConfig)
-		// groupSongsIPC($groupByConfig, $groupByValuesConfig)
 	}
 </script>
 

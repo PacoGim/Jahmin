@@ -47,8 +47,6 @@ export let albumArtMapStore: Writable<
 
 export let appTitle: Writable<string> = writable('Jahmin')
 
-export let dbVersion: Writable<string> = writable('')
-
 export let updateSongProgress: Writable<number> = writable(-1)
 
 export let elementMap: Writable<Map<string, HTMLElement>> = writable(undefined)
@@ -90,3 +88,5 @@ export let songSyncQueueProgress: Writable<{ maxLength: number; currentLength: n
 	maxLength: 0,
 	currentLength: 0
 })
+
+export let dbVersion: Writable<number> = writable(undefined)

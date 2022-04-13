@@ -9,7 +9,7 @@
 			let dbSong = await getSongById(song.ID)
 
 			if (dbSong === undefined) {
-				await db.songs.add(song)
+				addSong(song)
 			} else {
 				// TODO: Update song
 				// await db.update(song)

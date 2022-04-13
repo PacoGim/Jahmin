@@ -67,20 +67,6 @@ function runGroupSongs(songs: SongType[], groups: string[], groupValues: string[
 		// sendWebContents('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` })
 	}
 
-	// Send result to renderer.
-	/* 	sendWebContents('group-songs', {
-		index,
-		data: groupedValues.sort((a, b) => {
-			if (a && b) {
-				a = String(a).toLowerCase()
-				b = String(b).toLowerCase()
-				return a.localeCompare(b, undefined, { numeric: true })
-			} else {
-				return false
-			}
-		})
-	}) */
-
 	let selectedGroupsLocal
 
 	selectedGroups.subscribe(value => {

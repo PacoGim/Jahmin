@@ -1,6 +1,7 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
+import { addSong } from '../db/db';
 	import generateId from '../functions/generateId.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
@@ -86,7 +87,8 @@
 		})
 
 		ipcRenderer.on('web-storage', (event, data) => {
-			$storageService.addSong(data.data)
+			// $storageService.addSong(data.data)
+			addSong(data.data)
 		})
 
 		ipcRenderer.on('art-queue-progress', (event, data) => {
