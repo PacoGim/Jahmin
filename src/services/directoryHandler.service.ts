@@ -1,8 +1,9 @@
+import { SongType } from '../types/song.type'
 import { getConfig, saveConfig } from './config.service'
 import { sendWebContents } from './sendWebContents.service'
 import { watchFolders } from './songSync.service'
 
-export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-add' | 'remove-exclude') {
+export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-add' | 'remove-exclude', dbSongs: SongType[]) {
 	let config = getConfig()
 
 	filePaths.forEach((filePath: string) => {
@@ -21,5 +22,5 @@ export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-
 
 	sendWebContents('selected-directories', config.directories)
 
-	watchFolders(config.directories)
+	watchFolders(dbSongs)
 }

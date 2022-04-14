@@ -164,14 +164,14 @@ function loadIPC() {
         (0, songSync_service_1.sendSongSyncQueueProgress)();
         return true;
     });
-    electron_1.ipcMain.handle('select-directories', (evt, type) => {
+    electron_1.ipcMain.handle('select-directories', (evt, type, dbSongs) => {
         electron_1.dialog
             .showOpenDialog({
             properties: ['openDirectory', 'multiSelections']
         })
             .then(result => {
             if (result.canceled === false) {
-                (0, directoryHandler_service_1.default)(result.filePaths, type);
+                (0, directoryHandler_service_1.default)(result.filePaths, type, dbSongs);
             }
         })
             .catch(err => {
@@ -179,7 +179,10 @@ function loadIPC() {
         });
     });
     electron_1.ipcMain.handle('remove-directory', (evt, directory, type) => {
-        (0, directoryHandler_service_1.default)([directory], type);
+        (0, directoryHandler_service_1.default)([directory], type, dbSongs);
+    });
+    electron_1.ipcMain.handle('run-song-fetch', (evt, songDb) => {
+        (0, songSync_service_1.watchFolders)(songDb);
     });
 }
 exports.loadIPC = loadIPC;

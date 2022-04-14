@@ -7,7 +7,7 @@ import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
-import { getMaxTaskQueueLength, getTaskQueueLength, sendSongSyncQueueProgress } from './songSync.service'
+import { getMaxTaskQueueLength, getTaskQueueLength, sendSongSyncQueueProgress, watchFolders } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
@@ -201,14 +201,14 @@ export function loadIPC() {
 		return true
 	})
 
-	ipcMain.handle('select-directories', (evt, type) => {
+	ipcMain.handle('select-directories', (evt, type, dbSongs) => {
 		dialog
 			.showOpenDialog({
 				properties: ['openDirectory', 'multiSelections']
 			})
 			.then(result => {
 				if (result.canceled === false) {
-					directoryHandlerService(result.filePaths, type)
+					directoryHandlerService(result.filePaths, type, dbSongs)
 				}
 			})
 			.catch(err => {
@@ -217,6 +217,10 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('remove-directory', (evt, directory, type: 'remove-add' | 'remove-exclude') => {
-		directoryHandlerService([directory], type)
+		directoryHandlerService([directory], type, dbSongs)
+	})
+
+	ipcMain.handle('run-song-fetch', (evt, songDb) => {
+		watchFolders(songDb)
 	})
 }

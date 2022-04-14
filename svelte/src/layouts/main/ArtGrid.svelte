@@ -29,6 +29,8 @@
 		})
 	}
 
+	function updateSong() {}
+
 	function groupSongs(results) {
 		return new Promise((resolve, reject) => {
 			let albums = []

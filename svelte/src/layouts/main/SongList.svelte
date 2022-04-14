@@ -24,6 +24,8 @@
 
 	let isMounting = true
 
+
+
 	$: {
 		// If there is a song playing AND app is idle AND the playing album is the same as the selected album, scroll to song.
 		// The purpose is to make sure the song is visible when the app is idle.

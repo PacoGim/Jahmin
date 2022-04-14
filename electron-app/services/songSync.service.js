@@ -24,6 +24,7 @@ const mp3_format_1 = require("../formats/mp3.format");
 const flac_format_1 = require("../formats/flac.format");
 const aac_format_1 = require("../formats/aac.format");
 const sendWebContents_service_1 = require("./sendWebContents.service");
+const config_service_1 = require("./config.service");
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
@@ -32,16 +33,20 @@ let isQueueRunning = false;
 let taskQueue = [];
 exports.maxTaskQueueLength = 0;
 let foundPaths = [];
-function watchFolders(directories) {
+function watchFolders(dbSongs) {
     return __awaiter(this, void 0, void 0, function* () {
+        const config = (0, config_service_1.getConfig)();
+        if ((config === null || config === void 0 ? void 0 : config.directories) === undefined) {
+            return;
+        }
         taskQueue = [];
         exports.maxTaskQueueLength = 0;
-        let filesInFolders = getAllFilesInFoldersDeep(directories.add);
+        let filesInFolders = getAllFilesInFoldersDeep(config.directories.add);
         let audioFiles = filesInFolders
-            .filter(path => isExcludedPaths(path, directories.exclude))
+            .filter(path => isExcludedPaths(path, config.directories.exclude))
             .filter(file => isAudioFile(file))
             .sort((a, b) => a.localeCompare(b));
-        filterSongs(audioFiles);
+        filterSongs(audioFiles, dbSongs);
         // startChokidarWatch(directories.add, directories.exclude)
     });
 }
@@ -117,11 +122,6 @@ function processQueue() {
                     type: task.type,
                     data: tags
                 });
-                /* 			storageWorker?.postMessage({
-                    type: task.type,
-                    data: tags,
-                    appDataPath: appDataPath()
-                }) */
                 getTask(processIndex);
             })
                 .catch(err => {
@@ -131,13 +131,8 @@ function processQueue() {
         else if (task !== undefined && ['delete'].includes(task.type)) {
             (0, sendWebContents_service_1.sendWebContents)('web-storage', {
                 type: task.type,
-                path: task.path
+                data: task.path
             });
-            /* 			storageWorker?.postMessage({
-                type: task.type,
-                data: task.path,
-                appDataPath: appDataPath()
-            }) */
             getTask(processIndex);
         }
         else {
@@ -178,21 +173,21 @@ function getTags(task) {
         }
     });
 }
-function filterSongs(audioFilesFound = []) {
+function filterSongs(audioFilesFound = [], dbSongs) {
     return new Promise((resolve, reject) => {
         let worker = (0, worker_service_1.getWorker)('songFilter');
-        let collection = (0, storage_service_1.getStorageMapToArray)().map(song => song.SourceFile);
         worker.on('message', (data) => {
             if (data.type === 'songsToAdd') {
                 data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
             }
             if (data.type === 'songsToDelete') {
-                data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')));
-                resolve(null);
+                if (data.songs.length > 0) {
+                    (0, sendWebContents_service_1.sendWebContents)('web-storage-bulk-delete', data.songs);
+                }
             }
         });
         worker.postMessage({
-            dbSongs: collection,
+            dbSongs,
             userSongs: audioFilesFound
         });
     });

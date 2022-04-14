@@ -37,9 +37,6 @@ async function createMainWindow() {
 	// Gets the storage data from files and creates a map.
 	initStorage()
 
-	// Watches the given root folder.
-	if (config?.directories) watchFolders(config.directories)
-
 	browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow))
 }
 

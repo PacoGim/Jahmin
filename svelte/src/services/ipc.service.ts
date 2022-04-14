@@ -1,7 +1,8 @@
 const { ipcRenderer } = require('electron')
 
+import { getAllSongs } from '../db/db'
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-import { albumArtMapStore, dbVersion } from '../store/final.store'
+import { albumArtMapStore, dbVersionStore } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { ConfigType } from '../types/config.type'
 import type { EqualizerType } from '../types/equalizer.type'
@@ -229,7 +230,9 @@ export function getChangesProgressIPC() {
 }
 
 export function selectDirectoriesIPC(type: 'add' | 'exclude') {
-	ipcRenderer.invoke('select-directories', type)
+	getAllSongs().then(songs => {
+		ipcRenderer.invoke('select-directories', type, songs)
+	})
 	return
 }
 
@@ -238,21 +241,11 @@ export function removeDirectoryIPC(directory: string, type: 'remove-add' | 'remo
 	return
 }
 
-export function showContextMenuIPC(menuToOpen, parameters) {
-	ipcRenderer.send('show-context-menu', menuToOpen, parameters)
+export function runSongFetchIPC(songDb: SongType[]) {
+	ipcRenderer.invoke('run-song-fetch', songDb)
+	return
 }
 
-export function syncDbVersionIPC() {
-	let storeDbVersion = undefined
-
-	dbVersion.subscribe(value => (storeDbVersion = value))()
-
-	// Waits for the version to change in main.
-	ipcRenderer.invoke('sync-db-version', storeDbVersion).then(result => {
-		dbVersion.set(result)
-
-		setTimeout(() => {
-			syncDbVersionIPC()
-		}, 2000)
-	})
+export function showContextMenuIPC(menuToOpen, parameters) {
+	ipcRenderer.send('show-context-menu', menuToOpen, parameters)
 }

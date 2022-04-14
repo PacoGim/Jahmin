@@ -7,7 +7,7 @@
 
 	import {
 		albumListStore,
-		dbVersion,
+		dbVersionStore,
 		selectedAlbumDir,
 		selectedAlbumId,
 		selectedGroupByStore,
@@ -23,29 +23,6 @@
 			firstGroupByAssign = false
 		} else {
 			getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
-		}
-	}
-
-	$: {
-		$dbVersion
-		if (firstDbVersionAssign === true) {
-			firstDbVersionAssign = false
-		} else {
-			syncDBSongs()
-		}
-	}
-
-	function syncDBSongs() {
-		if ($dbVersion !== '') {
-			// getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
-
-			// Refills the current album selected songs to add them as they are found.
-			getAlbumIPC($selectedAlbumId).then(result => {
-				if (result.Songs.length !== $songListStore.length) {
-					console.log('Getting songs')
-					$songListStore = result.Songs
-				}
-			})
 		}
 	}
 
@@ -66,7 +43,6 @@
 
 			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
 		})
-
 	}
 
 	onMount(() => {

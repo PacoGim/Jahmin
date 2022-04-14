@@ -15,6 +15,7 @@ import { getAacTags } from '../formats/aac.format'
 import { SongType } from '../types/song.type'
 import { ConfigType } from '../types/config.type'
 import { sendWebContents } from './sendWebContents.service'
+import { getConfig } from './config.service'
 
 const TOTAL_CPUS = cpus().length
 
@@ -31,18 +32,24 @@ export let maxTaskQueueLength: number = 0
 
 let foundPaths: string[] = []
 
-export async function watchFolders(directories: ConfigType['directories']) {
+export async function watchFolders(dbSongs: SongType[]) {
+	const config = getConfig()
+
+	if (config?.directories === undefined) {
+		return
+	}
+
 	taskQueue = []
 	maxTaskQueueLength = 0
 
-	let filesInFolders = getAllFilesInFoldersDeep(directories.add)
+	let filesInFolders = getAllFilesInFoldersDeep(config.directories.add)
 
 	let audioFiles = filesInFolders
-		.filter(path => isExcludedPaths(path, directories.exclude))
+		.filter(path => isExcludedPaths(path, config.directories.exclude))
 		.filter(file => isAudioFile(file))
 		.sort((a, b) => a.localeCompare(b))
 
-	filterSongs(audioFiles)
+	filterSongs(audioFiles, dbSongs)
 	// startChokidarWatch(directories.add, directories.exclude)
 }
 
@@ -129,11 +136,6 @@ function processQueue() {
 						type: task.type,
 						data: tags
 					})
-					/* 			storageWorker?.postMessage({
-						type: task.type,
-						data: tags,
-						appDataPath: appDataPath()
-					}) */
 
 					getTask(processIndex)
 				})
@@ -143,13 +145,8 @@ function processQueue() {
 		} else if (task !== undefined && ['delete'].includes(task.type)) {
 			sendWebContents('web-storage', {
 				type: task.type,
-				path: task.path
+				data: task.path
 			})
-			/* 			storageWorker?.postMessage({
-				type: task.type,
-				data: task.path,
-				appDataPath: appDataPath()
-			}) */
 			getTask(processIndex)
 		} else {
 			// If no task left then sets its own process as false.
@@ -189,10 +186,9 @@ function getTags(task: any): Promise<SongType | null> {
 	})
 }
 
-function filterSongs(audioFilesFound: string[] = []) {
+function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
 	return new Promise((resolve, reject) => {
 		let worker = getWorker('songFilter') as Worker
-		let collection = getStorageMapToArray().map(song => song.SourceFile)
 
 		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
 			if (data.type === 'songsToAdd') {
@@ -200,13 +196,14 @@ function filterSongs(audioFilesFound: string[] = []) {
 			}
 
 			if (data.type === 'songsToDelete') {
-				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'delete')))
-				resolve(null)
+				if (data.songs.length > 0) {
+					sendWebContents('web-storage-bulk-delete', data.songs)
+				}
 			}
 		})
 
 		worker.postMessage({
-			dbSongs: collection,
+			dbSongs,
 			userSongs: audioFilesFound
 		})
 	})

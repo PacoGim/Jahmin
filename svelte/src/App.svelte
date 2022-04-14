@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, isAppIdle, keyDown, keyUp, layoutToShow, currentAudioElement } from './store/final.store'
+	import { appTitle, isAppIdle, keyDown, keyUp, layoutToShow, currentAudioElement, dbVersionStore } from './store/final.store'
 
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import SearchLayout from './layouts/search/SearchLayout.svelte'
@@ -8,7 +8,6 @@
 	import previousSongFn from './functions/previousSong.fn'
 
 	import { runThemeHandler } from './services/themeHandler.service'
-	import { syncDbVersionIPC } from './services/ipc.service'
 	import { handleContextMenuEvent } from './services/contextMenu.service'
 
 	import iziToast from 'izitoast'
@@ -37,6 +36,8 @@
 	import EventsHandlerMiddleware from './middleware/EventsHandlerMiddleware.svelte'
 	import nextSongFn from './functions/nextSong.fn'
 	import StorageService from './svelte-services/StorageService.svelte'
+	import { runSongFetchIPC } from './services/ipc.service'
+	import { db, getAllSongs } from './db/db'
 
 	let appIdleDebounce = getAppIdleDebounce()
 
@@ -45,7 +46,9 @@
 
 		runThemeHandler()
 
-		syncDbVersionIPC()
+		getAllSongs().then(songs => {
+			runSongFetchIPC(songs)
+		})
 
 		// To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Far after app is done loading).
 		setTimeout(() => {

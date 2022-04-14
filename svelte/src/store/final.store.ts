@@ -89,4 +89,4 @@ export let songSyncQueueProgress: Writable<{ maxLength: number; currentLength: n
 	currentLength: 0
 })
 
-export let dbVersion: Writable<number> = writable(undefined)
+export let dbVersionStore: Writable<number> = writable(undefined)

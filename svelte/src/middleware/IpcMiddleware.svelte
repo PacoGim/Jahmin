@@ -1,7 +1,7 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
-import { addSong } from '../db/db';
+	import { addSong, bulkDeleteSongs, deleteSong } from '../db/db'
 	import generateId from '../functions/generateId.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
@@ -87,8 +87,15 @@ import { addSong } from '../db/db';
 		})
 
 		ipcRenderer.on('web-storage', (event, data) => {
-			// $storageService.addSong(data.data)
-			addSong(data.data)
+			if (data.type === 'delete') {
+				deleteSong(data.data)
+			} else if (data.type === 'insert') {
+				addSong(data.data)
+			}
+		})
+
+		ipcRenderer.on('web-storage-bulk-delete', (event, songs) => {
+			bulkDeleteSongs(songs)
 		})
 
 		ipcRenderer.on('art-queue-progress', (event, data) => {

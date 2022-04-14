@@ -1,13 +1,21 @@
 <script lang="ts">
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
-import { groupSongs } from '../../services/groupSongs.service';
+	import { groupSongs } from '../../services/groupSongs.service'
 	import { groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { dbVersion, selectedGroupByValueStore, selectedGroups, triggerGroupingChangeEvent } from '../../store/final.store'
+	import {
+		dbVersionStore,
+		selectedGroupByValueStore,
+		selectedGroups,
+		triggerGroupingChangeEvent
+	} from '../../store/final.store'
 
 	let isFirstGroupSongs = true
 
-	$:{
-		// console.log($dbVersion)
+	$: {
+		if ($dbVersionStore) {
+			console.log($dbVersionStore)
+			runSongGroup()
+		}
 	}
 
 	$: {
@@ -38,7 +46,7 @@ import { groupSongs } from '../../services/groupSongs.service';
 			}
 		}
 
-		groupSongs($groupByConfig,$groupByValuesConfig)
+		groupSongs($groupByConfig, $groupByValuesConfig)
 	}
 
 	function setNewGroupValue(index, groupValue) {
@@ -50,7 +58,7 @@ import { groupSongs } from '../../services/groupSongs.service';
 			}
 		}
 
-		groupSongs($groupByConfig,$groupByValuesConfig)
+		groupSongs($groupByConfig, $groupByValuesConfig)
 	}
 </script>
 

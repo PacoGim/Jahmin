@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie'
-import { dbVersion } from '../store/final.store'
+import { dbVersionStore } from '../store/final.store'
 import type { SongType } from '../types/song.type'
 
 export class JahminDb extends Dexie {
@@ -17,6 +17,34 @@ export class JahminDb extends Dexie {
 
 export const db = new JahminDb()
 
+let dbVersion = 0
+let isVersionUpdating = false
+
+function updateVersion() {
+	dbVersion++
+
+	if (isVersionUpdating === false) {
+		isVersionUpdating = true
+		updateStoreVersion()
+	}
+}
+
+function updateStoreVersion() {
+	let dbVersionStoreLocal = undefined
+
+	dbVersionStore.subscribe(value => (dbVersionStoreLocal = value))()
+
+	if (dbVersionStoreLocal !== dbVersion) {
+		dbVersionStore.set(dbVersion)
+
+		setTimeout(() => {
+			updateStoreVersion()
+		}, 5000)
+	} else {
+		isVersionUpdating = false
+	}
+}
+
 export function addSong(song: SongType) {
 	return new Promise(async (resolve, reject) => {
 		let dbSong = await getSongById(song.ID)
@@ -25,8 +53,7 @@ export function addSong(song: SongType) {
 			db.songs
 				.add(song)
 				.then(data => {
-					dbVersion.set(Date.now())
-
+					updateVersion()
 					resolve(data)
 				})
 				.catch(err => {
@@ -36,6 +63,29 @@ export function addSong(song: SongType) {
 			// TODO: Update song
 			// await db.update(song)
 		}
+	})
+}
+
+export async function bulkDeleteSongs(songs: SongType[]) {
+	console.log('bulkDeleteSongs', songs)
+	let songsId = songs.map(song => song.ID)
+
+	let songsToDeleteKeys = (await getAllSongs()).filter(song => songsId.includes(song.ID)).map(song => song.id)
+
+	db.songs.bulkDelete(songsToDeleteKeys).then(() => {
+		updateVersion()
+	})
+}
+
+export function deleteSong(song: SongType) {
+	return new Promise(async (resolve, reject) => {
+		await db.songs
+			.where('ID')
+			.equals(song.ID)
+			.delete()
+			.then(() => {
+				updateVersion()
+			})
 	})
 }
 
