@@ -13,7 +13,6 @@
 
 	$: {
 		if ($dbVersionStore) {
-			console.log($dbVersionStore)
 			runSongGroup()
 		}
 	}

@@ -83,6 +83,13 @@ function getMainWindow() {
 }
 exports.getMainWindow = getMainWindow;
 electron_1.app.on('ready', createMainWindow);
+electron_1.app.whenReady().then(() => {
+    electron_1.globalShortcut.register('CommandOrControl+R', () => {
+        console.log('CommandOrControl+R is pressed: Shortcut Disabled');
+        electron_1.app.relaunch();
+        electron_1.app.quit();
+    });
+});
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();
@@ -94,8 +101,6 @@ electron_1.app.on('before-quit', () => {
     (0, storage_service_1.killStorageWatcher)();
     (_a = (0, songSync_service_1.getRootDirFolderWatcher)()) === null || _a === void 0 ? void 0 : _a.close();
 });
-// process.on('exit',()=>{
-// })
 electron_1.app.on('activate', () => {
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {
         createMainWindow();

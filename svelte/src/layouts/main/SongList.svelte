@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 
 	import SongListItem from '../../components/SongListItem.svelte'
+	import { getAlbumSongs } from '../../db/db'
 	import { songAmountConfig } from '../../store/config.store'
 
 	import {
@@ -11,7 +12,8 @@
 		isAppIdle,
 		songPlayingIdStore,
 		selectedAlbumDir,
-		albumPlayingDirStore
+		albumPlayingDirStore,
+		dbVersionStore
 	} from '../../store/final.store'
 
 	let isSelectedAlbumIdFirstAssign = true
@@ -24,7 +26,15 @@
 
 	let isMounting = true
 
-
+	// $: {
+	// 	if ($dbVersionStore) {
+	// 		getAlbumSongs($selectedAlbumDir).then(songs => {
+	// 			if (songs.length !== $songListStore.length) {
+	// 				$songListStore =   songs
+	// 			}
+	// 		})
+	// 	}
+	// }
 
 	$: {
 		// If there is a song playing AND app is idle AND the playing album is the same as the selected album, scroll to song.

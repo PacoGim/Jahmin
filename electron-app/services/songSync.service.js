@@ -39,6 +39,7 @@ function watchFolders(dbSongs) {
         if ((config === null || config === void 0 ? void 0 : config.directories) === undefined) {
             return;
         }
+        isQueueRunning = false;
         taskQueue = [];
         exports.maxTaskQueueLength = 0;
         let filesInFolders = getAllFilesInFoldersDeep(config.directories.add);
@@ -178,7 +179,7 @@ function filterSongs(audioFilesFound = [], dbSongs) {
         let worker = (0, worker_service_1.getWorker)('songFilter');
         worker.on('message', (data) => {
             if (data.type === 'songsToAdd') {
-                data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')));
+                data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
             }
             if (data.type === 'songsToDelete') {
                 if (data.songs.length > 0) {
@@ -276,11 +277,6 @@ function reloadAlbumData(albumId) {
                     type: 'update',
                     data: tags
                 });
-                /* 		storageWorker?.postMessage({
-                    type: 'update',
-                    data: tags,
-                    appDataPath: appDataPath()
-                }) */
             })
                 .catch(err => {
                 console.error(err);

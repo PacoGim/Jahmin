@@ -89,6 +89,14 @@ export function getMainWindow() {
 
 app.on('ready', createMainWindow)
 
+app.whenReady().then(() => {
+	globalShortcut.register('CommandOrControl+R', () => {
+		console.log('CommandOrControl+R is pressed: Shortcut Disabled')
+		app.relaunch()
+		app.quit()
+	})
+})
+
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit()
@@ -100,10 +108,6 @@ app.on('before-quit', () => {
 	killStorageWatcher()
 	getRootDirFolderWatcher()?.close()
 })
-
-// process.on('exit',()=>{
-
-// })
 
 app.on('activate', () => {
 	if (BrowserWindow.getAllWindows().length === 0) {

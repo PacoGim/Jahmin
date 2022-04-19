@@ -1,16 +1,18 @@
 import Dexie, { Table } from 'dexie'
+import getDirectoryFn from '../functions/getDirectory.fn'
+import { hash } from '../functions/hashString.fn'
 import { dbVersionStore } from '../store/final.store'
+import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
 export class JahminDb extends Dexie {
-	songs!: Table<SongType>
+	albums!: Table<AlbumType>
 
 	constructor() {
 		super('JahminDb')
 
 		this.version(1).stores({
-			songs:
-				'++id,ID,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,Date_Year,Date_Month,Date_Day,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
+			albums: '++id,Album,AlbumArtist,DynamicAlbumArtist,RootDir,ID,Songs'
 		})
 	}
 }
@@ -47,21 +49,35 @@ function updateStoreVersion() {
 
 export function addSong(song: SongType) {
 	return new Promise(async (resolve, reject) => {
-		let dbSong = await getSongById(song.ID)
+		let albumId = hash(getDirectoryFn(song.SourceFile)) as string
+		let dbAlbum = await getAlbumById(albumId)
 
-		if (dbSong === undefined) {
-			db.songs
-				.add(song)
+		if (dbAlbum === undefined) {
+			db.albums
+				.add({
+					Album: song.Album,
+					AlbumArtist: song.AlbumArtist,
+					DynamicAlbumArtist: undefined,
+					RootDir: getDirectoryFn(song.SourceFile),
+					ID: albumId,
+					Songs: [song]
+				})
 				.then(data => {
 					updateVersion()
 					resolve(data)
 				})
-				.catch(err => {
-					reject(err)
-				})
 		} else {
-			// TODO: Update song
-			// await db.update(song)
+			if (!dbAlbum.Songs.find(songFoo => songFoo.ID === song.ID)) {
+				dbAlbum.Songs.push(song)
+				db.albums
+					.where('ID')
+					.equals(albumId)
+					.modify(dbAlbum)
+					.then(data => {
+						updateVersion()
+						resolve(data)
+					})
+			}
 		}
 	})
 }
@@ -89,20 +105,28 @@ export function deleteSong(song: SongType) {
 	})
 }
 
-export function getSongById(songId: number): Promise<SongType> {
+export function getAlbumById(albumId: string): Promise<AlbumType> {
 	return new Promise((resolve, reject) => {
-		db.songs
+		db.albums
 			.where('ID')
-			.equals(songId)
+			.equals(albumId)
 			.toArray()
-			.then(song => {
-				resolve(song[0])
+			.then(albums => {
+				let album = albums[0]
+
+				if (album?.Songs && album?.Album) {
+					album.DynamicAlbumArtist = getAllAlbumArtists(album.Songs, album.Album)
+				}
+
+				resolve(album)
 			})
 	})
 }
 
 export function getAllSongs(): Promise<SongType[]> {
 	return new Promise(resolve => {
+		resolve([])
+		return
 		db.songs.toArray().then(songs => {
 			resolve(songs)
 		})
@@ -111,6 +135,7 @@ export function getAllSongs(): Promise<SongType[]> {
 
 export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
 	return new Promise(resolve => {
+		return
 		db.songs
 			.where('SourceFile')
 			.startsWithIgnoreCase(rootDir)
@@ -119,4 +144,55 @@ export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
 				resolve(songs)
 			})
 	})
+}
+
+// Iterates through every song of an album to get every single artist, then sorts them by the amount of songs done by artist, the more an artist has songs the firstest it will be in the array.
+function getAllAlbumArtists(songArray: any[], album: string | undefined | null) {
+	let artistsCount: any[] = []
+	let artistsConcat: any[] = []
+	let artistsSorted: string = ''
+
+	songArray.forEach(song => {
+		if (song['Album'] === album) {
+			let artists = splitArtists(song['Artist'])
+
+			if (artists.length > 0) {
+				artistsConcat.push(...artists)
+			} else {
+				artistsConcat = artists
+			}
+		}
+	})
+
+	artistsConcat.forEach(artist => {
+		let foundArtist = artistsCount.find(i => i['Artist'] === artist)
+
+		if (foundArtist) {
+			foundArtist['Count']++
+		} else {
+			artistsCount.push({
+				Artist: artist,
+				Count: 0
+			})
+		}
+	})
+
+	artistsCount = artistsCount.sort((a, b) => b['Count'] - a['Count'])
+	artistsSorted = artistsCount.map(a => a['Artist']).join(', ')
+
+	return artistsSorted
+}
+
+function splitArtists(artists: string) {
+	if (artists) {
+		let artistSplit: string[] = []
+
+		if (typeof artists === 'string') {
+			artistSplit = artists.split(', ')
+			artistSplit = artists.split(',')
+		}
+
+		return artistSplit
+	}
+	return []
 }

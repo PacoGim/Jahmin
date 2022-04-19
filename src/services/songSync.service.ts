@@ -39,6 +39,7 @@ export async function watchFolders(dbSongs: SongType[]) {
 		return
 	}
 
+	isQueueRunning = false
 	taskQueue = []
 	maxTaskQueueLength = 0
 
@@ -192,7 +193,7 @@ function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
 
 		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
 			if (data.type === 'songsToAdd') {
-				data.songs.forEach(song => process.nextTick(() => addToTaskQueue(song, 'insert')))
+				data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
 			}
 
 			if (data.type === 'songsToDelete') {
@@ -304,12 +305,6 @@ export function reloadAlbumData(albumId: string) {
 						type: 'update',
 						data: tags
 					})
-
-					/* 		storageWorker?.postMessage({
-						type: 'update',
-						data: tags,
-						appDataPath: appDataPath()
-					}) */
 				})
 				.catch(err => {
 					console.error(err)
