@@ -19,8 +19,38 @@ export class JahminDb extends Dexie {
 
 export const db = new JahminDb()
 
+db.delete()
+
+let taskQueue = []
+let isQueueRunning = false
 let dbVersion = 0
 let isVersionUpdating = false
+
+export function addTaskToQueue(object, taskType: 'create' | 'update' | 'delete') {
+	taskQueue.push({
+		object,
+		taskType
+	})
+
+	if (isQueueRunning === false) {
+		isQueueRunning = true
+		runQueue()
+	}
+}
+
+function runQueue() {
+	let task = taskQueue.shift()
+
+	if (task) {
+		if (task.taskType === 'create') {
+			addSong(task.object).then(data => {
+				runQueue()
+			})
+		}
+	} else {
+		isQueueRunning = false
+	}
+}
 
 function updateVersion() {
 	dbVersion++
@@ -47,38 +77,39 @@ function updateStoreVersion() {
 	}
 }
 
-export function addSong(song: SongType) {
+function addSong(song: SongType) {
 	return new Promise(async (resolve, reject) => {
 		let albumId = hash(getDirectoryFn(song.SourceFile)) as string
-		let dbAlbum = await getAlbumById(albumId)
 
-		if (dbAlbum === undefined) {
-			db.albums
-				.add({
-					Album: song.Album,
-					AlbumArtist: song.AlbumArtist,
-					DynamicAlbumArtist: undefined,
-					RootDir: getDirectoryFn(song.SourceFile),
-					ID: albumId,
-					Songs: [song]
-				})
-				.then(data => {
-					updateVersion()
-					resolve(data)
-				})
-		} else {
-			if (!dbAlbum.Songs.find(songFoo => songFoo.ID === song.ID)) {
-				dbAlbum.Songs.push(song)
+		getAlbumById(albumId).then(dbAlbum => {
+			if (dbAlbum === undefined) {
 				db.albums
-					.where('ID')
-					.equals(albumId)
-					.modify(dbAlbum)
+					.add({
+						Album: song.Album,
+						AlbumArtist: song.AlbumArtist,
+						DynamicAlbumArtist: undefined,
+						RootDir: getDirectoryFn(song.SourceFile),
+						ID: albumId,
+						Songs: [song]
+					})
 					.then(data => {
 						updateVersion()
 						resolve(data)
 					})
+			} else {
+				if (!dbAlbum.Songs.find(songFoo => songFoo.ID === song.ID)) {
+					dbAlbum.Songs.push(song)
+					db.albums
+						.where('ID')
+						.equals(albumId)
+						.modify(dbAlbum)
+						.then(data => {
+							updateVersion()
+							resolve(data)
+						})
+				}
 			}
-		}
+		})
 	})
 }
 
@@ -114,9 +145,9 @@ export function getAlbumById(albumId: string): Promise<AlbumType> {
 			.then(albums => {
 				let album = albums[0]
 
-				if (album?.Songs && album?.Album) {
-					album.DynamicAlbumArtist = getAllAlbumArtists(album.Songs, album.Album)
-				}
+				// if (album?.Songs && album?.Album) {
+				// 	album.DynamicAlbumArtist = getAllAlbumArtists(album.Songs, album.Album)
+				// }
 
 				resolve(album)
 			})
@@ -125,23 +156,24 @@ export function getAlbumById(albumId: string): Promise<AlbumType> {
 
 export function getAllSongs(): Promise<SongType[]> {
 	return new Promise(resolve => {
-		resolve([])
-		return
-		db.songs.toArray().then(songs => {
-			resolve(songs)
+		db.albums.toArray().then(albums => {
+			let allSongs = []
+
+			albums.forEach(album => allSongs.push(...album.Songs))
+
+			resolve(allSongs)
 		})
 	})
 }
 
 export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
 	return new Promise(resolve => {
-		return
-		db.songs
-			.where('SourceFile')
+		db.albums
+			.where('RootDir')
 			.startsWithIgnoreCase(rootDir)
 			.toArray()
-			.then(songs => {
-				resolve(songs)
+			.then(album => {
+				resolve(album[0].Songs)
 			})
 	})
 }

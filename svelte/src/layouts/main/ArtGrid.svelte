@@ -24,7 +24,10 @@
 
 	function runLiveQuery() {
 		albums = liveQuery(async () => {
-			let results = await db.songs.where($groupByConfig[0]).equals($groupByValuesConfig[0]).toArray()
+			let results = await (await db.albums.toArray())
+				.flatMap(album => album.Songs)
+				.filter(song => song[$groupByConfig[0]] === $groupByValuesConfig[0])
+
 			return await groupSongs(results)
 		})
 	}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
-	import { addSong, bulkDeleteSongs, deleteSong } from '../db/db'
+	import { addTaskToQueue, bulkDeleteSongs, deleteSong } from '../db/db'
 	import generateId from '../functions/generateId.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 
@@ -90,7 +90,7 @@
 			if (data.type === 'delete') {
 				deleteSong(data.data)
 			} else if (data.type === 'insert') {
-				addSong(data.data)
+				addTaskToQueue(data.data, 'create')
 			}
 		})
 

@@ -26,15 +26,19 @@
 
 	let isMounting = true
 
-	// $: {
-	// 	if ($dbVersionStore) {
-	// 		getAlbumSongs($selectedAlbumDir).then(songs => {
-	// 			if (songs.length !== $songListStore.length) {
-	// 				$songListStore =   songs
-	// 			}
-	// 		})
-	// 	}
-	// }
+	$: {
+		if ($dbVersionStore) {
+			foopdate()
+		}
+	}
+
+	function foopdate() {
+		getAlbumSongs($selectedAlbumDir).then(songs => {
+			if (songs.length !== $songListStore.length) {
+				$songListStore = songs
+			}
+		})
+	}
 
 	$: {
 		// If there is a song playing AND app is idle AND the playing album is the same as the selected album, scroll to song.
