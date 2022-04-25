@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getAlbumSongs } from '../db/db'
+	// import { getAlbumSongs } from '../db/db'
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { getAlbumIPC, getAlbumsIPC } from '../services/ipc.service'
@@ -38,11 +38,13 @@
 
 		$selectedAlbumDir = lastPlayedDir
 
+		/*
 		getAlbumSongs(lastPlayedDir).then(songs => {
 			$songListStore = songs
 
 			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
 		})
+		*/
 	}
 
 	onMount(() => {

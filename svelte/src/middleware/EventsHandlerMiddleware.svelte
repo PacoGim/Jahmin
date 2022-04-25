@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { db, getAlbumSongs } from '../db/db'
+	// import { db, getAlbumSongs } from '../db/db'
 	import { hash } from '../functions/hashString.fn'
 	import parseJson from '../functions/parseJson'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
@@ -56,7 +56,7 @@
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		const rootDir = element.getAttribute('rootDir')
-
+/*
 		let songs = await getAlbumSongs(rootDir)
 
 		if (evtType === 'dblclick') {
@@ -74,6 +74,7 @@
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
 			$selectedSongsStore = []
 		}
+		*/
 	}
 
 	function handleSongListItemEvent(element: HTMLElement, evtType: string) {

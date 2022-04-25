@@ -1,4 +1,5 @@
 import Dexie, { Table } from 'dexie'
+import generateId from '../functions/generateId.fn'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import { hash } from '../functions/hashString.fn'
 import { dbVersionStore } from '../store/final.store'
@@ -6,27 +7,28 @@ import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
 export class JahminDb extends Dexie {
-	albums!: Table<AlbumType>
+	songs!: Table<SongType>
 
 	constructor() {
 		super('JahminDb')
 
 		this.version(1).stores({
-			albums: '++id,Album,AlbumArtist,DynamicAlbumArtist,RootDir,ID,Songs'
+			songs:
+				'ID,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,Date_Year,Date_Month,Date_Day,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
 		})
 	}
 }
 
 export const db = new JahminDb()
 
-db.delete()
+// db.delete()
 
 let taskQueue = []
 let isQueueRunning = false
 let dbVersion = 0
 let isVersionUpdating = false
 
-export function addTaskToQueue(object, taskType: 'create' | 'update' | 'delete') {
+export function addTaskToQueue(object, taskType: 'insert' | 'update' | 'delete') {
 	taskQueue.push({
 		object,
 		taskType
@@ -34,22 +36,101 @@ export function addTaskToQueue(object, taskType: 'create' | 'update' | 'delete')
 
 	if (isQueueRunning === false) {
 		isQueueRunning = true
-		runQueue()
+
+		setTimeout(() => {
+			runQueue()
+		}, 500)
 	}
 }
 
-function runQueue() {
-	let task = taskQueue.shift()
+async function runQueue() {
+	// Groups all the same tasks together.
+	let addSongQueue = taskQueue.filter(task => task.taskType === 'insert')
+	let deleteSongQueue = taskQueue.filter(task => task.taskType === 'delete')
+	let updateSongQueue = taskQueue.filter(task => task.taskType === 'update')
 
-	if (task) {
-		if (task.taskType === 'create') {
-			addSong(task.object).then(data => {
-				runQueue()
-			})
-		}
-	} else {
+	// Removes from the task queue all the tasks that have grouped.
+	addSongQueue.forEach(task => taskQueue.splice(taskQueue.indexOf(task), 1))
+	deleteSongQueue.forEach(task => taskQueue.splice(taskQueue.indexOf(task), 1))
+	updateSongQueue.forEach(task => taskQueue.splice(taskQueue.indexOf(task), 1))
+
+	if (addSongQueue.length === 0 && deleteSongQueue.length === 0 && updateSongQueue.length === 0) {
 		isQueueRunning = false
+		return
 	}
+
+	if (addSongQueue.length > 0) {
+		// Run Bulk Add
+		await bulkInsertSongs(addSongQueue.map(task => task.object))
+	}
+
+	if (deleteSongQueue.length > 0) {
+		// Run Bulk Delete
+		await bulkDeleteSongs(deleteSongQueue.map(task => task.object))
+	}
+
+	if (updateSongQueue.length > 0) {
+		// Run Bulk Update
+		await bulkUpdateSongs(updateSongQueue.map(task => task.object))
+	}
+
+	runQueue()
+}
+
+function bulkInsertSongs(songs: SongType[]): Promise<undefined> {
+	return new Promise((resolve, reject) => {
+		db.songs
+			.bulkAdd(songs)
+			.then(() => {
+				resolve(undefined)
+			})
+			.catch(err => {
+				console.log(err)
+			})
+			.finally(() => {
+				resolve(undefined)
+			})
+	})
+}
+
+export function bulkUpdateSongs(songs: SongType[]) {
+	return new Promise((resolve, reject) => {
+		resolve(undefined)
+		/* 		db.songs
+			.bulkAdd(songs)
+			.then(() => {
+				resolve(undefined)
+			})
+			.catch(err => {
+				console.log(err)
+			})
+			.finally(() => {
+				resolve(undefined)
+			}) */
+	})
+}
+
+export function bulkDeleteSongs(songs: SongType[]) {
+	return new Promise((resolve, reject) => {
+		resolve(undefined)
+		/* 		db.songs
+			.bulkAdd(songs)
+			.then(() => {
+				resolve(undefined)
+			})
+			.catch(err => {
+				console.log(err)
+			})
+			.finally(() => {
+				resolve(undefined)
+			}) */
+	})
+}
+
+export function getAllSongs() {
+	return new Promise((resolve, reject) => {
+		resolve([])
+	})
 }
 
 function updateVersion() {
@@ -75,156 +156,4 @@ function updateStoreVersion() {
 	} else {
 		isVersionUpdating = false
 	}
-}
-
-function addSong(song: SongType) {
-	return new Promise(async (resolve, reject) => {
-		let albumId = hash(getDirectoryFn(song.SourceFile)) as string
-
-		getAlbumById(albumId).then(dbAlbum => {
-			if (dbAlbum === undefined) {
-				db.albums
-					.add({
-						Album: song.Album,
-						AlbumArtist: song.AlbumArtist,
-						DynamicAlbumArtist: undefined,
-						RootDir: getDirectoryFn(song.SourceFile),
-						ID: albumId,
-						Songs: [song]
-					})
-					.then(data => {
-						updateVersion()
-						resolve(data)
-					})
-			} else {
-				if (!dbAlbum.Songs.find(songFoo => songFoo.ID === song.ID)) {
-					dbAlbum.Songs.push(song)
-					db.albums
-						.where('ID')
-						.equals(albumId)
-						.modify(dbAlbum)
-						.then(data => {
-							updateVersion()
-							resolve(data)
-						})
-				}
-			}
-		})
-	})
-}
-
-export async function bulkDeleteSongs(songs: SongType[]) {
-	console.log('bulkDeleteSongs', songs)
-	let songsId = songs.map(song => song.ID)
-
-	let songsToDeleteKeys = (await getAllSongs()).filter(song => songsId.includes(song.ID)).map(song => song.id)
-
-	db.songs.bulkDelete(songsToDeleteKeys).then(() => {
-		updateVersion()
-	})
-}
-
-export function deleteSong(song: SongType) {
-	return new Promise(async (resolve, reject) => {
-		await db.songs
-			.where('ID')
-			.equals(song.ID)
-			.delete()
-			.then(() => {
-				updateVersion()
-			})
-	})
-}
-
-export function getAlbumById(albumId: string): Promise<AlbumType> {
-	return new Promise((resolve, reject) => {
-		db.albums
-			.where('ID')
-			.equals(albumId)
-			.toArray()
-			.then(albums => {
-				let album = albums[0]
-
-				// if (album?.Songs && album?.Album) {
-				// 	album.DynamicAlbumArtist = getAllAlbumArtists(album.Songs, album.Album)
-				// }
-
-				resolve(album)
-			})
-	})
-}
-
-export function getAllSongs(): Promise<SongType[]> {
-	return new Promise(resolve => {
-		db.albums.toArray().then(albums => {
-			let allSongs = []
-
-			albums.forEach(album => allSongs.push(...album.Songs))
-
-			resolve(allSongs)
-		})
-	})
-}
-
-export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
-	return new Promise(resolve => {
-		db.albums
-			.where('RootDir')
-			.startsWithIgnoreCase(rootDir)
-			.toArray()
-			.then(album => {
-				resolve(album[0].Songs)
-			})
-	})
-}
-
-// Iterates through every song of an album to get every single artist, then sorts them by the amount of songs done by artist, the more an artist has songs the firstest it will be in the array.
-function getAllAlbumArtists(songArray: any[], album: string | undefined | null) {
-	let artistsCount: any[] = []
-	let artistsConcat: any[] = []
-	let artistsSorted: string = ''
-
-	songArray.forEach(song => {
-		if (song['Album'] === album) {
-			let artists = splitArtists(song['Artist'])
-
-			if (artists.length > 0) {
-				artistsConcat.push(...artists)
-			} else {
-				artistsConcat = artists
-			}
-		}
-	})
-
-	artistsConcat.forEach(artist => {
-		let foundArtist = artistsCount.find(i => i['Artist'] === artist)
-
-		if (foundArtist) {
-			foundArtist['Count']++
-		} else {
-			artistsCount.push({
-				Artist: artist,
-				Count: 0
-			})
-		}
-	})
-
-	artistsCount = artistsCount.sort((a, b) => b['Count'] - a['Count'])
-	artistsSorted = artistsCount.map(a => a['Artist']).join(', ')
-
-	return artistsSorted
-}
-
-function splitArtists(artists: string) {
-	if (artists) {
-		let artistSplit: string[] = []
-
-		if (typeof artists === 'string') {
-			artistSplit = artists.split(', ')
-			artistSplit = artists.split(',')
-		}
-
-		return artistSplit
-	}
-	return []
 }

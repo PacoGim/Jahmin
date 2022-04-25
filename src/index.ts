@@ -18,6 +18,7 @@ import { getRootDirFolderWatcher, watchFolders } from './services/songSync.servi
 import { ConfigType } from './types/config.type'
 
 import chokidar from 'chokidar'
+import { sendWebContents } from './services/sendWebContents.service'
 
 let browserWindow: BrowserWindow
 
