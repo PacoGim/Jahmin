@@ -18,8 +18,6 @@ export async function setNewPlayback(
 	songIdToPlay: number | undefined,
 	playNow: boolean
 ) {
-	// console.log(albumId, playbackSongs, songIdToPlay, playNow)
-
 	// let indexToPlay = playbackSongs.findIndex(song => song.ID === songIdToPlay)
 	let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0]
 

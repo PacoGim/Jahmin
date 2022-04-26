@@ -37,8 +37,6 @@ function createMainWindow() {
         browserWindow = new electron_1.BrowserWindow(loadOptions(config));
         browserWindow.webContents.openDevTools();
         browserWindow.loadFile('index.html');
-        // Gets the storage data from files and creates a map.
-        (0, storage_service_1.initStorage)();
         browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow));
     });
 }
@@ -83,13 +81,13 @@ function getMainWindow() {
 }
 exports.getMainWindow = getMainWindow;
 electron_1.app.on('ready', createMainWindow);
-electron_1.app.whenReady().then(() => {
-    electron_1.globalShortcut.register('CommandOrControl+R', () => {
-        console.log('CommandOrControl+R is pressed: Shortcut Disabled');
-        electron_1.app.relaunch();
-        electron_1.app.quit();
-    });
-});
+/* app.whenReady().then(() => {
+    globalShortcut.register('CommandOrControl+R', () => {
+        console.log('CommandOrControl+R is pressed: Shortcut Disabled')
+        app.relaunch()
+        app.quit()
+    })
+}) */
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();

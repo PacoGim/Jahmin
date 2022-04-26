@@ -33,6 +33,7 @@ const equalizer_service_1 = require("./equalizer.service");
 const common_1 = require("electron/common");
 const directoryHandler_service_1 = __importDefault(require("./directoryHandler.service"));
 const hashFile_fn_1 = __importDefault(require("../functions/hashFile.fn"));
+const appReady_service_1 = __importDefault(require("./appReady.service"));
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_service_1.loadContextMenu)(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
@@ -160,10 +161,6 @@ function loadIPC() {
         (0, albumArt_service_1.sendArtQueueProgress)();
         return true;
     });
-    electron_1.ipcMain.handle('send-song-sync-queue-progress', () => {
-        (0, songSync_service_1.sendSongSyncQueueProgress)();
-        return true;
-    });
     electron_1.ipcMain.handle('select-directories', (evt, type, dbSongs) => {
         electron_1.dialog
             .showOpenDialog({
@@ -182,6 +179,12 @@ function loadIPC() {
         (0, directoryHandler_service_1.default)([directory], type, dbSongs);
     });
     electron_1.ipcMain.handle('run-song-fetch', (evt, songDb) => {
+        (0, songSync_service_1.watchFolders)(songDb);
+    });
+    electron_1.ipcMain.handle('app-ready', (evt, songDb) => {
+        (0, appReady_service_1.default)();
+    });
+    electron_1.ipcMain.handle('send-all-songs-from-renderer', (evt, songDb) => {
         (0, songSync_service_1.watchFolders)(songDb);
     });
 }

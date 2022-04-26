@@ -35,8 +35,6 @@ async function createMainWindow() {
 
 	browserWindow.webContents.openDevTools()
 	browserWindow.loadFile('index.html')
-	// Gets the storage data from files and creates a map.
-	initStorage()
 
 	browserWindow.on('resize', () => saveWindowBounds(browserWindow)).on('move', () => saveWindowBounds(browserWindow))
 }
@@ -90,13 +88,13 @@ export function getMainWindow() {
 
 app.on('ready', createMainWindow)
 
-app.whenReady().then(() => {
+/* app.whenReady().then(() => {
 	globalShortcut.register('CommandOrControl+R', () => {
 		console.log('CommandOrControl+R is pressed: Shortcut Disabled')
 		app.relaunch()
 		app.quit()
 	})
-})
+}) */
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {

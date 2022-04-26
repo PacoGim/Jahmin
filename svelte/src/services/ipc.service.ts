@@ -20,6 +20,18 @@ let isGetTagEditProgressRunning = false
 // 	})
 // }
 
+export function sendAllSongsFromRendererIPC() {
+	getAllSongs().then(songs => {
+		ipcRenderer.invoke('send-all-songs-from-renderer', songs)
+	})
+}
+
+export function sendAppReadyIPC() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer.invoke('app-ready')
+	})
+}
+
 export function userSearchIPC(searchString: string, keys: string[]): Promise<SongFuzzySearchType[]> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer.invoke('search', searchString, keys).then(result => {
@@ -173,10 +185,6 @@ export function getAlbumsIPC(groupBy: string, groupByValue: string): Promise<any
 
 export function sendNewArtQueueProgressIPC(): void {
 	ipcRenderer.invoke('send-new-art-queue-progress')
-}
-
-export function sendSongSyncQueueProgressIPC(): void {
-	ipcRenderer.invoke('send-song-sync-queue-progress')
 }
 
 export function compressAlbumArtIPC(rootDir, artSize, forceNewCheck: boolean) {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { getAlbumSongs } from '../db/db'
 	// import { getAlbumSongs } from '../db/db'
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
@@ -12,7 +13,8 @@
 		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
-		songListStore
+		songListStore,
+		triggerScrollToSongEvent
 	} from '../store/final.store'
 
 	let firstGroupByAssign = true
@@ -38,13 +40,19 @@
 
 		$selectedAlbumDir = lastPlayedDir
 
-		/*
 		getAlbumSongs(lastPlayedDir).then(songs => {
 			$songListStore = songs
 
 			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
+
+			let albumElement = document.querySelector(`[rootDir="${lastPlayedDir}"]`)
+
+			if (albumElement) {
+				albumElement.scrollIntoView({ block: 'center', behavior: 'smooth' })
+			}
+
+			$triggerScrollToSongEvent = lastPlayedSongId
 		})
-		*/
 	}
 
 	onMount(() => {

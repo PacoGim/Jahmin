@@ -10,7 +10,8 @@
 		sendNewArtQueueProgressIPC,
 		saveConfig,
 		compressAlbumArtIPC,
-		sendSongSyncQueueProgressIPC
+		sendSongSyncQueueProgressIPC,
+		sendAllSongsFromRendererIPC
 	} from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import { directoriesConfig, groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
@@ -94,6 +95,10 @@
 			bulkDeleteSongs(songs)
 		})
 
+		ipcRenderer.on('get-all-songs-from-renderer', event => {
+			sendAllSongsFromRendererIPC()
+		})
+
 		ipcRenderer.on('art-queue-progress', (event, data) => {
 			$artCompressQueueProgress = data
 
@@ -108,14 +113,6 @@
 
 		ipcRenderer.on('song-sync-queue-progress', (event, data) => {
 			$songSyncQueueProgress = data
-
-			if ($songSyncQueueProgress.currentLength === 0 && $songSyncQueueProgress.maxLength === 0) {
-				return
-			}
-
-			setTimeout(() => {
-				sendSongSyncQueueProgressIPC()
-			}, 1000)
 		})
 
 		ipcRenderer.on('get-art-sizes', (event, data) => {

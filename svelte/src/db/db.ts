@@ -1,4 +1,4 @@
-import Dexie, { Table } from 'dexie'
+import Dexie, { liveQuery, Table } from 'dexie'
 import generateId from '../functions/generateId.fn'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import { hash } from '../functions/hashString.fn'
@@ -82,6 +82,7 @@ function bulkInsertSongs(songs: SongType[]): Promise<undefined> {
 		db.songs
 			.bulkAdd(songs)
 			.then(() => {
+				updateVersion()
 				resolve(undefined)
 			})
 			.catch(err => {
@@ -127,9 +128,31 @@ export function bulkDeleteSongs(songs: SongType[]) {
 	})
 }
 
-export function getAllSongs() {
+export function getAllSongs(): Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
-		resolve([])
+		db.songs
+			.toArray()
+			.then(songs => {
+				resolve(songs)
+			})
+			.catch(err => {
+				console.log(err)
+			})
+	})
+}
+
+export function getAlbumSongs(rootDir: string):Promise<SongType[]> {
+	return new Promise((resolve, reject) => {
+		db.songs
+			.where('SourceFile')
+			.startsWithIgnoreCase(rootDir)
+			.toArray()
+			.then(songs => {
+				resolve(songs)
+			})
+			.catch(err => {
+				console.log(err)
+			})
 	})
 }
 

@@ -32,6 +32,8 @@ import { groupSongs } from './songGroup.service'
 import { sendWebContents } from './sendWebContents.service'
 import directoryHandlerService from './directoryHandler.service'
 import hashFileFn from '../functions/hashFile.fn'
+import appReadyService from './appReady.service'
+import { SongType } from '../types/song.type'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -196,11 +198,6 @@ export function loadIPC() {
 		return true
 	})
 
-	ipcMain.handle('send-song-sync-queue-progress', () => {
-		sendSongSyncQueueProgress()
-		return true
-	})
-
 	ipcMain.handle('select-directories', (evt, type, dbSongs) => {
 		dialog
 			.showOpenDialog({
@@ -221,6 +218,14 @@ export function loadIPC() {
 	})
 
 	ipcMain.handle('run-song-fetch', (evt, songDb) => {
+		watchFolders(songDb)
+	})
+
+	ipcMain.handle('app-ready', (evt, songDb) => {
+		appReadyService()
+	})
+
+	ipcMain.handle('send-all-songs-from-renderer', (evt, songDb: SongType[]) => {
 		watchFolders(songDb)
 	})
 }

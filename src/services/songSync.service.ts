@@ -243,6 +243,12 @@ export function sendSongSyncQueueProgress() {
 		currentLength: taskQueue.length,
 		maxLength: maxTaskQueueLength
 	})
+
+	if (!(taskQueue.length === 0 && maxTaskQueueLength === 0)) {
+		setTimeout(() => {
+			sendSongSyncQueueProgress()
+		}, 1000)
+	}
 }
 
 function getAllFilesInFoldersDeep(rootDirectory: string[]) {

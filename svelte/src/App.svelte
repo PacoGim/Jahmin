@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { appTitle, isAppIdle, keyDown, keyUp, layoutToShow, currentAudioElement, dbVersionStore } from './store/final.store'
+	import {
+		appTitle,
+		isAppIdle,
+		keyDown,
+		keyUp,
+		layoutToShow,
+		currentAudioElement,
+		dbVersionStore,
+		dbSongsStore
+	} from './store/final.store'
 
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import SearchLayout from './layouts/search/SearchLayout.svelte'
@@ -36,19 +45,25 @@
 	import EventsHandlerMiddleware from './middleware/EventsHandlerMiddleware.svelte'
 	import nextSongFn from './functions/nextSong.fn'
 	import StorageService from './svelte-services/StorageService.svelte'
-	import { runSongFetchIPC } from './services/ipc.service'
+	import { runSongFetchIPC, sendAppReadyIPC } from './services/ipc.service'
 	import { db, getAllSongs } from './db/db'
+	import { liveQuery } from 'dexie'
 
 	let appIdleDebounce = getAppIdleDebounce()
+
+	// Listens to live changes from the db and updates the svelte store.
+	liveQuery(async () => {
+		return await db.songs.toArray()
+	}).subscribe(songs => {
+		$dbSongsStore = songs
+	})
 
 	onMount(() => {
 		iziToast.settings({ position: 'topRight' })
 
 		runThemeHandler()
 
-		getAllSongs().then(songs => {
-			runSongFetchIPC(songs)
-		})
+		sendAppReadyIPC()
 
 		// To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Far after app is done loading).
 		setTimeout(() => {

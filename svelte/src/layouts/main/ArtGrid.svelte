@@ -7,8 +7,9 @@
 	import Album from '../../components/Album.svelte'
 	import scrollToAlbumFn from '../../functions/scrollToAlbum.fn'
 	import { artSizeConfig, gridGapConfig, groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { albumListStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
+	import { albumListStore, dbSongsStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
 	import { hash } from '../../functions/hashString.fn'
+	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 
 	let albums
 
@@ -17,49 +18,22 @@
 	$: if ($gridGapConfig !== undefined) document.documentElement.style.setProperty('--grid-gap', `${$gridGapConfig}px`)
 
 	$: {
-		$groupByConfig
-		$groupByValuesConfig
-		runLiveQuery()
+		if ($dbSongsStore && $dbSongsStore.length > 0 && $groupByValuesConfig && $groupByConfig) {
+			updateArtGridAlbums()
+		}
 	}
 
-	function runLiveQuery() {
-		albums = liveQuery(async () => {
-			let results = await (await db.albums.toArray())
-				.flatMap(album => album.Songs)
-				.filter(song => song[$groupByConfig[0]] === $groupByValuesConfig[0])
+	function updateArtGridAlbums() {
+		let songsFiltered = []
 
-			return await groupSongs(results)
-		})
-	}
-
-	function updateSong() {}
-
-	function groupSongs(results) {
-		return new Promise((resolve, reject) => {
-			let albums = []
-			results.forEach(song => {
-				const rootDir = song.SourceFile.split('/').slice(0, -1).join('/')
-				const albumId = hash(rootDir)
-
-				let album = albums.find(album => album.ID === albumId)
-
-				if (album === undefined) {
-					album = {
-						ID: albumId,
-						RootDir: rootDir,
-						Name: song.Album || '',
-						Songs: []
-					}
-
-					albums.push(album)
-				}
-
-				album.Songs.push(song)
-
-				albums[albums.indexOf(album)] = album
+		$groupByConfig.forEach((group, index) => {
+			songsFiltered = $dbSongsStore.filter(song => {
+				return song[$groupByConfig[index]] === $groupByValuesConfig[index]
 			})
+		})
 
-			resolve(albums)
+		groupSongsByAlbumFn(songsFiltered).then(groupedAlbums => {
+			albums = groupedAlbums
 		})
 	}
 
@@ -76,14 +50,9 @@
 </script>
 
 <art-grid-svlt>
-	{#each $albums || [] as album (album.ID)}
-		<!-- {album} -->
+	{#each albums || [] as album (album.ID)}
 		<Album {album} />
 	{/each}
-
-	<!-- {#each $albumListStore as album (album.ID)}
-		<Album {album} />
-	{/each} -->
 </art-grid-svlt>
 
 <style>
