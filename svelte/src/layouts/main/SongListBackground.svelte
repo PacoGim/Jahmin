@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 	import { hash } from '../../functions/hashString.fn'
 
-	import { albumArtMapStore, selectedAlbumDir, selectedAlbumId } from '../../store/final.store'
+	import { albumArtMapStore, selectedAlbumDir } from '../../store/final.store'
 
 	$: {
 		if ($selectedAlbumDir !== undefined) setArt()

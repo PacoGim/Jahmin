@@ -3,6 +3,7 @@
 	import { getAlbumSongs } from '../db/db'
 	// import { getAlbumSongs } from '../db/db'
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
+	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import { getAlbumIPC, getAlbumsIPC } from '../services/ipc.service'
 
@@ -45,11 +46,7 @@
 
 			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
 
-			let albumElement = document.querySelector(`[rootDir="${lastPlayedDir}"]`)
-
-			if (albumElement) {
-				albumElement.scrollIntoView({ block: 'center', behavior: 'smooth' })
-			}
+			scrollToAlbumFn(lastPlayedDir, 'smooth-scroll')
 
 			$triggerScrollToSongEvent = lastPlayedSongId
 		})

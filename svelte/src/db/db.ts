@@ -144,10 +144,10 @@ export function getAllSongs(): Promise<SongType[]> {
 export function getAlbumSongs(rootDir: string):Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
 		db.songs
-			.where('SourceFile')
-			.startsWithIgnoreCase(rootDir)
-			.toArray()
-			.then(songs => {
+		.where('SourceFile')
+		.startsWithIgnoreCase(rootDir)
+		.toArray()
+		.then(songs => {
 				resolve(songs)
 			})
 			.catch(err => {

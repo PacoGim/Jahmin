@@ -14,13 +14,13 @@
 	let element
 
 	onMount(() => {
-		let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
+		// let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
 
-		if (album.ID === lastPlayedAlbumId) {
-			setTimeout(() => {
-				scrollToAlbumFn(album.ID)
-			}, 100)
-		}
+		// if (album.ID === lastPlayedAlbumId) {
+		// 	setTimeout(() => {
+		// 		scrollToAlbumFn(album.ID)
+		// 	}, 100)
+		// }
 
 		artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 	})

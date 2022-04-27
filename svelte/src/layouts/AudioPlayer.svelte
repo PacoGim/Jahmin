@@ -11,7 +11,8 @@
 		altAudioElement,
 		playbackStore,
 		playingSongStore,
-		isPlaying
+		isPlaying,
+albumPlayingDirStore
 	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
@@ -96,7 +97,7 @@
 	function updateCurrentSongData(song: SongType) {
 		$playingSongStore = song
 
-		setWaveSource(song.SourceFile, $albumPlayingIdStore, song.Duration)
+		setWaveSource(song.SourceFile, $albumPlayingDirStore, song.Duration)
 	}
 
 	function setCurrentAudioElement(audioElement: HTMLAudioElement) {

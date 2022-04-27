@@ -296,12 +296,6 @@
 		detectSongListHeightChange()
 
 		scrollBarHandler()
-
-		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
-
-		setTimeout(() => {
-			setScrollAmountFromSong(lastPlayedSongId)
-		}, 250)
 	})
 </script>
 

@@ -5,13 +5,13 @@
 	import { saveConfig } from '../../../services/ipc.service'
 	import notifyService from '../../../services/notify.service'
 	import { contrastRatioConfig } from '../../../store/config.store'
-	import { albumPlayingIdStore, keyDown } from '../../../store/final.store'
+	import { albumPlayingDirStore, albumPlayingIdStore, keyDown } from '../../../store/final.store'
 
 	let colorContrastRangeValue = $contrastRatioConfig
 
 	$: {
-		if ($albumPlayingIdStore) {
-			getAlbumColors($albumPlayingIdStore, colorContrastRangeValue)
+		if ($albumPlayingDirStore) {
+			getAlbumColors($albumPlayingDirStore, colorContrastRangeValue)
 		}
 	}
 

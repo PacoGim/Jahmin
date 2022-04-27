@@ -41,7 +41,11 @@ export async function setNewPlayback(
 	}
 
 	// playbackCursor.set([indexToPlay, playNow])
-	getAlbumColors(rootDir)
+	getAlbumColors(rootDir).then(color => {
+		document.documentElement.style.setProperty('--low-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
+		document.documentElement.style.setProperty('--base-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessBase}%)`)
+		document.documentElement.style.setProperty('--high-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessHigh}%)`)
+	})
 }
 
 function fetchAlbum(albumId): Promise<SongType[]> {

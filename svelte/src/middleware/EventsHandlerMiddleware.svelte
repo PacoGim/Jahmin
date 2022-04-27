@@ -10,6 +10,7 @@
 	import { getAlbumIPC, saveConfig } from '../services/ipc.service'
 	import { groupByConfig, groupByValuesConfig } from '../store/config.store'
 	import {
+		albumPlayingDirStore,
 		elementMap,
 		playbackStore,
 		playingSongStore,
@@ -34,25 +35,30 @@
 		const imgElement = $elementMap.get('img')
 		const albumElement = $elementMap.get('album')
 		const songListItemElement = $elementMap.get('song-list-item')
-		const playerElement = $elementMap.get('player-svlt')
+		const controlBarElement = $elementMap.get('control-bar-svlt')
 
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
 
 		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type)
 
-		if (imgElement && playerElement) {
-			let playingSong = $playingSongStore
-			let albumID = imgElement.dataset.albumArtId
+		if (imgElement && controlBarElement) setAlbumBackInView()
+	}
 
-			$selectedAlbumId = albumID
-			$songListStore = $playbackStore
+	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
+	function setAlbumBackInView() {
+		let playingSong = $playingSongStore
 
-			$triggerGroupingChangeEvent = parseJson(localStorage.getItem('GroupByValues'))
+		$selectedAlbumDir = $albumPlayingDirStore
+		$songListStore = $playbackStore
 
-			$triggerScrollToSongEvent = playingSong.ID
-			$selectedSongsStore = [playingSong.ID]
-			scrollToAlbumFn(albumID)
-		}
+		$triggerGroupingChangeEvent = parseJson(localStorage.getItem('GroupByValues'))
+
+		$triggerScrollToSongEvent = playingSong.ID
+		$selectedSongsStore = [playingSong.ID]
+
+		setTimeout(() => {
+			scrollToAlbumFn($albumPlayingDirStore, 'not-smooth-scroll')
+		}, 250)
 	}
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 
 	import { liveQuery } from 'dexie'
 	import { db } from '../../db/db'
@@ -23,6 +23,8 @@
 		}
 	}
 
+	let groupByValuesConfigObserver
+
 	function updateArtGridAlbums() {
 		let songsFiltered = []
 
@@ -39,13 +41,13 @@
 
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
-		selectedGroupByStore.subscribe(() => {
+		groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
-		})()
+		})
+	})
 
-		selectedGroupByValueStore.subscribe(() => {
-			document.querySelector('art-grid-svlt').scrollTop = 0
-		})()
+	onDestroy(() => {
+		groupByValuesConfigObserver()
 	})
 </script>
 

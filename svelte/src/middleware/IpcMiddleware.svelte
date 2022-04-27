@@ -69,17 +69,17 @@
 			})
 		})
 
-		ipcRenderer.on('sort-songs', (event, data) => {
-			localStorage.setItem(
-				'sorting',
-				JSON.stringify({
-					tag: data.tag,
-					order: data.order
-				})
-			)
+		// ipcRenderer.on('sort-songs', (event, data) => {
+		// 	localStorage.setItem(
+		// 		'sorting',
+		// 		JSON.stringify({
+		// 			tag: data.tag,
+		// 			order: data.order
+		// 		})
+		// 	)
 
-			$songListStore = sortSongsArrayFn($songListStore, data.tag, data.order)
-		})
+		// 	$songListStore = sortSongsArrayFn($songListStore, data.tag, data.order)
+		// })
 
 		ipcRenderer.on('new-art', (event, data) => handleNewArt(data))
 

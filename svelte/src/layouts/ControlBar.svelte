@@ -27,13 +27,7 @@
 	} from '../store/final.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
-	import { escapeString } from '../functions/escapeString.fn'
-	import { nextSong } from '../functions/nextSong.fn'
 
-	import { setWaveSource } from '../services/waveform.service'
-	import generateId from '../functions/generateId.fn'
-	import { hash } from '../functions/hashString.fn'
-	import { isFileExistIPC } from '../services/ipc.service'
 	import { currentPlayerTime } from '../store/player.store'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 
@@ -120,63 +114,6 @@
 
 	function checkIfPlaying() {
 		$isPlaying = $mainAudioElement.paused === false || $altAudioElement.paused === false
-	}
-
-	async function playSong(playbackCursor: [number, boolean]) {
-		let songToPlay = getSongToPlay(playbackCursor[0])
-
-		if (songToPlay === undefined) {
-			return
-		}
-
-		rootDir = undefined
-		rootDir = songToPlay.SourceFile.split('/').slice(0, -1).join('/')
-
-		currentSong = songToPlay
-		$playingSongStore = currentSong
-
-		songTime = {
-			currentTime: parseDuration(0),
-			duration: parseDuration(songToPlay['Duration']),
-			timeLeft: parseDuration(songToPlay['Duration'] - 0)
-		}
-
-		navigator.mediaSession.metadata = new MediaMetadata({
-			title: songToPlay.Title,
-			artist: songToPlay.Album
-		})
-
-		setWaveSource(songToPlay.SourceFile, $albumPlayingIdStore, songToPlay.Duration)
-
-		$mainAudioElement.src = escapeString(songToPlay['SourceFile'])
-		isMainAudioPlaying = true
-
-		if (playbackCursor[1] === true) {
-			$mainAudioElement.addEventListener('canplay', function handler() {
-				$altAudioElement.src = ''
-
-				isNextAudioPlaying = false
-				$currentAudioElement = $mainAudioElement
-				$mainAudioElement.play()
-				isNextAudioSongPreloaded = false
-
-				this.removeEventListener('canplay', handler)
-			})
-
-			// Play song and update data
-			// $mainAudioElement.play()
-			/*.catch(async err => {
-				if ((await isFileExistIPC(songToPlay.SourceFile)) === false) {
-					// If file does not exist, play next song.
-					nextSong()
-				}
-			}) */
-		}
-
-		$songPlayingIdStore = songToPlay.ID
-		// localStorage.setItem('LastPlayedAlbumId', $albumPlayingIdStore)
-		// localStorage.setItem('LastPlayedSongId', String(songToPlay.ID))
-		// localStorage.setItem('LastPlayedSongIndex', String(playbackCursor[0]))
 	}
 
 	function getSongToPlay(index: number) {
