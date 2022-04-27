@@ -49,6 +49,14 @@ export function getConfig(): ConfigType {
 			config.userOptions.fontSize = getDefaultConfigFile().userOptions?.fontSize
 		}
 
+		if (config?.userOptions?.sortBy === undefined) {
+			config.userOptions.sortBy = getDefaultConfigFile().userOptions?.sortBy
+		}
+
+		if (config?.userOptions?.sortOrder === undefined) {
+			config.userOptions.sortOrder = getDefaultConfigFile().userOptions?.sortOrder
+		}
+
 		if (config?.userOptions?.songAmount === undefined) {
 			config.userOptions.songAmount = getDefaultConfigFile().userOptions?.songAmount
 		}
@@ -111,7 +119,9 @@ function getDefaultConfigFile(): ConfigType {
 			artSize: 128,
 			gridGap: 16,
 			contrastRatio: 4.5,
-			fontSize: 16
+			fontSize: 16,
+			sortBy: 'Track',
+			sortOrder: 'desc'
 		},
 		songListTags: [
 			{

@@ -13,7 +13,9 @@
 		gridGapConfig,
 		contrastRatioConfig,
 		directoriesConfig,
-		fontSizeConfig
+		fontSizeConfig,
+		sortByConfig,
+		sortOrderConfig
 	} from '../store/config.store'
 
 	import type { ConfigType } from '../types/config.type'
@@ -31,6 +33,9 @@
 			$contrastRatioConfig = syncConfigLocalStorage('ContrastRatio', config.userOptions.contrastRatio)
 			$fontSizeConfig = syncConfigLocalStorage('FontSize', config.userOptions.fontSize)
 			$gridGapConfig = syncConfigLocalStorage('GridGap', config.userOptions.gridGap)
+
+			$sortByConfig = syncConfigLocalStorage('SortBy', config.userOptions.sortBy)
+			$sortOrderConfig = syncConfigLocalStorage('SortOrder', config.userOptions.sortOrder)
 
 			$groupByConfig = syncConfigLocalStorage('GroupBy', config.group.groupBy)
 			$groupByValuesConfig = syncConfigLocalStorage('GroupByValues', config.group.groupByValues)

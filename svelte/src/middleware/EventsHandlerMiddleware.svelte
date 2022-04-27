@@ -63,6 +63,8 @@
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		const rootDir = element.getAttribute('rootDir')
+
+		// TODO get state from config file.
 		let sorting = JSON.parse(localStorage.getItem('sorting'))
 
 		let songs = await getAlbumSongs(rootDir)

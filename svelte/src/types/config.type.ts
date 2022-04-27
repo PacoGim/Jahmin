@@ -20,6 +20,8 @@ type UserOptionsType = {
 	artSize?: number
 	contrastRatio?: number
 	fontSize?: number
+	sortBy?: string
+	sortOrder?: 'asc' | 'desc'
 }
 
 export enum ThemeOptions {

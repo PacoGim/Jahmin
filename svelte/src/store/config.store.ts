@@ -3,6 +3,9 @@ import parseJson from '../functions/parseJson'
 import type { ThemeOptions } from '../types/config.type'
 import type { SelectedTagType } from '../types/selectedTag.type'
 
+export let sortByConfig: Writable<string> = writable(localStorage.getItem('SortBy'))
+export let sortOrderConfig: Writable<string> = writable(localStorage.getItem('SortOrder'))
+
 export let artSizeConfig: Writable<number> = writable(Number(localStorage.getItem('AlbumArtSize')))
 export let songListTagsConfig: Writable<SelectedTagType[]> = writable(getSongListTagsConfig())
 export let equalizerIdConfig: Writable<string> = writable(localStorage.getItem('EqualizerId'))
