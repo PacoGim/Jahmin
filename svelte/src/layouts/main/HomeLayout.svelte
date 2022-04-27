@@ -32,7 +32,8 @@
 		display: grid;
 		grid-template-columns: auto 3fr 256px;
 		/* grid-template-rows: auto minmax(auto, var(--song-list-svlt-height)); */
-		grid-template-rows: auto clamp(25%, var(--song-list-svlt-height), var(--song-list-svlt-height));
+		/* grid-template-rows: auto clamp(160px, var(--song-list-svlt-height), var(--song-list-svlt-height)); */
+		grid-template-rows: auto var(--song-list-svlt-height);
 		grid-template-areas:
 			'tag-group-svlt art-grid-svlt tag-edit-svlt'
 			'tag-group-svlt song-list-svlt tag-edit-svlt';

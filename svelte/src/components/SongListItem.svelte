@@ -100,14 +100,20 @@
 
 		align-items: center;
 
-		min-height: 30px;
-		max-height: 30px;
+		--height: 36px;
+
+		min-height: var(--height);
+		max-height: var(--height);
+		height: var(--height);
 
 		display: grid;
 		/* grid-template-columns: max-content auto max-content max-content max-content; */
 		grid-template-rows: auto;
 
-		margin: 0.25rem 0;
+		/* margin: 0.25rem 0; */
+		border-bottom: .25rem transparent solid;
+		border-top: .25rem transparent solid;
+		background-clip: padding-box;
 		padding: 0.25rem 0.5rem;
 		user-select: none;
 

@@ -3,12 +3,13 @@
 	import { getAlbumSongs } from '../db/db'
 	// import { db, getAlbumSongs } from '../db/db'
 	import { hash } from '../functions/hashString.fn'
+	import isArrayEqualFn from '../functions/isArrayEqual.fn'
 	import parseJson from '../functions/parseJson'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { getAlbumIPC, saveConfig } from '../services/ipc.service'
-	import { groupByConfig, groupByValuesConfig } from '../store/config.store'
+	import { groupByConfig, groupByValuesConfig, sortByConfig, sortOrderConfig } from '../store/config.store'
 	import {
 		albumPlayingDirStore,
 		elementMap,
@@ -51,7 +52,11 @@
 		$selectedAlbumDir = $albumPlayingDirStore
 		$songListStore = $playbackStore
 
-		$triggerGroupingChangeEvent = parseJson(localStorage.getItem('GroupByValues'))
+		let groupByValuesLocalStorage = parseJson(localStorage.getItem('GroupByValues'))
+
+		if (!isArrayEqualFn(groupByValuesLocalStorage, $groupByValuesConfig)) {
+			$triggerGroupingChangeEvent = groupByValuesLocalStorage
+		}
 
 		$triggerScrollToSongEvent = playingSong.ID
 		$selectedSongsStore = [playingSong.ID]
@@ -64,12 +69,9 @@
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		const rootDir = element.getAttribute('rootDir')
 
-		// TODO get state from config file.
-		let sorting = JSON.parse(localStorage.getItem('sorting'))
-
 		let songs = await getAlbumSongs(rootDir)
 
-		let sortedSongs = sortSongsArrayFn(songs, sorting?.tag || 'Track', sorting?.order || 1)
+		let sortedSongs = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
 
 		if (evtType === 'dblclick') {
 			setNewPlayback(rootDir, sortedSongs, undefined, true)

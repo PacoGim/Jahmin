@@ -1,33 +1,51 @@
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
 
-	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
+	import { songAmountConfig } from '../../store/config.store'
 
-	import { songAmountConfig, sortByConfig, sortOrderConfig } from '../../store/config.store'
-
-	import { songListStore } from '../../store/final.store'
+	import { selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../store/final.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
 	let songsToShow = []
 	let scrollAmount = 0
 
+	$: {
+		$selectedAlbumDir
+		setScrollAmount(0)
+	}
+
 	// Main Song List refresh trigger
 	$: {
 		$songListStore
-		scrollAmount
 		trimSongArray()
+	}
+
+	$: {
+		changeSongListHeight($songAmountConfig)
+	}
+
+	$: {
+		if ($triggerScrollToSongEvent !== 0) {
+			setScrollAmountFromSong($triggerScrollToSongEvent)
+			$triggerScrollToSongEvent = 0
+		}
 	}
 
 	// Trims the current song array to show a limited amount of songs.
 	function trimSongArray() {
-		songsToShow = sortSongsArrayFn($songListStore, $sortByConfig, $sortOrderConfig).slice(
-			scrollAmount,
-			scrollAmount + $songAmountConfig
-		)
+		songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
 	}
 
 	function setScrollAmount(amount) {
+		if (amount <= 0) {
+			amount = 0
+		} else if (amount > $songListStore.length - 1) {
+			amount = $songListStore.length - 1
+		}
+
 		scrollAmount = amount
+
+		trimSongArray()
 
 		setScrollProgress()
 	}
@@ -40,9 +58,32 @@
 		let scrollValue = ((100 / ($songListStore.length - 1)) * scrollAmount) | 0
 		document.documentElement.style.setProperty('--scrollbar-fill', `${scrollValue}%`)
 	}
+
+	function changeSongListHeight(songAmount) {
+		document.documentElement.style.setProperty('--song-list-svlt-height', `${songAmount * 36 + 16}px`)
+	}
+
+	function scrollContainer(e: WheelEvent) {
+		setScrollAmount(scrollAmount + Math.sign(e.deltaY))
+	}
+
+	// Manages to "scroll" to the proper song on demand.
+	function setScrollAmountFromSong(songId) {
+		let songIndex = $songListStore.findIndex(song => song.ID === songId)
+
+		let differenceAmount = Math.floor($songAmountConfig / 2)
+
+		if (songIndex !== -1) {
+			if (songIndex < differenceAmount) {
+				setScrollAmount(0)
+			} else {
+				setScrollAmount(songIndex - differenceAmount)
+			}
+		}
+	}
 </script>
 
-<song-list-svlt>
+<song-list-svlt on:mousewheel={e => scrollContainer(e)}>
 	<song-list>
 		{#each songsToShow as song, index (song.ID)}
 			<SongListItem {song} {index} />
@@ -52,28 +93,15 @@
 </song-list-svlt>
 
 <style>
-	/* Items are 30px min and max */
 	song-list-svlt {
 		color: #fff;
 		grid-area: song-list-svlt;
 		display: grid;
 		grid-template-columns: auto max-content;
 		z-index: 2;
-
-		/* border: 4px var(--high-color) solid; */
-		/* border-bottom: none; */
-
-		/* transition: border 300ms linear; */
 	}
 
 	song-list {
-		/* display: flex; */
-		/* flex-direction: column; */
-		/* justify-content: space-evenly; */
 		padding: 8px;
-
-		/* min-height: auto; */
-
-		/* transition: all 1000ms ease-in-out; */
 	}
 </style>

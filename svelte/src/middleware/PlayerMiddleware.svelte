@@ -5,7 +5,9 @@
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
+	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import { getAlbumIPC, getAlbumsIPC } from '../services/ipc.service'
+	import { sortByConfig, sortOrderConfig } from '../store/config.store'
 
 	import {
 		albumListStore,
@@ -42,7 +44,7 @@
 		$selectedAlbumDir = lastPlayedDir
 
 		getAlbumSongs(lastPlayedDir).then(songs => {
-			$songListStore = songs
+			$songListStore = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
 
 			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
 
