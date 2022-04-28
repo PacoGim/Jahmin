@@ -10,6 +10,7 @@ import {
 import { songToPlayUrlStore } from '../store/player.store'
 // import { playback, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
+import applyColorSchemeFn from './applyColorScheme.fn'
 import { getAlbumColors } from './getAlbumColors.fn'
 
 export async function setNewPlayback(
@@ -40,11 +41,8 @@ export async function setNewPlayback(
 		songToPlayUrlStore.set(songToPlay.SourceFile)
 	}
 
-	// playbackCursor.set([indexToPlay, playNow])
 	getAlbumColors(rootDir).then(color => {
-		document.documentElement.style.setProperty('--low-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
-		document.documentElement.style.setProperty('--base-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessBase}%)`)
-		document.documentElement.style.setProperty('--high-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessHigh}%)`)
+		applyColorSchemeFn(color)
 	})
 }
 

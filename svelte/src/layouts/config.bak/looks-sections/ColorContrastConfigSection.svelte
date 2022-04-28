@@ -1,18 +1,25 @@
 <script lang="ts">
 	import InputShiftInfo from '../../../components/InputShiftInfo.svelte'
 	import OptionSection from '../../../components/OptionSection.svelte'
+	import applyColorSchemeFn from '../../../functions/applyColorScheme.fn'
 	import { getAlbumColors } from '../../../functions/getAlbumColors.fn'
 	import { saveConfig } from '../../../services/ipc.service'
 	import notifyService from '../../../services/notify.service'
 	import { contrastRatioConfig } from '../../../store/config.store'
-	import { albumPlayingDirStore, albumPlayingIdStore, keyDown } from '../../../store/final.store'
+	import { albumPlayingDirStore, keyDown } from '../../../store/final.store'
 
 	let colorContrastRangeValue = $contrastRatioConfig
 
 	$: {
-		if ($albumPlayingDirStore) {
-			getAlbumColors($albumPlayingDirStore, colorContrastRangeValue)
-		}
+		$albumPlayingDirStore
+		colorContrastRangeValue
+		updateColor()
+	}
+
+	function updateColor() {
+		getAlbumColors($albumPlayingDirStore, colorContrastRangeValue).then(color => {
+			applyColorSchemeFn(color)
+		})
 	}
 
 	function saveContrastRatio() {
