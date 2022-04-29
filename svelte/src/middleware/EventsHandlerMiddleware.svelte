@@ -13,6 +13,7 @@
 	import {
 		albumPlayingDirStore,
 		elementMap,
+		layoutToShow,
 		playbackStore,
 		playingSongStore,
 		selectedAlbumDir,
@@ -47,6 +48,7 @@
 
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
 	function setAlbumBackInView() {
+		$layoutToShow = 'Home'
 		let playingSong = $playingSongStore
 
 		$selectedAlbumDir = $albumPlayingDirStore

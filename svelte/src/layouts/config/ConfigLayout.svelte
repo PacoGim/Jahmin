@@ -54,9 +54,17 @@
 		position: relative;
 		box-shadow: inset 0 0px 0 0 transparent;
 
-		transition: box-shadow 300ms cubic-bezier(0.47, 0, 0.745, 0.715);
+		transition-property: box-shadow background-color;
+		transition-duration: 300ms;
+		transition-timing-function: ease-in-out;
 	}
 	config-layout-svlt > options-list > option-svlt[data-selected='true'] {
-		box-shadow: inset 0 -1px 0 0 var(--color-fg-1);
+		box-shadow: inset 0 -2px 0 0 var(--color-fg-1);
+		background-color: var(--color-fg-1-low);
+	}
+
+	current-component-svlt {
+		width: 100%;
+		padding: 1rem;
 	}
 </style>
