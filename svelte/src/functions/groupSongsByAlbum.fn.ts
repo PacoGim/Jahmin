@@ -1,7 +1,8 @@
+import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 import { hash } from './hashString.fn'
 
-export default function (songs: SongType[]) {
+export default function (songs: SongType[]): Promise<AlbumType[]> {
 	return new Promise((resolve, reject) => {
 		let albums = []
 		songs.forEach(song => {

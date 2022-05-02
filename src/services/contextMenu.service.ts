@@ -55,8 +55,8 @@ function getSongListContextMenuTemplate(data: any) {
 	let template: MenuItemConstructorOptions[] = []
 
 	if (data.songs.length === 1) {
-		let album = getStorageMap().get(data.albumId)
-		let song = album?.Songs.find(x => x.ID === data.songs[0])
+		// let album = getStorageMap().get(data.albumId)
+		// let song = album?.Songs.find(x => x.ID === data.songs[0])
 
 		template.push({
 			label: `Show File`,
@@ -164,13 +164,12 @@ function getSortMenu() {
 }
 
 function getAlbumContextMenuTemplate(data: any) {
-	let album = getStorageMap().get(data.albumId)
 	let template: MenuItemConstructorOptions[] = []
 
 	template.push({
 		label: `Show Folder`,
 		click: () => {
-			shell.openPath(album?.RootDir || '')
+			shell.openPath(data.albumRootDir || '')
 		}
 	})
 

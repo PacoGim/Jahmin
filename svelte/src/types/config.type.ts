@@ -25,9 +25,9 @@ type UserOptionsType = {
 }
 
 export enum ThemeOptions {
-	Auto = 'Auto',
-	Dark = 'Dark',
-	Light = 'Light'
+	SystemBased = 'SystemBased',
+	Night = 'Night',
+	Day = 'Day'
 }
 
 type GroupType = {

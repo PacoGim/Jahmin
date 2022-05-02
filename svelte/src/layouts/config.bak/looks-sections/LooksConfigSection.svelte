@@ -18,19 +18,19 @@
 
 <OptionSection title="Theme">
 	<theme-section slot="body">
-		<theme-card data-selected={$themeConfig === 'Auto'} on:click={() => saveThemeToConfig('Auto')}>
+		<theme-card data-selected={$themeConfig === 'SystemBased'} on:click={() => saveThemeToConfig('SystemBased')}>
 			<theme-gradient class="auto" />
 			<theme-name>System Default</theme-name>
 		</theme-card>
 
-		<theme-card data-selected={$themeConfig === 'Light'} on:click={() => saveThemeToConfig('Light')}>
+		<theme-card data-selected={$themeConfig === 'Day'} on:click={() => saveThemeToConfig('Day')}>
 			<theme-gradient class="light" />
-			<theme-name>Light</theme-name>
+			<theme-name>Day</theme-name>
 		</theme-card>
 
-		<theme-card data-selected={$themeConfig === 'Dark'} on:click={() => saveThemeToConfig('Dark')}>
+		<theme-card data-selected={$themeConfig === 'Night'} on:click={() => saveThemeToConfig('Night')}>
 			<theme-gradient class="dark" />
-			<theme-name>Dark</theme-name>
+			<theme-name>Night</theme-name>
 		</theme-card>
 	</theme-section>
 </OptionSection>

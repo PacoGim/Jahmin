@@ -9,10 +9,10 @@ export function handleContextMenuEvent(e: MouseEvent) {
 	if (pathsName.includes('ALBUM')) {
 		let albumElement: HTMLElement = e.composedPath().find((path: HTMLElement) => path.tagName === 'ALBUM') as HTMLElement
 
-		let albumId = albumElement.getAttribute('id')
+		let albumRootDir = albumElement.getAttribute('rootDir')
 
 		showContextMenuIPC('AlbumContextMenu', {
-			albumId
+			albumRootDir
 		})
 	}
 
@@ -22,6 +22,9 @@ export function handleContextMenuEvent(e: MouseEvent) {
 
 		selectedAlbumId.subscribe(_ => (albumId = _))()
 		selectedSongsStore.subscribe(_ => (songs = _))()
+
+
+		console.log(albumId,songs)
 
 		showContextMenuIPC('SongListContextMenu', {
 			albumId,

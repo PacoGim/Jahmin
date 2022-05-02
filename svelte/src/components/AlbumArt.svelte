@@ -86,7 +86,7 @@
 		display: none;
 	}
 
-	body[theme='Dark'] art-svlt[data-type='unfound'] img {
+	body[theme='Night'] art-svlt[data-type='unfound'] img {
 		filter: invert(1);
 	}
 

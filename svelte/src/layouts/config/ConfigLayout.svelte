@@ -1,6 +1,8 @@
 <script lang="ts">
-	import AppearanceConfig from './appearance/AppearanceConfig.svelte'
-	import EqualizerConfig from './equalizer/EqualizerConfig.svelte'
+	import { onMount } from 'svelte'
+
+	import AppearanceConfig from './appearance/!AppearanceConfig.svelte'
+	import EqualizerConfig from './equalizer/!EqualizerConfig.svelte'
 
 	const options = [
 		{
@@ -13,19 +15,33 @@
 		}
 	]
 
-	let selectedOption = options[0].name
-	let currentComponent = options[0].component
+	let selectedOption = undefined
+	let currentComponent = undefined
 
-	function updateSelectedOption(option: any) {
-		selectedOption = option.name
-		currentComponent = option.component
+	function loadComponent(optionName: string) {
+		let option = options.find(option => option.name === optionName)
+
+		if (option.component && option.name) {
+			currentComponent = option.component
+			selectedOption = option.name
+
+			sessionStorage.setItem('selectedConfigOptionName', option.name)
+		}
 	}
+
+	onMount(() => {
+		let selectedConfigOptionName = sessionStorage.getItem('selectedConfigOptionName') || 'Appearance'
+
+		if (selectedConfigOptionName) {
+			loadComponent(selectedConfigOptionName)
+		}
+	})
 </script>
 
 <config-layout-svlt>
 	<options-list>
 		{#each options as option, index (index)}
-			<option-svlt data-selected={selectedOption === option.name} on:click={() => updateSelectedOption(option)}
+			<option-svlt data-selected={selectedOption === option.name} on:click={() => loadComponent(option.name)}
 				>{option.name}</option-svlt
 			>
 		{/each}

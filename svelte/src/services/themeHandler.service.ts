@@ -1,39 +1,39 @@
 import { themeConfig } from '../store/config.store'
 
 export function runThemeHandler() {
-	// Enables Auto theme when the app first runs.
-	enableAutoTheme(window.matchMedia('(prefers-color-scheme: light)').matches)
+	// Enables SystemBased theme when the app first runs.
+	enableSystemBasedTheme(window.matchMedia('(prefers-color-scheme: light)').matches)
 
 	// Listens to system theme change and applies proper theme.
 	window
 		.matchMedia('(prefers-color-scheme: light)')
-		.addEventListener('change', (evt: MediaQueryListEvent) => enableAutoTheme(evt.matches))
+		.addEventListener('change', (evt: MediaQueryListEvent) => enableSystemBasedTheme(evt.matches))
 
 	// Listens to changes in theme from AppearanceOption.
 	themeConfig.subscribe(themeOption => {
-		if (themeOption === 'Light') {
-			// Sets theme to light
+		if (themeOption === 'Day') {
+			// Sets theme to day
 			setHTMLThemeAtb(true)
-		} else if (themeOption === 'Auto') {
+		} else if (themeOption === 'SystemBased') {
 			// Sets theme to system default
 			setHTMLThemeAtb(window.matchMedia('(prefers-color-scheme: light)').matches)
 		} else {
-			// Sets theme to dark
+			// Sets theme to night
 			setHTMLThemeAtb(false)
 		}
 	})
 }
 
-// Sets Auto theme ONLY if enabled in the config file or selected as Option.
-function enableAutoTheme(isLightTheme: boolean) {
+// Sets SystemBased theme ONLY if enabled in the config file or selected as Option.
+function enableSystemBasedTheme(isDayTheme: boolean) {
 	themeConfig.subscribe(themeOption => {
-		if (themeOption === 'Auto') {
-			setHTMLThemeAtb(isLightTheme)
+		if (themeOption === 'SystemBased') {
+			setHTMLThemeAtb(isDayTheme)
 		}
 	})()
 }
 
 // Sets the
-function setHTMLThemeAtb(isLightTheme: boolean) {
-	document.body.setAttribute('theme', isLightTheme ? 'Light' : 'Dark')
+function setHTMLThemeAtb(isDayTheme: boolean) {
+	document.body.setAttribute('theme', isDayTheme ? 'Day' : 'Night')
 }

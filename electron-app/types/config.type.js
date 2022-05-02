@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThemeOptions = void 0;
 var ThemeOptions;
 (function (ThemeOptions) {
-    ThemeOptions["Auto"] = "Auto";
-    ThemeOptions["Dark"] = "Dark";
-    ThemeOptions["Light"] = "Light";
+    ThemeOptions["SystemBased"] = "SystemBased";
+    ThemeOptions["Night"] = "Night";
+    ThemeOptions["Day"] = "Day";
 })(ThemeOptions = exports.ThemeOptions || (exports.ThemeOptions = {}));

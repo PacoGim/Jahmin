@@ -4,7 +4,6 @@ exports.loadContextMenu = void 0;
 const electron_1 = require("electron");
 const sendWebContents_service_1 = require("./sendWebContents.service");
 const songSync_service_1 = require("./songSync.service");
-const storage_service_1 = require("./storage.service");
 function loadContextMenu(event, menuToOpen, data) {
     let template = [];
     if (menuToOpen === 'AlbumContextMenu') {
@@ -46,8 +45,8 @@ function getGroupNameContextMenuTemplate(data) {
 function getSongListContextMenuTemplate(data) {
     let template = [];
     if (data.songs.length === 1) {
-        let album = (0, storage_service_1.getStorageMap)().get(data.albumId);
-        let song = album === null || album === void 0 ? void 0 : album.Songs.find(x => x.ID === data.songs[0]);
+        // let album = getStorageMap().get(data.albumId)
+        // let song = album?.Songs.find(x => x.ID === data.songs[0])
         template.push({
             label: `Show File`,
             click: () => {
@@ -141,12 +140,11 @@ function getSortMenu() {
     return submenu;
 }
 function getAlbumContextMenuTemplate(data) {
-    let album = (0, storage_service_1.getStorageMap)().get(data.albumId);
     let template = [];
     template.push({
         label: `Show Folder`,
         click: () => {
-            electron_1.shell.openPath((album === null || album === void 0 ? void 0 : album.RootDir) || '');
+            electron_1.shell.openPath(data.albumRootDir || '');
         }
     });
     template.push({

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte'
+
 	import CheckIcon from '../icons/CheckIcon.svelte'
 
 	import DeleteIcon from '../icons/DeleteIcon.svelte'
@@ -65,6 +67,17 @@
 		rangeInputState.onConfirm(rangeInputValue)
 		isRangeInputVisible = false
 	}
+
+	onMount(() => {
+		setTimeout(() => {
+			// Prevents the container to animate when app is loading.
+			let rangeInputContainer = document.querySelector('range-input-container') as HTMLElement
+
+			if (rangeInputContainer) {
+				rangeInputContainer.setAttribute('style', 'transition: transform 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);')
+			}
+		}, 1000)
+	})
 </script>
 
 <range-input-svlt show={isRangeInputVisible}>
@@ -132,8 +145,6 @@
 		background-color: var(--color-bg-2);
 
 		box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.5);
-
-		transition: transform 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
 	range-input-input-title {

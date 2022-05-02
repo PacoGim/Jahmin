@@ -8,7 +8,7 @@ body {
 	--filter-hl: var(--theme-filter-hl);
 }
 
-body[theme='Light'] {
+body[theme='Day'] {
 	--theme-fg-1: hsl(210, 12%, 16%);
 	--theme-fg-1-low: hsl(210, 12%, 16%, 0.1);
 	--theme-bg-1: hsl(0, 0%, 100%);
@@ -18,7 +18,7 @@ body[theme='Light'] {
 		contrast(96%);
 }
 
-body[theme='Dark'] {
+body[theme='Night'] {
 	--theme-fg-1: hsl(210, 17%, 82%);
 	--theme-fg-1-low: hsla(210, 17%, 82%, 0.1);
 	--theme-bg-1: hsl(215, 18%, 13%);
