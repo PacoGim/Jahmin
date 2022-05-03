@@ -3,6 +3,7 @@
 
 	import AppearanceConfig from './appearance/!AppearanceConfig.svelte'
 	import EqualizerConfig from './equalizer/!EqualizerConfig.svelte'
+	import LibraryConfig from './library/!LibraryConfig.svelte'
 
 	const options = [
 		{
@@ -12,6 +13,10 @@
 		{
 			name: 'Equalizer',
 			component: EqualizerConfig
+		},
+		{
+			name: 'Library',
+			component: LibraryConfig
 		}
 	]
 

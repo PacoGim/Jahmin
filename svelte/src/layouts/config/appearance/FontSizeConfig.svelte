@@ -41,9 +41,11 @@
 	}
 </script>
 
-<button on:click={() => setFontSize()}
-	>Change Font Size <UpdateIcon style="height: 1rem;margin-left: 0.5rem;fill:#fff;" />
-</button>
+<font-size-config>
+	<button on:click={() => setFontSize()}
+		>Change Font Size <UpdateIcon style="height: 1rem;margin-left: 0.5rem;fill:#fff;" />
+	</button>
+</font-size-config>
 
 <style>
 </style>

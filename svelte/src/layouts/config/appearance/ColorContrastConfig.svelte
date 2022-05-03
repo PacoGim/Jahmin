@@ -35,7 +35,7 @@
 	}
 </script>
 
-<color-contrast-option>
+<color-contrast-config>
 	<current-contrast-value
 		>{colorContrastRangeValue}
 		{colorContrastRangeValue === 4.5 ? ' Suggested' : ''}</current-contrast-value
@@ -52,7 +52,7 @@
 	<InputShiftInfo />
 
 	<current-contrast-sample>Sample</current-contrast-sample>
-</color-contrast-option>
+</color-contrast-config>
 
 <style>
 	input {

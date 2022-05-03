@@ -1,5 +1,6 @@
 export type SongType = {
 	[index: string]: string | number | undefined | null
+	ID: number
 	Album?: string | null // Modifiable
 	AlbumArtist?: string | null // Modifiable
 	Artist?: string | null // Modifiable

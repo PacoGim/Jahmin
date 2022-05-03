@@ -35,7 +35,7 @@
 	})
 </script>
 
-<section-body>
+<day-night-theme-config>
 	<theme-section
 		data-theme="SystemBased"
 		data-selected={$themeConfig === 'SystemBased' ? 'true' : 'false'}
@@ -73,10 +73,10 @@
 
 		<theme-name>Night</theme-name>
 	</theme-section>
-</section-body>
+</day-night-theme-config>
 
 <style>
-	section-body {
+	day-night-theme-config {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
@@ -111,14 +111,14 @@
 	theme-section[data-selected='true'] theme-name {
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 	}
-	section-body theme-section section-icon {
+	day-night-theme-config theme-section section-icon {
 		display: grid;
 		transition-property: transform opacity;
 		transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 		transition-duration: 300ms;
 	}
 
-	:global(section-body theme-section section-icon svg) {
+	:global(day-night-theme-config theme-section section-icon svg) {
 		grid-row: 1;
 		grid-column: 1;
 	}

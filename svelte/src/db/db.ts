@@ -83,7 +83,6 @@ function bulkInsertSongs(songs: SongType[]): Promise<undefined> {
 			.bulkAdd(songs)
 			.then(() => {
 				updateVersion()
-				resolve(undefined)
 			})
 			.catch(err => {
 				console.log(err)
@@ -111,20 +110,21 @@ export function bulkUpdateSongs(songs: SongType[]) {
 	})
 }
 
-export function bulkDeleteSongs(songs: SongType[]) {
+export function bulkDeleteSongs(songsId: number[]) {
 	return new Promise((resolve, reject) => {
-		resolve(undefined)
-		/* 		db.songs
-			.bulkAdd(songs)
+		db.songs
+			.bulkDelete(songsId)
 			.then(() => {
-				resolve(undefined)
+				console.log('Deleted Songs')
+
+				updateVersion()
 			})
 			.catch(err => {
 				console.log(err)
 			})
 			.finally(() => {
 				resolve(undefined)
-			}) */
+			})
 	})
 }
 
@@ -141,13 +141,13 @@ export function getAllSongs(): Promise<SongType[]> {
 	})
 }
 
-export function getAlbumSongs(rootDir: string):Promise<SongType[]> {
+export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
 		db.songs
-		.where('SourceFile')
-		.startsWithIgnoreCase(rootDir)
-		.toArray()
-		.then(songs => {
+			.where('SourceFile')
+			.startsWithIgnoreCase(rootDir)
+			.toArray()
+			.then(songs => {
 				resolve(songs)
 			})
 			.catch(err => {

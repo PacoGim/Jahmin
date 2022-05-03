@@ -175,7 +175,7 @@ function loadIPC() {
             console.log(err);
         });
     });
-    electron_1.ipcMain.handle('remove-directory', (evt, directory, type) => {
+    electron_1.ipcMain.handle('remove-directory', (evt, directory, type, dbSongs) => {
         (0, directoryHandler_service_1.default)([directory], type, dbSongs);
     });
     electron_1.ipcMain.handle('run-song-fetch', (evt, songDb) => {

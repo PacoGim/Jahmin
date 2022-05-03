@@ -182,6 +182,7 @@ function filterSongs(audioFilesFound = [], dbSongs) {
                 data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
             }
             if (data.type === 'songsToDelete') {
+                console.log('songsToDelete', data.songs);
                 if (data.songs.length > 0) {
                     (0, sendWebContents_service_1.sendWebContents)('web-storage-bulk-delete', data.songs);
                 }

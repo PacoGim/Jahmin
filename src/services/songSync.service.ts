@@ -197,6 +197,7 @@ function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
 			}
 
 			if (data.type === 'songsToDelete') {
+				console.log('songsToDelete', data.songs)
 				if (data.songs.length > 0) {
 					sendWebContents('web-storage-bulk-delete', data.songs)
 				}

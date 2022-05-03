@@ -10,7 +10,6 @@
 		sendNewArtQueueProgressIPC,
 		saveConfig,
 		compressAlbumArtIPC,
-		sendSongSyncQueueProgressIPC,
 		sendAllSongsFromRendererIPC
 	} from '../services/ipc.service'
 	import notifyService from '../services/notify.service'

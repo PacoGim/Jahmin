@@ -213,7 +213,7 @@ export function loadIPC() {
 			})
 	})
 
-	ipcMain.handle('remove-directory', (evt, directory, type: 'remove-add' | 'remove-exclude') => {
+	ipcMain.handle('remove-directory', (evt, directory, type: 'remove-add' | 'remove-exclude', dbSongs) => {
 		directoryHandlerService([directory], type, dbSongs)
 	})
 

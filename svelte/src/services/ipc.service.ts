@@ -239,13 +239,16 @@ export function getChangesProgressIPC() {
 
 export function selectDirectoriesIPC(type: 'add' | 'exclude') {
 	getAllSongs().then(songs => {
+		console.timeEnd('select-directories')
 		ipcRenderer.invoke('select-directories', type, songs)
 	})
 	return
 }
 
 export function removeDirectoryIPC(directory: string, type: 'remove-add' | 'remove-exclude') {
-	ipcRenderer.invoke('remove-directory', directory, type)
+	getAllSongs().then(songs => {
+		ipcRenderer.invoke('remove-directory', directory, type, songs)
+	})
 	return
 }
 
