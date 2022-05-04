@@ -260,3 +260,7 @@ export function runSongFetchIPC(songDb: SongType[]) {
 export function showContextMenuIPC(menuToOpen, parameters) {
 	ipcRenderer.send('show-context-menu', menuToOpen, parameters)
 }
+
+export function updateSongIPC(song: SongType, newTags: any) {
+	ipcRenderer.invoke('update-song', song, newTags)
+}

@@ -187,5 +187,8 @@ function loadIPC() {
     electron_1.ipcMain.handle('send-all-songs-from-renderer', (evt, songDb) => {
         (0, songSync_service_1.watchFolders)(songDb);
     });
+    electron_1.ipcMain.handle('update-song', (evt, song, newTags) => {
+        (0, songSync_service_1.addToTaskQueue)(song.SourceFile, 'update', newTags);
+    });
 }
 exports.loadIPC = loadIPC;

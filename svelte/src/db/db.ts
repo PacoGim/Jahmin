@@ -2,6 +2,7 @@ import Dexie, { liveQuery, Table } from 'dexie'
 import generateId from '../functions/generateId.fn'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import { hash } from '../functions/hashString.fn'
+import { runSongUpdateQueue } from '../services/songUpdate.service'
 import { dbVersionStore } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
@@ -95,6 +96,8 @@ function bulkInsertSongs(songs: SongType[]): Promise<undefined> {
 
 export function bulkUpdateSongs(songs: SongType[]) {
 	return new Promise((resolve, reject) => {
+		runSongUpdateQueue()
+		console.log(songs)
 		resolve(undefined)
 		/* 		db.songs
 			.bulkAdd(songs)

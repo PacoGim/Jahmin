@@ -23,7 +23,7 @@ const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) =>
 	}
 })
 
-export function writeOpusTags(filePath: string, newTags: any) {
+export function writeOpusTags(filePath: string, newTags: any): Promise<any> {
 	return new Promise((resolve, reject) => {
 		ffmpegDeferredPromise = resolve
 		ffmpegDeferredPromiseId = generateId()

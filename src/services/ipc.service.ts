@@ -7,7 +7,13 @@ import { getAlbumColors } from './getAlbumColors.fn'
 import { customAlphabet } from 'nanoid'
 // import { getTotalChangesToProcess, getTotalProcessedChanged } from './folderWatcher.service'
 import { hash } from '../functions/hashString.fn'
-import { getMaxTaskQueueLength, getTaskQueueLength, sendSongSyncQueueProgress, watchFolders } from './songSync.service'
+import {
+	addToTaskQueue,
+	getMaxTaskQueueLength,
+	getTaskQueueLength,
+	sendSongSyncQueueProgress,
+	watchFolders
+} from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
@@ -227,5 +233,9 @@ export function loadIPC() {
 
 	ipcMain.handle('send-all-songs-from-renderer', (evt, songDb: SongType[]) => {
 		watchFolders(songDb)
+	})
+
+	ipcMain.handle('update-song', (evt, song: SongType, newTags) => {
+		addToTaskQueue(song.SourceFile, 'update', newTags)
 	})
 }

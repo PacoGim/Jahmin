@@ -4,26 +4,23 @@ import fs from 'fs'
 import path from 'path'
 
 import { Worker } from 'worker_threads'
-import { getWorker, killWorker } from './worker.service'
+import { getWorker } from './worker.service'
 
-import { appDataPath } from '..'
-import { getStorageMap, getStorageMapToArray } from './storage.service'
-import { getOpusTags } from '../formats/opus.format'
-import { getMp3Tags } from '../formats/mp3.format'
-import { getFlacTags } from '../formats/flac.format'
-import { getAacTags } from '../formats/aac.format'
+import { getStorageMap } from './storage.service'
 import { SongType } from '../types/song.type'
-import { ConfigType } from '../types/config.type'
+
 import { sendWebContents } from './sendWebContents.service'
 import { getConfig } from './config.service'
+import sortByOrderFn from '../functions/sortByOrder.fn'
+import getSongTagsFn from '../functions/getSongTags.fn'
+import getFileExtensionFn from '../functions/getFileExtension.fn'
+import updateSongTagsFn from '../functions/updateSongTags.fn'
 
 const TOTAL_CPUS = cpus().length
 
 let watcher: FSWatcher | undefined
 
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
-
-let storageWorker = getWorker('storage')
 
 let isQueueRunning = false
 let taskQueue: any[] = []
@@ -105,18 +102,6 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 	})
 }
 
-export function unwatchPaths(paths: string[]) {
-	if (watcher) {
-		paths.forEach(path => watcher!.unwatch(path))
-	}
-}
-
-export function watchPaths(paths: string[]) {
-	if (watcher) {
-		paths.forEach(path => watcher!.add(path))
-	}
-}
-
 // Splits excecution based on the amount of cpus.
 function processQueue() {
 	// Creates an array with the length from cpus amount and map it to true.
@@ -129,27 +114,7 @@ function processQueue() {
 	function getTask(processIndex: number) {
 		let task = taskQueue.shift()
 
-		// This part works with Storage Worker TS
-		if (task !== undefined && ['insert', 'update'].includes(task.type)) {
-			getTags(task)
-				.then(tags => {
-					sendWebContents('web-storage', {
-						type: task.type,
-						data: tags
-					})
-
-					getTask(processIndex)
-				})
-				.catch(err => {
-					getTask(processIndex)
-				})
-		} else if (task !== undefined && ['delete'].includes(task.type)) {
-			sendWebContents('web-storage', {
-				type: task.type,
-				data: task.path
-			})
-			getTask(processIndex)
-		} else {
+		if (task === undefined) {
 			// If no task left then sets its own process as false.
 			processesRunning[processIndex] = false
 
@@ -157,72 +122,68 @@ function processQueue() {
 			if (processesRunning.every(process => process === false)) {
 				isQueueRunning = false
 			}
+			return
+		}
+
+		if (task.type === 'insert') {
+			getSongTagsFn(task.path)
+				.then(tags => {
+					sendWebContents('web-storage', {
+						type: 'insert',
+						data: tags
+					})
+				})
+				.catch()
+				.finally(() => getTask(processIndex))
+		} else if (task.type === 'update') {
+			let newTags: any = undefined
+
+			if (task.data !== undefined) {
+				newTags = task.data
+			} else {
+				getSongTagsFn(task.path)
+					.then(tags => {
+						newTags = tags
+					})
+					.catch()
+			}
+
+			updateSongTagsFn(task.path, newTags)
+				.then(result => {
+					// Result can be 0 | 1 | -1
+					// -1 means error.
+					if (result === -1) {
+						sendWebContents('web-storage', {
+							type: 'update',
+							data: undefined
+						})
+					} else {
+						sendWebContents('web-storage', {
+							type: 'update',
+							data: newTags
+						})
+					}
+				})
+				.catch()
+				.finally(() => getTask(processIndex))
+		} else if (task.type === 'delete') {
+			sendWebContents('web-storage', {
+				type: 'delete',
+				data: task.path
+			})
+			getTask(processIndex)
 		}
 	}
 }
 
-function getTags(task: any): Promise<SongType | null> {
-	return new Promise((resolve, reject) => {
-		let extension = task.path.split('.').pop().toLowerCase()
-
-		if (extension === 'opus') {
-			getOpusTags(task.path)
-				.then(tags => resolve(tags))
-				.catch(err => reject(err))
-		} else if (extension === 'mp3') {
-			getMp3Tags(task.path)
-				.then(tags => resolve(tags))
-				.catch(err => reject(err))
-		} else if (extension === 'flac') {
-			getFlacTags(task.path)
-				.then(tags => resolve(tags))
-				.catch(err => reject(err))
-		} else if (extension === 'm4a') {
-			getAacTags(task.path)
-				.then(tags => resolve(tags))
-				.catch(err => reject(err))
-		} else {
-			resolve(null)
-		}
+export function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update', data: any = undefined) {
+	taskQueue.push({
+		type,
+		path,
+		data
 	})
-}
 
-function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
-	return new Promise((resolve, reject) => {
-		let worker = getWorker('songFilter') as Worker
-
-		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
-			if (data.type === 'songsToAdd') {
-				data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
-			}
-
-			if (data.type === 'songsToDelete') {
-				console.log('songsToDelete', data.songs)
-				if (data.songs.length > 0) {
-					sendWebContents('web-storage-bulk-delete', data.songs)
-				}
-			}
-		})
-
-		worker.postMessage({
-			dbSongs,
-			userSongs: audioFilesFound
-		})
-	})
-}
-
-function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update' | 'deleteFolder') {
-	if (type === 'delete') {
-		taskQueue.unshift({
-			path: path,
-			type: type
-		})
-	} else {
-		taskQueue.push({
-			type,
-			path
-		})
-	}
+	taskQueue = sortByOrderFn(taskQueue, 'type', ['delete', 'update', 'insert'])
 
 	if (taskQueue.length > maxTaskQueueLength) {
 		maxTaskQueueLength = taskQueue.length
@@ -234,6 +195,8 @@ function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update' | 'de
 		processQueue()
 	}
 }
+
+function updateSong() {}
 
 export function sendSongSyncQueueProgress() {
 	if (taskQueue.length === 0) {
@@ -249,6 +212,41 @@ export function sendSongSyncQueueProgress() {
 		setTimeout(() => {
 			sendSongSyncQueueProgress()
 		}, 1000)
+	}
+}
+
+function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
+	return new Promise((resolve, reject) => {
+		let worker = getWorker('songFilter') as Worker
+
+		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
+			if (data.type === 'songsToAdd') {
+				data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
+			}
+
+			if (data.type === 'songsToDelete') {
+				if (data.songs.length > 0) {
+					sendWebContents('web-storage-bulk-delete', data.songs)
+				}
+			}
+		})
+
+		worker.postMessage({
+			dbSongs,
+			userSongs: audioFilesFound
+		})
+	})
+}
+
+export function unwatchPaths(paths: string[]) {
+	if (watcher) {
+		paths.forEach(path => watcher!.unwatch(path))
+	}
+}
+
+export function watchPaths(paths: string[]) {
+	if (watcher) {
+		paths.forEach(path => watcher!.add(path))
 	}
 }
 
@@ -306,7 +304,7 @@ export function reloadAlbumData(albumId: string) {
 
 		// If song found in db and local song modified time is bigger than db song.
 		if (dbSong && fs.statSync(dbSong?.SourceFile).mtimeMs > dbSong?.LastModified!) {
-			getTags({ path: dbSong.SourceFile })
+			getSongTagsFn(dbSong.SourceFile)
 				.then(tags => {
 					sendWebContents('web-storage', {
 						type: 'update',

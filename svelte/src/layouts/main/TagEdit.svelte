@@ -10,6 +10,7 @@
 	import generateId from '../../functions/generateId.fn'
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
+	import { addSongToUpdateToQueue } from '../../services/songUpdate.service'
 
 	let songsToEdit: SongType[] = []
 	let groupedTags: SongType = {}
@@ -128,10 +129,6 @@
 		})
 	}
 
-	function sendNewTags() {
-		console.log(newTags, songsToEdit)
-	}
-
 	function undoAllTags() {
 		for (let tag in bindingTags) {
 			undoTagModification(tag)
@@ -240,7 +237,7 @@
 		<button
 			class="info"
 			on:click={() => {
-				sendNewTags()
+				addSongToUpdateToQueue(newTags, songsToEdit)
 			}}
 			disabled={isEmptyObject(newTags)}
 		>

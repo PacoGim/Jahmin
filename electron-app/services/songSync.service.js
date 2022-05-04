@@ -12,23 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.sendSongSyncQueueProgress = exports.watchPaths = exports.unwatchPaths = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
+exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const worker_service_1 = require("./worker.service");
 const storage_service_1 = require("./storage.service");
-const opus_format_1 = require("../formats/opus.format");
-const mp3_format_1 = require("../formats/mp3.format");
-const flac_format_1 = require("../formats/flac.format");
-const aac_format_1 = require("../formats/aac.format");
 const sendWebContents_service_1 = require("./sendWebContents.service");
 const config_service_1 = require("./config.service");
+const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"));
+const getSongTags_fn_1 = __importDefault(require("../functions/getSongTags.fn"));
+const updateSongTags_fn_1 = __importDefault(require("../functions/updateSongTags.fn"));
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
-let storageWorker = (0, worker_service_1.getWorker)('storage');
 let isQueueRunning = false;
 let taskQueue = [];
 exports.maxTaskQueueLength = 0;
@@ -94,18 +92,6 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
     });
 }
 exports.startChokidarWatch = startChokidarWatch;
-function unwatchPaths(paths) {
-    if (watcher) {
-        paths.forEach(path => watcher.unwatch(path));
-    }
-}
-exports.unwatchPaths = unwatchPaths;
-function watchPaths(paths) {
-    if (watcher) {
-        paths.forEach(path => watcher.add(path));
-    }
-}
-exports.watchPaths = watchPaths;
 // Splits excecution based on the amount of cpus.
 function processQueue() {
     // Creates an array with the length from cpus amount and map it to true.
@@ -115,98 +101,74 @@ function processQueue() {
     // Shifts a task from array and gets the tags.
     function getTask(processIndex) {
         let task = taskQueue.shift();
-        // This part works with Storage Worker TS
-        if (task !== undefined && ['insert', 'update'].includes(task.type)) {
-            getTags(task)
-                .then(tags => {
-                (0, sendWebContents_service_1.sendWebContents)('web-storage', {
-                    type: task.type,
-                    data: tags
-                });
-                getTask(processIndex);
-            })
-                .catch(err => {
-                getTask(processIndex);
-            });
-        }
-        else if (task !== undefined && ['delete'].includes(task.type)) {
-            (0, sendWebContents_service_1.sendWebContents)('web-storage', {
-                type: task.type,
-                data: task.path
-            });
-            getTask(processIndex);
-        }
-        else {
+        if (task === undefined) {
             // If no task left then sets its own process as false.
             processesRunning[processIndex] = false;
             // And if the other process is also set to false (so both of them are done), sets isQueueRuning to false so the queue can eventually run again.
             if (processesRunning.every(process => process === false)) {
                 isQueueRunning = false;
             }
+            return;
         }
-    }
-}
-function getTags(task) {
-    return new Promise((resolve, reject) => {
-        let extension = task.path.split('.').pop().toLowerCase();
-        if (extension === 'opus') {
-            (0, opus_format_1.getOpusTags)(task.path)
-                .then(tags => resolve(tags))
-                .catch(err => reject(err));
+        if (task.type === 'insert') {
+            (0, getSongTags_fn_1.default)(task.path)
+                .then(tags => {
+                (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                    type: 'insert',
+                    data: tags
+                });
+            })
+                .catch()
+                .finally(() => getTask(processIndex));
         }
-        else if (extension === 'mp3') {
-            (0, mp3_format_1.getMp3Tags)(task.path)
-                .then(tags => resolve(tags))
-                .catch(err => reject(err));
-        }
-        else if (extension === 'flac') {
-            (0, flac_format_1.getFlacTags)(task.path)
-                .then(tags => resolve(tags))
-                .catch(err => reject(err));
-        }
-        else if (extension === 'm4a') {
-            (0, aac_format_1.getAacTags)(task.path)
-                .then(tags => resolve(tags))
-                .catch(err => reject(err));
-        }
-        else {
-            resolve(null);
-        }
-    });
-}
-function filterSongs(audioFilesFound = [], dbSongs) {
-    return new Promise((resolve, reject) => {
-        let worker = (0, worker_service_1.getWorker)('songFilter');
-        worker.on('message', (data) => {
-            if (data.type === 'songsToAdd') {
-                data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
+        else if (task.type === 'update') {
+            let newTags = undefined;
+            if (task.data !== undefined) {
+                newTags = task.data;
             }
-            if (data.type === 'songsToDelete') {
-                console.log('songsToDelete', data.songs);
-                if (data.songs.length > 0) {
-                    (0, sendWebContents_service_1.sendWebContents)('web-storage-bulk-delete', data.songs);
+            else {
+                (0, getSongTags_fn_1.default)(task.path)
+                    .then(tags => {
+                    newTags = tags;
+                })
+                    .catch();
+            }
+            (0, updateSongTags_fn_1.default)(task.path, newTags)
+                .then(result => {
+                // Result can be 0 | 1 | -1
+                // -1 means error.
+                if (result === -1) {
+                    (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                        type: 'update',
+                        data: undefined
+                    });
                 }
-            }
-        });
-        worker.postMessage({
-            dbSongs,
-            userSongs: audioFilesFound
-        });
-    });
+                else {
+                    (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                        type: 'update',
+                        data: newTags
+                    });
+                }
+            })
+                .catch()
+                .finally(() => getTask(processIndex));
+        }
+        else if (task.type === 'delete') {
+            (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                type: 'delete',
+                data: task.path
+            });
+            getTask(processIndex);
+        }
+    }
 }
-function addToTaskQueue(path, type) {
-    if (type === 'delete') {
-        taskQueue.unshift({
-            path: path,
-            type: type
-        });
-    }
-    else {
-        taskQueue.push({
-            type,
-            path
-        });
-    }
+function addToTaskQueue(path, type, data = undefined) {
+    taskQueue.push({
+        type,
+        path,
+        data
+    });
+    taskQueue = (0, sortByOrder_fn_1.default)(taskQueue, 'type', ['delete', 'update', 'insert']);
     if (taskQueue.length > exports.maxTaskQueueLength) {
         exports.maxTaskQueueLength = taskQueue.length;
     }
@@ -216,6 +178,8 @@ function addToTaskQueue(path, type) {
         processQueue();
     }
 }
+exports.addToTaskQueue = addToTaskQueue;
+function updateSong() { }
 function sendSongSyncQueueProgress() {
     if (taskQueue.length === 0) {
         exports.maxTaskQueueLength = 0;
@@ -231,6 +195,37 @@ function sendSongSyncQueueProgress() {
     }
 }
 exports.sendSongSyncQueueProgress = sendSongSyncQueueProgress;
+function filterSongs(audioFilesFound = [], dbSongs) {
+    return new Promise((resolve, reject) => {
+        let worker = (0, worker_service_1.getWorker)('songFilter');
+        worker.on('message', (data) => {
+            if (data.type === 'songsToAdd') {
+                data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
+            }
+            if (data.type === 'songsToDelete') {
+                if (data.songs.length > 0) {
+                    (0, sendWebContents_service_1.sendWebContents)('web-storage-bulk-delete', data.songs);
+                }
+            }
+        });
+        worker.postMessage({
+            dbSongs,
+            userSongs: audioFilesFound
+        });
+    });
+}
+function unwatchPaths(paths) {
+    if (watcher) {
+        paths.forEach(path => watcher.unwatch(path));
+    }
+}
+exports.unwatchPaths = unwatchPaths;
+function watchPaths(paths) {
+    if (watcher) {
+        paths.forEach(path => watcher.add(path));
+    }
+}
+exports.watchPaths = watchPaths;
 function getAllFilesInFoldersDeep(rootDirectory) {
     let allFiles = [];
     rootDirectory.forEach(rootDirectory => {
@@ -277,7 +272,7 @@ function reloadAlbumData(albumId) {
         let dbSong = album === null || album === void 0 ? void 0 : album.Songs.find(song => song.SourceFile === songPath);
         // If song found in db and local song modified time is bigger than db song.
         if (dbSong && fs_1.default.statSync(dbSong === null || dbSong === void 0 ? void 0 : dbSong.SourceFile).mtimeMs > (dbSong === null || dbSong === void 0 ? void 0 : dbSong.LastModified)) {
-            getTags({ path: dbSong.SourceFile })
+            (0, getSongTags_fn_1.default)(dbSong.SourceFile)
                 .then(tags => {
                 (0, sendWebContents_service_1.sendWebContents)('web-storage', {
                     type: 'update',

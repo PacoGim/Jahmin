@@ -15,7 +15,7 @@ let nodeId3Worker: any = getWorker('nodeID3')?.on('message', (response: any) => 
 	tagWriteDeferredPromise(response)
 })
 
-export function writeMp3Tags(filePath: string, newTags: any) {
+export function writeMp3Tags(filePath: string, newTags: any): Promise<any> {
 	return new Promise((resolve, reject) => {
 		newTags = normalizeNewTags(newTags)
 

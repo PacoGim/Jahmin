@@ -14,7 +14,7 @@ let exifToolWriteWorker: any = getWorker('exifToolWrite')?.on('message', (respon
 	tagWriteDeferredPromise(response)
 })
 
-export function writeAacTags(filePath: string, newTags: any) {
+export function writeAacTags(filePath: string, newTags: any): Promise<any> {
 	return new Promise((resolve, reject) => {
 		newTags = normalizeNewTags(newTags)
 
