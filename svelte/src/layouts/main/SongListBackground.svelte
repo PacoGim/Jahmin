@@ -5,7 +5,9 @@
 	import { albumArtMapStore, selectedAlbumDir } from '../../store/final.store'
 
 	$: {
-		if ($selectedAlbumDir !== undefined) setArt()
+		if ($selectedAlbumDir !== undefined) {
+			setArt()
+		}
 	}
 
 	let setArtRetryCounter = 0
@@ -82,10 +84,6 @@
 			videoElement.style.opacity = '0'
 		}
 	}
-
-	onMount(() => {
-		setArt()
-	})
 </script>
 
 <song-list-background-svlt>

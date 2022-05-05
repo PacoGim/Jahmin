@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { getAlbumSongs } from '../db/db'
+	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 	// import { getAlbumSongs } from '../db/db'
 	import { getAlbumColors } from '../functions/getAlbumColors.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
@@ -11,6 +12,7 @@
 
 	import {
 		albumListStore,
+		dbSongsStore,
 		dbVersionStore,
 		selectedAlbumDir,
 		selectedAlbumId,
@@ -31,6 +33,18 @@
 		}
 	}
 
+	$: {
+		if ($dbVersionStore !== undefined) {
+			updateSongList()
+		}
+	}
+
+	function updateSongList() {
+		getAlbumSongs($selectedAlbumDir).then(songs => {
+			$songListStore = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
+		})
+	}
+
 	function getAlbums(groupBy: string, groupByValue: string) {
 		getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
 	}
@@ -39,11 +53,17 @@
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 		let lastPlayedDir = localStorage.getItem('LastPlayedDir')
 
-		getAlbumColors(lastPlayedDir)
-
-		$selectedAlbumDir = lastPlayedDir
-
 		getAlbumSongs(lastPlayedDir).then(songs => {
+			if (songs.length === 0) {
+				$selectedAlbumDir = undefined
+				getAlbumColors(undefined).then(color => {
+					applyColorSchemeFn(color)
+				})
+				return
+			} else {
+				$selectedAlbumDir = lastPlayedDir
+			}
+
 			$songListStore = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
 
 			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)

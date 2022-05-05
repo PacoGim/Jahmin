@@ -19,20 +19,15 @@ export async function setNewPlayback(
 	songIdToPlay: number | undefined,
 	playNow: boolean
 ) {
-	// let indexToPlay = playbackSongs.findIndex(song => song.ID === songIdToPlay)
 	let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0]
 
 	if (songToPlay === undefined) {
+
 		return
 	}
 
 	playingSongStore.set(songToPlay)
 	setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration)
-	// if (indexToPlay === -1) {
-	// 	indexToPlay = 0
-	// }
-
-	// let songToPlay= playbackSongs[songIdToPlay]
 
 	albumPlayingDirStore.set(rootDir)
 	playbackStore.set(playbackSongs)

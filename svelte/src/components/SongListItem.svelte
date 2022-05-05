@@ -13,7 +13,7 @@
 	} from '../store/final.store'
 
 	import Star from './Star.svelte'
-	import { editTagsIPC } from '../services/ipc.service'
+	import { editTagsIPC, updateSongsIPC } from '../services/ipc.service'
 	import { songListTagsConfig } from '../store/config.store'
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'
@@ -62,9 +62,7 @@
 	}
 
 	function setStar(starChangeEvent) {
-		editTagsIPC([song.SourceFile], {
-			Rating: starChangeEvent.detail.starRating
-		})
+		updateSongsIPC([song], { Rating: starChangeEvent.detail.rating })
 	}
 </script>
 
@@ -111,8 +109,8 @@
 		grid-template-rows: auto;
 
 		/* margin: 0.25rem 0; */
-		border-bottom: .25rem transparent solid;
-		border-top: .25rem transparent solid;
+		border-bottom: 0.25rem transparent solid;
+		border-top: 0.25rem transparent solid;
 		background-clip: padding-box;
 		padding: 0.25rem 0.5rem;
 		user-select: none;

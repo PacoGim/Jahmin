@@ -24,6 +24,7 @@ const config_service_1 = require("./config.service");
 const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"));
 const getSongTags_fn_1 = __importDefault(require("../functions/getSongTags.fn"));
 const updateSongTags_fn_1 = __importDefault(require("../functions/updateSongTags.fn"));
+const hashString_fn_1 = require("../functions/hashString.fn");
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let watcher;
 const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
@@ -100,6 +101,11 @@ function processQueue() {
     processesRunning.forEach((process, processIndex) => getTask(processIndex));
     // Shifts a task from array and gets the tags.
     function getTask(processIndex) {
+        taskQueue = removeDuplicateObjectsFromArray(taskQueue);
+        taskQueue = (0, sortByOrder_fn_1.default)(taskQueue, 'type', ['delete', 'update', 'insert']);
+        if (taskQueue.length > exports.maxTaskQueueLength) {
+            exports.maxTaskQueueLength = taskQueue.length;
+        }
         let task = taskQueue.shift();
         if (task === undefined) {
             // If no task left then sets its own process as false.
@@ -146,7 +152,10 @@ function processQueue() {
                 else {
                     (0, sendWebContents_service_1.sendWebContents)('web-storage', {
                         type: 'update',
-                        data: newTags
+                        data: {
+                            id: (0, hashString_fn_1.hash)(task.path, 'number'),
+                            newTags
+                        }
                     });
                 }
             })
@@ -163,15 +172,12 @@ function processQueue() {
     }
 }
 function addToTaskQueue(path, type, data = undefined) {
-    taskQueue.push({
+    let newTask = {
         type,
         path,
         data
-    });
-    taskQueue = (0, sortByOrder_fn_1.default)(taskQueue, 'type', ['delete', 'update', 'insert']);
-    if (taskQueue.length > exports.maxTaskQueueLength) {
-        exports.maxTaskQueueLength = taskQueue.length;
-    }
+    };
+    taskQueue.push(newTask);
     if (isQueueRunning === false) {
         isQueueRunning = true;
         sendSongSyncQueueProgress();
@@ -179,7 +185,9 @@ function addToTaskQueue(path, type, data = undefined) {
     }
 }
 exports.addToTaskQueue = addToTaskQueue;
-function updateSong() { }
+function removeDuplicateObjectsFromArray(array) {
+    return [...new Map(array.map(v => [JSON.stringify(v), v])).values()];
+}
 function sendSongSyncQueueProgress() {
     if (taskQueue.length === 0) {
         exports.maxTaskQueueLength = 0;

@@ -18,7 +18,7 @@
 	$: if ($gridGapConfig !== undefined) document.documentElement.style.setProperty('--grid-gap', `${$gridGapConfig}px`)
 
 	$: {
-		if ($dbSongsStore && $dbSongsStore.length > 0 && $groupByValuesConfig && $groupByConfig) {
+		if ($dbSongsStore && $groupByValuesConfig && $groupByConfig) {
 			updateArtGridAlbums()
 		}
 	}

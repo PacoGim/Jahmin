@@ -10,7 +10,7 @@
 	import generateId from '../../functions/generateId.fn'
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
-	import { addSongToUpdateToQueue } from '../../services/songUpdate.service'
+	import { updateSongsIPC } from '../../services/ipc.service'
 
 	let songsToEdit: SongType[] = []
 	let groupedTags: SongType = {}
@@ -237,7 +237,7 @@
 		<button
 			class="info"
 			on:click={() => {
-				addSongToUpdateToQueue(newTags, songsToEdit)
+				updateSongsIPC(songsToEdit, newTags)
 			}}
 			disabled={isEmptyObject(newTags)}
 		>

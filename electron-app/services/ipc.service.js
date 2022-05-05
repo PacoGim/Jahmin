@@ -184,11 +184,13 @@ function loadIPC() {
     electron_1.ipcMain.handle('app-ready', (evt, songDb) => {
         (0, appReady_service_1.default)();
     });
-    electron_1.ipcMain.handle('send-all-songs-from-renderer', (evt, songDb) => {
-        (0, songSync_service_1.watchFolders)(songDb);
+    electron_1.ipcMain.handle('send-all-songs-from-renderer', (evt, songsDb) => {
+        (0, songSync_service_1.watchFolders)(songsDb);
     });
-    electron_1.ipcMain.handle('update-song', (evt, song, newTags) => {
-        (0, songSync_service_1.addToTaskQueue)(song.SourceFile, 'update', newTags);
+    electron_1.ipcMain.handle('update-songs', (evt, songs, newTags) => {
+        songs.forEach(song => {
+            (0, songSync_service_1.addToTaskQueue)(song.SourceFile, 'update', newTags);
+        });
     });
 }
 exports.loadIPC = loadIPC;

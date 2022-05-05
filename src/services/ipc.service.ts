@@ -231,11 +231,13 @@ export function loadIPC() {
 		appReadyService()
 	})
 
-	ipcMain.handle('send-all-songs-from-renderer', (evt, songDb: SongType[]) => {
-		watchFolders(songDb)
+	ipcMain.handle('send-all-songs-from-renderer', (evt, songsDb: SongType[]) => {
+		watchFolders(songsDb)
 	})
 
-	ipcMain.handle('update-song', (evt, song: SongType, newTags) => {
-		addToTaskQueue(song.SourceFile, 'update', newTags)
+	ipcMain.handle('update-songs', (evt, songs: SongType[], newTags) => {
+		songs.forEach(song => {
+			addToTaskQueue(song.SourceFile, 'update', newTags)
+		})
 	})
 }

@@ -15,6 +15,7 @@ import sortByOrderFn from '../functions/sortByOrder.fn'
 import getSongTagsFn from '../functions/getSongTags.fn'
 import getFileExtensionFn from '../functions/getFileExtension.fn'
 import updateSongTagsFn from '../functions/updateSongTags.fn'
+import { hash } from '../functions/hashString.fn'
 
 const TOTAL_CPUS = cpus().length
 
@@ -112,6 +113,14 @@ function processQueue() {
 
 	// Shifts a task from array and gets the tags.
 	function getTask(processIndex: number) {
+		taskQueue = removeDuplicateObjectsFromArray(taskQueue)
+
+		taskQueue = sortByOrderFn(taskQueue, 'type', ['delete', 'update', 'insert'])
+
+		if (taskQueue.length > maxTaskQueueLength) {
+			maxTaskQueueLength = taskQueue.length
+		}
+
 		let task = taskQueue.shift()
 
 		if (task === undefined) {
@@ -160,7 +169,10 @@ function processQueue() {
 					} else {
 						sendWebContents('web-storage', {
 							type: 'update',
-							data: newTags
+							data: {
+								id: hash(task.path, 'number'),
+								newTags
+							}
 						})
 					}
 				})
@@ -177,17 +189,13 @@ function processQueue() {
 }
 
 export function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update', data: any = undefined) {
-	taskQueue.push({
+	let newTask = {
 		type,
 		path,
 		data
-	})
-
-	taskQueue = sortByOrderFn(taskQueue, 'type', ['delete', 'update', 'insert'])
-
-	if (taskQueue.length > maxTaskQueueLength) {
-		maxTaskQueueLength = taskQueue.length
 	}
+
+	taskQueue.push(newTask)
 
 	if (isQueueRunning === false) {
 		isQueueRunning = true
@@ -196,7 +204,9 @@ export function addToTaskQueue(path: string, type: 'insert' | 'delete' | 'update
 	}
 }
 
-function updateSong() {}
+function removeDuplicateObjectsFromArray(array: any[]) {
+	return [...new Map(array.map(v => [JSON.stringify(v), v])).values()]
+}
 
 export function sendSongSyncQueueProgress() {
 	if (taskQueue.length === 0) {

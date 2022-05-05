@@ -2,8 +2,7 @@ import Dexie, { liveQuery, Table } from 'dexie'
 import generateId from '../functions/generateId.fn'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import { hash } from '../functions/hashString.fn'
-import { runSongUpdateQueue } from '../services/songUpdate.service'
-import { dbVersionStore } from '../store/final.store'
+import { dbSongsStore, dbVersionStore } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
@@ -94,22 +93,24 @@ function bulkInsertSongs(songs: SongType[]): Promise<undefined> {
 	})
 }
 
-export function bulkUpdateSongs(songs: SongType[]) {
+export function bulkUpdateSongs(data: { id: string; newTags: SongType }[]) {
 	return new Promise((resolve, reject) => {
-		runSongUpdateQueue()
-		console.log(songs)
-		resolve(undefined)
-		/* 		db.songs
-			.bulkAdd(songs)
+		let keys = data.map(d => d.id)
+		let newTags = data[0].newTags
+
+		db.songs
+			.where('ID')
+			.anyOf(keys)
+			.modify(newTags)
 			.then(() => {
-				resolve(undefined)
+				updateVersion()
 			})
 			.catch(err => {
 				console.log(err)
 			})
 			.finally(() => {
 				resolve(undefined)
-			}) */
+			})
 	})
 }
 
@@ -118,9 +119,14 @@ export function bulkDeleteSongs(songsId: number[]) {
 		db.songs
 			.bulkDelete(songsId)
 			.then(() => {
-				console.log('Deleted Songs')
-
 				updateVersion()
+
+				db.songs.count().then(count => {
+					if (count === 0) {
+						dbSongsStore.set([])
+						updateVersion()
+					}
+				})
 			})
 			.catch(err => {
 				console.log(err)
@@ -133,29 +139,25 @@ export function bulkDeleteSongs(songsId: number[]) {
 
 export function getAllSongs(): Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
-		db.songs
-			.toArray()
-			.then(songs => {
+		dbSongsStore.subscribe(songs => {
+			if (songs.length === 0) {
+				db.songs.toArray().then(songs => {
+					resolve(songs)
+				})
+			} else {
 				resolve(songs)
-			})
-			.catch(err => {
-				console.log(err)
-			})
+			}
+		})()
 	})
 }
 
 export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
-		db.songs
-			.where('SourceFile')
-			.startsWithIgnoreCase(rootDir)
-			.toArray()
-			.then(songs => {
-				resolve(songs)
-			})
-			.catch(err => {
-				console.log(err)
-			})
+		getAllSongs().then(songs => {
+			let songsToResolve = songs.filter(song => getDirectoryFn(song.SourceFile) === rootDir)
+
+			resolve(songsToResolve)
+		})
 	})
 }
 
@@ -178,7 +180,7 @@ function updateStoreVersion() {
 
 		setTimeout(() => {
 			updateStoreVersion()
-		}, 5000)
+		}, 500)
 	} else {
 		isVersionUpdating = false
 	}

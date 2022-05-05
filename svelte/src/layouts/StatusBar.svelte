@@ -2,9 +2,10 @@
 	import { onMount } from 'svelte'
 	import generateId from '../functions/generateId.fn'
 	import ImageIcon from '../icons/ImageIcon.svelte'
+	import MusicNoteIcon from '../icons/MusicNoteIcon.svelte'
 	import tippyService from '../services/tippy.service'
 
-	import { artCompressQueueProgress, playingSongStore, songSyncQueueProgress } from '../store/final.store'
+	import { artCompressQueueProgress, dbSongsStore, playingSongStore, songSyncQueueProgress } from '../store/final.store'
 	import type { SongType } from '../types/song.type'
 	import AlbumInfo from './main/AlbumInfo.svelte'
 
@@ -16,6 +17,8 @@
 
 	let tippyId = generateId()
 
+	let currentSongSyncProgress = 0
+
 	$: {
 		if ($playingSongStore) {
 			currentSong = $playingSongStore
@@ -25,6 +28,20 @@
 		<bold>${currentSong.Artist || ''}</bold>`
 			})
 		}
+	}
+
+	$: calculateProgress($songSyncQueueProgress)
+
+	function calculateProgress(songSyncQueueProgress) {
+		let progress = 100 - Math.ceil((100 / songSyncQueueProgress.maxLength) * songSyncQueueProgress.currentLength)
+
+		if (Math.abs(progress) === Infinity || isNaN(progress)) {
+			currentSongSyncProgress = 100
+		} else {
+			currentSongSyncProgress = progress
+		}
+
+		document.documentElement.style.setProperty('--song-sync-queue-progress', progress + 'px')
 	}
 
 	function fixNumber(num: number) {
@@ -44,9 +61,11 @@
 			<span>{$artCompressQueueProgress.maxLength}</span>
 		</art-compress-queue>
 		<song-sync-queue>
-			<ImageIcon style="fill:var(--low-color);height: 20px;width: 20px;margin-right: .5rem;" />
-			<span>{$songSyncQueueProgress.currentLength}</span>/
-			<span>{$songSyncQueueProgress.maxLength}</span>
+			<MusicNoteIcon style="fill:var(--low-color);height: 20px;width: 20px;margin-right: .5rem;" />
+			<span>
+				{currentSongSyncProgress}%
+			</span>
+			<song-sync-queue-progress data-progress={currentSongSyncProgress} />
 		</song-sync-queue>
 		<!-- Image Process -->
 		<!-- Song Add Process -->
@@ -126,6 +145,24 @@
 		width: max-content;
 
 		padding: 0.5rem;
+	}
+	song-sync-queue song-sync-queue-progress {
+		margin-left: 0.5rem;
+		display: block;
+		height: 8px;
+		width: 100px;
+		border-radius: 50px;
+		background-color: var(--base-color);
+		border: 1px solid var(--low-color);
+	}
+
+	song-sync-queue song-sync-queue-progress::before {
+		content: '';
+		display: block;
+		height: 100%;
+		width: var(--song-sync-queue-progress);
+		border-radius: 50px;
+		background-color: var(--low-color);
 	}
 
 	song-info {
