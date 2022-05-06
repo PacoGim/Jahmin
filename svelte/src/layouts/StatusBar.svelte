@@ -132,6 +132,10 @@
 		width: max-content;
 
 		padding: 0.5rem;
+
+		transition-property: color, background-color;
+		transition-duration: 300ms;
+		transition-timing-function: linear;
 	}
 
 	song-sync-queue {
@@ -145,6 +149,10 @@
 		width: max-content;
 
 		padding: 0.5rem;
+
+		transition-property: color, background-color;
+		transition-duration: 300ms;
+		transition-timing-function: linear;
 	}
 	song-sync-queue song-sync-queue-progress {
 		margin-left: 0.5rem;
@@ -154,6 +162,10 @@
 		border-radius: 50px;
 		background-color: var(--base-color);
 		border: 1px solid var(--low-color);
+
+		transition-property: background-color, border;
+		transition-timing-function: linear;
+		transition-duration: 300ms;
 	}
 
 	song-sync-queue song-sync-queue-progress::before {
@@ -163,6 +175,8 @@
 		width: var(--song-sync-queue-progress);
 		border-radius: 50px;
 		background-color: var(--low-color);
+
+		transition: background-color 300ms linear;
 	}
 
 	song-info {

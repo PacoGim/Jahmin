@@ -67,8 +67,8 @@
 </script>
 
 <song-list-item
-	id={song.ID}
-	{index}
+	data-id={song.ID}
+	data-index={index}
 	style="grid-template-columns:{isDisabled === true || isSongPlaying === true ? 'max-content' : ''}{gridStyle};"
 	class="
 	{isDisabled === true ? 'disabled' : ''}

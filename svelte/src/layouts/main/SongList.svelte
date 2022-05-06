@@ -1,9 +1,10 @@
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
+	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 
 	import { songAmountConfig } from '../../store/config.store'
 
-	import { selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../store/final.store'
+	import { selectedAlbumDir, selectedSongsStore, songListStore, triggerScrollToSongEvent } from '../../store/final.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
 	let songsToShow = []
@@ -83,7 +84,7 @@
 	}
 </script>
 
-<song-list-svlt on:mousewheel={e => scrollContainer(e)}>
+<song-list-svlt on:mousewheel={e => scrollContainer(e)} on:click={e => songListClickEventHandlerService(e)}>
 	<song-list>
 		{#each songsToShow as song, index (song.ID)}
 			<SongListItem {song} {index} />
