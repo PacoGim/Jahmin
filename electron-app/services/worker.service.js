@@ -7,9 +7,11 @@ exports.killWorker = exports.getWorker = exports.killAllWorkers = exports.initWo
 const worker_threads_1 = require("worker_threads");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const WORKER_FOLDER_PATH = path_1.default.join(path_1.default.resolve(), 'electron-app/workers');
+// const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
+const WORKER_FOLDER_PATH = path_1.default.join(__dirname, '../workers');
 let workers = [];
 function initWorkers() {
+    console.log(WORKER_FOLDER_PATH);
     let workerFiles = fs_1.default.readdirSync(WORKER_FOLDER_PATH);
     workerFiles.forEach((workerFile) => {
         let worker = new worker_threads_1.Worker(getWorkerPath(workerFile));

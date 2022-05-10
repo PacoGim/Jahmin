@@ -103,13 +103,13 @@ function getDefaultConfigFile() {
         groupOnlyByFolder: false,
         userOptions: {
             songAmount: 8,
-            theme: config_type_1.ThemeOptions.Auto,
+            theme: config_type_1.ThemeOptions.SystemBased,
             artSize: 128,
             gridGap: 16,
             contrastRatio: 4.5,
             fontSize: 16,
             sortBy: 'Track',
-            sortOrder: 'desc'
+            sortOrder: 'asc'
         },
         songListTags: [
             {

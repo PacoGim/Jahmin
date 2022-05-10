@@ -2,10 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadContextMenu = void 0;
 const electron_1 = require("electron");
-const sendWebContents_service_1 = require("./sendWebContents.service");
-const songSync_service_1 = require("./songSync.service");
+const sendWebContents_service_1 = require("../services/sendWebContents.service");
+const songSync_service_1 = require("../services/songSync.service");
 function loadContextMenu(event, menuToOpen, data) {
-    console.log(event, menuToOpen, data);
     let template = [];
     if (menuToOpen === 'AlbumContextMenu') {
         template = getAlbumContextMenuTemplate(data);

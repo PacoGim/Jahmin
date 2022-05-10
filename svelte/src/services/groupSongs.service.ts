@@ -206,6 +206,11 @@ function filterSongsByValue(songs: SongType[], groups: string[], groupValues: st
 }
 
 function normalizeGroupNames(groups: string[]) {
+
+	if (!groups) {
+		return groups
+	}
+
 	groups = groups.map(group => {
 		switch (group) {
 			case 'Album Artist':

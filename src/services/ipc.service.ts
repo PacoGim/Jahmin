@@ -18,7 +18,7 @@ import { getPeaks, savePeaks } from './peaks'
 import { getTagEditProgress, tagEdit } from './tagEdit.service'
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 import { getFuzzyList, getNewPromiseDbVersion, getStorageMap, getStorageMapToArray } from './storage.service'
-import { loadContextMenu } from './contextMenu.service'
+import { loadContextMenu } from '../context_menu/contextMenu'
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20)
 
 import fs from 'fs'

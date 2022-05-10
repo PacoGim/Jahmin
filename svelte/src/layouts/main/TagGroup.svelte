@@ -62,7 +62,7 @@
 </script>
 
 <tag-group-svlt>
-	{#each $groupByConfig as group, index (index)}
+	{#each $groupByConfig || [] as group, index (index)}
 		<group-svlt data-index={index}>
 			<group-name on:click={e => handleContextMenuEvent(e)} data-name={group} data-index={index}>{group}</group-name>
 

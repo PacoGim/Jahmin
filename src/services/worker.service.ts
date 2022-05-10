@@ -2,7 +2,8 @@ import { Worker } from 'worker_threads'
 import path from 'path'
 import fs from 'fs'
 
-const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
+// const WORKER_FOLDER_PATH = path.join(path.resolve(), 'electron-app/workers')
+const WORKER_FOLDER_PATH = path.join(__dirname,'../workers')
 
 type WorkerNameType =
 	| 'ffmpeg'
@@ -26,6 +27,7 @@ type WorkerType = {
 let workers: WorkerType[] = []
 
 export function initWorkers() {
+	console.log(WORKER_FOLDER_PATH)
 	let workerFiles = fs.readdirSync(WORKER_FOLDER_PATH)
 
 	workerFiles.forEach((workerFile) => {

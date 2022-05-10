@@ -14,13 +14,14 @@ export function getEqFolderPath() {
 }
 
 export function getEqualizers() {
-	let equalizerFilePaths = fs.readdirSync(eqFolderPath)
 	let defaultEqualizerPath = path.join(eqFolderPath, 'Default.txt')
 	let equalizers: any[] = []
 
 	if (!fs.existsSync(eqFolderPath)) {
 		fs.mkdirSync(eqFolderPath)
 	}
+
+	let equalizerFilePaths = fs.readdirSync(eqFolderPath)
 
 	if (!fs.existsSync(defaultEqualizerPath)) {
 		fs.writeFileSync(defaultEqualizerPath, EqualizerFile.stringify(defaultEqualizer))

@@ -1,5 +1,5 @@
 import { showContextMenuIPC } from './ipc.service'
-import { selectedAlbumId, selectedSongsStore } from '../store/final.store'
+import { selectedAlbumDir, selectedAlbumId, selectedSongsStore } from '../store/final.store'
 
 export function handleContextMenuEvent(e: MouseEvent) {
 	e.preventDefault()
@@ -17,18 +17,23 @@ export function handleContextMenuEvent(e: MouseEvent) {
 	}
 
 	if (pathsName.includes('SONG-LIST')) {
-		let albumId
-		let songs
+		let clickedSongItem: HTMLElement = e.composedPath().find((path: HTMLElement) => path.tagName === 'SONG-LIST-ITEM') as HTMLElement
 
-		selectedAlbumId.subscribe(_ => (albumId = _))()
-		selectedSongsStore.subscribe(_ => (songs = _))()
+		let clickedSongId = +clickedSongItem.dataset.id
 
+		let albumRootDir
+		let selectedSongs
 
-		console.log(albumId,songs)
+		selectedAlbumDir.subscribe(_ => (albumRootDir = _))()
+		selectedSongsStore.subscribe(_ => (selectedSongs = _))()
+
+		if (selectedSongs.length === 0) {
+			selectedSongs = [clickedSongId]
+		}
 
 		showContextMenuIPC('SongListContextMenu', {
-			albumId,
-			songs
+			albumRootDir,
+			selectedSongs
 		})
 	}
 

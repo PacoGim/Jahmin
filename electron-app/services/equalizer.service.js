@@ -15,12 +15,12 @@ function getEqFolderPath() {
 }
 exports.getEqFolderPath = getEqFolderPath;
 function getEqualizers() {
-    let equalizerFilePaths = fs_1.default.readdirSync(eqFolderPath);
     let defaultEqualizerPath = path_1.default.join(eqFolderPath, 'Default.txt');
     let equalizers = [];
     if (!fs_1.default.existsSync(eqFolderPath)) {
         fs_1.default.mkdirSync(eqFolderPath);
     }
+    let equalizerFilePaths = fs_1.default.readdirSync(eqFolderPath);
     if (!fs_1.default.existsSync(defaultEqualizerPath)) {
         fs_1.default.writeFileSync(defaultEqualizerPath, equalizerFile_service_1.default.stringify(defaultEqualizer));
         equalizers.push(defaultEqualizer);

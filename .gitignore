@@ -5,3 +5,4 @@ binaries
 .vscode
 pnpm-lock.yaml
 electron-app/build
+executables

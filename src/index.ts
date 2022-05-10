@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, screen, shell, globalShortcut } from 'elec
 
 import path from 'path'
 
-export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin')
+export const appDataPath = () => path.join(app.getPath('appData'), 'Jahmin/App Data')
 
 import { getConfig, saveConfig } from './services/config.service'
 

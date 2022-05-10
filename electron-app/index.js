@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMainWindow = exports.appDataPath = void 0;
 const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
-const appDataPath = () => path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin');
+const appDataPath = () => path_1.default.join(electron_1.app.getPath('appData'), 'Jahmin/App Data');
 exports.appDataPath = appDataPath;
 const config_service_1 = require("./services/config.service");
 const worker_service_1 = require("./services/worker.service");

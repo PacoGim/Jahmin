@@ -98,12 +98,6 @@
 
 			saveGroupingConfig()
 		}
-
-		if (evtType === 'contextmenu') {
-			if (!$selectedSongsStore.includes(songId)) {
-				$selectedSongsStore = [songId]
-			}
-		}
 	}
 
 	function saveGroupingConfig() {

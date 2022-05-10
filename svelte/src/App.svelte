@@ -8,7 +8,8 @@
 		layoutToShow,
 		currentAudioElement,
 		dbVersionStore,
-		dbSongsStore
+		dbSongsStore,
+selectedSongsStore
 	} from './store/final.store'
 
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'

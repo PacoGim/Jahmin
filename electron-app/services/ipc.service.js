@@ -25,7 +25,7 @@ const peaks_1 = require("./peaks");
 const tagEdit_service_1 = require("./tagEdit.service");
 // import { getTagEditProgress } from '../functions/getTagEditProgress.fn'
 const storage_service_1 = require("./storage.service");
-const contextMenu_service_1 = require("./contextMenu.service");
+const contextMenu_1 = require("../context_menu/contextMenu");
 const nanoid = (0, nanoid_1.customAlphabet)('ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-', 20);
 const fs_1 = __importDefault(require("fs"));
 const fuse_js_1 = __importDefault(require("fuse.js"));
@@ -35,7 +35,7 @@ const directoryHandler_service_1 = __importDefault(require("./directoryHandler.s
 const hashFile_fn_1 = __importDefault(require("../functions/hashFile.fn"));
 const appReady_service_1 = __importDefault(require("./appReady.service"));
 function loadIPC() {
-    electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_service_1.loadContextMenu)(event, menuToOpen, parameters));
+    electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_1.loadContextMenu)(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
         return (0, equalizer_service_1.renameEqualizer)(eqId, newName);
     }));

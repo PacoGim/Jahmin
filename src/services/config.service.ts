@@ -115,13 +115,13 @@ function getDefaultConfigFile(): ConfigType {
 		groupOnlyByFolder: false,
 		userOptions: {
 			songAmount: 8,
-			theme: ThemeOptions.Auto,
+			theme: ThemeOptions.SystemBased,
 			artSize: 128,
 			gridGap: 16,
 			contrastRatio: 4.5,
 			fontSize: 16,
 			sortBy: 'Track',
-			sortOrder: 'desc'
+			sortOrder: 'asc'
 		},
 		songListTags: [
 			{
