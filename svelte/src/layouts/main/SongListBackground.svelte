@@ -13,8 +13,10 @@
 	let setArtRetryCounter = 0
 
 	function setArt() {
+		let albumArts = $albumArtMapStore.get(hash($selectedAlbumDir))
+
 		// If the map is empty
-		if ($albumArtMapStore.size <= 0) {
+		if ($albumArtMapStore.size <= 0 || albumArts === undefined) {
 			// Prevents checking forever whenever the map gets filled.
 			if (setArtRetryCounter === 10) {
 				setArtRetryCounter = 0
@@ -28,9 +30,8 @@
 
 			return
 		}
-		// If the map is not empty
 
-		let albumArts = $albumArtMapStore.get(hash($selectedAlbumDir))
+		// If the map is not empty
 
 		if (albumArts === undefined) {
 			loadArt(undefined, undefined)

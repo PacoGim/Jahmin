@@ -1,7 +1,8 @@
 import { showContextMenuIPC } from './ipc.service'
-import { selectedAlbumDir, selectedAlbumId, selectedSongsStore } from '../store/final.store'
+import { activeSongStore, selectedAlbumDir, selectedAlbumId, selectedSongsStore } from '../store/final.store'
+import { bulkGetSongs } from '../db/db'
 
-export function handleContextMenuEvent(e: MouseEvent) {
+export async function handleContextMenuEvent(e: MouseEvent) {
 	e.preventDefault()
 
 	const pathsName = e.composedPath().map((path: HTMLElement) => path.tagName)
@@ -17,23 +18,32 @@ export function handleContextMenuEvent(e: MouseEvent) {
 	}
 
 	if (pathsName.includes('SONG-LIST')) {
-		let clickedSongItem: HTMLElement = e.composedPath().find((path: HTMLElement) => path.tagName === 'SONG-LIST-ITEM') as HTMLElement
+		let clickedSongItem: HTMLElement = e
+			.composedPath()
+			.find((path: HTMLElement) => path.tagName === 'SONG-LIST-ITEM') as HTMLElement
 
-		let clickedSongId = +clickedSongItem.dataset.id
+		let clickedSongId = clickedSongItem?.dataset.id
+		let clickedSongData = undefined
 
 		let albumRootDir
-		let selectedSongs
+		let selectedSongsId: number[]
+		let selectedSongsData = []
 
 		selectedAlbumDir.subscribe(_ => (albumRootDir = _))()
-		selectedSongsStore.subscribe(_ => (selectedSongs = _))()
+		selectedSongsStore.subscribe(_ => (selectedSongsId = _))()
 
-		if (selectedSongs.length === 0) {
-			selectedSongs = [clickedSongId]
+		if (clickedSongId) {
+			activeSongStore.set(Number(clickedSongId))
+			clickedSongData = await bulkGetSongs([Number(clickedSongId)])
+			clickedSongData = clickedSongData[0]
 		}
+
+		selectedSongsData = await bulkGetSongs(selectedSongsId)
 
 		showContextMenuIPC('SongListContextMenu', {
 			albumRootDir,
-			selectedSongs
+			selectedSongsData,
+			clickedSongData: clickedSongData
 		})
 	}
 

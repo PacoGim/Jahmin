@@ -5,6 +5,7 @@
 
 	import {
 		albumPlayingIdStore,
+		activeSongStore,
 		playingSongStore,
 		selectedAlbumId,
 		selectedSongsStore,
@@ -73,6 +74,7 @@
 	class="
 	{isDisabled === true ? 'disabled' : ''}
 	{isSongPlaying === true ? 'playing' : ''}
+	{$activeSongStore === song.ID ? 'active' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#each $songListTagsConfig as tag, index (index)}
@@ -127,6 +129,9 @@
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
 		background-color: rgba(255, 255, 255, 0.1);
+	}
+	song-list-item.active {
+		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
 	}
 	song-list-item.selected {
 		background-color: rgba(255, 255, 255, 0.15);

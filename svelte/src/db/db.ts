@@ -151,6 +151,19 @@ export function getAllSongs(): Promise<SongType[]> {
 	})
 }
 
+export function bulkGetSongs(ids: number[]): Promise<SongType[]> {
+	return new Promise((resolve, reject) => {
+		db.songs
+			.bulkGet(ids)
+			.then(songs => {
+				resolve(songs)
+			})
+			.catch(err => {
+				reject(err)
+			})
+	})
+}
+
 export function getAlbumSongs(rootDir: string): Promise<SongType[]> {
 	return new Promise((resolve, reject) => {
 		getAllSongs().then(songs => {

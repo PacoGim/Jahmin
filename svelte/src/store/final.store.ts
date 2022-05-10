@@ -33,6 +33,7 @@ export let selectedAlbumId: Writable<string> = writable(undefined)
 export let selectedAlbumDir: Writable<string> = writable(undefined)
 
 export let selectedSongsStore: Writable<number[]> = writable([])
+export let activeSongStore: Writable<number> = writable(undefined)
 
 export let albumArtMapStore: Writable<
 	Map<

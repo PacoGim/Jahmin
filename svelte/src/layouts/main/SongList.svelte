@@ -18,6 +18,7 @@
 	// Main Song List refresh trigger
 	$: {
 		$songListStore
+		$songAmountConfig
 		trimSongArray()
 	}
 

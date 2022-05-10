@@ -12,6 +12,7 @@
 	import { groupByConfig, groupByValuesConfig, sortByConfig, sortOrderConfig } from '../store/config.store'
 	import {
 		albumPlayingDirStore,
+		activeSongStore,
 		elementMap,
 		layoutToShow,
 		playbackStore,
@@ -98,6 +99,8 @@
 
 			saveGroupingConfig()
 		}
+
+		$activeSongStore = undefined
 	}
 
 	function saveGroupingConfig() {
