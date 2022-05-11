@@ -6,89 +6,42 @@ const sendWebContents_service_1 = require("../services/sendWebContents.service")
 function default_1(data) {
     let template = [];
     let { selectedSongsData, clickedSongData, albumRootDir } = data;
-    let isClickedSongInSelectedSongs = selectedSongsData.find(song => song.ID === (clickedSongData === null || clickedSongData === void 0 ? void 0 : clickedSongData.ID));
     /*
     1. No songs selected && No song cliked on
     2. No songs selected && Song clicked on
     3. Songs selected && No song cliked on
     4. Songs selected && Song clicked on
   */
-    /*if (selectedSongsData.length === 0 && clickedSongData === undefined) {
-        console.log('1. No songs selected && No song cliked on')
-    } else */ if (selectedSongsData.length === 0 && clickedSongData !== undefined) {
+    if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
         template.push({
-            label: `Selected Song`,
-            type: 'submenu',
-            submenu: [
-                {
-                    label: 'Show File'
-                },
-                {
-                    label: 'Disable'
-                }
-            ]
-        });
-    }
-    else if (selectedSongsData.length > 0 && clickedSongData === undefined) {
-        console.log('3. Songs selected && No song cliked on');
-    }
-    else if (selectedSongsData.length > 0 && clickedSongData !== undefined && isClickedSongInSelectedSongs === undefined) {
-        console.log('4. Songs selected && Song clicked on but not in selected songs');
-    }
-    else if (selectedSongsData.length > 0 && clickedSongData !== undefined && isClickedSongInSelectedSongs !== undefined) {
-        // console.log('5. Songs selected && Song clicked on and in selected songs')
-        template.push({
-            label: `${cutString(clickedSongData.Title || '', 20)}`
-        });
-        template.push({
-            label: `Show File`,
+            label: 'Enable',
             click: () => {
-                electron_1.shell.showItemInFolder((clickedSongData === null || clickedSongData === void 0 ? void 0 : clickedSongData.SourceFile) || '');
+                handleEnableDisableSongs({ enable: true }, selectedSongsData, clickedSongData);
             }
         });
         template.push({
-            label: `Disable Song`,
-            click: () => disableSongs([clickedSongData])
-        });
-        template.push({
-            type: 'separator'
-        });
-    }
-    /*
-    if (selectedSongsData.length === 1 && isClickedSongInSelectedSongs) {
-    }
-
-    if (clickedSongData !== undefined) {
-        template.push({
-            label: `Show File: ${cutString(clickedSongData.Title || '', 20)}`,
+            label: 'Disable',
             click: () => {
-                shell.showItemInFolder(clickedSongData?.SourceFile || '')
+                handleEnableDisableSongs({ enable: false }, selectedSongsData, clickedSongData);
             }
-        })
+        });
+        addSeparator(template);
     }
-
-    // If the clicked song is present inside the selected songs.
-    if (clickedSongData !== undefined && !isClickedSongInSelectedSongs) {
-        template.push({
-            label: `Disable: ${cutString(clickedSongData.Title || '', 26)}`,
-            click: () => disableSongs([clickedSongData!])
-        })
-    } else if (selectedSongsData.length > 0) {
-        template.push({
-            label: `Disable ${selectedSongsData.length} Song${selectedSongsData.length > 1 ? 's' : ''}`,
-            click: () => disableSongs(selectedSongsData)
-        })
-    }
-
-  */
+    template.push({
+        label: 'Reveal in Folder',
+        enabled: clickedSongData !== undefined,
+        click: () => {
+            if (clickedSongData !== undefined) {
+                electron_1.shell.showItemInFolder(clickedSongData.SourceFile);
+            }
+        }
+    });
     template.push({
         label: 'Songs to Show',
         type: 'submenu',
         submenu: getSongAmountMenu()
     });
-    template.push({
-        type: 'separator'
-    });
+    addSeparator(template);
     template.push({
         label: 'Sort by',
         type: 'submenu',
@@ -97,16 +50,43 @@ function default_1(data) {
     return template;
 }
 exports.default = default_1;
-function disableSongs(songs) {
-    console.log(songs);
-}
-function cutString(str, maxLength) {
-    if (str.length > maxLength) {
-        return str.substring(0, maxLength) + '...';
+function handleEnableDisableSongs({ enable }, selectedSongs, clickedSong) {
+    let isClickedSongInSelectedSongs = selectedSongs.find(song => song.ID === (clickedSong === null || clickedSong === void 0 ? void 0 : clickedSong.ID)) ? true : false;
+    if (isClickedSongInSelectedSongs === false && clickedSong !== undefined) {
+        clickedSong.isEnabled = enable;
+        selectedSongs.push(clickedSong);
     }
-    else {
-        return str;
+    else if (selectedSongs.length !== 0) {
+        selectedSongs.forEach(song => {
+            song.isEnabled = enable;
+        });
     }
+    /*
+                sendWebContents('web-storage', {
+                            type: 'update',
+                            data: {
+                                id: hash(task.path, 'number'),
+                                newTags
+                            }
+                        })
+
+    */
+    // sendWebContents('web-storage', {
+    // 	songs: selectedSongs.filter(song => song.isEnabled)
+    // })
+    selectedSongs
+        .filter(song => song.hasOwnProperty('isEnabled'))
+        .forEach(song => {
+        (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+            type: 'update',
+            data: {
+                id: song.ID,
+                newTags: {
+                    isEnabled: song.isEnabled
+                }
+            }
+        });
+    });
 }
 function getSongAmountMenu() {
     let submenu = [];
@@ -126,29 +106,29 @@ function getSongAmountMenu() {
     return submenu;
 }
 function getSortMenu() {
+    var _a;
     let submenu = [];
-    submenu.push({
-        label: 'Add Sorting',
-        click: () => {
-            //TODO Add sorting option
-        }
-    });
-    let options = [
-        'Track',
-        'Rating',
-        'Title',
-        'Artist',
-        'Composer',
-        'Date',
-        'Duration',
-        'Extension',
-        'Genre',
-        'Sample Rate',
-        'Size',
-        'BitRate',
-        'Comment',
-        'Disc #'
-    ];
+    let options = (_a = (0, config_service_1.getConfig)().songListTags) === null || _a === void 0 ? void 0 : _a.map(tag => tag.name);
+    let sortByConfig = (0, config_service_1.getConfig)().userOptions.sortBy;
+    let sortOrderConfig = (0, config_service_1.getConfig)().userOptions.sortOrder;
+    if (options === undefined) {
+        options = [
+            'Track',
+            'Rating',
+            'Title',
+            'Artist',
+            'Composer',
+            'Date',
+            'Duration',
+            'Extension',
+            'Genre',
+            'Sample Rate',
+            'Size',
+            'BitRate',
+            'Comment',
+            'Disc #'
+        ];
+    }
     options.forEach(option => {
         submenu.push({
             label: option,
@@ -156,19 +136,25 @@ function getSortMenu() {
             submenu: [
                 {
                     label: 'Asc (A->Z)',
+                    type: 'radio',
+                    checked: sortByConfig === option && sortOrderConfig === 'asc',
+                    enabled: sortByConfig !== option || sortOrderConfig !== 'asc',
                     click: () => {
                         (0, sendWebContents_service_1.sendWebContents)('sort-songs', {
                             tag: option,
-                            order: 1
+                            order: 'asc'
                         });
                     }
                 },
                 {
                     label: 'Desc (Z->A)',
+                    type: 'radio',
+                    checked: sortByConfig === option && sortOrderConfig === 'desc',
+                    enabled: sortByConfig !== option || sortOrderConfig !== 'desc',
                     click: () => {
                         (0, sendWebContents_service_1.sendWebContents)('sort-songs', {
                             tag: option,
-                            order: -1
+                            order: 'desc'
                         });
                     }
                 }
@@ -176,4 +162,20 @@ function getSortMenu() {
         });
     });
     return submenu;
+}
+function disableSongs(songs) {
+    console.log(songs);
+}
+function cutString(str, maxLength) {
+    if (str.length > maxLength) {
+        return str.substring(0, maxLength) + '...';
+    }
+    else {
+        return str;
+    }
+}
+function addSeparator(template) {
+    template.push({
+        type: 'separator'
+    });
 }

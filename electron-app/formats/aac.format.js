@@ -84,8 +84,7 @@ function normalizeNewTags(newTags) {
         (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'DiscNumber', 'DiskNumber');
     if (newTags.Track !== undefined)
         (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Track', 'TrackNumber');
-    if (newTags.Rating !== undefined)
-        (0, renameObjectKey_fn_1.renameObjectKey)(newTags, 'Rating', 'RatingPercent');
+    // if (newTags.Rating !== undefined) renameObjectKey(newTags, 'Rating', 'RatingPercent')
     if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
         newTags.AllDates = `${newTags.Date_Year || '0000'} ${newTags.Date_Month || '00'} ${newTags.Date_Day || '00'}`;
         if (newTags.Date_Year && newTags.Date_Month) {

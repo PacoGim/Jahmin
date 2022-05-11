@@ -112,7 +112,7 @@ function normalizeNewTags(newTags: EditTag) {
 			counter: 0
 		}
 
-		delete newTags.Rating
+		// delete newTags.Rating
 	}
 
 	return newTags

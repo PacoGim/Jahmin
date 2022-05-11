@@ -1,7 +1,7 @@
 <script lang="ts">
 	const { ipcRenderer } = require('electron')
 	import { onMount } from 'svelte'
-	import { addTaskToQueue, bulkDeleteSongs } from '../db/db'
+	import { addTaskToQueue, bulkDeleteSongs, bulkUpdateSongs } from '../db/db'
 	import generateId from '../functions/generateId.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 

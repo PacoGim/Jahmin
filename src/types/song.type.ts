@@ -1,5 +1,5 @@
 export type SongType = {
-	[index: string]: string | number | undefined | null
+	[index: string]: string | number | undefined | null | boolean
 	ID: number
 	Album?: string | null // Modifiable
 	AlbumArtist?: string | null // Modifiable
@@ -22,4 +22,5 @@ export type SongType = {
 	LastModified?: number
 	BitRate?: number | null
 	BitDepth?: number | null
+	isEnabled?: boolean
 }

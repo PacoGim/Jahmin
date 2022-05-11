@@ -33,18 +33,6 @@
 		}
 	}
 
-	$: {
-		if ($dbVersionStore !== undefined) {
-			updateSongList()
-		}
-	}
-
-	function updateSongList() {
-		getAlbumSongs($selectedAlbumDir).then(songs => {
-			$songListStore = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
-		})
-	}
-
 	function getAlbums(groupBy: string, groupByValue: string) {
 		getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
 	}

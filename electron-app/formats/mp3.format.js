@@ -116,7 +116,7 @@ function normalizeNewTags(newTags) {
             rating: convertRating('Mp3', newTags.Rating),
             counter: 0
         };
-        delete newTags.Rating;
+        // delete newTags.Rating
     }
     return newTags;
 }

@@ -14,8 +14,6 @@ export default function (data: dataType) {
 
 	let { selectedSongsData, clickedSongData, albumRootDir } = data
 
-	let isClickedSongInSelectedSongs = selectedSongsData.find(song => song.ID === clickedSongData?.ID)
-
 	/*
     1. No songs selected && No song cliked on
     2. No songs selected && Song clicked on
@@ -23,75 +21,33 @@ export default function (data: dataType) {
     4. Songs selected && Song clicked on
   */
 
-	/*if (selectedSongsData.length === 0 && clickedSongData === undefined) {
-		console.log('1. No songs selected && No song cliked on')
-	} else */ if (selectedSongsData.length === 0 && clickedSongData !== undefined) {
+	if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
 		template.push({
-			label: `Selected Song`,
-			type: 'submenu',
-			submenu: [
-				{
-					label: 'Show File'
-				},
-				{
-					label: 'Disable'
-				}
-			]
-		})
-	} else if (selectedSongsData.length > 0 && clickedSongData === undefined) {
-		console.log('3. Songs selected && No song cliked on')
-	} else if (selectedSongsData.length > 0 && clickedSongData !== undefined && isClickedSongInSelectedSongs === undefined) {
-		console.log('4. Songs selected && Song clicked on but not in selected songs')
-	} else if (selectedSongsData.length > 0 && clickedSongData !== undefined && isClickedSongInSelectedSongs !== undefined) {
-		// console.log('5. Songs selected && Song clicked on and in selected songs')
-		template.push({
-			label: `${cutString(clickedSongData.Title || '', 20)}`
-		})
-
-		template.push({
-			label: `Show File`,
+			label: 'Enable',
 			click: () => {
-				shell.showItemInFolder(clickedSongData?.SourceFile || '')
+				handleEnableDisableSongs({ enable: true }, selectedSongsData, clickedSongData)
 			}
 		})
 
 		template.push({
-			label: `Disable Song`,
-			click: () => disableSongs([clickedSongData!])
-		})
-
-		template.push({
-			type: 'separator'
-		})
-	}
-
-	/*
-	if (selectedSongsData.length === 1 && isClickedSongInSelectedSongs) {
-	}
-
-	if (clickedSongData !== undefined) {
-		template.push({
-			label: `Show File: ${cutString(clickedSongData.Title || '', 20)}`,
+			label: 'Disable',
 			click: () => {
-				shell.showItemInFolder(clickedSongData?.SourceFile || '')
+				handleEnableDisableSongs({ enable: false }, selectedSongsData, clickedSongData)
 			}
 		})
+
+		addSeparator(template)
 	}
 
-	// If the clicked song is present inside the selected songs.
-	if (clickedSongData !== undefined && !isClickedSongInSelectedSongs) {
-		template.push({
-			label: `Disable: ${cutString(clickedSongData.Title || '', 26)}`,
-			click: () => disableSongs([clickedSongData!])
-		})
-	} else if (selectedSongsData.length > 0) {
-		template.push({
-			label: `Disable ${selectedSongsData.length} Song${selectedSongsData.length > 1 ? 's' : ''}`,
-			click: () => disableSongs(selectedSongsData)
-		})
-	}
-
-  */
+	template.push({
+		label: 'Reveal in Folder',
+		enabled: clickedSongData !== undefined,
+		click: () => {
+			if (clickedSongData !== undefined) {
+				shell.showItemInFolder(clickedSongData.SourceFile)
+			}
+		}
+	})
 
 	template.push({
 		label: 'Songs to Show',
@@ -99,9 +55,7 @@ export default function (data: dataType) {
 		submenu: getSongAmountMenu()
 	})
 
-	template.push({
-		type: 'separator'
-	})
+	addSeparator(template)
 
 	template.push({
 		label: 'Sort by',
@@ -112,16 +66,51 @@ export default function (data: dataType) {
 	return template
 }
 
-function disableSongs(songs: SongType[]) {
-	console.log(songs)
-}
+function handleEnableDisableSongs(
+	{ enable }: { enable: boolean },
+	selectedSongs: SongType[],
+	clickedSong: SongType | undefined
+) {
+	let isClickedSongInSelectedSongs = selectedSongs.find(song => song.ID === clickedSong?.ID) ? true : false
 
-function cutString(str: string, maxLength: number) {
-	if (str.length > maxLength) {
-		return str.substring(0, maxLength) + '...'
-	} else {
-		return str
+	if (isClickedSongInSelectedSongs === false && clickedSong !== undefined) {
+		clickedSong.isEnabled = enable
+
+		selectedSongs.push(clickedSong)
+	} else if (selectedSongs.length !== 0) {
+		selectedSongs.forEach(song => {
+			song.isEnabled = enable
+		})
 	}
+
+	/*
+				sendWebContents('web-storage', {
+							type: 'update',
+							data: {
+								id: hash(task.path, 'number'),
+								newTags
+							}
+						})
+
+	*/
+
+	// sendWebContents('web-storage', {
+	// 	songs: selectedSongs.filter(song => song.isEnabled)
+	// })
+
+	selectedSongs
+		.filter(song => song.hasOwnProperty('isEnabled'))
+		.forEach(song => {
+			sendWebContents('web-storage', {
+				type: 'update',
+				data: {
+					id: song.ID,
+					newTags: {
+						isEnabled: song.isEnabled
+					}
+				}
+			})
+		})
 }
 
 function getSongAmountMenu() {
@@ -146,29 +135,29 @@ function getSongAmountMenu() {
 
 function getSortMenu() {
 	let submenu: MenuItemConstructorOptions[] = []
-	submenu.push({
-		label: 'Add Sorting',
-		click: () => {
-			//TODO Add sorting option
-		}
-	})
 
-	let options = [
-		'Track',
-		'Rating',
-		'Title',
-		'Artist',
-		'Composer',
-		'Date',
-		'Duration',
-		'Extension',
-		'Genre',
-		'Sample Rate',
-		'Size',
-		'BitRate',
-		'Comment',
-		'Disc #'
-	]
+	let options = getConfig().songListTags?.map(tag => tag.name)
+	let sortByConfig = getConfig().userOptions.sortBy
+	let sortOrderConfig = getConfig().userOptions.sortOrder
+
+	if (options === undefined) {
+		options = [
+			'Track',
+			'Rating',
+			'Title',
+			'Artist',
+			'Composer',
+			'Date',
+			'Duration',
+			'Extension',
+			'Genre',
+			'Sample Rate',
+			'Size',
+			'BitRate',
+			'Comment',
+			'Disc #'
+		]
+	}
 
 	options.forEach(option => {
 		submenu.push({
@@ -177,19 +166,25 @@ function getSortMenu() {
 			submenu: [
 				{
 					label: 'Asc (A->Z)',
+					type: 'radio',
+					checked: sortByConfig === option && sortOrderConfig === 'asc',
+					enabled: sortByConfig !== option || sortOrderConfig !== 'asc',
 					click: () => {
 						sendWebContents('sort-songs', {
 							tag: option,
-							order: 1
+							order: 'asc'
 						})
 					}
 				},
 				{
 					label: 'Desc (Z->A)',
+					type: 'radio',
+					checked: sortByConfig === option && sortOrderConfig === 'desc',
+					enabled: sortByConfig !== option || sortOrderConfig !== 'desc',
 					click: () => {
 						sendWebContents('sort-songs', {
 							tag: option,
-							order: -1
+							order: 'desc'
 						})
 					}
 				}
@@ -198,4 +193,22 @@ function getSortMenu() {
 	})
 
 	return submenu
+}
+
+function disableSongs(songs: SongType[]) {
+	console.log(songs)
+}
+
+function cutString(str: string, maxLength: number) {
+	if (str.length > maxLength) {
+		return str.substring(0, maxLength) + '...'
+	} else {
+		return str
+	}
+}
+
+function addSeparator(template: MenuItemConstructorOptions[]) {
+	template.push({
+		type: 'separator'
+	})
 }

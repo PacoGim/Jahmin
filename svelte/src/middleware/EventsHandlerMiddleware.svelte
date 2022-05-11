@@ -92,7 +92,7 @@
 	}
 
 	function handleSongListItemEvent(element: HTMLElement, evtType: string) {
-		const songId = Number(element.getAttribute('id'))
+		const songId = +element.dataset.id
 
 		if (evtType === 'dblclick') {
 			setNewPlayback($selectedAlbumDir, $songListStore, songId, true)

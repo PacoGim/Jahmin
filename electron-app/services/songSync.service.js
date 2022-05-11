@@ -150,6 +150,10 @@ function processQueue() {
                     });
                 }
                 else {
+                    // Removes Mp3 Popularimeter (Rating) tag.
+                    if (newTags === null || newTags === void 0 ? void 0 : newTags.popularimeter) {
+                        delete newTags.popularimeter;
+                    }
                     (0, sendWebContents_service_1.sendWebContents)('web-storage', {
                         type: 'update',
                         data: {

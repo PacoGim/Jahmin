@@ -167,6 +167,11 @@ function processQueue() {
 							data: undefined
 						})
 					} else {
+						// Removes Mp3 Popularimeter (Rating) tag.
+						if (newTags?.popularimeter) {
+							delete newTags.popularimeter
+						}
+
 						sendWebContents('web-storage', {
 							type: 'update',
 							data: {

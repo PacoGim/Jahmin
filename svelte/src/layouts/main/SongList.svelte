@@ -4,7 +4,13 @@
 
 	import { songAmountConfig } from '../../store/config.store'
 
-	import { selectedAlbumDir, selectedSongsStore, songListStore, triggerScrollToSongEvent } from '../../store/final.store'
+	import {
+		dbVersionStore,
+		selectedAlbumDir,
+		selectedSongsStore,
+		songListStore,
+		triggerScrollToSongEvent
+	} from '../../store/final.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
 	let songsToShow = []
