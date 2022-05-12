@@ -49,7 +49,6 @@ const notCompress = ['mp4', 'webm', 'apng', 'gif']
 const videoFormats = ['mp4', 'webm']
 
 export function compressAlbumArt(rootDir: string, artSize: number, forceNewCheck: boolean) {
-
 	// If the art size is not a number, it can't compress the art so it returns.
 	if (isNaN(Number(artSize))) return
 
@@ -152,7 +151,7 @@ export function sendArtQueueProgress() {
 }
 
 // Returns all images sorted by priority.
-export function getAllowedFiles(rootDir:string) {
+export function getAllowedFiles(rootDir: string) {
 	let allowedMediaFiles = fs
 		.readdirSync(rootDir)
 		.filter(file => allowedNames.includes(file.toLowerCase()))

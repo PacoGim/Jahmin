@@ -1,29 +1,30 @@
 export type SongType = {
-	[index: string]: string | number | undefined
-	ID?: number
-	Album?: string // Modifiable
-	AlbumArtist?: string // Modifiable
-	Artist?: string // Modifiable
-	Composer?: string // Modifiable
-	DynamicArtists?: string // Programmatically added
-	Genre?: string // Modifiable
-	Title?: string // Modifiable
-	Track?: number // Modifiable
-	Rating?: number // Modifiable
-	Comment?: string // Modifiable
-	DiscNumber?: number // Modifiable
-	Date_Year?: number | undefined // Modifiable
-	Date_Month?: number | undefined // Modifiable
-	Date_Day?: number | undefined // Modifiable
-	SourceFile?: string
+	[index: string]: string | number | undefined | null | boolean
+	ID: number
+	Album?: string | null // Modifiable
+	AlbumArtist?: string | null // Modifiable
+	Artist?: string | null // Modifiable
+	Composer?: string | null // Modifiable
+	Genre?: string | null // Modifiable
+	Title?: string | null // Modifiable
+	Track?: number | null // Modifiable
+	Rating?: number | null // Modifiable
+	Comment?: string | null // Modifiable
+	DiscNumber?: number | null // Modifiable
+	Date_Year?: number | null // Modifiable
+	Date_Month?: number | null // Modifiable
+	Date_Day?: number | null // Modifiable
+	SourceFile: string
 	Extension?: string
 	Size?: number
-	Duration?: number
-	SampleRate?: number
+	Duration?: number | null
+	SampleRate?: number | null
 	LastModified?: number
-	BitRate?: string
-	BitDepth?: number
+	BitRate?: number | null
+	BitDepth?: number | null
+	isEnabled?: boolean
 }
+
 
 export type SongFuzzySearchType = {
 	item: SongType

@@ -51,6 +51,7 @@
 
 <art-svlt
 	data-albumId={albumId}
+	data-rootDir={rootDir}
 	data-artSize={artSize}
 	data-type={artType}
 	data-loaded={dataLoaded}

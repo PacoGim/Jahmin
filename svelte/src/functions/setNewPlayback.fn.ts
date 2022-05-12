@@ -1,14 +1,7 @@
 import { getAlbumIPC } from '../services/ipc.service'
 import { setWaveSource } from '../services/waveform.service'
-import {
-	albumPlayingIdStore,
-	albumPlayingDirStore,
-	playbackCursor,
-	playbackStore,
-	playingSongStore
-} from '../store/final.store'
+import { albumPlayingDirStore, playbackStore, playingSongStore } from '../store/final.store'
 import { songToPlayUrlStore } from '../store/player.store'
-// import { playback, selectedAlbum } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 import applyColorSchemeFn from './applyColorScheme.fn'
 import { getAlbumColors } from './getAlbumColors.fn'
@@ -22,7 +15,6 @@ export async function setNewPlayback(
 	let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0]
 
 	if (songToPlay === undefined) {
-
 		return
 	}
 

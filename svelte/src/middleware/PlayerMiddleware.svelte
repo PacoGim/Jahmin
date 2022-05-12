@@ -12,10 +12,7 @@
 
 	import {
 		albumListStore,
-		dbSongsStore,
-		dbVersionStore,
 		selectedAlbumDir,
-		selectedAlbumId,
 		selectedGroupByStore,
 		selectedGroupByValueStore,
 		songListStore,
@@ -23,7 +20,6 @@
 	} from '../store/final.store'
 
 	let firstGroupByAssign = true
-	let firstDbVersionAssign = true
 
 	$: {
 		if (firstGroupByAssign === true) {

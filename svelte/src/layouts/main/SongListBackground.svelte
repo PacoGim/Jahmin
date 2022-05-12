@@ -2,7 +2,11 @@
 	import { onMount } from 'svelte'
 	import { hash } from '../../functions/hashString.fn'
 
-	import { albumArtMapStore, selectedAlbumDir } from '../../store/final.store'
+	import { albumArtMapStore, layoutToShow, selectedAlbumDir } from '../../store/final.store'
+
+	let isMounted = false
+
+	let setArtRetryCounter = 0
 
 	$: {
 		if ($selectedAlbumDir !== undefined) {
@@ -10,7 +14,21 @@
 		}
 	}
 
-	let setArtRetryCounter = 0
+	$: {
+		if ($layoutToShow === 'Home') {
+			loadArtWhenLayoutMounted()
+		}
+	}
+
+	function loadArtWhenLayoutMounted() {
+		if (isMounted === false) {
+			setTimeout(() => {
+				loadArtWhenLayoutMounted()
+			}, 100)
+		} else {
+			setArt()
+		}
+	}
 
 	function setArt() {
 		let albumArts = $albumArtMapStore.get(hash($selectedAlbumDir))
@@ -18,8 +36,9 @@
 		// If the map is empty
 		if ($albumArtMapStore.size <= 0 || albumArts === undefined) {
 			// Prevents checking forever whenever the map gets filled.
-			if (setArtRetryCounter === 10) {
+			if (setArtRetryCounter === 5) {
 				setArtRetryCounter = 0
+				loadArt(undefined, undefined)
 				return
 			}
 
@@ -32,11 +51,6 @@
 		}
 
 		// If the map is not empty
-
-		if (albumArts === undefined) {
-			loadArt(undefined, undefined)
-			return
-		}
 
 		// Gets all the available sizes.
 		let artSizes = albumArts.map(albumArt => Number(albumArt.artSize))
@@ -85,6 +99,10 @@
 			videoElement.style.opacity = '0'
 		}
 	}
+
+	onMount(() => {
+		isMounted = true
+	})
 </script>
 
 <song-list-background-svlt>

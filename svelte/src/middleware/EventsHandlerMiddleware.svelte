@@ -8,7 +8,7 @@
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { getAlbumIPC, saveConfig } from '../services/ipc.service'
+	import { saveConfig } from '../services/ipc.service'
 	import { groupByConfig, groupByValuesConfig, sortByConfig, sortOrderConfig } from '../store/config.store'
 	import {
 		albumPlayingDirStore,
@@ -18,15 +18,13 @@
 		playbackStore,
 		playingSongStore,
 		selectedAlbumDir,
-		selectedAlbumId,
 		selectedSongsStore,
 		songListStore,
 		triggerGroupingChangeEvent,
 		triggerScrollToSongEvent
 	} from '../store/final.store'
-	import type { SongType } from '../types/song.type'
 
-	function handleClickEvent(evt: MouseEvent) {
+	function handleClickEvents(evt: MouseEvent) {
 		$elementMap = new Map<string, HTMLElement>()
 
 		evt.composedPath().forEach((element: HTMLElement) => {
@@ -38,6 +36,7 @@
 		const imgElement = $elementMap.get('img')
 		const albumElement = $elementMap.get('album')
 		const songListItemElement = $elementMap.get('song-list-item')
+		const songListElement = $elementMap.get('song-list')
 		const controlBarElement = $elementMap.get('control-bar-svlt')
 
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
@@ -45,6 +44,27 @@
 		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type)
 
 		if (imgElement && controlBarElement) setAlbumBackInView()
+
+		if (songListElement === undefined) {
+			$selectedSongsStore = []
+			$activeSongStore = undefined
+		}
+	}
+
+	function handleKeyboardEvents(evt: KeyboardEvent) {
+		let keyModifier = {
+			ctrl: evt.ctrlKey || evt.metaKey,
+			shift: evt.shiftKey,
+			alt: evt.altKey
+		}
+
+		if (evt.key === 'a' && keyModifier.ctrl === true) {
+			const songListElement = $elementMap.get('song-list')
+
+			if (songListElement) {
+				$selectedSongsStore = [...$songListStore.map(song => song.ID)]
+			}
+		}
 	}
 
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
@@ -115,8 +135,9 @@
 	}
 
 	onMount(() => {
-		document.addEventListener('click', (evt: MouseEvent) => handleClickEvent(evt))
-		document.addEventListener('dblclick', (evt: MouseEvent) => handleClickEvent(evt))
-		document.addEventListener('contextmenu', (evt: MouseEvent) => handleClickEvent(evt))
+		;['click', 'dblclick', 'contextmenu'].forEach(evtType =>
+			document.addEventListener(evtType, (evt: MouseEvent) => handleClickEvents(evt))
+		)
+		;['keydown'].forEach(evtType => document.addEventListener(evtType, (evt: KeyboardEvent) => handleKeyboardEvents(evt)))
 	})
 </script>

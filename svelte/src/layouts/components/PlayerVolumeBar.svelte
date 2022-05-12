@@ -48,6 +48,13 @@
 
 		let volumeBarWidth = document.querySelector('volume-bar').clientWidth
 
+		if (volumeBarWidth === 0) {
+			setTimeout(() => {
+				updateVolumeBarVisual(newVolume)
+			}, 250)
+			return
+		}
+
 		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
 
 		document.documentElement.style.setProperty('--volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`)

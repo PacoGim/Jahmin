@@ -41,10 +41,10 @@
 			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
 				artElement.dataset.artsize = String(newArtSize)
 				if (isElementInViewportFn(artElement)) {
-					compressAlbumArtIPC(artElement.dataset.albumid, newArtSize, false)
+					compressAlbumArtIPC(artElement.dataset.rootDir, newArtSize, false)
 				} else {
 					setTimeout(() => {
-						compressAlbumArtIPC(artElement.dataset.albumid, newArtSize, false)
+						compressAlbumArtIPC(artElement.dataset.rootDir, newArtSize, false)
 					}, 1000)
 				}
 			})

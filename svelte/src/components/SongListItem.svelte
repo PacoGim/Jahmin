@@ -23,7 +23,6 @@
 	export let index: number
 
 	let isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
-	let isDisabled = false
 	let gridStyle = ''
 
 	$: {
@@ -70,9 +69,9 @@
 <song-list-item
 	data-id={song.ID}
 	data-index={index}
-	style="grid-template-columns:{isDisabled === true || isSongPlaying === true ? 'max-content' : ''}{gridStyle};"
+	style="grid-template-columns:{song.isEnabled === false || isSongPlaying === true ? 'max-content' : ''}{gridStyle};"
 	class="
-	{isDisabled === true ? 'disabled' : ''}
+	{song.isEnabled === false ? 'disabled' : ''}
 	{isSongPlaying === true ? 'playing' : ''}
 	{$activeSongStore === song.ID ? 'active' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
@@ -120,8 +119,8 @@
 		border-radius: 5px;
 
 		/* transition-property: font-variation-settings, box-shadow, background-color; */
-		transition-property: font-variation-settings, background-color;
-		transition-duration: 250ms, 500ms;
+		transition-property: font-variation-settings, background-color, box-shadow;
+		transition-duration: 250ms, 500ms, 500ms;
 		transition-timing-function: ease-in-out;
 	}
 
@@ -138,13 +137,17 @@
 	}
 
 	song-list-item.disabled {
-		background: repeating-linear-gradient(
+		background-image: linear-gradient(
 			45deg,
-			rgba(255, 255, 255, 0),
-			rgba(255, 255, 255, 0) 10px,
-			rgba(255, 255, 255, 0.1) 10px,
-			rgba(255, 255, 255, 0.1) 20px
+			rgba(255, 255, 255, 0) 25%,
+			rgba(255, 255, 255, 0.1) 25%,
+			rgba(255, 255, 255, 0.1) 50%,
+			rgba(255, 255, 255, 0) 50%,
+			rgba(255, 255, 255, 0) 75%,
+			rgba(255, 255, 255, 0.1) 75%,
+			rgba(255, 255, 255, 0.1) 100%
 		);
+		background-size: 28.28px 28.28px;
 	}
 
 	song-list-item.disabled::before {

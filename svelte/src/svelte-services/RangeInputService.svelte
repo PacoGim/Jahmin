@@ -103,7 +103,7 @@
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{rangeInputState.cancelButtonText}
 			</button>
-			<button class="confirm" disabled={rangeInputValue === rangeInputState.value} on:click={() => confirmRangeInput()}>
+			<button class="info" disabled={rangeInputValue === rangeInputState.value} on:click={() => confirmRangeInput()}>
 				<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{rangeInputState.confirmButtonText}
 			</button>

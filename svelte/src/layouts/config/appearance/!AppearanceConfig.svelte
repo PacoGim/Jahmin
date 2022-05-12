@@ -1,10 +1,13 @@
 <script lang="ts">
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import OptionSectionCompact from '../../../components/OptionSectionCompact.svelte'
-	import { fontSizeConfig } from '../../../store/config.store'
+
+	import { artSizeConfig, fontSizeConfig } from '../../../store/config.store'
+
 	import ColorContrastConfig from './ColorContrastConfig.svelte'
 	import DayNightThemeConfig from './DayNightThemeConfig.svelte'
 	import FontSizeConfig from './FontSizeConfig.svelte'
+	import GridArtSize from './GridArtSize.svelte'
 </script>
 
 <config-section>
@@ -18,6 +21,10 @@
 
 	<OptionSectionCompact title="Font Size: {$fontSizeConfig}">
 		<FontSizeConfig />
+	</OptionSectionCompact>
+
+	<OptionSectionCompact title="Grid Art Size: {$artSizeConfig}">
+		<GridArtSize />
 	</OptionSectionCompact>
 </config-section>
 

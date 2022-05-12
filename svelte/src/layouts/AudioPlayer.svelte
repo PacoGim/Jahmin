@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import notifyService from '../services/notify.service'
 	import { setWaveSource } from '../services/waveform.service'
 	import { context, sourceAltAudio, sourceMainAudio } from '../store/equalizer.store'
 
@@ -12,7 +13,7 @@
 		playbackStore,
 		playingSongStore,
 		isPlaying,
-albumPlayingDirStore
+		albumPlayingDirStore
 	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
@@ -74,6 +75,22 @@ albumPlayingDirStore
 				return
 			}
 
+			// If the song is disabled, finds the next enabled song to play.
+			if (song.isEnabled === false) {
+				// Gets the current song index in the playlist.
+				let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === songUrl)
+
+				let nextSong = findNextValidSong(currentSongIndex)
+
+				if (nextSong !== undefined) {
+					// If an enabled song is found, play it.
+					return playSong(nextSong.SourceFile)
+				} else {
+					// If no enabled songs found, notify the user.
+					return notifyService.error('No enabled songs found')
+				}
+			}
+
 			updateCurrentSongData(song)
 
 			setCurrentAudioElement($mainAudioElement)
@@ -119,6 +136,7 @@ albumPlayingDirStore
 			$currentPlayerTime = currentTime
 		}
 
+		////////// AUDIO PRELOADS HERE \\\\\\\\\\
 		// If the current time is greater than one second, then the next audio element is preloaded.
 		if (currentTime > 1 && audioElements[altAudioName].isPreloaded === false) {
 			audioElements[altAudioName].isPreloaded = true
@@ -127,25 +145,26 @@ albumPlayingDirStore
 			// Gets the current song index.
 			let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
 
-			// Gets the next song based of the current song index.
-			let nextSong = $playbackStore[currentSongIndex + 1]
+			let nextValidSong = findNextValidSong(currentSongIndex)
 
-			if (nextSong !== undefined) {
-				audioElements[altAudioName].domElement.src = nextSong.SourceFile
+			if (nextValidSong) {
+				audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
+			} else {
+				return
 			}
-
-			//TODO: Check if song does not exist.
 		}
 
+		////////// AUDIO PRE PLAYS HERE \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
 		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
 			audioElements[altAudioName].isPlaying = true
 			audioElements[this.id].isPlaying = false
-			audioElements[altAudioName].domElement.play()
+			audioElements[altAudioName].domElement.play().catch(error => {})
 
 			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
 
 			if (song === undefined) {
+				console.log('Playlst done')
 				return
 			}
 
@@ -153,6 +172,19 @@ albumPlayingDirStore
 
 			setCurrentAudioElement(audioElements[altAudioName].domElement)
 		}
+	}
+
+	function findNextValidSong(currentSongIndex: number): SongType | undefined {
+		// Creates a copy of the playback array.
+		let playbackArrayCopy = [...$playbackStore]
+
+		// Cuts the array from the index to the end, to find the next enabled song beyond the current song in the playback.
+		let cutArray = playbackArrayCopy.splice(currentSongIndex + 1)
+
+		// Finds the first enabled song in the array.
+		let nextSong = cutArray.find(song => song.isEnabled !== false)
+
+		return nextSong
 	}
 
 	function hookEventListeners() {
