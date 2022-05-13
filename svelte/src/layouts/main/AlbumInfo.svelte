@@ -48,6 +48,12 @@
 		justify-content: center;
 
 		grid-area: album-info-svlt;
+
+		background-color: var(--high-color);
+		color: var(--low-color);
+
+		height: 100%;
+		padding: 0 0.5rem;
 	}
 
 	p {

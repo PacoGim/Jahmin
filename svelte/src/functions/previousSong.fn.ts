@@ -31,8 +31,12 @@ export default function () {
 	if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
 		songToPlayUrlStore.set(previousSong.SourceFile)
 	} else {
-		currentAudioElementLocal.currentTime = 0
+		if (currentAudioElementLocal !== undefined) {
+			currentAudioElementLocal.currentTime = 0
+		}
 	}
 
-	triggerScrollToSongEvent.set(previousSong.ID)
+	if (previousSong !== undefined) {
+		triggerScrollToSongEvent.set(previousSong.ID)
+	}
 }

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
+exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.stopSongsUpdating = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
 const chokidar_1 = require("chokidar");
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
@@ -197,6 +197,7 @@ function sendSongSyncQueueProgress() {
         exports.maxTaskQueueLength = 0;
     }
     (0, sendWebContents_service_1.sendWebContents)('song-sync-queue-progress', {
+        isSongUpdating: taskQueue.find(task => task.type === 'update') !== undefined,
         currentLength: taskQueue.length,
         maxLength: exports.maxTaskQueueLength
     });
@@ -207,6 +208,13 @@ function sendSongSyncQueueProgress() {
     }
 }
 exports.sendSongSyncQueueProgress = sendSongSyncQueueProgress;
+function stopSongsUpdating() {
+    return new Promise(resolve => {
+        taskQueue = taskQueue.filter(task => task.type !== 'update');
+        resolve(null);
+    });
+}
+exports.stopSongsUpdating = stopSongsUpdating;
 function filterSongs(audioFilesFound = [], dbSongs) {
     return new Promise((resolve, reject) => {
         let worker = (0, worker_service_1.getWorker)('songFilter');

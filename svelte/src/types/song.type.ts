@@ -25,6 +25,7 @@ export type SongType = {
 	isEnabled?: boolean
 }
 
+export type PartialSongType = Partial<SongType>
 
 export type SongFuzzySearchType = {
 	item: SongType

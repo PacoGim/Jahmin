@@ -38,6 +38,7 @@
 		const songListItemElement = $elementMap.get('song-list-item')
 		const songListElement = $elementMap.get('song-list')
 		const controlBarElement = $elementMap.get('control-bar-svlt')
+		const tagEditElement = $elementMap.get('tag-edit-svlt')
 
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
 
@@ -45,7 +46,7 @@
 
 		if (imgElement && controlBarElement) setAlbumBackInView()
 
-		if (songListElement === undefined) {
+		if (songListElement === undefined && tagEditElement === undefined) {
 			$selectedSongsStore = []
 			$activeSongStore = undefined
 		}
@@ -73,7 +74,8 @@
 		let playingSong = $playingSongStore
 
 		$selectedAlbumDir = $albumPlayingDirStore
-		$songListStore = $playbackStore
+
+		$songListStore = sortSongsArrayFn($playbackStore, $sortByConfig, $sortOrderConfig)
 
 		let groupByValuesLocalStorage = parseJson(localStorage.getItem('GroupByValues'))
 
@@ -99,6 +101,8 @@
 		if (evtType === 'dblclick') {
 			setNewPlayback(rootDir, sortedSongs, undefined, true)
 			saveGroupingConfig()
+
+			$triggerScrollToSongEvent = $playingSongStore.ID
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
 			if ($selectedAlbumDir !== rootDir) {

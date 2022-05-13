@@ -59,7 +59,7 @@ export let triggerGroupingChangeEvent: Writable<string[]> = writable([])
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Home' | 'Search' | 'Config'> = writable('Config')
+export let layoutToShow: Writable<'Home' | 'Search' | 'Config'> = writable('Home')
 export let selectedOptionSection: Writable<string> = writable('')
 
 export let mainAudioElement: Writable<HTMLAudioElement> = writable(undefined)
@@ -82,7 +82,12 @@ export let artCompressQueueProgress: Writable<{ maxLength: number; currentLength
 	maxLength: 0,
 	currentLength: 0
 })
-export let songSyncQueueProgress: Writable<{ maxLength: number; currentLength: number }> = writable({
+export let songSyncQueueProgress: Writable<{
+	isSongUpdating: boolean
+	maxLength: number
+	currentLength: number
+}> = writable({
+	isSongUpdating: false,
 	maxLength: 0,
 	currentLength: 0
 })
@@ -90,3 +95,7 @@ export let songSyncQueueProgress: Writable<{ maxLength: number; currentLength: n
 export let dbVersionStore: Writable<number> = writable(undefined)
 
 export let dbSongsStore: Writable<SongType[]> = writable([])
+
+export let isSongRepeatEnabledStore: Writable<boolean> = writable(false)
+export let isPlaybackRepeatEnabledStore: Writable<boolean> = writable(false)
+export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)

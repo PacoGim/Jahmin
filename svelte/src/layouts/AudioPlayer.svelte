@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import getDirectoryFn from '../functions/getDirectory.fn'
+	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import notifyService from '../services/notify.service'
 	import { setWaveSource } from '../services/waveform.service'
 	import { context, sourceAltAudio, sourceMainAudio } from '../store/equalizer.store'
@@ -13,7 +15,9 @@
 		playbackStore,
 		playingSongStore,
 		isPlaying,
-		albumPlayingDirStore
+		albumPlayingDirStore,
+		isSongRepeatEnabledStore,
+		isPlaybackRepeatEnabledStore
 	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
@@ -142,15 +146,23 @@
 			audioElements[altAudioName].isPreloaded = true
 			audioElements[this.id].isPreloaded = false
 
-			// Gets the current song index.
-			let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
+			if ($isSongRepeatEnabledStore === false) {
+				// Gets the current song index.
+				let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
 
-			let nextValidSong = findNextValidSong(currentSongIndex)
+				let nextValidSong = findNextValidSong(currentSongIndex)
 
-			if (nextValidSong) {
-				audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
+				if (nextValidSong) {
+					audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
+				} /*else {
+					if ($isPlaybackRepeatEnabledStore === true) {
+						let firstValidSong = findNextValidSong(-1)
+
+						audioElements[altAudioName].domElement.src = firstValidSong.SourceFile
+					}
+				}*/
 			} else {
-				return
+				audioElements[altAudioName].domElement.src = this.getAttribute('src')
 			}
 		}
 
@@ -164,7 +176,10 @@
 			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
 
 			if (song === undefined) {
-				console.log('Playlst done')
+				let rootDir = getDirectoryFn($playbackStore[0].SourceFile)
+
+				setNewPlayback(rootDir, $playbackStore, undefined, true)
+
 				return
 			}
 

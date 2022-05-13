@@ -191,6 +191,14 @@ export function compressAlbumArtIPC(rootDir, artSize, forceNewCheck: boolean) {
 	ipcRenderer.invoke('handle-art-compression', rootDir, artSize, forceNewCheck)
 }
 
+export function stopSongUpdateIPC() {
+	return new Promise(resolve => {
+		ipcRenderer.invoke('stop-song-update').then(() => {
+			resolve(null)
+		})
+	})
+}
+
 export function getFileHashIPC(filePath: string) {
 	return new Promise((resolve, reject) => {
 		resolve(ipcRenderer.invoke('get-file-hash', filePath))

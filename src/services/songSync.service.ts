@@ -219,6 +219,7 @@ export function sendSongSyncQueueProgress() {
 	}
 
 	sendWebContents('song-sync-queue-progress', {
+		isSongUpdating: taskQueue.find(task => task.type === 'update') !== undefined,
 		currentLength: taskQueue.length,
 		maxLength: maxTaskQueueLength
 	})
@@ -228,6 +229,14 @@ export function sendSongSyncQueueProgress() {
 			sendSongSyncQueueProgress()
 		}, 1000)
 	}
+}
+
+export function stopSongsUpdating() {
+	return new Promise(resolve => {
+		taskQueue = taskQueue.filter(task => task.type !== 'update')
+
+		resolve(null)
+	})
 }
 
 function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {

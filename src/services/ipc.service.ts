@@ -12,6 +12,7 @@ import {
 	getMaxTaskQueueLength,
 	getTaskQueueLength,
 	sendSongSyncQueueProgress,
+	stopSongsUpdating,
 	watchFolders
 } from './songSync.service'
 import { getPeaks, savePeaks } from './peaks'
@@ -174,6 +175,10 @@ export function loadIPC() {
 
 	ipcMain.handle('get-file-hash', async (evt, filePath) => {
 		return await hashFileFn(filePath)
+	})
+
+	ipcMain.handle('stop-song-update', async evt => {
+		return await stopSongsUpdating()
 	})
 
 	ipcMain.handle('handle-art-compression', async (evt, rootDir, artSize, forceNewCheck) => {

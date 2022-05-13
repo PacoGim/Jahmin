@@ -31,12 +31,11 @@
 	import IpcMiddleware from './middleware/IpcMiddleware.svelte'
 	import EqualizerMiddleware from './middleware/EqualizerMiddleware.svelte'
 
-	import EqualizerService from './svelte-services/EqualizerService.svelte'
-	import PromptService from './svelte-services/PromptService.svelte'
-	import ConfirmService from './svelte-services/ConfirmService.svelte'
-	import RangeInputService from './svelte-services/RangeInputService.svelte'
+	import EqualizerService from './svelte_services/EqualizerService.svelte'
+	import PromptService from './svelte_services/PromptService.svelte'
+	import ConfirmService from './svelte_services/ConfirmService.svelte'
+	import RangeInputService from './svelte_services/RangeInputService.svelte'
 
-	import StatusBar from './layouts/StatusBar.svelte'
 	import Navigation from './layouts/Navigation.svelte'
 	import ControlBar from './layouts/ControlBar.svelte'
 	import HomeLayout from './layouts/main/HomeLayout.svelte'
@@ -47,12 +46,13 @@
 	import AudioPlayer from './layouts/AudioPlayer.svelte'
 	import EventsHandlerMiddleware from './middleware/EventsHandlerMiddleware.svelte'
 	import nextSongFn from './functions/nextSong.fn'
-	import StorageService from './svelte-services/StorageService.svelte'
+	import StorageService from './svelte_services/StorageService.svelte'
 	import { runSongFetchIPC, sendAppReadyIPC } from './services/ipc.service'
 	import { addTaskToQueue, db, getAlbumSongs, getAllSongs } from './db/db'
 	import { liveQuery } from 'dexie'
 	import sortSongsArrayFn from './functions/sortSongsArray.fn'
 	import { sortByConfig, sortOrderConfig } from './store/config.store'
+import StatusBar from './layouts/status_bar/!StatusBar.svelte'
 
 	let appIdleDebounce = getAppIdleDebounce()
 

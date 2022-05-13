@@ -139,6 +139,9 @@ function loadIPC() {
     electron_1.ipcMain.handle('get-file-hash', (evt, filePath) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, hashFile_fn_1.default)(filePath);
     }));
+    electron_1.ipcMain.handle('stop-song-update', (evt) => __awaiter(this, void 0, void 0, function* () {
+        return yield (0, songSync_service_1.stopSongsUpdating)();
+    }));
     electron_1.ipcMain.handle('handle-art-compression', (evt, rootDir, artSize, forceNewCheck) => __awaiter(this, void 0, void 0, function* () {
         (0, albumArt_service_1.compressAlbumArt)(rootDir, artSize, forceNewCheck);
     }));
