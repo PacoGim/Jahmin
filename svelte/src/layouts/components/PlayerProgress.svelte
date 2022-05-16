@@ -1,92 +1,129 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import parseDuration from '../../functions/parseDuration.fn'
 
-	import { currentAudioElement, playingSongStore, updateSongProgress } from '../../store/final.store'
-
-	import type { SongType } from '../../types/song.type'
-
-	export let song: SongType
+	import {
+		currentAudioElement,
+		currentSongDurationStore,
+		currentSongProgressStore,
+		isPlaying,
+		playingSongStore
+	} from '../../store/final.store'
 
 	let pauseDebounce: NodeJS.Timeout = undefined
+	let playerProgressFillElement: HTMLElement = undefined
+	let playerProgressElement: HTMLElement = undefined
 
 	let isMouseDown = false
 	let isMouseIn = false
 
-	onMount(() => {
-		hookPlayerProgressEvents()
-	})
-
 	function hookPlayerProgressEvents() {
-		let playerProgress = document.querySelector('player-progress')
-		let playerForeground: HTMLElement = document.querySelector('player-progress progress-foreground')
+		playerProgressElement.addEventListener('mouseenter', () => (isMouseIn = true))
 
-		playerProgress.addEventListener('mouseenter', () => (isMouseIn = true))
-
-		playerProgress.addEventListener('mouseleave', () => {
+		playerProgressElement.addEventListener('mouseleave', () => {
 			isMouseIn = false
 
 			// Resets also mouse down if the user leaves the area while holding the mouse down then comes back with mouse up the event would still trigger.
 			isMouseDown = false
 		})
 
-		playerProgress.addEventListener('mousedown', () => (isMouseDown = true))
+		playerProgressElement.addEventListener('mousedown', () => (isMouseDown = true))
 
-		playerProgress.addEventListener('mouseup', () => (isMouseDown = false))
+		playerProgressElement.addEventListener('mouseup', () => (isMouseDown = false))
 
-		playerProgress.addEventListener('mousemove', evt => {
-			if (isMouseDown && isMouseIn) applyProgressChange(evt as MouseEvent)
-		})
+		// playerProgressElement.addEventListener('mousemove', evt => {
+		// 	if (isMouseDown && isMouseIn) applyProgressChange(evt as MouseEvent)
+		// })
 
-		playerProgress.addEventListener('click', evt => applyProgressChange(evt as MouseEvent))
+		playerProgressElement.addEventListener('click', evt => applyProgressChange(evt as MouseEvent))
+	}
 
-		function applyProgressChange(evt: MouseEvent) {
-			if (song === undefined) return
+	function applyProgressChange(evt: MouseEvent) {
+		if ($playingSongStore === undefined) return
+		$currentAudioElement.pause()
+		let playerProgressElementWidth = playerProgressElement.scrollWidth
+		let selectedPercent = Math.floor((100 / playerProgressElementWidth) * evt.offsetX)
 
-			$currentAudioElement.pause()
+		if (selectedPercent <= 0) selectedPercent = 0
 
-			playerForeground.classList.add('not-smooth')
+		if (selectedPercent >= 100) selectedPercent = 100
 
-			let playerWidth = playerProgress.scrollWidth
+		let songPercentTimeInSeconds = $currentSongDurationStore / (100 / selectedPercent)
 
-			let selectedPercent = Math.ceil((100 / playerWidth) * evt.offsetX)
+		$currentSongProgressStore = songPercentTimeInSeconds
 
-			if (selectedPercent <= 0) {
-				selectedPercent = 0
-			}
+		setProgress(false, undefined, songPercentTimeInSeconds)
 
-			if (selectedPercent > 100) {
-				selectedPercent = 100
-			}
+		clearTimeout(pauseDebounce)
 
-			let songPercentTime = song.Duration / (100 / selectedPercent)
+		pauseDebounce = setTimeout(() => {
+			$currentAudioElement.currentTime = songPercentTimeInSeconds
 
-			// Allows for the player component to get the new value and update the song duration.
-			$updateSongProgress = songPercentTime
+			setProgress(true, undefined, songPercentTimeInSeconds)
+			$currentAudioElement.play()
+		}, 500)
+	}
 
-			document.documentElement.style.setProperty('--song-time', `${selectedPercent}%`)
+	/*$ : {
+		if ($currentAudioElement) {
+			setProgress(!$currentAudioElement.paused, $currentAudioElement.currentTime, $currentAudioElement.duration)
+		}
+	} */
 
-			clearTimeout(pauseDebounce)
-
-			pauseDebounce = setTimeout(() => {
-				$currentAudioElement.currentTime = songPercentTime
-				playerForeground.classList.remove('not-smooth')
-				$currentAudioElement.play()
-			}, 500)
+	$: {
+		if ($playingSongStore !== undefined) {
+			setProgress($isPlaying, $currentSongProgressStore, $currentSongDurationStore)
 		}
 	}
+
+	function setProgress(isPlaying: boolean, songProgress: number | undefined, songDuration: number | undefined) {
+		// if (songDuration === undefined || isNaN(songDuration)) {
+		// 	songDuration = $playingSongStore.Duration
+		// }
+
+		// if (songProgress === undefined) {
+		// 	songProgress = 0
+		// }
+
+		console.log('setProgress', isPlaying, songDuration, songProgress)
+
+		let songProgressInPercent = 100 / (songDuration / songProgress)
+		let timeLeft = Math.round(songDuration - songProgress)
+
+		document.documentElement.style.setProperty('--progress-transition-duration', '0s')
+
+		playerProgressFillElement.style.minWidth = `${songProgressInPercent}%`
+
+		setTimeout(() => {
+			document.documentElement.style.setProperty('--progress-transition-duration', `${timeLeft}s`)
+
+			if (isPlaying === true) {
+				playerProgressFillElement.style.minWidth = `100%`
+			}
+		}, 1)
+	}
+
+	// function updateProgressFillWidth(songProgressPercent: number) {
+	// 	playerProgressFillElement.style.transitionDuration = '0ms'
+	// 	playerProgressFillElement.style.minWidth = `${songProgressPercent}%`
+	// }
+
+	onMount(() => {
+		playerProgressFillElement = document.querySelector('player-progress player-progress-fill')
+		playerProgressElement = document.querySelector('player-progress')
+		hookPlayerProgressEvents()
+	})
 </script>
 
 <player-progress>
 	<player-gloss />
-	<progress-foreground />
+	<player-progress-fill />
 	<div id="waveform-data" />
 </player-progress>
 
 <style>
 	player-progress {
 		--player-progress-border-radius: 4px;
-
-		cursor: grab;
 
 		display: grid;
 		width: 100%;
@@ -101,6 +138,10 @@
 
 	player-progress:active {
 		cursor: grabbing;
+	}
+
+	player-progress {
+		cursor: grab;
 	}
 
 	player-gloss {
@@ -119,16 +160,16 @@
 		z-index: 2;
 	}
 
-	player-progress progress-foreground {
+	player-progress player-progress-fill {
 		grid-area: 1/1/1/1;
 		z-index: 1;
 		background-color: rgba(0, 0, 0, 0.1);
 
 		width: 0;
-		min-width: var(--song-time);
+		/* min-width: var(--song-time); */
 
 		transition-property: min-width, background-color;
-		transition-duration: 250ms, 300ms;
+		transition-duration: var(--progress-transition-duration), 300ms;
 		transition-timing-function: linear;
 		height: 100%;
 
@@ -143,6 +184,8 @@
 		border-radius: var(--player-progress-border-radius);
 		opacity: var(--waveform-opacity);
 		transition: opacity var(--waveform-transition-duration) linear;
+
+		pointer-events: none;
 	}
 
 	:global(player-progress #waveform-data wave) {

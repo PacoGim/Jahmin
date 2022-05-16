@@ -1,6 +1,13 @@
 import { getAlbumIPC } from '../services/ipc.service'
 import { setWaveSource } from '../services/waveform.service'
-import { albumPlayingDirStore, isSongShuffleEnabledStore, playbackStore, playingSongStore } from '../store/final.store'
+import {
+	albumPlayingDirStore,
+	currentSongDurationStore,
+	currentSongProgressStore,
+	isSongShuffleEnabledStore,
+	playbackStore,
+	playingSongStore
+} from '../store/final.store'
 import { songToPlayUrlStore } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 import applyColorSchemeFn from './applyColorScheme.fn'
@@ -30,6 +37,10 @@ export async function setNewPlayback(
 	}
 
 	playingSongStore.set(songToPlay)
+
+	currentSongDurationStore.set(songToPlay.Duration)
+	currentSongProgressStore.set(0)
+
 	setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration)
 
 	albumPlayingDirStore.set(rootDir)
@@ -40,13 +51,5 @@ export async function setNewPlayback(
 
 	getAlbumColors(rootDir).then(color => {
 		applyColorSchemeFn(color)
-	})
-}
-
-function fetchAlbum(albumId): Promise<SongType[]> {
-	return new Promise(async (resolve, reject) => {
-		let album = await getAlbumIPC(albumId)
-		let songs = album['Songs'].sort((a, b) => a['Track'] - b['Track'])
-		resolve(songs)
 	})
 }

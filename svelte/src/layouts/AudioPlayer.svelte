@@ -17,7 +17,9 @@
 		isPlaying,
 		albumPlayingDirStore,
 		isSongRepeatEnabledStore,
-		isPlaybackRepeatEnabledStore
+		isPlaybackRepeatEnabledStore,
+		currentSongDurationStore,
+		currentSongProgressStore
 	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
@@ -119,6 +121,12 @@
 		$playingSongStore = song
 
 		setWaveSource(song.SourceFile, $albumPlayingDirStore, song.Duration)
+
+		document.documentElement.style.setProperty('--progress-transition-duration', `${song.Duration * 10}ms`)
+
+		// console.log(getComputedStyle(document.body).getPropertyValue('--progress-transition-duration'))
+		localStorage.setItem('LastPlayedSongId', String(song.ID))
+		localStorage.setItem('LastPlayedDir', String(getDirectoryFn(song.SourceFile)))
 	}
 
 	function setCurrentAudioElement(audioElement: HTMLAudioElement) {
@@ -135,6 +143,9 @@
 		const currentTime /* in seconds */ = this.currentTime
 		const duration /* in seconds */ = this.duration
 
+		$currentSongDurationStore = duration
+		$currentSongProgressStore = currentTime
+
 		// Update time only if the current audio element is playing.
 		if (audioElements[this.id].isPlaying === true) {
 			$currentPlayerTime = currentTime
@@ -146,7 +157,9 @@
 			audioElements[altAudioName].isPreloaded = true
 			audioElements[this.id].isPreloaded = false
 
-			if ($isSongRepeatEnabledStore === false) {
+			if ($isSongRepeatEnabledStore === true) {
+				audioElements[altAudioName].domElement.src = this.getAttribute('src')
+			} else {
 				// Gets the current song index.
 				let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
 
@@ -154,15 +167,13 @@
 
 				if (nextValidSong) {
 					audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
-				} /*else {
+				} else {
 					if ($isPlaybackRepeatEnabledStore === true) {
 						let firstValidSong = findNextValidSong(-1)
 
 						audioElements[altAudioName].domElement.src = firstValidSong.SourceFile
 					}
-				}*/
-			} else {
-				audioElements[altAudioName].domElement.src = this.getAttribute('src')
+				}
 			}
 		}
 
@@ -175,17 +186,15 @@
 
 			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
 
-			if (song === undefined) {
+			if (song === undefined && $isPlaybackRepeatEnabledStore === true) {
 				let rootDir = getDirectoryFn($playbackStore[0].SourceFile)
 
 				setNewPlayback(rootDir, $playbackStore, undefined, true)
-
-				return
+			} else if (song !== undefined) {
+				audioElements[this.id].domElement.removeEventListener('timeupdate', handleTimeUpdate)
+				updateCurrentSongData(song)
+				setCurrentAudioElement(audioElements[altAudioName].domElement)
 			}
-
-			updateCurrentSongData(song)
-
-			setCurrentAudioElement(audioElements[altAudioName].domElement)
 		}
 	}
 
@@ -226,6 +235,8 @@
 
 		audioElements.main.domElement = $mainAudioElement
 		audioElements.alt.domElement = $altAudioElement
+
+		$currentAudioElement = $mainAudioElement
 
 		hookEventListeners()
 	})

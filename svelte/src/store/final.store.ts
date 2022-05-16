@@ -99,3 +99,6 @@ export let dbSongsStore: Writable<SongType[]> = writable([])
 export let isSongRepeatEnabledStore: Writable<boolean> = writable(false)
 export let isPlaybackRepeatEnabledStore: Writable<boolean> = writable(false)
 export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)
+
+export let currentSongDurationStore: Writable<number> = writable(0)
+export let currentSongProgressStore: Writable<number> = writable(0)

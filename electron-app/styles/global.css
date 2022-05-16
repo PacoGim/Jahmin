@@ -15,7 +15,7 @@
 
 	--song-list-svlt-height: 0px;
 
-	--progress-bar-fill: 50%;
+	--progress-transition-duration: 10000ms;
 
 	--clamp-width: clamp(500px, 50vw, 700px);
 
