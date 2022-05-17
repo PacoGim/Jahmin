@@ -82,7 +82,7 @@
 		{songTime.currentTime}/{songTime.duration}
 	</song-duration>
 
-	<PlayerProgress song={currentSong} />
+	<PlayerProgress />
 
 	<song-time-left class="song-time">
 		-{songTime.timeLeft}

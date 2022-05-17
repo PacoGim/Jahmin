@@ -99,10 +99,8 @@
 		let sortedSongs = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
 
 		if (evtType === 'dblclick') {
-			setNewPlayback(rootDir, sortedSongs, undefined, true)
+			setNewPlayback(rootDir, sortedSongs, undefined, {playNow:true})
 			saveGroupingConfig()
-
-			$triggerScrollToSongEvent = $playingSongStore.ID
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
 			if ($selectedAlbumDir !== rootDir) {
@@ -119,7 +117,7 @@
 		const songId = +element.dataset.id
 
 		if (evtType === 'dblclick') {
-			setNewPlayback($selectedAlbumDir, $songListStore, songId, true)
+			setNewPlayback($selectedAlbumDir, $songListStore, songId, {playNow:true})
 
 			saveGroupingConfig()
 		}

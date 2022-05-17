@@ -29,7 +29,7 @@ export default function () {
 	}
 
 	if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
-		songToPlayUrlStore.set(previousSong.SourceFile)
+		songToPlayUrlStore.set([previousSong.SourceFile, { playNow: true }])
 	} else {
 		if (currentAudioElementLocal !== undefined) {
 			currentAudioElementLocal.currentTime = 0

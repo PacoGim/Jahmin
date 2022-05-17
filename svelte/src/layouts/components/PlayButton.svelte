@@ -9,7 +9,7 @@
 			if ($currentAudioElement !== undefined && $currentAudioElement.src !== '') {
 				$currentAudioElement.play()
 			} else {
-				$songToPlayUrlStore = $playingSongStore.SourceFile
+				$songToPlayUrlStore = [$playingSongStore.SourceFile,{playNow:true}]
 			}
 		}
 	}

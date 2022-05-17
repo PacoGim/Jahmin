@@ -6,7 +6,8 @@ import {
 	currentSongProgressStore,
 	isSongShuffleEnabledStore,
 	playbackStore,
-	playingSongStore
+	playingSongStore,
+	triggerScrollToSongEvent
 } from '../store/final.store'
 import { songToPlayUrlStore } from '../store/player.store'
 import type { SongType } from '../types/song.type'
@@ -18,7 +19,7 @@ export async function setNewPlayback(
 	rootDir: string,
 	playbackSongs: SongType[],
 	songIdToPlay: number | undefined,
-	playNow: boolean
+	{ playNow }: { playNow: boolean }
 ) {
 	let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0]
 
@@ -45,9 +46,9 @@ export async function setNewPlayback(
 
 	albumPlayingDirStore.set(rootDir)
 
-	if (playNow === true) {
-		songToPlayUrlStore.set(songToPlay.SourceFile)
-	}
+	songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }])
+
+	triggerScrollToSongEvent.set(songToPlay.ID)
 
 	getAlbumColors(rootDir).then(color => {
 		applyColorSchemeFn(color)

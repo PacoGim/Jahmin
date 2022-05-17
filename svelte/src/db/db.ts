@@ -12,9 +12,9 @@ export class JahminDb extends Dexie {
 	constructor() {
 		super('JahminDb')
 
-		this.version(1).stores({
+		this.version(2).stores({
 			songs:
-				'ID,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,Date_Year,Date_Month,Date_Day,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
+				'ID,PlayCount,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,Date_Year,Date_Month,Date_Day,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
 		})
 	}
 }
@@ -189,6 +189,17 @@ export function bulkGetSongs(ids: number[]): Promise<SongType[]> {
 				reject(err)
 			})
 	})
+}
+
+export function incrementPlayCount(id: number) {
+	db.songs
+		.where('ID')
+		.equals(id)
+		.first()
+		.then(song => {
+			song.PlayCount = song.PlayCount !== undefined ? song.PlayCount + 1 : 1
+			db.songs.put(song).then(() => updateVersion())
+		})
 }
 
 export function getAlbumSongs(rootDir: string): Promise<SongType[]> {

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { incrementPlayCount } from '../db/db'
 	import getDirectoryFn from '../functions/getDirectory.fn'
+	import previousSongFn from '../functions/previousSong.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import notifyService from '../services/notify.service'
 	import { setWaveSource } from '../services/waveform.service'
@@ -54,7 +56,7 @@
 		}
 	}
 
-	$: playSong($songToPlayUrlStore)
+	$: playSong($songToPlayUrlStore[0] /* Song Url to Play */, $songToPlayUrlStore[1] /* Play now boolean */)
 
 	$: {
 		if (audioElements) {
@@ -71,7 +73,7 @@
 		}
 	}
 
-	function playSong(songUrl: string | undefined) {
+	function playSong(songUrl: string | undefined, { playNow }) {
 		if (songUrl) {
 			$songToPlayUrlStore = undefined
 
@@ -90,7 +92,7 @@
 
 				if (nextSong !== undefined) {
 					// If an enabled song is found, play it.
-					return playSong(nextSong.SourceFile)
+					return playSong(nextSong.SourceFile, { playNow: true })
 				} else {
 					// If no enabled songs found, notify the user.
 					return notifyService.error('No enabled songs found')
@@ -107,13 +109,15 @@
 			// Stops the next audio element from playing.
 			$altAudioElement.src = ''
 
-			// Starts playing the song.
-			$mainAudioElement.play().catch(error => {})
+			if (playNow) {
+				// Starts playing the song.
+				$mainAudioElement.play().catch(error => {})
 
-			audioElements.main.isPlaying = true
-			audioElements.main.isPreloaded = true
-			audioElements.alt.isPlaying = false
-			audioElements.alt.isPreloaded = false
+				audioElements.main.isPlaying = true
+				audioElements.main.isPreloaded = true
+				audioElements.alt.isPlaying = false
+				audioElements.alt.isPreloaded = false
+			}
 		}
 	}
 
@@ -122,9 +126,6 @@
 
 		setWaveSource(song.SourceFile, $albumPlayingDirStore, song.Duration)
 
-		document.documentElement.style.setProperty('--progress-transition-duration', `${song.Duration * 10}ms`)
-
-		// console.log(getComputedStyle(document.body).getPropertyValue('--progress-transition-duration'))
 		localStorage.setItem('LastPlayedSongId', String(song.ID))
 		localStorage.setItem('LastPlayedDir', String(getDirectoryFn(song.SourceFile)))
 	}
@@ -151,50 +152,70 @@
 			$currentPlayerTime = currentTime
 		}
 
-		////////// AUDIO PRELOADS HERE \\\\\\\\\\
+		////////// Audio Preloads Here \\\\\\\\\\
 		// If the current time is greater than one second, then the next audio element is preloaded.
 		if (currentTime > 1 && audioElements[altAudioName].isPreloaded === false) {
 			audioElements[altAudioName].isPreloaded = true
 			audioElements[this.id].isPreloaded = false
 
-			if ($isSongRepeatEnabledStore === true) {
-				audioElements[altAudioName].domElement.src = this.getAttribute('src')
+			// Gets the current song index.
+			let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
+
+			let nextValidSong = findNextValidSong(currentSongIndex)
+
+			if (nextValidSong) {
+				audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
 			} else {
-				// Gets the current song index.
-				let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
+				if ($isPlaybackRepeatEnabledStore === true) {
+					let firstValidSong = findNextValidSong(-1)
 
-				let nextValidSong = findNextValidSong(currentSongIndex)
-
-				if (nextValidSong) {
-					audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
+					audioElements[altAudioName].domElement.src = firstValidSong.SourceFile
 				} else {
-					if ($isPlaybackRepeatEnabledStore === true) {
-						let firstValidSong = findNextValidSong(-1)
-
-						audioElements[altAudioName].domElement.src = firstValidSong.SourceFile
-					}
+					audioElements[altAudioName].domElement.src = ''
 				}
 			}
 		}
 
-		////////// AUDIO PRE PLAYS HERE \\\\\\\\\\
+		////////// Audio Pre Plays Here \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
-		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
-			audioElements[altAudioName].isPlaying = true
+		if (
+			$isSongRepeatEnabledStore === false &&
+			audioElements[altAudioName].isPlaying === false &&
+			currentTime >= duration - smoothTimeMs
+		) {
+			incrementPlayCount(
+				$playbackStore.find(song => song.SourceFile === audioElements[this.id].domElement.getAttribute('src')).ID
+			)
+
 			audioElements[this.id].isPlaying = false
-			audioElements[altAudioName].domElement.play().catch(error => {})
+
+			audioElements[altAudioName].domElement
+				.play()
+				.then(() => {
+					audioElements[altAudioName].isPlaying = true
+				})
+				.catch(() => {})
 
 			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
 
 			if (song === undefined && $isPlaybackRepeatEnabledStore === true) {
 				let rootDir = getDirectoryFn($playbackStore[0].SourceFile)
 
-				setNewPlayback(rootDir, $playbackStore, undefined, true)
+				setNewPlayback(rootDir, $playbackStore, undefined, { playNow: true })
 			} else if (song !== undefined) {
 				audioElements[this.id].domElement.removeEventListener('timeupdate', handleTimeUpdate)
 				updateCurrentSongData(song)
 				setCurrentAudioElement(audioElements[altAudioName].domElement)
+			} else if (song === undefined) {
+				// Resets the last played song, so the song gets back to progress 0 and can be played again just by pressing the play button.
+
+				audioElements[altAudioName].isPlaying = false
+				$playingSongStore = { ...$playingSongStore }
+				$currentSongProgressStore = 0
 			}
+		} else if ($isSongRepeatEnabledStore === true && currentTime >= duration) {
+			$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: true }]
+			$currentSongProgressStore = 0
 		}
 	}
 
@@ -226,6 +247,14 @@
 
 		$altAudioElement.addEventListener('play', () => {
 			audioElements.alt.isPlaying = true
+		})
+
+		$mainAudioElement.addEventListener('ended', () => {
+			audioElements.main.isPlaying = false
+		})
+
+		$altAudioElement.addEventListener('ended', () => {
+			audioElements.alt.isPlaying = false
 		})
 	}
 

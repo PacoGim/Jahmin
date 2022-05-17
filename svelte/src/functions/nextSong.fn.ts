@@ -26,7 +26,7 @@ export default function () {
 
 	if (nextSong === undefined) return
 
-	songToPlayUrlStore.set(nextSong.SourceFile)
+	songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }])
 
 	triggerScrollToSongEvent.set(nextSong.ID)
 }

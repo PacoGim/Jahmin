@@ -50,11 +50,9 @@
 
 			$songListStore = sortSongsArrayFn(songs, $sortByConfig, $sortOrderConfig)
 
-			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, false)
+			setNewPlayback(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
 
 			scrollToAlbumFn(lastPlayedDir, 'smooth-scroll')
-
-			$triggerScrollToSongEvent = lastPlayedSongId
 		})
 	}
 

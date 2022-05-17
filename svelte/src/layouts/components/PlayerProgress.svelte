@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import parseDuration from '../../functions/parseDuration.fn'
 
 	import {
 		currentAudioElement,
@@ -9,6 +8,7 @@
 		isPlaying,
 		playingSongStore
 	} from '../../store/final.store'
+	import type { SongType } from '../../types/song.type'
 
 	let pauseDebounce: NodeJS.Timeout = undefined
 	let playerProgressFillElement: HTMLElement = undefined
@@ -16,6 +16,22 @@
 
 	let isMouseDown = false
 	let isMouseIn = false
+
+	$: {
+		if (playerProgressFillElement !== undefined) {
+			if ($isPlaying) {
+				resumeProgress()
+			} else {
+				stopProgress()
+			}
+		}
+	}
+
+	$: {
+		if ($playingSongStore !== undefined) {
+			setProgressFromNewSong($playingSongStore)
+		}
+	}
 
 	function hookPlayerProgressEvents() {
 		playerProgressElement.addEventListener('mouseenter', () => (isMouseIn = true))
@@ -31,16 +47,18 @@
 
 		playerProgressElement.addEventListener('mouseup', () => (isMouseDown = false))
 
-		// playerProgressElement.addEventListener('mousemove', evt => {
-		// 	if (isMouseDown && isMouseIn) applyProgressChange(evt as MouseEvent)
-		// })
+		playerProgressElement.addEventListener('mousemove', evt => {
+			if (isMouseDown && isMouseIn) applyProgressChange(evt as MouseEvent)
+		})
 
 		playerProgressElement.addEventListener('click', evt => applyProgressChange(evt as MouseEvent))
 	}
 
 	function applyProgressChange(evt: MouseEvent) {
 		if ($playingSongStore === undefined) return
+
 		$currentAudioElement.pause()
+
 		let playerProgressElementWidth = playerProgressElement.scrollWidth
 		let selectedPercent = Math.floor((100 / playerProgressElementWidth) * evt.offsetX)
 
@@ -52,61 +70,41 @@
 
 		$currentSongProgressStore = songPercentTimeInSeconds
 
-		setProgress(false, undefined, songPercentTimeInSeconds)
+		setProgress(songPercentTimeInSeconds, $playingSongStore.Duration)
 
 		clearTimeout(pauseDebounce)
 
 		pauseDebounce = setTimeout(() => {
 			$currentAudioElement.currentTime = songPercentTimeInSeconds
-
-			setProgress(true, undefined, songPercentTimeInSeconds)
-			$currentAudioElement.play()
+			$currentAudioElement.play().catch(err => {})
 		}, 500)
 	}
 
-	/*$ : {
-		if ($currentAudioElement) {
-			setProgress(!$currentAudioElement.paused, $currentAudioElement.currentTime, $currentAudioElement.duration)
-		}
-	} */
-
-	$: {
-		if ($playingSongStore !== undefined) {
-			setProgress($isPlaying, $currentSongProgressStore, $currentSongDurationStore)
-		}
+	function resumeProgress() {
+		playerProgressFillElement.style.animationPlayState = 'running'
 	}
 
-	function setProgress(isPlaying: boolean, songProgress: number | undefined, songDuration: number | undefined) {
-		// if (songDuration === undefined || isNaN(songDuration)) {
-		// 	songDuration = $playingSongStore.Duration
-		// }
+	function stopProgress() {
+		playerProgressFillElement.style.animationPlayState = 'paused'
+	}
 
-		// if (songProgress === undefined) {
-		// 	songProgress = 0
-		// }
-
-		console.log('setProgress', isPlaying, songDuration, songProgress)
-
+	function setProgress(songProgress: number | undefined, songDuration: number | undefined) {
 		let songProgressInPercent = 100 / (songDuration / songProgress)
 		let timeLeft = Math.round(songDuration - songProgress)
 
-		document.documentElement.style.setProperty('--progress-transition-duration', '0s')
-
-		playerProgressFillElement.style.minWidth = `${songProgressInPercent}%`
+		playerProgressFillElement.style.animationName = 'reset-fill-progress'
 
 		setTimeout(() => {
-			document.documentElement.style.setProperty('--progress-transition-duration', `${timeLeft}s`)
-
-			if (isPlaying === true) {
-				playerProgressFillElement.style.minWidth = `100%`
-			}
+			playerProgressFillElement.style.minWidth = `${songProgressInPercent}%`
+			playerProgressFillElement.style.animationDuration = `${timeLeft}s`
+			playerProgressFillElement.style.animationName = 'fill-progress'
+			resumeProgress()
 		}, 1)
 	}
 
-	// function updateProgressFillWidth(songProgressPercent: number) {
-	// 	playerProgressFillElement.style.transitionDuration = '0ms'
-	// 	playerProgressFillElement.style.minWidth = `${songProgressPercent}%`
-	// }
+	function setProgressFromNewSong(song: SongType) {
+		setProgress(0, song.Duration)
+	}
 
 	onMount(() => {
 		playerProgressFillElement = document.querySelector('player-progress player-progress-fill')
@@ -168,13 +166,31 @@
 		width: 0;
 		/* min-width: var(--song-time); */
 
-		transition-property: min-width, background-color;
-		transition-duration: var(--progress-transition-duration), 300ms;
+		transition-property: background-color;
+		transition-duration: 300ms;
 		transition-timing-function: linear;
+
+		animation-name: fill-progress;
+		animation-timing-function: linear;
+		animation-play-state: paused;
+		animation-fill-mode: forwards;
+
 		height: 100%;
 
 		box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.25), inset -1px 0px 5px 0px rgba(0, 0, 0, 0.25);
 		border-right: 2px solid #fff;
+	}
+
+	@keyframes -global-fill-progress {
+		to {
+			min-width: 100%;
+		}
+	}
+
+	@keyframes -global-reset-fill-progress {
+		to {
+			min-width: 0%;
+		}
 	}
 
 	player-progress #waveform-data {
