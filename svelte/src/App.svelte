@@ -52,7 +52,7 @@
 	import { liveQuery } from 'dexie'
 	import sortSongsArrayFn from './functions/sortSongsArray.fn'
 	import { sortByConfig, sortOrderConfig } from './store/config.store'
-import StatusBar from './layouts/status_bar/!StatusBar.svelte'
+	import StatusBar from './layouts/status_bar/!StatusBar.svelte'
 
 	let appIdleDebounce = getAppIdleDebounce()
 
@@ -71,6 +71,10 @@ import StatusBar from './layouts/status_bar/!StatusBar.svelte'
 	}
 
 	onMount(() => {
+		setTimeout(() => {
+			$layoutToShow = 'Config'
+		}, 1000)
+
 		iziToast.settings({ position: 'topRight' })
 
 		runThemeHandler()

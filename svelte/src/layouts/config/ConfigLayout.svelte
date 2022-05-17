@@ -4,6 +4,7 @@
 	import AppearanceConfig from './appearance/!AppearanceConfig.svelte'
 	import EqualizerConfig from './equalizer/!EqualizerConfig.svelte'
 	import LibraryConfig from './library/!LibraryConfig.svelte'
+	import SongListConfig from './song_list/!SongListConfig.svelte'
 
 	const options = [
 		{
@@ -17,6 +18,10 @@
 		{
 			name: 'Library',
 			component: LibraryConfig
+		},
+		{
+			name: 'Song List',
+			component: SongListConfig
 		}
 	]
 
@@ -35,7 +40,7 @@
 	}
 
 	onMount(() => {
-		let selectedConfigOptionName = sessionStorage.getItem('selectedConfigOptionName') || 'Appearance'
+		let selectedConfigOptionName = sessionStorage.getItem('selectedConfigOptionName') || 'Song List'
 
 		if (selectedConfigOptionName) {
 			loadComponent(selectedConfigOptionName)
