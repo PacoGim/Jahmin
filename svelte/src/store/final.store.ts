@@ -102,3 +102,11 @@ export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)
 
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
+
+export let selectedTagsStore: Writable<{ value: string; isExpanded: boolean; align: string }[]> = writable([
+	{ value: 'Album', isExpanded: false, align: 'center' },
+	{ value: 'Artist', isExpanded: true, align: 'center' },
+	{ value: 'Genre', isExpanded: false, align: 'center' },
+	{ value: 'DiscNumber', isExpanded: false, align: 'center' },
+	{ value: 'Track', isExpanded: false, align: 'center' },
+])
