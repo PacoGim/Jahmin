@@ -40,7 +40,7 @@
 	}
 
 	onMount(() => {
-		let selectedConfigOptionName = sessionStorage.getItem('selectedConfigOptionName') || 'Song List Tags'
+		let selectedConfigOptionName = sessionStorage.getItem('selectedConfigOptionName') || 'Appearance'
 
 		if (selectedConfigOptionName) {
 			loadComponent(selectedConfigOptionName)

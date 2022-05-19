@@ -214,6 +214,7 @@
 				$currentSongProgressStore = 0
 			}
 		} else if ($isSongRepeatEnabledStore === true && currentTime >= duration) {
+			incrementPlayCount($playbackStore.find(song => song.SourceFile === $playingSongStore.SourceFile).ID)
 			$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: true }]
 			$currentSongProgressStore = 0
 		}

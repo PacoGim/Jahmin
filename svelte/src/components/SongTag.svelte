@@ -1,5 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte'
+	import tippy from 'tippy.js'
+	import generateId from '../functions/generateId.fn'
 	import parseDuration from '../functions/parseDuration.fn'
+	import tippyService from '../services/tippy.service'
 
 	import type { SelectedTagNameType } from '../types/selectedTag.type'
 
@@ -24,6 +28,13 @@
 			data = data.toFixed(0) + ' Hz'
 		} else if (tagName === 'Size') {
 			data = truncateString(bytesToMebibytes(data)) + ' MiB'
+		} else if (tagName === 'PlayCount') {
+			if (data > 999) {
+				tippy('[data-tippy-content]')
+				// data = '•••'
+			} else {
+				data = data || '0'
+			}
 		}
 	}
 
@@ -36,9 +47,17 @@
 
 		return `${value[0]}.${value[1].substring(0, 2)}`
 	}
+
+	onMount(() => {
+		applyChangeToTag()
+	})
 </script>
 
-<span style="text-align: {align};{customStyle}">{data}</span>
+{#if tagName === 'PlayCount'}
+	<span data-tippy-content={data} style="text-align: {align};{customStyle}">{data}</span>
+{:else}
+	<span style="text-align: {align};{customStyle}">{data}</span>
+{/if}
 
 <style>
 	span {

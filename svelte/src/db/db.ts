@@ -4,7 +4,7 @@ import getDirectoryFn from '../functions/getDirectory.fn'
 import { hash } from '../functions/hashString.fn'
 import { dbSongsStore, dbVersionStore } from '../store/final.store'
 import type { AlbumType } from '../types/album.type'
-import type { SongType } from '../types/song.type'
+import type { PartialSongType, SongType } from '../types/song.type'
 
 export class JahminDb extends Dexie {
 	songs!: Table<SongType>
@@ -93,7 +93,7 @@ function bulkInsertSongs(songs: SongType[]): Promise<undefined> {
 	})
 }
 
-export function bulkUpdateSongs(songs: { id: string; newTags: SongType }[]) {
+export function bulkUpdateSongs(songs: { id: string | number; newTags: PartialSongType }[]) {
 	return new Promise((resolve, reject) => {
 		// Will contain songs grouped by the same new tags to update.
 		let updateGroups = []
@@ -129,7 +129,8 @@ export function bulkUpdateSongs(songs: { id: string; newTags: SongType }[]) {
 
 		// When all promises are done, then update version, catch errors and finally resolve.
 		Promise.all(bulkUpdatePromises)
-			.then(() => {
+			.then(x => {
+				console.log(x)
 				updateVersion()
 			})
 			.catch(err => {

@@ -23,3 +23,4 @@ export type SelectedTagNameType =
 	| 'Duration'
 	| 'SampleRate'
 	| 'Size'
+	| 'PlayCount'

@@ -25,6 +25,20 @@
 	let isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
 	let gridStyle = ''
 
+	let titleTagStyle = 'display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;overflow:hidden;max-height:22px;'
+	let playCountTagStyle = `
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size:.9rem;
+		width: 36px;
+		height: 20px;
+		background-color: #fff;
+		border-radius: 25px;
+		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+		color: var(--low-color);
+	`
+
 	$: {
 		isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
 	}
@@ -82,10 +96,12 @@
 		{:else if tag.value === 'Title'}
 			<SongTag
 				data="{song[tag.value] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
-				customStyle="display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;overflow:hidden;max-height:22px;"
+				customStyle={titleTagStyle}
 				tagName={tag.value}
 				align={tag?.align?.toLowerCase()}
 			/>
+		{:else if tag.value === 'PlayCount'}
+			<SongTag data={song[tag.value]} customStyle={playCountTagStyle} tagName={tag.value} align={tag?.align?.toLowerCase()} />
 		{:else}
 			<SongTag data={song[tag.value] || ''} tagName={tag.value} align={tag?.align?.toLowerCase()} />
 		{/if}

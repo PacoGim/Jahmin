@@ -84,6 +84,7 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
+		margin: 0 .5rem;
 	}
 
 	button {

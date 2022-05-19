@@ -10,7 +10,7 @@ const defaultOptions = {
 	allowHTML: true
 }
 
-export default function (id: string, query: string, options: any) {
+export default function (id: string, query: string | Element, options: any) {
 	let tippyInstance = tippyInstances.get(id)
 
 	// If exists, update content.

@@ -101,5 +101,3 @@ export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)
 
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
-
-// export let selectedTagsStore: Writable<SelectedTagType[]> = writable([])

@@ -48,7 +48,7 @@
 	import nextSongFn from './functions/nextSong.fn'
 	import StorageService from './svelte_services/StorageService.svelte'
 	import { runSongFetchIPC, sendAppReadyIPC } from './services/ipc.service'
-	import { addTaskToQueue, db, getAlbumSongs, getAllSongs } from './db/db'
+	import { addTaskToQueue, bulkUpdateSongs, db, getAlbumSongs, getAllSongs } from './db/db'
 	import { liveQuery } from 'dexie'
 	import sortSongsArrayFn from './functions/sortSongsArray.fn'
 	import { sortByConfig, sortOrderConfig } from './store/config.store'
@@ -71,10 +71,6 @@
 	}
 
 	onMount(() => {
-		setTimeout(() => {
-			$layoutToShow = 'Config'
-		}, 1000)
-
 		iziToast.settings({ position: 'topRight' })
 
 		runThemeHandler()
