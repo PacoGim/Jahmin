@@ -4,7 +4,7 @@
 	import type { SelectedTagNameType } from '../types/selectedTag.type'
 
 	export let align
-	export let tagName: SelectedTagNameType
+	export let tagName: SelectedTagNameType | any
 	export let data
 	export let customStyle = ''
 

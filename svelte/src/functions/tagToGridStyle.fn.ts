@@ -1,13 +1,13 @@
 import type { SelectedTagType } from '../types/selectedTag.type'
 
-export default function (tags: SelectedTagType[]) {
+export default function (tags: SelectedTagType[] | any) {
 	let gridStyle = ''
 
-	if (tags.length>0) {
+	if (tags.length > 0) {
 		tags.forEach(tag => {
-			if (tag.size === 'Collapse') {
+			if (tag.isExpanded === false) {
 				gridStyle += ' max-content'
-			} else if (tag.size === 'Expand') {
+			} else if (tag.isExpanded === true) {
 				gridStyle += ' auto'
 			}
 		})

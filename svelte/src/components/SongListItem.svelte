@@ -77,17 +77,17 @@
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#each $songListTagsConfig as tag, index (index)}
-		{#if tag.name === 'Rating'}
+		{#if tag.value === 'Rating'}
 			<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
-		{:else if tag.name === 'Title'}
+		{:else if tag.value === 'Title'}
 			<SongTag
-				data="{song[tag.name] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
+				data="{song[tag.value] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
 				customStyle="display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;overflow:hidden;max-height:22px;"
-				tagName={tag.name}
+				tagName={tag.value}
 				align={tag?.align?.toLowerCase()}
 			/>
 		{:else}
-			<SongTag data={song[tag.name] || ''} tagName={tag.name} align={tag?.align?.toLowerCase()} />
+			<SongTag data={song[tag.value] || ''} tagName={tag.value} align={tag?.align?.toLowerCase()} />
 		{/if}
 	{/each}
 </song-list-item>

@@ -1,58 +1,62 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
+	import songListTagsVar from '../../../global/songListTags.var'
+	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
 	const dispatch = createEventDispatcher()
 
 	import MoveIcon from '../../../icons/MoveIcon.svelte'
-	import { selectedTagsStore } from '../../../store/final.store'
+	import { songListTagsConfig } from '../../../store/config.store'
 
 	export let tag
 	export let index
-	export let possibleTags
 
 	function getTagNameFromValue(value: string) {
-		return possibleTags.find(tag => tag.value === value).name
+		return songListTagsVar.find(tag => tag.value === value).name
+	}
+
+	function removeTagFromTagList(tagIndex: number) {
+		$songListTagsConfig.splice(tagIndex, 1)
+		$songListTagsConfig = $songListTagsConfig
 	}
 </script>
 
 <selected-tag-component
 	draggable
 	data-index={index}
-	on:dragenter={evt => {
-		dispatch('dragEnter', evt)
-	}}
-	on:dragend={evt => {
-		dispatch('dragEnd', evt)
-	}}
+	on:dragover={evt => evt.preventDefault()}
 	on:dragstart={evt => {
 		dispatch('dragStart', evt)
 	}}
+	on:drop={evt => {
+		dispatch('dragDrop', evt)
+	}}
 >
 	<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
-	<select bind:value={$selectedTagsStore[index].value}>
-		{#each possibleTags as tag, index (index)}
+	<select bind:value={$songListTagsConfig[index].value}>
+		{#each songListTagsVar as tag, index (index)}
 			<option value={tag.value}>{tag.name}</option>
 		{/each}
 	</select>
 	<tag-empty-space />
-	<tag-expand data-is-expanded={$selectedTagsStore[index].isExpanded}>
-		<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$selectedTagsStore[index].isExpanded} />
+	<tag-expand data-is-expanded={$songListTagsConfig[index].isExpanded}>
+		<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$songListTagsConfig[index].isExpanded} />
 		<label for="{index}-{tag.value}-expand">Expanded</label>
 	</tag-expand>
 
-	<tag-aligns data-is-active={$selectedTagsStore[index].isExpanded}>
+	<tag-aligns data-is-active={$songListTagsConfig[index].isExpanded}>
 		<tag-align-left class="tag-align">
-			<input id="{index}-{tag.value}-l" type="radio" bind:group={$selectedTagsStore[index].align} value="left" />
+			<input id="{index}-{tag.value}-l" type="radio" bind:group={$songListTagsConfig[index].align} value="left" />
 			<label for="{index}-{tag.value}-l">L</label>
 		</tag-align-left>
 
 		<tag-align-center class="tag-align">
-			<input id="{index}-{tag.value}-c" type="radio" bind:group={$selectedTagsStore[index].align} value="center" />
+			<input id="{index}-{tag.value}-c" type="radio" bind:group={$songListTagsConfig[index].align} value="center" />
 			<label for="{index}-{tag.value}-c">C</label>
 		</tag-align-center>
 
 		<tag-align-right class="tag-align">
-			<input id="{index}-{tag.value}-r" type="radio" bind:group={$selectedTagsStore[index].align} value="right" />
+			<input id="{index}-{tag.value}-r" type="radio" bind:group={$songListTagsConfig[index].align} value="right" />
 			<label for="{index}-{tag.value}-r">R</label>
 		</tag-align-right>
 	</tag-aligns>
@@ -60,19 +64,29 @@
 	<move-icon>
 		<MoveIcon style="height: 1.25rem;fill:var(--color-fg-1);margin-left: 1rem;" />
 	</move-icon>
+
+	<delete-icon
+		on:click={() => {
+			removeTagFromTagList(index)
+		}}
+	>
+		<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);margin-left: 1rem;" />
+	</delete-icon>
 </selected-tag-component>
 
 <style>
 	selected-tag-component {
 		display: grid;
 		align-items: center;
-		grid-template-columns: max-content auto repeat(3, max-content);
+		grid-template-columns: max-content auto repeat(4, max-content);
 		cursor: grab;
 		padding: 0.5rem 1rem;
 		margin: 1rem 0;
 		background-color: var(--color-bg-2);
+	}
 
-    transition: transform 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+	:global(selected-tag-component.slow-transition) {
+		transition: transform 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
 	selected-tag-component:active {
@@ -185,6 +199,13 @@
 	}
 
 	selected-tag-component move-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	selected-tag-component delete-icon {
+		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;

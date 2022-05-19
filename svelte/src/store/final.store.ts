@@ -1,6 +1,5 @@
 import { writable, Writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
-import type { AlbumArtType } from '../types/albumArt.type'
 import type { SongType } from '../types/song.type'
 
 export let selectedGroupByStore: Writable<string> = writable('')
@@ -103,10 +102,4 @@ export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
 
-export let selectedTagsStore: Writable<{ value: string; isExpanded: boolean; align: string }[]> = writable([
-	{ value: 'Album', isExpanded: false, align: 'center' },
-	{ value: 'Artist', isExpanded: true, align: 'center' },
-	{ value: 'Genre', isExpanded: false, align: 'center' },
-	{ value: 'DiscNumber', isExpanded: false, align: 'center' },
-	{ value: 'Track', isExpanded: false, align: 'center' },
-])
+// export let selectedTagsStore: Writable<SelectedTagType[]> = writable([])

@@ -113,24 +113,24 @@ function getDefaultConfigFile() {
         },
         songListTags: [
             {
-                align: 'Left',
-                name: 'Track',
-                size: 'Collapse'
+                align: 'left',
+                value: 'Track',
+                isExpanded: false
             },
             {
-                align: 'Left',
-                name: 'Title',
-                size: 'Expand'
+                align: 'center',
+                value: 'Title',
+                isExpanded: true
             },
             {
-                align: 'Left',
-                name: 'Rating',
-                size: 'Collapse'
+                align: 'left',
+                value: 'Rating',
+                isExpanded: false
             },
             {
-                align: 'Left',
-                name: 'Duration',
-                size: 'Collapse'
+                align: 'left',
+                value: 'Duration',
+                isExpanded: false
             }
         ]
     };

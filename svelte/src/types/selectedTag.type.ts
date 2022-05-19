@@ -1,8 +1,7 @@
 export type SelectedTagType = {
-	name: SelectedTagNameType
-
-	size: 'Collapse' | 'Expand'
-	align: 'Left' | 'Center' | 'Right'
+	value: SelectedTagNameType
+	isExpanded: boolean
+	align: 'left' | 'center' | 'right'
 }
 
 export type SelectedTagNameType =

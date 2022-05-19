@@ -1,4 +1,4 @@
-export default function isJson(str: string): boolean {
+export default function isJson(str: string|object): boolean {
 	try {
 		if (typeof str === 'object') {
 			return true
