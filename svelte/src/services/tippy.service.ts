@@ -2,7 +2,7 @@ import tippy, { roundArrow, Instance, Props } from 'tippy.js'
 
 let tippyInstances = new Map<string, Instance<Props>[]>()
 
-const defaultOptions = {
+export const defaultTippyOptions = {
 	theme: 'dynamic',
 	arrow: roundArrow,
 	animation: 'scale-subtle',
@@ -20,6 +20,6 @@ export default function (id: string, query: string | Element, options: any) {
 		})
 		// Otherwise, create new instance.
 	} else {
-		tippyInstances.set(id, tippy(query, Object.assign(defaultOptions, options)))
+		tippyInstances.set(id, tippy(query, Object.assign(defaultTippyOptions, options)))
 	}
 }

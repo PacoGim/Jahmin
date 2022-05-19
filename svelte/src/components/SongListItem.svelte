@@ -91,23 +91,24 @@
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#each $songListTagsConfig as tag, index (index)}
-		{#if tag.value === 'Rating'}
-			<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
-		{:else if tag.value === 'Title'}
-			<SongTag
-				data="{song[tag.value] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
-				customStyle={titleTagStyle}
-				tagName={tag.value}
-				align={tag?.align?.toLowerCase()}
-			/>
-		{:else if tag.value === 'PlayCount'}
-			<SongTag data={song[tag.value]} customStyle={playCountTagStyle} tagName={tag.value} align={tag?.align?.toLowerCase()} />
-		{:else}
-			<SongTag data={song[tag.value] || ''} tagName={tag.value} align={tag?.align?.toLowerCase()} />
-		{/if}
+		<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} />
 	{/each}
 </song-list-item>
 
+<!--
+	{#if tag.value === 'Rating'}
+		<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
+	{:else if tag.value === 'Title'}
+		<SongTag
+			data="{song[tag.value] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
+			customStyle={titleTagStyle}
+			tagName={tag.value}
+			align={tag?.align?.toLowerCase()}
+		/>
+	{:else if tag.value === 'PlayCount'}
+		<SongTag data={song[tag.value]} customStyle={playCountTagStyle} tagName={tag.value} align={tag?.align?.toLowerCase()} />
+	{:else}
+	{/if} -->
 <style>
 	song-list-item {
 		position: relative;

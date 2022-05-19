@@ -3,21 +3,21 @@
 	import tippy from 'tippy.js'
 	import generateId from '../functions/generateId.fn'
 	import parseDuration from '../functions/parseDuration.fn'
-	import tippyService from '../services/tippy.service'
+	import tippyService, { defaultTippyOptions } from '../services/tippy.service'
 
 	import type { SelectedTagNameType } from '../types/selectedTag.type'
 
 	export let align
 	export let tagName: SelectedTagNameType | any
-	export let data
-	export let customStyle = ''
+	export let tagValue: any
+	let originalTagValue: any
 
-	$: {
+	/* 	$: {
 		data
 		applyChangeToTag()
-	}
+	} */
 
-	function applyChangeToTag() {
+	/*function applyChangeToTag() {
 		if (tagName === 'Duration') {
 			data = parseDuration(data)
 		} else if (tagName === 'Rating') {
@@ -36,7 +36,7 @@
 				data = data || '0'
 			}
 		}
-	}
+	}*/
 
 	function bytesToMebibytes(bytesValue: number) {
 		return bytesValue / Math.pow(2, 20)
@@ -48,15 +48,27 @@
 		return `${value[0]}.${value[1].substring(0, 2)}`
 	}
 
-	onMount(() => {
-		applyChangeToTag()
-	})
+	function parseTag(tagName, tagValue) {
+		if (tagName === 'Duration') return parseDuration(tagValue)
+
+		if (tagName === 'PlayCount' && tagValue > 999) {
+			originalTagValue = tagValue
+
+			setTimeout(() => {
+				tippy('[data-tippy-content]', defaultTippyOptions)
+			}, 1000)
+
+			return '•••'
+		}
+
+		return tagValue
+	}
 </script>
 
 {#if tagName === 'PlayCount'}
-	<span data-tippy-content={data} style="text-align: {align};{customStyle}">{data}</span>
+	<span data-tippy-content={originalTagValue} style="text-align: {align};">{parseTag(tagName, tagValue)}</span>
 {:else}
-	<span style="text-align: {align};{customStyle}">{data}</span>
+	<span style="text-align: {align}">{parseTag(tagName, tagValue)}</span>
 {/if}
 
 <style>
