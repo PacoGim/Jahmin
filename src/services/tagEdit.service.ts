@@ -31,7 +31,6 @@ async function processQueue() {
 	let extension = task.sourceFile.split('.').pop()
 	let result
 
-	//IMPORTANT Do something if error
 	switch (extension) {
 		case 'm4a':
 			result = await writeAacTags(task.sourceFile, task.newTags)

@@ -8,7 +8,7 @@ import type { ConfigType } from '../types/config.type'
 import type { EqualizerType } from '../types/equalizer.type'
 import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../types/returnMessage.type'
-import type { SongFuzzySearchType, SongType } from '../types/song.type'
+import type { PartialSongType, SongFuzzySearchType, SongType } from '../types/song.type'
 
 let isGetTagEditProgressRunning = false
 
@@ -268,6 +268,6 @@ export function showContextMenuIPC(menuToOpen, parameters) {
 	ipcRenderer.send('show-context-menu', menuToOpen, parameters)
 }
 
-export function updateSongsIPC(songs: SongType[], newTags: any) {
+export function updateSongsIPC(songs: PartialSongType[], newTags: any) {
 	ipcRenderer.invoke('update-songs', songs, newTags)
 }

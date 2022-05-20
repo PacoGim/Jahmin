@@ -130,7 +130,6 @@ export function bulkUpdateSongs(songs: { id: string | number; newTags: PartialSo
 		// When all promises are done, then update version, catch errors and finally resolve.
 		Promise.all(bulkUpdatePromises)
 			.then(x => {
-				console.log(x)
 				updateVersion()
 			})
 			.catch(err => {

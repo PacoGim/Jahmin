@@ -37,7 +37,6 @@ function processQueue() {
             return (isQueueRunning = false);
         let extension = task.sourceFile.split('.').pop();
         let result;
-        //IMPORTANT Do something if error
         switch (extension) {
             case 'm4a':
                 result = yield (0, aac_format_1.writeAacTags)(task.sourceFile, task.newTags);

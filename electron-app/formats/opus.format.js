@@ -18,6 +18,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
+const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const worker_service_1 = require("../services/worker.service");
 let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 /********************** Write Opus Tags **********************/
@@ -88,7 +89,7 @@ function getOpusTags(filePath) {
                     tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TITLE) || null;
                     tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRACKNUMBER) || null;
                     tags.BitRate = METADATA.format.bitrate / 1000 || null;
-                    tags.Duration = Math.trunc(METADATA.format.duration) || null;
+                    tags.Duration = (0, truncToDecimalPoint_fn_1.default)(METADATA.format.duration, 3) || null;
                     tags.LastModified = stats.mtimeMs;
                     tags.SampleRate = METADATA.format.sampleRate || null;
                     tags.Size = stats.size;

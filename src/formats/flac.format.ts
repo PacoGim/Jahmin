@@ -3,6 +3,7 @@ import path from 'path'
 import stringHash from 'string-hash'
 import generateId from '../functions/generateId.fn'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
+import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
 import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { FlacTagType } from '../types/flacTagType'
@@ -103,7 +104,7 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 
 		tags.BitDepth = METADATA.format.bitsPerSample || null
 		tags.BitRate = METADATA.format.bitrate / 1000 || null
-		tags.Duration = Math.trunc(METADATA.format.duration) || null
+		tags.Duration = truncToDecimalPointFn(METADATA.format.duration, 3) || null
 		tags.LastModified = STATS.mtimeMs
 		tags.SampleRate = METADATA.format.sampleRate || null
 		tags.Size = STATS.size

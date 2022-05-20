@@ -18,6 +18,7 @@ const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const worker_service_1 = require("../services/worker.service");
+const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 /********************** Write Mp3 Tags **********************/
 let tagWriteDeferredPromise = undefined;
 let nodeId3Worker = (_a = (0, worker_service_1.getWorker)('nodeID3')) === null || _a === void 0 ? void 0 : _a.on('message', (response) => {
@@ -70,7 +71,7 @@ function getMp3Tags(filePath) {
             tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2) || null;
             tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || null;
             tags.BitRate = METADATA.format.bitrate / 1000 || null;
-            tags.Duration = Math.trunc(METADATA.format.duration) || null;
+            tags.Duration = (0, truncToDecimalPoint_fn_1.default)(METADATA.format.duration, 3) || null;
             tags.LastModified = STATS.mtimeMs;
             tags.SampleRate = METADATA.format.sampleRate || null;
             tags.Size = STATS.size;

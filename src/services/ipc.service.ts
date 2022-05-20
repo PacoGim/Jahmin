@@ -41,6 +41,7 @@ import directoryHandlerService from './directoryHandler.service'
 import hashFileFn from '../functions/hashFile.fn'
 import appReadyService from './appReady.service'
 import { SongType } from '../types/song.type'
+import deepmerge from 'deepmerge'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))

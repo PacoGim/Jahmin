@@ -1,4 +1,4 @@
-import type { SongType } from '../types/song.type'
+import type { PartialSongType, SongType } from '../types/song.type'
 
 // Return selected songs data (from an array of IDs). If none are selected, then return all songs.
 export function filterSongsToEdit(songList: SongType[], selectedSongs) {
@@ -6,7 +6,7 @@ export function filterSongsToEdit(songList: SongType[], selectedSongs) {
 }
 
 // Group tags by tag name. If a tag mismatches, it will be set to null. The purpose of this fn is to keep only the tag values that are common to all selected songs.
-export function groupSongsByValues(songs: SongType[]) {
+export function groupSongsByValues(songs: PartialSongType[]) {
 	let groupedValues: any = {}
 
 	for (let song of songs) {

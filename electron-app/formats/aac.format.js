@@ -19,6 +19,7 @@ exports.getAacTags = exports.writeAacTags = void 0;
 const fs_1 = __importDefault(require("fs"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
+const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const worker_service_1 = require("../services/worker.service");
 /********************** Write Aac Tags **********************/
 let tagWriteDeferredPromise = undefined;
@@ -71,7 +72,7 @@ function getAacTags(filePath) {
             Track: getTrack(METADATA.TrackNumber, METADATA.Track) || null,
             BitDepth: METADATA.AudioBitsPerSample || null,
             BitRate: getBitRate(METADATA.AvgBitrate) || null,
-            Duration: METADATA.Duration || null,
+            Duration: (0, truncToDecimalPoint_fn_1.default)(METADATA.Duration, 3) || null,
             LastModified: STATS.mtimeMs,
             SampleRate: METADATA.AudioSampleRate || null,
             Size: STATS.size

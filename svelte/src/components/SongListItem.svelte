@@ -25,20 +25,6 @@
 	let isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
 	let gridStyle = ''
 
-	let titleTagStyle = 'display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;overflow:hidden;max-height:22px;'
-	let playCountTagStyle = `
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size:.9rem;
-		width: 36px;
-		height: 20px;
-		background-color: #fff;
-		border-radius: 25px;
-		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-		color: var(--low-color);
-	`
-
 	$: {
 		isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $albumPlayingIdStore
 	}
@@ -91,7 +77,7 @@
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#each $songListTagsConfig as tag, index (index)}
-		<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} />
+		<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />
 	{/each}
 </song-list-item>
 

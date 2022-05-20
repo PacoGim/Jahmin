@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { selectedAlbumDir, selectedAlbumId, selectedSongsStore, songListStore } from '../../store/final.store'
+	import { elementMap, selectedAlbumDir, selectedAlbumId, selectedSongsStore, songListStore } from '../../store/final.store'
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
-	import type { SongType } from '../../types/song.type'
+	import type { PartialSongType, SongType } from '../../types/song.type'
 	import Star from '../../components/Star.svelte'
 	import { onMount } from 'svelte'
 	import UndoIcon from '../../icons/UndoIcon.svelte'
@@ -12,9 +12,11 @@
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 	import { updateSongsIPC } from '../../services/ipc.service'
 
-	let songsToEdit: SongType[] = []
-	let groupedTags: SongType = {}
-	let bindingTags: SongType = {}
+	let songsToEdit: PartialSongType[] = []
+	let groupedTags: PartialSongType = {}
+	let bindingTags: PartialSongType = {}
+
+	let tagEditElement: HTMLElement
 
 	let newTags: any = {}
 
@@ -27,6 +29,10 @@
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
 	function setupSongs() {
+		if ($elementMap?.get('tag-edit-svlt') !== undefined) {
+			return
+		}
+
 		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
 		groupedTags = groupSongsByValues(songsToEdit)
 		bindingTags = Object.assign({}, groupedTags)
@@ -152,7 +158,7 @@
 	})
 </script>
 
-<tag-edit-svlt>
+<tag-edit-svlt bind:this={tagEditElement}>
 	<songs-to-edit
 		>Song{songsToEdit.length > 1 ? 's' : ''} Edit{songsToEdit.length > 0 ? 'ing' : ''}: {songsToEdit.length}</songs-to-edit
 	>

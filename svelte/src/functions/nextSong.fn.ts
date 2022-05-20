@@ -1,4 +1,11 @@
-import { currentAudioElement, playbackStore, playingSongStore, triggerScrollToSongEvent } from '../store/final.store'
+import { incrementPlayCount } from '../db/db'
+import {
+	currentAudioElement,
+	currentSongProgressStore,
+	playbackStore,
+	playingSongStore,
+	triggerScrollToSongEvent
+} from '../store/final.store'
 import { songToPlayUrlStore } from '../store/player.store'
 import type { SongType } from '../types/song.type'
 
@@ -24,9 +31,14 @@ export default function () {
 
 	let nextSong = playbackStoreValue[nextSongIndex]
 
-	if (nextSong === undefined) return
+	if (nextSong === undefined) {
+		let currentSong = playbackStoreValue[currentSongIndex]
+		currentSongProgressStore.set(0)
 
-	songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }])
+		songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }])
+	} else {
+		songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }])
 
-	triggerScrollToSongEvent.set(nextSong.ID)
+		triggerScrollToSongEvent.set(nextSong.ID)
+	}
 }

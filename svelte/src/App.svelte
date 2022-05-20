@@ -71,6 +71,15 @@
 	}
 
 	onMount(() => {
+/* 		bulkUpdateSongs([
+			{
+				id: 2720730105,
+				newTags: {
+					PlayCount: 2000
+				}
+			}
+		]) */
+
 		iziToast.settings({ position: 'topRight' })
 
 		runThemeHandler()

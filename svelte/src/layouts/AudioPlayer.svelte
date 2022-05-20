@@ -176,6 +176,11 @@
 			}
 		}
 
+		// if (currentTime >= duration - smoothTimeMs) {
+		// 	console.log('Played next song')
+
+		// 	console.log(audioElements[this.id])
+
 		////////// Audio Pre Plays Here \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
 		if (
@@ -183,11 +188,11 @@
 			audioElements[altAudioName].isPlaying === false &&
 			currentTime >= duration - smoothTimeMs
 		) {
+			audioElements[this.id].isPlaying = false
+
 			incrementPlayCount(
 				$playbackStore.find(song => song.SourceFile === audioElements[this.id].domElement.getAttribute('src')).ID
 			)
-
-			audioElements[this.id].isPlaying = false
 
 			audioElements[altAudioName].domElement
 				.play()
@@ -203,20 +208,20 @@
 
 				setNewPlayback(rootDir, $playbackStore, undefined, { playNow: true })
 			} else if (song !== undefined) {
-				audioElements[this.id].domElement.removeEventListener('timeupdate', handleTimeUpdate)
 				updateCurrentSongData(song)
 				setCurrentAudioElement(audioElements[altAudioName].domElement)
 			} else if (song === undefined) {
 				// Resets the last played song, so the song gets back to progress 0 and can be played again just by pressing the play button.
-
-				audioElements[altAudioName].isPlaying = false
-				$playingSongStore = { ...$playingSongStore }
+				$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: false }]
 				$currentSongProgressStore = 0
+				audioElements[altAudioName].isPlaying = false
 			}
 		} else if ($isSongRepeatEnabledStore === true && currentTime >= duration) {
 			incrementPlayCount($playbackStore.find(song => song.SourceFile === $playingSongStore.SourceFile).ID)
-			$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: true }]
 			$currentSongProgressStore = 0
+			setTimeout(() => {
+				$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: true }]
+			}, 1000)
 		}
 	}
 

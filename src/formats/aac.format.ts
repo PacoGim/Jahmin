@@ -3,6 +3,7 @@
 import fs from 'fs'
 import stringHash from 'string-hash'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
+import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
 import { getWorker } from '../services/worker.service'
 import { EditTag } from '../types/editTag.type'
 import { SongType } from '../types/song.type'
@@ -69,7 +70,7 @@ export function getAacTags(filePath: string): Promise<SongType> {
 			Track: getTrack(METADATA.TrackNumber, METADATA.Track) || null,
 			BitDepth: METADATA.AudioBitsPerSample || null,
 			BitRate: getBitRate(METADATA.AvgBitrate) || null,
-			Duration: METADATA.Duration || null,
+			Duration: truncToDecimalPointFn(METADATA.Duration, 3) || null,
 			LastModified: STATS.mtimeMs,
 			SampleRate: METADATA.AudioSampleRate || null,
 			Size: STATS.size

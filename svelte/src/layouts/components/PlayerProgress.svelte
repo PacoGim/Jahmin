@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import nextSongFn from '../../functions/nextSong.fn'
 
 	import {
 		currentAudioElement,
@@ -66,7 +67,7 @@
 
 		if (selectedPercent >= 100) selectedPercent = 100
 
-		let songPercentTimeInSeconds = $currentSongDurationStore / (100 / selectedPercent)
+		let songPercentTimeInSeconds = $currentSongDurationStore / (100 / selectedPercent) || 0
 
 		$currentSongProgressStore = songPercentTimeInSeconds
 
@@ -76,6 +77,7 @@
 
 		pauseDebounce = setTimeout(() => {
 			$currentAudioElement.currentTime = songPercentTimeInSeconds
+
 			$currentAudioElement.play().catch(err => {})
 		}, 500)
 	}
@@ -91,6 +93,11 @@
 	function setProgress(songProgress: number | undefined, songDuration: number | undefined) {
 		let songProgressInPercent = 100 / (songDuration / songProgress)
 		let timeLeft = Math.round(songDuration - songProgress)
+
+		if (songDuration - songProgress <= 0.5) {
+			nextSongFn()
+			return
+		}
 
 		playerProgressFillElement.style.animationName = 'reset-fill-progress'
 

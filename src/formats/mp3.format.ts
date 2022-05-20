@@ -7,6 +7,7 @@ import { Mp3TagType } from '../types/mp3TagType'
 import { EditTag } from '../types/editTag.type'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import { getWorker } from '../services/worker.service'
+import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
 
 /********************** Write Mp3 Tags **********************/
 let tagWriteDeferredPromise: any = undefined
@@ -70,7 +71,7 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 		tags.Track = Number(nativeTags?.TRCK) || null
 
 		tags.BitRate = METADATA.format.bitrate / 1000 || null
-		tags.Duration = Math.trunc(METADATA.format.duration) || null
+		tags.Duration = truncToDecimalPointFn(METADATA.format.duration, 3) || null
 		tags.LastModified = STATS.mtimeMs
 		tags.SampleRate = METADATA.format.sampleRate || null
 		tags.Size = STATS.size

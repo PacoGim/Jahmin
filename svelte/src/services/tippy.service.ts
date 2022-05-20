@@ -1,10 +1,11 @@
 import tippy, { roundArrow, Instance, Props } from 'tippy.js'
+import DomPurify from 'dompurify'
 
 let tippyInstances = new Map<string, Instance<Props>[]>()
 
 export const defaultTippyOptions = {
 	theme: 'dynamic',
-	arrow: roundArrow,
+	// arrow: roundArrow,
 	animation: 'scale-subtle',
 	inertia: true,
 	allowHTML: true
@@ -13,6 +14,10 @@ export const defaultTippyOptions = {
 export default function (id: string, query: string | Element, options: any) {
 	let tippyInstance = tippyInstances.get(id)
 
+	if (options?.content) {
+		options.content = DomPurify.sanitize(options.content, { ALLOWED_TAGS: ['bold'] })
+	}
+
 	// If exists, update content.
 	if (tippyInstance) {
 		tippyInstance.forEach(instance => {
@@ -20,6 +25,7 @@ export default function (id: string, query: string | Element, options: any) {
 		})
 		// Otherwise, create new instance.
 	} else {
+		//@ts-ignore
 		tippyInstances.set(id, tippy(query, Object.assign(defaultTippyOptions, options)))
 	}
 }
