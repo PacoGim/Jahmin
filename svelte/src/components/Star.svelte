@@ -27,7 +27,13 @@
 
 	function setStarRating(e: MouseEvent) {
 		if (!starElementWidth) {
-			starElementWidth = document.querySelector(`${hook} img.star`).scrollWidth
+			let starElement = document.querySelector(`${hook} img.star`)
+
+			if (starElement) {
+				starElementWidth = starElement.scrollWidth
+			} else {
+				return
+			}
 		}
 
 		// Gets a value from 0 to 10 based on the percentage of the cursor position on star element.
@@ -75,7 +81,6 @@
 		dispatch('undoChange')
 	}}>Undo Rating</button
 > -->
-
 <style>
 	:global(img.starFilter.tag-edit-star) {
 		filter: var(--filter-hl);
@@ -84,7 +89,7 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		margin: 0 .5rem;
+		margin: 0 0.5rem;
 	}
 
 	button {

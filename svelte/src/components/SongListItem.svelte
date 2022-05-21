@@ -58,6 +58,8 @@
 
 		if (splitArtists.length > 0) {
 			song.DynamicArtists = `(feat. ${splitArtists.join('//')})`
+		} else {
+			song.DynamicArtists = ''
 		}
 	}
 
@@ -77,7 +79,18 @@
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#each $songListTagsConfig as tag, index (index)}
-		<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />
+		{#if tag.value === 'Title' && $songListTagsConfig.find(configTag => configTag.value === 'DynamicArtists')}
+			<SongTag
+				tagName={tag.value}
+				tagValue={`${song[tag.value]} ${song.DynamicArtists}` || ''}
+				align={tag?.align?.toLowerCase()}
+				on:starChange={setStar}
+			/>
+		{:else if tag.value === 'DynamicArtists' || !$songListTagsConfig.find(configTag => configTag.value === 'Title')}
+			<!--  -->
+		{:else}
+			<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />
+		{/if}
 	{/each}
 </song-list-item>
 

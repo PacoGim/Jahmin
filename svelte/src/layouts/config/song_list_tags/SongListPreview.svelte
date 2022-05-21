@@ -20,23 +20,59 @@
 		Duration: 126,
 		Extension: 'opus',
 		Genre: 'Lo-fi',
-		Rating: 4,
+		Rating: 100,
 		SampleRate: 48000,
 		Size: 2738235,
 		Title: 'Forest',
 		Track: 1,
-		PlayCount: 10
+		PlayCount: 10,
+		DynamicArtists: '(feat. Jokabi)'
 	}
 
 	$: {
 		gridStyle = tagToGridStyleFn($songListTagsConfig)
 	}
+
+	function toggleDynamicArtists() {
+		let tagIndex = $songListTagsConfig.findIndex(tag => tag.value === 'DynamicArtists')
+
+		if (tagIndex === -1) {
+			$songListTagsConfig.push({
+				value: 'DynamicArtists',
+				isExpanded: false,
+				align: 'center'
+			})
+		} else {
+			$songListTagsConfig.splice(tagIndex, 1)
+		}
+
+		$songListTagsConfig = $songListTagsConfig
+	}
 </script>
 
 <song-list-preview>
+	<enable-dynamic-artists>
+		<button on:click={toggleDynamicArtists}>Toggle Dynamic Artists</button>
+	</enable-dynamic-artists>
 	<grid-tags style="grid-template-columns:{gridStyle};">
 		{#each $songListTagsConfig as selectedTag, index (index)}
-			<SongTag data={sampleSong[selectedTag.value]} tagName={selectedTag.value} align={selectedTag?.align?.toLowerCase()} />
+			<!-- <SongTag tagValue={sampleSong[selectedTag.value]} tagName={selectedTag.value} align={selectedTag?.align?.toLowerCase()} /> -->
+
+			{#if selectedTag.value === 'Title' && $songListTagsConfig.find(configTag => configTag.value === 'DynamicArtists')}
+				<SongTag
+					tagName={selectedTag.value}
+					tagValue={`${sampleSong[selectedTag.value]} ${sampleSong.DynamicArtists}` || ''}
+					align={selectedTag?.align?.toLowerCase()}
+				/>
+			{:else if selectedTag.value === 'DynamicArtists' || !$songListTagsConfig.find(configTag => configTag.value === 'Title')}
+				<!--  -->
+			{:else}
+				<SongTag
+					tagName={selectedTag.value}
+					tagValue={sampleSong[selectedTag.value] || ''}
+					align={selectedTag?.align?.toLowerCase()}
+				/>
+			{/if}
 		{/each}
 	</grid-tags>
 </song-list-preview>

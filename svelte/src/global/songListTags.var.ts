@@ -18,5 +18,6 @@ export default [
 	{ value: 'Size', name: 'Size' },
 	{ value: 'Title', name: 'Title' },
 	{ value: 'Track', name: 'Track' },
-	{ value: 'PlayCount', name: 'Play Count' }
+	{ value: 'PlayCount', name: 'Play Count' },
+	{ value: 'DynamicArtists', name: 'Dynamic Artists' }
 ].sort((a, b) => a.name.localeCompare(b.name))

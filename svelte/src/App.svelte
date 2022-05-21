@@ -71,7 +71,11 @@
 	}
 
 	onMount(() => {
-/* 		bulkUpdateSongs([
+		setTimeout(() => {
+			// $layoutToShow = 'Config'
+		}, 1000)
+
+		/* 		bulkUpdateSongs([
 			{
 				id: 2720730105,
 				newTags: {

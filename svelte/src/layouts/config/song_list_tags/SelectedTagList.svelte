@@ -55,7 +55,9 @@
 
 <selected-tags-list>
 	{#each $songListTagsConfig as tag, index (index)}
-		<SelectedTag on:dragStart={onDragStart} on:dragDrop={onDragDrop} {tag} {index} />
+		{#if tag.value !== 'DynamicArtists'}
+			<SelectedTag on:dragStart={onDragStart} on:dragDrop={onDragDrop} {tag} {index} />
+		{/if}
 	{/each}
 </selected-tags-list>
 
