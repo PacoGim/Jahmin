@@ -139,7 +139,7 @@ function processQueue() {
                 })
                     .catch();
             }
-            (0, updateSongTags_fn_1.default)(task.path, newTags)
+            (0, updateSongTags_fn_1.default)(task.path, Object.assign({}, newTags))
                 .then(result => {
                 // Result can be 0 | 1 | -1
                 // -1 means error.

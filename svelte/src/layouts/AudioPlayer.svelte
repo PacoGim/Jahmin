@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { incrementPlayCount } from '../db/db'
+	import findNextValidSongFn from '../functions/findNextValidSong.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
+	import nextSongFn from '../functions/nextSong.fn'
 	import previousSongFn from '../functions/previousSong.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
 	import notifyService from '../services/notify.service'
@@ -35,12 +37,14 @@
 		main: {
 			domElement: undefined,
 			isPlaying: false,
-			isPreloaded: false
+			isPreloaded: false,
+			isPreloading: false
 		},
 		alt: {
 			domElement: undefined,
 			isPlaying: false,
-			isPreloaded: false
+			isPreloaded: false,
+			isPreloading: false
 		}
 	}
 
@@ -88,7 +92,7 @@
 				// Gets the current song index in the playlist.
 				let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === songUrl)
 
-				let nextSong = findNextValidSong(currentSongIndex)
+				let nextSong = findNextValidSongFn(currentSongIndex, $playbackStore)
 
 				if (nextSong !== undefined) {
 					// If an enabled song is found, play it.
@@ -154,40 +158,46 @@
 
 		////////// Audio Preloads Here \\\\\\\\\\
 		// If the current time is greater than one second, then the next audio element is preloaded.
-		if (currentTime > 1 && audioElements[altAudioName].isPreloaded === false) {
-			audioElements[altAudioName].isPreloaded = true
-			audioElements[this.id].isPreloaded = false
+		if (
+			currentTime > 1 &&
+			audioElements[altAudioName].isPreloading === false &&
+			audioElements[altAudioName].isPreloaded === false
+		) {
+			audioElements[altAudioName].isPreloading = true
 
-			// Gets the current song index.
 			let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
 
-			let nextValidSong = findNextValidSong(currentSongIndex)
+			preLoadNextSong(currentSongIndex, $playbackStore)
+
+			console.log('Preloading next song...')
+
+			// let nextValidSong = findNextValidSongFn(currentSongIndex, $playbackStore)
+
+			// audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
+			/*
+
+
+			// Gets the current song index.
+
+			// audioElements[this.id].isPreloaded = false
 
 			if (nextValidSong) {
-				audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
 			} else {
 				if ($isPlaybackRepeatEnabledStore === true) {
-					let firstValidSong = findNextValidSong(-1)
+					let firstValidSong = findNextValidSongFn(-1, $playbackStore)
 
 					audioElements[altAudioName].domElement.src = firstValidSong.SourceFile
 				} else {
 					audioElements[altAudioName].domElement.src = ''
 				}
 			}
+
+			*/
 		}
-
-		// if (currentTime >= duration - smoothTimeMs) {
-		// 	console.log('Played next song')
-
-		// 	console.log(audioElements[this.id])
 
 		////////// Audio Pre Plays Here \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
-		if (
-			$isSongRepeatEnabledStore === false &&
-			audioElements[altAudioName].isPlaying === false &&
-			currentTime >= duration - smoothTimeMs
-		) {
+		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
 			audioElements[this.id].isPlaying = false
 
 			incrementPlayCount(
@@ -201,6 +211,7 @@
 				})
 				.catch(() => {})
 
+			return
 			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
 
 			if (song === undefined && $isPlaybackRepeatEnabledStore === true) {
@@ -225,17 +236,28 @@
 		}
 	}
 
-	function findNextValidSong(currentSongIndex: number): SongType | undefined {
-		// Creates a copy of the playback array.
-		let playbackArrayCopy = [...$playbackStore]
+	function preLoadNextSong(songIndex: number, songList: SongType[]) {
+		let nextAudioElementId = $currentAudioElement.id === 'main' ? 'alt' : 'main'
 
-		// Cuts the array from the index to the end, to find the next enabled song beyond the current song in the playback.
-		let cutArray = playbackArrayCopy.splice(currentSongIndex + 1)
+		let nextSongToPlay = undefined
 
-		// Finds the first enabled song in the array.
-		let nextSong = cutArray.find(song => song.isEnabled !== false)
+		if ($isSongRepeatEnabledStore === true) {
+			// If Song Repeat Enabled
+			nextSongToPlay = songList[songIndex]?.SourceFile
+		} else if ($isPlaybackRepeatEnabledStore === true) {
+			// If Playback Repeat Enabled
 
-		return nextSong
+			// If there is no more songs in playback list, then the first song in the list is played.
+			nextSongToPlay = findNextValidSongFn(songIndex, songList)?.SourceFile || findNextValidSongFn(-1, songList)?.SourceFile
+		} else {
+			// Song Repeat Disabled && If Playback Repeat Disabled
+			nextSongToPlay = findNextValidSongFn(songIndex, songList)?.SourceFile
+		}
+
+		if (nextSongToPlay === undefined) nextSongToPlay = ''
+
+		audioElements[nextAudioElementId].domElement.src = nextSongToPlay
+		audioElements[nextAudioElementId].isPreloading = false
 	}
 
 	function hookEventListeners() {
@@ -257,10 +279,24 @@
 
 		$mainAudioElement.addEventListener('ended', () => {
 			audioElements.main.isPlaying = false
+			console.log('main ended')
 		})
 
 		$altAudioElement.addEventListener('ended', () => {
 			audioElements.alt.isPlaying = false
+			console.log('alt ended')
+		})
+
+		$mainAudioElement.addEventListener('canplaythrough', e => {
+			console.log('main canplaythrough')
+			audioElements.main.isPreloaded = true
+			audioElements.main.isPreloading = false
+		})
+
+		$altAudioElement.addEventListener('canplaythrough', e => {
+			console.log('alt canplaythrough')
+			audioElements.alt.isPreloaded = true
+			audioElements.alt.isPreloading = false
 		})
 	}
 

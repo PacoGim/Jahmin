@@ -23,6 +23,7 @@ const ffmpegWorker = getWorker('ffmpeg')?.on('message', async (response: any) =>
 			fs.unlinkSync(response.filePath)
 			fs.renameSync(response.tempFileName, response.filePath)
 		}
+
 		ffmpegDeferredPromise(response.status)
 	}
 })

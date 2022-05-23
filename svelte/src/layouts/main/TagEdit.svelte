@@ -246,6 +246,7 @@
 			class="info"
 			on:click={() => {
 				updateSongsIPC(songsToEdit, newTags)
+				$elementMap = undefined
 			}}
 			disabled={isEmptyObject(newTags)}
 		>

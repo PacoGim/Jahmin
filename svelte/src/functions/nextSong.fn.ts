@@ -31,6 +31,8 @@ export default function () {
 
 	let nextSong = playbackStoreValue[nextSongIndex]
 
+	console.log(nextSong)
+
 	if (nextSong === undefined) {
 		let currentSong = playbackStoreValue[currentSongIndex]
 		currentSongProgressStore.set(0)

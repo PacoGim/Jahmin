@@ -157,7 +157,7 @@ function processQueue() {
 					.catch()
 			}
 
-			updateSongTagsFn(task.path, newTags)
+			updateSongTagsFn(task.path, { ...newTags })
 				.then(result => {
 					// Result can be 0 | 1 | -1
 					// -1 means error.
