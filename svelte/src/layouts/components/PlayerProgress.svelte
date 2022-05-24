@@ -110,6 +110,8 @@
 	}
 
 	function setProgressFromNewSong(song: SongType) {
+		playerProgressFillElement.style.animationDuration = `0ms`
+		playerProgressFillElement.style.animationName = 'reset-fill-progress'
 		setProgress(0, song.Duration)
 	}
 

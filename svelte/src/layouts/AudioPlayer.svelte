@@ -118,9 +118,11 @@
 				$mainAudioElement.play().catch(error => {})
 
 				audioElements.main.isPlaying = true
-				audioElements.main.isPreloaded = true
+				audioElements.main.isPreloaded = false
+				audioElements.main.isPreloading = false
 				audioElements.alt.isPlaying = false
 				audioElements.alt.isPreloaded = false
+				audioElements.alt.isPreloading = false
 			}
 		}
 	}
@@ -164,66 +166,25 @@
 			let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
 
 			preLoadNextSong(currentSongIndex, $playbackStore)
-
-			// let nextValidSong = findNextValidSongFn(currentSongIndex, $playbackStore)
-
-			// audioElements[altAudioName].domElement.src = nextValidSong.SourceFile
-			/*
-
-
-			// Gets the current song index.
-
-			// audioElements[this.id].isPreloaded = false
-
-			if (nextValidSong) {
-			} else {
-				if ($isPlaybackRepeatEnabledStore === true) {
-					let firstValidSong = findNextValidSongFn(-1, $playbackStore)
-
-					audioElements[altAudioName].domElement.src = firstValidSong.SourceFile
-				} else {
-					audioElements[altAudioName].domElement.src = ''
-				}
-			}
-
-			*/
 		}
-
-		/* 		incrementPlayCount(
-					$playbackStore.find(song => song.SourceFile === audioElements[this.id].domElement.getAttribute('src')).ID
-				) */
 
 		////////// Audio Pre Plays Here \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
 		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
-			audioElements[this.id].isPlaying = false
+			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
 
 			audioElements[altAudioName].domElement
 				.play()
 				.then(() => {
+					setCurrentAudioElement(audioElements[altAudioName].domElement)
 					audioElements[altAudioName].isPlaying = true
-					// audioElements[altAudioName].isPreloading = false
-					// audioElements[altAudioName].isPreloaded = false
-					$currentAudioElement = audioElements[altAudioName].domElement
+					updateCurrentSongData(song)
 				})
-				.catch(() => {})
+				.catch(err => {
+					console.log('Audio Preplays Error: ', err)
+				})
 		}
 	}
-	/* 		let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
-
-			if (song === undefined && $isPlaybackRepeatEnabledStore === true) {
-				let rootDir = getDirectoryFn($playbackStore[0].SourceFile)
-
-				setNewPlayback(rootDir, $playbackStore, undefined, { playNow: true })
-			} else if (song !== undefined) {
-				updateCurrentSongData(song)
-				setCurrentAudioElement(audioElements[altAudioName].domElement)
-			} else if (song === undefined) {
-				// Resets the last played song, so the song gets back to progress 0 and can be played again just by pressing the play button.
-				$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: false }]
-				$currentSongProgressStore = 0
-				audioElements[altAudioName].isPlaying = false
-			} */
 
 	function preLoadNextSong(songIndex: number, songList: SongType[]) {
 		let nextAudioElementId = $currentAudioElement.id === 'main' ? 'alt' : 'main'
@@ -245,10 +206,7 @@
 
 		if (nextSongToPlay === undefined) nextSongToPlay = ''
 
-		console.log(nextSongToPlay)
-
 		audioElements[nextAudioElementId].domElement.src = nextSongToPlay
-		audioElements[nextAudioElementId].isPreloading = false
 	}
 
 	function hookEventListeners() {
@@ -269,33 +227,27 @@
 		})
 
 		$mainAudioElement.addEventListener('ended', () => {
+			incrementPlayCount($playbackStore.find(song => song.SourceFile === audioElements.main.domElement.getAttribute('src')).ID)
 			audioElements.main.isPlaying = false
 
-			let currentIndex = $playbackStore.findIndex(song => song.SourceFile === audioElements.alt.domElement.getAttribute('src'))
-
-			preLoadNextSong(currentIndex, $playbackStore)
-
-			console.log('main ended')
+			audioElements.main.isPreloaded = false
+			audioElements.main.isPreloading = false
 		})
 
 		$altAudioElement.addEventListener('ended', () => {
+			incrementPlayCount($playbackStore.find(song => song.SourceFile === audioElements.alt.domElement.getAttribute('src')).ID)
 			audioElements.alt.isPlaying = false
 
-			let currentIndex = $playbackStore.findIndex(song => song.SourceFile === audioElements.main.domElement.getAttribute('src'))
-
-			preLoadNextSong(currentIndex, $playbackStore)
-
-			console.log('alt ended')
+			audioElements.alt.isPreloaded = false
+			audioElements.alt.isPreloading = false
 		})
 
 		$mainAudioElement.addEventListener('canplaythrough', e => {
-			console.log('main canplaythrough')
 			audioElements.main.isPreloaded = true
 			audioElements.main.isPreloading = false
 		})
 
 		$altAudioElement.addEventListener('canplaythrough', e => {
-			console.log('alt canplaythrough')
 			audioElements.alt.isPreloaded = true
 			audioElements.alt.isPreloading = false
 		})
