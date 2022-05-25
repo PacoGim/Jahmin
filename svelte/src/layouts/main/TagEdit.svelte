@@ -11,6 +11,7 @@
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 	import { updateSongsIPC } from '../../services/ipc.service'
+	import tagEditSuggestionFn from '../../services/tagEditSuggestion.fn'
 
 	let songsToEdit: PartialSongType[] = []
 	let groupedTags: PartialSongType = {}
@@ -78,25 +79,7 @@
 		let inputValue = inputElement.value
 		let data = parentElement.dataset
 
-/*
-		let autoCompleteElement = document.createElement('tag-autocomplete')
-
-		for (let i = 0; i <= 10; i++) {
-			let autocompleteContainerElement = document.createElement('autocomplete-container')
-
-			autocompleteContainerElement.setAttribute('tabindex', '0')
-			autocompleteContainerElement.setAttribute('data-content', `${i}`)
-
-			autocompleteContainerElement.addEventListener('keypress',(evt)=>{
-				console.log(evt)
-			})
-
-			autoCompleteElement.appendChild(autocompleteContainerElement)
-		}
-
-		inputElement.parentElement.appendChild(autoCompleteElement)
-		*/
-
+		tagEditSuggestionFn(inputElement.parentElement, data.tag, inputValue)
 
 		if (inputValue === '' && groupedTags[data.tag] === null) {
 			bindingTags[data.tag] = null
@@ -142,6 +125,12 @@
 				textAreaElement.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
 				textAreaElement.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
 				textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
+				textAreaElement.addEventListener('keydown', evt => {
+					if (['ArrowDown', 'ArrowUp', 'Enter'].includes(evt.key)) {
+						if (evt.key === 'Enter') evt.preventDefault()
+						selectSuggestion(evt.target as HTMLElement, evt.key as 'ArrowDown' | 'ArrowUp' | 'Enter')
+					}
+				})
 			}
 
 			if (undoIconElement) {
@@ -153,6 +142,35 @@
 				undoIconElement.addEventListener('click', evt => undoTagModification(dataSet.tag))
 			}
 		})
+	}
+
+	function selectSuggestion(targetElement: HTMLElement, keyPressed: 'ArrowDown' | 'ArrowUp' | 'Enter') {
+		let suggestionsElement = targetElement.parentElement.querySelector('tag-suggestions') as HTMLElement
+
+		if (suggestionsElement.dataset.index === undefined) {
+			suggestionsElement.dataset.index = '-1'
+		}
+
+		if (keyPressed === 'ArrowDown') {
+			suggestionsElement.dataset.index = String(Number(suggestionsElement.dataset.index) + 1)
+		} else if (keyPressed === 'ArrowUp') {
+			suggestionsElement.dataset.index = String(Number(suggestionsElement.dataset.index) - 1)
+		}
+
+		let suggestionElement = suggestionsElement.querySelector(
+			`tag-suggestion[data-index="${suggestionsElement.dataset.index}"]`
+		) as HTMLElement
+
+		if (suggestionElement === null) {
+			suggestionElement = suggestionsElement.querySelector(`tag-suggestion[data-index="0"]`) as HTMLElement
+			suggestionsElement.dataset.index = '0'
+		}
+
+		suggestionsElement.querySelectorAll('tag-suggestion').forEach(suggestion => {
+			suggestion.classList.remove('selected')
+		})
+
+		suggestionElement.classList.add('selected')
 	}
 
 	function undoAllTags() {
@@ -186,9 +204,6 @@
 	<tag-container data-tag="Title">
 		<tag-name>Title <UndoIcon /> </tag-name>
 		<textarea bind:value={bindingTags.Title} tabindex="0" />
-		<!-- 		<tag-autocomplete>
-			<autocomplete-container tabindex="0" data-content="Lorem ipsum dolor sit amet." />
-		</tag-autocomplete> -->
 	</tag-container>
 
 	<tag-container data-tag="Album">
@@ -458,7 +473,7 @@
 		align-items: center;
 	}
 
-	:global(tag-autocomplete) {
+	:global(tag-suggestions) {
 		position: absolute;
 		background-color: white;
 		color: black;
@@ -469,17 +484,22 @@
 		width: 100%;
 	}
 
-	:global(tag-autocomplete autocomplete-container) {
+	:global(tag-suggestions tag-suggestion) {
 		display: flex;
 		padding: 0.5rem 1rem;
 	}
 
-	:global(tag-autocomplete autocomplete-container:focus) {
+	:global(tag-suggestions tag-suggestion.selected) {
 		background-color: red;
 		color: white;
 	}
 
-	:global(tag-autocomplete autocomplete-container::after) {
+	:global(tag-suggestions tag-suggestion:focus) {
+		background-color: red;
+		color: white;
+	}
+
+	:global(tag-suggestions tag-suggestion::after) {
 		content: attr(data-content);
 		display: -webkit-box;
 		-webkit-line-clamp: 1;
