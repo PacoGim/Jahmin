@@ -29,9 +29,9 @@
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
 	function setupSongs() {
-		if ($elementMap?.get('tag-edit-svlt') !== undefined) {
+		/* 		if ($elementMap?.get('tag-edit-svlt') !== undefined) {
 			return
-		}
+		} */
 
 		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
 		groupedTags = groupSongsByValues(songsToEdit)
@@ -77,6 +77,26 @@
 		let inputElement = evt.target as HTMLInputElement
 		let inputValue = inputElement.value
 		let data = parentElement.dataset
+
+/*
+		let autoCompleteElement = document.createElement('tag-autocomplete')
+
+		for (let i = 0; i <= 10; i++) {
+			let autocompleteContainerElement = document.createElement('autocomplete-container')
+
+			autocompleteContainerElement.setAttribute('tabindex', '0')
+			autocompleteContainerElement.setAttribute('data-content', `${i}`)
+
+			autocompleteContainerElement.addEventListener('keypress',(evt)=>{
+				console.log(evt)
+			})
+
+			autoCompleteElement.appendChild(autocompleteContainerElement)
+		}
+
+		inputElement.parentElement.appendChild(autoCompleteElement)
+		*/
+
 
 		if (inputValue === '' && groupedTags[data.tag] === null) {
 			bindingTags[data.tag] = null
@@ -165,7 +185,10 @@
 
 	<tag-container data-tag="Title">
 		<tag-name>Title <UndoIcon /> </tag-name>
-		<textarea bind:value={bindingTags.Title} />
+		<textarea bind:value={bindingTags.Title} tabindex="0" />
+		<!-- 		<tag-autocomplete>
+			<autocomplete-container tabindex="0" data-content="Lorem ipsum dolor sit amet." />
+		</tag-autocomplete> -->
 	</tag-container>
 
 	<tag-container data-tag="Album">
@@ -292,6 +315,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+
+		position: relative;
 
 		font-size: 0.9rem;
 		margin-bottom: 0.5rem;
@@ -431,5 +456,34 @@
 		flex-direction: row;
 		justify-content: space-evenly;
 		align-items: center;
+	}
+
+	:global(tag-autocomplete) {
+		position: absolute;
+		background-color: white;
+		color: black;
+
+		z-index: 1;
+
+		top: 100%;
+		width: 100%;
+	}
+
+	:global(tag-autocomplete autocomplete-container) {
+		display: flex;
+		padding: 0.5rem 1rem;
+	}
+
+	:global(tag-autocomplete autocomplete-container:focus) {
+		background-color: red;
+		color: white;
+	}
+
+	:global(tag-autocomplete autocomplete-container::after) {
+		content: attr(data-content);
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 </style>
