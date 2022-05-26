@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { elementMap, selectedAlbumDir, selectedAlbumId, selectedSongsStore, songListStore } from '../../store/final.store'
+	import {
+		elementMap,
+		selectedAlbumDir,
+		selectedAlbumId,
+		selectedSongsStore,
+		songListStore,
+		songSyncQueueProgress
+	} from '../../store/final.store'
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
 	import type { PartialSongType, SongType } from '../../types/song.type'
@@ -23,16 +30,20 @@
 
 	$: {
 		$songListStore
+		setupSongs('songListStoreUpdate')
+	}
+
+	$: {
 		$selectedSongsStore
-		setupSongs()
+		setupSongs('selectedSongsStoreUpdate')
 	}
 
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
-	function setupSongs() {
-		/* 		if ($elementMap?.get('tag-edit-svlt') !== undefined) {
+	function setupSongs(from: string) {
+		if (from === 'songListStoreUpdate' && $songSyncQueueProgress.currentLength > 0) {
 			return
-		} */
+		}
 
 		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
 		groupedTags = groupSongsByValues(songsToEdit)
@@ -79,8 +90,6 @@
 		let inputValue = inputElement.value
 		let data = parentElement.dataset
 
-		tagEditSuggestionFn(inputElement.parentElement, data.tag, inputValue)
-
 		if (inputValue === '' && groupedTags[data.tag] === null) {
 			bindingTags[data.tag] = null
 		}
@@ -90,6 +99,18 @@
 		} else {
 			setUndoIconVisibility(data.tag, false)
 		}
+	}
+
+	function suggestTags(evt: Event, parentElement: HTMLElement) {
+		let inputElement = evt.target as HTMLInputElement
+		let inputValue = inputElement.value
+		let data = parentElement.dataset
+
+		tagEditSuggestionFn(inputElement.parentElement, data.tag, inputValue).then((result: string) => {
+			if (result) {
+				bindingTags[data.tag] = result
+			}
+		})
 	}
 
 	function undoTagModification(tag: string) {
@@ -103,6 +124,14 @@
 		if (undoIconElement) {
 			undoIconElement.style.opacity = isVisible ? '1' : '0'
 			undoIconElement.style.pointerEvents = isVisible ? 'all' : 'none'
+		}
+	}
+
+	function removeSuggestedTags(textAreaElement: HTMLElement) {
+		let eventTargetTagSuggestionElement = textAreaElement.parentElement.querySelector('tag-suggestions')
+
+		if (eventTargetTagSuggestionElement) {
+			eventTargetTagSuggestionElement.innerHTML = ''
 		}
 	}
 
@@ -125,8 +154,22 @@
 				textAreaElement.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
 				textAreaElement.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
 				textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
+				textAreaElement.addEventListener('input', evt => suggestTags(evt, tagContainerElement))
+
+				textAreaElement.addEventListener('focus', evt => {
+					setTimeout(() => {
+						suggestTags(evt, tagContainerElement)
+					}, 100)
+				})
+
+				textAreaElement.addEventListener('focusout', evt => {
+					setTimeout(() => {
+						removeSuggestedTags(evt.target as HTMLElement)
+					}, 100)
+				})
+
 				textAreaElement.addEventListener('keydown', evt => {
-					if (['ArrowDown', 'ArrowUp', 'Enter'].includes(evt.key)) {
+					if (['ArrowDown', 'ArrowUp', 'Escape', 'Enter'].includes(evt.key)) {
 						if (evt.key === 'Enter') evt.preventDefault()
 						selectSuggestion(evt.target as HTMLElement, evt.key as 'ArrowDown' | 'ArrowUp' | 'Enter')
 					}
@@ -144,29 +187,50 @@
 		})
 	}
 
-	function selectSuggestion(targetElement: HTMLElement, keyPressed: 'ArrowDown' | 'ArrowUp' | 'Enter') {
-		let suggestionsElement = targetElement.parentElement.querySelector('tag-suggestions') as HTMLElement
+	function selectSuggestion(targetElement: HTMLElement, keyPressed: 'ArrowDown' | 'ArrowUp' | 'Enter' | 'Escape') {
+		let suggestionElements = targetElement.parentElement.querySelector('tag-suggestions') as HTMLElement
 
-		if (suggestionsElement.dataset.index === undefined) {
-			suggestionsElement.dataset.index = '-1'
+		if (keyPressed === 'Enter') {
+			let selectedSuggestion = suggestionElements.querySelector('tag-suggestion.selected') as HTMLElement
+			let data = selectedSuggestion?.dataset
+
+			if (selectedSuggestion && data.tag && data.content) {
+				bindingTags[data.tag] = data.content
+			}
+
+			removeSuggestedTags(targetElement)
+
+			return
+		}
+
+		if (keyPressed === 'Escape') {
+			targetElement.blur()
+
+			return
+		}
+
+		if (suggestionElements.dataset.index === undefined) {
+			suggestionElements.dataset.index = '-1'
 		}
 
 		if (keyPressed === 'ArrowDown') {
-			suggestionsElement.dataset.index = String(Number(suggestionsElement.dataset.index) + 1)
+			suggestionElements.dataset.index = String(Number(suggestionElements.dataset.index) + 1)
 		} else if (keyPressed === 'ArrowUp') {
-			suggestionsElement.dataset.index = String(Number(suggestionsElement.dataset.index) - 1)
+			suggestionElements.dataset.index = String(Number(suggestionElements.dataset.index) - 1)
 		}
 
-		let suggestionElement = suggestionsElement.querySelector(
-			`tag-suggestion[data-index="${suggestionsElement.dataset.index}"]`
+		let suggestionElement = suggestionElements.querySelector(
+			`tag-suggestion[data-index="${suggestionElements.dataset.index}"]`
 		) as HTMLElement
 
 		if (suggestionElement === null) {
-			suggestionElement = suggestionsElement.querySelector(`tag-suggestion[data-index="0"]`) as HTMLElement
-			suggestionsElement.dataset.index = '0'
+			suggestionElement = suggestionElements.querySelector(`tag-suggestion[data-index="0"]`) as HTMLElement
+			suggestionElements.dataset.index = '0'
+
+			if (suggestionElement === null) return
 		}
 
-		suggestionsElement.querySelectorAll('tag-suggestion').forEach(suggestion => {
+		suggestionElements.querySelectorAll('tag-suggestion').forEach(suggestion => {
 			suggestion.classList.remove('selected')
 		})
 
@@ -475,8 +539,8 @@
 
 	:global(tag-suggestions) {
 		position: absolute;
-		background-color: white;
-		color: black;
+		background-color: var(--color-fg-1);
+		color: var(--color-bg-1);
 
 		z-index: 1;
 
@@ -487,16 +551,18 @@
 	:global(tag-suggestions tag-suggestion) {
 		display: flex;
 		padding: 0.5rem 1rem;
+		cursor: pointer;
+
+		transition-property: color, background-color;
+		transition-timing-function: linear;
+		transition-duration: 100ms;
 	}
 
-	:global(tag-suggestions tag-suggestion.selected) {
-		background-color: red;
-		color: white;
-	}
-
-	:global(tag-suggestions tag-suggestion:focus) {
-		background-color: red;
-		color: white;
+	:global(tag-suggestions tag-suggestion:focus),
+	:global(tag-suggestions tag-suggestion.selected),
+	:global(tag-suggestions tag-suggestion:hover) {
+		background-color: var(--color-bg-1);
+		color: var(--color-fg-1);
 	}
 
 	:global(tag-suggestions tag-suggestion::after) {

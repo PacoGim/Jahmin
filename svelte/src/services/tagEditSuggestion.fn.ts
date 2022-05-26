@@ -1,42 +1,70 @@
 import Fuse from 'fuse.js'
 
 const fuseOptions = {
-	shouldSort: true
+	shouldSort: true,
+	includeScore: true
 }
 
-import { playbackStore } from '../store/final.store'
+import { songListStore } from '../store/final.store'
 
 export default function (elementToHook: HTMLElement, tagToSearch: string, userInput: string) {
-	// console.log(elementToHook, tagToSearch, userInput)
+	return new Promise((resolve, reject) => {
+		if (userInput === '') {
+			userInput = undefined
+		}
 
-	let playbackList = []
+		let songList = []
 
-	playbackStore.subscribe(_ => (playbackList = _))()
+		songListStore.subscribe(_ => (songList = _))()
 
-	let suggestions = filterDistinctObjectArray(playbackList, tagToSearch)
+		let suggestions = filterDistinctObjectArray(songList, tagToSearch)
 
-	const fuse = new Fuse(suggestions, fuseOptions)
+		let results = []
 
-	const results = fuse.search(userInput).slice(0, 4)
+		if (userInput !== undefined) {
+			const fuse = new Fuse(suggestions, fuseOptions)
 
-	let suggestionElement = elementToHook.querySelector('tag-suggestions')
+			results = fuse.search(userInput).slice(0, 5)
+		} else {
+			results = suggestions.sort((a, b) => String(a).localeCompare(String(b))).slice(0, 5)
+		}
 
-	if (suggestionElement) {
-		suggestionElement.innerHTML = ''
-	} else {
-		suggestionElement = document.createElement('tag-suggestions')
-	}
+		let suggestionElement = elementToHook.querySelector('tag-suggestions')
 
-	if (results.length > 0) {
-		results.forEach((result, index) => {
-			let suggestionContainerElement = document.createElement('tag-suggestion')
-			suggestionContainerElement.setAttribute('data-content', `${result.item}`)
-			suggestionContainerElement.setAttribute('data-index', `${index}`)
-			suggestionElement.appendChild(suggestionContainerElement)
-		})
+		if (suggestionElement) {
+			suggestionElement.innerHTML = ''
+		} else {
+			suggestionElement = document.createElement('tag-suggestions')
+		}
 
-		elementToHook.appendChild(suggestionElement)
-	}
+		if (results.length > 0) {
+			results.forEach((result, index) => {
+				let suggestionContainerElement = document.createElement('tag-suggestion')
+				suggestionContainerElement.setAttribute('data-content', `${result.item || result}`)
+				suggestionContainerElement.setAttribute('data-index', `${index}`)
+				suggestionContainerElement.setAttribute('data-tag', `${tagToSearch}`)
+
+				suggestionContainerElement.addEventListener('click', evt => {
+					resolve(result.item || result)
+				})
+
+				suggestionContainerElement.addEventListener('click', evt => {
+					resolve(result.item || result)
+				})
+
+				suggestionContainerElement.addEventListener('keypress', evt => {
+					console.log(evt)
+					if (evt.key === 'Enter') {
+						resolve(result.item || result)
+					}
+				})
+
+				suggestionElement.appendChild(suggestionContainerElement)
+			})
+
+			elementToHook.appendChild(suggestionElement)
+		}
+	})
 }
 
 function filterDistinctObjectArray(array: any[], key: string) {

@@ -176,6 +176,7 @@
 			audioElements[altAudioName].domElement
 				.play()
 				.then(() => {
+					$currentSongProgressStore = 0
 					setCurrentAudioElement(audioElements[altAudioName].domElement)
 					audioElements[altAudioName].isPlaying = true
 					updateCurrentSongData(song)

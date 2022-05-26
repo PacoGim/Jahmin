@@ -91,9 +91,6 @@
 	}
 
 	function setProgress(songProgress: number | undefined, songDuration: number | undefined) {
-		let songProgressInPercent = 100 / (songDuration / songProgress)
-		let timeLeft = Math.round(songDuration - songProgress)
-
 		if (songDuration - songProgress <= 0.5) {
 			nextSongFn()
 			return
@@ -102,11 +99,13 @@
 		playerProgressFillElement.style.animationName = 'reset-fill-progress'
 
 		setTimeout(() => {
+			let songProgressInPercent = 100 / (songDuration / (songProgress + 0.2))
+			let timeLeft = Math.round(songDuration - (songProgress + 0.2))
 			playerProgressFillElement.style.minWidth = `${songProgressInPercent}%`
 			playerProgressFillElement.style.animationDuration = `${timeLeft}s`
 			playerProgressFillElement.style.animationName = 'fill-progress'
 			resumeProgress()
-		}, 1)
+		}, 100)
 	}
 
 	function setProgressFromNewSong(song: SongType) {
