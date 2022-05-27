@@ -23,7 +23,8 @@
 		isSongRepeatEnabledStore,
 		isPlaybackRepeatEnabledStore,
 		currentSongDurationStore,
-		currentSongProgressStore
+		currentSongProgressStore,
+		isSongShuffleEnabledStore
 	} from '../store/final.store'
 	import { currentPlayerTime, songToPlayUrlStore } from '../store/player.store'
 	import type { SongType } from '../types/song.type'
@@ -48,6 +49,15 @@
 		}
 	}
 
+	let isMounted = false
+
+	$: {
+		$isSongShuffleEnabledStore
+		$isSongRepeatEnabledStore
+		$isPlaybackRepeatEnabledStore
+		listenPlaybackChangers()
+	}
+
 	$: {
 		if ($mainAudioElement !== undefined && $context === undefined) {
 			$context = new window.AudioContext()
@@ -66,6 +76,15 @@
 		if (audioElements) {
 			checkIfIsPlaying()
 		}
+	}
+
+	function listenPlaybackChangers() {
+		if (isMounted === false) return
+
+		preLoadNextSong(
+			$playbackStore.findIndex(song => song.SourceFile === $currentAudioElement.getAttribute('src')),
+			$playbackStore
+		)
 	}
 
 	// Functions
@@ -118,7 +137,7 @@
 				$mainAudioElement.play().catch(error => {})
 
 				audioElements.main.isPlaying = true
-				audioElements.main.isPreloaded = false
+				audioElements.main.isPreloaded = true
 				audioElements.main.isPreloading = false
 				audioElements.alt.isPlaying = false
 				audioElements.alt.isPreloaded = false
@@ -194,20 +213,18 @@
 
 		if ($isSongRepeatEnabledStore === true) {
 			// If Song Repeat Enabled
-			nextSongToPlay = songList[songIndex]?.SourceFile
+			nextSongToPlay = songList[songIndex]
 		} else if ($isPlaybackRepeatEnabledStore === true) {
 			// If Playback Repeat Enabled
 
 			// If there is no more songs in playback list, then the first song in the list is played.
-			nextSongToPlay = findNextValidSongFn(songIndex, songList)?.SourceFile || findNextValidSongFn(-1, songList)?.SourceFile
+			nextSongToPlay = findNextValidSongFn(songIndex, songList) || findNextValidSongFn(-1, songList)
 		} else {
 			// Song Repeat Disabled && If Playback Repeat Disabled
-			nextSongToPlay = findNextValidSongFn(songIndex, songList)?.SourceFile
+			nextSongToPlay = findNextValidSongFn(songIndex, songList)
 		}
 
-		if (nextSongToPlay === undefined) nextSongToPlay = ''
-
-		audioElements[nextAudioElementId].domElement.src = nextSongToPlay
+		audioElements[nextAudioElementId].domElement.src = nextSongToPlay?.SourceFile || ''
 	}
 
 	function hookEventListeners() {
@@ -264,6 +281,8 @@
 		$currentAudioElement = $mainAudioElement
 
 		hookEventListeners()
+
+		isMounted = true
 	})
 </script>
 

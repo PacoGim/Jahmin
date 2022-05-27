@@ -27,6 +27,9 @@
 			shuffledArray.unshift(removedSong[0])
 
 			$playbackStore = shuffledArray
+
+			// Sets value to false first to trigger an update.
+			$isSongShuffleEnabledStore = false
 			$isSongShuffleEnabledStore = true
 		} else if (evt.type === 'contextmenu') {
 			$playbackStore = sortSongsArrayFn($playbackStore, $sortByConfig, $sortOrderConfig)
