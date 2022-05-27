@@ -13,7 +13,14 @@
 		sendAllSongsFromRendererIPC
 	} from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
-	import { directoriesConfig, groupByConfig, groupByValuesConfig, songAmountConfig } from '../store/config.store'
+	import {
+		directoriesConfig,
+		groupByConfig,
+		groupByValuesConfig,
+		songAmountConfig,
+		sortByConfig,
+		sortOrderConfig
+	} from '../store/config.store'
 	import {
 		albumArtMapStore,
 		albumListStore,
@@ -21,7 +28,8 @@
 		selectedAlbumId,
 		selectedGroups,
 		songListStore,
-		songSyncQueueProgress
+		songSyncQueueProgress,
+		triggerScrollToSongEvent
 	} from '../store/final.store'
 	import { storageService } from '../store/service.store'
 	import type { AlbumType } from '../types/album.type'
@@ -68,17 +76,25 @@
 			})
 		})
 
-		// ipcRenderer.on('sort-songs', (event, data) => {
-		// 	localStorage.setItem(
-		// 		'sorting',
-		// 		JSON.stringify({
-		// 			tag: data.tag,
-		// 			order: data.order
-		// 		})
-		// 	)
+		ipcRenderer.on('sort-songs', (event, data) => {
+			if (data.tag === 'Play Count') data.tag = 'PlayCount'
+			if (data.tag === 'Sample Rate') data.tag = 'SampleRate'
 
-		// 	$songListStore = sortSongsArrayFn($songListStore, data.tag, data.order)
-		// })
+			$songListStore = sortSongsArrayFn($songListStore, data.tag, data.order)
+
+			$triggerScrollToSongEvent = $songListStore[0].ID
+
+			saveConfig({
+				userOptions: {
+					sortBy: data.tag,
+					sortOrder: data.order
+				}
+			})
+
+			$sortByConfig = data.tag
+			$sortOrderConfig = data.order
+
+		})
 
 		ipcRenderer.on('new-art', (event, data) => handleNewArt(data))
 

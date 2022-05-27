@@ -3,11 +3,11 @@ import type { SongType } from '../types/song.type'
 export default (songs: SongType[], tag, order) => {
 	let songsArrayCopy = [...songs]
 
-	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate'].includes(tag)) {
+	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
 		if (order === 'asc') {
-			songsArrayCopy.sort((a, b) => Number(a[tag]) - Number(b[tag]))
+			songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0))
 		} else {
-			songsArrayCopy.sort((a, b) => Number(b[tag]) - Number(a[tag]))
+			songsArrayCopy.sort((a, b) => Number(b[tag] || 0) - Number(a[tag || 0]))
 		}
 	}
 

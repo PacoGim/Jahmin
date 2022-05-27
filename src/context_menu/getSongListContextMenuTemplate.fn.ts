@@ -12,14 +12,7 @@ type dataType = {
 export default function (data: dataType) {
 	let template: MenuItemConstructorOptions[] = []
 
-	let { selectedSongsData, clickedSongData, albumRootDir } = data
-
-	/*
-    1. No songs selected && No song cliked on
-    2. No songs selected && Song clicked on
-    3. Songs selected && No song cliked on
-    4. Songs selected && Song clicked on
-  */
+	let { selectedSongsData, clickedSongData } = data
 
 	if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
 		template.push({
@@ -136,7 +129,12 @@ function getSongAmountMenu() {
 function getSortMenu() {
 	let submenu: MenuItemConstructorOptions[] = []
 
-	let options = getConfig().songListTags?.map(tag => tag.name)
+	let options = getConfig().songListTags?.map(tag => tag.value)
+
+	options?.splice(options.indexOf('DynamicArtists'), 1)
+	options?.splice(options.indexOf('PlayCount'), 1, 'Play Count')
+	options?.splice(options.indexOf('SampleRate'), 1, 'Sample Rate')
+
 	let sortByConfig = getConfig().userOptions.sortBy
 	let sortOrderConfig = getConfig().userOptions.sortOrder
 

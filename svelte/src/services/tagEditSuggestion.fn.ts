@@ -26,7 +26,7 @@ export default function (elementToHook: HTMLElement, tagToSearch: string, userIn
 
 			results = fuse.search(userInput).slice(0, 5)
 		} else {
-			results = suggestions.sort((a, b) => String(a).localeCompare(String(b))).slice(0, 5)
+			results = suggestions.sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true })).slice(0, 5)
 		}
 
 		let suggestionElement = elementToHook.querySelector('tag-suggestions')
@@ -39,6 +39,8 @@ export default function (elementToHook: HTMLElement, tagToSearch: string, userIn
 
 		if (results.length > 0) {
 			results.forEach((result, index) => {
+				if (!(result?.item || result)) return
+
 				let suggestionContainerElement = document.createElement('tag-suggestion')
 				suggestionContainerElement.setAttribute('data-content', `${result.item || result}`)
 				suggestionContainerElement.setAttribute('data-index', `${index}`)

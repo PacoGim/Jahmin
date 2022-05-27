@@ -5,13 +5,7 @@ const config_service_1 = require("../services/config.service");
 const sendWebContents_service_1 = require("../services/sendWebContents.service");
 function default_1(data) {
     let template = [];
-    let { selectedSongsData, clickedSongData, albumRootDir } = data;
-    /*
-    1. No songs selected && No song cliked on
-    2. No songs selected && Song clicked on
-    3. Songs selected && No song cliked on
-    4. Songs selected && Song clicked on
-  */
+    let { selectedSongsData, clickedSongData } = data;
     if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
         template.push({
             label: 'Enable',
@@ -108,7 +102,10 @@ function getSongAmountMenu() {
 function getSortMenu() {
     var _a;
     let submenu = [];
-    let options = (_a = (0, config_service_1.getConfig)().songListTags) === null || _a === void 0 ? void 0 : _a.map(tag => tag.name);
+    let options = (_a = (0, config_service_1.getConfig)().songListTags) === null || _a === void 0 ? void 0 : _a.map(tag => tag.value);
+    options === null || options === void 0 ? void 0 : options.splice(options.indexOf('DynamicArtists'), 1);
+    options === null || options === void 0 ? void 0 : options.splice(options.indexOf('PlayCount'), 1, 'Play Count');
+    options === null || options === void 0 ? void 0 : options.splice(options.indexOf('SampleRate'), 1, 'Sample Rate');
     let sortByConfig = (0, config_service_1.getConfig)().userOptions.sortBy;
     let sortOrderConfig = (0, config_service_1.getConfig)().userOptions.sortOrder;
     if (options === undefined) {
