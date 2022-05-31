@@ -232,6 +232,6 @@
 
 	input:active,
 	input:focus {
-		border-bottom: 2px var(--color-hl-1) solid;
+		border-bottom: 2px var(--color-hl-gold) solid;
 	}
 </style>

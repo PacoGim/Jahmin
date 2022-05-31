@@ -126,30 +126,28 @@
 	}
 </script>
 
-<OptionSection title="Equalizer Profiles">
-	<equalizer-profiles-section slot="body">
-		<equalizer-profiles>
-			{#each $equalizerProfiles as eq (eq.id)}
-				<equalizer-field id="eq-{eq.id}">
-					<equalizer-name on:click={() => $equalizerService.changeProfile(eq.id)}
-						>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
-					>
-					<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.id, eq.name)}>
-						<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-						Rename
-					</equalizer-rename>
-					<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.id, eq.name)}>
-						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-						Delete
-					</equalizer-delete>
-				</equalizer-field>
-			{/each}
-		</equalizer-profiles>
-		<button class="addProfile" on:click={() => addNewProfile()}
-			><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
-		>
-	</equalizer-profiles-section>
-</OptionSection>
+<equalizer-profiles-config>
+	<equalizer-profiles>
+		{#each $equalizerProfiles as eq (eq.id)}
+			<equalizer-field id="eq-{eq.id}">
+				<equalizer-name on:click={() => $equalizerService.changeProfile(eq.id)}
+					>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
+				>
+				<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.id, eq.name)}>
+					<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+					Rename
+				</equalizer-rename>
+				<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.id, eq.name)}>
+					<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+					Delete
+				</equalizer-delete>
+			</equalizer-field>
+		{/each}
+	</equalizer-profiles>
+	<button class="addProfile" on:click={() => addNewProfile()}
+		><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
+	>
+</equalizer-profiles-config>
 
 <style>
 	equalizer-profiles {
@@ -191,7 +189,7 @@
 	}
 
 	equalizer-profiles equalizer-field equalizer-rename:hover {
-		background-color: var(--color-hl-1);
+		background-color: var(--color-hl-gold);
 	}
 
 	equalizer-profiles equalizer-field equalizer-delete:hover {

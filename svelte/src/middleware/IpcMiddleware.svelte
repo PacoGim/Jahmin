@@ -10,7 +10,8 @@
 		sendNewArtQueueProgressIPC,
 		saveConfig,
 		compressAlbumArtIPC,
-		sendAllSongsFromRendererIPC
+		sendAllSongsFromRendererIPC,
+		getSongAlbumArtIPC
 	} from '../services/ipc.service'
 	import notifyService from '../services/notify.service'
 	import {
@@ -93,7 +94,6 @@
 
 			$sortByConfig = data.tag
 			$sortOrderConfig = data.order
-
 		})
 
 		ipcRenderer.on('new-art', (event, data) => handleNewArt(data))
@@ -135,7 +135,32 @@
 				compressAlbumArtIPC(data.albumId, el.dataset.artsize, true)
 			})
 		})
+
+		ipcRenderer.on('send-single-songArt', (event, data) => {
+			setAlbumArtBase64(data)
+		})
 	})
+
+	function setAlbumArtBase64(data) {
+		let element: HTMLElement = document.querySelector(
+			`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
+		)
+
+		if (!element) return
+
+		let videoElement: HTMLVideoElement = element.querySelector('video')
+		let imageElement: HTMLImageElement = element.querySelector('img')
+		videoElement.src = ''
+
+		if (data.cover !== null) {
+			imageElement.setAttribute('src', data.cover)
+		} else {
+			imageElement.setAttribute('src', './img/disc-line.svg')
+		}
+
+		element.setAttribute('data-loaded', 'true')
+		element.setAttribute('data-type', 'image')
+	}
 
 	function handleNewArt(data) {
 		if (data.success === false) {
@@ -145,13 +170,9 @@
 
 			if (!element) return
 
-			let videoElement: HTMLVideoElement = element.querySelector('video')
-			let imageElement: HTMLImageElement = element.querySelector('img')
+			let dataSet = element.dataset
 
-			videoElement.src = ''
-			imageElement.setAttribute('src', './img/disc-line.svg')
-			element.setAttribute('data-loaded', 'true')
-			element.setAttribute('data-type', 'unfound')
+			getSongAlbumArtIPC(dataSet?.playingSongSourcefile || dataSet?.rootdir, dataSet.artsize, dataSet.albumid)
 
 			return
 		}

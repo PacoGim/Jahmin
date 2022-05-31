@@ -176,7 +176,7 @@
 		width: 16px;
 		height: 16px;
 		outline: none;
-		background-color: var(--color-hl-1);
+		background-color: var(--color-hl-gold);
 		box-shadow: 0px 0px 0px 5px hsl(0, 0%, 90%), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 	}
 

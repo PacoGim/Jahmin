@@ -1,13 +1,9 @@
 <script lang="ts">
-	import OptionSection from '../../../components/OptionSection.svelte'
-
 	import { objectToArray } from '../../../services/index.service'
-	import { equalizer, isEqualizerDirty, isEqualizerOn, selectedEqId } from '../../../store/equalizer.store'
+	import { equalizer, equalizerNameStore, isEqualizerDirty, isEqualizerOn, selectedEqId } from '../../../store/equalizer.store'
 	import { equalizerService } from '../../../store/service.store'
 
-	let equalizerName = ''
-
-	$: equalizerName = getProfileNameFromId($selectedEqId)
+	$: $equalizerNameStore = getProfileNameFromId($selectedEqId)
 
 	function getProfileNameFromId(eqId: String) {
 		if ($equalizerService !== undefined) {
@@ -18,30 +14,28 @@
 	}
 </script>
 
-<OptionSection title="Equalizer - {equalizerName} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
-	<equalizer-section slot="body">
-		{#each objectToArray($equalizer) as equalizer, index (index)}
-			<audio-filter-range>
-				<filter-frequency>{equalizer.frequency.value} Hz</filter-frequency>
-				<eq-input-container>
-					<input
-						type="range"
-						min="-8"
-						max="8"
-						step="1"
-						value={equalizer.gain.value}
-						on:input={evt => $equalizerService.gainChange(evt, equalizer.frequency.value)}
-						disabled={!$isEqualizerOn}
-					/>
-				</eq-input-container>
-				<filter-gain>{equalizer.gain.value} dB</filter-gain>
-			</audio-filter-range>
-		{/each}
-	</equalizer-section>
-</OptionSection>
+<equalizer-controls-config>
+	{#each objectToArray($equalizer) as equalizerProfile, index (index)}
+		<audio-filter-range>
+			<filter-frequency>{equalizerProfile.frequency.value} Hz</filter-frequency>
+			<eq-input-container>
+				<input
+					type="range"
+					min="-8"
+					max="8"
+					step="1"
+					value={equalizerProfile.gain.value}
+					on:input={evt => $equalizerService.gainChange(evt, equalizerProfile.frequency.value)}
+					disabled={!$isEqualizerOn}
+				/>
+			</eq-input-container>
+			<filter-gain>{equalizerProfile.gain.value} dB</filter-gain>
+		</audio-filter-range>
+	{/each}
+</equalizer-controls-config>
 
 <style>
-	equalizer-section {
+	equalizer-controls-config {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
@@ -86,8 +80,10 @@
 		width: 16px;
 		height: 16px;
 		outline: none;
-		background-color: var(--color-hl-1);
+		background-color: var(--color-hl-blue);
 		box-shadow: 0px 0px 0px 5px hsl(0, 0%, 90%), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+
+		transition: background-color 300ms linear;
 	}
 
 	audio-filter-range eq-input-container {

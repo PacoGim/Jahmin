@@ -68,7 +68,13 @@
 </script>
 
 <control-bar-svlt>
-	<AlbumArt rootDir={$albumPlayingDirStore} {artSize} observer="!addObserver" style="height:64px;width:64px;cursor:pointer" />
+	<AlbumArt
+		playingSongSourceFile={$playingSongStore?.SourceFile}
+		rootDir={$albumPlayingDirStore}
+		{artSize}
+		observer="!addObserver"
+		style="height:64px;width:64px;cursor:pointer"
+	/>
 
 	<player-buttons>
 		<PreviousButton />

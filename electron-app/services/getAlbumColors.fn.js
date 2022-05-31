@@ -17,51 +17,76 @@ const sharp_1 = __importDefault(require("sharp"));
 const color_type_1 = require("../types/color.type");
 const albumArt_service_1 = require("./albumArt.service");
 const config_service_1 = require("./config.service");
+const fs_1 = __importDefault(require("fs"));
+const music_metadata_1 = __importDefault(require("music-metadata"));
+const path_1 = __importDefault(require("path"));
+const allowedSongExtensions_var_1 = __importDefault(require("../global/allowedSongExtensions.var"));
+const getFileExtension_fn_1 = __importDefault(require("../functions/getFileExtension.fn"));
 let contrastRatio = (0, config_service_1.getConfig)().userOptions.contrastRatio;
 const notCompress = ['mp4', 'webm', 'apng', 'gif'];
 let previousContrastRatio = undefined;
 function getAlbumColors(rootDir, contrast) {
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-        if (contrast) {
-            contrastRatio = contrast;
-        }
-        if (rootDir === undefined || rootDir === 'undefined') {
-            return resolve(undefined);
-        }
-        const imagePaths = (0, albumArt_service_1.getAllowedFiles)(rootDir).filter(file => !notCompress.includes(getExtension(file)));
-        if (imagePaths === undefined) {
-            return resolve(undefined);
-        }
-        const imagePath = imagePaths[0];
-        if (imagePath === undefined) {
-            return resolve(undefined);
-        }
-        (0, sharp_1.default)(imagePath)
-            .resize(1, 1)
-            .raw()
-            .toBuffer((err, buffer) => {
-            if (err) {
-                return resolve({
-                    hue: 0,
-                    lightnessBase: 50,
-                    lightnessHigh: 25,
-                    lightnessLow: 75,
-                    saturation: 0
-                });
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (contrast) {
+                contrastRatio = contrast;
             }
-            let hexColor = buffer.toString('hex').substring(0, 6);
-            let hslColorObject = (0, color_type_1.ColorTypeShell)();
-            let hslColor = hexToHsl(hexColor);
-            getTwoContrastedHslColors(hslColor).then((data) => {
-                hslColorObject.hue = hslColor.h;
-                hslColorObject.saturation = hslColor.s;
-                hslColorObject.lightnessBase = hslColor.l;
-                hslColorObject.lightnessHigh = data.colorHigh.l;
-                hslColorObject.lightnessLow = data.colorLow.l;
-                resolve(hslColorObject);
+            if (rootDir === undefined || rootDir === 'undefined') {
+                return resolve(undefined);
+            }
+            const imagePaths = (0, albumArt_service_1.getAllowedFiles)(rootDir).filter(file => !notCompress.includes(getExtension(file)));
+            if (imagePaths === undefined) {
+                return resolve(undefined);
+            }
+            let imagePath = imagePaths[0];
+            if (imagePath === undefined) {
+                let firstValidFileFound = fs_1.default
+                    .readdirSync(rootDir)
+                    .find(file => allowedSongExtensions_var_1.default.includes((0, getFileExtension_fn_1.default)(file) || ''));
+                if (firstValidFileFound) {
+                    let common = (yield music_metadata_1.default.parseFile(path_1.default.join(rootDir, firstValidFileFound))).common;
+                    const cover = music_metadata_1.default.selectCover(common.picture); // pick the cover image
+                    if (cover === null) {
+                        return resolve(undefined);
+                    }
+                    else {
+                        imagePath = cover === null || cover === void 0 ? void 0 : cover.data;
+                    }
+                }
+                else {
+                    return resolve(undefined);
+                }
+            }
+            if (imagePath === undefined) {
+                return resolve(undefined);
+            }
+            (0, sharp_1.default)(imagePath)
+                .resize(1, 1)
+                .raw()
+                .toBuffer((err, buffer) => {
+                if (err) {
+                    return resolve({
+                        hue: 0,
+                        lightnessBase: 50,
+                        lightnessHigh: 25,
+                        lightnessLow: 75,
+                        saturation: 0
+                    });
+                }
+                let hexColor = buffer.toString('hex').substring(0, 6);
+                let hslColorObject = (0, color_type_1.ColorTypeShell)();
+                let hslColor = hexToHsl(hexColor);
+                getTwoContrastedHslColors(hslColor).then((data) => {
+                    hslColorObject.hue = hslColor.h;
+                    hslColorObject.saturation = hslColor.s;
+                    hslColorObject.lightnessBase = hslColor.l;
+                    hslColorObject.lightnessHigh = data.colorHigh.l;
+                    hslColorObject.lightnessLow = data.colorLow.l;
+                    resolve(hslColorObject);
+                });
             });
-        });
-    }));
+        }));
+    });
 }
 exports.getAlbumColors = getAlbumColors;
 function getExtension(data) {

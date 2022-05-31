@@ -70,7 +70,7 @@
 
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
 	function setAlbumBackInView() {
-		$layoutToShow = 'Home'
+		$layoutToShow = 'Library'
 		let playingSong = $playingSongStore
 
 		$selectedAlbumDir = $albumPlayingDirStore

@@ -3,9 +3,8 @@ body {
 	--color-bg-2: var(--theme-bg-2);
 	--color-fg-1: var(--theme-fg-1);
 	--color-fg-1-low: var(--theme-fg-1-low);
-	/* --color-hl-1: hsl(211, 100%, 55%); */
-	/* --color-hl-1: hsl(33, 98%, 66%); */
-	--color-hl-1: hsl(46, 55%, 52%);
+	--color-hl-gold: hsl(46, 55%, 52%);
+	--color-hl-blue: hsl(211, 100%, 55%);
 	--color-hl-2: hsl(348, 90%, 37%);
 	--filter-hl: var(--theme-filter-hl);
 }

@@ -456,7 +456,7 @@
 	}
 
 	tag-edit-svlt > tag-container:focus-within {
-		box-shadow: 0px 3px 0px 0px var(--color-hl-1);
+		box-shadow: 0px 3px 0px 0px var(--color-hl-gold);
 	}
 
 	songs-to-edit {

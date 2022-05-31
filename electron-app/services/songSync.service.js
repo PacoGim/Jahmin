@@ -25,9 +25,10 @@ const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"))
 const getSongTags_fn_1 = __importDefault(require("../functions/getSongTags.fn"));
 const updateSongTags_fn_1 = __importDefault(require("../functions/updateSongTags.fn"));
 const hashString_fn_1 = require("../functions/hashString.fn");
+const allowedSongExtensions_var_1 = __importDefault(require("../global/allowedSongExtensions.var"));
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let watcher;
-const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus'];
+// const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
 let isQueueRunning = false;
 let taskQueue = [];
 exports.maxTaskQueueLength = 0;
@@ -263,7 +264,7 @@ function getAllFilesInFoldersDeep(rootDirectory) {
     return allFiles;
 }
 function isAudioFile(path) {
-    return EXTENSIONS.includes(path.split('.').pop() || '');
+    return allowedSongExtensions_var_1.default.includes(path.split('.').pop() || '');
 }
 function getRootDirFolderWatcher() {
     return watcher;

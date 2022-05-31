@@ -8,17 +8,17 @@
 </script>
 
 <navigation-svlt class="dark-theme">
-	<nav-button on:click={() => ($layoutToShow = 'Home')}>
+	<nav-button on:click={() => ($layoutToShow = 'Library')}>
 		<HomeIcon
-			style="{$layoutToShow === 'Home'
-				? 'fill:var(--color-hl-1)'
+			style="{$layoutToShow === 'Library'
+				? 'fill:var(--color-hl-gold)'
 				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Search')}>
 		<SearchIcon
 			style="{$layoutToShow === 'Search'
-				? 'fill:var(--color-hl-1)'
+				? 'fill:var(--color-hl-gold)'
 				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
@@ -26,7 +26,7 @@
 	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
 		<CogIcon
 			style="{$layoutToShow === 'Config'
-				? 'fill:var(--color-hl-1)'
+				? 'fill:var(--color-hl-gold)'
 				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>

@@ -12,7 +12,7 @@
 	export let index
 
 	function getTagNameFromValue(value: string) {
-		return songListTagsVar.find(tag => tag.value === value).name
+		return songListTagsVar.find(tag => tag.value === value)?.name
 	}
 
 	function removeTagFromTagList(tagIndex: number) {
@@ -129,9 +129,9 @@
 	}
 
 	selected-tag-component tag-expand[data-is-expanded='true'] label {
-		background-color: var(--color-hl-1);
+		background-color: var(--color-hl-gold);
 		color: var(--color-bg-1);
-		border-color: var(--color-hl-1);
+		border-color: var(--color-hl-gold);
 		transform: translateX(0rem);
 	}
 
@@ -189,9 +189,9 @@
 	}
 
 	selected-tag-component tag-aligns .tag-align input:checked ~ label {
-		background-color: var(--color-hl-1);
+		background-color: var(--color-hl-gold);
 		color: var(--color-bg-1);
-		border-color: var(--color-hl-1);
+		border-color: var(--color-hl-gold);
 	}
 
 	selected-tag-component tag-aligns .tag-align input {

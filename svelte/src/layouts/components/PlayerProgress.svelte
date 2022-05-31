@@ -18,6 +18,8 @@
 	let isMouseDown = false
 	let isMouseIn = false
 
+	let skipDurationTimeout = undefined
+
 	$: {
 		if (playerProgressFillElement !== undefined) {
 			if ($isPlaying) {
@@ -92,16 +94,24 @@
 
 	function setProgress(songProgress: number | undefined, songDuration: number | undefined) {
 		if (songDuration - songProgress <= 0.5) {
-			nextSongFn()
+			if (skipDurationTimeout === undefined) {
+				nextSongFn()
+				skipDurationTimeout = setTimeout(() => {
+					skipDurationTimeout = undefined
+				}, 2000)
+			}
+
 			return
 		}
 
+		let songProgressInPercent = 100 / (songDuration / songProgress)
+
 		playerProgressFillElement.style.animationName = 'reset-fill-progress'
+		playerProgressFillElement.style.animationDuration = `$0s`
+		playerProgressFillElement.style.minWidth = `${songProgressInPercent}%`
 
 		setTimeout(() => {
-			let songProgressInPercent = 100 / (songDuration / (songProgress + 0.2))
-			let timeLeft = Math.round(songDuration - (songProgress + 0.2))
-			playerProgressFillElement.style.minWidth = `${songProgressInPercent}%`
+			let timeLeft = Math.round(songDuration - songProgress)
 			playerProgressFillElement.style.animationDuration = `${timeLeft}s`
 			playerProgressFillElement.style.animationName = 'fill-progress'
 			resumeProgress()

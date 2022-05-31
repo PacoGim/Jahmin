@@ -9,7 +9,7 @@
 	import generateId from '../../functions/generateId.fn'
 	import numberZeroPad from '../../functions/numberZeroPad'
 
-	import AlbumInfo from '../main/AlbumInfo.svelte'
+	import AlbumInfo from '../library/AlbumInfo.svelte'
 
 	import Queues from './Queues.svelte'
 	import PlaybackOptions from './PlaybackOptions.svelte'

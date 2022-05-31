@@ -15,7 +15,7 @@
 	}
 
 	$: {
-		if ($layoutToShow === 'Home') {
+		if ($layoutToShow === 'Library') {
 			loadArtWhenLayoutMounted()
 		}
 	}
@@ -39,13 +39,22 @@
 			if (setArtRetryCounter === 5) {
 				setArtRetryCounter = 0
 				loadArt(undefined, undefined)
+
+				let selectedAlbumSrcFile = document
+					.querySelector(`album[rootdir="${$selectedAlbumDir}"] art-svlt img`)
+					.getAttribute('src')
+
+				if (selectedAlbumSrcFile) {
+					loadArt(selectedAlbumSrcFile, 'image')
+				}
+
 				return
 			}
 
 			setTimeout(() => {
 				setArtRetryCounter++
 				setArt()
-			}, 100)
+			}, 50)
 
 			return
 		}

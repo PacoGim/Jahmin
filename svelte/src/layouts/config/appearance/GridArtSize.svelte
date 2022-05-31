@@ -7,7 +7,7 @@
 	import { rangeInputService } from '../../../store/service.store'
 
 	function setGridSize() {
-		$layoutToShow = 'Home'
+		$layoutToShow = 'Library'
 
 		$rangeInputService.showRangeInput({
 			title: 'Art Size',

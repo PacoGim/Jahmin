@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
+	import { selectedConfigOptionName } from '../../store/session.store'
+
 	import AppearanceConfig from './appearance/!AppearanceConfig.svelte'
 	import EqualizerConfig from './equalizer/!EqualizerConfig.svelte'
 	import LibraryConfig from './library/!LibraryConfig.svelte'
@@ -35,16 +37,12 @@
 			currentComponent = option.component
 			selectedOption = option.name
 
-			sessionStorage.setItem('selectedConfigOptionName', option.name)
+			$selectedConfigOptionName = option.name
 		}
 	}
 
 	onMount(() => {
-		let selectedConfigOptionName = sessionStorage.getItem('selectedConfigOptionName') || 'Appearance'
-
-		if (selectedConfigOptionName) {
-			loadComponent(selectedConfigOptionName)
-		}
+		loadComponent($selectedConfigOptionName)
 	})
 </script>
 

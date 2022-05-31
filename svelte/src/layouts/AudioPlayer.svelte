@@ -201,7 +201,14 @@
 					updateCurrentSongData(song)
 				})
 				.catch(err => {
-					console.log('Audio Preplays Error: ', err)
+					let previousPlayedSong = $playbackStore.find(
+						song => song.SourceFile === audioElements[this.id].domElement.getAttribute('src')
+					)
+
+					if (previousPlayedSong) {
+						audioElements[this.id].isPlaying = false
+						$songToPlayUrlStore = [previousPlayedSong.SourceFile, { playNow: false }]
+					}
 				})
 		}
 	}

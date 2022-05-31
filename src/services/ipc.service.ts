@@ -42,6 +42,7 @@ import hashFileFn from '../functions/hashFile.fn'
 import appReadyService from './appReady.service'
 import { SongType } from '../types/song.type'
 import deepmerge from 'deepmerge'
+import getSingleSongAlbumArtService from './getSingleSongAlbumArt.service'
 
 export function loadIPC() {
 	ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => loadContextMenu(event, menuToOpen, parameters))
@@ -184,6 +185,10 @@ export function loadIPC() {
 
 	ipcMain.handle('handle-art-compression', async (evt, rootDir, artSize, forceNewCheck) => {
 		compressAlbumArt(rootDir, artSize, forceNewCheck)
+	})
+
+	ipcMain.handle('get-song-album-art', async (evt, path, albumId, artSize) => {
+		getSingleSongAlbumArtService(path, albumId, artSize)
 	})
 
 	ipcMain.handle('get-album-colors', async (evt, rootDir, contrastRatio) => {

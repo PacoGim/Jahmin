@@ -12,15 +12,17 @@
 	export let observer: 'addObserver' | '!addObserver' = '!addObserver'
 	export let rootDir
 	export let artSize = undefined
+	export let playingSongSourceFile = undefined
 
 	let dataLoaded = false
 
 	let artType = 'image'
 	let element: HTMLElement = undefined
 
-	onMount(() => {})
-
-	$: handleAlbumArt(rootDir, artSize)
+	$: {
+		playingSongSourceFile
+		handleAlbumArt(rootDir, artSize)
+	}
 
 	function handleAlbumArt(rootDir, artSize) {
 		if (rootDir === undefined || artSize === 0) {
@@ -50,6 +52,7 @@
 </script>
 
 <art-svlt
+	data-playing-song-sourcefile={playingSongSourceFile}
 	data-albumId={albumId}
 	data-rootDir={rootDir}
 	data-artSize={artSize}

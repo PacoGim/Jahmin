@@ -34,6 +34,7 @@ const common_1 = require("electron/common");
 const directoryHandler_service_1 = __importDefault(require("./directoryHandler.service"));
 const hashFile_fn_1 = __importDefault(require("../functions/hashFile.fn"));
 const appReady_service_1 = __importDefault(require("./appReady.service"));
+const getSingleSongAlbumArt_service_1 = __importDefault(require("./getSingleSongAlbumArt.service"));
 function loadIPC() {
     electron_1.ipcMain.on('show-context-menu', (event, menuToOpen, parameters) => (0, contextMenu_1.loadContextMenu)(event, menuToOpen, parameters));
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
@@ -144,6 +145,9 @@ function loadIPC() {
     }));
     electron_1.ipcMain.handle('handle-art-compression', (evt, rootDir, artSize, forceNewCheck) => __awaiter(this, void 0, void 0, function* () {
         (0, albumArt_service_1.compressAlbumArt)(rootDir, artSize, forceNewCheck);
+    }));
+    electron_1.ipcMain.handle('get-song-album-art', (evt, path, albumId, artSize) => __awaiter(this, void 0, void 0, function* () {
+        (0, getSingleSongAlbumArt_service_1.default)(path, albumId, artSize);
     }));
     electron_1.ipcMain.handle('get-album-colors', (evt, rootDir, contrastRatio) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, getAlbumColors_fn_1.getAlbumColors)(rootDir, contrastRatio);

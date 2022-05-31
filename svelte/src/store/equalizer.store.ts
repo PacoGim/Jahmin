@@ -11,7 +11,7 @@ export let equalizer: Writable<EqualizerType> = writable({})
 
 export let selectedEqId: Writable<string> = writable(undefined)
 export let equalizerProfiles: Writable<EqualizerProfileType[]> = writable([])
-
+export let equalizerNameStore: Writable<string> = writable('')
 
 export let isEqualizerOn: Writable<boolean> = writable(true)
 export let isEqualizerDirty: Writable<boolean> = writable(false)

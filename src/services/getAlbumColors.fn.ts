@@ -3,7 +3,13 @@ import { ColorType, ColorTypeShell } from '../types/color.type'
 
 import { getAllowedFiles } from './albumArt.service'
 import { getConfig } from './config.service'
+
+import fs from 'fs'
+import mm from 'music-metadata'
+import path from 'path'
 import { getStorageMap } from './storage.service'
+import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
+import getFileExtensionFn from '../functions/getFileExtension.fn'
 
 let contrastRatio = getConfig().userOptions.contrastRatio!
 
@@ -11,7 +17,7 @@ const notCompress = ['mp4', 'webm', 'apng', 'gif']
 
 let previousContrastRatio: number | undefined = undefined
 
-export function getAlbumColors(rootDir: string, contrast: number | undefined): Promise<ColorType | undefined> {
+export async function getAlbumColors(rootDir: string, contrast: number | undefined): Promise<ColorType | undefined> {
 	return new Promise(async (resolve, reject) => {
 		if (contrast) {
 			contrastRatio = contrast
@@ -27,7 +33,27 @@ export function getAlbumColors(rootDir: string, contrast: number | undefined): P
 			return resolve(undefined)
 		}
 
-		const imagePath = imagePaths[0]
+		let imagePath: string | Buffer = imagePaths[0]
+
+		if (imagePath === undefined) {
+			let firstValidFileFound = fs
+				.readdirSync(rootDir)
+				.find(file => allowedSongExtensionsVar.includes(getFileExtensionFn(file) || ''))
+
+			if (firstValidFileFound) {
+				let common = (await mm.parseFile(path.join(rootDir, firstValidFileFound))).common
+
+				const cover = mm.selectCover(common.picture) // pick the cover image
+
+				if (cover === null) {
+					return resolve(undefined)
+				} else {
+					imagePath = cover?.data
+				}
+			} else {
+				return resolve(undefined)
+			}
+		}
 
 		if (imagePath === undefined) {
 			return resolve(undefined)

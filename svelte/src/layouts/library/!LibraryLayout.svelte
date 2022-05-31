@@ -17,16 +17,16 @@
 	})
 </script>
 
-<home-layout class="layout">
+<library-layout class="layout">
 	<ArtGrid />
 	<TagGroup />
 	<SongList />
 	<TagEdit />
 	<SongListBackground />
-</home-layout>
+</library-layout>
 
 <style>
-	home-layout {
+	library-layout {
 		overflow-y: hidden;
 
 		display: grid;

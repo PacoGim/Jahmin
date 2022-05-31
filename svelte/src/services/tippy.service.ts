@@ -5,7 +5,6 @@ let tippyInstances = new Map<string, Instance<Props>[]>()
 
 export const defaultTippyOptions = {
 	theme: 'dynamic',
-	// arrow: roundArrow,
 	animation: 'scale-subtle',
 	inertia: true,
 	allowHTML: true

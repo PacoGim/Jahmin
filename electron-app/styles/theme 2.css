@@ -2,8 +2,8 @@ body {
 	--color-bg-1: var(--theme-bg-1);
 	--color-bg-2: var(--theme-bg-2);
 	--color-fg-1: var(--theme-fg-1);
-	/* --color-hl-1: #58a6ff; */
-	--color-hl-1: #2246da;
+	/* --color-hl-gold: #58a6ff; */
+	--color-hl-gold: #2246da;
 	--color-hl-2: #b3092b;
 	--filter-hl: var(--theme-filter-hl);
 }

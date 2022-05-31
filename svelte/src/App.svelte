@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	import {
 		appTitle,
 		isAppIdle,
@@ -38,7 +38,7 @@
 
 	import Navigation from './layouts/Navigation.svelte'
 	import ControlBar from './layouts/ControlBar.svelte'
-	import HomeLayout from './layouts/main/HomeLayout.svelte'
+	import LibraryLayout from './layouts/library/!LibraryLayout.svelte'
 
 	import 'tippy.js/dist/tippy.css'
 	import 'tippy.js/dist/svg-arrow.css'
@@ -166,8 +166,8 @@
 	<ControlBar />
 	<StatusBar />
 	<current-window-svlt>
-		{#if $layoutToShow === 'Home'}
-			<HomeLayout />
+		{#if $layoutToShow === 'Library'}
+			<LibraryLayout />
 		{:else if $layoutToShow === 'Config'}
 			<ConfigLayout />
 		{:else if $layoutToShow === 'Search'}

@@ -7,7 +7,7 @@
 	import { rangeInputService } from '../../../store/service.store'
 
 	function setFontSize() {
-		$layoutToShow = 'Home'
+		$layoutToShow = 'Library'
 
 		$rangeInputService.showRangeInput({
 			title: 'Font Size',

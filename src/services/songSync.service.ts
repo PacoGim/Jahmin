@@ -16,12 +16,13 @@ import getSongTagsFn from '../functions/getSongTags.fn'
 import getFileExtensionFn from '../functions/getFileExtension.fn'
 import updateSongTagsFn from '../functions/updateSongTags.fn'
 import { hash } from '../functions/hashString.fn'
+import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 
 const TOTAL_CPUS = cpus().length
 
 let watcher: FSWatcher | undefined
 
-const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
+// const EXTENSIONS = ['flac', 'm4a', 'mp3', 'opus']
 
 let isQueueRunning = false
 let taskQueue: any[] = []
@@ -295,7 +296,7 @@ function getAllFilesInFoldersDeep(rootDirectory: string[]) {
 }
 
 function isAudioFile(path: string) {
-	return EXTENSIONS.includes(path.split('.').pop() || '')
+	return allowedSongExtensionsVar.includes(path.split('.').pop() || '')
 }
 
 export function getRootDirFolderWatcher() {

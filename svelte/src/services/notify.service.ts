@@ -4,7 +4,7 @@ function success(message: string) {
 	return iziToast.success({
 		message,
     messageColor:'#fff',
-    backgroundColor:'var(--color-hl-1)',
+    backgroundColor:'var(--color-hl-blue)',
     icon:'',
 	})
 }
