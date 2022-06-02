@@ -136,42 +136,53 @@
 			})
 		})
 
+		// Gets a Base64 encoded album art
 		ipcRenderer.on('send-single-songArt', (event, data) => {
 			setAlbumArtBase64(data)
 		})
 	})
 
+	// Sets a Base64 encoded album art into a imag element src
 	function setAlbumArtBase64(data) {
 		let element: HTMLElement = document.querySelector(
 			`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
 		)
 
+		// If the art element is not loaded anymore, return
 		if (!element) return
 
+		// Gets the video and image elements
 		let videoElement: HTMLVideoElement = element.querySelector('video')
 		let imageElement: HTMLImageElement = element.querySelector('img')
+
+		// Sets the video to nothing
 		videoElement.src = ''
 
+		// If a Base64 encoded album art is given, sets it to the image element src
 		if (data.cover !== null) {
 			imageElement.setAttribute('src', data.cover)
+			element.setAttribute('data-type', 'image')
 		} else {
+			// If not, load a placeholder image
 			imageElement.setAttribute('src', './img/disc-line.svg')
+			element.setAttribute('data-type', 'unfound')
 		}
-
 		element.setAttribute('data-loaded', 'true')
-		element.setAttribute('data-type', 'image')
 	}
 
 	function handleNewArt(data) {
+		// If the first attempt of finding the album art fails
 		if (data.success === false) {
 			let element: HTMLElement = document.querySelector(
 				`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
 			)
 
+			// If the art element is not loaded anymore, return
 			if (!element) return
 
 			let dataSet = element.dataset
 
+			// Attempts to get an album art from a song file instead of from a root directory
 			getSongAlbumArtIPC(dataSet?.playingSongSourcefile || dataSet?.rootdir, dataSet.artsize, dataSet.albumid)
 
 			return

@@ -39,24 +39,32 @@ function getAlbumColors(rootDir, contrast) {
                 return resolve(undefined);
             }
             let imagePath = imagePaths[0];
+            // If no images found in directory
             if (imagePath === undefined) {
+                // Find the first valid song file
                 let firstValidFileFound = fs_1.default
                     .readdirSync(rootDir)
                     .find(file => allowedSongExtensions_var_1.default.includes((0, getFileExtension_fn_1.default)(file) || ''));
+                // If valid song file found
                 if (firstValidFileFound) {
+                    // Get its album art
                     let common = (yield music_metadata_1.default.parseFile(path_1.default.join(rootDir, firstValidFileFound))).common;
                     const cover = music_metadata_1.default.selectCover(common.picture); // pick the cover image
+                    // If no cover found, just return
                     if (cover === null) {
                         return resolve(undefined);
                     }
                     else {
+                        // Sets the image path to the album art buffer
                         imagePath = cover === null || cover === void 0 ? void 0 : cover.data;
                     }
                 }
                 else {
+                    // If no valid song file found, just return
                     return resolve(undefined);
                 }
             }
+            // Check again if imagePath is undefined
             if (imagePath === undefined) {
                 return resolve(undefined);
             }

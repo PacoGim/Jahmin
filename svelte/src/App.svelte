@@ -15,7 +15,6 @@
 	} from './store/final.store'
 
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
-	import SearchLayout from './layouts/search/SearchLayout.svelte'
 
 	import previousSongFn from './functions/previousSong.fn'
 
@@ -53,6 +52,7 @@
 	import sortSongsArrayFn from './functions/sortSongsArray.fn'
 	import { sortByConfig, sortOrderConfig } from './store/config.store'
 	import StatusBar from './layouts/status_bar/!StatusBar.svelte'
+	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 
 	let appIdleDebounce = getAppIdleDebounce()
 
@@ -170,8 +170,8 @@
 			<LibraryLayout />
 		{:else if $layoutToShow === 'Config'}
 			<ConfigLayout />
-		{:else if $layoutToShow === 'Search'}
-			<SearchLayout />
+		{:else if $layoutToShow === 'Playback'}
+			<PlaybackLayout />
 		{/if}
 	</current-window-svlt>
 </main-app>

@@ -9,8 +9,6 @@ import { EditTag } from '../types/editTag.type'
 import { FlacTagType } from '../types/flacTagType'
 import { SongType } from '../types/song.type'
 
-let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
-
 // const mm = require('music-metadata')
 
 /********************** Write Flac Tags **********************/
@@ -36,7 +34,7 @@ export function writeFlacTags(filePath: string, newTags: any): Promise<any> {
 		let ffmpegString = objectToFfmpegString(newTags)
 		let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
 
-		let command = `"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`
+		let command = `-i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`
 
 		ffmpegWorker?.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command })
 	})

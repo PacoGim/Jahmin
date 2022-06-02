@@ -27,7 +27,6 @@ type WorkerType = {
 let workers: WorkerType[] = []
 
 export function initWorkers() {
-	console.log(WORKER_FOLDER_PATH)
 	let workerFiles = fs.readdirSync(WORKER_FOLDER_PATH)
 
 	workerFiles.forEach((workerFile) => {

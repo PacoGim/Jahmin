@@ -15,12 +15,10 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOpusTags = exports.writeOpusTags = void 0;
 const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const worker_service_1 = require("../services/worker.service");
-let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise = undefined;
 let ffmpegDeferredPromiseId;
@@ -39,7 +37,7 @@ function writeOpusTags(filePath, newTags) {
         ffmpegDeferredPromiseId = (0, generateId_fn_1.default)();
         let ffmpegString = objectToFfmpegString(newTags);
         let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus');
-        let command = `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`;
+        let command = `-i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`;
         ffmpegWorker === null || ffmpegWorker === void 0 ? void 0 : ffmpegWorker.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command });
     });
 }

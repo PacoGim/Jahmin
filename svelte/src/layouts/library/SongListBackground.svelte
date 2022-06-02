@@ -42,7 +42,7 @@
 
 				let selectedAlbumSrcFile = document
 					.querySelector(`album[rootdir="${$selectedAlbumDir}"] art-svlt img`)
-					.getAttribute('src')
+					?.getAttribute('src')
 
 				if (selectedAlbumSrcFile) {
 					loadArt(selectedAlbumSrcFile, 'image')

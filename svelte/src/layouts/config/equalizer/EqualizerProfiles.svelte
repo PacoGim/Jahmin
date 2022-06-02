@@ -151,12 +151,11 @@
 
 <style>
 	equalizer-profiles {
-		width: fit-content;
+		width: var(--clamp-width);
 		max-height: 10rem;
 		min-height: 10rem;
 		display: block;
 		overflow-y: auto;
-		width: 33%;
 		margin: 0 auto;
 		margin-top: 1rem;
 	}
@@ -189,7 +188,7 @@
 	}
 
 	equalizer-profiles equalizer-field equalizer-rename:hover {
-		background-color: var(--color-hl-gold);
+		background-color: var(--color-hl-blue);
 	}
 
 	equalizer-profiles equalizer-field equalizer-delete:hover {

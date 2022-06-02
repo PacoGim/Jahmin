@@ -15,13 +15,11 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFlacTags = exports.writeFlacTags = void 0;
 const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const string_hash_1 = __importDefault(require("string-hash"));
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const worker_service_1 = require("../services/worker.service");
-let ffmpegPath = path_1.default.join(process.cwd(), '/electron-app/binaries/ffmpeg');
 // const mm = require('music-metadata')
 /********************** Write Flac Tags **********************/
 let ffmpegDeferredPromise = undefined;
@@ -41,7 +39,7 @@ function writeFlacTags(filePath, newTags) {
         ffmpegDeferredPromiseId = (0, generateId_fn_1.default)();
         let ffmpegString = objectToFfmpegString(newTags);
         let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac');
-        let command = `"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`;
+        let command = `-i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`;
         ffmpegWorker === null || ffmpegWorker === void 0 ? void 0 : ffmpegWorker.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command });
     });
 }

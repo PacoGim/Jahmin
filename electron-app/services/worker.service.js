@@ -11,7 +11,6 @@ const fs_1 = __importDefault(require("fs"));
 const WORKER_FOLDER_PATH = path_1.default.join(__dirname, '../workers');
 let workers = [];
 function initWorkers() {
-    console.log(WORKER_FOLDER_PATH);
     let workerFiles = fs_1.default.readdirSync(WORKER_FOLDER_PATH);
     workerFiles.forEach((workerFile) => {
         let worker = new worker_threads_1.Worker(getWorkerPath(workerFile));

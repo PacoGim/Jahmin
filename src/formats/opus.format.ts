@@ -8,8 +8,6 @@ import { EditTag } from '../types/editTag.type'
 import { OpusTagType } from '../types/opus.type'
 import { SongType } from '../types/song.type'
 
-let ffmpegPath = path.join(process.cwd(), '/electron-app/binaries/ffmpeg')
-
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise: any = undefined
 let ffmpegDeferredPromiseId: string
@@ -32,7 +30,7 @@ export function writeOpusTags(filePath: string, newTags: any): Promise<any> {
 		let ffmpegString = objectToFfmpegString(newTags)
 		let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus')
 
-		let command = `"${ffmpegPath}" -i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`
+		let command = `-i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`
 
 		ffmpegWorker?.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command })
 	})

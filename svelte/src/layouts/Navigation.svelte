@@ -2,6 +2,8 @@
 	import CogIcon from '../icons/CogIcon.svelte'
 
 	import HomeIcon from '../icons/HomeIcon.svelte'
+	import PlaybackIcon from '../icons/PlaybackIcon.svelte'
+	import PlayListIcon from '../icons/PlayListIcon.svelte'
 	import SearchIcon from '../icons/SearchIcon.svelte'
 
 	import { layoutToShow } from '../store/final.store'
@@ -9,15 +11,15 @@
 
 <navigation-svlt class="dark-theme">
 	<nav-button on:click={() => ($layoutToShow = 'Library')}>
-		<HomeIcon
+		<PlayListIcon
 			style="{$layoutToShow === 'Library'
 				? 'fill:var(--color-hl-gold)'
 				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
-	<nav-button on:click={() => ($layoutToShow = 'Search')}>
-		<SearchIcon
-			style="{$layoutToShow === 'Search'
+	<nav-button on:click={() => ($layoutToShow = 'Playback')}>
+		<PlaybackIcon
+			style="{$layoutToShow === 'Playback'
 				? 'fill:var(--color-hl-gold)'
 				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
 		/>

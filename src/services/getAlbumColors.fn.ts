@@ -35,26 +35,34 @@ export async function getAlbumColors(rootDir: string, contrast: number | undefin
 
 		let imagePath: string | Buffer = imagePaths[0]
 
+		// If no images found in directory
 		if (imagePath === undefined) {
+			// Find the first valid song file
 			let firstValidFileFound = fs
 				.readdirSync(rootDir)
 				.find(file => allowedSongExtensionsVar.includes(getFileExtensionFn(file) || ''))
 
+			// If valid song file found
 			if (firstValidFileFound) {
+				// Get its album art
 				let common = (await mm.parseFile(path.join(rootDir, firstValidFileFound))).common
 
 				const cover = mm.selectCover(common.picture) // pick the cover image
 
+				// If no cover found, just return
 				if (cover === null) {
 					return resolve(undefined)
 				} else {
+					// Sets the image path to the album art buffer
 					imagePath = cover?.data
 				}
 			} else {
+				// If no valid song file found, just return
 				return resolve(undefined)
 			}
 		}
 
+		// Check again if imagePath is undefined
 		if (imagePath === undefined) {
 			return resolve(undefined)
 		}
