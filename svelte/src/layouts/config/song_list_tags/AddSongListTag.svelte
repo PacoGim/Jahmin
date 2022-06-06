@@ -27,7 +27,7 @@
 		</select>
 	</tag-to-add>
 
-	<tag-to-add-icon on:click={addTag}>
+	<tag-to-add-icon on:click={() => addTag()}>
 		<AddFillIcon style="height: 2rem;width: 2rem;fill:var(--color-hl-gold);" />
 	</tag-to-add-icon>
 </add-song-list-tag>

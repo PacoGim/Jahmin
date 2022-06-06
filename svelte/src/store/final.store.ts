@@ -1,4 +1,6 @@
-import { writable, Writable } from 'svelte/store'
+import { writable } from 'svelte/store'
+
+import type { Writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 
@@ -58,7 +60,7 @@ export let triggerGroupingChangeEvent: Writable<string[]> = writable([])
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config'> = writable('Playback')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config'> = writable('Config')
 export let selectedOptionSection: Writable<string> = writable('')
 
 export let mainAudioElement: Writable<HTMLAudioElement> = writable(undefined)

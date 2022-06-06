@@ -55,6 +55,7 @@
 		$isSongShuffleEnabledStore
 		$isSongRepeatEnabledStore
 		$isPlaybackRepeatEnabledStore
+		$playbackStore
 		listenPlaybackChangers()
 	}
 

@@ -1,4 +1,5 @@
-import { writable, Writable } from 'svelte/store'
+import { writable } from 'svelte/store'
+import type { Writable } from 'svelte/store'
 import parseJson from '../functions/parseJson'
 import type { ThemeOptions } from '../types/config.type'
 import type { SelectedTagType } from '../types/selectedTag.type'
@@ -24,13 +25,13 @@ function getSongListTagsConfig() {
 	let songListTagsLS = localStorage.getItem('SongListTags')
 
 	if (songListTagsLS) {
-		return [parseJson(songListTagsLS)]
+		return parseJson(songListTagsLS)
 	} else {
 		return [
-			{ name: 'Track', size: 'Collapse', align: 'Left' },
-			{ name: 'Title', size: 'Expand', align: 'Left' },
-			{ name: 'Rating', size: 'Collapse', align: 'Left' },
-			{ name: 'Duration', size: 'Collapse', align: 'Left' }
+			{ value: 'Track', isExpanded: false, align: 'Left' },
+			{ value: 'Title', isExpanded: true, align: 'Left' },
+			{ value: 'Rating', isExpanded: false, align: 'Left' },
+			{ value: 'Duration', isExpanded: false, align: 'Left' }
 		]
 	}
 }

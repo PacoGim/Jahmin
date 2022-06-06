@@ -21,17 +21,7 @@
 	}
 </script>
 
-<selected-tag-component
-	draggable
-	data-index={index}
-	on:dragover={evt => evt.preventDefault()}
-	on:dragstart={evt => {
-		dispatch('dragStart', evt)
-	}}
-	on:drop={evt => {
-		dispatch('dragDrop', evt)
-	}}
->
+<li data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value}>
 	<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
 	<select bind:value={$songListTagsConfig[index].value}>
 		{#each songListTagsVar as tag, index (index)}
@@ -72,10 +62,10 @@
 	>
 		<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);margin-left: 1rem;" />
 	</delete-icon>
-</selected-tag-component>
+</li>
 
 <style>
-	selected-tag-component {
+	li {
 		display: grid;
 		align-items: center;
 		grid-template-columns: max-content auto repeat(4, max-content);
@@ -85,32 +75,32 @@
 		background-color: var(--color-bg-2);
 	}
 
-	:global(selected-tag-component.slow-transition) {
+	:global(li.slow-transition) {
 		transition: transform 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
-	selected-tag-component:active {
+	li:active {
 		cursor: grabbing;
 	}
 
-	selected-tag-component tag-name {
+	li tag-name {
 		grid-area: 1 / 1;
 		cursor: pointer;
 	}
 
-	selected-tag-component select {
+	li select {
 		cursor: pointer;
 		grid-area: 1 / 1;
 		height: 100%;
 		opacity: 0;
 	}
 
-	selected-tag-component tag-empty-space {
+	li tag-empty-space {
 		display: block;
 		height: 100%;
 	}
 
-	selected-tag-component tag-expand label {
+	li tag-expand label {
 		cursor: pointer;
 		font-size: 0.9rem;
 		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
@@ -128,25 +118,25 @@
 		transform: translateX(7.5rem);
 	}
 
-	selected-tag-component tag-expand[data-is-expanded='true'] label {
+	li tag-expand[data-is-expanded='true'] label {
 		background-color: var(--color-hl-gold);
 		color: var(--color-bg-1);
 		border-color: var(--color-hl-gold);
 		transform: translateX(0rem);
 	}
 
-	selected-tag-component tag-expand input {
+	li tag-expand input {
 		display: none;
 	}
 
-	selected-tag-component tag-aligns {
+	li tag-aligns {
 		display: flex;
 		flex-direction: row;
 		width: calc(28 * 4px);
 		justify-content: space-around;
 	}
 
-	selected-tag-component tag-aligns .tag-align label {
+	li tag-aligns .tag-align label {
 		height: 100%;
 		width: 100%;
 		display: flex;
@@ -159,52 +149,52 @@
 		border-radius: 3px;
 	}
 
-	:where(selected-tag-component tag-aligns .tag-align label) {
+	:where(li tag-aligns .tag-align label) {
 		transition: transform 200ms ease-in-out;
 	}
 
-	selected-tag-component tag-aligns tag-align-left label {
+	li tag-aligns tag-align-left label {
 		transition-delay: 0ms;
 	}
 
-	selected-tag-component tag-aligns tag-align-center label {
+	li tag-aligns tag-align-center label {
 		transition-delay: 100ms;
 	}
 
-	selected-tag-component tag-aligns tag-align-right label {
+	li tag-aligns tag-align-right label {
 		transition-delay: 200ms;
 	}
 
-	selected-tag-component tag-aligns .tag-align {
+	li tag-aligns .tag-align {
 		display: block;
 		height: 28px;
 		width: 28px;
 	}
 
-	selected-tag-component tag-aligns[data-is-active='false'] .tag-align label {
+	li tag-aligns[data-is-active='false'] .tag-align label {
 		transform: rotateY(90deg);
 	}
-	selected-tag-component tag-aligns[data-is-active='true'] .tag-align label {
+	li tag-aligns[data-is-active='true'] .tag-align label {
 		transform: rotateY(0deg);
 	}
 
-	selected-tag-component tag-aligns .tag-align input:checked ~ label {
+	li tag-aligns .tag-align input:checked ~ label {
 		background-color: var(--color-hl-gold);
 		color: var(--color-bg-1);
 		border-color: var(--color-hl-gold);
 	}
 
-	selected-tag-component tag-aligns .tag-align input {
+	li tag-aligns .tag-align input {
 		display: none;
 	}
 
-	selected-tag-component move-icon {
+	li move-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	selected-tag-component delete-icon {
+	li delete-icon {
 		cursor: pointer;
 		display: flex;
 		align-items: center;
