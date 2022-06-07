@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { playbackStore } from '../../store/final.store'
+	import SortableService from '../../services/sortable.service'
 
-	import { Sortable, MultiDrag } from 'sortablejs'
+	import { playbackStore } from '../../store/final.store'
 
 	$: if ($playbackStore.length > 0) createSortableList()
 
@@ -13,7 +13,7 @@
 
 		if (el === undefined || el === null) return
 
-		let sortable = Sortable.create(el, {
+		SortableService.create(el, {
 			multiDrag: true,
 			animation: 150,
 			selectedClass: null,
@@ -46,7 +46,7 @@
 	}
 
 	onMount(() => {
-		Sortable.mount(new MultiDrag())
+		createSortableList()
 	})
 </script>
 
@@ -74,10 +74,12 @@
 	}
 
 	playback-layout li {
-		padding: 0.5rem 1rem;
-		background-color: rgba(255, 255, 255, 0.05);
-		margin-bottom: 0.5rem;
+		padding: 0.15rem 0.3rem;
 		cursor: pointer;
+	}
+
+	playback-layout li:nth-child(even) {
+		background-color: rgba(255, 255, 255, 0.05);
 	}
 
 	playback-layout li:hover {

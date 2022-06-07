@@ -5,6 +5,7 @@ export type SelectedTagType = {
 }
 
 export type SelectedTagNameType =
+	| 'ChooseTag'
 	| 'Extension'
 	| 'Album'
 	| 'AlbumArtist'

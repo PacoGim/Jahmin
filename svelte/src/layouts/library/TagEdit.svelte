@@ -250,7 +250,9 @@
 		// When the element is defined in the DOM, calculate the size of the art.
 		if (element !== undefined) {
 			setTimeout(() => {
-				artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
+				try {
+					artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
+				} catch (err) {}
 			}, 500)
 		}
 	}

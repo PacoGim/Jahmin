@@ -3,6 +3,7 @@ import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
+import { songListTagsConfig } from './config.store'
 
 export let selectedGroupByStore: Writable<string> = writable('')
 export let selectedGroupByValueStore: Writable<string> = writable('')
@@ -60,7 +61,7 @@ export let triggerGroupingChangeEvent: Writable<string[]> = writable([])
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config'> = writable('Config')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config'> = writable('Playback')
 export let selectedOptionSection: Writable<string> = writable('')
 
 export let mainAudioElement: Writable<HTMLAudioElement> = writable(undefined)
@@ -103,3 +104,9 @@ export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)
 
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
+
+export let songListTagsValuesStore: Writable<string[]> = writable([])
+
+songListTagsConfig.subscribe(tags => {
+	songListTagsValuesStore.set(tags.map(tag => tag.value))
+})

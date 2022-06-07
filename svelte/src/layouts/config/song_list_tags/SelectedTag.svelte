@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte'
 	import songListTagsVar from '../../../global/songListTags.var'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
-	const dispatch = createEventDispatcher()
-
 	import MoveIcon from '../../../icons/MoveIcon.svelte'
 	import { songListTagsConfig } from '../../../store/config.store'
+	import { songListTagsValuesStore } from '../../../store/final.store'
 
 	export let tag
 	export let index
@@ -16,53 +14,78 @@
 	}
 
 	function removeTagFromTagList(tagIndex: number) {
+		// Remove tag from config
 		$songListTagsConfig.splice(tagIndex, 1)
+
+		// Find Dynamic Artists and Title tag index
+		let dynamicArtistsTagIndex = $songListTagsConfig.findIndex(tag => tag.value === 'DynamicArtists')
+		let titleTagIndex = $songListTagsConfig.findIndex(tag => tag.value === 'Title')
+
+		// If Dynamic Artists tag is found but Title is NOT found, remove Dynamic Artists tag
+		if (dynamicArtistsTagIndex !== -1 && titleTagIndex === -1) {
+			$songListTagsConfig.splice(dynamicArtistsTagIndex, 1)
+		}
+
+		if ($songListTagsConfig.length === 0) {
+			$songListTagsConfig.push({
+				value: 'Album',
+				isExpanded: false,
+				align: 'center'
+			})
+		}
+
 		$songListTagsConfig = $songListTagsConfig
 	}
 </script>
 
-<li data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value}>
-	<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
-	<select bind:value={$songListTagsConfig[index].value}>
-		{#each songListTagsVar as tag, index (index)}
-			<option value={tag.value}>{tag.name}</option>
-		{/each}
-	</select>
-	<tag-empty-space />
-	<tag-expand data-is-expanded={$songListTagsConfig[index].isExpanded}>
-		<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$songListTagsConfig[index].isExpanded} />
-		<label for="{index}-{tag.value}-expand">Expanded</label>
-	</tag-expand>
+{#if tag.value !== 'DynamicArtists'}
+	<li data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value}>
+		<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
+		<select bind:value={$songListTagsConfig[index].value}>
+			{#each songListTagsVar as tag, index (index)}
+				{#if !$songListTagsValuesStore.includes(tag.value)}
+					<option value={tag.value} checked={false}>{tag.name}</option>
+				{/if}
+			{/each}
+		</select>
+		<tag-empty-space />
+		<tag-expand data-is-expanded={$songListTagsConfig[index].isExpanded}>
+			<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$songListTagsConfig[index].isExpanded} />
+			<label for="{index}-{tag.value}-expand">Expanded</label>
+		</tag-expand>
 
-	<tag-aligns data-is-active={$songListTagsConfig[index].isExpanded}>
-		<tag-align-left class="tag-align">
-			<input id="{index}-{tag.value}-l" type="radio" bind:group={$songListTagsConfig[index].align} value="left" />
-			<label for="{index}-{tag.value}-l">L</label>
-		</tag-align-left>
+		<tag-aligns data-is-active={$songListTagsConfig[index].isExpanded}>
+			<tag-align-left class="tag-align">
+				<input id="{index}-{tag.value}-l" type="radio" bind:group={$songListTagsConfig[index].align} value="left" />
+				<label for="{index}-{tag.value}-l">L</label>
+			</tag-align-left>
 
-		<tag-align-center class="tag-align">
-			<input id="{index}-{tag.value}-c" type="radio" bind:group={$songListTagsConfig[index].align} value="center" />
-			<label for="{index}-{tag.value}-c">C</label>
-		</tag-align-center>
+			<tag-align-center class="tag-align">
+				<input id="{index}-{tag.value}-c" type="radio" bind:group={$songListTagsConfig[index].align} value="center" />
+				<label for="{index}-{tag.value}-c">C</label>
+			</tag-align-center>
 
-		<tag-align-right class="tag-align">
-			<input id="{index}-{tag.value}-r" type="radio" bind:group={$songListTagsConfig[index].align} value="right" />
-			<label for="{index}-{tag.value}-r">R</label>
-		</tag-align-right>
-	</tag-aligns>
+			<tag-align-right class="tag-align">
+				<input id="{index}-{tag.value}-r" type="radio" bind:group={$songListTagsConfig[index].align} value="right" />
+				<label for="{index}-{tag.value}-r">R</label>
+			</tag-align-right>
+		</tag-aligns>
 
-	<move-icon>
-		<MoveIcon style="height: 1.25rem;fill:var(--color-fg-1);margin-left: 1rem;" />
-	</move-icon>
+		<move-icon>
+			<MoveIcon style="height: 1.25rem;fill:var(--color-fg-1);margin:0 1rem;" />
+		</move-icon>
 
-	<delete-icon
-		on:click={() => {
-			removeTagFromTagList(index)
-		}}
-	>
-		<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);margin-left: 1rem;" />
-	</delete-icon>
-</li>
+		<delete-icon
+			on:click={() => {
+				removeTagFromTagList(index)
+			}}
+		>
+			<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);" />
+		</delete-icon>
+	</li>
+{:else}
+	<li class="not-display" data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value} />
+{/if}
 
 <style>
 	li {
@@ -73,6 +96,10 @@
 		padding: 0.5rem 1rem;
 		margin: 1rem 0;
 		background-color: var(--color-bg-2);
+	}
+
+	li.not-display {
+		display: none;
 	}
 
 	:global(li.slow-transition) {
@@ -86,6 +113,8 @@
 	li tag-name {
 		grid-area: 1 / 1;
 		cursor: pointer;
+		box-shadow: 0 1px 0 0px var(--color-fg-1);
+		text-align: center;
 	}
 
 	li select {

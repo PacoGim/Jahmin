@@ -125,23 +125,33 @@ function getDefaultConfigFile(): ConfigType {
 		},
 		songListTags: [
 			{
-				align: 'left',
+				align: 'center',
 				value: 'Track',
 				isExpanded: false
 			},
 			{
-				align: 'center',
+				align: 'left',
 				value: 'Title',
 				isExpanded: true
 			},
 			{
-				align: 'left',
+				align: 'center',
+				value: 'PlayCount',
+				isExpanded: false
+			},
+			{
+				align: 'center',
 				value: 'Rating',
 				isExpanded: false
 			},
 			{
 				align: 'left',
 				value: 'Duration',
+				isExpanded: false
+			},
+			{
+				align: 'center',
+				value: 'DynamicArtists',
 				isExpanded: false
 			}
 		]

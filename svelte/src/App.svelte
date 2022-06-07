@@ -54,6 +54,8 @@
 	import StatusBar from './layouts/status_bar/!StatusBar.svelte'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 
+	import { Sortable, MultiDrag } from 'sortablejs'
+
 	let appIdleDebounce = getAppIdleDebounce()
 
 	// Listens to live changes from the db and updates the svelte store.
@@ -72,7 +74,7 @@
 
 	onMount(() => {
 		setTimeout(() => {
-			// $layoutToShow = 'Config'
+			// $layoutToShow = 'Playback'
 		}, 1000)
 
 		/* 		bulkUpdateSongs([

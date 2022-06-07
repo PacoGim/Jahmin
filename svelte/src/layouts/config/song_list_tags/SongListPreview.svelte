@@ -1,32 +1,35 @@
 <script lang="ts">
 	import SongTag from '../../../components/SongTag.svelte'
 	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
+	import ToggleOffIcon from '../../../icons/ToggleOffIcon.svelte'
+	import ToggleOnIcon from '../../../icons/ToggleOnIcon.svelte'
 	import { songListTagsConfig } from '../../../store/config.store'
+	import { songListTagsValuesStore } from '../../../store/final.store'
 	import type { PartialSongType } from '../../../types/song.type'
 
 	let gridStyle = ''
 
 	let sampleSong: PartialSongType = {
-		Album: 'Nightchild',
-		AlbumArtist: 'Jokabi',
-		Artist: 'Jokabi',
-		BitRate: 172.5405714285714,
+		Album: 'Post Traumatic',
+		AlbumArtist: 'Mike Shinoda',
+		Artist: 'Mike Shinoda',
+		BitRate: 159.5405714285714,
 		Comment: 'This is a comment',
-		Composer: 'Jokabi',
-		Date_Day: 13,
-		Date_Month: 12,
-		Date_Year: 2019,
+		Composer: 'Mike Shinoda',
+		Date_Day: 15,
+		Date_Month: 6,
+		Date_Year: 2018,
 		DiscNumber: 1,
-		Duration: 126,
+		Duration: 204,
 		Extension: 'opus',
-		Genre: 'Lo-fi',
+		Genre: 'Hip hop',
 		Rating: 100,
 		SampleRate: 48000,
-		Size: 2738235,
-		Title: 'Forest',
-		Track: 1,
+		Size: 4078741,
+		Title: 'Running From My Shadow',
+		Track: 13,
 		PlayCount: 10,
-		DynamicArtists: '(feat. Jokabi)'
+		DynamicArtists: '(feat. Mike Shinoda//Grandson)'
 	}
 
 	$: {
@@ -34,16 +37,25 @@
 	}
 
 	function toggleDynamicArtists() {
-		let tagIndex = $songListTagsConfig.findIndex(tag => tag.value === 'DynamicArtists')
+		let dynamicArtistsTagIndex = $songListTagsConfig.findIndex(tag => tag.value === 'DynamicArtists')
+		let titleTagIndex = $songListTagsConfig.findIndex(tag => tag.value === 'Title')
 
-		if (tagIndex === -1) {
+		if (dynamicArtistsTagIndex === -1) {
+			if (titleTagIndex === -1) {
+				$songListTagsConfig.push({
+					value: 'Title',
+					isExpanded: false,
+					align: 'center'
+				})
+			}
+
 			$songListTagsConfig.push({
 				value: 'DynamicArtists',
 				isExpanded: false,
 				align: 'center'
 			})
 		} else {
-			$songListTagsConfig.splice(tagIndex, 1)
+			$songListTagsConfig.splice(dynamicArtistsTagIndex, 1)
 		}
 
 		$songListTagsConfig = $songListTagsConfig
@@ -51,22 +63,15 @@
 </script>
 
 <song-list-preview>
-	<enable-dynamic-artists>
-		<button on:click={toggleDynamicArtists}>Toggle Dynamic Artists</button>
-	</enable-dynamic-artists>
 	<grid-tags style="grid-template-columns:{gridStyle};">
 		{#each $songListTagsConfig as selectedTag, index (index)}
-			<!-- <SongTag tagValue={sampleSong[selectedTag.value]} tagName={selectedTag.value} align={selectedTag?.align?.toLowerCase()} /> -->
-
-			{#if selectedTag.value === 'Title' && $songListTagsConfig.find(configTag => configTag.value === 'DynamicArtists')}
+			{#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}
 				<SongTag
 					tagName={selectedTag.value}
-					tagValue={`${sampleSong[selectedTag.value]} ${sampleSong.DynamicArtists}` || ''}
+					tagValue={`${sampleSong.Title} ${sampleSong.DynamicArtists}` || ''}
 					align={selectedTag?.align?.toLowerCase()}
 				/>
-			{:else if selectedTag.value === 'DynamicArtists' || !$songListTagsConfig.find(configTag => configTag.value === 'Title')}
-				<!--  -->
-			{:else}
+			{:else if selectedTag.value !== 'DynamicArtists'}
 				<SongTag
 					tagName={selectedTag.value}
 					tagValue={sampleSong[selectedTag.value] || ''}
@@ -75,16 +80,38 @@
 			{/if}
 		{/each}
 	</grid-tags>
+	<enable-dynamic-artists>
+		<button on:click={toggleDynamicArtists}>
+			{#if $songListTagsValuesStore.includes('DynamicArtists')}
+				<span>Dynamic Artists <ToggleOnIcon style="height: 1.25rem;fill:#fff;margin-left: 0.5rem;" /> </span>
+			{:else}
+				<span>Dynamic Artists <ToggleOffIcon style="height: 1.25rem;fill:#fff;margin-left: 0.5rem;" /></span>
+			{/if}
+		</button>
+	</enable-dynamic-artists>
 </song-list-preview>
 
 <style>
 	song-list-preview {
-		width: var(--clamp-width);
+		display: block;
+		padding: 0 1rem;
 	}
 
 	grid-tags {
 		align-items: center;
 		display: grid;
-		width: 100%;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	enable-dynamic-artists {
+		display: flex;
+		justify-content: center;
+
+		margin-top: 1rem;
+	}
+
+	enable-dynamic-artists button span {
+		display: flex;
+		align-items: center;
 	}
 </style>

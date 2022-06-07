@@ -14,18 +14,6 @@
 
 	function saveSelectedTagsToConfig(newSelectedTags: SelectedTagType[]) {
 		if (isMounted === true) {
-			if (newSelectedTags.length === 0) {
-				newSelectedTags = [
-					{
-						value: 'Title',
-						align: 'center',
-						isExpanded: false
-					}
-				]
-
-				$songListTagsConfig = newSelectedTags
-			}
-
 			saveConfig({
 				songListTags: newSelectedTags
 			})
