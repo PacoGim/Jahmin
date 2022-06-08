@@ -101,8 +101,8 @@
 		grid-area: control-bar-svlt;
 		display: flex;
 		align-items: center;
-		background-color: var(--high-color);
-		color: var(--low-color);
+		background-color: var(--art-color-light);
+		color: var(--art-color-dark);
 
 		transition-property: background-color, color;
 		transition-duration: 300ms;

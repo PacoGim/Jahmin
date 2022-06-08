@@ -145,7 +145,7 @@
 		width: 100%;
 		margin: 0 1rem;
 		height: calc(100% - 1rem);
-		border: 2px solid var(--base-color);
+		border: 2px solid var(--art-color-base);
 
 		border-radius: var(--player-progress-border-radius);
 

@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import getClosestElementFn from '../../functions/getClosestElement.fn'
 	import SortableService from '../../services/sortable.service'
 
-	import { playbackStore } from '../../store/final.store'
+	import { playbackStore, playingSongStore, songPlayingIdStore } from '../../store/final.store'
+	import { songToPlayUrlStore } from '../../store/player.store'
+	import PlayButton from '../components/PlayButton.svelte'
 
 	$: if ($playbackStore.length > 0) createSortableList()
+
+	$: {
+		console.log($playingSongStore)
+	}
 
 	let selectedSongsId = []
 
@@ -45,6 +52,22 @@
 		$playbackStore = newOrder
 	}
 
+	function playSong(evt: MouseEvent) {
+		let listElement = getClosestElementFn(evt.target as HTMLElement, 'li')
+
+		if (listElement === undefined || listElement === null) return
+
+		let songId = listElement?.dataset?.songId
+
+		if (songId === undefined || songId === null) return
+
+		let songSourceFile = $playbackStore.find(song => song.ID === Number(songId))?.SourceFile
+
+		if (songSourceFile === undefined || songSourceFile === null) return
+
+		songToPlayUrlStore.set([songSourceFile, { playNow: true }])
+	}
+
 	onMount(() => {
 		createSortableList()
 	})
@@ -52,11 +75,19 @@
 
 <selected-songs-preview />
 
-<playback-layout>
+<playback-layout on:dblclick={evt => playSong(evt)}>
 	<ul id="items">
 		{#each $playbackStore as song, index (song.ID)}
 			<li class={selectedSongsId.includes(song.ID) ? 'selected' : null} data-song-id={song.ID} data-index={index}>
-				{song.Track} - {song.Title}
+				<!-- {#if $playingSongStore.ID === song.ID}
+					<play-button>
+						<PlayButton customColor="#fff" customSize="0.75rem" />
+					</play-button>
+				{/if} -->
+
+				<span>{song.Track}</span>
+				<span>{song.Title}</span>
+				<span>{song.SampleRate}</span>
 			</li>
 		{/each}
 	</ul>
@@ -70,12 +101,13 @@
 	}
 
 	playback-layout li {
+		display: grid;
+		align-items: center;
 		list-style: none;
-	}
-
-	playback-layout li {
 		padding: 0.15rem 0.3rem;
 		cursor: pointer;
+
+		grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
 	}
 
 	playback-layout li:nth-child(even) {

@@ -49,8 +49,8 @@
 
 		grid-area: album-info-svlt;
 
-		background-color: var(--high-color);
-		color: var(--low-color);
+		background-color: var(--art-color-light);
+		color: var(--art-color-dark);
 
 		height: 100%;
 		padding: 0 0.5rem;

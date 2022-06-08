@@ -62,8 +62,8 @@
 
 		height: 32px;
 
-		color: var(--high-color);
-		background-color: var(--low-color);
+		color: var(--art-color-light);
+		background-color: var(--art-color-dark);
 
 		transition-property: color, background-color;
 		transition-duration: 300ms;

@@ -73,13 +73,7 @@ function getAlbumColors(rootDir, contrast) {
                 .raw()
                 .toBuffer((err, buffer) => {
                 if (err) {
-                    return resolve({
-                        hue: 0,
-                        lightnessBase: 50,
-                        lightnessHigh: 25,
-                        lightnessLow: 75,
-                        saturation: 0
-                    });
+                    return resolve(undefined);
                 }
                 let hexColor = buffer.toString('hex').substring(0, 6);
                 let hslColorObject = (0, color_type_1.ColorTypeShell)();
@@ -88,8 +82,8 @@ function getAlbumColors(rootDir, contrast) {
                     hslColorObject.hue = hslColor.h;
                     hslColorObject.saturation = hslColor.s;
                     hslColorObject.lightnessBase = hslColor.l;
-                    hslColorObject.lightnessHigh = data.colorHigh.l;
-                    hslColorObject.lightnessLow = data.colorLow.l;
+                    hslColorObject.lightnessLight = data.colorLight.l;
+                    hslColorObject.lightnessDark = data.colorDark.l;
                     resolve(hslColorObject);
                 });
             });
@@ -115,12 +109,12 @@ function recursiveLuminanceFinder(hslBaseColor, luminanceIndex = 0) {
             lowLuminance = 0;
         if (highLuminance > 100)
             highLuminance = 100;
-        let hslBaseColorLow = Object.assign(Object.assign({}, hslBaseColor), { l: lowLuminance });
-        let hslBaseColorHigh = Object.assign(Object.assign({}, hslBaseColor), { l: highLuminance });
-        let ratio = getTwoHslColorsContrastRatio(hslBaseColorLow, hslBaseColorHigh);
+        let hslBaseColorDark = Object.assign(Object.assign({}, hslBaseColor), { l: lowLuminance });
+        let hslBaseColorLight = Object.assign(Object.assign({}, hslBaseColor), { l: highLuminance });
+        let ratio = getTwoHslColorsContrastRatio(hslBaseColorDark, hslBaseColorLight);
         if (ratio < 1 / contrastRatio || previousContrastRatio === ratio) {
             previousContrastRatio = undefined;
-            return resolve({ colorLow: hslBaseColorLow, colorHigh: hslBaseColorHigh });
+            return resolve({ colorDark: hslBaseColorDark, colorLight: hslBaseColorLight });
         }
         else {
             previousContrastRatio = ratio;
@@ -128,14 +122,14 @@ function recursiveLuminanceFinder(hslBaseColor, luminanceIndex = 0) {
         }
     });
 }
-function getTwoHslColorsContrastRatio(colorLow, colorHigh) {
-    let colorLowRgb = convertHslColorToRgb(colorLow.h, colorLow.s, colorLow.l);
-    let colorHighRgb = convertHslColorToRgb(colorHigh.h, colorHigh.s, colorHigh.l);
-    let colorLowLuminance = luminance(colorLowRgb.r, colorLowRgb.g, colorLowRgb.b);
-    let colorHighLuminance = luminance(colorHighRgb.r, colorHighRgb.g, colorHighRgb.b);
-    const ratio = colorLowLuminance > colorHighLuminance
-        ? (colorHighLuminance + 0.05) / (colorLowLuminance + 0.05)
-        : (colorLowLuminance + 0.05) / (colorHighLuminance + 0.05);
+function getTwoHslColorsContrastRatio(colorDark, colorLight) {
+    let colorDarkRgb = convertHslColorToRgb(colorDark.h, colorDark.s, colorDark.l);
+    let colorLightRgb = convertHslColorToRgb(colorLight.h, colorLight.s, colorLight.l);
+    let colorDarkLuminance = luminance(colorDarkRgb.r, colorDarkRgb.g, colorDarkRgb.b);
+    let colorLightLuminance = luminance(colorLightRgb.r, colorLightRgb.g, colorLightRgb.b);
+    const ratio = colorDarkLuminance > colorLightLuminance
+        ? (colorLightLuminance + 0.05) / (colorDarkLuminance + 0.05)
+        : (colorDarkLuminance + 0.05) / (colorLightLuminance + 0.05);
     return ratio;
 }
 function luminance(r, g, b) {

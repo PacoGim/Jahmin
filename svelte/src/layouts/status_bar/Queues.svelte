@@ -63,12 +63,12 @@
 
 <queue-processes>
 	<art-compress-queue>
-		<ImageIcon style="fill:var(--low-color);height: 20px;width: 20px;margin-right: .5rem;" />
+		<ImageIcon style="fill:var(--art-color-dark);height: 20px;width: 20px;margin-right: .5rem;" />
 		<span>{$artCompressQueueProgress.currentLength}</span>/
 		<span>{$artCompressQueueProgress.maxLength}</span>
 	</art-compress-queue>
 	<song-sync-queue>
-		<MusicNoteIcon style="fill:var(--low-color);height: 20px;width: 20px;margin-right: .5rem;" />
+		<MusicNoteIcon style="fill:var(--art-color-dark);height: 20px;width: 20px;margin-right: .5rem;" />
 		<span>
 			{currentSongSyncProgress}%
 		</span>
@@ -76,7 +76,7 @@
 	</song-sync-queue>
 	<song-update on:click={() => stopSongUpdate()}>
 		<song-update-icon data-is-song-updating={$songSyncQueueProgress.isSongUpdating}>
-			<RefreshIcon style="fill:var(--low-color);height: 20px;width: 20px;" />
+			<RefreshIcon style="fill:var(--art-color-dark);height: 20px;width: 20px;" />
 		</song-update-icon>
 	</song-update>
 </queue-processes>
@@ -91,13 +91,13 @@
 	}
 
 	art-compress-queue {
-		color: var(--low-color);
+		color: var(--art-color-dark);
 		display: flex;
 		align-items: center;
 
 		max-height: 32px;
 
-		background-color: var(--high-color);
+		background-color: var(--art-color-light);
 		width: max-content;
 
 		padding: 0.5rem;
@@ -108,13 +108,13 @@
 	}
 
 	song-sync-queue {
-		color: var(--low-color);
+		color: var(--art-color-dark);
 		display: flex;
 		align-items: center;
 
 		max-height: 32px;
 
-		background-color: var(--high-color);
+		background-color: var(--art-color-light);
 		width: max-content;
 
 		padding: 0.5rem;
@@ -129,8 +129,8 @@
 		height: 8px;
 		width: 100px;
 		border-radius: 50px;
-		background-color: var(--base-color);
-		border: 1px solid var(--low-color);
+		background-color: var(--art-color-base);
+		border: 1px solid var(--art-color-dark);
 
 		transition-property: background-color, border;
 		transition-timing-function: linear;
@@ -143,7 +143,7 @@
 		height: 100%;
 		width: var(--song-sync-queue-progress);
 		border-radius: 50px;
-		background-color: var(--low-color);
+		background-color: var(--art-color-dark);
 
 		transition: background-color 300ms linear;
 	}
@@ -154,13 +154,13 @@
 
 	song-update {
 		cursor: pointer;
-		color: var(--low-color);
+		color: var(--art-color-dark);
 		display: flex;
 		align-items: center;
 
 		max-height: 32px;
 
-		background-color: var(--high-color);
+		background-color: var(--art-color-light);
 		width: max-content;
 
 		padding: 0.5rem;

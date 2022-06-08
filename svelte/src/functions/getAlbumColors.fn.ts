@@ -8,8 +8,8 @@ export async function getAlbumColors(rootDir: string, contrast = undefined): Pro
 				color = {
 					hue: 0,
 					lightnessBase: 30,
-					lightnessHigh: 45,
-					lightnessLow: 15,
+					lightnessLight: 45,
+					lightnessDark: 15,
 					saturation: 0
 				}
 			}

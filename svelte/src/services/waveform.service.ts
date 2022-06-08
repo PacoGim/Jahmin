@@ -51,7 +51,7 @@ export async function setWaveSource(sourceFile: string, rootDir: string, duratio
 			waveSurfer = undefined
 		}
 
-		waveSurfer = getNewWaveSurfer(`hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
+		waveSurfer = getNewWaveSurfer(`hsl(${color.hue},${color.saturation}%,${color.lightnessDark}%)`)
 
 		waveSurfer.load(escapeString(sourceFile), peaks, undefined, duration)
 

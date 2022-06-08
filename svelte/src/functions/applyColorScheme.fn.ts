@@ -1,5 +1,8 @@
 export default function (color) {
-	document.documentElement.style.setProperty('--low-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessLow}%)`)
-	document.documentElement.style.setProperty('--base-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessBase}%)`)
-	document.documentElement.style.setProperty('--high-color', `hsl(${color.hue},${color.saturation}%,${color.lightnessHigh}%)`)
+	document.documentElement.style.setProperty('--art-hue', color.hue)
+	document.documentElement.style.setProperty('--art-saturation', color.saturation + '%')
+
+	document.documentElement.style.setProperty('--art-lightness-dark', color.lightnessDark + '%')
+	document.documentElement.style.setProperty('--art-lightness-base', color.lightnessBase + '%')
+	document.documentElement.style.setProperty('--art-lightness-light', color.lightnessLight + '%')
 }

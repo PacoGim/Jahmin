@@ -6,8 +6,8 @@ function ColorTypeShell() {
         hue: 0,
         saturation: 0,
         lightnessBase: 0,
-        lightnessHigh: 0,
-        lightnessLow: 0
+        lightnessLight: 0,
+        lightnessDark: 0
     };
 }
 exports.ColorTypeShell = ColorTypeShell;

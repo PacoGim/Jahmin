@@ -94,7 +94,7 @@
 		background-color: #fff;
 		border-radius: 25px;
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-		color: var(--low-color);
+		color: var(--art-color-dark);
 	}
 
 	span.Title {

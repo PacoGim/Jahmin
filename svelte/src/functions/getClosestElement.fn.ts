@@ -1,3 +1,3 @@
-export default function (element: HTMLElement, parentTagName: string): HTMLElement {
-	return element.closest(parentTagName)
+export default function (element: HTMLElement, selector: string): HTMLElement {
+	return element.closest(selector)
 }

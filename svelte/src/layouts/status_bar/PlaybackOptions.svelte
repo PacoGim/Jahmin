@@ -69,7 +69,7 @@
 <style>
 	playback-options {
 		grid-area: playback-options;
-		background-color: var(--high-color);
+		background-color: var(--art-color-light);
 		display: flex;
 		align-items: center;
 
@@ -79,8 +79,8 @@
 	playback-options option-icon {
 		cursor: pointer;
 		display: flex;
-		background-color: var(--high-color);
-		border: 2px solid var(--low-color);
+		background-color: var(--art-color-light);
+		border: 2px solid var(--art-color-dark);
 
 		margin: 0 0.25rem;
 		padding: 0.1rem;
@@ -91,7 +91,7 @@
 	}
 
 	option-icon[data-is-active='true'] {
-		background-color: var(--low-color);
+		background-color: var(--art-color-dark);
 	}
 
 	playback-options option-icon:last-of-type {

@@ -2,6 +2,9 @@
 	import { isPlaying, currentAudioElement, playingSongStore } from '../../store/final.store'
 	import { songToPlayUrlStore } from '../../store/player.store'
 
+	export let customSize = 'var(--button-size)'
+	export let customColor = 'var(--art-color-dark)'
+
 	function togglePlay() {
 		if ($isPlaying) {
 			$currentAudioElement.pause()
@@ -15,18 +18,22 @@
 	}
 </script>
 
-<play-pause-button class={$isPlaying ? '' : 'playing'} on:click={() => togglePlay()}>
-	<left-part />
+<play-pause-button
+	style="height: {customSize}; width: {customSize};"
+	class={$isPlaying ? '' : 'playing'}
+	on:click={() => togglePlay()}
+>
+	<left-part style="background-color:{customColor};" />
 
-	<right-part />
+	<right-part style="background-color:{customColor};" />
 </play-pause-button>
 
 <style>
 	play-pause-button {
 		position: relative;
 		display: block;
-		height: var(--button-size);
-		width: var(--button-size);
+		/* height: var(--button-size); */
+		/* width: var(--button-size); */
 		background-color: transparent;
 	}
 
@@ -35,7 +42,7 @@
 		top: 0;
 		left: 0;
 		display: block;
-		background-color: var(--low-color);
+		/* background-color: var(--art-color-dark); */
 		width: 100%;
 		height: 100%;
 		transition: background-color 300ms ease-in-out, clip-path 500ms cubic-bezier(0.075, 0.82, 0.165, 1);

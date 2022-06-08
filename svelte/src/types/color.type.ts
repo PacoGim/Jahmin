@@ -2,8 +2,8 @@ export type ColorType = {
 	hue: number
 	saturation: number
 	lightnessBase: number
-	lightnessHigh: number
-	lightnessLow: number
+	lightnessLight: number
+	lightnessDark: number
 }
 
 export function ColorTypeShell(): ColorType {
@@ -11,7 +11,7 @@ export function ColorTypeShell(): ColorType {
 		hue: 0,
 		saturation: 0,
 		lightnessBase: 0,
-		lightnessHigh: 0,
-		lightnessLow: 0
+		lightnessLight: 0,
+		lightnessDark: 0
 	}
 }

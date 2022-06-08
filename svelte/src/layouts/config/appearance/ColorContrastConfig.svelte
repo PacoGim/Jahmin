@@ -70,8 +70,8 @@
 	current-contrast-sample {
 		display: block;
 		width: max-content;
-		background: var(--high-color);
-		color: var(--low-color);
+		background: var(--art-color-light);
+		color: var(--art-color-dark);
 		padding: 0.25rem 0.5rem;
 		border-radius: 4px;
 		margin: 0 auto;

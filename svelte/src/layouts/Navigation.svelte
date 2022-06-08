@@ -13,23 +13,23 @@
 	<nav-button on:click={() => ($layoutToShow = 'Library')}>
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'
-				? 'fill:var(--color-hl-gold)'
-				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
+				? `fill:var(--art-color-alt-mid)`
+				: 'fill:var(--art-color-alt-dark)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Playback')}>
 		<PlaybackIcon
 			style="{$layoutToShow === 'Playback'
-				? 'fill:var(--color-hl-gold)'
-				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
+				? `fill:var(--art-color-alt-mid)`
+				: 'fill:var(--art-color-alt-dark)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 	<separator />
 	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
 		<CogIcon
 			style="{$layoutToShow === 'Config'
-				? 'fill:var(--color-hl-gold)'
-				: 'fill:var(--color-fg-1)'};height: 48px;width: 48px;padding: .5rem;"
+				? `fill:var(--art-color-alt-mid)`
+				: 'fill:var(--art-color-alt-dark)'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 </navigation-svlt>
@@ -54,12 +54,13 @@
 		align-items: center;
 		justify-content: center;
 
-		border-radius: 7px;
+		border-radius: 3px;
 
 		cursor: pointer;
 		margin: 0.5rem;
 		margin-bottom: 0.25rem;
-		background-color: var(--color-bg-2);
+		/* background-color: var(--color-bg-2); */
+		background-color: var(--art-color-alt-light);
 
 		transition-property: background-color;
 		transition-duration: var(--theme-transition-duration);

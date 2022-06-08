@@ -97,11 +97,11 @@
 	song-list-scroll-bar scrollbar-fill {
 		display: block;
 		width: auto;
-		/* background-color: var(--high-color); */
+		/* background-color: var(--art-color-light); */
 		background-color: rgba(255, 255, 255, 0.5);
 		height: var(--scrollbar-fill);
 		border-bottom: 5px solid rgba(255, 255, 255, 0.75);
-		/* border-bottom: 5px solid var(--low-color); */
+		/* border-bottom: 5px solid var(--art-color-dark); */
 		max-height: 100%;
 	}
 </style>

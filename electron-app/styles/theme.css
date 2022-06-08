@@ -7,6 +7,9 @@ body {
 	--color-hl-blue: hsl(211, 100%, 55%);
 	--color-hl-2: hsl(348, 90%, 37%);
 	--filter-hl: var(--theme-filter-hl);
+
+	--art-color-alt-light-lightness: var(--theme-art-color-alt-light-lightness);
+	--art-color-alt-dark-lightness: var(--theme-art-color-alt-dark-lightness);
 }
 
 body[theme='Day'] {
@@ -17,6 +20,9 @@ body[theme='Day'] {
 
 	--theme-filter-hl: brightness(0) saturate(100%) invert(15%) sepia(24%) saturate(284%) hue-rotate(169deg) brightness(91%)
 		contrast(96%);
+
+	--theme-art-color-alt-light-lightness: 10%;
+	--theme-art-color-alt-dark-lightness: 90%;
 }
 
 body[theme='Night'] {
@@ -26,13 +32,16 @@ body[theme='Night'] {
 	--theme-bg-2: hsl(215, 21%, 11%);
 	--theme-filter-hl: brightness(0) saturate(100%) invert(90%) sepia(14%) saturate(137%) hue-rotate(169deg) brightness(92%)
 		contrast(90%);
+
+	--theme-art-color-alt-light-lightness: 90%;
+	--theme-art-color-alt-dark-lightness: 10%;
 }
 
 .tippy-box[data-theme~='dynamic'] {
-	background-color: var(--low-color);
-	color: var(--high-color);
+	background-color: var(--art-color-dark);
+	color: var(--art-color-light);
 }
 
 .tippy-box > .tippy-arrow:before {
-	border-top-color: var(--low-color) !important; /* set your color here and use the !important property */
+	border-top-color: var(--art-color-dark) !important; /* set your color here and use the !important property */
 }

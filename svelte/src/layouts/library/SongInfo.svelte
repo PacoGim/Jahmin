@@ -19,8 +19,8 @@
 
 <style>
 	song-info-svlt {
-		background-color: var(--high-color);
-		color: var(--low-color);
+		background-color: var(--art-color-light);
+		color: var(--art-color-dark);
 		grid-area: song-info-svlt;
 		text-align: right;
 

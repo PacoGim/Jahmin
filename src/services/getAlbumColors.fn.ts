@@ -72,13 +72,7 @@ export async function getAlbumColors(rootDir: string, contrast: number | undefin
 			.raw()
 			.toBuffer((err, buffer) => {
 				if (err) {
-					return resolve({
-						hue: 0,
-						lightnessBase: 50,
-						lightnessHigh: 25,
-						lightnessLow: 75,
-						saturation: 0
-					})
+					return resolve(undefined)
 				}
 
 				let hexColor = buffer.toString('hex').substring(0, 6)
@@ -91,8 +85,8 @@ export async function getAlbumColors(rootDir: string, contrast: number | undefin
 					hslColorObject.hue = hslColor.h
 					hslColorObject.saturation = hslColor.s
 					hslColorObject.lightnessBase = hslColor.l
-					hslColorObject.lightnessHigh = data.colorHigh.l
-					hslColorObject.lightnessLow = data.colorLow.l
+					hslColorObject.lightnessLight = data.colorLight.l
+					hslColorObject.lightnessDark = data.colorDark.l
 
 					resolve(hslColorObject)
 				})
@@ -115,7 +109,7 @@ function getTwoContrastedHslColors(hslColor: { h: number; s: number; l: number }
 function recursiveLuminanceFinder(
 	hslBaseColor: { h: number; s: number; l: number },
 	luminanceIndex = 0
-): Promise<{ colorLow: { h: number; s: number; l: number }; colorHigh: { h: number; s: number; l: number } }> {
+): Promise<{ colorDark: { h: number; s: number; l: number }; colorLight: { h: number; s: number; l: number } }> {
 	return new Promise((resolve, reject) => {
 		let lowLuminance = hslBaseColor.l - luminanceIndex
 		let highLuminance = hslBaseColor.l + luminanceIndex
@@ -124,14 +118,14 @@ function recursiveLuminanceFinder(
 
 		if (highLuminance > 100) highLuminance = 100
 
-		let hslBaseColorLow = { ...hslBaseColor, l: lowLuminance }
-		let hslBaseColorHigh = { ...hslBaseColor, l: highLuminance }
+		let hslBaseColorDark = { ...hslBaseColor, l: lowLuminance }
+		let hslBaseColorLight = { ...hslBaseColor, l: highLuminance }
 
-		let ratio = getTwoHslColorsContrastRatio(hslBaseColorLow, hslBaseColorHigh)
+		let ratio = getTwoHslColorsContrastRatio(hslBaseColorDark, hslBaseColorLight)
 
 		if (ratio < 1 / contrastRatio || previousContrastRatio === ratio) {
 			previousContrastRatio = undefined
-			return resolve({ colorLow: hslBaseColorLow, colorHigh: hslBaseColorHigh })
+			return resolve({ colorDark: hslBaseColorDark, colorLight: hslBaseColorLight })
 		} else {
 			previousContrastRatio = ratio
 			return resolve(recursiveLuminanceFinder(hslBaseColor, luminanceIndex + 1))
@@ -140,19 +134,19 @@ function recursiveLuminanceFinder(
 }
 
 function getTwoHslColorsContrastRatio(
-	colorLow: { h: number; s: number; l: number },
-	colorHigh: { h: number; s: number; l: number }
+	colorDark: { h: number; s: number; l: number },
+	colorLight: { h: number; s: number; l: number }
 ) {
-	let colorLowRgb = convertHslColorToRgb(colorLow.h, colorLow.s, colorLow.l)
-	let colorHighRgb = convertHslColorToRgb(colorHigh.h, colorHigh.s, colorHigh.l)
+	let colorDarkRgb = convertHslColorToRgb(colorDark.h, colorDark.s, colorDark.l)
+	let colorLightRgb = convertHslColorToRgb(colorLight.h, colorLight.s, colorLight.l)
 
-	let colorLowLuminance = luminance(colorLowRgb.r, colorLowRgb.g, colorLowRgb.b)
-	let colorHighLuminance = luminance(colorHighRgb.r, colorHighRgb.g, colorHighRgb.b)
+	let colorDarkLuminance = luminance(colorDarkRgb.r, colorDarkRgb.g, colorDarkRgb.b)
+	let colorLightLuminance = luminance(colorLightRgb.r, colorLightRgb.g, colorLightRgb.b)
 
 	const ratio =
-		colorLowLuminance > colorHighLuminance
-			? (colorHighLuminance + 0.05) / (colorLowLuminance + 0.05)
-			: (colorLowLuminance + 0.05) / (colorHighLuminance + 0.05)
+		colorDarkLuminance > colorLightLuminance
+			? (colorLightLuminance + 0.05) / (colorDarkLuminance + 0.05)
+			: (colorDarkLuminance + 0.05) / (colorLightLuminance + 0.05)
 
 	return ratio
 }
