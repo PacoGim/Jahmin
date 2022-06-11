@@ -13,23 +13,23 @@
 	<nav-button on:click={() => ($layoutToShow = 'Library')}>
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'
-				? `fill:var(--art-color-alt-mid)`
-				: 'fill:var(--art-color-alt-dark)'};height: 48px;width: 48px;padding: .5rem;"
+				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Playback')}>
 		<PlaybackIcon
 			style="{$layoutToShow === 'Playback'
-				? `fill:var(--art-color-alt-mid)`
-				: 'fill:var(--art-color-alt-dark)'};height: 48px;width: 48px;padding: .5rem;"
+				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 	<separator />
 	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
 		<CogIcon
 			style="{$layoutToShow === 'Config'
-				? `fill:var(--art-color-alt-mid)`
-				: 'fill:var(--art-color-alt-dark)'};height: 48px;width: 48px;padding: .5rem;"
+				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: 48px;width: 48px;padding: .5rem;"
 		/>
 	</nav-button>
 </navigation-svlt>
@@ -41,10 +41,12 @@
 		display: grid;
 		grid-template-rows: repeat(2, max-content) auto max-content;
 
-		background-color: var(--color-bg-1);
-		border-right: 2px var(--color-bg-2) solid;
+		background-color: rgba(255, 255, 255, 0.025);
+		/* background-color: var(--color-art-bg); */
+		/* border-right: 2px var(--color-bg-2) solid; */
+		border-right: 2px  rgba(255, 255, 255, 0.05) solid;
 
-		transition-property: background-color border-right;
+		transition-property: background-color, border-right;
 		transition-duration: var(--theme-transition-duration);
 		transition-timing-function: linear;
 	}
@@ -59,8 +61,8 @@
 		cursor: pointer;
 		margin: 0.5rem;
 		margin-bottom: 0.25rem;
-		/* background-color: var(--color-bg-2); */
-		background-color: var(--art-color-alt-light);
+
+		background-color: hsl(var(--art-hue), var(--art-saturation), 50%);
 
 		transition-property: background-color;
 		transition-duration: var(--theme-transition-duration);

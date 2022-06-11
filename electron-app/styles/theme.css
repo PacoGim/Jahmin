@@ -8,8 +8,8 @@ body {
 	--color-hl-2: hsl(348, 90%, 37%);
 	--filter-hl: var(--theme-filter-hl);
 
-	--art-color-alt-light-lightness: var(--theme-art-color-alt-light-lightness);
-	--art-color-alt-dark-lightness: var(--theme-art-color-alt-dark-lightness);
+	--color-art-fg: var(--theme-color-art-fg);
+	--color-art-bg: var(--theme-color-art-bg);
 }
 
 body[theme='Day'] {
@@ -21,8 +21,8 @@ body[theme='Day'] {
 	--theme-filter-hl: brightness(0) saturate(100%) invert(15%) sepia(24%) saturate(284%) hue-rotate(169deg) brightness(91%)
 		contrast(96%);
 
-	--theme-art-color-alt-light-lightness: 10%;
-	--theme-art-color-alt-dark-lightness: 90%;
+	--theme-color-art-fg: hsl(var(--art-hue), var(--art-saturation), 5%);
+	--theme-color-art-bg: hsl(var(--art-hue), var(--art-saturation), 95%);
 }
 
 body[theme='Night'] {
@@ -33,8 +33,8 @@ body[theme='Night'] {
 	--theme-filter-hl: brightness(0) saturate(100%) invert(90%) sepia(14%) saturate(137%) hue-rotate(169deg) brightness(92%)
 		contrast(90%);
 
-	--theme-art-color-alt-light-lightness: 90%;
-	--theme-art-color-alt-dark-lightness: 10%;
+	--theme-color-art-fg: hsl(var(--art-hue), var(--art-saturation), 95%);
+	--theme-color-art-bg: hsl(var(--art-hue), var(--art-saturation), 5%);
 }
 
 .tippy-box[data-theme~='dynamic'] {

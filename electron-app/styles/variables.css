@@ -32,9 +32,3 @@
 	--art-color-base: hsl(var(--art-hue), var(--art-saturation), var(--art-lightness-base));
 	--art-color-light: hsl(var(--art-hue), var(--art-saturation), var(--art-lightness-light));
 }
-
-body {
-	--art-color-alt-light: hsl(var(--art-hue), var(--art-saturation), var(--art-color-alt-light-lightness));
-	--art-color-alt-dark: hsl(var(--art-hue), var(--art-saturation), var(--art-color-alt-dark-lightness));
-	--art-color-alt-mid: hsl(var(--art-hue), var(--art-saturation), 40%);
-}

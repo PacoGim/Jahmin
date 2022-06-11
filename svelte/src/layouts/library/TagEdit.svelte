@@ -368,9 +368,12 @@
 
 		grid-template-rows: repeat(12, max-content) auto;
 
-		margin: 0 0.5rem;
+		/* margin: 0 0.5rem; */
+		padding: 0 0.5rem;
 
-		background-color: var(--color-bg-1);
+		background-color: rgba(255, 255, 255, 0.025);
+
+		/* background-color: var(--color-bg-1); */
 
 		grid-area: tag-edit-svlt;
 

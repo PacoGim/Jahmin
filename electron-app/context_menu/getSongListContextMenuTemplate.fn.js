@@ -55,19 +55,6 @@ function handleEnableDisableSongs({ enable }, selectedSongs, clickedSong) {
             song.isEnabled = enable;
         });
     }
-    /*
-                sendWebContents('web-storage', {
-                            type: 'update',
-                            data: {
-                                id: hash(task.path, 'number'),
-                                newTags
-                            }
-                        })
-
-    */
-    // sendWebContents('web-storage', {
-    // 	songs: selectedSongs.filter(song => song.isEnabled)
-    // })
     selectedSongs
         .filter(song => song.hasOwnProperty('isEnabled'))
         .forEach(song => {

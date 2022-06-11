@@ -1,4 +1,4 @@
-import Dexie, { liveQuery, Table } from 'dexie'
+import Dexie, { liveQuery, type Table } from 'dexie'
 import generateId from '../functions/generateId.fn'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import { hash } from '../functions/hashString.fn'
@@ -37,9 +37,7 @@ export function addTaskToQueue(object, taskType: 'insert' | 'update' | 'delete')
 	if (isQueueRunning === false) {
 		isQueueRunning = true
 
-		setTimeout(() => {
-			runQueue()
-		}, 500)
+		runQueue()
 	}
 }
 

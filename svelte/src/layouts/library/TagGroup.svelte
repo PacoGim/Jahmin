@@ -112,7 +112,9 @@
 	group-svlt group-name {
 		padding: 0.25rem 0.75rem;
 
-		background-color: var(--color-bg-2);
+		/* background-color: var(--color-bg-2); */
+		background-color: rgba(255, 255, 255, 0.05);
+		font-size: 0.95rem;
 
 		text-align: center;
 
@@ -125,10 +127,14 @@
 		display: flex;
 		align-items: center;
 		padding: 0.25rem 0.75rem;
-		background-color: var(--color-bg-2);
+		/* background-color: var(--color-bg-2); */
+		/* background-color: rgba(255, 255, 255, 0.025); */
+		/* border-bottom: 1px rgba(255, 255, 255, 0.05) solid; */
+		box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
+
 		font-variation-settings: 'wght' calc(var(--default-weight));
 
-		margin: 0.1rem 0.05rem;
+		/* margin: 0.1rem 0.05rem; */
 
 		cursor: pointer;
 		max-width: 200px;
@@ -138,6 +144,9 @@
 		text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
+
+
+		transition: background-color 200ms linear;
 	}
 
 	group-value.selected {
@@ -148,5 +157,9 @@
 		position: absolute;
 
 		transform: translateX(-8px);
+	}
+
+	group-value:hover {
+		background-color: rgba(255, 255, 255, 0.05);
 	}
 </style>

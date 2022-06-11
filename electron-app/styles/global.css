@@ -35,7 +35,8 @@ html {
 
 body {
 	color: var(--color-fg-1);
-	background-color: var(--color-bg-1);
+	/* background-color: var(--color-bg-1); */
+	background-color: var(--color-art-bg);
 	height: 100%;
 	display: block;
 	font-variation-settings: 'wght' var(--default-weight);
