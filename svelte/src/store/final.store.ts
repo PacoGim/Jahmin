@@ -1,6 +1,5 @@
-import { writable } from 'svelte/store'
+import { writable, type Writable } from 'svelte/store'
 
-import type { Writable } from 'svelte/store'
 import type { AlbumType } from '../types/album.type'
 import type { SongType } from '../types/song.type'
 import { songListTagsConfig } from './config.store'

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_service_1 = require("./config.service");
-const sendWebContents_service_1 = require("./sendWebContents.service");
-const songSync_service_1 = require("./songSync.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
+const librarySongs_service_1 = require("./librarySongs.service");
 function default_1(filePaths, type, dbSongs) {
     let config = (0, config_service_1.getConfig)();
     filePaths.forEach((filePath) => {
@@ -20,7 +20,7 @@ function default_1(filePaths, type, dbSongs) {
         }
     });
     (0, config_service_1.saveConfig)(config);
-    (0, sendWebContents_service_1.sendWebContents)('selected-directories', config.directories);
-    (0, songSync_service_1.watchFolders)(dbSongs);
+    (0, sendWebContents_fn_1.sendWebContents)('selected-directories', config.directories);
+    (0, librarySongs_service_1.fetchSongsTag)(dbSongs);
 }
 exports.default = default_1;

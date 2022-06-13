@@ -1,6 +1,6 @@
 import { MenuItemConstructorOptions, clipboard, shell } from 'electron'
 import { getConfig } from '../services/config.service'
-import { sendWebContents } from '../services/sendWebContents.service'
+import { sendWebContents } from '../functions/sendWebContents.fn'
 import { SongType } from '../types/song.type'
 
 type dataType = {

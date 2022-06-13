@@ -1,4 +1,4 @@
-import { sendWebContents } from './sendWebContents.service'
+import { sendWebContents } from '../functions/sendWebContents.fn'
 
 let isAppReady = false
 

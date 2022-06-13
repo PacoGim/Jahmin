@@ -6,7 +6,6 @@
 	export let songRating = 0
 	export let hook
 	export let klass: '' | 'tag-edit-star' = ''
-	export let showUndo = false
 
 	let starRating = 0
 	let starRatingTemp = 0 // Keeps track of the user selected rating.
@@ -90,22 +89,6 @@
 		align-items: center;
 		cursor: pointer;
 		margin: 0 0.5rem;
-	}
-
-	button {
-		margin: 0 auto;
-		width: fit-content;
-		opacity: 0;
-		display: none;
-
-		transition: opacity 100ms linear;
-	}
-
-	button.show-undo {
-		opacity: 1;
-	}
-	button.tag-edit-star {
-		display: block;
 	}
 
 	stars:hover img.delete-star {

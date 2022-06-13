@@ -9,7 +9,7 @@
 	} from '../../store/final.store'
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
-	import type { PartialSongType, SongType } from '../../types/song.type'
+	import type { PartialSongType } from '../../types/song.type'
 	import Star from '../../components/Star.svelte'
 	import { onMount } from 'svelte'
 	import UndoIcon from '../../icons/UndoIcon.svelte'
@@ -60,9 +60,9 @@
 		}
 
 		if (bindingTags['Rating'] !== groupedTags['Rating']) {
-			setUndoIconVisibility('Rating', true)
+			setUndoIconVisibility('Rating', { isVisible: true })
 		} else {
-			setUndoIconVisibility('Rating', false)
+			setUndoIconVisibility('Rating', { isVisible: false })
 		}
 	}
 
@@ -85,8 +85,7 @@
 		bindingTags[dataSet.tag] = bindingTagData.replace(/[^0-9]/g, '')
 	}
 
-	function checkInput(evt: Event, parentElement: HTMLElement) {
-		let inputElement = evt.target as HTMLInputElement
+	function checkInput(inputElement: HTMLTextAreaElement | HTMLInputElement, parentElement: HTMLElement) {
 		let inputValue = inputElement.value
 		let data = parentElement.dataset
 
@@ -95,9 +94,9 @@
 		}
 
 		if (bindingTags[data.tag] !== groupedTags[data.tag]) {
-			setUndoIconVisibility(data.tag, true)
+			setUndoIconVisibility(data.tag, { isVisible: true })
 		} else {
-			setUndoIconVisibility(data.tag, false)
+			setUndoIconVisibility(data.tag, { isVisible: false })
 		}
 	}
 
@@ -108,6 +107,7 @@
 
 		tagEditSuggestionFn(inputElement.parentElement, data.tag, inputValue).then((result: string) => {
 			if (result) {
+				console.log(result)
 				bindingTags[data.tag] = result
 			}
 		})
@@ -115,10 +115,10 @@
 
 	function undoTagModification(tag: string) {
 		bindingTags[tag] = groupedTags[tag]
-		setUndoIconVisibility(tag, false)
+		setUndoIconVisibility(tag, { isVisible: false })
 	}
 
-	function setUndoIconVisibility(query: string, isVisible: boolean) {
+	function setUndoIconVisibility(query: string, { isVisible }: { isVisible: boolean }) {
 		let undoIconElement = document.querySelector(`svg[data-tag="${query}"]`) as HTMLElement
 
 		if (undoIconElement) {
@@ -153,7 +153,7 @@
 				textAreaElement.addEventListener('mouseleave', evt => resizeTextArea(evt, 'collapse'))
 				textAreaElement.addEventListener('mouseover', evt => resizeTextArea(evt, 'expand'))
 				textAreaElement.addEventListener('input', evt => resizeTextArea(evt, 'expand'))
-				textAreaElement.addEventListener('input', evt => checkInput(evt, tagContainerElement))
+				textAreaElement.addEventListener('input', evt => checkInput(evt.target as HTMLInputElement, tagContainerElement))
 				textAreaElement.addEventListener('input', evt => suggestTags(evt, tagContainerElement))
 
 				textAreaElement.addEventListener('focus', evt => {
@@ -171,7 +171,7 @@
 				textAreaElement.addEventListener('keydown', evt => {
 					if (['ArrowDown', 'ArrowUp', 'Escape', 'Enter'].includes(evt.key)) {
 						if (evt.key === 'Enter') evt.preventDefault()
-						selectSuggestion(evt.target as HTMLElement, evt.key as 'ArrowDown' | 'ArrowUp' | 'Enter')
+						selectSuggestion(evt.target as HTMLTextAreaElement, evt.key as 'ArrowDown' | 'ArrowUp' | 'Enter')
 					}
 				})
 			}
@@ -187,7 +187,7 @@
 		})
 	}
 
-	function selectSuggestion(targetElement: HTMLElement, keyPressed: 'ArrowDown' | 'ArrowUp' | 'Enter' | 'Escape') {
+	function selectSuggestion(targetElement: HTMLTextAreaElement, keyPressed: 'ArrowDown' | 'ArrowUp' | 'Enter' | 'Escape') {
 		let suggestionElements = targetElement.parentElement.querySelector('tag-suggestions') as HTMLElement
 
 		if (keyPressed === 'Enter') {
@@ -199,6 +199,8 @@
 			}
 
 			removeSuggestedTags(targetElement)
+
+			checkInput(targetElement, targetElement.parentElement)
 
 			return
 		}
@@ -269,7 +271,7 @@
 
 	<tag-container data-tag="Title">
 		<tag-name>Title <UndoIcon /> </tag-name>
-		<textarea bind:value={bindingTags.Title} tabindex="0" />
+		<textarea bind:value={bindingTags.Title} />
 	</tag-container>
 
 	<tag-container data-tag="Album">
@@ -371,7 +373,7 @@
 		/* margin: 0 0.5rem; */
 		padding: 0 0.5rem;
 
-		background-color: rgba(255, 255, 255, 0.025);
+		background-color: rgba(var(--rgb-global), 0.025);
 
 		/* background-color: var(--color-bg-1); */
 

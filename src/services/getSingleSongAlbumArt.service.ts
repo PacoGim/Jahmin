@@ -5,7 +5,7 @@ import mm from 'music-metadata'
 
 import getFileExtensionFn from '../functions/getFileExtension.fn'
 import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
-import { sendWebContents } from './sendWebContents.service'
+import { sendWebContents } from '../functions/sendWebContents.fn'
 import sharp from 'sharp'
 
 export default function (path: string, artSize: string, albumId: string) {

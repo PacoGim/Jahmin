@@ -2,11 +2,8 @@ import fs from 'fs'
 import path from 'path'
 
 import { appDataPath } from '..'
-import { getConfig } from './config.service'
-import { sendWebContents } from './sendWebContents.service'
-import { getStorageMap } from './storage.service'
+import { sendWebContents } from '../functions/sendWebContents.fn'
 import { getWorker } from './worker.service'
-import { AlbumType } from '../types/album.type'
 import { hash } from '../functions/hashString.fn'
 
 // Queue for image compression

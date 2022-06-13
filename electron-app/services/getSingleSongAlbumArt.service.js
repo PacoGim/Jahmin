@@ -8,7 +8,7 @@ const path_1 = __importDefault(require("path"));
 const music_metadata_1 = __importDefault(require("music-metadata"));
 const getFileExtension_fn_1 = __importDefault(require("../functions/getFileExtension.fn"));
 const allowedSongExtensions_var_1 = __importDefault(require("../global/allowedSongExtensions.var"));
-const sendWebContents_service_1 = require("./sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 const sharp_1 = __importDefault(require("sharp"));
 function default_1(path, artSize, albumId) {
     // If path does not exist
@@ -34,7 +34,7 @@ function default_1(path, artSize, albumId) {
     }
     // Gets a Base64 version of the array buffer of the song found
     getCover(path, Number(artSize)).then(base64Cover => {
-        (0, sendWebContents_service_1.sendWebContents)('send-single-songArt', {
+        (0, sendWebContents_fn_1.sendWebContents)('send-single-songArt', {
             albumId,
             artSize,
             cover: base64Cover

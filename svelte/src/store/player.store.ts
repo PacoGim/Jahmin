@@ -1,5 +1,4 @@
-import { writable } from 'svelte/store'
-import type { Writable } from 'svelte/store'
+import { writable, type Writable } from 'svelte/store'
 
 export let songToPlayUrlStore: Writable<[string | undefined, { playNow: boolean }]> = writable([undefined, { playNow: false }])
 

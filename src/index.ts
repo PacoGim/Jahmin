@@ -12,13 +12,11 @@ initWorkers()
 import { loadIPC } from './services/ipc.service'
 loadIPC()
 
-import { initStorage, killStorageWatcher } from './services/storage.service'
-
-import { getRootDirFolderWatcher, watchFolders } from './services/songSync.service'
 import { ConfigType } from './types/config.type'
 
 import chokidar from 'chokidar'
-import { sendWebContents } from './services/sendWebContents.service'
+import { sendWebContents } from './functions/sendWebContents.fn'
+import { getRootDirFolderWatcher } from './services/chokidar.service'
 
 let browserWindow: BrowserWindow
 
@@ -104,7 +102,6 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
 	killAllWorkers()
-	killStorageWatcher()
 	getRootDirFolderWatcher()?.close()
 })
 

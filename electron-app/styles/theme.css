@@ -10,6 +10,8 @@ body {
 
 	--color-art-fg: var(--theme-color-art-fg);
 	--color-art-bg: var(--theme-color-art-bg);
+
+	--rgb-global: var(--theme-rgb-global);
 }
 
 body[theme='Day'] {
@@ -23,6 +25,8 @@ body[theme='Day'] {
 
 	--theme-color-art-fg: hsl(var(--art-hue), var(--art-saturation), 5%);
 	--theme-color-art-bg: hsl(var(--art-hue), var(--art-saturation), 95%);
+
+	--theme-rgb-global: 0, 0, 0;
 }
 
 body[theme='Night'] {
@@ -35,6 +39,8 @@ body[theme='Night'] {
 
 	--theme-color-art-fg: hsl(var(--art-hue), var(--art-saturation), 95%);
 	--theme-color-art-bg: hsl(var(--art-hue), var(--art-saturation), 5%);
+
+	--theme-rgb-global: 255, 255, 255;
 }
 
 .tippy-box[data-theme~='dynamic'] {

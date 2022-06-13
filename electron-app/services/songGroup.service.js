@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.groupSongs = void 0;
 const hashString_fn_1 = require("../functions/hashString.fn");
-const sendWebContents_service_1 = require("./sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 const storage_service_1 = require("./storage.service");
 function groupSongs(groups, groupValues) {
     let songs = (0, storage_service_1.getStorageMapToArray)();
@@ -23,18 +23,18 @@ function runGroupSongs(songs, groups, groupValues, index) {
         // If too many values, slice the array to prevent performance issues.
         if (firstIndexGroupedSongs.length > 500) {
             firstIndexGroupedSongs = firstIndexGroupedSongs.slice(0, 500);
-            (0, sendWebContents_service_1.sendWebContents)('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` });
+            (0, sendWebContents_fn_1.sendWebContents)('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` });
         }
         // Sort array.
         firstIndexGroupedSongs = firstIndexGroupedSongs.sort((a, b) => {
             return String(a).localeCompare(String(b), undefined, { numeric: true });
         });
         // Send result to renderer.
-        (0, sendWebContents_service_1.sendWebContents)('group-songs', {
+        (0, sendWebContents_fn_1.sendWebContents)('group-songs', {
             index,
             data: firstIndexGroupedSongs
         });
-        (0, sendWebContents_service_1.sendWebContents)('albums-grouped', groupAlbums(songs, groups, groupValues, index));
+        (0, sendWebContents_fn_1.sendWebContents)('albums-grouped', groupAlbums(songs, groups, groupValues, index));
         return;
     }
     /********************** Song Filtering **********************/
@@ -50,10 +50,10 @@ function runGroupSongs(songs, groups, groupValues, index) {
     // If too many values, slice the array to prevent performance issues.
     if (groupedValues.length > 500) {
         groupedValues = groupedValues.slice(0, 500);
-        (0, sendWebContents_service_1.sendWebContents)('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` });
+        (0, sendWebContents_fn_1.sendWebContents)('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` });
     }
     // Send result to renderer.
-    (0, sendWebContents_service_1.sendWebContents)('group-songs', {
+    (0, sendWebContents_fn_1.sendWebContents)('group-songs', {
         index,
         data: groupedValues.sort((a, b) => {
             if (a && b) {
@@ -69,7 +69,7 @@ function runGroupSongs(songs, groups, groupValues, index) {
     /********************** Album Grouping **********************/
     // If last index, group unique albums.
     if (index === groups.length - 1) {
-        (0, sendWebContents_service_1.sendWebContents)('albums-grouped', groupAlbums(filteredSongs, groups, groupValues, index));
+        (0, sendWebContents_fn_1.sendWebContents)('albums-grouped', groupAlbums(filteredSongs, groups, groupValues, index));
     }
 }
 function groupAlbums(filteredSongs, groups, groupValues, index) {

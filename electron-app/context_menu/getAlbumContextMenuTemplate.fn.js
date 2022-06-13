@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
-const sendWebContents_service_1 = require("../services/sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 function default_1(data) {
     let template = [];
     template.push({
@@ -20,7 +20,7 @@ function default_1(data) {
         label: `Reload Album Art`,
         click: () => {
             if (data.albumId) {
-                (0, sendWebContents_service_1.sendWebContents)('get-art-sizes', {
+                (0, sendWebContents_fn_1.sendWebContents)('get-art-sizes', {
                     albumId: data.albumId
                 });
             }

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const config_service_1 = require("../services/config.service");
-const sendWebContents_service_1 = require("../services/sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 function default_1(data) {
     let template = [];
     let { selectedSongsData, clickedSongData } = data;
@@ -58,7 +58,7 @@ function handleEnableDisableSongs({ enable }, selectedSongs, clickedSong) {
     selectedSongs
         .filter(song => song.hasOwnProperty('isEnabled'))
         .forEach(song => {
-        (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+        (0, sendWebContents_fn_1.sendWebContents)('web-storage', {
             type: 'update',
             data: {
                 id: song.ID,
@@ -78,7 +78,7 @@ function getSongAmountMenu() {
             type: 'radio',
             label: String(i),
             click: () => {
-                (0, sendWebContents_service_1.sendWebContents)('show-song-amount', i);
+                (0, sendWebContents_fn_1.sendWebContents)('show-song-amount', i);
             },
             checked: i === songAmountConfig,
             enabled: i !== songAmountConfig
@@ -124,7 +124,7 @@ function getSortMenu() {
                     checked: sortByConfig === option && sortOrderConfig === 'asc',
                     enabled: sortByConfig !== option || sortOrderConfig !== 'asc',
                     click: () => {
-                        (0, sendWebContents_service_1.sendWebContents)('sort-songs', {
+                        (0, sendWebContents_fn_1.sendWebContents)('sort-songs', {
                             tag: option,
                             order: 'asc'
                         });
@@ -136,7 +136,7 @@ function getSortMenu() {
                     checked: sortByConfig === option && sortOrderConfig === 'desc',
                     enabled: sortByConfig !== option || sortOrderConfig !== 'desc',
                     click: () => {
-                        (0, sendWebContents_service_1.sendWebContents)('sort-songs', {
+                        (0, sendWebContents_fn_1.sendWebContents)('sort-songs', {
                             tag: option,
                             order: 'desc'
                         });

@@ -1,4 +1,4 @@
-import { writable, Writable } from 'svelte/store'
+import { writable, type Writable } from 'svelte/store'
 import type { EqualizerType } from '../types/equalizer.type'
 import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 

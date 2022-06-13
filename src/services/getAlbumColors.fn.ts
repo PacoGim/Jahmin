@@ -7,7 +7,7 @@ import { getConfig } from './config.service'
 import fs from 'fs'
 import mm from 'music-metadata'
 import path from 'path'
-import { getStorageMap } from './storage.service'
+
 import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 import getFileExtensionFn from '../functions/getFileExtension.fn'
 

@@ -1,5 +1,5 @@
 import { MenuItemConstructorOptions, shell } from "electron"
-import { sendWebContents } from "../services/sendWebContents.service"
+import { sendWebContents } from "../functions/sendWebContents.fn"
 
 export default function (data: any) {
   let template: MenuItemConstructorOptions[] = []

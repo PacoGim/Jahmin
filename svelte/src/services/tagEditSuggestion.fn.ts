@@ -54,13 +54,6 @@ export default function (elementToHook: HTMLElement, tagToSearch: string, userIn
 					resolve(result.item || result)
 				})
 
-				suggestionContainerElement.addEventListener('keypress', evt => {
-					console.log(evt)
-					if (evt.key === 'Enter') {
-						resolve(result.item || result)
-					}
-				})
-
 				suggestionElement.appendChild(suggestionContainerElement)
 			})
 

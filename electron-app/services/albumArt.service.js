@@ -7,7 +7,7 @@ exports.getAllowedFiles = exports.sendArtQueueProgress = exports.compressAlbumAr
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const __1 = require("..");
-const sendWebContents_service_1 = require("./sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 const worker_service_1 = require("./worker.service");
 const hashString_fn_1 = require("../functions/hashString.fn");
 // Queue for image compression
@@ -24,7 +24,7 @@ sharpWorker.on('message', data => {
     delete data.artOutputDirPath;
     delete data.artOutputPath;
     delete data.dimension;
-    (0, sendWebContents_service_1.sendWebContents)('new-art', data);
+    (0, sendWebContents_fn_1.sendWebContents)('new-art', data);
     setTimeout(() => {
         runQueue();
     }, 100);
@@ -47,7 +47,7 @@ function compressAlbumArt(rootDir, artSize, forceNewCheck) {
     let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
     // Send image if already compressed and a forced new check is set to false.
     if (forceNewCheck === false && fs_1.default.existsSync(artOutputPath)) {
-        return (0, sendWebContents_service_1.sendWebContents)('new-art', {
+        return (0, sendWebContents_fn_1.sendWebContents)('new-art', {
             artSize,
             success: true,
             albumId,
@@ -60,7 +60,7 @@ function compressAlbumArt(rootDir, artSize, forceNewCheck) {
         return;
     let allowedMediaFiles = getAllowedFiles(rootDir);
     if (allowedMediaFiles.length === 0) {
-        (0, sendWebContents_service_1.sendWebContents)('new-art', {
+        (0, sendWebContents_fn_1.sendWebContents)('new-art', {
             artSize,
             success: false,
             albumId
@@ -70,7 +70,7 @@ function compressAlbumArt(rootDir, artSize, forceNewCheck) {
     let artInputPath = allowedMediaFiles[0];
     // If video found.
     if (videoFormats.includes(getExtension(artInputPath))) {
-        (0, sendWebContents_service_1.sendWebContents)('new-art', {
+        (0, sendWebContents_fn_1.sendWebContents)('new-art', {
             artSize,
             success: true,
             albumId,
@@ -80,7 +80,7 @@ function compressAlbumArt(rootDir, artSize, forceNewCheck) {
     }
     else {
         // Send the first image found uncompressed.
-        (0, sendWebContents_service_1.sendWebContents)('new-art', {
+        (0, sendWebContents_fn_1.sendWebContents)('new-art', {
             artSize,
             success: true,
             albumId,
@@ -119,7 +119,7 @@ function sendArtQueueProgress() {
     if (compressImageQueue.length === 0) {
         maxCompressImageQueueLength = 0;
     }
-    (0, sendWebContents_service_1.sendWebContents)('art-queue-progress', {
+    (0, sendWebContents_fn_1.sendWebContents)('art-queue-progress', {
         currentLength: compressImageQueue.length,
         maxLength: maxCompressImageQueueLength
     });

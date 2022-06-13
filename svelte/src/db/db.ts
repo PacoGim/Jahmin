@@ -28,7 +28,7 @@ let isQueueRunning = false
 let dbVersion = 0
 let isVersionUpdating = false
 
-export function addTaskToQueue(object, taskType: 'insert' | 'update' | 'delete') {
+export function addTaskToQueue(object, taskType: 'insert' | 'update' | 'delete' | 'external-update') {
 	taskQueue.push({
 		object,
 		taskType
@@ -45,7 +45,7 @@ async function runQueue() {
 	// Groups all the same tasks together.
 	let addSongQueue = taskQueue.filter(task => task.taskType === 'insert')
 	let deleteSongQueue = taskQueue.filter(task => task.taskType === 'delete')
-	let updateSongQueue = taskQueue.filter(task => task.taskType === 'update')
+	let updateSongQueue = taskQueue.filter(task => task.taskType === 'update'|| task.taskType === 'external-update')
 
 	// Removes from the task queue all the tasks that have grouped.
 	addSongQueue.forEach(task => taskQueue.splice(taskQueue.indexOf(task), 1))
@@ -72,7 +72,9 @@ async function runQueue() {
 		await bulkUpdateSongs(updateSongQueue.map(task => task.object))
 	}
 
-	runQueue()
+	setTimeout(() => {
+		runQueue()
+	}, 250)
 }
 
 function bulkInsertSongs(songs: SongType[]): Promise<undefined> {

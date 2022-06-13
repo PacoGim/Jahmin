@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const sendWebContents_service_1 = require("../services/sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 function default_1(data) {
     let groupName = data.groupName;
     let index = data.index;
@@ -14,7 +14,7 @@ function default_1(data) {
         template.push({
             label: `${groupName === tag ? '•' : ''} ${tag}`,
             click: () => {
-                (0, sendWebContents_service_1.sendWebContents)('new-group', {
+                (0, sendWebContents_fn_1.sendWebContents)('new-group', {
                     index,
                     groupName: tag
                 });

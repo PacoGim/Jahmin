@@ -1,7 +1,7 @@
 import { SongType } from '../types/song.type'
 import { getConfig, saveConfig } from './config.service'
-import { sendWebContents } from './sendWebContents.service'
-import { watchFolders } from './songSync.service'
+import { sendWebContents } from '../functions/sendWebContents.fn'
+import { fetchSongsTag } from './librarySongs.service'
 
 export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-add' | 'remove-exclude', dbSongs: SongType[]) {
 	let config = getConfig()
@@ -22,5 +22,5 @@ export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-
 
 	sendWebContents('selected-directories', config.directories)
 
-	watchFolders(dbSongs)
+	fetchSongsTag(dbSongs)
 }

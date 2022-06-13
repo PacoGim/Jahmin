@@ -22,9 +22,8 @@ const worker_service_1 = require("./services/worker.service");
 (0, worker_service_1.initWorkers)();
 const ipc_service_1 = require("./services/ipc.service");
 (0, ipc_service_1.loadIPC)();
-const storage_service_1 = require("./services/storage.service");
-const songSync_service_1 = require("./services/songSync.service");
 const chokidar_1 = __importDefault(require("chokidar"));
+const chokidar_service_1 = require("./services/chokidar.service");
 let browserWindow;
 // Watches for changes in svelte build folder and reloads the window. Kinda hot reload-ish. Works Great!
 chokidar_1.default.watch(path_1.default.join(__dirname, './build/bundle.js')).on('change', path => {
@@ -96,8 +95,7 @@ electron_1.app.on('window-all-closed', () => {
 electron_1.app.on('before-quit', () => {
     var _a;
     (0, worker_service_1.killAllWorkers)();
-    (0, storage_service_1.killStorageWatcher)();
-    (_a = (0, songSync_service_1.getRootDirFolderWatcher)()) === null || _a === void 0 ? void 0 : _a.close();
+    (_a = (0, chokidar_service_1.getRootDirFolderWatcher)()) === null || _a === void 0 ? void 0 : _a.close();
 });
 electron_1.app.on('activate', () => {
     if (electron_1.BrowserWindow.getAllWindows().length === 0) {

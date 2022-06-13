@@ -41,10 +41,8 @@
 		display: grid;
 		grid-template-rows: repeat(2, max-content) auto max-content;
 
-		background-color: rgba(255, 255, 255, 0.025);
-		/* background-color: var(--color-art-bg); */
-		/* border-right: 2px var(--color-bg-2) solid; */
-		border-right: 2px  rgba(255, 255, 255, 0.05) solid;
+		background-color: rgba(var(--rgb-global), 0.025);
+		border-right: 2px rgba(var(--rgb-global), 0.05) solid;
 
 		transition-property: background-color, border-right;
 		transition-duration: var(--theme-transition-duration);

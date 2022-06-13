@@ -12,14 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.stopSongsUpdating = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.startChokidarWatch = exports.watchFolders = exports.maxTaskQueueLength = void 0;
-const chokidar_1 = require("chokidar");
+exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.getRootDirFolderWatcher = exports.watchPaths = exports.unwatchPaths = exports.stopSongsUpdating = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.watchFolders = exports.maxTaskQueueLength = void 0;
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const worker_service_1 = require("./worker.service");
-const storage_service_1 = require("./storage.service");
-const sendWebContents_service_1 = require("./sendWebContents.service");
+const sendWebContents_fn_1 = require("../functions/sendWebContents.fn");
 const config_service_1 = require("./config.service");
 const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"));
 const getSongTags_fn_1 = __importDefault(require("../functions/getSongTags.fn"));
@@ -62,38 +60,6 @@ function isExcludedPaths(path, excludedPaths) {
     }
     return !isExcluded;
 }
-function startChokidarWatch(rootDirectories, excludeDirectories = []) {
-    if (watcher) {
-        watcher.close();
-        watcher = undefined;
-    }
-    watcher = (0, chokidar_1.watch)(rootDirectories, {
-        awaitWriteFinish: true,
-        ignored: '**/*.DS_Store'
-    });
-    watcher.unwatch(excludeDirectories);
-    watcher.on('add', (path) => {
-        foundPaths.push(path);
-    });
-    watcher.on('ready', () => {
-        watcher.on('add', path => {
-            if (isAudioFile(path)) {
-                addToTaskQueue(path, 'insert');
-            }
-        });
-        watcher.on('change', (path) => {
-            if (isAudioFile(path)) {
-                addToTaskQueue(path, 'update');
-            }
-        });
-        watcher.on('unlink', (path) => {
-            if (isAudioFile(path)) {
-                addToTaskQueue(path, 'delete');
-            }
-        });
-    });
-}
-exports.startChokidarWatch = startChokidarWatch;
 // Splits excecution based on the amount of cpus.
 function processQueue() {
     // Creates an array with the length from cpus amount and map it to true.
@@ -120,7 +86,7 @@ function processQueue() {
         if (task.type === 'insert') {
             (0, getSongTags_fn_1.default)(task.path)
                 .then(tags => {
-                (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                (0, sendWebContents_fn_1.sendWebContents)('web-storage', {
                     type: 'insert',
                     data: tags
                 });
@@ -145,7 +111,7 @@ function processQueue() {
                 // Result can be 0 | 1 | -1
                 // -1 means error.
                 if (result === -1) {
-                    (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                    (0, sendWebContents_fn_1.sendWebContents)('web-storage', {
                         type: 'update',
                         data: undefined
                     });
@@ -155,7 +121,7 @@ function processQueue() {
                     if (newTags === null || newTags === void 0 ? void 0 : newTags.popularimeter) {
                         delete newTags.popularimeter;
                     }
-                    (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                    (0, sendWebContents_fn_1.sendWebContents)('web-storage', {
                         type: 'update',
                         data: {
                             id: (0, hashString_fn_1.hash)(task.path, 'number'),
@@ -168,7 +134,7 @@ function processQueue() {
                 .finally(() => getTask(processIndex));
         }
         else if (task.type === 'delete') {
-            (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+            (0, sendWebContents_fn_1.sendWebContents)('web-storage', {
                 type: 'delete',
                 data: task.path
             });
@@ -197,7 +163,7 @@ function sendSongSyncQueueProgress() {
     if (taskQueue.length === 0) {
         exports.maxTaskQueueLength = 0;
     }
-    (0, sendWebContents_service_1.sendWebContents)('song-sync-queue-progress', {
+    (0, sendWebContents_fn_1.sendWebContents)('song-sync-queue-progress', {
         isSongUpdating: taskQueue.find(task => task.type === 'update') !== undefined,
         currentLength: taskQueue.length,
         maxLength: exports.maxTaskQueueLength
@@ -225,7 +191,7 @@ function filterSongs(audioFilesFound = [], dbSongs) {
             }
             if (data.type === 'songsToDelete') {
                 if (data.songs.length > 0) {
-                    (0, sendWebContents_service_1.sendWebContents)('web-storage-bulk-delete', data.songs);
+                    (0, sendWebContents_fn_1.sendWebContents)('web-storage-bulk-delete', data.songs);
                 }
             }
         });
@@ -279,7 +245,7 @@ function getTaskQueueLength() {
 }
 exports.getTaskQueueLength = getTaskQueueLength;
 function reloadAlbumData(albumId) {
-    let album = (0, storage_service_1.getStorageMap)().get(albumId);
+    let album = getStorageMap().get(albumId);
     let rootDir = album === null || album === void 0 ? void 0 : album.RootDir;
     if (rootDir === undefined)
         return;
@@ -295,7 +261,7 @@ function reloadAlbumData(albumId) {
         if (dbSong && fs_1.default.statSync(dbSong === null || dbSong === void 0 ? void 0 : dbSong.SourceFile).mtimeMs > (dbSong === null || dbSong === void 0 ? void 0 : dbSong.LastModified)) {
             (0, getSongTags_fn_1.default)(dbSong.SourceFile)
                 .then(tags => {
-                (0, sendWebContents_service_1.sendWebContents)('web-storage', {
+                (0, sendWebContents_fn_1.sendWebContents)('web-storage', {
                     type: 'update',
                     data: tags
                 });
