@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { objectToArray } from '../../../services/index.service'
-	import { equalizer, equalizerNameStore, isEqualizerDirty, isEqualizerOn, selectedEqId } from '../../../store/equalizer.store'
+	import { equalizer, equalizerNameStore, isEqualizerDirty, isEqualizerOn, selectedEqName } from '../../../store/equalizer.store'
 	import { equalizerService } from '../../../store/service.store'
 
-	$: $equalizerNameStore = getProfileNameFromId($selectedEqId)
+	$: $equalizerNameStore = getProfileNameFromId($selectedEqName)
 
 	function getProfileNameFromId(eqId: String) {
 		if ($equalizerService !== undefined) {

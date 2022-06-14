@@ -2,6 +2,7 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 
 	import generateId from '../../../functions/generateId.fn'
+	import validateFileNameFn from '../../../functions/validateFileName.fn'
 	import RefreshIcon from '../../../icons/RefreshIcon.svelte'
 	import SaveIcon from '../../../icons/SaveIcon.svelte'
 	import ToggleOffIcon from '../../../icons/ToggleOffIcon.svelte'
@@ -10,30 +11,33 @@
 
 	import { addNewEqualizerProfileIPC, showEqualizerFolderIPC } from '../../../services/ipc.service'
 	import notify from '../../../services/notify.service'
-	import { equalizer, equalizerProfiles, isEqualizerDirty, isEqualizerOn, selectedEqId } from '../../../store/equalizer.store'
+	import { equalizer, equalizerProfiles, isEqualizerDirty, isEqualizerOn, selectedEqName } from '../../../store/equalizer.store'
 	import { equalizerService, promptService } from '../../../store/service.store'
 	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
+	import type { EqualizerProfileType } from '../../../types/equalizerProfile.type'
+	import type { PromptStateType } from '../../../types/promptState.type'
 
 	function saveEqualizerAs(newName: string = '') {
-		let promptState = {
+		let promptState: PromptStateType = {
 			title: 'Enter Equalizer Name',
 			placeholder: 'Equalizer name',
 			confirmButtonText: 'Save As',
 			cancelButtonText: 'Cancel',
+			validateFn: validateFileNameFn,
 			data: { id: generateId(), inputValue: newName }
 		}
 
 		$promptService.showPrompt(promptState).then(promptResult => {
 			$promptService.closePrompt()
 
-			let newEqualizerProfile: EqualizerFileObjectType = {
-				id: promptResult.data.id,
+			let newEqualizerProfile: EqualizerProfileType = {
 				name: promptResult.data.result,
-				values: []
+				values: {}
 			}
 
 			for (let i in $equalizer) {
-				newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: $equalizer[i].gain.value })
+				newEqualizerProfile.values[$equalizer[i].frequency.value] = $equalizer[i].gain.value
+				// newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: $equalizer[i].gain.value })
 			}
 
 			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
@@ -44,7 +48,7 @@
 					$equalizerProfiles.unshift(newEqualizerProfile)
 
 					$equalizerProfiles = $equalizerProfiles
-					$selectedEqId = newEqualizerProfile.id
+					$selectedEqName = newEqualizerProfile.name
 				}
 			})
 		})
@@ -94,7 +98,7 @@
 		display: flex;
 		align-items: center;
 		margin: 0 0.25rem;
-		transition: background-color 300ms linear;
+		/* transition: background-color 300ms linear; */
 	}
 
 	equalizer-buttons-config button.toggleEqButton {

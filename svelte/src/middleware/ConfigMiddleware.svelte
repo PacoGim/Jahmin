@@ -5,7 +5,7 @@
 	import {
 		artSizeConfig,
 		songListTagsConfig,
-		equalizerIdConfig,
+		equalizerNameConfig,
 		themeConfig,
 		songAmountConfig,
 		groupByConfig,
@@ -26,7 +26,7 @@
 	onMount(() => {
 		getConfigIPC().then((config: ConfigType) => {
 			$themeConfig = syncConfigLocalStorage('Theme', config.userOptions.theme)
-			$equalizerIdConfig = syncConfigLocalStorage('EqualizerId', config.userOptions.equalizerId)
+			$equalizerNameConfig = syncConfigLocalStorage('EqualizerId', config.userOptions.equalizerName)
 			$artSizeConfig = syncConfigLocalStorage('AlbumArtSize', config.userOptions.artSize)
 			$songListTagsConfig = syncConfigLocalStorage('SongListTags', config.songListTags)
 			$songAmountConfig = syncConfigLocalStorage('SongAmount', config.userOptions.songAmount)

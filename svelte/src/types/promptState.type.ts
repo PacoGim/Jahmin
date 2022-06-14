@@ -4,4 +4,5 @@ export type PromptStateType = {
 	confirmButtonText: string
 	cancelButtonText: string
 	data: any
+	validateFn: (input: any) => { isValid: boolean; errorMessage?: string }
 }

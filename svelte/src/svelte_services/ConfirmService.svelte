@@ -34,7 +34,7 @@
 	}
 
 	function confirmConfirm() {
-		deferredPromise({ id: confirmState.data.id })
+		deferredPromise({ data: confirmState.data })
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {

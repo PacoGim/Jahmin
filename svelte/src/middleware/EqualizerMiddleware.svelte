@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { getEqualizersIPC, saveConfig } from '../services/ipc.service'
-	import { equalizerIdConfig } from '../store/config.store'
+	import { equalizerNameConfig } from '../store/config.store'
 	import {
 		context,
 		equalizerProfiles,
-		selectedEqId,
+		selectedEqName,
 		sourceMainAudio,
 		sourceAltAudio,
 		equalizer
@@ -22,7 +22,7 @@
 	}
 
 	$: {
-		if ($selectedEqId !== undefined) {
+		if ($selectedEqName !== undefined) {
 			if (isFirstSelectedEqIdChange === false) {
 				changeEqualizer()
 			} else {
@@ -69,11 +69,11 @@
 	}
 
 	function changeEqualizer() {
-		let foundEqualizerProfile = $equalizerProfiles.find(x => x.id === $selectedEqId)
+		let foundEqualizerProfile = $equalizerProfiles.find(x => x.name === $selectedEqName)
 
 		if (foundEqualizerProfile) {
-			for (const value of foundEqualizerProfile.values) {
-				$equalizer[value.frequency].gain.value = value.gain
+			for (const frequency in foundEqualizerProfile.values) {
+				$equalizer[frequency].gain.value = foundEqualizerProfile.values[frequency]
 			}
 
 			$equalizer = $equalizer
@@ -81,7 +81,7 @@
 			// Save ID to config file
 			saveConfig({
 				userOptions: {
-					equalizerId: foundEqualizerProfile.id
+					equalizerName: foundEqualizerProfile.name
 				}
 			})
 		}
@@ -89,23 +89,23 @@
 
 	function getAudioFilters(): Promise<void> {
 		return new Promise((resolve, reject) => {
-			getEqualizersIPC().then(result => {
-				$equalizerProfiles = result
+			getEqualizersIPC().then(equalizers => {
+				$equalizerProfiles = equalizers
 
-				let equalizerFound = result.find(x => x.id === $equalizerIdConfig)
+				let equalizerFound = equalizers.find(x => x.name === $equalizerNameConfig)
 
 				if (equalizerFound) {
 					$equalizerProfiles = $equalizerProfiles.sort((a, b) => a.name.localeCompare(b.name))
 
 					// Moves the previously used equalizer to the top of the list.
-					let index = $equalizerProfiles.findIndex(x => x.id === equalizerFound.id)
+					let index = $equalizerProfiles.findIndex(x => x.name === equalizerFound.name)
 					$equalizerProfiles.unshift($equalizerProfiles.splice(index, 1)[0])
 
-					$selectedEqId = equalizerFound.id
+					$selectedEqName = equalizerFound.name
 				} else {
-					let defaultEqualizerFound = result.find(x => x.id === 'Default')
+					let defaultEqualizerFound = equalizers.find(x => x.name === 'Default')
 					if (defaultEqualizerFound) {
-						$selectedEqId = defaultEqualizerFound.id
+						$selectedEqName = defaultEqualizerFound.name
 					}
 				}
 

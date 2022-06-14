@@ -14,7 +14,7 @@ type DirectoriesType = {
 
 type UserOptionsType = {
 	theme?: ThemeOptions
-	equalizerId?: string
+	equalizerName?: string
 	songAmount?: number
 	gridGap?: number
 	artSize?: number

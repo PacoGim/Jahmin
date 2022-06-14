@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CheckIcon from '../icons/CheckIcon.svelte'
 	import DeleteIcon from '../icons/DeleteIcon.svelte'
+	import notifyService from '../services/notify.service'
 	import { keyUp } from '../store/final.store'
 	import type { PromptStateType } from '../types/promptState.type'
 
@@ -11,7 +12,8 @@
 		cancelButtonText: '',
 		confirmButtonText: '',
 		data: {},
-		placeholder: ''
+		placeholder: '',
+		validateFn: undefined
 	}
 
 	let promptElement = undefined
@@ -57,9 +59,15 @@
 	}
 
 	function confirmPrompt() {
-		deferredPromise({
-			data: Object.assign(promptState.data, { result: inputValue })
-		})
+		let validatedInput = promptState.validateFn(inputValue)
+
+		if (validatedInput.isValid === true) {
+			deferredPromise({
+				data: Object.assign(promptState.data, { result: inputValue })
+			})
+		} else {
+			notifyService.error(validatedInput.errorMessage)
+		}
 	}
 
 	function handleOutsidePromptClick(e: MouseEvent) {

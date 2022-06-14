@@ -8,7 +8,7 @@ export let sortOrderConfig: Writable<string> = writable(localStorage.getItem('So
 
 export let artSizeConfig: Writable<number> = writable(Number(localStorage.getItem('AlbumArtSize')))
 export let songListTagsConfig: Writable<SelectedTagType[]> = writable(getSongListTagsConfig())
-export let equalizerIdConfig: Writable<string> = writable(localStorage.getItem('EqualizerId'))
+export let equalizerNameConfig: Writable<string> = writable(localStorage.getItem('EqualizerName'))
 export let themeConfig: Writable<ThemeOptions> = writable(localStorage.getItem('Theme') as ThemeOptions)
 export let songAmountConfig: Writable<number> = writable(Number(localStorage.getItem('SongAmount')))
 export let groupByConfig: Writable<string[]> = writable(parseJson(localStorage.getItem('GroupBy')))

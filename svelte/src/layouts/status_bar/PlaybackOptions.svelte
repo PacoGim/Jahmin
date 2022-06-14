@@ -48,21 +48,21 @@
 
 <playback-options>
 	<option-icon class="shuffle" data-is-active={$isSongShuffleEnabledStore}>
-		<ShuffleIcon style="height: 1.25rem;fill:var(--{$isSongShuffleEnabledStore === true ? 'high' : 'low'}-color)" />
+		<ShuffleIcon style="height: 1.25rem;fill:var(--art-color-{$isSongShuffleEnabledStore === true ? 'light' : 'dark'})" />
 	</option-icon>
 
 	<option-icon
 		data-is-active={$isPlaybackRepeatEnabledStore}
 		on:click={() => ($isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore)}
 	>
-		<RepeatIcon style="height: 1.25rem;fill:var(--{$isPlaybackRepeatEnabledStore === true ? 'high' : 'low'}-color)" />
+		<RepeatIcon style="height: 1.25rem;fill:var(--art-color-{$isPlaybackRepeatEnabledStore === true ? 'light' : 'dark'})" />
 	</option-icon>
 
 	<option-icon
 		data-is-active={$isSongRepeatEnabledStore}
 		on:click={() => ($isSongRepeatEnabledStore = !$isSongRepeatEnabledStore)}
 	>
-		<RepeatOneIcon style="height: 1.25rem;fill:var(--{$isSongRepeatEnabledStore === true ? 'high' : 'low'}-color)" />
+		<RepeatOneIcon style="height: 1.25rem;fill:var(--art-color-{$isSongRepeatEnabledStore === true ? 'light' : 'dark'})" />
 	</option-icon>
 </playback-options>
 

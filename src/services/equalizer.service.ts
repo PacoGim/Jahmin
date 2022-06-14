@@ -14,14 +14,14 @@ export function getEqFolderPath() {
 }
 
 export function getEqualizers() {
-	let defaultEqualizerPath = path.join(eqFolderPath, 'Default.txt')
+	let defaultEqualizerPath = path.join(eqFolderPath, 'Default.json')
 	let equalizers: any[] = []
 
 	if (!fs.existsSync(eqFolderPath)) {
 		fs.mkdirSync(eqFolderPath)
 	}
 
-	let equalizerFilePaths = fs.readdirSync(eqFolderPath)
+	let equalizerFilePaths = fs.readdirSync(eqFolderPath).filter(file => file.endsWith('.json'))
 
 	if (!fs.existsSync(defaultEqualizerPath)) {
 		fs.writeFileSync(defaultEqualizerPath, EqualizerFile.stringify(defaultEqualizer))
@@ -29,25 +29,25 @@ export function getEqualizers() {
 	}
 
 	equalizerFilePaths.forEach(filePath => {
-		if (filePath !== '.DS_Store') {
-			let equalizerObject = EqualizerFile.parse(fs.readFileSync(path.join(eqFolderPath, filePath), { encoding: 'utf8' }))
+		let equalizerObject = EqualizerFile.parse(fs.readFileSync(path.join(eqFolderPath, filePath), { encoding: 'utf8' }))
 
-			equalizerObject.name = filePath.split('.')[0]
+		if (equalizerObject === null) return
 
-			equalizers.push(equalizerObject)
-		}
+		equalizers.push(equalizerObject)
 	})
 
 	return equalizers
 }
 
-export function renameEqualizer(eqId: string, newName: string): ReturnMessageType {
+export function renameEqualizer(eqName: string, newName: string): ReturnMessageType {
 	let equalizers = getEqualizers()
-	let foundEq = equalizers.find(x => x.id === eqId)
+	let foundEq = equalizers.find(x => x.name === eqName)
 
 	if (foundEq) {
-		let newNamePath = path.join(eqFolderPath, `${newName}.txt`)
-		let oldNamePath = path.join(eqFolderPath, `${foundEq.name}.txt`)
+		let newNamePath = path.join(eqFolderPath, `${newName}.json`)
+		let oldNamePath = path.join(eqFolderPath, `${foundEq.name}.json`)
+
+		foundEq.name = newName
 
 		if (fileExistsWithCaseSync(newNamePath)) {
 			return {
@@ -57,7 +57,8 @@ export function renameEqualizer(eqId: string, newName: string): ReturnMessageTyp
 		}
 
 		try {
-			fs.renameSync(oldNamePath, newNamePath)
+			fs.writeFileSync(newNamePath, EqualizerFile.stringify(foundEq))
+			fs.unlinkSync(oldNamePath)
 
 			return {
 				code: 'OK'
@@ -76,16 +77,16 @@ export function renameEqualizer(eqId: string, newName: string): ReturnMessageTyp
 	}
 }
 
-export function updateEqualizerValues(eqId: string, newValues: string) {
+export function updateEqualizerValues(eqName: string, newValues: string) {
 	let equalizers = getEqualizers()
 
-	let foundEq = equalizers.find(x => x.id === eqId)
+	let foundEq = equalizers.find(x => x.name === eqName)
 
 	if (foundEq) {
 		foundEq.values = newValues
 
 		try {
-			fs.writeFileSync(path.join(eqFolderPath, `${foundEq.name}.txt`), EqualizerFile.stringify(foundEq))
+			fs.writeFileSync(path.join(eqFolderPath, `${foundEq.name}.json`), EqualizerFile.stringify(foundEq))
 
 			return true
 		} catch (error) {
@@ -99,9 +100,9 @@ export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessage
 		newProfile.name = 'Noname'
 	}
 
-	if (!fs.existsSync(path.join(eqFolderPath, `${newProfile.name}.txt`))) {
+	if (!fs.existsSync(path.join(eqFolderPath, `${newProfile.name}.json`))) {
 		try {
-			fs.writeFileSync(path.join(eqFolderPath, `${newProfile.name}.txt`), EqualizerFile.stringify(newProfile))
+			fs.writeFileSync(path.join(eqFolderPath, `${newProfile.name}.json`), EqualizerFile.stringify(newProfile))
 
 			return {
 				code: 'OK'
@@ -120,13 +121,13 @@ export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessage
 	}
 }
 
-export function deleteEqualizer(eqId: string): ReturnMessageType {
+export function deleteEqualizer(eqName: string): ReturnMessageType {
 	let equalizers = getEqualizers()
 
-	let foundEq = equalizers.find(x => x.id === eqId)
+	let foundEq = equalizers.find(x => x.name === eqName)
 
 	if (foundEq) {
-		let eqPath = path.join(eqFolderPath, `${foundEq.name}.txt`)
+		let eqPath = path.join(eqFolderPath, `${foundEq.name}.json`)
 
 		if (fs.existsSync(eqPath)) {
 			try {
@@ -156,18 +157,17 @@ export function deleteEqualizer(eqId: string): ReturnMessageType {
 }
 
 let defaultEqualizer: EqualizerFileObjectType = {
-	id: 'Default',
 	name: 'Default',
-	values: [
-		{ frequency: 32, gain: 0 },
-		{ frequency: 64, gain: 0 },
-		{ frequency: 128, gain: 0 },
-		{ frequency: 256, gain: 0 },
-		{ frequency: 512, gain: 0 },
-		{ frequency: 1024, gain: 0 },
-		{ frequency: 2048, gain: 0 },
-		{ frequency: 4096, gain: 0 },
-		{ frequency: 8192, gain: 0 },
-		{ frequency: 16384, gain: 0 }
-	]
+	values: {
+		'32': 0,
+		'64': 0,
+		'128': 0,
+		'256': 0,
+		'512': 0,
+		'1024': 0,
+		'2048': 0,
+		'4096': 0,
+		'8192': 0,
+		'16384': 0
+	}
 }

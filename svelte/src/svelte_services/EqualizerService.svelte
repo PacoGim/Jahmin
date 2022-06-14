@@ -3,8 +3,8 @@
 	import { updateEqualizerValuesIPC } from '../services/ipc.service'
 	import notify from '../services/notify.service'
 
-	import { equalizer, equalizerProfiles, selectedEqId, isEqualizerDirty, isEqualizerOn } from '../store/equalizer.store'
-	import type { EqualizerProfileType, EqualizerProfileValuesType } from '../types/equalizerProfile.type'
+	import { equalizer, equalizerProfiles, selectedEqName, isEqualizerDirty, isEqualizerOn } from '../store/equalizer.store'
+	import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 
 	$: {
 		$equalizer
@@ -12,25 +12,22 @@
 	}
 
 	export function changeProfile(id: string) {
-		if ($isEqualizerOn === false && $selectedEqId === id) {
+		if ($isEqualizerOn === false && $selectedEqName === id) {
 			resetEqualizer()
 		} else {
-			$selectedEqId = id
+			$selectedEqName = id
 		}
 		$isEqualizerOn = true
 	}
 
 	export function updateEqualizer() {
-		let equalizerFound = $equalizerProfiles.find(x => x.id === $selectedEqId)
+		let equalizerFound = $equalizerProfiles.find(x => x.name === $selectedEqName)
 
-		let newValues = objectToArray($equalizer).map(x => {
-			return {
-				frequency: x.frequency.value,
-				gain: x.gain.value
-			}
-		})
+		let newValues = {}
 
-		updateEqualizerValuesIPC(equalizerFound.id, newValues).then(isEqualizerUpdated => {
+		objectToArray($equalizer).forEach(x => (newValues[x.frequency.value] = x.gain.value))
+
+		updateEqualizerValuesIPC(equalizerFound.name, newValues).then(isEqualizerUpdated => {
 			if (isEqualizerUpdated) {
 				equalizerFound.values = newValues
 				$equalizerProfiles = $equalizerProfiles
@@ -48,56 +45,54 @@
 		$equalizer[frequency].gain.value = value
 	}
 
-	export function getEqualizerName(eqId: string): string {
-		let equalizerProfileFound = $equalizerProfiles.find(x => x.id === eqId)
+	export function getEqualizerName(eqName: string): string {
+		let equalizerProfileFound = $equalizerProfiles.find(x => x.name === eqName)
 		if (equalizerProfileFound) {
 			return equalizerProfileFound?.name || 'No Name'
 		}
 	}
 
-	let tempEq: EqualizerProfileValuesType[] = []
+	let tempEq: EqualizerProfileType = {
+		name: 'Temp Equalizer',
+		values: {}
+	}
 
 	export function toggleEq() {
 		if ($isEqualizerOn === true) {
 			// Turn off
 			$isEqualizerOn = false
 
-			tempEq = []
+			for (let Hz in $equalizer) {
+				tempEq.values[Hz] = $equalizer[Hz].gain.value
 
-			for (let i in $equalizer) {
-				tempEq.push({
-					frequency: Number(i),
-					gain: $equalizer[i].gain.value
-				})
-
-				$equalizer[i].gain.value = 0
+				$equalizer[Hz].gain.value = 0
 			}
 		} else {
 			// Turn on
 			$isEqualizerOn = true
 
-			applyEqualizerProfile(tempEq)
+			applyEqualizerProfile(tempEq.values)
 		}
 	}
 
 	export function resetEqualizer() {
-		applyEqualizerProfile($equalizerProfiles.find(x => x.id === $selectedEqId).values)
+		applyEqualizerProfile($equalizerProfiles.find(x => x.name === $selectedEqName).values)
 	}
 
-	function applyEqualizerProfile(values: EqualizerProfileValuesType[]) {
-		for (let i in $equalizer) {
-			$equalizer[i].gain.value = values.find(x => x.frequency === Number(i)).gain
+	function applyEqualizerProfile(values: { [key: string]: number }) {
+		for (let Hz in $equalizer) {
+			$equalizer[Hz].gain.value = values[Hz]
 		}
 	}
 
 	function checkIfEqualizerChanged() {
 		let isChanged = false
-		let equalizerSelected = $equalizerProfiles.find(x => x.id === $selectedEqId)
+		let equalizerSelected = $equalizerProfiles.find(x => x.name === $selectedEqName)
 
 		if (equalizerSelected === undefined) return
 
-		for (let i in $equalizer) {
-			if ($equalizer[i].gain.value !== equalizerSelected.values.find(x => x.frequency === Number(i)).gain) {
+		for (let Hz in $equalizer) {
+			if ($equalizer[Hz].gain.value !== equalizerSelected.values[Hz]) {
 				isChanged = true
 			}
 		}

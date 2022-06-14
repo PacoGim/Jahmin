@@ -45,12 +45,12 @@ export function loadIPC() {
 		return renameEqualizer(eqId, newName)
 	})
 
-	ipcMain.handle('delete-equalizer', async (evt, eqId) => {
-		return deleteEqualizer(eqId)
+	ipcMain.handle('delete-equalizer', async (evt, eqName) => {
+		return deleteEqualizer(eqName)
 	})
 
-	ipcMain.handle('update-equalizer-values', async (evt, eqId, newValues) => {
-		return updateEqualizerValues(eqId, newValues)
+	ipcMain.handle('update-equalizer-values', async (evt, eqName, newValues) => {
+		return updateEqualizerValues(eqName, newValues)
 	})
 
 	ipcMain.handle('add-new-equalizer-profile', async (evt, newProfile: EqualizerFileObjectType) => {

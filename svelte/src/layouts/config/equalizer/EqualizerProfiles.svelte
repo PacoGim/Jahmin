@@ -2,6 +2,7 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 
 	import generateId from '../../../functions/generateId.fn'
+	import validateFileNameFn from '../../../functions/validateFileName.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
@@ -9,31 +10,34 @@
 	import { addNewEqualizerProfileIPC, deleteEqualizerIPC, renameEqualizerIPC } from '../../../services/ipc.service'
 	import notify from '../../../services/notify.service'
 
-	import { equalizer, equalizerProfiles, selectedEqId } from '../../../store/equalizer.store'
+	import { equalizer, equalizerProfiles, selectedEqName } from '../../../store/equalizer.store'
 	import { confirmService, equalizerService, promptService } from '../../../store/service.store'
 	import type { EqualizerFileObjectType } from '../../../types/equalizerFileObject.type'
+	import type { EqualizerProfileType } from '../../../types/equalizerProfile.type'
+	import type { PromptStateType } from '../../../types/promptState.type'
 
-	function renameEq(eqId: string, name: string) {
-		if (eqId === 'Default') {
+	function renameEq(eqName: string) {
+		if (eqName === 'Default') {
 			return notify.error("Default profile can't be renamed.")
 		}
 
-		let promptState = {
+		let promptState: PromptStateType = {
 			title: 'Rename Equalizer Preset',
 			placeholder: 'Equalizer new name',
 			confirmButtonText: 'Rename',
 			cancelButtonText: 'Cancel',
-			data: { eqId, inputValue: name }
+			validateFn: validateFileNameFn,
+			data: { eqName, inputValue: eqName }
 		}
 
 		$promptService.showPrompt(promptState).then(promptResult => {
 			let newName = promptResult.data.result
 
-			renameEqualizerIPC(eqId, newName).then(result => {
+			renameEqualizerIPC(eqName, newName).then(result => {
 				$promptService.closePrompt()
 
 				if (result.code === 'OK') {
-					let equalizerFound = $equalizerProfiles.find(x => x.id === eqId)
+					let equalizerFound = $equalizerProfiles.find(x => x.name === eqName)
 
 					if (equalizerFound) {
 						equalizerFound.name = newName
@@ -45,41 +49,41 @@
 					notify.error(`Name ${newName} already exists.`)
 
 					// Reruns the fn to reopen the prompt.
-					renameEq(eqId, name)
+					renameEq(eqName)
 				}
 			})
 		})
 	}
 
-	function deleteEq(eqId: string, name: string) {
-		if (eqId === 'Default') {
+	function deleteEq(eqName: string) {
+		if (eqName === 'Default') {
 			return notify.error("Default profile can't be deleted")
 		}
 
 		let confirmState = {
-			textToConfirm: `Delete equalizer "${name}"?`,
+			textToConfirm: `Delete equalizer "${eqName}"?`,
 			title: 'Delete Equalizer',
 			data: {
-				id: eqId
+				name: eqName
 			}
 		}
 
 		$confirmService.showConfirm(confirmState).then(result => {
 			$confirmService.closeConfirm()
 
-			let equalizerId = result.id
+			let equalizerName = result.data.name
 
-			if (equalizerId) {
-				deleteEqualizerIPC(equalizerId).then(result => {
+			if (equalizerName) {
+				deleteEqualizerIPC(equalizerName).then(result => {
 					if (result.code === 'OK') {
-						let indexToDelete = $equalizerProfiles.findIndex(x => x.id === equalizerId)
+						let indexToDelete = $equalizerProfiles.findIndex(x => x.name === equalizerName)
 
 						$equalizerProfiles.splice(indexToDelete, 1)
 
 						$equalizerProfiles = $equalizerProfiles
 
-						if ($selectedEqId === equalizerId) {
-							$selectedEqId = 'Default'
+						if ($selectedEqName === equalizerName) {
+							$selectedEqName = 'Default'
 						}
 
 						notify.success('Equalizer successfully deleted.')
@@ -90,25 +94,25 @@
 	}
 
 	function addNewProfile(newName: string = '') {
-		let promptState = {
+		let promptState: PromptStateType = {
 			title: 'New Profile Name',
 			placeholder: 'Enter new profile name',
 			confirmButtonText: 'Confirm',
 			cancelButtonText: 'Cancel',
+			validateFn: validateFileNameFn,
 			data: { id: generateId(), inputValue: newName }
 		}
 
 		$promptService.showPrompt(promptState).then(promptResult => {
 			$promptService.closePrompt()
 
-			let newEqualizerProfile: EqualizerFileObjectType = {
-				id: promptResult.data.id,
+			let newEqualizerProfile: EqualizerProfileType = {
 				name: promptResult.data.result,
-				values: []
+				values: {}
 			}
 
 			for (let i in $equalizer) {
-				newEqualizerProfile.values.push({ frequency: $equalizer[i].frequency.value, gain: 0 })
+				newEqualizerProfile.values[$equalizer[i].frequency.value] = 0
 			}
 
 			addNewEqualizerProfileIPC(newEqualizerProfile).then(result => {
@@ -119,7 +123,7 @@
 					$equalizerProfiles.unshift(newEqualizerProfile)
 
 					$equalizerProfiles = $equalizerProfiles
-					$selectedEqId = newEqualizerProfile.id
+					$selectedEqName = newEqualizerProfile.name
 				}
 			})
 		})
@@ -128,16 +132,16 @@
 
 <equalizer-profiles-config>
 	<equalizer-profiles>
-		{#each $equalizerProfiles as eq (eq.id)}
-			<equalizer-field id="eq-{eq.id}">
-				<equalizer-name on:click={() => $equalizerService.changeProfile(eq.id)}
-					>{$selectedEqId === eq.id ? '‣ ' : ''} {eq.name}</equalizer-name
+		{#each $equalizerProfiles as eq (eq.name)}
+			<equalizer-field id="eq-{eq.name}">
+				<equalizer-name on:click={() => $equalizerService.changeProfile(eq.name)}
+					>{$selectedEqName === eq.name ? '‣ ' : ''} {eq.name}</equalizer-name
 				>
-				<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.id, eq.name)}>
+				<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.name)}>
 					<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 					Rename
 				</equalizer-rename>
-				<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.id, eq.name)}>
+				<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.name)}>
 					<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 					Delete
 				</equalizer-delete>

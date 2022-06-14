@@ -9,7 +9,7 @@ export let equalizers: Writable<EqualizerType[]> = writable([])
 
 export let equalizer: Writable<EqualizerType> = writable({})
 
-export let selectedEqId: Writable<string> = writable(undefined)
+export let selectedEqName: Writable<string> = writable(undefined)
 export let equalizerProfiles: Writable<EqualizerProfileType[]> = writable([])
 export let equalizerNameStore: Writable<string> = writable('')
 

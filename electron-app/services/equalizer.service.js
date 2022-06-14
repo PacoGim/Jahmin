@@ -15,32 +15,32 @@ function getEqFolderPath() {
 }
 exports.getEqFolderPath = getEqFolderPath;
 function getEqualizers() {
-    let defaultEqualizerPath = path_1.default.join(eqFolderPath, 'Default.txt');
+    let defaultEqualizerPath = path_1.default.join(eqFolderPath, 'Default.json');
     let equalizers = [];
     if (!fs_1.default.existsSync(eqFolderPath)) {
         fs_1.default.mkdirSync(eqFolderPath);
     }
-    let equalizerFilePaths = fs_1.default.readdirSync(eqFolderPath);
+    let equalizerFilePaths = fs_1.default.readdirSync(eqFolderPath).filter(file => file.endsWith('.json'));
     if (!fs_1.default.existsSync(defaultEqualizerPath)) {
         fs_1.default.writeFileSync(defaultEqualizerPath, equalizerFile_service_1.default.stringify(defaultEqualizer));
         equalizers.push(defaultEqualizer);
     }
     equalizerFilePaths.forEach(filePath => {
-        if (filePath !== '.DS_Store') {
-            let equalizerObject = equalizerFile_service_1.default.parse(fs_1.default.readFileSync(path_1.default.join(eqFolderPath, filePath), { encoding: 'utf8' }));
-            equalizerObject.name = filePath.split('.')[0];
-            equalizers.push(equalizerObject);
-        }
+        let equalizerObject = equalizerFile_service_1.default.parse(fs_1.default.readFileSync(path_1.default.join(eqFolderPath, filePath), { encoding: 'utf8' }));
+        if (equalizerObject === null)
+            return;
+        equalizers.push(equalizerObject);
     });
     return equalizers;
 }
 exports.getEqualizers = getEqualizers;
-function renameEqualizer(eqId, newName) {
+function renameEqualizer(eqName, newName) {
     let equalizers = getEqualizers();
-    let foundEq = equalizers.find(x => x.id === eqId);
+    let foundEq = equalizers.find(x => x.name === eqName);
     if (foundEq) {
-        let newNamePath = path_1.default.join(eqFolderPath, `${newName}.txt`);
-        let oldNamePath = path_1.default.join(eqFolderPath, `${foundEq.name}.txt`);
+        let newNamePath = path_1.default.join(eqFolderPath, `${newName}.json`);
+        let oldNamePath = path_1.default.join(eqFolderPath, `${foundEq.name}.json`);
+        foundEq.name = newName;
         if ((0, fileExistsWithCaseSync_fn_1.default)(newNamePath)) {
             return {
                 code: 'EXISTS',
@@ -48,7 +48,8 @@ function renameEqualizer(eqId, newName) {
             };
         }
         try {
-            fs_1.default.renameSync(oldNamePath, newNamePath);
+            fs_1.default.writeFileSync(newNamePath, equalizerFile_service_1.default.stringify(foundEq));
+            fs_1.default.unlinkSync(oldNamePath);
             return {
                 code: 'OK'
             };
@@ -68,13 +69,13 @@ function renameEqualizer(eqId, newName) {
     }
 }
 exports.renameEqualizer = renameEqualizer;
-function updateEqualizerValues(eqId, newValues) {
+function updateEqualizerValues(eqName, newValues) {
     let equalizers = getEqualizers();
-    let foundEq = equalizers.find(x => x.id === eqId);
+    let foundEq = equalizers.find(x => x.name === eqName);
     if (foundEq) {
         foundEq.values = newValues;
         try {
-            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${foundEq.name}.txt`), equalizerFile_service_1.default.stringify(foundEq));
+            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${foundEq.name}.json`), equalizerFile_service_1.default.stringify(foundEq));
             return true;
         }
         catch (error) {
@@ -87,9 +88,9 @@ function addEqualizer(newProfile) {
     if (newProfile.name === '') {
         newProfile.name = 'Noname';
     }
-    if (!fs_1.default.existsSync(path_1.default.join(eqFolderPath, `${newProfile.name}.txt`))) {
+    if (!fs_1.default.existsSync(path_1.default.join(eqFolderPath, `${newProfile.name}.json`))) {
         try {
-            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${newProfile.name}.txt`), equalizerFile_service_1.default.stringify(newProfile));
+            fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${newProfile.name}.json`), equalizerFile_service_1.default.stringify(newProfile));
             return {
                 code: 'OK'
             };
@@ -109,11 +110,11 @@ function addEqualizer(newProfile) {
     }
 }
 exports.addEqualizer = addEqualizer;
-function deleteEqualizer(eqId) {
+function deleteEqualizer(eqName) {
     let equalizers = getEqualizers();
-    let foundEq = equalizers.find(x => x.id === eqId);
+    let foundEq = equalizers.find(x => x.name === eqName);
     if (foundEq) {
-        let eqPath = path_1.default.join(eqFolderPath, `${foundEq.name}.txt`);
+        let eqPath = path_1.default.join(eqFolderPath, `${foundEq.name}.json`);
         if (fs_1.default.existsSync(eqPath)) {
             try {
                 fs_1.default.unlinkSync(eqPath);
@@ -144,18 +145,17 @@ function deleteEqualizer(eqId) {
 }
 exports.deleteEqualizer = deleteEqualizer;
 let defaultEqualizer = {
-    id: 'Default',
     name: 'Default',
-    values: [
-        { frequency: 32, gain: 0 },
-        { frequency: 64, gain: 0 },
-        { frequency: 128, gain: 0 },
-        { frequency: 256, gain: 0 },
-        { frequency: 512, gain: 0 },
-        { frequency: 1024, gain: 0 },
-        { frequency: 2048, gain: 0 },
-        { frequency: 4096, gain: 0 },
-        { frequency: 8192, gain: 0 },
-        { frequency: 16384, gain: 0 }
-    ]
+    values: {
+        '32': 0,
+        '64': 0,
+        '128': 0,
+        '256': 0,
+        '512': 0,
+        '1024': 0,
+        '2048': 0,
+        '4096': 0,
+        '8192': 0,
+        '16384': 0
+    }
 };

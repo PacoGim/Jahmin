@@ -37,11 +37,11 @@ function loadIPC() {
     electron_1.ipcMain.handle('rename-equalizer', (evt, eqId, newName) => __awaiter(this, void 0, void 0, function* () {
         return (0, equalizer_service_1.renameEqualizer)(eqId, newName);
     }));
-    electron_1.ipcMain.handle('delete-equalizer', (evt, eqId) => __awaiter(this, void 0, void 0, function* () {
-        return (0, equalizer_service_1.deleteEqualizer)(eqId);
+    electron_1.ipcMain.handle('delete-equalizer', (evt, eqName) => __awaiter(this, void 0, void 0, function* () {
+        return (0, equalizer_service_1.deleteEqualizer)(eqName);
     }));
-    electron_1.ipcMain.handle('update-equalizer-values', (evt, eqId, newValues) => __awaiter(this, void 0, void 0, function* () {
-        return (0, equalizer_service_1.updateEqualizerValues)(eqId, newValues);
+    electron_1.ipcMain.handle('update-equalizer-values', (evt, eqName, newValues) => __awaiter(this, void 0, void 0, function* () {
+        return (0, equalizer_service_1.updateEqualizerValues)(eqName, newValues);
     }));
     electron_1.ipcMain.handle('add-new-equalizer-profile', (evt, newProfile) => __awaiter(this, void 0, void 0, function* () {
         return (0, equalizer_service_1.addEqualizer)(newProfile);
