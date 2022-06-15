@@ -9,10 +9,6 @@
 
 	$: if ($playbackStore.length > 0) createSortableList()
 
-	$: {
-		console.log($playingSongStore)
-	}
-
 	let selectedSongsId = []
 
 	function createSortableList() {

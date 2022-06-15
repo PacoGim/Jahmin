@@ -13,8 +13,7 @@
 		songPlayingIdStore
 	} from '../store/final.store'
 
-	import Star from './Star.svelte'
-	import { editTagsIPC, updateSongsIPC } from '../services/ipc.service'
+	import { updateSongsIPC } from '../services/ipc.service'
 	import { songListTagsConfig } from '../store/config.store'
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'
@@ -36,7 +35,10 @@
 	}
 
 	$: {
-		gridStyle = tagToGridStyleFn($songListTagsConfig)
+		song
+		$songListTagsConfig
+		isSongPlaying
+		buildGridStyle()
 	}
 
 	onMount(() => {
@@ -48,6 +50,20 @@
 			$songListItemElement = document.querySelector('song-list-item')
 		}
 	})
+
+	function buildGridStyle() {
+		let tempGridStyle = tagToGridStyleFn($songListTagsConfig)
+
+		if (song.isEnabled === false) {
+			tempGridStyle = 'max-content ' + tempGridStyle
+		}
+
+		if (isSongPlaying) {
+			tempGridStyle = 'max-content ' + tempGridStyle
+		}
+
+		gridStyle = tempGridStyle
+	}
 
 	function setDynamicArtists() {
 		if (!song?.AlbumArtist || !song?.Artist) {
@@ -70,10 +86,11 @@
 </script>
 
 <!-- {isSongPlaying === true ? 'playing' : ''} -->
+<!-- style="grid-template-columns:{gridStyle};" -->
 <song-list-item
 	data-id={song.ID}
 	data-index={index}
-	style="grid-template-columns:{song.isEnabled === false || isSongPlaying === true ? 'max-content' : ''}{gridStyle};"
+	style="grid-template-columns:{gridStyle};"
 	class="
 	{song.isEnabled === false ? 'disabled' : ''}
 	{$activeSongStore === song.ID ? 'active' : ''}
@@ -176,9 +193,4 @@
 
 		font-size: 0.75rem;
 	}
-
-	/* song-list-item.playing::before {
-		content: '▶ ';
-		font-size: 0.75rem;
-	} */
 </style>

@@ -4,20 +4,16 @@
 
 	import { songAmountConfig } from '../../store/config.store'
 
-	import {
-		dbVersionStore,
-		selectedAlbumDir,
-		selectedSongsStore,
-		songListStore,
-		triggerScrollToSongEvent
-	} from '../../store/final.store'
+	import { selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../store/final.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
 	let songsToShow = []
 	let scrollAmount = 0
+	let previousScrollAmount = undefined
 
 	$: {
 		$selectedAlbumDir
+		previousScrollAmount = undefined
 		setScrollAmount(0)
 	}
 
@@ -25,6 +21,7 @@
 	$: {
 		$songListStore
 		$songAmountConfig
+		previousScrollAmount = undefined
 		trimSongArray()
 	}
 
@@ -41,7 +38,13 @@
 
 	// Trims the current song array to show a limited amount of songs.
 	function trimSongArray() {
-		songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
+		if (scrollAmount !== previousScrollAmount) {
+			songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
+
+			if (songsToShow.length > 0) {
+				previousScrollAmount = scrollAmount
+			}
+		}
 	}
 
 	function setScrollAmount(amount) {

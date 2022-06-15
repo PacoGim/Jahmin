@@ -116,7 +116,7 @@
 
 				if (nextSong !== undefined) {
 					// If an enabled song is found, play it.
-					return playSong(nextSong.SourceFile, { playNow: true })
+					return playSong(nextSong.SourceFile, { playNow })
 				} else {
 					// If no enabled songs found, notify the user.
 					return notifyService.error('No enabled songs found')
