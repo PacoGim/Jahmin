@@ -78,7 +78,6 @@ function getTask(processIndex: number, processesRunning: boolean[]) {
 	}
 
 	if (task.type === 'insert') {
-		console.log(task)
 		getSongTagsFn(task.path)
 			.then(tags => {
 				sendWebContents('web-storage', {

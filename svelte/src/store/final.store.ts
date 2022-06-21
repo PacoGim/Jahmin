@@ -61,7 +61,6 @@ export let triggerScrollToSongEvent: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
 export let layoutToShow: Writable<'Library' | 'Playback' | 'Config'> = writable('Library')
-export let selectedOptionSection: Writable<string> = writable('')
 
 export let mainAudioElement: Writable<HTMLAudioElement> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement> = writable(undefined)

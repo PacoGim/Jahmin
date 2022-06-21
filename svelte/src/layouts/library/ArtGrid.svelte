@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte'
 
-	import { liveQuery } from 'dexie'
-	import { db } from '../../db/db'
-
 	import Album from '../../components/Album.svelte'
-	import scrollToAlbumFn from '../../functions/scrollToAlbum.fn'
+
 	import { artSizeConfig, gridGapConfig, groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { albumListStore, dbSongsStore, selectedGroupByStore, selectedGroupByValueStore } from '../../store/final.store'
-	import { hash } from '../../functions/hashString.fn'
+	import { dbSongsStore, layoutToShow } from '../../store/final.store'
+
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
+
+	import { selectedConfigOptionName } from '../../store/session.store'
 
 	let albums
 
@@ -35,12 +34,16 @@
 		})
 
 		groupSongsByAlbumFn(songsFiltered).then(groupedAlbums => {
-
 			// TODO add user controlled album sorting.
 			albums = groupedAlbums.sort((a, b) => {
 				return a.RootDir.localeCompare(b.RootDir)
 			})
 		})
+	}
+
+	function handleAddFolder() {
+		$selectedConfigOptionName = 'Library'
+		$layoutToShow = 'Config'
 	}
 
 	onMount(() => {
@@ -56,9 +59,16 @@
 </script>
 
 <art-grid-svlt>
-	{#each albums || [] as album (album.ID)}
-		<Album {album} />
-	{/each}
+	{#if $dbSongsStore.length > 0}
+		{#each albums || [] as album (album.ID)}
+			<Album {album} />
+		{/each}
+	{:else}
+		<no-song-found-container>
+			<p>No songs found!</p>
+			<button on:click={() => handleAddFolder()}>Click here to add folder</button>
+		</no-song-found-container>
+	{/if}
 </art-grid-svlt>
 
 <style>
@@ -73,5 +83,13 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-content: flex-start;
+	}
+
+	no-song-found-container {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

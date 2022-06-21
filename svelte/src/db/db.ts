@@ -1,9 +1,6 @@
-import Dexie, { liveQuery, type Table } from 'dexie'
-import generateId from '../functions/generateId.fn'
+import Dexie, { type Table } from 'dexie'
 import getDirectoryFn from '../functions/getDirectory.fn'
-import { hash } from '../functions/hashString.fn'
 import { dbSongsStore, dbVersionStore } from '../store/final.store'
-import type { AlbumType } from '../types/album.type'
 import type { PartialSongType, SongType } from '../types/song.type'
 
 export class JahminDb extends Dexie {
@@ -45,7 +42,7 @@ async function runQueue() {
 	// Groups all the same tasks together.
 	let addSongQueue = taskQueue.filter(task => task.taskType === 'insert')
 	let deleteSongQueue = taskQueue.filter(task => task.taskType === 'delete')
-	let updateSongQueue = taskQueue.filter(task => task.taskType === 'update'|| task.taskType === 'external-update')
+	let updateSongQueue = taskQueue.filter(task => task.taskType === 'update' || task.taskType === 'external-update')
 
 	// Removes from the task queue all the tasks that have grouped.
 	addSongQueue.forEach(task => taskQueue.splice(taskQueue.indexOf(task), 1))

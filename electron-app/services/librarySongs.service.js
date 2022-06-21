@@ -74,7 +74,6 @@ function getTask(processIndex, processesRunning) {
         return;
     }
     if (task.type === 'insert') {
-        console.log(task);
         (0, getSongTags_fn_1.default)(task.path)
             .then(tags => {
             (0, sendWebContents_fn_1.sendWebContents)('web-storage', {

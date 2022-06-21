@@ -48,6 +48,10 @@
 	}
 
 	function setScrollAmount(amount) {
+		if ($songListStore.length <= 0) {
+			return
+		}
+
 		if (amount <= 0) {
 			amount = 0
 		} else if (amount > $songListStore.length - 1) {
