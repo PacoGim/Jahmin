@@ -116,7 +116,7 @@
 
 <song-list-background-svlt>
 	<backdrop />
-	<img alt="" />
+	<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" />
 
 	<video autoplay loop>
 		<track kind="captions" />
@@ -132,6 +132,8 @@
 		height: 100%;
 		width: 100%;
 		z-index: 0;
+
+		border: transparent !important;
 
 		transition: opacity 300ms linear;
 	}

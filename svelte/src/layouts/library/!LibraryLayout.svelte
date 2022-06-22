@@ -2,8 +2,10 @@
 	import { onMount } from 'svelte'
 	import { groupSongs } from '../../services/groupSongs.service'
 	import { fontSizeConfig, groupByConfig, groupByValuesConfig } from '../../store/config.store'
+	import { dbSongsStore } from '../../store/final.store'
 
 	import ArtGrid from './ArtGrid.svelte'
+	import NoSong from './NoSong.svelte'
 
 	import SongList from './SongList.svelte'
 	import SongListBackground from './SongListBackground.svelte'
@@ -18,7 +20,11 @@
 </script>
 
 <library-layout class="layout">
-	<ArtGrid />
+	{#if $dbSongsStore.length > 0}
+		<ArtGrid />
+	{:else}
+		<NoSong />
+	{/if}
 	<TagGroup />
 	<SongList />
 	<TagEdit />

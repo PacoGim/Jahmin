@@ -4,11 +4,9 @@
 	import Album from '../../components/Album.svelte'
 
 	import { artSizeConfig, gridGapConfig, groupByConfig, groupByValuesConfig } from '../../store/config.store'
-	import { dbSongsStore, layoutToShow } from '../../store/final.store'
+	import { dbSongsStore } from '../../store/final.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
-
-	import { selectedConfigOptionName } from '../../store/session.store'
 
 	let albums
 
@@ -41,11 +39,6 @@
 		})
 	}
 
-	function handleAddFolder() {
-		$selectedConfigOptionName = 'Library'
-		$layoutToShow = 'Config'
-	}
-
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
 		groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
@@ -59,16 +52,9 @@
 </script>
 
 <art-grid-svlt>
-	{#if $dbSongsStore.length > 0}
-		{#each albums || [] as album (album.ID)}
-			<Album {album} />
-		{/each}
-	{:else}
-		<no-song-found-container>
-			<p>No songs found!</p>
-			<button on:click={() => handleAddFolder()}>Click here to add folder</button>
-		</no-song-found-container>
-	{/if}
+	{#each albums || [] as album (album.ID)}
+		<Album {album} />
+	{/each}
 </art-grid-svlt>
 
 <style>
@@ -83,13 +69,5 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-content: flex-start;
-	}
-
-	no-song-found-container {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 </style>

@@ -3,6 +3,7 @@
 	import { incrementPlayCount } from '../db/db'
 	import findNextValidSongFn from '../functions/findNextValidSong.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
+	import { hash } from '../functions/hashString.fn'
 	import nextSongFn from '../functions/nextSong.fn'
 	import previousSongFn from '../functions/previousSong.fn'
 	import { setNewPlayback } from '../functions/setNewPlayback.fn'
@@ -83,7 +84,7 @@
 		if (isMounted === false) return
 
 		preLoadNextSong(
-			$playbackStore.findIndex(song => song.SourceFile === $currentAudioElement.getAttribute('src')),
+			$playbackStore.findIndex(song => song.ID === +$currentAudioElement.getAttribute('data-song-id')),
 			$playbackStore
 		)
 	}
@@ -128,9 +129,12 @@
 			setCurrentAudioElement($mainAudioElement)
 
 			// Sets the new song to play.
+
+			$mainAudioElement.setAttribute('data-song-id', String(hash(songUrl, 'number')))
 			$mainAudioElement.src = songUrl
 
 			// Stops the next audio element from playing.
+			$altAudioElement.setAttribute('data-song-id', '')
 			$altAudioElement.src = ''
 
 			if (playNow) {
@@ -183,7 +187,7 @@
 		if (audioElements[altAudioName].isPreloading === false && audioElements[altAudioName].isPreloaded === false) {
 			audioElements[altAudioName].isPreloading = true
 
-			let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === this.getAttribute('src'))
+			let currentSongIndex = $playbackStore.findIndex(song => song.ID === +this.getAttribute('data-song-id'))
 
 			preLoadNextSong(currentSongIndex, $playbackStore)
 		}
@@ -191,7 +195,7 @@
 		////////// Audio Pre Plays Here \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
 		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
-			let song = $playbackStore.find(song => song.SourceFile === audioElements[altAudioName].domElement.getAttribute('src'))
+			let song = $playbackStore.find(song => song.ID === +audioElements[altAudioName].domElement.getAttribute('data-song-id'))
 
 			audioElements[altAudioName].domElement
 				.play()
@@ -203,7 +207,7 @@
 				})
 				.catch(err => {
 					let previousPlayedSong = $playbackStore.find(
-						song => song.SourceFile === audioElements[this.id].domElement.getAttribute('src')
+						song => song.ID === +audioElements[this.id].domElement.getAttribute('data-song-id')
 					)
 
 					if (previousPlayedSong) {
@@ -232,6 +236,7 @@
 			nextSongToPlay = findNextValidSongFn(songIndex, songList)
 		}
 
+		audioElements[nextAudioElementId].domElement.setAttribute('data-song-id', nextSongToPlay?.ID || '')
 		audioElements[nextAudioElementId].domElement.src = nextSongToPlay?.SourceFile || ''
 	}
 
@@ -253,7 +258,9 @@
 		})
 
 		$mainAudioElement.addEventListener('ended', () => {
-			incrementPlayCount($playbackStore.find(song => song.SourceFile === audioElements.main.domElement.getAttribute('src')).ID)
+			incrementPlayCount(
+				$playbackStore.find(song => song.ID === +audioElements.main.domElement.getAttribute('data-song-id')).ID
+			)
 			audioElements.main.isPlaying = false
 
 			audioElements.main.isPreloaded = false
@@ -261,7 +268,7 @@
 		})
 
 		$altAudioElement.addEventListener('ended', () => {
-			incrementPlayCount($playbackStore.find(song => song.SourceFile === audioElements.alt.domElement.getAttribute('src')).ID)
+			incrementPlayCount($playbackStore.find(song => song.ID === +audioElements.alt.domElement.getAttribute('data-song-id')).ID)
 			audioElements.alt.isPlaying = false
 
 			audioElements.alt.isPreloaded = false
