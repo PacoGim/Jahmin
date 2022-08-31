@@ -1,59 +1,107 @@
 {
-	"name": "jahmin",
-	"version": "1.0.0",
-	"description": "",
-	"main": "electron-app/dist/index.js",
-	"scripts": {
-		"transpile:ts": "cd ./src && tsc -w",
-		"start": "electron electron-app"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/Franchills/Jahmin.git"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"bugs": {
-		"url": "https://github.com/Franchills/Jahmin/issues"
-	},
-	"homepage": "https://github.com/Franchills/Jahmin#readme",
-	"devDependencies": {
-		"@types/electron-prompt": "^1.6.1",
-		"@types/node": "^17.0.41",
-		"@types/sharp": "^0.30.4",
-		"@types/spark-md5": "^3.0.2",
-		"@types/string-hash": "^1.1.1",
-		"@types/xxhashjs": "^0.2.2",
-		"concurrently": "^7.2.1",
-		"electron": "^19.0.3",
-		"typescript": "^4.7.3"
-	},
-	"dependencies": {
-		"@iarna/toml": "^2.2.5",
-		"chokidar": "^3.5.1",
-		"deepmerge": "^4.2.2",
-		"dexie": "^3.2.1",
-		"dompurify": "^2.3.8",
-		"electron-prompt": "^1.7.0",
-		"electron-store": "^8.0.1",
-		"exiftool-vendored": "^16.4.0",
-		"filespy": "^1.2.4",
-		"fuse.js": "^6.6.2",
-		"fzf": "^0.5.1",
-		"hex-to-hsl": "^1.0.2",
-		"image-info": "^0.0.2",
-		"izitoast": "^1.4.0",
-		"js-datepicker": "^5.18.0",
-		"music-metadata": "^7.11.4",
-		"nanoid": "^3.1.30",
-		"node-id3": "^0.2.3",
-		"sharp": "0.30.6",
-		"sortablejs": "^1.15.0",
-		"spark-md5": "^3.0.2",
-		"string-hash": "^1.1.3",
-		"trash": "^8.1.0",
-		"trim-newlines": "^4.0.2",
-		"xxhashjs": "^0.2.2"
-	}
+  "name": "jahmin",
+  "productName": "Jahmin",
+  "version": "1.0.0",
+  "description": "Jahmin",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "tsc-watch:main": "cd app/main && npx tsc --watch",
+    "tsc-watch:preload": "cd app/preload && npx tsc --watch",
+    "tsc-watch:workers": "cd app/workers && npx tsc --watch",
+    "electron": "electron .",
+    "svelte:dev": "cd app/svelte && npm run dev",
+    "dev": "concurrently \"npm run tsc-watch:main\" \"npm run tsc-watch:preload\"  \"npm run tsc-watch:workers\" \"npm run svelte:dev\"",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
+  },
+  "keywords": [],
+  "author": {
+    "name": "Francisco Gimeno",
+    "email": "franchills@tuta.io"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "electron_build"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {
+            "options": {
+              "maintainer": {
+                "name": "Francisco Gimeno"
+              }
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "deepmerge": "^4.2.2",
+    "dexie": "^3.2.2",
+    "dompurify": "^2.3.12",
+    "electron-squirrel-startup": "^1.0.0",
+    "exiftool-vendored": "^17.0.1",
+    "fuse.js": "^6.6.2",
+    "izitoast": "^1.4.0",
+    "music-metadata": "^7.12.6",
+    "node-id3": "^0.2.3",
+    "sanitize-filename": "^1.6.3",
+    "sharp": "^0.30.7",
+    "sirv-cli": "^2.0.0",
+    "sortablejs": "^1.15.0",
+    "string-hash": "^1.1.3",
+    "tippy.js": "^6.3.7",
+    "xxhashjs": "^0.2.2"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.65",
+    "@electron-forge/maker-deb": "^6.0.0-beta.65",
+    "@electron-forge/maker-dmg": "6.0.0-beta.65",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.65",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.65",
+    "@electron-forge/maker-zip": "^6.0.0-beta.65",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@rollup/plugin-typescript": "^8.0.0",
+    "@tsconfig/svelte": "^2.0.1",
+    "@types/node": "^18.7.6",
+    "@types/xxhashjs": "^0.2.2",
+    "chokidar": "^3.5.3",
+    "concurrently": "^7.3.0",
+    "electron": "20.0.2",
+    "rollup": "^2.3.4",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "svelte": "^3.49.0",
+    "svelte-check": "^2.0.0",
+    "svelte-preprocess": "^4.0.0",
+    "tslib": "^2.0.0",
+    "typescript": "^4.7.4"
+  }
 }

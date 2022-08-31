@@ -1,0 +1,54 @@
+body {
+	--color-bg-1: var(--theme-bg-1);
+	--color-bg-2: var(--theme-bg-2);
+	--color-fg-1: var(--theme-fg-1);
+	--color-fg-1-low: var(--theme-fg-1-low);
+	--color-hl-gold: hsl(46, 55%, 52%);
+	--color-hl-blue: hsl(211, 100%, 55%);
+	--color-hl-reactBlue: hsl(193, 95%, 68%);
+	--color-hl-2: hsl(348, 90%, 37%);
+	--filter-hl: var(--theme-filter-hl);
+
+	--color-art-fg: var(--theme-color-art-fg);
+	--color-art-bg: var(--theme-color-art-bg);
+
+	--rgb-global: var(--theme-rgb-global);
+}
+
+body[theme='Day'] {
+	--theme-fg-1: hsl(210, 12%, 16%);
+	--theme-fg-1-low: hsl(210, 12%, 16%, 0.1);
+	--theme-bg-1: hsl(0, 0%, 100%);
+	--theme-bg-2: hsl(0, 0%, 97%);
+
+	--theme-filter-hl: brightness(0) saturate(100%) invert(15%) sepia(24%) saturate(284%) hue-rotate(169deg) brightness(91%)
+		contrast(96%);
+
+	--theme-color-art-fg: hsl(var(--art-hue), var(--art-saturation), 5%);
+	--theme-color-art-bg: hsl(var(--art-hue), var(--art-saturation), 95%);
+
+	--theme-rgb-global: 0, 0, 0;
+}
+
+body[theme='Night'] {
+	--theme-fg-1: hsl(210, 17%, 82%);
+	--theme-fg-1-low: hsla(210, 17%, 82%, 0.1);
+	--theme-bg-1: hsl(215, 18%, 13%);
+	--theme-bg-2: hsl(215, 21%, 11%);
+	--theme-filter-hl: brightness(0) saturate(100%) invert(90%) sepia(14%) saturate(137%) hue-rotate(169deg) brightness(92%)
+		contrast(90%);
+
+	--theme-color-art-fg: hsl(var(--art-hue), var(--art-saturation), 95%);
+	--theme-color-art-bg: hsl(var(--art-hue), var(--art-saturation), 5%);
+
+	--theme-rgb-global: 255, 255, 255;
+}
+
+.tippy-box[data-theme~='dynamic'] {
+	background-color: var(--art-color-dark);
+	color: var(--art-color-light);
+}
+
+.tippy-box > .tippy-arrow:before {
+	border-top-color: var(--art-color-dark) !important; /* set your color here and use the !important property */
+}
