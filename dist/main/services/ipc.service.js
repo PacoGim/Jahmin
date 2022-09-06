@@ -17,6 +17,7 @@ const electron_1 = require("electron");
 const contextMenu_1 = require("../context_menu/contextMenu");
 const getAlbumColors_fn_1 = require("../functions/getAlbumColors.fn");
 const albumArt_service_1 = require("./albumArt.service");
+const handleArt_service_1 = __importDefault(require("./handleArt.service"));
 const appReady_service_1 = __importDefault(require("./appReady.service"));
 const chokidar_service_1 = require("./chokidar.service");
 const compressSingleSongAlbumArt_service_1 = __importDefault(require("./compressSingleSongAlbumArt.service"));
@@ -60,6 +61,9 @@ function startIPC() {
     });
     electron_1.ipcMain.on('remove-directory', (evt, directory, type, dbSongs) => {
         (0, directoryHandler_service_1.default)([directory], type, dbSongs);
+    });
+    electron_1.ipcMain.on('handle-art', (event, imageLocation, elementId, height, width) => {
+        (0, handleArt_service_1.default)(imageLocation, elementId, height, width);
     });
     /********************** Two-way **********************/
     electron_1.ipcMain.handle('get-config', config_service_1.getConfig);

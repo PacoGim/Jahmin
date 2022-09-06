@@ -1,16 +1,21 @@
-export function addIntersectionObserver(element: HTMLElement, rootDir: string, artSize: number) {
-	let artObserver: IntersectionObserver
+export default function(elementId: string, intersectionRoot: string) {
+	return new Promise((resolve, reject) => {
+		let elementObserver: IntersectionObserver
 
-	artObserver = new IntersectionObserver(
-		entries => {
-			if (entries[0].isIntersecting === true) {
-				window.ipc.compressAlbumArt(rootDir, artSize, false)
-
-				// "Closes" the Art Observer to avoid unnecessary checks.
-				artObserver.disconnect()
+		elementObserver = new IntersectionObserver(
+			entries => {
+				if (entries[0].isIntersecting === true) {
+					resolve(true)
+					elementObserver.disconnect()
+				}
+			},
+			{
+				root: document.querySelector(intersectionRoot),
+				threshold: 0,
+				rootMargin: '200% 0px 200% 0px'
 			}
-		},
-		{ root: document.querySelector('art-grid-svlt'), threshold: 0, rootMargin: '200% 0px 200% 0px' }
-	)
-	artObserver.observe(element)
+		)
+
+		elementObserver.observe(document.querySelector(`#${CSS.escape(elementId)}`))
+	})
 }

@@ -9,31 +9,34 @@ export {}
 declare global {
 	interface Window {
 		ipc: {
+			/********************** Renderer to Main (two-way) **********************/
 			getConfig: () => Promise<ConfigType>
-			windowResize
-			sendAppReady
-			getAlbumColors
-			savePeaks
 			getPeaks
+			getAlbumColors
 			getEqualizers
 			saveConfig
-			compressAlbumArt
-			updateSongs
-			handleNewArt
-			compressSingleSongAlbumArt
-			sendSingleSongArt
-			selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => void
-			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
-			onGetAllSongsFromRenderer: (callback: any) => void
-			sendAllSongsToMain: (songs: SongType[]) => void
-			handleWebStorage: (callback: any) => void
-			songSyncQueueProgress: (callback: any) => void
-			showContextMenu: (menuToOpen: string, parameters: any) => void
 			addNewEqualizerProfile: (newProfile: EqualizerProfileType) => Promise<ReturnMessageType>
 			renameEqualizer: (eqName: string, newName: string) => Promise<ReturnMessageType>
 			updateEqualizerValues: (eqName: string, newValues: any) => Promise<boolean>
 			deleteEqualizer: (eqName: string) => Promise<ReturnMessageType>
 			stopSongUpdate: () => Promise<>
+			/********************** Renderer to Main (one-way) **********************/
+			sendAppReady
+			sendAllSongsToMain: (songs: SongType[]) => void
+			showContextMenu: (menuToOpen: string, parameters: any) => void
+			savePeaks
+			compressAlbumArt
+			updateSongs
+			compressSingleSongAlbumArt
+			selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => void
+			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
+			handleArt: (imageLocation: string, elementId: string, height: number, width: number) => void
+			/********************** Main to Renderer **********************/
+			handleNewArt
+			sendSingleSongArt
+			onGetAllSongsFromRenderer: (callback: any) => void
+			handleWebStorage: (callback: any) => void
+			songSyncQueueProgress: (callback: any) => void
 		}
 	}
 }

@@ -2,12 +2,8 @@
 	import calculateElementArtSizeFn from '../functions/calculateElementArtSize.fn'
 	import generateId from '../functions/generateId.fn'
 
-	import { hash } from '../functions/hashString.fn'
-	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
-	import setArtToSrcFn from '../functions/setArtToSrc.fn'
-	import { albumArtMapStore } from '../stores/main.store'
+	import intersectionObserverFn from '../functions/intersectionObserver.fn'
 
-	// export let addObserver = false
 	export let intersectionRoot = undefined
 	export let imageSourceLocation = ''
 
@@ -29,12 +25,12 @@
 	}
 
 	function loadArt(imageLocation, elementId, intersectionRoot, height, width) {
-
-
 		if (intersectionRoot !== undefined) {
-
-
-
+			intersectionObserverFn(elementId, intersectionRoot).then(() => {
+				window.ipc.handleArt(imageLocation, elementId, height, width)
+			})
+		} else {
+			window.ipc.handleArt(imageLocation, elementId, height, width)
 		}
 	}
 </script>

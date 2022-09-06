@@ -23,6 +23,7 @@ const ipcFunctions = {
     compressSingleSongAlbumArt: (path, artSize, albumId) => electron_1.ipcRenderer.send('compress-single-song-album-art', path, albumId, artSize),
     selectDirectories: (type, songs) => electron_1.ipcRenderer.send('select-directories', type, songs),
     removeDirectory: (directory, type, songs) => electron_1.ipcRenderer.send('remove-directory', directory, type, songs),
+    handleArt: (imageLocation, elementId, height, width) => electron_1.ipcRenderer.send('handle-art', imageLocation, elementId, height, width),
     /********************** Main to Renderer **********************/
     onGetAllSongsFromRenderer: (callback) => electron_1.ipcRenderer.on('get-all-songs-from-renderer', callback),
     handleWebStorage: (callback) => electron_1.ipcRenderer.on('web-storage', callback),

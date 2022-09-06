@@ -3,6 +3,7 @@ import { loadContextMenu } from '../context_menu/contextMenu'
 import { getAlbumColors } from '../functions/getAlbumColors.fn'
 import { SongType } from '../../types/song.type'
 import { compressAlbumArt } from './albumArt.service'
+import handleArtService from './handleArt.service'
 import appReadyService from './appReady.service'
 import { unwatchPaths } from './chokidar.service'
 import compressSingleSongAlbumArtService from './compressSingleSongAlbumArt.service'
@@ -57,6 +58,10 @@ export function startIPC() {
 
 	ipcMain.on('remove-directory', (evt, directory, type: 'remove-add' | 'remove-exclude', dbSongs) => {
 		directoryHandlerService([directory], type, dbSongs)
+	})
+
+	ipcMain.on('handle-art', (event, imageLocation: string, elementId: string, height: number, width: number) => {
+		handleArtService(imageLocation, elementId, height, width)
 	})
 
 	/********************** Two-way **********************/
