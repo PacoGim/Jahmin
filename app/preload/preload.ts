@@ -16,6 +16,7 @@ const ipcFunctions = {
 	updateEqualizerValues,
 	deleteEqualizer,
 	renameEqualizer,
+	stopSongUpdate,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -33,6 +34,7 @@ const ipcFunctions = {
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),
 	handleNewArt: (callback: any) => ipcRenderer.on('new-art', callback),
+	songSyncQueueProgress: (callback: any) => ipcRenderer.on('song-sync-queue-progress', callback),
 	// Gets a Base64 encoded album art
 	sendSingleSongArt: (callback: any) => ipcRenderer.on('send-single-song-art', callback)
 }
@@ -113,6 +115,15 @@ function renameEqualizer(eqName: string, newName: string): Promise<ReturnMessage
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('rename-equalizer', eqName, newName)
+			.then(result => resolve(result))
+			.catch(err => reject(err))
+	})
+}
+
+function stopSongUpdate() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('stop-song-update')
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})

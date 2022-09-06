@@ -2,7 +2,7 @@
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
-	import { albumArtMapStore } from '../stores/main.store'
+	import { albumArtMapStore, songSyncQueueProgress } from '../stores/main.store'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {
@@ -20,6 +20,10 @@
 
 	window.ipc.sendSingleSongArt((_, data) => {
 		setAlbumArtBase64(data)
+	})
+
+	window.ipc.songSyncQueueProgress((_, data) => {
+		$songSyncQueueProgress = data
 	})
 
 	function handleNewArt(data) {

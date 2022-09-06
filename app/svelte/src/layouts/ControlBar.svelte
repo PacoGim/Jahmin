@@ -64,13 +64,9 @@
 </script>
 
 <control-bar-svlt>
-	<AlbumArt
-		playingSongSourceFile={$playingSongStore?.SourceFile}
-		rootDir={$albumPlayingDirStore}
-		{artSize}
-		observer="!addObserver"
-		style="height:64px;width:64px;cursor:pointer"
-	/>
+	<album-art>
+		<AlbumArt imageSourceLocation={$playingSongStore?.SourceFile} intersectionRoot={undefined} />
+	</album-art>
 
 	<player-buttons>
 		<PreviousButton />
@@ -95,8 +91,11 @@
 	control-bar-svlt {
 		z-index: 3;
 		grid-area: control-bar-svlt;
-		display: flex;
+		display: grid;
 		align-items: center;
+
+		grid-template-columns: 64px max-content max-content max-content auto max-content;
+
 		background-color: var(--art-color-light);
 		color: var(--art-color-dark);
 
@@ -105,18 +104,30 @@
 		transition-timing-function: ease-in-out;
 	}
 
+	control-bar-svlt album-art {
+		height: 64px;
+		width: 64px;
+		cursor: pointer;
+	}
+
 	player-buttons {
 		height: var(--button-size);
 		display: flex;
 		flex-direction: row;
+		margin: 0 1rem;
 	}
 
 	.song-time {
 		font-size: 0.9rem;
 		font-variation-settings: 'wght' 500;
 	}
+
+	song-duration {
+		margin: 0 1rem;
+	}
+
 	song-time-left {
-		margin-right: 1rem;
+		margin: 0 1rem;
 	}
 
 	:global(player-buttons > *) {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import type { AlbumType } from '../types/album.type'
+	import type { AlbumType } from '../../../types/album.type'
 	import { selectedAlbumDir } from '../stores/main.store'
 	import AlbumArt from './AlbumArt.svelte'
 
@@ -13,19 +13,16 @@
 
 	onMount(() => {
 		// let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
-
 		// if (album.ID === lastPlayedAlbumId) {
 		// 	setTimeout(() => {
 		// 		scrollToAlbumFn(album.ID)
 		// 	}, 100)
 		// }
-
-		artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
 	})
 </script>
 
-<album id={album.ID} rootDir={album.RootDir} class={$selectedAlbumDir === album?.RootDir ? 'selected' : ''} bind:this={element}>
-	<AlbumArt rootDir={album.RootDir} {artSize} observer="addObserver" style="height:inherit;width:inherit;cursor:pointer;" />
+<album rootDir={album.RootDir} class={$selectedAlbumDir === album?.RootDir ? 'selected' : ''}>
+	<AlbumArt imageSourceLocation={album.RootDir} intersectionRoot='art-grid-svlt'  />
 
 	<overlay-gradient />
 

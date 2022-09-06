@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte'
 
 	import generateId from '../../functions/generateId.fn'
@@ -10,6 +10,7 @@
 	import ImageIcon from '../../icons/ImageIcon.svelte'
 	import MusicNoteIcon from '../../icons/MusicNoteIcon.svelte'
 	import RefreshIcon from '../../icons/RefreshIcon.svelte'
+	import notifyService from '../../services/notify.service'
 
 	let currentSongSyncProgress = 0
 	let tippySongUpdateId = generateId()
@@ -36,7 +37,7 @@
 
 	function stopSongUpdate() {
 		if ($songSyncQueueProgress.isSongUpdating === true) {
-			stopSongUpdateIPC().then(() => {
+			window.ipc.stopSongUpdate().then(() => {
 				notifyService.success('Song update stopped')
 			})
 		}

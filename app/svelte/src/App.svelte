@@ -6,8 +6,6 @@
 	import onAppMountedService from './services/onAppMounted.service'
 
 	/********************** Functions **********************/
-	import getAlbumSongsFn from './db/getAlbumSongs.fn'
-	import sortSongsArrayFn from './functions/sortSongsArray.fn'
 
 	/********************** Tippy **********************/
 	import 'tippy.js/dist/tippy.css'
@@ -29,8 +27,7 @@
 
 	import { getDB } from './db/!dbObject'
 
-	import { dbSongsStore, appTitle, selectedAlbumDir, songListStore, layoutToShow, config } from './stores/main.store'
-	import { setWaveSource } from './services/waveform.service'
+	import { dbSongsStore, appTitle, layoutToShow } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 	import { equalizerService, confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import EqualizerService from './svelte_services/EqualizerService.svelte'
@@ -43,10 +40,6 @@
 		return await getDB().songs.toArray()
 	}).subscribe(songs => {
 		$dbSongsStore = songs
-		getAlbumSongsFn(/*$selectedAlbumDir*/ '/Users/fran/Temp Music Folder/Retro/Super Aleste').then(songs => {
-			setWaveSource(songs[0].SourceFile, '/Users/fran/Temp Music Folder/Retro/Super Aleste', songs[0].Duration)
-			$songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder)
-		})
 	})
 
 	onMount(() => {

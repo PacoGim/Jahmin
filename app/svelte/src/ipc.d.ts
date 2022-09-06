@@ -27,11 +27,13 @@ declare global {
 			onGetAllSongsFromRenderer: (callback: any) => void
 			sendAllSongsToMain: (songs: SongType[]) => void
 			handleWebStorage: (callback: any) => void
+			songSyncQueueProgress: (callback: any) => void
 			showContextMenu: (menuToOpen: string, parameters: any) => void
 			addNewEqualizerProfile: (newProfile: EqualizerProfileType) => Promise<ReturnMessageType>
 			renameEqualizer: (eqName: string, newName: string) => Promise<ReturnMessageType>
 			updateEqualizerValues: (eqName: string, newValues: any) => Promise<boolean>
 			deleteEqualizer: (eqName: string) => Promise<ReturnMessageType>
+			stopSongUpdate: () => Promise<>
 		}
 	}
 }

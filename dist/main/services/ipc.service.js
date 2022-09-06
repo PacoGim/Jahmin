@@ -81,6 +81,9 @@ function startIPC() {
     electron_1.ipcMain.handle('update-equalizer-values', (evt, eqName, newValues) => __awaiter(this, void 0, void 0, function* () {
         return (0, equalizer_service_1.updateEqualizerValues)(eqName, newValues);
     }));
+    electron_1.ipcMain.handle('stop-song-update', (evt) => __awaiter(this, void 0, void 0, function* () {
+        return yield (0, librarySongs_service_1.stopSongsUpdating)();
+    }));
 }
 exports.startIPC = startIPC;
 function windowResize(event) {

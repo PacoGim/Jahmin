@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import type { SongType } from '../types/song.type'
+	import type { SongType } from '../../../types/song.type'
 
 	import { activeSongStore, config, playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
 
@@ -12,14 +12,10 @@
 	export let song: SongType
 	export let index: number
 
-	// TODO Fix this
-	// let isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $playingSongStore.ID
-	let isSongPlaying = true
+	let isSongPlaying = false
 	let gridStyle = ''
 
-	$: {
-		// isSongPlaying = $playingSongStore?.ID === song?.ID && $selectedAlbumId === $playingSongStore.ID
-	}
+	$: isSongPlaying = $playingSongStore?.ID === song?.ID
 
 	$: {
 		song

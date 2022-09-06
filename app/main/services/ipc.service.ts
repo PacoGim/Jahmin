@@ -9,7 +9,7 @@ import compressSingleSongAlbumArtService from './compressSingleSongAlbumArt.serv
 import directoryHandlerService from './directoryHandler.service'
 import { getConfig, saveConfig } from './config.service'
 import { addEqualizer, deleteEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
-import { addToTaskQueue, fetchSongsTag } from './librarySongs.service'
+import { addToTaskQueue, fetchSongsTag, stopSongsUpdating } from './librarySongs.service'
 import { getPeaks, savePeaks } from './peaks.service'
 import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
 
@@ -78,6 +78,10 @@ export function startIPC() {
 	})
 	ipcMain.handle('update-equalizer-values', async (evt, eqName, newValues) => {
 		return updateEqualizerValues(eqName, newValues)
+	})
+
+	ipcMain.handle('stop-song-update', async evt => {
+		return await stopSongsUpdating()
 	})
 }
 

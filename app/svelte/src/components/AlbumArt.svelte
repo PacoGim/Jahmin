@@ -1,72 +1,45 @@
 <script lang="ts">
+	import calculateElementArtSizeFn from '../functions/calculateElementArtSize.fn'
+	import generateId from '../functions/generateId.fn'
+
 	import { hash } from '../functions/hashString.fn'
 	import { addIntersectionObserver } from '../functions/intersectionObserver.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 	import { albumArtMapStore } from '../stores/main.store'
 
-	export let style
-	let albumId
-	export let observer: 'addObserver' | '!addObserver' = '!addObserver'
-	export let rootDir
-	export let artSize = undefined
-	export let playingSongSourceFile = undefined
+	// export let addObserver = false
+	export let intersectionRoot = undefined
+	export let imageSourceLocation = ''
 
-	let dataLoaded = false
-
-	let artType = 'image'
+	let elementId = generateId()
 	let element: HTMLElement = undefined
+	let elementWidth = 0
+	let elementHeight = 0
 
 	$: {
-		playingSongSourceFile
-		if (element) {
-			handleAlbumArt(rootDir, artSize)
+		if (element !== undefined) {
+			let { height, width } = calculateElementArtSizeFn(element.parentElement, { keepSquare: true })
+			elementHeight = height
+			elementWidth = width
+
+			if (imageSourceLocation) {
+				loadArt(imageSourceLocation, elementId, intersectionRoot, elementHeight, elementWidth)
+			}
 		}
 	}
 
-	function handleAlbumArt(rootDir, artSize) {
-		if (rootDir === undefined || artSize === 0) {
-			return
-		}
+	function loadArt(imageLocation, elementId, intersectionRoot, height, width) {
 
-		albumId = hash(rootDir) as string
 
-		let albumArtData = $albumArtMapStore.get(albumId)?.find(art => art.artSize === artSize)
+		if (intersectionRoot !== undefined) {
 
-		if (albumArtData === undefined) {
-			if (observer === 'addObserver') {
-				addIntersectionObserver(element, rootDir, artSize)
-			} else {
-				window.ipc.compressAlbumArt(rootDir, artSize, false)
-			}
 
-			return
-		} else {
-			setArtToSrcFn(albumId, albumArtData.artSize, albumArtData.artPath, albumArtData.artType).catch(reason => {
-				setTimeout(() => {
-					handleAlbumArt(rootDir, artSize)
-				}, 5)
-			})
+
 		}
 	}
 </script>
 
-<art-svlt
-	data-playing-song-sourcefile={playingSongSourceFile}
-	data-albumId={albumId}
-	data-rootDir={rootDir}
-	data-artSize={artSize}
-	data-type={artType}
-	data-loaded={dataLoaded}
-	bind:this={element}
-	{style}
->
-	<img alt="" />
-
-	<video autoplay loop>
-		<track kind="captions" />
-		<source />
-	</video>
-</art-svlt>
+<art-svlt id={elementId} bind:this={element} style="height:{elementHeight}px;width:{elementWidth}px;" />
 
 <style>
 	art-svlt {
@@ -75,33 +48,14 @@
 		grid-row: 1;
 		display: block;
 
-		transform: scale(0);
+		background-image: url('../assets/img/disc-line.svg');
+		background-color: hsla(0, 0%, 50%, 0.5);
 
 		transition: transform 300ms cubic-bezier(0.5, 0.5, 0.265, 1.5);
 	}
 
-	art-svlt[data-type='unfound'] video,
-	art-svlt[data-type='image'] video {
-		display: none;
-	}
-
-	art-svlt[data-type='video'] img {
-		display: none;
-	}
-
-	body[theme='Night'] art-svlt[data-type='unfound'] img {
-		filter: invert(1);
-	}
-
-	art-svlt[data-loaded='true'] {
-		transform: scale(1);
-	}
-
-	art-svlt[data-loaded='false'] {
-		transform: scale(0);
-	}
-
-	art-svlt > * {
+	:global(art-svlt > *) {
+		width: 100%;
 		height: 100%;
 	}
 </style>

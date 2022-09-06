@@ -22,8 +22,6 @@
 	let groupedTags: PartialSongType = {}
 	let bindingTags: PartialSongType = {}
 
-	let tagEditElement: HTMLElement
-
 	let newTags: any = {}
 
 	$: {
@@ -243,26 +241,12 @@
 		}
 	}
 
-	let element
-	let artSize
-
-	$: {
-		// When the element is defined in the DOM, calculate the size of the art.
-		if (element !== undefined) {
-			setTimeout(() => {
-				try {
-					artSize = Number(getComputedStyle(element).getPropertyValue('height').replace('px', ''))
-				} catch (err) {}
-			}, 500)
-		}
-	}
-
 	onMount(() => {
 		hookUpEventListeners()
 	})
 </script>
 
-<tag-edit-svlt bind:this={tagEditElement}>
+<tag-edit-svlt>
 	<songs-to-edit
 		>Song{songsToEdit.length > 1 ? 's' : ''} Edit{songsToEdit.length > 0 ? 'ing' : ''}: {songsToEdit.length}</songs-to-edit
 	>
@@ -332,14 +316,9 @@
 		<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
 	</tag-container>
 
-	<cover-container bind:this={element}>
-		<AlbumArt
-			rootDir={$selectedAlbumDir}
-			{artSize}
-			style="height:100%; width:100%; position: absolute; top: 0; left: 0;"
-			observer="!addObserver"
-		/>
-	</cover-container>
+	<album-art>
+		<AlbumArt imageSourceLocation={songsToEdit[0]?.SourceFile} intersectionRoot={undefined} />
+	</album-art>
 
 	<button-container>
 		<button class="danger" on:click={() => undoAllTags()} disabled={isEmptyObject(newTags)}>
@@ -389,7 +368,7 @@
 			'tag-comment	tag-comment tag-comment'
 			'tag-date-year tag-date-month tag-date-day'
 			'tag-rating tag-rating tag-rating'
-			'cover-container cover-container cover-container'
+			'album-art album-art album-art'
 			'button-container button-container button-container';
 
 		transition: background-color var(--theme-transition-duration) linear;
@@ -524,12 +503,9 @@
 		box-shadow: none;
 	}
 
-	cover-container {
-		grid-area: cover-container;
+	album-art {
+		grid-area: album-art;
 		width: 100%;
-		height: 0;
-		padding-top: 100%;
-		position: relative;
 	}
 
 	button-container {
