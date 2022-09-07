@@ -194,7 +194,7 @@ function stopSongsUpdating() {
 exports.stopSongsUpdating = stopSongsUpdating;
 function filterSongs(audioFilesFound = [], dbSongs) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-        let worker = yield (0, workers_service_1.getWorker)('songFilter');
+        let worker = (yield (0, workers_service_1.getWorker)('songFilter'));
         worker.on('message', (data) => {
             if (data.type === 'songsToAdd') {
                 data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));

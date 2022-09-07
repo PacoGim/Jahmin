@@ -24,13 +24,15 @@
 		}
 	}
 
-	function loadArt(imageLocation, elementId, intersectionRoot, height, width) {
+	function loadArt(artPath, elementId, intersectionRoot, height, width) {
+		let size = height || width
+
 		if (intersectionRoot !== undefined) {
 			intersectionObserverFn(elementId, intersectionRoot).then(() => {
-				window.ipc.handleArt(imageLocation, elementId, height, width)
+				window.ipc.handleArt(artPath, elementId, size)
 			})
 		} else {
-			window.ipc.handleArt(imageLocation, elementId, height, width)
+			window.ipc.handleArt(artPath, elementId, size)
 		}
 	}
 </script>

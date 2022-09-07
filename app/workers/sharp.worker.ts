@@ -2,39 +2,30 @@ const sharp = require('sharp')
 import * as fs from 'fs'
 import { parentPort } from 'worker_threads'
 
-type DataType = {
-	id: string
-	elementId: string
-	dimension: number
-	artInputPath: string
-	artOutputDirPath: string
-	artOutputPath: string
-	success: boolean
-}
+import typeOfFn from '../functions/typeOf.fn'
 
-parentPort?.on('message', (data: DataType) => {
-	const { dimension, artInputPath, artOutputDirPath, artOutputPath } = data
+parentPort?.on('message', (data: any) => {
+	const { artData, artPath, elementId, size } = data
 
-	if (!fs.existsSync(artOutputDirPath)) {
-		fs.mkdirSync(artOutputDirPath, { recursive: true })
+	let sharpData = undefined
+
+	if (typeOfFn(artData) === 'Uint8Array') {
+		sharpData = artData
 	}
 
-	let file = fs.readFileSync(artInputPath)
-
-	sharp(file)
+	sharp(artData)
 		.resize({
-			height: dimension * 2,
-			width: dimension * 2
+			height: size * 2,
+			width: size * 2
 		})
-		.webp({
-			quality: 85
+		.avif({
+			quality: 64
 		})
-		.toFile(artOutputPath)
+		.toFile(artPath)
 		.then(() => {
 			parentPort?.postMessage(data)
 		})
 		.catch((err: any) => {
 			console.log(err)
-			console.log(artInputPath)
 		})
 })

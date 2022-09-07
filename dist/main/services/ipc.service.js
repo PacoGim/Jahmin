@@ -16,8 +16,7 @@ exports.startIPC = void 0;
 const electron_1 = require("electron");
 const contextMenu_1 = require("../context_menu/contextMenu");
 const getAlbumColors_fn_1 = require("../functions/getAlbumColors.fn");
-const albumArt_service_1 = require("./albumArt.service");
-const handleArt_service_1 = __importDefault(require("./handleArt.service"));
+const handleArt_service_1 = require("./handleArt.service");
 const appReady_service_1 = __importDefault(require("./appReady.service"));
 const chokidar_service_1 = require("./chokidar.service");
 const compressSingleSongAlbumArt_service_1 = __importDefault(require("./compressSingleSongAlbumArt.service"));
@@ -34,7 +33,6 @@ function startIPC() {
     electron_1.ipcMain.on('send-all-songs-to-main', (evt, songsDb) => (0, librarySongs_service_1.fetchSongsTag)(songsDb));
     electron_1.ipcMain.on('show-context-menu', (evt, menuToOpen, parameters) => (0, contextMenu_1.loadContextMenu)(evt, menuToOpen, parameters));
     electron_1.ipcMain.on('save-peaks', (evt, sourceFile, peaks) => (0, peaks_service_1.savePeaks)(sourceFile, peaks));
-    electron_1.ipcMain.on('handle-art-compression', (evt, rootDir, artSize, forceNewCheck) => __awaiter(this, void 0, void 0, function* () { return (0, albumArt_service_1.compressAlbumArt)(rootDir, artSize, forceNewCheck); }));
     electron_1.ipcMain.on('compress-single-song-album-art', (evt, path, albumId, artSize) => __awaiter(this, void 0, void 0, function* () {
         (0, compressSingleSongAlbumArt_service_1.default)(path, artSize, albumId);
     }));
@@ -62,8 +60,8 @@ function startIPC() {
     electron_1.ipcMain.on('remove-directory', (evt, directory, type, dbSongs) => {
         (0, directoryHandler_service_1.default)([directory], type, dbSongs);
     });
-    electron_1.ipcMain.on('handle-art', (event, imageLocation, elementId, height, width) => {
-        (0, handleArt_service_1.default)(imageLocation, elementId, height, width);
+    electron_1.ipcMain.on('handle-art', (event, filePath, elementId, size) => {
+        (0, handleArt_service_1.handleArtService)(filePath, elementId, size);
     });
     /********************** Two-way **********************/
     electron_1.ipcMain.handle('get-config', config_service_1.getConfig);

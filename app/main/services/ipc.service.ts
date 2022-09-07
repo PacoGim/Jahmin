@@ -3,7 +3,7 @@ import { loadContextMenu } from '../context_menu/contextMenu'
 import { getAlbumColors } from '../functions/getAlbumColors.fn'
 import { SongType } from '../../types/song.type'
 import { compressAlbumArt } from './albumArt.service'
-import handleArtService from './handleArt.service'
+import { handleArtService } from './handleArt.service'
 import appReadyService from './appReady.service'
 import { unwatchPaths } from './chokidar.service'
 import compressSingleSongAlbumArtService from './compressSingleSongAlbumArt.service'
@@ -23,9 +23,6 @@ export function startIPC() {
 	ipcMain.on('send-all-songs-to-main', (evt, songsDb: SongType[]) => fetchSongsTag(songsDb))
 	ipcMain.on('show-context-menu', (evt, menuToOpen: string, parameters: any) => loadContextMenu(evt, menuToOpen, parameters))
 	ipcMain.on('save-peaks', (evt, sourceFile: string, peaks: number[]) => savePeaks(sourceFile, peaks))
-	ipcMain.on('handle-art-compression', async (evt, rootDir, artSize, forceNewCheck) =>
-		compressAlbumArt(rootDir, artSize, forceNewCheck)
-	)
 
 	ipcMain.on('compress-single-song-album-art', async (evt, path, albumId, artSize) => {
 		compressSingleSongAlbumArtService(path, artSize, albumId)
@@ -60,8 +57,8 @@ export function startIPC() {
 		directoryHandlerService([directory], type, dbSongs)
 	})
 
-	ipcMain.on('handle-art', (event, imageLocation: string, elementId: string, height: number, width: number) => {
-		handleArtService(imageLocation, elementId, height, width)
+	ipcMain.on('handle-art', (event, filePath: string, elementId: string, size: number) => {
+		handleArtService(filePath, elementId, size)
 	})
 
 	/********************** Two-way **********************/

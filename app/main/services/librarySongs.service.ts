@@ -203,8 +203,8 @@ export function stopSongsUpdating() {
 }
 
 function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
-	return new Promise(async(resolve, reject) => {
-		let worker =await getWorker('songFilter') as Worker
+	return new Promise(async (resolve, reject) => {
+		let worker = (await getWorker('songFilter')) as Worker
 
 		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
 			if (data.type === 'songsToAdd') {

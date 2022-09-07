@@ -27,24 +27,24 @@ let isQueueRuning = false
 
 let sharpWorker: Worker
 
-getWorker('sharp').then(worker => {
-	sharpWorker = worker
-	sharpWorker.on('message', data => {
-		data.artPath = data.artOutputPath
-		data.success = true
-		data.artSize = data.dimension
-		data.artType = 'image'
-		delete data.artOutputDirPath
-		delete data.artOutputPath
-		delete data.dimension
+// getWorker('sharp').then(worker => {
+// 	sharpWorker = worker
+// 	sharpWorker.on('message', data => {
+// 		data.artPath = data.artOutputPath
+// 		data.success = true
+// 		data.artSize = data.dimension
+// 		data.artType = 'image'
+// 		delete data.artOutputDirPath
+// 		delete data.artOutputPath
+// 		delete data.dimension
 
-		sendWebContentsFn('new-art', data)
+// 		sendWebContentsFn('new-art', data)
 
-		setTimeout(() => {
-			runQueue()
-		}, 100)
-	})
-})
+// 		setTimeout(() => {
+// 			runQueue()
+// 		}, 100)
+// 	})
+// })
 
 let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg']
 const validNames = ['cover', 'folder', 'front', 'art', 'album']

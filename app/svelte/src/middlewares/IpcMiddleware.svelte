@@ -27,52 +27,16 @@
 	})
 
 	function handleNewArt(data) {
-		// If the first attempt of finding the album art fails
-		if (data.success === false) {
-			let element: HTMLElement = document.querySelector(
-				`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
-			)
+		// console.log(data)
+		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
-			// If the art element is not loaded anymore, return
-			if (!element) return
+		let imgElement = document.createElement('img')
+		imgElement.src = data.artPath
 
-			let dataSet = element.dataset
+		element.querySelectorAll('img').forEach(foo => foo.remove())
 
-			// Attempts to get an album art from a song file instead of from a root directory
-			window.ipc.compressSingleSongAlbumArt(
-				dataSet?.playingSongSourcefile || dataSet?.rootdir,
-				dataSet.artsize,
-				dataSet.albumid
-			)
-
-			return
-		}
-
-		setArtToSrcFn(data.albumId, data.artSize, data.artPath, data.artType).catch(reason => {
-			console.log(reason)
-		})
-
-		let albumArtData = $albumArtMapStore.get(data.albumId)
-
-		let artData = {
-			artSize: data.artSize,
-			artPath: data.artPath,
-			artType: data.artType
-		}
-
-		if (albumArtData) {
-			let artDataIndex = albumArtData.findIndex(art => art.artSize === data.artSize)
-
-			if (artDataIndex !== -1) {
-				albumArtData[artDataIndex] = artData
-			} else {
-				albumArtData.push(artData)
-			}
-		} else {
-			albumArtData = [artData]
-		}
-
-		$albumArtMapStore = $albumArtMapStore.set(data.albumId, albumArtData)
+		element.appendChild(imgElement)
+		// console.log(element)
 	}
 
 	// Sets a Base64 encoded album art into a imag element src

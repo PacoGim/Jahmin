@@ -30,7 +30,7 @@ declare global {
 			compressSingleSongAlbumArt
 			selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => void
 			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
-			handleArt: (imageLocation: string, elementId: string, height: number, width: number) => void
+			handleArt: (filePath: string, elementId: string, size: number) => void
 			/********************** Main to Renderer **********************/
 			handleNewArt
 			sendSingleSongArt

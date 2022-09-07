@@ -29,7 +29,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllowedFiles = exports.sendArtQueueProgress = exports.compressAlbumArt = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const workers_service_1 = require("./workers.service");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const hashString_fn_1 = __importDefault(require("../functions/hashString.fn"));
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
@@ -39,22 +38,22 @@ let compressImageQueue = [];
 let maxCompressImageQueueLength = 0;
 let isQueueRuning = false;
 let sharpWorker;
-(0, workers_service_1.getWorker)('sharp').then(worker => {
-    sharpWorker = worker;
-    sharpWorker.on('message', data => {
-        data.artPath = data.artOutputPath;
-        data.success = true;
-        data.artSize = data.dimension;
-        data.artType = 'image';
-        delete data.artOutputDirPath;
-        delete data.artOutputPath;
-        delete data.dimension;
-        (0, sendWebContents_fn_1.default)('new-art', data);
-        setTimeout(() => {
-            runQueue();
-        }, 100);
-    });
-});
+// getWorker('sharp').then(worker => {
+// 	sharpWorker = worker
+// 	sharpWorker.on('message', data => {
+// 		data.artPath = data.artOutputPath
+// 		data.success = true
+// 		data.artSize = data.dimension
+// 		data.artType = 'image'
+// 		delete data.artOutputDirPath
+// 		delete data.artOutputPath
+// 		delete data.dimension
+// 		sendWebContentsFn('new-art', data)
+// 		setTimeout(() => {
+// 			runQueue()
+// 		}, 100)
+// 	})
+// })
 let validFormats = ['mp4', 'webm', 'apng', 'gif', 'webp', 'png', 'jpg', 'jpeg'];
 const validNames = ['cover', 'folder', 'front', 'art', 'album'];
 const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
