@@ -1,6 +1,7 @@
-const sharp = require('sharp')
-import * as fs from 'fs'
 import { parentPort } from 'worker_threads'
+
+import sharp from 'sharp'
+import fs from 'fs'
 
 import typeOfFn from '../functions/typeOf.fn'
 

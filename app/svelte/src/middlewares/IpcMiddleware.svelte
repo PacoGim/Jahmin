@@ -27,7 +27,6 @@
 	})
 
 	function handleNewArt(data) {
-		// console.log(data)
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
 		let imgElement = document.createElement('img')
@@ -36,7 +35,6 @@
 		element.querySelectorAll('img').forEach(foo => foo.remove())
 
 		element.appendChild(imgElement)
-		// console.log(element)
 	}
 
 	// Sets a Base64 encoded album art into a imag element src

@@ -7482,14 +7482,12 @@ var app = (function () {
     }
 
     function handleNewArt(data) {
-    	// console.log(data)
     	let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
-
     	let imgElement = document.createElement('img');
     	imgElement.src = data.artPath;
     	element.querySelectorAll('img').forEach(foo => foo.remove());
     	element.appendChild(imgElement);
-    } // console.log(element)
+    }
 
     // Sets a Base64 encoded album art into a imag element src
     function setAlbumArtBase64(data) {
@@ -7582,7 +7580,7 @@ var app = (function () {
     }
 
     function getDirectoryFn (inputString) {
-        return inputString.split('/').slice(0, -1).join('/');
+        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
     }
 
     function getAlbumSongsFn (rootDir) {
