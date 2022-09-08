@@ -38,6 +38,7 @@
 		if (videoElement === null) {
 			videoElement = document.createElement('video')
 			videoElement.autoplay = true
+			videoElement.loop = true
 			element.appendChild(videoElement)
 		}
 

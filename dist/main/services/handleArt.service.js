@@ -54,13 +54,11 @@ function handleFolderArt(folderPath, elementId, size) {
     if (fs_1.default.existsSync(artOutputPath)) {
         (0, sendWebContents_fn_1.default)('new-image-art', {
             artPath: artOutputPath,
-            elementId,
-            size
+            elementId
         });
         return;
     }
     let allowedArtFiles = getAllowedFiles(folderPath);
-    // let allowedArtFilesExtensions = allowedArtFiles.map(file => getExtension(file))
     let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getExtension(file)));
     let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getExtension(file)));
     let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getExtension(file)));
@@ -96,7 +94,8 @@ function handleFolderVideoArt(artPaths, elementId) {
         elementId
     });
 }
-function handleFolderAnimatedArt(artPaths, artOutputPath, elementId) { }
+function handleFolderAnimatedArt(artPaths, artOutputPath, elementId) {
+}
 function handleFileArt(filePath, elementId, size) {
     const fileNameHash = (0, hashString_fn_1.default)(filePath);
     const embeddedArtDirectory = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'arts', 'embedded', String(size));

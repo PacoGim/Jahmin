@@ -65,15 +65,12 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 	if (fs.existsSync(artOutputPath)) {
 		sendWebContentsFn('new-image-art', {
 			artPath: artOutputPath,
-			elementId,
-			size
+			elementId
 		})
 		return
 	}
 
 	let allowedArtFiles = getAllowedFiles(folderPath)
-
-	// let allowedArtFilesExtensions = allowedArtFiles.map(file => getExtension(file))
 
 	let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getExtension(file)))
 	let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getExtension(file)))
@@ -120,7 +117,9 @@ function handleFolderVideoArt(artPaths: string[], elementId: string) {
 	})
 }
 
-function handleFolderAnimatedArt(artPaths: string[], artOutputPath: string, elementId: string) {}
+function handleFolderAnimatedArt(artPaths: string[], artOutputPath: string, elementId: string) {
+
+}
 
 function handleFileArt(filePath: string, elementId: string, size: number) {
 	const fileNameHash = hashStringFn(filePath) as string
