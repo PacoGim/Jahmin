@@ -27,7 +27,8 @@ const ipcFunctions = {
     /********************** Main to Renderer **********************/
     onGetAllSongsFromRenderer: (callback) => electron_1.ipcRenderer.on('get-all-songs-from-renderer', callback),
     handleWebStorage: (callback) => electron_1.ipcRenderer.on('web-storage', callback),
-    handleNewArt: (callback) => electron_1.ipcRenderer.on('new-art', callback),
+    handleNewImageArt: (callback) => electron_1.ipcRenderer.on('new-image-art', callback),
+    handleNewVideoArt: (callback) => electron_1.ipcRenderer.on('new-video-art', callback),
     songSyncQueueProgress: (callback) => electron_1.ipcRenderer.on('song-sync-queue-progress', callback),
     // Gets a Base64 encoded album art
     sendSingleSongArt: (callback) => electron_1.ipcRenderer.on('send-single-song-art', callback)

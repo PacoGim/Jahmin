@@ -14,8 +14,12 @@
 		addTaskToQueue(data.data, data.type)
 	})
 
-	window.ipc.handleNewArt((_, data) => {
-		handleNewArt(data)
+	window.ipc.handleNewImageArt((_, data) => {
+		handleNewImageArt(data)
+	})
+
+	window.ipc.handleNewVideoArt((_, data) => {
+		handleNewVideoArt(data)
 	})
 
 	window.ipc.sendSingleSongArt((_, data) => {
@@ -26,13 +30,31 @@
 		$songSyncQueueProgress = data
 	})
 
-	function handleNewArt(data) {
+	function handleNewVideoArt(data) {
+		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+		let videoElement = element.querySelector('video')
+		let imageElement = element.querySelector('img')
+
+		if (videoElement === null) {
+			videoElement = document.createElement('video')
+			videoElement.autoplay = true
+			element.appendChild(videoElement)
+		}
+
+		if (imageElement !== null) {
+			element.querySelectorAll('img').forEach(subElement => subElement.remove())
+		}
+
+		videoElement.src = data.artPath
+	}
+
+	function handleNewImageArt(data) {
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
 		let imgElement = document.createElement('img')
 		imgElement.src = data.artPath
 
-		element.querySelectorAll('img').forEach(foo => foo.remove())
+		element.querySelectorAll('*').forEach(subElement => subElement.remove())
 
 		element.appendChild(imgElement)
 	}

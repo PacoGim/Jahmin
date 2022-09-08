@@ -32,7 +32,8 @@ declare global {
 			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
 			handleArt: (filePath: string, elementId: string, size: number) => void
 			/********************** Main to Renderer **********************/
-			handleNewArt
+			handleNewImageArt
+			handleNewVideoArt
 			sendSingleSongArt
 			onGetAllSongsFromRenderer: (callback: any) => void
 			handleWebStorage: (callback: any) => void

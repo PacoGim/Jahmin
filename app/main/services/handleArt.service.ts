@@ -14,10 +14,16 @@ import { getWorker } from './workers.service'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import getAllFilesInFoldersDeep from '../functions/getAllFilesInFoldersDeep.fn'
 
-const validFormats = ['mp4', 'webm', 'apng', 'avif', 'webp', 'gif', 'svg', 'png', 'jpg', 'jpeg']
+const videoFormats = ['mp4', 'webm']
+const animatedFormats = ['apng', 'avif', 'webp', 'gif']
+const vectorFormats = ['svg']
+const imageFormats = ['png', 'jpg', 'jpeg']
+
+const validFormats = [...videoFormats, ...animatedFormats, ...vectorFormats, ...imageFormats]
+
 const validNames = ['cover', 'folder', 'front', 'art', 'album']
-const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat()
-const extensionsToCompress = ['jpg', 'jpeg', 'png']
+
+const allowedFiles = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat()
 
 let sharpWorker: Worker
 
@@ -32,7 +38,7 @@ getWorker('sharp').then(worker => {
 function handleWorkerResponse(data: any) {
 	delete data.artData
 
-	sendWebContentsFn('new-art', data)
+	sendWebContentsFn('new-image-art', data)
 }
 
 export function handleArtService(filePath: string, elementId: string, size: number) {
@@ -57,7 +63,7 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 	if (!fs.existsSync(artOutputDirPath)) fs.mkdirSync(artOutputDirPath, { recursive: true })
 
 	if (fs.existsSync(artOutputPath)) {
-		sendWebContentsFn('new-art', {
+		sendWebContentsFn('new-image-art', {
 			artPath: artOutputPath,
 			elementId,
 			size
@@ -65,23 +71,56 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 		return
 	}
 
-	let allowedMediaFile =
-		getAllowedFiles(folderPath).sort((fileA, fileB) => fs.statSync(fileB).size - fs.statSync(fileA).size)[0] || undefined
+	let allowedArtFiles = getAllowedFiles(folderPath)
 
-	if (!allowedMediaFile) return
+	// let allowedArtFilesExtensions = allowedArtFiles.map(file => getExtension(file))
 
-	sendWebContentsFn('new-art', {
-		artPath: allowedMediaFile,
-		elementId,
-		size
-	})
+	let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getExtension(file)))
+	let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getExtension(file)))
+	let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getExtension(file)))
 
-	let extension = getExtension(allowedMediaFile)
+	if (videoArts.length !== 0) {
+		return handleFolderVideoArt(videoArts, elementId)
+	}
 
-	if (extensionsToCompress.includes(extension)) {
-		compressArt(allowedMediaFile, artOutputPath, elementId, size)
+	if (animatedArts.length !== 0) {
+		return handleFolderAnimatedArt(animatedArts, artOutputPath, elementId)
+	}
+
+	if (imageArts.length !== 0) {
+		return handleFolderImageArt(imageArts, artOutputPath, elementId, size)
 	}
 }
+
+function handleFolderImageArt(artPaths: string[], artOutputPath: string, elementId: string, size: number) {
+	let bestArtFile = artPaths.sort((fileA, fileB) => fs.statSync(fileB).size - fs.statSync(fileA).size)[0] || undefined
+
+	if (!bestArtFile) return
+
+	sendWebContentsFn('new-image-art', {
+		artPath: bestArtFile,
+		elementId
+	})
+
+	let extension = getExtension(bestArtFile)
+
+	if (imageFormats.includes(extension)) {
+		compressArt(bestArtFile, artOutputPath, elementId, size)
+	}
+}
+
+function handleFolderVideoArt(artPaths: string[], elementId: string) {
+	let artPath = artPaths[0]
+
+	if (artPath === undefined) return
+
+	sendWebContentsFn('new-video-art', {
+		artPath,
+		elementId
+	})
+}
+
+function handleFolderAnimatedArt(artPaths: string[], artOutputPath: string, elementId: string) {}
 
 function handleFileArt(filePath: string, elementId: string, size: number) {
 	const fileNameHash = hashStringFn(filePath) as string
@@ -99,10 +138,9 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 		let finalArtPath = path.join(getDirectoryFn(embeddedArtPath), 'cover.avif')
 
 		if (fs.existsSync(finalArtPath)) {
-			sendWebContentsFn('new-art', {
+			sendWebContentsFn('new-image-art', {
 				artPath: finalArtPath,
-				elementId,
-				size
+				elementId
 			})
 		}
 	}
@@ -145,9 +183,9 @@ function compressArt(artData: Buffer | string, artPath: string, elementId: strin
 
 // Returns all images sorted by priority.
 export function getAllowedFiles(rootDir: string) {
-	let allowedMediaFiles = fs
+	let allowedArtFiles = fs
 		.readdirSync(rootDir)
-		.filter(file => allowedNames.includes(file.toLowerCase()))
+		.filter(file => allowedFiles.includes(file.toLowerCase()))
 		.map(file => path.join(rootDir, file))
 		.sort((a, b) => {
 			// Gets the priority from the index of the valid formats above.
@@ -158,7 +196,7 @@ export function getAllowedFiles(rootDir: string) {
 			return aExtension - bExtension
 		})
 
-	return allowedMediaFiles
+	return allowedArtFiles
 }
 
 function getExtension(data: string) {

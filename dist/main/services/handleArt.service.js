@@ -14,10 +14,13 @@ const hashString_fn_1 = __importDefault(require("../functions/hashString.fn"));
 const workers_service_1 = require("./workers.service");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const getAllFilesInFoldersDeep_fn_1 = __importDefault(require("../functions/getAllFilesInFoldersDeep.fn"));
-const validFormats = ['mp4', 'webm', 'apng', 'avif', 'webp', 'gif', 'svg', 'png', 'jpg', 'jpeg'];
+const videoFormats = ['mp4', 'webm'];
+const animatedFormats = ['apng', 'avif', 'webp', 'gif'];
+const vectorFormats = ['svg'];
+const imageFormats = ['png', 'jpg', 'jpeg'];
+const validFormats = [...videoFormats, ...animatedFormats, ...vectorFormats, ...imageFormats];
 const validNames = ['cover', 'folder', 'front', 'art', 'album'];
-const allowedNames = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
-const extensionsToCompress = ['jpg', 'jpeg', 'png'];
+const allowedFiles = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
 let sharpWorker;
 (0, workers_service_1.getWorker)('sharp').then(worker => {
     if (!sharpWorker) {
@@ -27,7 +30,7 @@ let sharpWorker;
 });
 function handleWorkerResponse(data) {
     delete data.artData;
-    (0, sendWebContents_fn_1.default)('new-art', data);
+    (0, sendWebContents_fn_1.default)('new-image-art', data);
 }
 function handleArtService(filePath, elementId, size) {
     if (isNaN(size) || !filePath || !elementId)
@@ -49,26 +52,51 @@ function handleFolderArt(folderPath, elementId, size) {
     if (!fs_1.default.existsSync(artOutputDirPath))
         fs_1.default.mkdirSync(artOutputDirPath, { recursive: true });
     if (fs_1.default.existsSync(artOutputPath)) {
-        (0, sendWebContents_fn_1.default)('new-art', {
+        (0, sendWebContents_fn_1.default)('new-image-art', {
             artPath: artOutputPath,
             elementId,
             size
         });
         return;
     }
-    let allowedMediaFile = getAllowedFiles(folderPath).sort((fileA, fileB) => fs_1.default.statSync(fileB).size - fs_1.default.statSync(fileA).size)[0] || undefined;
-    if (!allowedMediaFile)
-        return;
-    (0, sendWebContents_fn_1.default)('new-art', {
-        artPath: allowedMediaFile,
-        elementId,
-        size
-    });
-    let extension = getExtension(allowedMediaFile);
-    if (extensionsToCompress.includes(extension)) {
-        compressArt(allowedMediaFile, artOutputPath, elementId, size);
+    let allowedArtFiles = getAllowedFiles(folderPath);
+    // let allowedArtFilesExtensions = allowedArtFiles.map(file => getExtension(file))
+    let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getExtension(file)));
+    let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getExtension(file)));
+    let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getExtension(file)));
+    if (videoArts.length !== 0) {
+        return handleFolderVideoArt(videoArts, elementId);
+    }
+    if (animatedArts.length !== 0) {
+        return handleFolderAnimatedArt(animatedArts, artOutputPath, elementId);
+    }
+    if (imageArts.length !== 0) {
+        return handleFolderImageArt(imageArts, artOutputPath, elementId, size);
     }
 }
+function handleFolderImageArt(artPaths, artOutputPath, elementId, size) {
+    let bestArtFile = artPaths.sort((fileA, fileB) => fs_1.default.statSync(fileB).size - fs_1.default.statSync(fileA).size)[0] || undefined;
+    if (!bestArtFile)
+        return;
+    (0, sendWebContents_fn_1.default)('new-image-art', {
+        artPath: bestArtFile,
+        elementId
+    });
+    let extension = getExtension(bestArtFile);
+    if (imageFormats.includes(extension)) {
+        compressArt(bestArtFile, artOutputPath, elementId, size);
+    }
+}
+function handleFolderVideoArt(artPaths, elementId) {
+    let artPath = artPaths[0];
+    if (artPath === undefined)
+        return;
+    (0, sendWebContents_fn_1.default)('new-video-art', {
+        artPath,
+        elementId
+    });
+}
+function handleFolderAnimatedArt(artPaths, artOutputPath, elementId) { }
 function handleFileArt(filePath, elementId, size) {
     const fileNameHash = (0, hashString_fn_1.default)(filePath);
     const embeddedArtDirectory = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'arts', 'embedded', String(size));
@@ -81,10 +109,9 @@ function handleFileArt(filePath, elementId, size) {
     if (embeddedArtPath) {
         let finalArtPath = path_1.default.join((0, getDirectory_fn_1.default)(embeddedArtPath), 'cover.avif');
         if (fs_1.default.existsSync(finalArtPath)) {
-            (0, sendWebContents_fn_1.default)('new-art', {
+            (0, sendWebContents_fn_1.default)('new-image-art', {
                 artPath: finalArtPath,
-                elementId,
-                size
+                elementId
             });
         }
     }
@@ -121,9 +148,9 @@ function compressArt(artData, artPath, elementId, size) {
 }
 // Returns all images sorted by priority.
 function getAllowedFiles(rootDir) {
-    let allowedMediaFiles = fs_1.default
+    let allowedArtFiles = fs_1.default
         .readdirSync(rootDir)
-        .filter(file => allowedNames.includes(file.toLowerCase()))
+        .filter(file => allowedFiles.includes(file.toLowerCase()))
         .map(file => path_1.default.join(rootDir, file))
         .sort((a, b) => {
         // Gets the priority from the index of the valid formats above.
@@ -132,7 +159,7 @@ function getAllowedFiles(rootDir) {
         let bExtension = validFormats.indexOf(getExtension(b));
         return aExtension - bExtension;
     });
-    return allowedMediaFiles;
+    return allowedArtFiles;
 }
 exports.getAllowedFiles = getAllowedFiles;
 function getExtension(data) {
