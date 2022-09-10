@@ -14,6 +14,8 @@ import { getWorker } from './workers.service'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import getAllFilesInFoldersDeep from '../functions/getAllFilesInFoldersDeep.fn'
 
+import Freezeframe from 'freezeframe'
+
 const videoFormats = ['mp4', 'webm']
 const animatedFormats = ['apng', 'avif', 'webp', 'gif']
 const vectorFormats = ['svg']
@@ -31,14 +33,28 @@ getWorker('sharp').then(worker => {
 	if (!sharpWorker) {
 		sharpWorker = worker
 
-		sharpWorker.on('message', handleWorkerResponse)
+		sharpWorker.on('message', handleSharpWorkerResponse)
 	}
 })
 
-function handleWorkerResponse(data: any) {
+let ffmpegImageWorker: Worker
+
+getWorker('ffmpegImage').then(worker => {
+	if (!ffmpegImageWorker) {
+		ffmpegImageWorker = worker
+
+		ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse)
+	}
+})
+
+function handleSharpWorkerResponse(data: any) {
 	delete data.artData
 
 	sendWebContentsFn('new-image-art', data)
+}
+
+function handleFfmpegImageWorkerResponse(data: any) {
+	sendWebContentsFn('new-animation-art', data)
 }
 
 export function handleArtService(filePath: string, elementId: string, size: number) {
@@ -81,7 +97,7 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 	}
 
 	if (animatedArts.length !== 0) {
-		return handleFolderAnimatedArt(animatedArts, artOutputPath, elementId)
+		return handleFolderAnimatedArt(animatedArts, elementId, size)
 	}
 
 	if (imageArts.length !== 0) {
@@ -117,8 +133,18 @@ function handleFolderVideoArt(artPaths: string[], elementId: string) {
 	})
 }
 
-function handleFolderAnimatedArt(artPaths: string[], artOutputPath: string, elementId: string) {
+function handleFolderAnimatedArt(artPaths: string[], elementId: string, size: number) {
+	sendWebContentsFn('new-animation-art', {
+		artPath: artPaths[1],
+		elementId
+	})
 
+	ffmpegImageWorker.postMessage({
+		artPath: artPaths[1],
+		elementId,
+		size,
+		appDataPath: getAppDataPathFn()
+	})
 }
 
 function handleFileArt(filePath: string, elementId: string, size: number) {

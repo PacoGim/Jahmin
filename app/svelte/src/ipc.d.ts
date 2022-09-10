@@ -34,6 +34,7 @@ declare global {
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt
+			handleNewAnimationArt
 			sendSingleSongArt
 			onGetAllSongsFromRenderer: (callback: any) => void
 			handleWebStorage: (callback: any) => void

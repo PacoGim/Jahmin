@@ -3,7 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.killWorker = exports.killAllWorkers = exports.getWorker = void 0;
 const worker_threads_1 = require("worker_threads");
 const path_1 = require("path");
-let workersName = ['exifToolRead', 'exifToolWrite', 'ffmpeg', 'musicMetadata', 'nodeID3', 'sharp', 'songFilter'];
+let workersName = [
+    'exifToolRead',
+    'exifToolWrite',
+    'ffmpeg',
+    'ffmpegImage',
+    'musicMetadata',
+    'nodeID3',
+    'sharp',
+    'songFilter'
+];
 let workers = [];
 function getWorker(workerName) {
     return new Promise((resolve, reject) => {

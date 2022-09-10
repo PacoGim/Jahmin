@@ -46,6 +46,8 @@
 		grid-row: 1;
 		display: block;
 
+		position: relative;
+
 		background-image: url('../assets/img/disc-line.svg');
 		background-color: hsla(0, 0%, 50%, 0.5);
 

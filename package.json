@@ -64,6 +64,7 @@
     "dompurify": "^2.3.12",
     "electron-squirrel-startup": "^1.0.0",
     "exiftool-vendored": "^17.0.1",
+    "freezeframe": "^5.0.2",
     "fuse.js": "^6.6.2",
     "izitoast": "^1.4.0",
     "music-metadata": "^7.12.6",

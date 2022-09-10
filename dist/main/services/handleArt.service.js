@@ -25,12 +25,22 @@ let sharpWorker;
 (0, workers_service_1.getWorker)('sharp').then(worker => {
     if (!sharpWorker) {
         sharpWorker = worker;
-        sharpWorker.on('message', handleWorkerResponse);
+        sharpWorker.on('message', handleSharpWorkerResponse);
     }
 });
-function handleWorkerResponse(data) {
+let ffmpegImageWorker;
+(0, workers_service_1.getWorker)('ffmpegImage').then(worker => {
+    if (!ffmpegImageWorker) {
+        ffmpegImageWorker = worker;
+        ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse);
+    }
+});
+function handleSharpWorkerResponse(data) {
     delete data.artData;
     (0, sendWebContents_fn_1.default)('new-image-art', data);
+}
+function handleFfmpegImageWorkerResponse(data) {
+    (0, sendWebContents_fn_1.default)('new-animation-art', data);
 }
 function handleArtService(filePath, elementId, size) {
     if (isNaN(size) || !filePath || !elementId)
@@ -66,7 +76,7 @@ function handleFolderArt(folderPath, elementId, size) {
         return handleFolderVideoArt(videoArts, elementId);
     }
     if (animatedArts.length !== 0) {
-        return handleFolderAnimatedArt(animatedArts, artOutputPath, elementId);
+        return handleFolderAnimatedArt(animatedArts, elementId, size);
     }
     if (imageArts.length !== 0) {
         return handleFolderImageArt(imageArts, artOutputPath, elementId, size);
@@ -94,7 +104,17 @@ function handleFolderVideoArt(artPaths, elementId) {
         elementId
     });
 }
-function handleFolderAnimatedArt(artPaths, artOutputPath, elementId) {
+function handleFolderAnimatedArt(artPaths, elementId, size) {
+    (0, sendWebContents_fn_1.default)('new-animation-art', {
+        artPath: artPaths[1],
+        elementId
+    });
+    ffmpegImageWorker.postMessage({
+        artPath: artPaths[1],
+        elementId,
+        size,
+        appDataPath: (0, getAppDataPath_fn_1.default)()
+    });
 }
 function handleFileArt(filePath, elementId, size) {
     const fileNameHash = (0, hashString_fn_1.default)(filePath);

@@ -1,7 +1,16 @@
 import { Worker } from 'worker_threads'
 import { join as pathJoin } from 'path'
 
-let workersName = ['exifToolRead', 'exifToolWrite', 'ffmpeg', 'musicMetadata', 'nodeID3', 'sharp', 'songFilter'] as const
+let workersName = [
+	'exifToolRead',
+	'exifToolWrite',
+	'ffmpeg',
+	'ffmpegImage',
+	'musicMetadata',
+	'nodeID3',
+	'sharp',
+	'songFilter'
+] as const
 
 type WorkersNameType = typeof workersName[number]
 

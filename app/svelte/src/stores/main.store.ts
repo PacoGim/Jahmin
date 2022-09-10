@@ -1,3 +1,4 @@
+import type Freezeframe from 'freezeframe'
 import { writable, type Writable } from 'svelte/store'
 import type { ConfigType, ThemeOptions } from '../../../types/config.type'
 import type { SongType } from '../../../types/song.type'

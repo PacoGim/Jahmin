@@ -1,3 +1,4 @@
+import Freezeframe from 'freezeframe'
 import iziToast from 'izitoast'
 import { isAppIdle, keyPressed } from '../stores/main.store'
 import { handleContextMenuEvent } from './contextMenu.service'
@@ -35,6 +36,34 @@ export default function () {
 	})
 
 	window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
+
+	window.addEventListener('blur', () => {
+		document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
+			videoElement.pause()
+		})
+
+		document.querySelectorAll('art-svlt.animation').forEach((artElement: HTMLElement) => {
+			let art: HTMLElement = artElement.querySelector(':not(.static)')
+			let staticArt: HTMLElement = artElement.querySelector('.static')
+
+			art.style.display = 'none'
+			staticArt.style.display = 'block'
+		})
+	})
+
+	window.addEventListener('focus', () => {
+		document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
+			videoElement.play()
+		})
+
+		document.querySelectorAll('art-svlt.animation').forEach((artElement: HTMLElement) => {
+			let art: HTMLElement = artElement.querySelector(':not(.static)')
+			let staticArt: HTMLElement = artElement.querySelector('.static')
+
+			art.style.display = 'block'
+			staticArt.style.display = 'none'
+		})
+	})
 }
 
 function getAppIdleDebounce() {

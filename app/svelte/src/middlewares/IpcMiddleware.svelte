@@ -2,7 +2,9 @@
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import setArtToSrcFn from '../functions/setArtToSrc.fn'
-	import { albumArtMapStore, songSyncQueueProgress } from '../stores/main.store'
+	import { songSyncQueueProgress } from '../stores/main.store'
+
+	import Freezeframe from 'freezeframe'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {
@@ -22,6 +24,10 @@
 		handleNewVideoArt(data)
 	})
 
+	window.ipc.handleNewAnimationArt((_, data) => {
+		handleNewAnimationArt(data)
+	})
+
 	window.ipc.sendSingleSongArt((_, data) => {
 		setAlbumArtBase64(data)
 	})
@@ -29,6 +35,29 @@
 	window.ipc.songSyncQueueProgress((_, data) => {
 		$songSyncQueueProgress = data
 	})
+
+	function handleNewAnimationArt(data) {
+		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+		let imgElement = document.createElement('img')
+		let altImgElement = document.createElement('img')
+
+		element.classList.add('animation')
+
+		element.querySelectorAll('*').forEach(subElement => subElement.remove())
+
+		imgElement.src = data.artPath
+		imgElement.style.position = 'absolute'
+		element.appendChild(imgElement)
+
+		if (data?.artAlt) {
+			altImgElement.src = `data:image/jpg;base64,${data.artAlt}`
+
+			altImgElement.style.position = 'absolute'
+			altImgElement.style.display = 'none'
+			altImgElement.classList.add('static')
+			element.appendChild(altImgElement)
+		}
+	}
 
 	function handleNewVideoArt(data) {
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
