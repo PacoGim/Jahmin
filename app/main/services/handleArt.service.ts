@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 import mm from 'music-metadata'
-import sharp from 'sharp'
+
 
 import { Worker } from 'worker_threads'
 
@@ -14,7 +14,6 @@ import { getWorker } from './workers.service'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import getAllFilesInFoldersDeep from '../functions/getAllFilesInFoldersDeep.fn'
 
-import Freezeframe from 'freezeframe'
 
 const videoFormats = ['mp4', 'webm']
 const animatedFormats = ['apng', 'avif', 'webp', 'gif']

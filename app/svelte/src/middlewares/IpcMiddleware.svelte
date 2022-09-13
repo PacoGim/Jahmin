@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
-	import setArtToSrcFn from '../functions/setArtToSrc.fn'
 	import { songSyncQueueProgress } from '../stores/main.store'
-
-	import Freezeframe from 'freezeframe'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {
@@ -28,41 +25,82 @@
 		handleNewAnimationArt(data)
 	})
 
-	window.ipc.sendSingleSongArt((_, data) => {
-		setAlbumArtBase64(data)
-	})
-
 	window.ipc.songSyncQueueProgress((_, data) => {
 		$songSyncQueueProgress = data
 	})
 
+	/**
+	 * @param data
+	 * This function get the art source data from the main process and sets the source to the proper element.
+	 *
+	 * The data received is:
+	 * 	· The Path of the animated art.
+	 * 	· The id of the element requesting the art.
+	 * 	· (Sometimes) The base64 value of the firt frame of the animated art.
+	 *
+	 * The logic is to show the animated art the the app is focused and show the static first frame of the animated art when not focused.
+	 */
 	function handleNewAnimationArt(data) {
+		// Selects the Art Container where to set the art src.
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
-		let imgElement = document.createElement('img')
-		let altImgElement = document.createElement('img')
 
-		element.classList.add('animation')
+		if (element === null) return
 
-		element.querySelectorAll('*').forEach(subElement => subElement.remove())
+		// Gets the Animated Art Container.
+		let artAnimationElement = element.querySelector('art-animation') as HTMLElement
 
-		imgElement.src = data.artPath
-		imgElement.style.position = 'absolute'
-		element.appendChild(imgElement)
+		// Gets both img elements inside the Animated Art Container.
+		let animatedImgElement = element.querySelector('art-animation img.animated') as HTMLImageElement
+		let staticImgElement = element.querySelector('art-animation img.static') as HTMLImageElement
 
-		if (data?.artAlt) {
-			altImgElement.src = `data:image/jpg;base64,${data.artAlt}`
+		// Removes all the direct image elements (does not remove img elements deeper than the Art Container) from the Art Container.
+		element.querySelectorAll(':scope > img').forEach(imageElement => imageElement.remove())
 
-			altImgElement.style.position = 'absolute'
-			altImgElement.style.display = 'none'
-			altImgElement.classList.add('static')
-			element.appendChild(altImgElement)
+		// Removes all video elements from the Art Container.
+		element.querySelectorAll('video').forEach(videoElement => videoElement.remove())
+
+		// If no Animated Art Container found, create it and append it the the Art Container.
+		if (artAnimationElement === null) {
+			artAnimationElement = document.createElement('art-animation')
+			element.append(artAnimationElement)
 		}
+
+		// If no Animated Image Element found, create it and append it to the Animated Art Container.
+		if (animatedImgElement === null) {
+			animatedImgElement = document.createElement('img')
+
+			// This class is used the differentiate between animated and static images.
+			animatedImgElement.classList.add('animated')
+			artAnimationElement.appendChild(animatedImgElement)
+		}
+
+		// If no Static Image Element found, create it and append it to the Animated Art Container.
+		if (staticImgElement === null) {
+			staticImgElement = document.createElement('img')
+
+			// When loading the art, don't display the static art if the window is focused.
+			if (document.hasFocus() === true) {
+				staticImgElement.style.display = 'none'
+			}
+
+			staticImgElement.classList.add('static')
+			artAnimationElement.appendChild(staticImgElement)
+		}
+
+		if (data?.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`
+
+		animatedImgElement.src = data.artPath
 	}
 
 	function handleNewVideoArt(data) {
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+
+		if (element === null) return
+
 		let videoElement = element.querySelector('video')
-		let imageElement = element.querySelector('img')
+
+		element.querySelectorAll('img').forEach(imageElement => imageElement.remove())
+		element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove())
 
 		if (videoElement === null) {
 			videoElement = document.createElement('video')
@@ -71,8 +109,10 @@
 			element.appendChild(videoElement)
 		}
 
-		if (imageElement !== null) {
-			element.querySelectorAll('img').forEach(subElement => subElement.remove())
+		if (document.hasFocus() === true) {
+			videoElement.play()
+		} else {
+			videoElement.pause()
 		}
 
 		videoElement.src = data.artPath
@@ -81,39 +121,18 @@
 	function handleNewImageArt(data) {
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
-		let imgElement = document.createElement('img')
-		imgElement.src = data.artPath
+		if (element === null) return
 
-		element.querySelectorAll('*').forEach(subElement => subElement.remove())
+		let imgElement = element.querySelector(':scope > img') as HTMLImageElement
 
-		element.appendChild(imgElement)
-	}
+		element.querySelectorAll('video').forEach(videoElement => videoElement.remove())
+		element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove())
 
-	// Sets a Base64 encoded album art into a imag element src
-	function setAlbumArtBase64(data) {
-		let element: HTMLElement = document.querySelector(
-			`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`
-		)
-
-		// If the art element is not loaded anymore, return
-		if (!element) return
-
-		// Gets the video and image elements
-		let videoElement: HTMLVideoElement = element.querySelector('video')
-		let imageElement: HTMLImageElement = element.querySelector('img')
-
-		// Sets the video to nothing
-		videoElement.src = ''
-
-		// If a Base64 encoded album art is given, sets it to the image element src
-		if (data.cover !== null) {
-			imageElement.setAttribute('src', data.cover)
-			element.setAttribute('data-type', 'image')
-		} else {
-			// If not, load a placeholder image
-			imageElement.setAttribute('src', 'assets/img/disc-line.svg')
-			element.setAttribute('data-type', 'unfound')
+		if (imgElement === null) {
+			imgElement = document.createElement('img')
+			element.appendChild(imgElement)
 		}
-		element.setAttribute('data-loaded', 'true')
+
+		imgElement.src = data.artPath
 	}
 </script>

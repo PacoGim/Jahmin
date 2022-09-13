@@ -1,7 +1,6 @@
 import { parentPort } from 'worker_threads'
 
 import sharp from 'sharp'
-import fs from 'fs'
 
 import typeOfFn from '../functions/typeOf.fn'
 

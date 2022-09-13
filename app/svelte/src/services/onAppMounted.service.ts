@@ -42,8 +42,8 @@ export default function () {
 			videoElement.pause()
 		})
 
-		document.querySelectorAll('art-svlt.animation').forEach((artElement: HTMLElement) => {
-			let art: HTMLElement = artElement.querySelector(':not(.static)')
+		document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement) => {
+			let art: HTMLElement = artElement.querySelector('.animated')
 			let staticArt: HTMLElement = artElement.querySelector('.static')
 
 			art.style.display = 'none'
@@ -56,8 +56,8 @@ export default function () {
 			videoElement.play()
 		})
 
-		document.querySelectorAll('art-svlt.animation').forEach((artElement: HTMLElement) => {
-			let art: HTMLElement = artElement.querySelector(':not(.static)')
+		document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement) => {
+			let art: HTMLElement = artElement.querySelector('.animated')
 			let staticArt: HTMLElement = artElement.querySelector('.static')
 
 			art.style.display = 'block'

@@ -513,7 +513,8 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
-		align-items: center;
+		align-items: end;
+		margin: .5rem 0;
 	}
 
 	:global(tag-suggestions) {

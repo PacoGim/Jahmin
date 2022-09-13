@@ -7294,8 +7294,8 @@ var app = (function () {
             document.querySelectorAll('art-svlt video').forEach((videoElement) => {
                 videoElement.pause();
             });
-            document.querySelectorAll('art-svlt.animation').forEach((artElement) => {
-                let art = artElement.querySelector(':not(.static)');
+            document.querySelectorAll('art-svlt art-animation').forEach((artElement) => {
+                let art = artElement.querySelector('.animated');
                 let staticArt = artElement.querySelector('.static');
                 art.style.display = 'none';
                 staticArt.style.display = 'block';
@@ -7305,8 +7305,8 @@ var app = (function () {
             document.querySelectorAll('art-svlt video').forEach((videoElement) => {
                 videoElement.play();
             });
-            document.querySelectorAll('art-svlt.animation').forEach((artElement) => {
-                let art = artElement.querySelector(':not(.static)');
+            document.querySelectorAll('art-svlt art-animation').forEach((artElement) => {
+                let art = artElement.querySelector('.animated');
                 let staticArt = artElement.querySelector('.static');
                 art.style.display = 'block';
                 staticArt.style.display = 'none';
@@ -7517,28 +7517,64 @@ var app = (function () {
     }
 
     function handleNewAnimationArt(data) {
+    	// Selects the Art Container where to set the art src.
     	let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
-    	let imgElement = document.createElement('img');
-    	let altImgElement = document.createElement('img');
-    	element.classList.add('animation');
-    	element.querySelectorAll('*').forEach(subElement => subElement.remove());
-    	imgElement.src = data.artPath;
-    	imgElement.style.position = 'absolute';
-    	element.appendChild(imgElement);
 
-    	if (data === null || data === void 0 ? void 0 : data.artAlt) {
-    		altImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
-    		altImgElement.style.position = 'absolute';
-    		altImgElement.style.display = 'none';
-    		altImgElement.classList.add('static');
-    		element.appendChild(altImgElement);
+    	if (element === null) return;
+
+    	// Gets the Animated Art Container.
+    	let artAnimationElement = element.querySelector('art-animation');
+
+    	// Gets both img elements inside the Animated Art Container.
+    	let animatedImgElement = element.querySelector('art-animation img.animated');
+
+    	let staticImgElement = element.querySelector('art-animation img.static');
+
+    	// Removes all the direct image elements (does not remove img elements deeper than the Art Container) from the Art Container.
+    	element.querySelectorAll(':scope > img').forEach(imageElement => imageElement.remove());
+
+    	// Removes all video elements from the Art Container.
+    	element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
+
+    	// If no Animated Art Container found, create it and append it the the Art Container.
+    	if (artAnimationElement === null) {
+    		artAnimationElement = document.createElement('art-animation');
+    		element.append(artAnimationElement);
     	}
+
+    	// If no Animated Image Element found, create it and append it to the Animated Art Container.
+    	if (animatedImgElement === null) {
+    		animatedImgElement = document.createElement('img');
+
+    		// This class is used the differentiate between animated and static images.
+    		animatedImgElement.classList.add('animated');
+
+    		artAnimationElement.appendChild(animatedImgElement);
+    	}
+
+    	// If no Static Image Element found, create it and append it to the Animated Art Container.
+    	if (staticImgElement === null) {
+    		staticImgElement = document.createElement('img');
+
+    		// When loading the art, don't display the static art if the window is focused.
+    		if (document.hasFocus() === true) {
+    			staticImgElement.style.display = 'none';
+    		}
+
+    		staticImgElement.classList.add('static');
+    		artAnimationElement.appendChild(staticImgElement);
+    	}
+
+    	if (data === null || data === void 0 ? void 0 : data.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
+    	animatedImgElement.src = data.artPath;
     }
 
     function handleNewVideoArt(data) {
     	let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
+    	if (element === null) return;
     	let videoElement = element.querySelector('video');
-    	let imageElement = element.querySelector('img');
+    	element.querySelectorAll('img').forEach(imageElement => imageElement.remove());
+    	element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
 
     	if (videoElement === null) {
     		videoElement = document.createElement('video');
@@ -7547,8 +7583,10 @@ var app = (function () {
     		element.appendChild(videoElement);
     	}
 
-    	if (imageElement !== null) {
-    		element.querySelectorAll('img').forEach(subElement => subElement.remove());
+    	if (document.hasFocus() === true) {
+    		videoElement.play();
+    	} else {
+    		videoElement.pause();
     	}
 
     	videoElement.src = data.artPath;
@@ -7556,39 +7594,17 @@ var app = (function () {
 
     function handleNewImageArt(data) {
     	let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
-    	let imgElement = document.createElement('img');
-    	imgElement.src = data.artPath;
-    	element.querySelectorAll('*').forEach(subElement => subElement.remove());
-    	element.appendChild(imgElement);
-    }
+    	if (element === null) return;
+    	let imgElement = element.querySelector(':scope > img');
+    	element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
+    	element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
 
-    // Sets a Base64 encoded album art into a imag element src
-    function setAlbumArtBase64(data) {
-    	let element = document.querySelector(`art-svlt[data-albumid="${data.albumId}"][data-artsize="${data.artSize}"]`);
-
-    	// If the art element is not loaded anymore, return
-    	if (!element) return;
-
-    	// Gets the video and image elements
-    	let videoElement = element.querySelector('video');
-
-    	let imageElement = element.querySelector('img');
-
-    	// Sets the video to nothing
-    	videoElement.src = '';
-
-    	// If a Base64 encoded album art is given, sets it to the image element src
-    	if (data.cover !== null) {
-    		imageElement.setAttribute('src', data.cover);
-    		element.setAttribute('data-type', 'image');
-    	} else {
-    		// If not, load a placeholder image
-    		imageElement.setAttribute('src', 'assets/img/disc-line.svg');
-
-    		element.setAttribute('data-type', 'unfound');
+    	if (imgElement === null) {
+    		imgElement = document.createElement('img');
+    		element.appendChild(imgElement);
     	}
 
-    	element.setAttribute('data-loaded', 'true');
+    	imgElement.src = data.artPath;
     }
 
     function instance$1g($$self, $$props, $$invalidate) {
@@ -7620,10 +7636,6 @@ var app = (function () {
     		handleNewAnimationArt(data);
     	});
 
-    	window.ipc.sendSingleSongArt((_, data) => {
-    		setAlbumArtBase64(data);
-    	});
-
     	window.ipc.songSyncQueueProgress((_, data) => {
     		set_store_value(songSyncQueueProgress, $songSyncQueueProgress = data, $songSyncQueueProgress);
     	});
@@ -7641,7 +7653,6 @@ var app = (function () {
     		handleNewAnimationArt,
     		handleNewVideoArt,
     		handleNewImageArt,
-    		setAlbumArtBase64,
     		$songSyncQueueProgress
     	});
 
@@ -10242,7 +10253,7 @@ var app = (function () {
     			set_custom_element_data(art_svlt, "id", /*elementId*/ ctx[3]);
     			set_style(art_svlt, "height", /*elementHeight*/ ctx[2] + "px");
     			set_style(art_svlt, "width", /*elementWidth*/ ctx[1] + "px");
-    			set_custom_element_data(art_svlt, "class", "svelte-12hwmo1");
+    			set_custom_element_data(art_svlt, "class", "svelte-nelgvi");
     			add_location(art_svlt, file$_, 32, 0, 1145);
     		},
     		l: function claim(nodes) {
@@ -22596,103 +22607,103 @@ var app = (function () {
     			button1 = element("button");
     			create_component(updateicon.$$.fragment);
     			t49 = text("\n\t\t\tUpdate");
-    			set_custom_element_data(songs_to_edit, "class", "svelte-1m7635b");
+    			set_custom_element_data(songs_to_edit, "class", "svelte-bs5kqf");
     			add_location(songs_to_edit, file$D, 193, 1, 7915);
-    			set_custom_element_data(tag_name0, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name0, "class", "svelte-bs5kqf");
     			add_location(tag_name0, file$D, 198, 2, 8092);
-    			attr_dev(textarea0, "class", "svelte-1m7635b");
+    			attr_dev(textarea0, "class", "svelte-bs5kqf");
     			add_location(textarea0, file$D, 199, 2, 8135);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
-    			set_custom_element_data(tag_container0, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container0, "class", "svelte-bs5kqf");
     			add_location(tag_container0, file$D, 197, 1, 8057);
-    			set_custom_element_data(tag_name1, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name1, "class", "svelte-bs5kqf");
     			add_location(tag_name1, file$D, 203, 2, 8234);
-    			attr_dev(textarea1, "class", "svelte-1m7635b");
+    			attr_dev(textarea1, "class", "svelte-bs5kqf");
     			add_location(textarea1, file$D, 204, 2, 8277);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
-    			set_custom_element_data(tag_container1, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container1, "class", "svelte-bs5kqf");
     			add_location(tag_container1, file$D, 202, 1, 8199);
-    			set_custom_element_data(tag_name2, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name2, "class", "svelte-bs5kqf");
     			add_location(tag_name2, file$D, 208, 2, 8395);
-    			attr_dev(textarea2, "class", "svelte-1m7635b");
+    			attr_dev(textarea2, "class", "svelte-bs5kqf");
     			add_location(textarea2, file$D, 209, 2, 8440);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
-    			set_custom_element_data(tag_container2, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container2, "class", "svelte-bs5kqf");
     			add_location(tag_container2, file$D, 207, 1, 8341);
-    			set_custom_element_data(tag_name3, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name3, "class", "svelte-bs5kqf");
     			add_location(tag_name3, file$D, 213, 2, 8563);
-    			attr_dev(textarea3, "class", "svelte-1m7635b");
+    			attr_dev(textarea3, "class", "svelte-bs5kqf");
     			add_location(textarea3, file$D, 214, 2, 8607);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
-    			set_custom_element_data(tag_container3, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container3, "class", "svelte-bs5kqf");
     			add_location(tag_container3, file$D, 212, 1, 8504);
-    			set_custom_element_data(tag_name4, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name4, "class", "svelte-bs5kqf");
     			add_location(tag_name4, file$D, 218, 2, 8712);
-    			attr_dev(textarea4, "class", "svelte-1m7635b");
+    			attr_dev(textarea4, "class", "svelte-bs5kqf");
     			add_location(textarea4, file$D, 219, 2, 8756);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
-    			set_custom_element_data(tag_container4, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container4, "class", "svelte-bs5kqf");
     			add_location(tag_container4, file$D, 217, 1, 8676);
-    			set_custom_element_data(tag_name5, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name5, "class", "svelte-bs5kqf");
     			add_location(tag_name5, file$D, 223, 2, 8862);
-    			attr_dev(textarea5, "class", "svelte-1m7635b");
+    			attr_dev(textarea5, "class", "svelte-bs5kqf");
     			add_location(textarea5, file$D, 224, 2, 8912);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
-    			set_custom_element_data(tag_container5, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container5, "class", "svelte-bs5kqf");
     			add_location(tag_container5, file$D, 222, 1, 8821);
-    			set_custom_element_data(tag_name6, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name6, "class", "svelte-bs5kqf");
     			add_location(tag_name6, file$D, 228, 2, 9017);
-    			attr_dev(textarea6, "class", "svelte-1m7635b");
+    			attr_dev(textarea6, "class", "svelte-bs5kqf");
     			add_location(textarea6, file$D, 229, 2, 9060);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
-    			set_custom_element_data(tag_container6, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container6, "class", "svelte-bs5kqf");
     			add_location(tag_container6, file$D, 227, 1, 8982);
-    			set_custom_element_data(tag_name7, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name7, "class", "svelte-bs5kqf");
     			add_location(tag_name7, file$D, 233, 2, 9162);
-    			attr_dev(textarea7, "class", "svelte-1m7635b");
+    			attr_dev(textarea7, "class", "svelte-bs5kqf");
     			add_location(textarea7, file$D, 234, 2, 9208);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
-    			set_custom_element_data(tag_container7, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container7, "class", "svelte-bs5kqf");
     			add_location(tag_container7, file$D, 232, 1, 9124);
-    			set_custom_element_data(tag_name8, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name8, "class", "svelte-bs5kqf");
     			add_location(tag_name8, file$D, 238, 2, 9312);
-    			attr_dev(textarea8, "class", "svelte-1m7635b");
+    			attr_dev(textarea8, "class", "svelte-bs5kqf");
     			add_location(textarea8, file$D, 239, 2, 9357);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
-    			set_custom_element_data(tag_container8, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container8, "class", "svelte-bs5kqf");
     			add_location(tag_container8, file$D, 237, 1, 9275);
-    			set_custom_element_data(tag_name9, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name9, "class", "svelte-bs5kqf");
     			add_location(tag_name9, file$D, 243, 2, 9481);
-    			attr_dev(textarea9, "class", "svelte-1m7635b");
+    			attr_dev(textarea9, "class", "svelte-bs5kqf");
     			add_location(textarea9, file$D, 244, 2, 9523);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
-    			set_custom_element_data(tag_container9, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container9, "class", "svelte-bs5kqf");
     			add_location(tag_container9, file$D, 242, 1, 9423);
-    			set_custom_element_data(tag_name10, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name10, "class", "svelte-bs5kqf");
     			add_location(tag_name10, file$D, 248, 2, 9650);
-    			attr_dev(textarea10, "class", "svelte-1m7635b");
+    			attr_dev(textarea10, "class", "svelte-bs5kqf");
     			add_location(textarea10, file$D, 249, 2, 9693);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
-    			set_custom_element_data(tag_container10, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container10, "class", "svelte-bs5kqf");
     			add_location(tag_container10, file$D, 247, 1, 9591);
-    			set_custom_element_data(tag_name11, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name11, "class", "svelte-bs5kqf");
     			add_location(tag_name11, file$D, 253, 2, 9819);
-    			attr_dev(textarea11, "class", "svelte-1m7635b");
+    			attr_dev(textarea11, "class", "svelte-bs5kqf");
     			add_location(textarea11, file$D, 254, 2, 9860);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
-    			set_custom_element_data(tag_container11, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container11, "class", "svelte-bs5kqf");
     			add_location(tag_container11, file$D, 252, 1, 9762);
-    			set_custom_element_data(tag_name12, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_name12, "class", "svelte-bs5kqf");
     			add_location(tag_name12, file$D, 258, 2, 9963);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
-    			set_custom_element_data(tag_container12, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_container12, "class", "svelte-bs5kqf");
     			add_location(tag_container12, file$D, 257, 1, 9927);
-    			set_custom_element_data(album_art, "class", "svelte-1m7635b");
+    			set_custom_element_data(album_art, "class", "svelte-bs5kqf");
     			add_location(album_art, file$D, 262, 1, 10143);
     			attr_dev(button0, "class", "danger");
     			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
@@ -22700,9 +22711,9 @@ var app = (function () {
     			attr_dev(button1, "class", "info");
     			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
     			add_location(button1, file$D, 271, 2, 10491);
-    			set_custom_element_data(button_container, "class", "svelte-1m7635b");
+    			set_custom_element_data(button_container, "class", "svelte-bs5kqf");
     			add_location(button_container, file$D, 266, 1, 10264);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-1m7635b");
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-bs5kqf");
     			add_location(tag_edit_svlt, file$D, 192, 0, 7898);
     		},
     		l: function claim(nodes) {
