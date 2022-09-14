@@ -7,6 +7,7 @@
 	import DayNightThemeConfig from './DayNightThemeConfig.svelte'
 	import FontSizeConfig from './FontSizeConfig.svelte'
 	import GridArtSize from './GridArtSize.svelte'
+  import RebuildArtCacheConfig from './RebuildArtCacheConfig.svelte'
 </script>
 
 <config-section>
@@ -24,6 +25,10 @@
 
 	<OptionSectionCompact title="Grid Art Size: {$config.userOptions.artSize}">
 		<GridArtSize />
+	</OptionSectionCompact>
+
+	<OptionSectionCompact title="Rebuild Art Cache">
+		<RebuildArtCacheConfig />
 	</OptionSectionCompact>
 </config-section>
 

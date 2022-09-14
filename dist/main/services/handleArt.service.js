@@ -58,7 +58,7 @@ exports.handleArtService = handleArtService;
 function handleFolderArt(folderPath, elementId, size) {
     let albumId = (0, hashString_fn_1.default)(folderPath);
     let artOutputDirPath = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'arts', String(size));
-    let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.avif';
+    let artOutputPath = path_1.default.join(artOutputDirPath, albumId) + '.webp';
     if (!fs_1.default.existsSync(artOutputDirPath))
         fs_1.default.mkdirSync(artOutputDirPath, { recursive: true });
     if (fs_1.default.existsSync(artOutputPath)) {
@@ -122,11 +122,11 @@ function handleFileArt(filePath, elementId, size) {
     if (!fs_1.default.existsSync(embeddedArtDirectory))
         fs_1.default.mkdirSync(embeddedArtDirectory, { recursive: true });
     let embeddedArtPath = (0, getAllFilesInFoldersDeep_fn_1.default)([embeddedArtDirectory])
-        .filter(file => !file.endsWith('.avif'))
+        .filter(file => !file.endsWith('.webp'))
         .filter(file => !file.endsWith('.DS_Store'))
         .filter(file => file.endsWith(fileNameHash))[0] || undefined;
     if (embeddedArtPath) {
-        let finalArtPath = path_1.default.join((0, getDirectory_fn_1.default)(embeddedArtPath), 'cover.avif');
+        let finalArtPath = path_1.default.join((0, getDirectory_fn_1.default)(embeddedArtPath), 'cover.webp');
         if (fs_1.default.existsSync(finalArtPath)) {
             (0, sendWebContents_fn_1.default)('new-image-art', {
                 artPath: finalArtPath,
@@ -153,7 +153,7 @@ function handleFileArt(filePath, elementId, size) {
                 fs_1.default.rmSync((0, getDirectory_fn_1.default)(embeddedArtPath), { recursive: true });
             }
         }
-        compressArt(cover.data, path_1.default.join(artDirectory, 'cover.avif'), elementId, size);
+        compressArt(cover.data, path_1.default.join(artDirectory, 'cover.webp'), elementId, size);
         fs_1.default.writeFileSync(path_1.default.join(artDirectory, `${artHash}.${fileNameHash}`), '');
     });
 }

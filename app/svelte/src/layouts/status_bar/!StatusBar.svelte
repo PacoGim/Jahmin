@@ -73,14 +73,16 @@
 		position: relative;
 	}
 
-	bold {
-		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
-	}
-
-
-
 	song-info {
+		font-variation-settings: 'wght' calc(var(--default-weight) + 100);
+
 		text-align: center;
 		font-size: 0.9rem;
+
+		padding: 0 0.5rem;
+
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 	}
 </style>

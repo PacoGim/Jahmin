@@ -3,14 +3,20 @@
 	import generateId from '../functions/generateId.fn'
 
 	import intersectionObserverFn from '../functions/intersectionObserver.fn'
+	import { reloadArts } from '../stores/main.store'
 
 	export let intersectionRoot = undefined
 	export let imageSourceLocation = ''
 
-	let elementId = generateId()
+	let elementId = ''
 	let element: HTMLElement = undefined
 	let elementWidth = 0
 	let elementHeight = 0
+
+	$: {
+		imageSourceLocation
+		elementId = generateId()
+	}
 
 	$: {
 		if (element !== undefined) {
@@ -37,7 +43,9 @@
 	}
 </script>
 
-<art-svlt id={elementId} bind:this={element} style="height:{elementHeight}px;width:{elementWidth}px;" />
+{#key $reloadArts}
+	<art-svlt id={elementId} bind:this={element} style="height:{elementHeight}px;width:{elementWidth}px;" />
+{/key}
 
 <style>
 	art-svlt {

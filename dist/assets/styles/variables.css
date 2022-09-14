@@ -12,8 +12,8 @@
 
 	--clamp-width: clamp(500px, 50vw, 700px);
 
-	/* Min 100 Mid 450 Max 1000 */
-	--default-weight: 300;
+	/* Min 200 Mid 400 Max 1000 */
+	--default-weight: 400;
 
 	--theme-transition-duration: 0ms;
 

@@ -122,7 +122,8 @@ function getDefaultConfigFile(): ConfigType {
 			contrastRatio: 4.5,
 			fontSize: 16,
 			sortBy: 'Track',
-			sortOrder: 'asc'
+			sortOrder: 'asc',
+			pauseAnimatedArtWhenAppUnfocused:false
 		},
 		songListTags: [
 			{

@@ -17,6 +17,7 @@ const ipcFunctions = {
 	deleteEqualizer,
 	renameEqualizer,
 	stopSongUpdate,
+	rebuildArtCache,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -30,8 +31,7 @@ const ipcFunctions = {
 	selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => ipcRenderer.send('select-directories', type, songs),
 	removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) =>
 		ipcRenderer.send('remove-directory', directory, type, songs),
-	handleArt: (filePath: string, elementId: string, size: number) =>
-		ipcRenderer.send('handle-art', filePath, elementId,size),
+	handleArt: (filePath: string, elementId: string, size: number) => ipcRenderer.send('handle-art', filePath, elementId, size),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),
@@ -128,6 +128,15 @@ function stopSongUpdate() {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('stop-song-update')
+			.then(result => resolve(result))
+			.catch(err => reject(err))
+	})
+}
+
+function rebuildArtCache() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('rebuild-art-cache')
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})

@@ -13,6 +13,7 @@ const ipcFunctions = {
     deleteEqualizer,
     renameEqualizer,
     stopSongUpdate,
+    rebuildArtCache,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -109,6 +110,14 @@ function stopSongUpdate() {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer
             .invoke('stop-song-update')
+            .then(result => resolve(result))
+            .catch(err => reject(err));
+    });
+}
+function rebuildArtCache() {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('rebuild-art-cache')
             .then(result => resolve(result))
             .catch(err => reject(err));
     });

@@ -73,7 +73,7 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 	let albumId = hashStringFn(folderPath) as string
 
 	let artOutputDirPath = path.join(getAppDataPathFn(), 'arts', String(size))
-	let artOutputPath = path.join(artOutputDirPath, albumId) + '.avif'
+	let artOutputPath = path.join(artOutputDirPath, albumId) + '.webp'
 
 	if (!fs.existsSync(artOutputDirPath)) fs.mkdirSync(artOutputDirPath, { recursive: true })
 
@@ -154,12 +154,12 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 
 	let embeddedArtPath =
 		getAllFilesInFoldersDeep([embeddedArtDirectory])
-			.filter(file => !file.endsWith('.avif'))
+			.filter(file => !file.endsWith('.webp'))
 			.filter(file => !file.endsWith('.DS_Store'))
 			.filter(file => file.endsWith(fileNameHash))[0] || undefined
 
 	if (embeddedArtPath) {
-		let finalArtPath = path.join(getDirectoryFn(embeddedArtPath), 'cover.avif')
+		let finalArtPath = path.join(getDirectoryFn(embeddedArtPath), 'cover.webp')
 
 		if (fs.existsSync(finalArtPath)) {
 			sendWebContentsFn('new-image-art', {
@@ -190,7 +190,7 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 			}
 		}
 
-		compressArt(cover.data, path.join(artDirectory, 'cover.avif'), elementId, size)
+		compressArt(cover.data, path.join(artDirectory, 'cover.webp'), elementId, size)
 
 		fs.writeFileSync(path.join(artDirectory, `${artHash}.${fileNameHash}`), '')
 	})

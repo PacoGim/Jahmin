@@ -1,6 +1,8 @@
 import { BrowserWindow, dialog, ipcMain, IpcMainEvent } from 'electron'
 import { loadContextMenu } from '../context_menu/contextMenu'
 import { getAlbumColors } from '../functions/getAlbumColors.fn'
+import cleanArtCacheFn from '../functions/clearArtCache.fn'
+
 import { SongType } from '../../types/song.type'
 import { compressAlbumArt } from './albumArt.service'
 import { handleArtService } from './handleArt.service'
@@ -84,6 +86,10 @@ export function startIPC() {
 
 	ipcMain.handle('stop-song-update', async evt => {
 		return await stopSongsUpdating()
+	})
+
+	ipcMain.handle('rebuild-art-cache', async evt => {
+		return await cleanArtCacheFn()
 	})
 }
 

@@ -16,6 +16,7 @@ exports.startIPC = void 0;
 const electron_1 = require("electron");
 const contextMenu_1 = require("../context_menu/contextMenu");
 const getAlbumColors_fn_1 = require("../functions/getAlbumColors.fn");
+const clearArtCache_fn_1 = __importDefault(require("../functions/clearArtCache.fn"));
 const handleArt_service_1 = require("./handleArt.service");
 const appReady_service_1 = __importDefault(require("./appReady.service"));
 const chokidar_service_1 = require("./chokidar.service");
@@ -85,6 +86,9 @@ function startIPC() {
     }));
     electron_1.ipcMain.handle('stop-song-update', (evt) => __awaiter(this, void 0, void 0, function* () {
         return yield (0, librarySongs_service_1.stopSongsUpdating)();
+    }));
+    electron_1.ipcMain.handle('rebuild-art-cache', (evt) => __awaiter(this, void 0, void 0, function* () {
+        return yield (0, clearArtCache_fn_1.default)();
     }));
 }
 exports.startIPC = startIPC;

@@ -22,6 +22,7 @@ type UserOptionsType = {
 	fontSize?: number
 	sortBy?: string
 	sortOrder?: 'asc' | 'desc'
+	pauseAnimatedArtWhenAppUnfocused: boolean
 }
 
 export enum ThemeOptions {

@@ -127,8 +127,8 @@ svg.player-button {
 	fill: var(--art-color-dark);
 }
 
-.tippy-box bold {
-	font-variation-settings: 'wght' calc(var(--default-weight) + 200);
+bold {
+	font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 }
 
 input[type='range'] {

@@ -85,3 +85,5 @@ export let songSyncQueueProgress: Writable<{
 export let songListItemElement: Writable<HTMLElement | undefined> = writable(undefined)
 
 export let songListTagsValuesStore: Writable<string[]> = writable([])
+
+export let reloadArts: Writable<number> = writable(Math.random())

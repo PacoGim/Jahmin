@@ -20,6 +20,7 @@ declare global {
 			updateEqualizerValues: (eqName: string, newValues: any) => Promise<boolean>
 			deleteEqualizer: (eqName: string) => Promise<ReturnMessageType>
 			stopSongUpdate: () => Promise<>
+			rebuildArtCache: () => Promise<>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void

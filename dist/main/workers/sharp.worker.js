@@ -17,8 +17,8 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
         height: size * 2,
         width: size * 2
     })
-        .avif({
-        quality: 64
+        .webp({
+        quality: 82
     })
         .toFile(artPath)
         .then(() => {

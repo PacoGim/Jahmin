@@ -18,8 +18,8 @@ parentPort?.on('message', (data: any) => {
 			height: size * 2,
 			width: size * 2
 		})
-		.avif({
-			quality: 64
+		.webp({
+			quality: 82
 		})
 		.toFile(artPath)
 		.then(() => {
