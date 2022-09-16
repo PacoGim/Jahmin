@@ -9,7 +9,7 @@ import * as path from 'path'
 
 import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 import getFileExtensionFn from './getFileExtension.fn'
-import { getAllowedFiles } from '../services/albumArt.service'
+import { getAllowedFiles } from '../services/handleArt.service'
 
 let contrastRatio = getConfig().userOptions.contrastRatio!
 

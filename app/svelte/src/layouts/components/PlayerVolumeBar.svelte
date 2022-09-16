@@ -112,6 +112,8 @@
 		align-items: center;
 		justify-content: center;
 
+		font-size: calc(1rem - 2px);
+
 		height: 32px;
 		width: 32px;
 		background-color: #fff;
@@ -121,7 +123,7 @@
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 		color: #767676;
 
-		font-variation-settings: 'wght' 450;
+		font-variation-settings: 'wght' 700;
 	}
 
 	background {
@@ -130,7 +132,6 @@
 		top: 0;
 		left: 0;
 		height: 16px;
-		/* background: linear-gradient(to right, var(--art-color-light), var(--art-color-dark)); */
 		background: linear-gradient(to right, var(--art-color-base), var(--art-color-dark));
 		border-radius: 25px;
 		box-shadow: inset 0 0 0 2px #fff, inset 0 0 5px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.2);

@@ -4,11 +4,9 @@ import { getAlbumColors } from '../functions/getAlbumColors.fn'
 import cleanArtCacheFn from '../functions/clearArtCache.fn'
 
 import { SongType } from '../../types/song.type'
-import { compressAlbumArt } from './albumArt.service'
 import { handleArtService } from './handleArt.service'
 import appReadyService from './appReady.service'
 import { unwatchPaths } from './chokidar.service'
-import compressSingleSongAlbumArtService from './compressSingleSongAlbumArt.service'
 import directoryHandlerService from './directoryHandler.service'
 import { getConfig, saveConfig } from './config.service'
 import { addEqualizer, deleteEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
@@ -26,9 +24,9 @@ export function startIPC() {
 	ipcMain.on('show-context-menu', (evt, menuToOpen: string, parameters: any) => loadContextMenu(evt, menuToOpen, parameters))
 	ipcMain.on('save-peaks', (evt, sourceFile: string, peaks: number[]) => savePeaks(sourceFile, peaks))
 
-	ipcMain.on('compress-single-song-album-art', async (evt, path, albumId, artSize) => {
-		compressSingleSongAlbumArtService(path, artSize, albumId)
-	})
+	// ipcMain.on('compress-single-song-album-art', async (evt, path, albumId, artSize) => {
+	// 	compressSingleSongAlbumArtService(path, artSize, albumId)
+	// })
 
 	ipcMain.on('update-songs', (evt, songs: SongType[], newTags) => {
 		let sourceFiles = songs.map(song => song.SourceFile)

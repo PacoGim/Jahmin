@@ -44,7 +44,7 @@ const music_metadata_1 = __importDefault(require("music-metadata"));
 const path = __importStar(require("path"));
 const allowedSongExtensions_var_1 = __importDefault(require("../global/allowedSongExtensions.var"));
 const getFileExtension_fn_1 = __importDefault(require("./getFileExtension.fn"));
-const albumArt_service_1 = require("../services/albumArt.service");
+const handleArt_service_1 = require("../services/handleArt.service");
 let contrastRatio = (0, config_service_1.getConfig)().userOptions.contrastRatio;
 const notCompress = ['mp4', 'webm', 'apng', 'gif'];
 let previousContrastRatio = undefined;
@@ -57,7 +57,7 @@ function getAlbumColors(rootDir, contrast) {
             if (rootDir === undefined || rootDir === 'undefined') {
                 return resolve(undefined);
             }
-            const imagePaths = (0, albumArt_service_1.getAllowedFiles)(rootDir).filter(file => !notCompress.includes(getExtension(file)));
+            const imagePaths = (0, handleArt_service_1.getAllowedFiles)(rootDir).filter(file => !notCompress.includes(getExtension(file)));
             if (imagePaths === undefined) {
                 return resolve(undefined);
             }

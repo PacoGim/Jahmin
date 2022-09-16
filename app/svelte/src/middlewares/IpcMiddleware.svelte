@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
-  import generateId from '../functions/generateId.fn'
+	import generateId from '../functions/generateId.fn'
 	import { songSyncQueueProgress } from '../stores/main.store'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
@@ -42,11 +42,17 @@
 	 * One of the logic is to show the animated art the the app is focused and show the static first frame of the animated art when not focused.
 	 */
 	function handleNewAnimationArt(data) {
+		console.log(data)
 		// Selects the Art Container where to set the art src.
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
 		// If the element returns null, it means that the element is not in the DOM anymore.
 		if (element === null) return
+
+		if (data.artPath === null) {
+			element.querySelectorAll('*').forEach(videoElement => videoElement.remove())
+			return
+		}
 
 		// Gets the Animated Art Container in the Art Container.
 		let artAnimationElement = element.querySelector('art-animation') as HTMLElement
@@ -106,11 +112,17 @@
 	 * Shows a video as art.
 	 */
 	function handleNewVideoArt(data) {
+		console.log(data)
 		// Selects the Art Container where to set the art src.
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
 		// If the element returns null, it means that the element is not in the DOM anymore.
 		if (element === null) return
+
+		if (data.artPath === null) {
+			element.querySelectorAll('*').forEach(videoElement => videoElement.remove())
+			return
+		}
 
 		// Removes everything that is not the video element inside the element.
 		element.querySelectorAll('img').forEach(imageElement => imageElement.remove())
@@ -144,6 +156,11 @@
 
 		// If the element returns null, it means that the element is not in the DOM anymore.
 		if (element === null) return
+
+		if (data.artPath === null) {
+			element.querySelectorAll('*').forEach(videoElement => videoElement.remove())
+			return
+		}
 
 		element.querySelectorAll('video').forEach(videoElement => videoElement.remove())
 		element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove())

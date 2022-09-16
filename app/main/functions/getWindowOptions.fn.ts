@@ -14,6 +14,7 @@ export default function (config: ConfigType) {
 		height: 800,
 		backgroundColor: '#1c2128',
 		webPreferences: {
+			experimentalFeatures: true,
 			preload: pathJoin(__dirname, '../preload/preload.js')
 		}
 	}

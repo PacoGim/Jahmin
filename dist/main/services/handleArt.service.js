@@ -81,11 +81,20 @@ function handleFolderArt(folderPath, elementId, size) {
     if (imageArts.length !== 0) {
         return handleFolderImageArt(imageArts, artOutputPath, elementId, size);
     }
+    (0, sendWebContents_fn_1.default)('new-image-art', {
+        artPath: null,
+        elementId
+    });
 }
 function handleFolderImageArt(artPaths, artOutputPath, elementId, size) {
     let bestArtFile = artPaths.sort((fileA, fileB) => fs_1.default.statSync(fileB).size - fs_1.default.statSync(fileA).size)[0] || undefined;
-    if (!bestArtFile)
+    if (!bestArtFile) {
+        (0, sendWebContents_fn_1.default)('new-image-art', {
+            artPath: null,
+            elementId
+        });
         return;
+    }
     (0, sendWebContents_fn_1.default)('new-image-art', {
         artPath: bestArtFile,
         elementId
@@ -97,24 +106,39 @@ function handleFolderImageArt(artPaths, artOutputPath, elementId, size) {
 }
 function handleFolderVideoArt(artPaths, elementId) {
     let artPath = artPaths[0];
-    if (artPath === undefined)
-        return;
-    (0, sendWebContents_fn_1.default)('new-video-art', {
-        artPath,
-        elementId
-    });
+    if (artPath !== undefined) {
+        (0, sendWebContents_fn_1.default)('new-video-art', {
+            artPath,
+            elementId
+        });
+    }
+    else {
+        (0, sendWebContents_fn_1.default)('new-video-art', {
+            artPath: null,
+            elementId
+        });
+    }
 }
 function handleFolderAnimatedArt(artPaths, elementId, size) {
-    (0, sendWebContents_fn_1.default)('new-animation-art', {
-        artPath: artPaths[1],
-        elementId
-    });
-    ffmpegImageWorker.postMessage({
-        artPath: artPaths[1],
-        elementId,
-        size,
-        appDataPath: (0, getAppDataPath_fn_1.default)()
-    });
+    let artPath = artPaths[1];
+    if (artPath) {
+        (0, sendWebContents_fn_1.default)('new-animation-art', {
+            artPath: artPaths[1],
+            elementId
+        });
+        ffmpegImageWorker.postMessage({
+            artPath: artPaths[1],
+            elementId,
+            size,
+            appDataPath: (0, getAppDataPath_fn_1.default)()
+        });
+    }
+    else {
+        (0, sendWebContents_fn_1.default)('new-animation-art', {
+            artPath: null,
+            elementId
+        });
+    }
 }
 function handleFileArt(filePath, elementId, size) {
     const fileNameHash = (0, hashString_fn_1.default)(filePath);

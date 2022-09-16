@@ -3,7 +3,6 @@ import path from 'path'
 
 import mm from 'music-metadata'
 
-
 import { Worker } from 'worker_threads'
 
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
@@ -13,7 +12,6 @@ import hashStringFn from '../functions/hashString.fn'
 import { getWorker } from './workers.service'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import getAllFilesInFoldersDeep from '../functions/getAllFilesInFoldersDeep.fn'
-
 
 const videoFormats = ['mp4', 'webm']
 const animatedFormats = ['apng', 'avif', 'webp', 'gif']
@@ -102,12 +100,23 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 	if (imageArts.length !== 0) {
 		return handleFolderImageArt(imageArts, artOutputPath, elementId, size)
 	}
+
+	sendWebContentsFn('new-image-art', {
+		artPath: null,
+		elementId
+	})
 }
 
 function handleFolderImageArt(artPaths: string[], artOutputPath: string, elementId: string, size: number) {
 	let bestArtFile = artPaths.sort((fileA, fileB) => fs.statSync(fileB).size - fs.statSync(fileA).size)[0] || undefined
 
-	if (!bestArtFile) return
+	if (!bestArtFile) {
+		sendWebContentsFn('new-image-art', {
+			artPath: null,
+			elementId
+		})
+		return
+	}
 
 	sendWebContentsFn('new-image-art', {
 		artPath: bestArtFile,
@@ -124,26 +133,40 @@ function handleFolderImageArt(artPaths: string[], artOutputPath: string, element
 function handleFolderVideoArt(artPaths: string[], elementId: string) {
 	let artPath = artPaths[0]
 
-	if (artPath === undefined) return
-
-	sendWebContentsFn('new-video-art', {
-		artPath,
-		elementId
-	})
+	if (artPath !== undefined) {
+		sendWebContentsFn('new-video-art', {
+			artPath,
+			elementId
+		})
+	} else {
+		sendWebContentsFn('new-video-art', {
+			artPath: null,
+			elementId
+		})
+	}
 }
 
 function handleFolderAnimatedArt(artPaths: string[], elementId: string, size: number) {
-	sendWebContentsFn('new-animation-art', {
-		artPath: artPaths[1],
-		elementId
-	})
+	let artPath = artPaths[1]
 
-	ffmpegImageWorker.postMessage({
-		artPath: artPaths[1],
-		elementId,
-		size,
-		appDataPath: getAppDataPathFn()
-	})
+	if (artPath) {
+		sendWebContentsFn('new-animation-art', {
+			artPath: artPaths[1],
+			elementId
+		})
+
+		ffmpegImageWorker.postMessage({
+			artPath: artPaths[1],
+			elementId,
+			size,
+			appDataPath: getAppDataPathFn()
+		})
+	} else {
+		sendWebContentsFn('new-animation-art', {
+			artPath: null,
+			elementId
+		})
+	}
 }
 
 function handleFileArt(filePath: string, elementId: string, size: number) {

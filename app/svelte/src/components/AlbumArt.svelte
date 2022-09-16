@@ -54,12 +54,8 @@
 		grid-row: 1;
 		display: block;
 
-		/* position: relative; */
-
 		background-image: url('../assets/img/disc-line.svg');
 		background-color: hsla(0, 0%, 50%, 0.5);
-
-		/* transition: transform 300ms cubic-bezier(0.5, 0.5, 0.265, 1.5); */
 	}
 
 	:global(art-svlt img, art-svlt video) {
@@ -78,12 +74,8 @@
 		position: absolute;
 	}
 
-	/*
-
-			imgAnimationElement.style.display = 'block'
-			imgAnimationElement.style.width = '100%'
-			imgAnimationElement.style.height = '100%'
-			imgAnimationElement.style.position = 'relative'
-
-	*/
+	art-svlt:has(*) {
+		background-color: hsla(0, 0%, 50%, 0);
+		background-image: none;
+	}
 </style>

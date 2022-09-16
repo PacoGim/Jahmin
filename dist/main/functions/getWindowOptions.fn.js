@@ -16,6 +16,7 @@ function default_1(config) {
         height: 800,
         backgroundColor: '#1c2128',
         webPreferences: {
+            experimentalFeatures: true,
             preload: (0, path_1.join)(__dirname, '../preload/preload.js')
         }
     };
