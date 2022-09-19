@@ -18,6 +18,7 @@
 	} from '../stores/main.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
+  import cssVariablesService from '../services/cssVariables.service'
 
 	let progress: number = 0
 
@@ -51,7 +52,7 @@
 
 		progress = progress >= 100 ? 100 : progress
 
-		document.documentElement.style.setProperty('--song-time', `${progress}%`)
+		cssVariablesService.set('song-time', `${progress}%`)
 
 		songTime = {
 			currentTime: parseDuration(currentTime),

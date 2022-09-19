@@ -35,6 +35,7 @@
 	import ConfirmService from './svelte_services/ConfirmService.svelte'
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
+	import cssVariablesService from './services/cssVariables.service'
 
 	liveQuery(async () => {
 		return await getDB().songs.toArray()

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import cssVariablesService from '../../services/cssVariables.service'
 	import { keyPressed, mainAudioElement, altAudioElement } from '../../stores/main.store'
 
 	let hasVolumeFromStorageLoaded: boolean = false
@@ -61,7 +62,7 @@
 
 		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
 
-		document.documentElement.style.setProperty('--volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`)
+		cssVariablesService.set('volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`)
 	}
 </script>
 

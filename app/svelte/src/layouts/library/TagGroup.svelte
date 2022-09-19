@@ -90,7 +90,7 @@
 
 		color: var(--color-fg-1);
 
-		overflow-y: hidden;
+		/* overflow-y: hidden; */
 	}
 
 	group-svlt {

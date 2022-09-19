@@ -11,6 +11,7 @@
 	import MusicNoteIcon from '../../icons/MusicNoteIcon.svelte'
 	import RefreshIcon from '../../icons/RefreshIcon.svelte'
 	import notifyService from '../../services/notify.service'
+	import cssVariablesService from '../../services/cssVariables.service'
 
 	let currentSongSyncProgress = 0
 	let tippySongUpdateId = generateId()
@@ -32,7 +33,7 @@
 			currentSongSyncProgress = progress
 		}
 
-		document.documentElement.style.setProperty('--song-sync-queue-progress', progress + 'px')
+		cssVariablesService.set('song-sync-queue-progress', progress || 100 + 'px')
 	}
 
 	function stopSongUpdate() {

@@ -1,7 +1,7 @@
-import Freezeframe from 'freezeframe'
 import iziToast from 'izitoast'
 import { isAppIdle, keyPressed } from '../stores/main.store'
 import { handleContextMenuEvent } from './contextMenu.service'
+import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
 
 let appIdleDebounce = getAppIdleDebounce()
@@ -15,7 +15,7 @@ export default function () {
 
 	// To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Long after the app has finished loading).
 	setTimeout(() => {
-		document.documentElement.style.setProperty('--theme-transition-duration', '500ms')
+		cssVariablesService.set('theme-transition-duration', '500ms')
 	}, 2000)
 
 	window.addEventListener('keydown', evt => keyPressed.set(evt.key))

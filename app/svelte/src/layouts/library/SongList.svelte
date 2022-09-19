@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
+  import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 
 	import { config, selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../stores/main.store'
@@ -69,11 +70,11 @@
 
 	function setScrollProgress() {
 		let scrollValue = ((100 / ($songListStore.length - 1)) * scrollAmount) | 0
-		document.documentElement.style.setProperty('--scrollbar-fill', `${scrollValue}%`)
+		cssVariablesService.set('scrollbar-fill', `${scrollValue}%`)
 	}
 
 	function changeSongListHeight(songAmount) {
-		document.documentElement.style.setProperty('--song-list-svlt-height', `${songAmount * 36 + 16}px`)
+		cssVariablesService.set('song-list-svlt-height', `${songAmount * 36 + 16}px`)
 	}
 
 	function scrollContainer(e: WheelEvent) {

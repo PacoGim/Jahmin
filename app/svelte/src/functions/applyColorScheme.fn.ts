@@ -1,8 +1,10 @@
-export default function (color) {
-	document.documentElement.style.setProperty('--art-hue', color.hue)
-	document.documentElement.style.setProperty('--art-saturation', color.saturation + '%')
+import cssVariablesService from '../services/cssVariables.service'
 
-	document.documentElement.style.setProperty('--art-lightness-dark', color.lightnessDark + '%')
-	document.documentElement.style.setProperty('--art-lightness-base', color.lightnessBase + '%')
-	document.documentElement.style.setProperty('--art-lightness-light', color.lightnessLight + '%')
+export default function (color) {
+	cssVariablesService.set('art-hue', color.hue)
+	cssVariablesService.set('art-saturation', color.saturation + '%')
+
+	cssVariablesService.set('art-lightness-dark', color.lightnessDark + '%')
+	cssVariablesService.set('art-lightness-base', color.lightnessBase + '%')
+	cssVariablesService.set('art-lightness-light', color.lightnessLight + '%')
 }

@@ -42,7 +42,6 @@
 	 * One of the logic is to show the animated art the the app is focused and show the static first frame of the animated art when not focused.
 	 */
 	function handleNewAnimationArt(data) {
-		console.log(data)
 		// Selects the Art Container where to set the art src.
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
@@ -112,7 +111,6 @@
 	 * Shows a video as art.
 	 */
 	function handleNewVideoArt(data) {
-		console.log(data)
 		// Selects the Art Container where to set the art src.
 		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
 

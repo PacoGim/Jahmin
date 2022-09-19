@@ -5762,19 +5762,6 @@ var app = (function () {
     	return fn(module, module.exports), module.exports;
     }
 
-    createCommonjsModule(function (module, exports) {
-    !function(t,e){module.exports=e();}(window,(function(){return function(t){var e={};function n(i){if(e[i])return e[i].exports;var r=e[i]={i:i,l:!1,exports:{}};return t[i].call(r.exports,r,r.exports,n),r.l=!0,r.exports}return n.m=t,n.c=e,n.d=function(t,e,i){n.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:i});},n.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0});},n.t=function(t,e){if(1&e&&(t=n(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var i=Object.create(null);if(n.r(i),Object.defineProperty(i,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var r in t)n.d(i,r,function(e){return t[e]}.bind(null,r));return i},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},n.p="examples",n(n.s=4)}([function(t,e,n){var i,r;!function(o,s){i=[n(2)],void 0===(r=function(t){return function(t,e){var n=t.jQuery,i=t.console;function r(t,e){for(var n in e)t[n]=e[n];return t}var o=Array.prototype.slice;function s(t,e,a){if(!(this instanceof s))return new s(t,e,a);var c,l=t;("string"==typeof t&&(l=document.querySelectorAll(t)),l)?(this.elements=(c=l,Array.isArray(c)?c:"object"==typeof c&&"number"==typeof c.length?o.call(c):[c]),this.options=r({},this.options),"function"==typeof e?a=e:r(this.options,e),a&&this.on("always",a),this.getImages(),n&&(this.jqDeferred=new n.Deferred),setTimeout(this.check.bind(this))):i.error("Bad element for imagesLoaded "+(l||t));}s.prototype=Object.create(e.prototype),s.prototype.options={},s.prototype.getImages=function(){this.images=[],this.elements.forEach(this.addElementImages,this);},s.prototype.addElementImages=function(t){"IMG"==t.nodeName&&this.addImage(t),!0===this.options.background&&this.addElementBackgroundImages(t);var e=t.nodeType;if(e&&a[e]){for(var n=t.querySelectorAll("img"),i=0;i<n.length;i++){var r=n[i];this.addImage(r);}if("string"==typeof this.options.background){var o=t.querySelectorAll(this.options.background);for(i=0;i<o.length;i++){var s=o[i];this.addElementBackgroundImages(s);}}}};var a={1:!0,9:!0,11:!0};function c(t){this.img=t;}function l(t,e){this.url=t,this.element=e,this.img=new Image;}return s.prototype.addElementBackgroundImages=function(t){var e=getComputedStyle(t);if(e)for(var n=/url\((['"])?(.*?)\1\)/gi,i=n.exec(e.backgroundImage);null!==i;){var r=i&&i[2];r&&this.addBackground(r,t),i=n.exec(e.backgroundImage);}},s.prototype.addImage=function(t){var e=new c(t);this.images.push(e);},s.prototype.addBackground=function(t,e){var n=new l(t,e);this.images.push(n);},s.prototype.check=function(){var t=this;function e(e,n,i){setTimeout((function(){t.progress(e,n,i);}));}this.progressedCount=0,this.hasAnyBroken=!1,this.images.length?this.images.forEach((function(t){t.once("progress",e),t.check();})):this.complete();},s.prototype.progress=function(t,e,n){this.progressedCount++,this.hasAnyBroken=this.hasAnyBroken||!t.isLoaded,this.emitEvent("progress",[this,t,e]),this.jqDeferred&&this.jqDeferred.notify&&this.jqDeferred.notify(this,t),this.progressedCount==this.images.length&&this.complete(),this.options.debug&&i&&i.log("progress: "+n,t,e);},s.prototype.complete=function(){var t=this.hasAnyBroken?"fail":"done";if(this.isComplete=!0,this.emitEvent(t,[this]),this.emitEvent("always",[this]),this.jqDeferred){var e=this.hasAnyBroken?"reject":"resolve";this.jqDeferred[e](this);}},c.prototype=Object.create(e.prototype),c.prototype.check=function(){this.getIsImageComplete()?this.confirm(0!==this.img.naturalWidth,"naturalWidth"):(this.proxyImage=new Image,this.proxyImage.addEventListener("load",this),this.proxyImage.addEventListener("error",this),this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.proxyImage.src=this.img.src);},c.prototype.getIsImageComplete=function(){return this.img.complete&&this.img.naturalWidth},c.prototype.confirm=function(t,e){this.isLoaded=t,this.emitEvent("progress",[this,this.img,e]);},c.prototype.handleEvent=function(t){var e="on"+t.type;this[e]&&this[e](t);},c.prototype.onload=function(){this.confirm(!0,"onload"),this.unbindEvents();},c.prototype.onerror=function(){this.confirm(!1,"onerror"),this.unbindEvents();},c.prototype.unbindEvents=function(){this.proxyImage.removeEventListener("load",this),this.proxyImage.removeEventListener("error",this),this.img.removeEventListener("load",this),this.img.removeEventListener("error",this);},l.prototype=Object.create(c.prototype),l.prototype.check=function(){this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.img.src=this.url,this.getIsImageComplete()&&(this.confirm(0!==this.img.naturalWidth,"naturalWidth"),this.unbindEvents());},l.prototype.unbindEvents=function(){this.img.removeEventListener("load",this),this.img.removeEventListener("error",this);},l.prototype.confirm=function(t,e){this.isLoaded=t,this.emitEvent("progress",[this,this.element,e]);},s.makeJQueryPlugin=function(e){(e=e||t.jQuery)&&((n=e).fn.imagesLoaded=function(t,e){return new s(this,t,e).jqDeferred.promise(n(this))});},s.makeJQueryPlugin(),s}(o,t)}.apply(e,i))||(t.exports=r);}("undefined"!=typeof window?window:this);},function(t,e,n){(t.exports=n(3)(!1)).push([t.i,'.ff-container{display:inline-block;position:relative}.ff-container .ff-image{z-index:0;vertical-align:top;opacity:0}.ff-container .ff-canvas{display:inline-block;position:absolute;top:0;left:0;pointer-events:none;z-index:1;vertical-align:top;opacity:0}.ff-container .ff-canvas.ff-canvas-ready{-webkit-transition:opacity 300ms;-o-transition:opacity 300ms;-moz-transition:opacity 300ms;transition:opacity 300ms;opacity:1}.ff-container.ff-active .ff-image{opacity:1}.ff-container.ff-active .ff-canvas.ff-canvas-ready{-webkit-transition:none;-o-transition:none;-moz-transition:none;transition:none;opacity:0}.ff-container.ff-active .ff-overlay{display:none}.ff-container.ff-inactive .ff-canvas.ff-canvas-ready{-webkit-transition:opacity 300ms;-o-transition:opacity 300ms;-moz-transition:opacity 300ms;transition:opacity 300ms;opacity:1}.ff-container.ff-inactive .ff-image{-webkit-transition:opacity 300ms;-o-transition:opacity 300ms;-moz-transition:opacity 300ms;transition:opacity 300ms;-webkit-transition-delay:170ms;-moz-transition-delay:170ms;-o-transition-delay:170ms;transition-delay:170ms;opacity:0}.ff-container.ff-responsive{width:100%}.ff-container.ff-responsive .ff-image,.ff-container.ff-responsive .ff-canvas{width:100%}.ff-container.ff-loading-icon:before{content:"";position:absolute;background-image:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHdpZHRoPSc1MHB4JyBoZWlnaHQ9JzUwcHgnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIiBjbGFzcz0idWlsLXNwaW4iPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJub25lIiBjbGFzcz0iYmsiPjwvcmVjdD48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MCA1MCkiPjxnIHRyYW5zZm9ybT0icm90YXRlKDApIHRyYW5zbGF0ZSgzNCAwKSI+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiNmZmZmZmYiPjxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIGZyb209IjEiIHRvPSIwLjEiIGJlZ2luPSIwcyIgZHVyPSIxcyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiPjwvYW5pbWF0ZT48YW5pbWF0ZVRyYW5zZm9ybSBhdHRyaWJ1dGVOYW1lPSJ0cmFuc2Zvcm0iIHR5cGU9InNjYWxlIiBmcm9tPSIxLjUiIHRvPSIxIiBiZWdpbj0iMHMiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGVUcmFuc2Zvcm0+PC9jaXJjbGU+PC9nPjxnIHRyYW5zZm9ybT0icm90YXRlKDQ1KSB0cmFuc2xhdGUoMzQgMCkiPjxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSI4IiBmaWxsPSIjZmZmZmZmIj48YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvcGFjaXR5IiBmcm9tPSIxIiB0bz0iMC4xIiBiZWdpbj0iMC4xMnMiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+PGFuaW1hdGVUcmFuc2Zvcm0gYXR0cmlidXRlTmFtZT0idHJhbnNmb3JtIiB0eXBlPSJzY2FsZSIgZnJvbT0iMS41IiB0bz0iMSIgYmVnaW49IjAuMTJzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlVHJhbnNmb3JtPjwvY2lyY2xlPjwvZz48ZyB0cmFuc2Zvcm09InJvdGF0ZSg5MCkgdHJhbnNsYXRlKDM0IDApIj48Y2lyY2xlIGN4PSIwIiBjeT0iMCIgcj0iOCIgZmlsbD0iI2ZmZmZmZiI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0ib3BhY2l0eSIgZnJvbT0iMSIgdG89IjAuMSIgYmVnaW49IjAuMjVzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlPjxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0ic2NhbGUiIGZyb209IjEuNSIgdG89IjEiIGJlZ2luPSIwLjI1cyIgZHVyPSIxcyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiPjwvYW5pbWF0ZVRyYW5zZm9ybT48L2NpcmNsZT48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoMTM1KSB0cmFuc2xhdGUoMzQgMCkiPjxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSI4IiBmaWxsPSIjZmZmZmZmIj48YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvcGFjaXR5IiBmcm9tPSIxIiB0bz0iMC4xIiBiZWdpbj0iMC4zN3MiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+PGFuaW1hdGVUcmFuc2Zvcm0gYXR0cmlidXRlTmFtZT0idHJhbnNmb3JtIiB0eXBlPSJzY2FsZSIgZnJvbT0iMS41IiB0bz0iMSIgYmVnaW49IjAuMzdzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlVHJhbnNmb3JtPjwvY2lyY2xlPjwvZz48ZyB0cmFuc2Zvcm09InJvdGF0ZSgxODApIHRyYW5zbGF0ZSgzNCAwKSI+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiNmZmZmZmYiPjxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIGZyb209IjEiIHRvPSIwLjEiIGJlZ2luPSIwLjVzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlPjxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0ic2NhbGUiIGZyb209IjEuNSIgdG89IjEiIGJlZ2luPSIwLjVzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlVHJhbnNmb3JtPjwvY2lyY2xlPjwvZz48ZyB0cmFuc2Zvcm09InJvdGF0ZSgyMjUpIHRyYW5zbGF0ZSgzNCAwKSI+PGNpcmNsZSBjeD0iMCIgY3k9IjAiIHI9IjgiIGZpbGw9IiNmZmZmZmYiPjxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIGZyb209IjEiIHRvPSIwLjEiIGJlZ2luPSIwLjYycyIgZHVyPSIxcyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiPjwvYW5pbWF0ZT48YW5pbWF0ZVRyYW5zZm9ybSBhdHRyaWJ1dGVOYW1lPSJ0cmFuc2Zvcm0iIHR5cGU9InNjYWxlIiBmcm9tPSIxLjUiIHRvPSIxIiBiZWdpbj0iMC42MnMiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGVUcmFuc2Zvcm0+PC9jaXJjbGU+PC9nPjxnIHRyYW5zZm9ybT0icm90YXRlKDI3MCkgdHJhbnNsYXRlKDM0IDApIj48Y2lyY2xlIGN4PSIwIiBjeT0iMCIgcj0iOCIgZmlsbD0iI2ZmZmZmZiI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0ib3BhY2l0eSIgZnJvbT0iMSIgdG89IjAuMSIgYmVnaW49IjAuNzVzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlPjxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0ic2NhbGUiIGZyb209IjEuNSIgdG89IjEiIGJlZ2luPSIwLjc1cyIgZHVyPSIxcyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiPjwvYW5pbWF0ZVRyYW5zZm9ybT48L2NpcmNsZT48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoMzE1KSB0cmFuc2xhdGUoMzQgMCkiPjxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSI4IiBmaWxsPSIjZmZmZmZmIj48YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJvcGFjaXR5IiBmcm9tPSIxIiB0bz0iMC4xIiBiZWdpbj0iMC44N3MiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIj48L2FuaW1hdGU+PGFuaW1hdGVUcmFuc2Zvcm0gYXR0cmlidXRlTmFtZT0idHJhbnNmb3JtIiB0eXBlPSJzY2FsZSIgZnJvbT0iMS41IiB0bz0iMSIgYmVnaW49IjAuODdzIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSI+PC9hbmltYXRlVHJhbnNmb3JtPjwvY2lyY2xlPjwvZz48L2c+PC9zdmc+");background-position:center center;background-repeat:no-repeat;height:46px;width:46px;z-index:3;top:50%;left:50%;-webkit-transform:translate(-50%, -50%);-moz-transform:translate(-50%, -50%);-ms-transform:translate(-50%, -50%);-o-transform:translate(-50%, -50%);transform:translate(-50%, -50%)}.ff-container .ff-overlay{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAQAAAAA22vlAAAGFklEQVR42t2ce0yVdRjHP9zlKnfQAwoqV80bImCR90tGhJmShVOxVFJBrdSWVmvmnJlSm2ZbWwunlc4ZOf5IV7NJ84KmFpmZioiKigoKyPWct72vJ4dj0Lm8t9Nz/jt/fd73/L6/5/v8fs9z4H8VTjjhjAuu5o8LLtJ3DoEuYnvghS89pY8PnrjjgrPeH0BEd8fbEHRpaVOZqVUQ2m/cLfomGX+8pAfQ8S8gonvglx/TeEToEKbW69vnD6Annrjp9QEevnU/Q0RDmdAp2m6ffSs0DD964KrHBeSEK96EnlgtdBGN5T9kEYQPHvp7AGc8CCCq7ozQTdzdv2U4AXjrTQEueBFGorFN6DaMzZWFU/t2UIAuwhVfIkkSLIiW6lOLfULx1Y8C3PAnmjTBwmg4UTyFQLzx0MMCcieQAaQLlofp1u73B+sjB7gTRCyjBavCWF+xPs2gvQJE+DjGCFZH8+WjuQRrqwB3gm2DF+P+4Z1jJQVotIDsghcEk7H6q4I4/M02TuUHsBNejPa6c2sTemlhImSAF6Pp/M/ZkgJUNREywYtRe3B7mroKkBFetNFXP5vTXz0bLSu8ZKNr/nhDLRstO7xko39Tx0YrAi/G7e+Vt9GKwYs2uqowK0pJE6EgvKSAG7/nK2ejFYaXbPSpkgxlFKACvKSAfR8Pk18BKsELgrGpcovchaRq8IJUSJ5eIqcCVIWXFHBy/1QC5VGA6vCii7i9d+NQOQpJLeBFBTy4vMl+BWgELyng2q95hNijAA3hJQWUPTpKcbV+AWkMLylgzwdDbFOA9vCiAhovb5zQx3oF6AJeUkDVyQXWHqXoBl5SwLF9k6w5TNQVvHSY+K3lh4l6gxcV0FCxIc1gSSGpQ3hJAZWl2QTghVt3+DqFF3+AMwUE4SXt/w4HL5hatoonoZ5db546hheEq3sQ1767Q8I33yKGYOndOx68IDCE3vg4JLypnWRE2+DqgPC3K0glGn+HhC8pIpUoh3zzd24aZpJEJL4OB3+vNnMlExlEON4OJViTUFqWsJwsUulHID1wdhj4C1XZn7KA6aSTQDg+XRsEncHX3lu323k5c3medAYiXlR7OIQ9aG3bfSjobRaQzWRSiMeAv2SL9W/MjpWnrOd1csggnSH049+rIb37+crq3M/JZw7TGEcScRgsu1XUHL6+cfN3riuYzwwmkkIifSw/iNIUvt1Y/EvkWhbxEs/wJE8QTZg1ByAawp/+a9xHLGY2mYxmGAPoZe31g0bw1TUFX5LPPGmVjyCOCFsufjSAf9C0vcTzTV5lJpNJJZG+hNh26awyvNF08PiA91jEyzzLUwyWtkR/W6/7VYX/81JmIUukVT6GYcTQ275GC9Xga2rX7GQZuUxnAsnEE2l/k5cq8M0tRQd7rmKBtMrTGEQUoXK0VigObxIOnxq8jjxeMSf+/oTL1dioMPzFqllbWcocshhDErGWJn7N4evurxftbS4vMpGRJNBH7lZGheDb2vYcChHtrZj4R0mrPEz+/g9F4MvOjtpgtrdPM5T+9FKmfVd2+Gs3874gn7mP7G3Eo/tuJ123rDQ2bdvvISb+GUyy1t5qCm80HTje710WMYuptthbDeHPVTxK/KPNiV+FMQ0Z4O/Urdn1WOKPIFidARk74Vtbd/0YsPqxxB+iXlexXfBHy0d82CnxezpAO+6V6nnbzYl/rPyJX0H4hsbC4g4VvwKJXyF4o7HkSF87Kn4N4csvTNncqeL30m7swuKBl5q7q3ZQwDxeYLztFb/c8LGM/q/xuuaWogO+K3nNXPEPtL3ilxdeGvK6fr479NLTUi0kVvwPD0HDba/45QzzeN2ObV2BV1zL2dahForRYkvsKsyDjZ7TrvzdGfxe/aa9zuKWqFgtZF+YR0oZH7/w4oWO4O3txaWGd1iobC1kX5iHeUkmwy33k68vXWlvF4S6+p/Kxm0gjxyeU7YWsi/MY9TEkUYGOeSxjBXks4jZZHU6BNXZGLt5gJ1exJLMeDKZwUymk8E4RipfC8mB74EfoUSRyHBSSGUkQ4nX4yrv6u17E0AYEUQRTV8MhDjCnzbgaH+X8Q8RGKy7dFBuqQAAAABJRU5ErkJggg==");background-repeat:no-repeat;max-width:94px;max-height:94px;position:absolute;left:0%;right:0%;top:0%;bottom:0%;margin:auto;-webkit-background-size:contain;-moz-background-size:contain;background-size:contain;background-position:center;pointer-events:none;z-index:100}',""]);},function(t,e,n){var i,r;void 0===(r="function"==typeof(i=function(){function t(){}var e=t.prototype;return e.on=function(t,e){if(t&&e){var n=this._events=this._events||{},i=n[t]=n[t]||[];return -1==i.indexOf(e)&&i.push(e),this}},e.once=function(t,e){if(t&&e){this.on(t,e);var n=this._onceEvents=this._onceEvents||{};return (n[t]=n[t]||{})[e]=!0,this}},e.off=function(t,e){var n=this._events&&this._events[t];if(n&&n.length){var i=n.indexOf(e);return -1!=i&&n.splice(i,1),this}},e.emitEvent=function(t,e){var n=this._events&&this._events[t];if(n&&n.length){n=n.slice(0),e=e||[];for(var i=this._onceEvents&&this._onceEvents[t],r=0;r<n.length;r++){var o=n[r];i&&i[o]&&(this.off(t,o),delete i[o]),o.apply(this,e);}return this}},e.allOff=function(){delete this._events,delete this._onceEvents;},t})?i.call(e,n,e,t):i)||(t.exports=r);},function(t,e,n){t.exports=function(t){var e=[];return e.toString=function(){return this.map((function(e){var n=function(t,e){var n=t[1]||"",i=t[3];if(!i)return n;if(e&&"function"==typeof btoa){var r=(s=i,"/*# sourceMappingURL=data:application/json;charset=utf-8;base64,"+btoa(unescape(encodeURIComponent(JSON.stringify(s))))+" */"),o=i.sources.map((function(t){return "/*# sourceURL="+i.sourceRoot+t+" */"}));return [n].concat(o).concat([r]).join("\n")}var s;return [n].join("\n")}(e,t);return e[2]?"@media "+e[2]+"{"+n+"}":n})).join("")},e.i=function(t,n){"string"==typeof t&&(t=[[null,t,""]]);for(var i={},r=0;r<this.length;r++){var o=this[r][0];null!=o&&(i[o]=!0);}for(r=0;r<t.length;r++){var s=t[r];null!=s[0]&&i[s[0]]||(n&&!s[2]?s[2]=n:n&&(s[2]="("+s[2]+") and ("+n+")"),e.push(s));}},e};},function(t,e,n){n.r(e);var i,r=n(0),o=n.n(r);!function(t){t.START="start",t.STOP="stop",t.TOGGLE="toggle";}(i||(i={}));const s=t=>`✨Freezeframe: ${t}✨`,a=(t,...e)=>{console.error(s(t),...e);},c=t=>"string"==typeof t?document.querySelectorAll(t):t,l=(t,e,n)=>{const i=t instanceof Element?[t]:t;return Array.from(i).reduce((t,e)=>{if(e instanceof HTMLImageElement)t.push(e),"gif"!==(t=>t.split(".").pop().toLowerCase().substring(0,3))(e.src)&&n.warnings&&((t,...e)=>{console.warn(s(t),...e);})("Image does not appear to be a gif",e);else {const n=e.querySelectorAll("img");n.length?t=t.concat(Array.from(n)):a("Invalid element",e);}return t},[])},u=t=>[...new Set(t)],m=t=>{const e=window.document.createElement("div");e.innerHTML=t;const n=e.childNodes;return n.length>1?n:n[0]};var h,f,d=function(){function t(t,e){for(var n=0;n<e.length;n++){var i=e[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(t,i.key,i);}}return function(e,n,i){return n&&t(e.prototype,n),i&&t(e,i),e}}(),p=(h=["",""],f=["",""],Object.freeze(Object.defineProperties(h,{raw:{value:Object.freeze(f)}})));function g(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var I=function(){function t(){for(var e=this,n=arguments.length,i=Array(n),r=0;r<n;r++)i[r]=arguments[r];return g(this,t),this.tag=function(t){for(var n=arguments.length,i=Array(n>1?n-1:0),r=1;r<n;r++)i[r-1]=arguments[r];return "function"==typeof t?e.interimTag.bind(e,t):"string"==typeof t?e.transformEndResult(t):(t=t.map(e.transformString.bind(e)),e.transformEndResult(t.reduce(e.processSubstitutions.bind(e,i))))},i.length>0&&Array.isArray(i[0])&&(i=i[0]),this.transformers=i.map((function(t){return "function"==typeof t?t():t})),this.tag}return d(t,[{key:"interimTag",value:function(t,e){for(var n=arguments.length,i=Array(n>2?n-2:0),r=2;r<n;r++)i[r-2]=arguments[r];return this.tag(p,t.apply(void 0,[e].concat(i)))}},{key:"processSubstitutions",value:function(t,e,n){var i=this.transformSubstitution(t.shift(),e);return "".concat(e,i,n)}},{key:"transformString",value:function(t){return this.transformers.reduce((function(t,e){return e.onString?e.onString(t):t}),t)}},{key:"transformSubstitution",value:function(t,e){return this.transformers.reduce((function(t,n){return n.onSubstitution?n.onSubstitution(t,e):t}),t)}},{key:"transformEndResult",value:function(t){return this.transformers.reduce((function(t,e){return e.onEndResult?e.onEndResult(t):t}),t)}}]),t}(),v=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"";return {onEndResult:function(e){if(""===t)return e.trim();if("start"===(t=t.toLowerCase())||"left"===t)return e.replace(/^\s*/,"");if("end"===t||"right"===t)return e.replace(/\s*$/,"");throw new Error("Side not supported: "+t)}}};function y(t){if(Array.isArray(t)){for(var e=0,n=Array(t.length);e<t.length;e++)n[e]=t[e];return n}return Array.from(t)}var b=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"initial";return {onEndResult:function(e){if("initial"===t){var n=e.match(/^[^\S\n]*(?=\S)/gm),i=n&&Math.min.apply(Math,y(n.map((function(t){return t.length}))));if(i){var r=new RegExp("^.{"+i+"}","gm");return e.replace(r,"")}return e}if("all"===t)return e.replace(/^[^\S\n]+/gm,"");throw new Error("Unknown type: "+t)}}},Z=function(t,e){return {onEndResult:function(n){if(null==t||null==e)throw new Error("replaceResultTransformer requires at least 2 arguments.");return n.replace(t,e)}}},j=function(t,e){return {onSubstitution:function(n,i){if(null==t||null==e)throw new Error("replaceSubstitutionTransformer requires at least 2 arguments.");return null==n?n:n.toString().replace(t,e)}}},S={separator:"",conjunction:"",serial:!1},w=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:S;return {onSubstitution:function(e,n){if(Array.isArray(e)){var i=e.length,r=t.separator,o=t.conjunction,s=t.serial,a=n.match(/(\n?[^\S\n]+)$/);if(e=a?e.join(r+a[1]):e.join(r+" "),o&&i>1){var c=e.lastIndexOf(r);e=e.slice(0,c)+(s?r:"")+" "+o+e.slice(c+1);}}return e}}},G=function(t){return {onSubstitution:function(e,n){if(null==t||"string"!=typeof t)throw new Error("You need to specify a string character to split by.");return "string"==typeof e&&e.includes(t)&&(e=e.split(t)),e}}},W=function(t){return null!=t&&!Number.isNaN(t)&&"boolean"!=typeof t},P=function(){return {onSubstitution:function(t){return Array.isArray(t)?t.filter(W):W(t)?t:""}}},E=(new I(w({separator:","}),b,v),new I(w({separator:",",conjunction:"and"}),b,v),new I(w({separator:",",conjunction:"or"}),b,v),new I(G("\n"),P,w,b,v));new I(G("\n"),w,b,v,j(/&/g,"&amp;"),j(/</g,"&lt;"),j(/>/g,"&gt;"),j(/"/g,"&quot;"),j(/'/g,"&#x27;"),j(/`/g,"&#x60;")),new I(Z(/(?:\n(?:\s*))+/g," "),v),new I(Z(/(?:\n\s*)/g,""),v),new I(w({separator:","}),Z(/(?:\s+)/g," "),v),new I(w({separator:",",conjunction:"or"}),Z(/(?:\s+)/g," "),v),new I(w({separator:",",conjunction:"and"}),Z(/(?:\s+)/g," "),v),new I(w,b,v),new I(w,Z(/(?:\s+)/g," "),v),new I(b,v),new I(b("all"),v);const R=".freezeframe",Y="ff-container",A="ff-loading-icon",x="ff-image",B="ff-canvas",J="ff-ready",F="ff-inactive",L="ff-active",k="ff-canvas-ready",z="ff-responsive",M="ff-overlay",H={selector:R,responsive:!0,trigger:"hover",overlay:!1,warnings:!0};var T=n(1),X=n.n(T);var V,N,C,U=function(t,e,n,i){return new(n||(n=Promise))((function(r,o){function s(t){try{c(i.next(t));}catch(t){o(t);}}function a(t){try{c(i.throw(t));}catch(t){o(t);}}function c(t){var e;t.done?r(t.value):(e=t.value,e instanceof n?e:new n((function(t){t(e);}))).then(s,a);}c((i=i.apply(t,e||[])).next());}))},O=function(t,e,n){if(!e.has(t))throw new TypeError("attempted to set private field on non-instance");return e.set(t,n),n},D=function(t,e){if(!e.has(t))throw new TypeError("attempted to get private field on non-instance");return e.get(t)};V=new WeakMap,N=new WeakMap,C=new WeakMap;e.default=class{constructor(t=R,e){this.items=[],this.$images=[],V.set(this,void 0),N.set(this,void 0),this._eventListeners=Object.assign({},Object.values(i).reduce((t,e)=>(t[e]=[],t),{})),C.set(this,[]),"string"==typeof t||t instanceof Element||t instanceof HTMLCollection||t instanceof NodeList?(this.options=Object.assign(Object.assign({},H),e),O(this,V,t)):"object"!=typeof t||e?a("Invalid Freezeframe.js configuration:",...[t,e].filter(t=>void 0!==t)):(this.options=Object.assign(Object.assign({},H),t),O(this,V,this.options.selector)),this._init(D(this,V));}get _stylesInjected(){return !!document.querySelector("style#ff-styles")}_init(t){this._injectStylesheet(),O(this,N,"ontouchstart"in window||"onmsgesturechange"in window),this._capture(t),this._load(this.$images);}_capture(t){this.$images=((...t)=>(...e)=>t.reduceRight((t,n)=>(...i)=>t(n(...i,...e)))())(c,l,u)(t,this.options);}_load(t){o()(t).on("progress",(t,{img:e})=>{this._setup(e);});}_setup(t){return U(this,void 0,void 0,(function*(){const e=this._wrap(t);this.items.push(e),yield this._process(e),this._attach(e);}))}_wrap(t){const e=m(E`
-    <div class="${Y} ${A}">
-    </div>
-  `),n=m(E`
-    <canvas class="${B}" width="0" height="0">
-    </canvas>
-  `);var i,r;return this.options.responsive&&e.classList.add(z),this.options.overlay&&e.appendChild(m(E`
-    <div class="${M}">
-    </div>
-  `)),t.classList.add(x),e.appendChild(n),r=e,(i=t).parentNode.insertBefore(r,i),r.appendChild(i),{$container:e,$canvas:n,$image:t}}_process(t){return new Promise(e=>{const{$canvas:n,$image:i,$container:r}=t,{clientWidth:o,clientHeight:s}=i;n.setAttribute("width",o.toString()),n.setAttribute("height",s.toString());n.getContext("2d").drawImage(i,0,0,o,s),n.classList.add(k),n.addEventListener("transitionend",()=>{this._ready(r),e(t);},{once:!0});})}_ready(t){t.classList.add(J),t.classList.add(F),t.classList.remove(A);}_attach(t){const{$image:e}=t;if(!D(this,N)&&"hover"===this.options.trigger){const n=()=>{this._toggleOn(t),this._emit(i.START,t,!0),this._emit(i.TOGGLE,t,!0);},r=()=>{this._toggleOff(t),this._emit(i.START,t,!1),this._emit(i.TOGGLE,t,!1);};this._addEventListener(e,"mouseleave",r),this._addEventListener(e,"mouseenter",n);}if(D(this,N)||"click"===this.options.trigger){const n=()=>{this._toggle(t);};this._addEventListener(e,"click",n);}}_addEventListener(t,e,n){D(this,C).push({$image:t,event:e,listener:n}),t.addEventListener(e,n);}_removeEventListener(t,e,n){t.removeEventListener(e,n);}_injectStylesheet(){this._stylesInjected||document.head.appendChild(m(E(`\n    <style id="ff-styles">\n      ${X.a.toString()}\n    </style>\n  `)));}_emit(t,e,n){this._eventListeners[t].forEach(t=>{t(Array.isArray(e)&&1===e.length?e[0]:e,n);});}_toggleOn(t){const{$container:e,$image:n}=t;e.classList.contains(J)&&(n.setAttribute("src",n.src),e.classList.remove(F),e.classList.add(L));}_toggleOff(t){const{$container:e}=t;e.classList.contains(J)&&(e.classList.add(F),e.classList.remove(L));}_toggle(t){const{$container:e}=t,n=e.classList.contains(L);return n?this._toggleOff(t):this._toggleOn(t),!n}start(){return this.items.forEach(t=>{this._toggleOn(t);}),this._emit(i.START,this.items,!0),this._emit(i.TOGGLE,this.items,!0),this}stop(){return this.items.forEach(t=>{this._toggleOff(t);}),this._emit(i.STOP,this.items,!1),this._emit(i.TOGGLE,this.items,!1),this}toggle(){return this.items.forEach(t=>{const e=this._toggle(t);e?this._emit(i.START,this.items,!1):this._emit(i.STOP,this.items,!1),this._emit(i.TOGGLE,this.items,e);}),this}on(t,e){return this._eventListeners[t].push(e),this}destroy(){D(this,C).forEach(({$image:t,event:e,listener:n})=>{this._removeEventListener(t,e,n);});}};}]).default}));
-    });
-
     /*
     * iziToast | v1.4.0
     * http://izitoast.marcelodolce.com
@@ -7151,7 +7138,6 @@ var app = (function () {
     let selectedGroups = writable([]);
     // Allows to share with the rest of the app whether the player is playing or not.
     let isPlaying = writable(false);
-    let albumArtMapStore = writable(new Map());
     /********************** Queue Progress **********************/
     let artCompressQueueProgress = writable({
         maxLength: 0,
@@ -7233,6 +7219,35 @@ var app = (function () {
         }
     }
 
+    function set(key, value) {
+        let headStyleElement = document.querySelector('head style');
+        let headStyle = headStyleElement.innerHTML;
+        headStyle = headStyle.replace(':root{', '').replace('}', '').replace(/\s+/g, ' ').trim();
+        headStyle = headStyle
+            .split(';')
+            .map(foo => foo.split(':'))
+            .filter(style => style.length === 2);
+        let styleIndex = headStyle.findIndex(style => style[0].includes(key));
+        if (styleIndex !== -1) {
+            headStyle[styleIndex] = [`--${key}`, value];
+        }
+        else {
+            headStyle.push([`--${key}`, value]);
+        }
+        headStyleElement.innerHTML = `
+    :root{
+      ${headStyle.map(foo => foo.join(':')).join(';')};
+    }
+  `;
+    }
+    function get$1(key) {
+        return getComputedStyle(document.head).getPropertyValue(`--${key}`);
+    }
+    var cssVariablesService = {
+        set,
+        get: get$1
+    };
+
     // import { themeConfig } from '../stores/main.store'
     function runThemeHandler() {
         // Enables SystemBased theme when the app first runs.
@@ -7277,7 +7292,7 @@ var app = (function () {
         window.ipc.sendAppReady();
         // To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Long after the app has finished loading).
         setTimeout(() => {
-            document.documentElement.style.setProperty('--theme-transition-duration', '500ms');
+            cssVariablesService.set('theme-transition-duration', '500ms');
         }, 2000);
         window.addEventListener('keydown', evt => keyPressed.set(evt.key));
         window.addEventListener('keyup', () => keyPressed.set(undefined));
@@ -7497,8 +7512,6 @@ var app = (function () {
 
     /* src/middlewares/IpcMiddleware.svelte generated by Svelte v3.49.0 */
 
-    const { console: console_1$2 } = globals;
-
     function create_fragment$1h(ctx) {
     	const block = {
     		c: noop,
@@ -7568,8 +7581,6 @@ var app = (function () {
      * One of the logic is to show the animated art the the app is focused and show the static first frame of the animated art when not focused.
      */
     	function handleNewAnimationArt(data) {
-    		console.log(data);
-
     		// Selects the Art Container where to set the art src.
     		let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
 
@@ -7641,8 +7652,6 @@ var app = (function () {
      * Shows a video as art.
      */
     	function handleNewVideoArt(data) {
-    		console.log(data);
-
     		// Selects the Art Container where to set the art src.
     		let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
 
@@ -7712,7 +7721,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<IpcMiddleware> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<IpcMiddleware> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -7756,11 +7765,11 @@ var app = (function () {
     }
 
     function applyColorSchemeFn (color) {
-        document.documentElement.style.setProperty('--art-hue', color.hue);
-        document.documentElement.style.setProperty('--art-saturation', color.saturation + '%');
-        document.documentElement.style.setProperty('--art-lightness-dark', color.lightnessDark + '%');
-        document.documentElement.style.setProperty('--art-lightness-base', color.lightnessBase + '%');
-        document.documentElement.style.setProperty('--art-lightness-light', color.lightnessLight + '%');
+        cssVariablesService.set('art-hue', color.hue);
+        cssVariablesService.set('art-saturation', color.saturation + '%');
+        cssVariablesService.set('art-lightness-dark', color.lightnessDark + '%');
+        cssVariablesService.set('art-lightness-base', color.lightnessBase + '%');
+        cssVariablesService.set('art-lightness-light', color.lightnessLight + '%');
     }
 
     function getAlbumColors (rootDir, contrast = undefined) {
@@ -7844,7 +7853,7 @@ var app = (function () {
         }
         let peaks = await window.ipc.getPeaks(sourceFile);
         let color = await getAlbumColors(rootDir);
-        document.documentElement.style.setProperty('--waveform-opacity', '0');
+        cssVariablesService.set('waveform-opacity', '0');
         setTimeout(() => {
             if (waveSurfer !== undefined) {
                 waveSurfer.empty();
@@ -7855,11 +7864,11 @@ var app = (function () {
             waveSurfer = getNewWaveSurfer(`hsl(${color.hue},${color.saturation}%,${color.lightnessDark}%)`);
             waveSurfer.load(escapeStringFn(sourceFile), peaks, undefined, duration);
             if (peaks) {
-                document.documentElement.style.setProperty('--waveform-opacity', '1');
+                cssVariablesService.set('waveform-opacity', '1');
             }
             else {
                 waveSurfer.on('redraw', () => {
-                    document.documentElement.style.setProperty('--waveform-opacity', '1');
+                    cssVariablesService.set('waveform-opacity', '1');
                     waveSurfer.exportPCM(1024, undefined, true, undefined).then(newPeaks => {
                         window.ipc.savePeaks(sourceFile, newPeaks);
                     });
@@ -10084,13 +10093,13 @@ var app = (function () {
     			attr_dev(input, "max", "1");
     			attr_dev(input, "step", input_step_value = /*$keyPressed*/ ctx[0] === 'Shift' ? '0.05' : '0.01');
     			attr_dev(input, "class", "svelte-m1gmow");
-    			add_location(input, file$10, 49, 1, 1916);
+    			add_location(input, file$10, 50, 1, 1966);
     			attr_dev(background, "class", "svelte-m1gmow");
-    			add_location(background, file$10, 58, 1, 2062);
+    			add_location(background, file$10, 59, 1, 2112);
     			set_custom_element_data(volume_thumb, "class", "svelte-m1gmow");
-    			add_location(volume_thumb, file$10, 59, 1, 2078);
+    			add_location(volume_thumb, file$10, 60, 1, 2128);
     			set_custom_element_data(volume_bar, "class", "svelte-m1gmow");
-    			add_location(volume_bar, file$10, 48, 0, 1902);
+    			add_location(volume_bar, file$10, 49, 0, 1952);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10131,31 +10140,6 @@ var app = (function () {
     	});
 
     	return block;
-    }
-
-    function updateVolumeBarVisual(newVolume) {
-    	let volumeThumbElement = document.querySelector('volume-bar volume-thumb');
-
-    	if (volumeThumbElement === null) {
-    		return;
-    	}
-
-    	volumeThumbElement.innerHTML = String(Math.round(newVolume * 100));
-    	let volumeBarWidth = document.querySelector('volume-bar').clientWidth;
-
-    	if (volumeBarWidth === 0) {
-    		setTimeout(
-    			() => {
-    				updateVolumeBarVisual(newVolume);
-    			},
-    			250
-    		);
-
-    		return;
-    	}
-
-    	let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth;
-    	document.documentElement.style.setProperty('--volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`);
     }
 
     function instance$15($$self, $$props, $$invalidate) {
@@ -10205,6 +10189,31 @@ var app = (function () {
     		set_store_value(altAudioElement, $altAudioElement.volume = newVolume, $altAudioElement);
     	}
 
+    	function updateVolumeBarVisual(newVolume) {
+    		let volumeThumbElement = document.querySelector('volume-bar volume-thumb');
+
+    		if (volumeThumbElement === null) {
+    			return;
+    		}
+
+    		volumeThumbElement.innerHTML = String(Math.round(newVolume * 100));
+    		let volumeBarWidth = document.querySelector('volume-bar').clientWidth;
+
+    		if (volumeBarWidth === 0) {
+    			setTimeout(
+    				() => {
+    					updateVolumeBarVisual(newVolume);
+    				},
+    				250
+    			);
+
+    			return;
+    		}
+
+    		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth;
+    		cssVariablesService.set('volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`);
+    	}
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -10216,6 +10225,7 @@ var app = (function () {
     	};
 
     	$$self.$capture_state = () => ({
+    		cssVariablesService,
     		keyPressed,
     		mainAudioElement,
     		altAudioElement,
@@ -10320,7 +10330,7 @@ var app = (function () {
     			set_custom_element_data(art_svlt, "id", /*elementId*/ ctx[0]);
     			set_style(art_svlt, "height", /*elementHeight*/ ctx[3] + "px");
     			set_style(art_svlt, "width", /*elementWidth*/ ctx[2] + "px");
-    			set_custom_element_data(art_svlt, "class", "svelte-1hq008u");
+    			set_custom_element_data(art_svlt, "class", "svelte-r1jesa");
     			add_location(art_svlt, file$$, 38, 1, 1268);
     		},
     		m: function mount(target, anchor) {
@@ -10632,15 +10642,15 @@ var app = (function () {
     			t10 = text("-");
     			t11 = text(t11_value);
     			set_custom_element_data(album_art, "class", "svelte-3escra");
-    			add_location(album_art, file$_, 43, 1, 1619);
+    			add_location(album_art, file$_, 44, 1, 1666);
     			set_custom_element_data(player_buttons, "class", "svelte-3escra");
-    			add_location(player_buttons, file$_, 47, 1, 1743);
+    			add_location(player_buttons, file$_, 48, 1, 1790);
     			set_custom_element_data(song_duration, "class", "song-time svelte-3escra");
-    			add_location(song_duration, file$_, 55, 1, 1858);
+    			add_location(song_duration, file$_, 56, 1, 1905);
     			set_custom_element_data(song_time_left, "class", "song-time svelte-3escra");
-    			add_location(song_time_left, file$_, 61, 1, 1978);
+    			add_location(song_time_left, file$_, 62, 1, 2025);
     			set_custom_element_data(control_bar_svlt, "class", "svelte-3escra");
-    			add_location(control_bar_svlt, file$_, 42, 0, 1599);
+    			add_location(control_bar_svlt, file$_, 43, 0, 1646);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10757,7 +10767,7 @@ var app = (function () {
     		progress = Math.round((100 / duration * currentTime + Number.EPSILON) * 100) / 100;
 
     		progress = progress >= 100 ? 100 : progress;
-    		document.documentElement.style.setProperty('--song-time', `${progress}%`);
+    		cssVariablesService.set('song-time', `${progress}%`);
 
     		$$invalidate(0, songTime = {
     			currentTime: parseDuration(currentTime),
@@ -10788,6 +10798,7 @@ var app = (function () {
     		currentSongDurationStore,
     		currentSongProgressStore,
     		parseDuration,
+    		cssVariablesService,
     		progress,
     		artSize,
     		currentSong,
@@ -16391,24 +16402,24 @@ var app = (function () {
     			song_update = element("song-update");
     			song_update_icon = element("song-update-icon");
     			create_component(refreshicon.$$.fragment);
-    			add_location(span0, file$V, 55, 2, 1975);
-    			add_location(span1, file$V, 56, 2, 2033);
+    			add_location(span0, file$V, 56, 2, 2032);
+    			add_location(span1, file$V, 57, 2, 2090);
     			set_custom_element_data(art_compress_queue, "class", "svelte-53qjea");
-    			add_location(art_compress_queue, file$V, 53, 1, 1855);
+    			add_location(art_compress_queue, file$V, 54, 1, 1912);
     			attr_dev(span2, "class", "svelte-53qjea");
-    			add_location(span2, file$V, 60, 2, 2229);
+    			add_location(span2, file$V, 61, 2, 2286);
     			set_custom_element_data(song_sync_queue_progress, "data-progress", /*currentSongSyncProgress*/ ctx[1]);
     			set_custom_element_data(song_sync_queue_progress, "class", "svelte-53qjea");
-    			add_location(song_sync_queue_progress, file$V, 63, 2, 2278);
+    			add_location(song_sync_queue_progress, file$V, 64, 2, 2335);
     			set_custom_element_data(song_sync_queue, "class", "svelte-53qjea");
-    			add_location(song_sync_queue, file$V, 58, 1, 2108);
+    			add_location(song_sync_queue, file$V, 59, 1, 2165);
     			set_custom_element_data(song_update_icon, "data-is-song-updating", song_update_icon_data_is_song_updating_value = /*$songSyncQueueProgress*/ ctx[0].isSongUpdating);
     			set_custom_element_data(song_update_icon, "class", "svelte-53qjea");
-    			add_location(song_update_icon, file$V, 66, 2, 2418);
+    			add_location(song_update_icon, file$V, 67, 2, 2475);
     			set_custom_element_data(song_update, "class", "svelte-53qjea");
-    			add_location(song_update, file$V, 65, 1, 2368);
+    			add_location(song_update, file$V, 66, 1, 2425);
     			set_custom_element_data(queue_processes, "class", "svelte-53qjea");
-    			add_location(queue_processes, file$V, 52, 0, 1836);
+    			add_location(queue_processes, file$V, 53, 0, 1893);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16511,7 +16522,7 @@ var app = (function () {
     			$$invalidate(1, currentSongSyncProgress = progress);
     		}
 
-    		document.documentElement.style.setProperty('--song-sync-queue-progress', progress + 'px');
+    		cssVariablesService.set('song-sync-queue-progress', progress || 100 + 'px');
     	}
 
     	function stopSongUpdate() {
@@ -16552,6 +16563,7 @@ var app = (function () {
     		MusicNoteIcon,
     		RefreshIcon,
     		notifyService,
+    		cssVariablesService,
     		currentSongSyncProgress,
     		tippySongUpdateId,
     		calculateProgress,
@@ -17918,7 +17930,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (44:1) {#each albums || [] as album (album.ID)}
+    // (45:1) {#each albums || [] as album (album.ID)}
     function create_each_block$c(key_1, ctx) {
     	let first;
     	let album;
@@ -17967,7 +17979,7 @@ var app = (function () {
     		block,
     		id: create_each_block$c.name,
     		type: "each",
-    		source: "(44:1) {#each albums || [] as album (album.ID)}",
+    		source: "(45:1) {#each albums || [] as album (album.ID)}",
     		ctx
     	});
 
@@ -17998,8 +18010,8 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(art_grid_svlt, "class", "svelte-oe3zak");
-    			add_location(art_grid_svlt, file$O, 42, 0, 1708);
+    			set_custom_element_data(art_grid_svlt, "class", "svelte-n3jpin");
+    			add_location(art_grid_svlt, file$O, 43, 0, 1729);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -18093,8 +18105,8 @@ var app = (function () {
     	}); // Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
     	//TODO Improve this part.
     	/* 	groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
-            document.querySelector('art-grid-svlt').scrollTop = 0
-        }) */
+        document.querySelector('art-grid-svlt').scrollTop = 0
+    }) */
 
     	onDestroy(() => {
     		
@@ -18113,6 +18125,7 @@ var app = (function () {
     		config,
     		dbSongsStore,
     		groupSongsByAlbumFn,
+    		cssVariablesService,
     		albums,
     		groupByValuesConfigObserver,
     		updateArtGridAlbums,
@@ -18132,11 +18145,11 @@ var app = (function () {
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$config*/ 2) {
     			// If the album art size has been set in the store.
-    			if ($config.userOptions.artSize !== undefined) document.documentElement.style.setProperty('--art-dimension', `${$config.userOptions.artSize}px`);
+    			if ($config.userOptions.artSize !== undefined) cssVariablesService.set('art-dimension', `${$config.userOptions.artSize}px`);
     		}
 
     		if ($$self.$$.dirty & /*$config*/ 2) {
-    			if ($config.userOptions.gridGap !== undefined) document.documentElement.style.setProperty('--grid-gap', `${$config.userOptions.gridGap}px`);
+    			if ($config.userOptions.gridGap !== undefined) cssVariablesService.set('grid-gap', `${$config.userOptions.gridGap}px`);
     		}
 
     		if ($$self.$$.dirty & /*$dbSongsStore, $config*/ 6) {
@@ -19748,12 +19761,12 @@ var app = (function () {
 
     function get_each_context$a(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
-    	child_ctx[17] = i;
+    	child_ctx[16] = list[i];
+    	child_ctx[18] = i;
     	return child_ctx;
     }
 
-    // (82:2) {#each songsToShow as song, index (song.ID)}
+    // (83:2) {#each songsToShow as song, index (song.ID)}
     function create_each_block$a(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -19761,8 +19774,8 @@ var app = (function () {
 
     	songlistitem = new SongListItem({
     			props: {
-    				song: /*song*/ ctx[15],
-    				index: /*index*/ ctx[17]
+    				song: /*song*/ ctx[16],
+    				index: /*index*/ ctx[18]
     			},
     			$$inline: true
     		});
@@ -19783,8 +19796,8 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
     			const songlistitem_changes = {};
-    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.song = /*song*/ ctx[15];
-    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.index = /*index*/ ctx[17];
+    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.song = /*song*/ ctx[16];
+    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.index = /*index*/ ctx[18];
     			songlistitem.$set(songlistitem_changes);
     		},
     		i: function intro(local) {
@@ -19806,7 +19819,7 @@ var app = (function () {
     		block,
     		id: create_each_block$a.name,
     		type: "each",
-    		source: "(82:2) {#each songsToShow as song, index (song.ID)}",
+    		source: "(83:2) {#each songsToShow as song, index (song.ID)}",
     		ctx
     	});
 
@@ -19825,7 +19838,7 @@ var app = (function () {
     	let dispose;
     	let each_value = /*songsToShow*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*song*/ ctx[15].ID;
+    	const get_key = ctx => /*song*/ ctx[16].ID;
     	validate_each_keys(ctx, each_value, get_each_context$a, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -19849,9 +19862,9 @@ var app = (function () {
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
     			set_custom_element_data(song_list, "class", "svelte-91mkw9");
-    			add_location(song_list, file$I, 80, 1, 2672);
+    			add_location(song_list, file$I, 81, 1, 2701);
     			set_custom_element_data(song_list_svlt, "class", "svelte-91mkw9");
-    			add_location(song_list_svlt, file$I, 79, 0, 2562);
+    			add_location(song_list_svlt, file$I, 80, 0, 2591);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19929,10 +19942,6 @@ var app = (function () {
     	return block;
     }
 
-    function changeSongListHeight(songAmount) {
-    	document.documentElement.style.setProperty('--song-list-svlt-height', `${songAmount * 36 + 16}px`);
-    }
-
     function instance$N($$self, $$props, $$invalidate) {
     	let $config;
     	let $songListStore;
@@ -19985,7 +19994,11 @@ var app = (function () {
 
     	function setScrollProgress() {
     		let scrollValue = 100 / ($songListStore.length - 1) * scrollAmount | 0;
-    		document.documentElement.style.setProperty('--scrollbar-fill', `${scrollValue}%`);
+    		cssVariablesService.set('scrollbar-fill', `${scrollValue}%`);
+    	}
+
+    	function changeSongListHeight(songAmount) {
+    		cssVariablesService.set('song-list-svlt-height', `${songAmount * 36 + 16}px`);
     	}
 
     	function scrollContainer(e) {
@@ -20017,6 +20030,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		SongListItem,
+    		cssVariablesService,
     		songListClickEventHandlerService,
     		config,
     		selectedAlbumDir,
@@ -20110,45 +20124,32 @@ var app = (function () {
     }
 
     /* src/layouts/library/SongListBackground.svelte generated by Svelte v3.49.0 */
-
     const file$H = "src/layouts/library/SongListBackground.svelte";
 
     function create_fragment$M(ctx) {
     	let song_list_background_svlt;
     	let backdrop;
-    	let t0;
-    	let img;
-    	let img_src_value;
-    	let t1;
-    	let video;
-    	let track;
-    	let source;
+    	let t;
+    	let albumart;
+    	let current;
+
+    	albumart = new AlbumArt({
+    			props: {
+    				imageSourceLocation: /*$selectedAlbumDir*/ ctx[0]
+    			},
+    			$$inline: true
+    		});
 
     	const block = {
     		c: function create() {
     			song_list_background_svlt = element("song-list-background-svlt");
     			backdrop = element("backdrop");
-    			t0 = space();
-    			img = element("img");
-    			t1 = space();
-    			video = element("video");
-    			track = element("track");
-    			source = element("source");
-    			attr_dev(backdrop, "class", "svelte-1anbakl");
-    			add_location(backdrop, file$H, 93, 1, 3137);
-    			if (!src_url_equal(img.src, img_src_value = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "");
-    			attr_dev(img, "class", "svelte-1anbakl");
-    			add_location(img, file$H, 94, 1, 3151);
-    			attr_dev(track, "kind", "captions");
-    			add_location(track, file$H, 97, 2, 3257);
-    			add_location(source, file$H, 98, 2, 3285);
-    			video.autoplay = true;
-    			video.loop = true;
-    			attr_dev(video, "class", "svelte-1anbakl");
-    			add_location(video, file$H, 96, 1, 3233);
-    			set_custom_element_data(song_list_background_svlt, "class", "svelte-1anbakl");
-    			add_location(song_list_background_svlt, file$H, 92, 0, 3108);
+    			t = space();
+    			create_component(albumart.$$.fragment);
+    			attr_dev(backdrop, "class", "svelte-1lseuey");
+    			add_location(backdrop, file$H, 5, 1, 175);
+    			set_custom_element_data(song_list_background_svlt, "class", "svelte-1lseuey");
+    			add_location(song_list_background_svlt, file$H, 4, 0, 146);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20156,18 +20157,27 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, song_list_background_svlt, anchor);
     			append_dev(song_list_background_svlt, backdrop);
-    			append_dev(song_list_background_svlt, t0);
-    			append_dev(song_list_background_svlt, img);
-    			append_dev(song_list_background_svlt, t1);
-    			append_dev(song_list_background_svlt, video);
-    			append_dev(video, track);
-    			append_dev(video, source);
+    			append_dev(song_list_background_svlt, t);
+    			mount_component(albumart, song_list_background_svlt, null);
+    			current = true;
     		},
-    		p: noop,
-    		i: noop,
-    		o: noop,
+    		p: function update(ctx, [dirty]) {
+    			const albumart_changes = {};
+    			if (dirty & /*$selectedAlbumDir*/ 1) albumart_changes.imageSourceLocation = /*$selectedAlbumDir*/ ctx[0];
+    			albumart.$set(albumart_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(albumart.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(albumart.$$.fragment, local);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(song_list_background_svlt);
+    			destroy_component(albumart);
     		}
     	};
 
@@ -20182,122 +20192,12 @@ var app = (function () {
     	return block;
     }
 
-    function filterNumbersFromArray(array) {
-    	return array.map(item => Number(item)).filter(item => !isNaN(item));
-    }
-
     function instance$M($$self, $$props, $$invalidate) {
     	let $selectedAlbumDir;
-    	let $albumArtMapStore;
-    	let $layoutToShow;
     	validate_store(selectedAlbumDir, 'selectedAlbumDir');
     	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(0, $selectedAlbumDir = $$value));
-    	validate_store(albumArtMapStore, 'albumArtMapStore');
-    	component_subscribe($$self, albumArtMapStore, $$value => $$invalidate(5, $albumArtMapStore = $$value));
-    	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(1, $layoutToShow = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SongListBackground', slots, []);
-    	let isMounted = false;
-    	let setArtRetryCounter = 0;
-
-    	function loadArtWhenLayoutMounted() {
-    		if (isMounted === false) {
-    			setTimeout(
-    				() => {
-    					loadArtWhenLayoutMounted();
-    				},
-    				100
-    			);
-    		} else {
-    			setArt();
-    		}
-    	}
-
-    	function setArt() {
-    		var _a;
-    		let albumArts = $albumArtMapStore.get(hash$2($selectedAlbumDir));
-
-    		// If the map is empty
-    		if ($albumArtMapStore.size <= 0 || albumArts === undefined) {
-    			// Prevents checking forever whenever the map gets filled.
-    			if (setArtRetryCounter === 5) {
-    				setArtRetryCounter = 0;
-    				loadArt(undefined, undefined);
-
-    				let selectedAlbumSrcFile = (_a = document.querySelector(`album[rootdir="${$selectedAlbumDir}"] art-svlt img`)) === null || _a === void 0
-    				? void 0
-    				: _a.getAttribute('src');
-
-    				if (selectedAlbumSrcFile) {
-    					loadArt(selectedAlbumSrcFile, 'image');
-    				}
-
-    				return;
-    			}
-
-    			setTimeout(
-    				() => {
-    					setArtRetryCounter++;
-    					setArt();
-    				},
-    				50
-    			);
-
-    			return;
-    		}
-
-    		// If the map is not empty
-    		// Gets all the available sizes.
-    		let artSizes = albumArts.map(albumArt => Number(albumArt.artSize));
-
-    		// Gets the max size available at the time.
-    		let maxArtSize = Math.max(...artSizes);
-
-    		// Gets the album art with the max size.
-    		let maxSizeAlbumArt = albumArts.find(albumArt => Number(albumArt.artSize) === maxArtSize);
-
-    		loadArt(maxSizeAlbumArt.artPath, maxSizeAlbumArt.artType);
-    	}
-
-    	let backgroundTransitionDebounce = undefined;
-
-    	// Takes a file path and loads it to the bg image style property.
-    	function loadArt(artPath, artType) {
-    		let imageElement = document.querySelector('song-list-background-svlt img');
-    		let videoElement = document.querySelector('song-list-background-svlt video');
-
-    		if (!imageElement && !videoElement) {
-    			return;
-    		}
-
-    		if (artPath && artType) {
-    			imageElement.style.opacity = '0';
-    			videoElement.style.opacity = '0';
-    			clearTimeout(backgroundTransitionDebounce);
-
-    			backgroundTransitionDebounce = setTimeout(
-    				() => {
-    					if (artType === 'image') {
-    						imageElement.setAttribute('src', artPath);
-    						imageElement.style.opacity = '1';
-    					} else if (artType === 'video') {
-    						videoElement.setAttribute('src', artPath);
-    						videoElement.style.opacity = '1';
-    					}
-    				},
-    				300
-    			);
-    		} else {
-    			imageElement.style.opacity = '0';
-    			videoElement.style.opacity = '0';
-    		}
-    	}
-
-    	onMount(() => {
-    		isMounted = true;
-    	});
-
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -20305,52 +20205,12 @@ var app = (function () {
     	});
 
     	$$self.$capture_state = () => ({
-    		onMount,
-    		hash: hash$2,
-    		albumArtMapStore,
-    		layoutToShow,
+    		AlbumArt,
     		selectedAlbumDir,
-    		isMounted,
-    		setArtRetryCounter,
-    		loadArtWhenLayoutMounted,
-    		setArt,
-    		filterNumbersFromArray,
-    		backgroundTransitionDebounce,
-    		loadArt,
-    		$selectedAlbumDir,
-    		$albumArtMapStore,
-    		$layoutToShow
+    		$selectedAlbumDir
     	});
 
-    	$$self.$inject_state = $$props => {
-    		if ('isMounted' in $$props) isMounted = $$props.isMounted;
-    		if ('setArtRetryCounter' in $$props) setArtRetryCounter = $$props.setArtRetryCounter;
-    		if ('backgroundTransitionDebounce' in $$props) backgroundTransitionDebounce = $$props.backgroundTransitionDebounce;
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedAlbumDir*/ 1) {
-    			{
-    				if ($selectedAlbumDir !== undefined) {
-    					setArt();
-    				}
-    			}
-    		}
-
-    		if ($$self.$$.dirty & /*$layoutToShow*/ 2) {
-    			{
-    				if ($layoutToShow === 'Library') {
-    					loadArtWhenLayoutMounted();
-    				}
-    			}
-    		}
-    	};
-
-    	return [$selectedAlbumDir, $layoutToShow];
+    	return [$selectedAlbumDir];
     }
 
     class SongListBackground extends SvelteComponentDev {
@@ -22728,103 +22588,103 @@ var app = (function () {
     			button1 = element("button");
     			create_component(updateicon.$$.fragment);
     			t49 = text("\n\t\t\tUpdate");
-    			set_custom_element_data(songs_to_edit, "class", "svelte-bs5kqf");
+    			set_custom_element_data(songs_to_edit, "class", "svelte-58oab7");
     			add_location(songs_to_edit, file$E, 193, 1, 7915);
-    			set_custom_element_data(tag_name0, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name0, "class", "svelte-58oab7");
     			add_location(tag_name0, file$E, 198, 2, 8092);
-    			attr_dev(textarea0, "class", "svelte-bs5kqf");
+    			attr_dev(textarea0, "class", "svelte-58oab7");
     			add_location(textarea0, file$E, 199, 2, 8135);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
-    			set_custom_element_data(tag_container0, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container0, "class", "svelte-58oab7");
     			add_location(tag_container0, file$E, 197, 1, 8057);
-    			set_custom_element_data(tag_name1, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name1, "class", "svelte-58oab7");
     			add_location(tag_name1, file$E, 203, 2, 8234);
-    			attr_dev(textarea1, "class", "svelte-bs5kqf");
+    			attr_dev(textarea1, "class", "svelte-58oab7");
     			add_location(textarea1, file$E, 204, 2, 8277);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
-    			set_custom_element_data(tag_container1, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container1, "class", "svelte-58oab7");
     			add_location(tag_container1, file$E, 202, 1, 8199);
-    			set_custom_element_data(tag_name2, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name2, "class", "svelte-58oab7");
     			add_location(tag_name2, file$E, 208, 2, 8395);
-    			attr_dev(textarea2, "class", "svelte-bs5kqf");
+    			attr_dev(textarea2, "class", "svelte-58oab7");
     			add_location(textarea2, file$E, 209, 2, 8440);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
-    			set_custom_element_data(tag_container2, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container2, "class", "svelte-58oab7");
     			add_location(tag_container2, file$E, 207, 1, 8341);
-    			set_custom_element_data(tag_name3, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name3, "class", "svelte-58oab7");
     			add_location(tag_name3, file$E, 213, 2, 8563);
-    			attr_dev(textarea3, "class", "svelte-bs5kqf");
+    			attr_dev(textarea3, "class", "svelte-58oab7");
     			add_location(textarea3, file$E, 214, 2, 8607);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
-    			set_custom_element_data(tag_container3, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container3, "class", "svelte-58oab7");
     			add_location(tag_container3, file$E, 212, 1, 8504);
-    			set_custom_element_data(tag_name4, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name4, "class", "svelte-58oab7");
     			add_location(tag_name4, file$E, 218, 2, 8712);
-    			attr_dev(textarea4, "class", "svelte-bs5kqf");
+    			attr_dev(textarea4, "class", "svelte-58oab7");
     			add_location(textarea4, file$E, 219, 2, 8756);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
-    			set_custom_element_data(tag_container4, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container4, "class", "svelte-58oab7");
     			add_location(tag_container4, file$E, 217, 1, 8676);
-    			set_custom_element_data(tag_name5, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name5, "class", "svelte-58oab7");
     			add_location(tag_name5, file$E, 223, 2, 8862);
-    			attr_dev(textarea5, "class", "svelte-bs5kqf");
+    			attr_dev(textarea5, "class", "svelte-58oab7");
     			add_location(textarea5, file$E, 224, 2, 8912);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
-    			set_custom_element_data(tag_container5, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container5, "class", "svelte-58oab7");
     			add_location(tag_container5, file$E, 222, 1, 8821);
-    			set_custom_element_data(tag_name6, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name6, "class", "svelte-58oab7");
     			add_location(tag_name6, file$E, 228, 2, 9017);
-    			attr_dev(textarea6, "class", "svelte-bs5kqf");
+    			attr_dev(textarea6, "class", "svelte-58oab7");
     			add_location(textarea6, file$E, 229, 2, 9060);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
-    			set_custom_element_data(tag_container6, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container6, "class", "svelte-58oab7");
     			add_location(tag_container6, file$E, 227, 1, 8982);
-    			set_custom_element_data(tag_name7, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name7, "class", "svelte-58oab7");
     			add_location(tag_name7, file$E, 233, 2, 9162);
-    			attr_dev(textarea7, "class", "svelte-bs5kqf");
+    			attr_dev(textarea7, "class", "svelte-58oab7");
     			add_location(textarea7, file$E, 234, 2, 9208);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
-    			set_custom_element_data(tag_container7, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container7, "class", "svelte-58oab7");
     			add_location(tag_container7, file$E, 232, 1, 9124);
-    			set_custom_element_data(tag_name8, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name8, "class", "svelte-58oab7");
     			add_location(tag_name8, file$E, 238, 2, 9312);
-    			attr_dev(textarea8, "class", "svelte-bs5kqf");
+    			attr_dev(textarea8, "class", "svelte-58oab7");
     			add_location(textarea8, file$E, 239, 2, 9357);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
-    			set_custom_element_data(tag_container8, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container8, "class", "svelte-58oab7");
     			add_location(tag_container8, file$E, 237, 1, 9275);
-    			set_custom_element_data(tag_name9, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name9, "class", "svelte-58oab7");
     			add_location(tag_name9, file$E, 243, 2, 9481);
-    			attr_dev(textarea9, "class", "svelte-bs5kqf");
+    			attr_dev(textarea9, "class", "svelte-58oab7");
     			add_location(textarea9, file$E, 244, 2, 9523);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
-    			set_custom_element_data(tag_container9, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container9, "class", "svelte-58oab7");
     			add_location(tag_container9, file$E, 242, 1, 9423);
-    			set_custom_element_data(tag_name10, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name10, "class", "svelte-58oab7");
     			add_location(tag_name10, file$E, 248, 2, 9650);
-    			attr_dev(textarea10, "class", "svelte-bs5kqf");
+    			attr_dev(textarea10, "class", "svelte-58oab7");
     			add_location(textarea10, file$E, 249, 2, 9693);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
-    			set_custom_element_data(tag_container10, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container10, "class", "svelte-58oab7");
     			add_location(tag_container10, file$E, 247, 1, 9591);
-    			set_custom_element_data(tag_name11, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name11, "class", "svelte-58oab7");
     			add_location(tag_name11, file$E, 253, 2, 9819);
-    			attr_dev(textarea11, "class", "svelte-bs5kqf");
+    			attr_dev(textarea11, "class", "svelte-58oab7");
     			add_location(textarea11, file$E, 254, 2, 9860);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
-    			set_custom_element_data(tag_container11, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container11, "class", "svelte-58oab7");
     			add_location(tag_container11, file$E, 252, 1, 9762);
-    			set_custom_element_data(tag_name12, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_name12, "class", "svelte-58oab7");
     			add_location(tag_name12, file$E, 258, 2, 9963);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
-    			set_custom_element_data(tag_container12, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_container12, "class", "svelte-58oab7");
     			add_location(tag_container12, file$E, 257, 1, 9927);
-    			set_custom_element_data(album_art, "class", "svelte-bs5kqf");
+    			set_custom_element_data(album_art, "class", "svelte-58oab7");
     			add_location(album_art, file$E, 262, 1, 10143);
     			attr_dev(button0, "class", "danger");
     			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
@@ -22832,9 +22692,9 @@ var app = (function () {
     			attr_dev(button1, "class", "info");
     			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
     			add_location(button1, file$E, 271, 2, 10491);
-    			set_custom_element_data(button_container, "class", "svelte-bs5kqf");
+    			set_custom_element_data(button_container, "class", "svelte-58oab7");
     			add_location(button_container, file$E, 266, 1, 10264);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-bs5kqf");
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-58oab7");
     			add_location(tag_edit_svlt, file$E, 192, 0, 7898);
     		},
     		l: function claim(nodes) {
@@ -23599,7 +23459,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-ahh6zz"));
+    			: null) + " svelte-8d8l9"));
 
     			add_location(group_value, file$D, 54, 4, 1699);
     		},
@@ -23627,7 +23487,7 @@ var app = (function () {
 
     			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-ahh6zz"))) {
+    			: null) + " svelte-8d8l9"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
 
@@ -23698,7 +23558,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-ahh6zz"));
+    			: null) + " svelte-8d8l9"));
 
     			add_location(group_value, file$D, 61, 5, 1977);
     		},
@@ -23718,7 +23578,7 @@ var app = (function () {
 
     			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-ahh6zz"))) {
+    			: null) + " svelte-8d8l9"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
     		},
@@ -23767,10 +23627,10 @@ var app = (function () {
     			t2 = space();
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_name, "class", "svelte-ahh6zz");
+    			set_custom_element_data(group_name, "class", "svelte-8d8l9");
     			add_location(group_name, file$D, 51, 3, 1550);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_svlt, "class", "svelte-ahh6zz");
+    			set_custom_element_data(group_svlt, "class", "svelte-8d8l9");
     			add_location(group_svlt, file$D, 50, 2, 1515);
     			this.first = group_svlt;
     		},
@@ -23858,7 +23718,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(tag_group_svlt, "class", "svelte-ahh6zz");
+    			set_custom_element_data(tag_group_svlt, "class", "svelte-8d8l9");
     			add_location(tag_group_svlt, file$D, 48, 0, 1435);
     		},
     		l: function claim(nodes) {
@@ -24039,7 +23899,7 @@ var app = (function () {
     /* src/layouts/library/!LibraryLayout.svelte generated by Svelte v3.49.0 */
     const file$C = "src/layouts/library/!LibraryLayout.svelte";
 
-    // (20:1) {:else}
+    // (22:1) {:else}
     function create_else_block$3(ctx) {
     	let nosong;
     	let current;
@@ -24071,14 +23931,14 @@ var app = (function () {
     		block,
     		id: create_else_block$3.name,
     		type: "else",
-    		source: "(20:1) {:else}",
+    		source: "(22:1) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (18:1) {#if $dbSongsStore.length > 0}
+    // (20:1) {#if $dbSongsStore.length > 0}
     function create_if_block$6(ctx) {
     	let artgrid;
     	let current;
@@ -24110,7 +23970,7 @@ var app = (function () {
     		block,
     		id: create_if_block$6.name,
     		type: "if",
-    		source: "(18:1) {#if $dbSongsStore.length > 0}",
+    		source: "(20:1) {#if $dbSongsStore.length > 0}",
     		ctx
     	});
 
@@ -24157,8 +24017,8 @@ var app = (function () {
     			create_component(tagedit.$$.fragment);
     			t3 = space();
     			create_component(songlistbackground.$$.fragment);
-    			set_custom_element_data(library_layout, "class", "layout svelte-1suejer");
-    			add_location(library_layout, file$C, 16, 0, 694);
+    			set_custom_element_data(library_layout, "class", "layout svelte-16c4lhj");
+    			add_location(library_layout, file$C, 18, 0, 748);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24259,6 +24119,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		onMount,
+    		cssVariablesService,
     		groupSongs,
     		config,
     		dbSongsStore,
@@ -24274,7 +24135,9 @@ var app = (function () {
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$config*/ 2) {
-    			if ($config.userOptions.fontSize !== undefined) document.documentElement.style.setProperty('--font-size', `${$config.userOptions.fontSize}px`);
+    			if ($config.userOptions.fontSize !== undefined) {
+    				cssVariablesService.set('font-size', `${$config.userOptions.fontSize}px`);
+    			}
     		}
     	};
 
@@ -38048,7 +37911,7 @@ var app = (function () {
     /* src/App.svelte generated by Svelte v3.49.0 */
     const file = "src/App.svelte";
 
-    // (61:41) 
+    // (62:41) 
     function create_if_block_2(ctx) {
     	let playbacklayout;
     	let current;
@@ -38080,14 +37943,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(61:41) ",
+    		source: "(62:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (59:39) 
+    // (60:39) 
     function create_if_block_1(ctx) {
     	let configlayout;
     	let current;
@@ -38119,14 +37982,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(59:39) ",
+    		source: "(60:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (57:2) {#if $layoutToShow === 'Library'}
+    // (58:2) {#if $layoutToShow === 'Library'}
     function create_if_block(ctx) {
     	let librarylayout;
     	let current;
@@ -38158,7 +38021,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(57:2) {#if $layoutToShow === 'Library'}",
+    		source: "(58:2) {#if $layoutToShow === 'Library'}",
     		ctx
     	});
 
@@ -38296,9 +38159,9 @@ var app = (function () {
     			t13 = space();
     			create_component(storageservice.$$.fragment);
     			set_custom_element_data(current_window_svlt, "class", "svelte-syvpm2");
-    			add_location(current_window_svlt, file, 55, 1, 2234);
+    			add_location(current_window_svlt, file, 56, 1, 2276);
     			set_custom_element_data(main_app, "class", "svelte-syvpm2");
-    			add_location(main_app, file, 50, 0, 2174);
+    			add_location(main_app, file, 51, 0, 2216);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

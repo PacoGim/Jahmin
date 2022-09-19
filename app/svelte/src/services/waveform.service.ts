@@ -1,6 +1,7 @@
 import escapeStringFn from '../functions/escapeString.fn'
 import getAlbumColorsFn from '../functions/getAlbumColors.fn'
 import WaveSurfer from '../services/wavesurfer/wavesurfer.min'
+import cssVariablesService from './cssVariables.service'
 
 let waveformTransitionDuration = Number(
 	getComputedStyle(document.body).getPropertyValue('--waveform-transition-duration').replace('ms', '')
@@ -40,7 +41,7 @@ export async function setWaveSource(sourceFile: string, rootDir: string, duratio
 	let peaks = await window.ipc.getPeaks(sourceFile)
 	let color = await getAlbumColorsFn(rootDir)
 
-	document.documentElement.style.setProperty('--waveform-opacity', '0')
+	cssVariablesService.set('waveform-opacity', '0')
 
 	setTimeout(() => {
 		if (waveSurfer !== undefined) {
@@ -55,10 +56,10 @@ export async function setWaveSource(sourceFile: string, rootDir: string, duratio
 		waveSurfer.load(escapeStringFn(sourceFile), peaks, undefined, duration)
 
 		if (peaks) {
-			document.documentElement.style.setProperty('--waveform-opacity', '1')
+			cssVariablesService.set('waveform-opacity', '1')
 		} else {
 			waveSurfer.on('redraw', () => {
-				document.documentElement.style.setProperty('--waveform-opacity', '1')
+				cssVariablesService.set('waveform-opacity', '1')
 
 				waveSurfer.exportPCM(1024, undefined, true, undefined).then(newPeaks => {
 					window.ipc.savePeaks(sourceFile, newPeaks)

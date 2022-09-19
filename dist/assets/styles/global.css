@@ -12,10 +12,18 @@ html {
 }
 
 body {
+	/* background-image: url('/Users/fran/Library/Mobile Documents/com~apple~CloudDocs/Programming/jahmin/dist/assets/img/background/autumn-forests-leaves-fall-5k-7h.jpg'); */
+	/* background-image: url('/Volumes/Seagate/Pictures/Wallpapers/1085729.jpg'); */
+	/* background-image: url('/Volumes/Seagate/Pictures/Wallpapers/tree-pink-desert-10k-ym.jpg'); */
+	/* background-image: url('/Volumes/Seagate/Pictures/Wallpapers/125689-galaxy-universe-mac-os-x-lion-stock-hd-5k.jpg'); */
+
+	background-size: contain;
+	backdrop-filter: blur(100px);
+
 	font-size: var(--font-size);
 
 	color: var(--color-fg-1);
-	background-color: var(--color-art-bg);
+	/* background-color: var(--color-art-bg); */
 	height: 100%;
 	display: block;
 	font-variation-settings: 'wght' var(--default-weight);

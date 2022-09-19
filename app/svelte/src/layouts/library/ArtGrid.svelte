@@ -6,14 +6,13 @@
 	import { config, dbSongsStore } from '../../stores/main.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
+	import cssVariablesService from '../../services/cssVariables.service'
 
 	let albums
 
 	// If the album art size has been set in the store.
-	$: if ($config.userOptions.artSize !== undefined)
-		document.documentElement.style.setProperty('--art-dimension', `${$config.userOptions.artSize}px`)
-	$: if ($config.userOptions.gridGap !== undefined)
-		document.documentElement.style.setProperty('--grid-gap', `${$config.userOptions.gridGap}px`)
+	$: if ($config.userOptions.artSize !== undefined) cssVariablesService.set('art-dimension', `${$config.userOptions.artSize}px`)
+	$: if ($config.userOptions.gridGap !== undefined) cssVariablesService.set('grid-gap', `${$config.userOptions.gridGap}px`)
 
 	$: {
 		if ($dbSongsStore && $config.group.groupByValues && $config.group.groupBy) {
@@ -43,7 +42,7 @@
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
 		//TODO Improve this part.
-	/* 	groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
+		/* 	groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
 		}) */
 	})
@@ -61,6 +60,8 @@
 
 <style>
 	art-grid-svlt {
+		background-color: rgba(255, 255, 255, 0.25);
+
 		padding: var(--grid-gap);
 
 		overflow-y: auto;
