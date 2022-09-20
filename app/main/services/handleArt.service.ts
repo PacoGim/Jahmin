@@ -57,6 +57,14 @@ function handleFfmpegImageWorkerResponse(data: any) {
 export function handleArtService(filePath: string, elementId: string, size: number) {
 	if (isNaN(size) || !filePath || !elementId) return
 
+	if (!fs.existsSync(filePath)) {
+		sendWebContentsFn('new-image-art', {
+			artPath: null,
+			elementId
+		})
+		return
+	}
+
 	const isDirectory = fs.statSync(filePath).isDirectory()
 
 	// If it is a file

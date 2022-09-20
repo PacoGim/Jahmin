@@ -16,9 +16,11 @@ body {
 }
 
 body[theme='Day'] {
-	--theme-fg-1: hsl(210, 12%, 16%);
+	/* --theme-fg-1: hsl(210, 12%, 16%); */
+	--theme-fg-1: #5c6165;
 	--theme-fg-1-low: hsl(210, 12%, 16%, 0.1);
-	--theme-bg-1: hsl(0, 0%, 100%);
+	/* --theme-bg-1: hsl(0, 0%, 100%); */
+	--theme-bg-1: #f8f9fa;
 	--theme-bg-2: hsl(0, 0%, 97%);
 
 	--theme-filter-hl: brightness(0) saturate(100%) invert(15%) sepia(24%) saturate(284%) hue-rotate(169deg) brightness(91%)

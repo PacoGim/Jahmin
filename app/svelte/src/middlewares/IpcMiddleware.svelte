@@ -69,6 +69,9 @@
 		// If no Animated Art Container found, create it and append it the the Art Container.
 		if (artAnimationElement === null) {
 			artAnimationElement = document.createElement('art-animation')
+
+			artAnimationElement.style.transition = 'transform 200ms ease-out'
+
 			element.appendChild(artAnimationElement)
 		}
 
@@ -97,14 +100,20 @@
 			artAnimationElement.appendChild(staticImgElement)
 		}
 
-		// If data has artAlt, it means that it contains a base64 static image.
-		// If there is no artAlt, it means that there no static image for this animation yet.
-		// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
-		// Sets the static source of the animation art.
-		if (data?.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`
+		artAnimationElement.style.transform = 'scale(0)'
 
-		// Sets the animated source of the animation art.
-		animatedImgElement.src = `${data.artPath}?time=${generateId()}`
+		setTimeout(() => {
+			// If data has artAlt, it means that it contains a base64 static image.
+			// If there is no artAlt, it means that there no static image for this animation yet.
+			// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
+			// Sets the static source of the animation art.
+			if (data?.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`
+
+			// Sets the animated source of the animation art.
+			animatedImgElement.src = `${data.artPath}?time=${generateId()}`
+
+			artAnimationElement.style.transform = 'scale(1)'
+		}, 200)
 	}
 
 	/**
@@ -134,12 +143,20 @@
 			videoElement = document.createElement('video')
 			videoElement.loop = true
 
+			videoElement.style.transition = 'transform 200ms ease-out'
+
 			// Add the video element to the Main Element
 			element.appendChild(videoElement)
 		}
 
-		// Sets the source of the video art.
-		videoElement.src = `${data.artPath}?time=${generateId()}`
+		videoElement.style.transform = 'scale(0)'
+
+		setTimeout(() => {
+			// Sets the source of the video art.
+			videoElement.src = `${data.artPath}?time=${generateId()}`
+
+			videoElement.style.transform = 'scale(1)'
+		}, 200)
 
 		// If the window is in focus, start playing the video.
 		if (document.hasFocus() === true) {
@@ -150,7 +167,7 @@
 
 	function handleNewImageArt(data) {
 		// Selects the Art Container where to set the art src.
-		let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+		let element: HTMLElement = document.querySelector(`#${CSS.escape(data.elementId)}`)
 
 		// If the element returns null, it means that the element is not in the DOM anymore.
 		if (element === null) return
@@ -164,15 +181,22 @@
 		element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove())
 
 		// Selects the direct image element in the Art Container. The Art Container may contain more img elements from potential animated covers, we don't want to select those.
-		let imgElement = element.querySelector('img') as HTMLImageElement
+		let imgElement: HTMLImageElement = element.querySelector('img')
 
 		// If no image element, create it.
 		if (imgElement === null) {
 			imgElement = document.createElement('img')
+			imgElement.style.transition = 'transform 200ms ease-out'
 			element.appendChild(imgElement)
 		}
 
-		// Sets the source of the image art.
-		imgElement.src = `${data.artPath}?time=${generateId()}`
+		imgElement.style.transform = 'scale(0)'
+
+		setTimeout(() => {
+			// Sets the source of the image art.
+			imgElement.src = `${data.artPath}?time=${generateId()}`
+
+			imgElement.style.transform = 'scale(1)'
+		}, 200)
 	}
 </script>

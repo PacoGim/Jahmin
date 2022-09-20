@@ -38,7 +38,7 @@
 		overflow-y: hidden;
 
 		display: grid;
-		grid-template-columns: auto auto 256px;
+		grid-template-columns: max-content auto 256px;
 		/* grid-template-rows: auto minmax(auto, var(--song-list-svlt-height)); */
 		/* grid-template-rows: auto clamp(160px, var(--song-list-svlt-height), var(--song-list-svlt-height)); */
 		grid-template-rows: auto var(--song-list-svlt-height);

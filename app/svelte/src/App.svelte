@@ -87,7 +87,7 @@
 
 		height: 100vh;
 
-		grid-template-columns: 64px auto;
+		grid-template-columns: min-content auto;
 		grid-template-rows: auto 64px 32px;
 
 		grid-template-areas:

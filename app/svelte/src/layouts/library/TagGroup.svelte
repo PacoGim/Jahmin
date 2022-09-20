@@ -83,6 +83,12 @@
 
 <style>
 	tag-group-svlt {
+		/* border-right: 1px hsl(var(--art-hue), var(--art-saturation), 50%) solid; */
+
+		/* background-color: hsl(var(--art-hue), var(--art-saturation), 20%); */
+		/* color: hsl(var(--art-hue), var(--art-saturation), 80%); */
+
+
 		grid-area: tag-group-svlt;
 
 		display: flex;

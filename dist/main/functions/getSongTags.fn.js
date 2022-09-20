@@ -8,11 +8,15 @@ const flac_format_1 = require("../formats/flac.format");
 const mp3_format_1 = require("../formats/mp3.format");
 const opus_format_1 = require("../formats/opus.format");
 const getFileExtension_fn_1 = __importDefault(require("./getFileExtension.fn"));
+const fs_1 = __importDefault(require("fs"));
 function default_1(songPath) {
     return new Promise((resolve, reject) => {
         let extension = (0, getFileExtension_fn_1.default)(songPath);
         if (extension === undefined) {
             return reject(new Error('Invalid file path'));
+        }
+        if (!fs_1.default.existsSync(songPath)) {
+            return reject(new Error('Song not found'));
         }
         if (extension === 'opus') {
             (0, opus_format_1.getOpusTags)(songPath)

@@ -5,6 +5,8 @@
 	import PlayListIcon from '../icons/PlayListIcon.svelte'
 
 	import { layoutToShow } from '../stores/main.store'
+
+	let iconSize = '32px'
 </script>
 
 <navigation-svlt class="dark-theme">
@@ -12,14 +14,14 @@
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: 48px;width: 48px;padding: .5rem;"
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
 	</nav-button>
 	<nav-button on:click={() => ($layoutToShow = 'Playback')}>
 		<PlaybackIcon
 			style="{$layoutToShow === 'Playback'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: 48px;width: 48px;padding: .5rem;"
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
 	</nav-button>
 	<separator />
@@ -27,7 +29,7 @@
 		<CogIcon
 			style="{$layoutToShow === 'Config'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: 48px;width: 48px;padding: .5rem;"
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
 	</nav-button>
 </navigation-svlt>
@@ -39,9 +41,9 @@
 		display: grid;
 		grid-template-rows: repeat(2, max-content) auto max-content;
 
-		background-color: rgba(var(--rgb-global), 0.025);
-		/* border-right: 2px rgba(var(--rgb-global), 0.05) solid; */
-		border-right: 1px hsl(var(--art-hue), var(--art-saturation), 50%) solid;
+		border-right: 2px solid #cdcfd3;
+
+		width: max-content;
 
 		transition-property: background-color, border-right;
 		transition-duration: var(--theme-transition-duration);
@@ -52,6 +54,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+
+		width: max-content;
 
 		border-radius: 3px;
 

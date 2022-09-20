@@ -45,6 +45,13 @@ function handleFfmpegImageWorkerResponse(data) {
 function handleArtService(filePath, elementId, size) {
     if (isNaN(size) || !filePath || !elementId)
         return;
+    if (!fs_1.default.existsSync(filePath)) {
+        (0, sendWebContents_fn_1.default)('new-image-art', {
+            artPath: null,
+            elementId
+        });
+        return;
+    }
     const isDirectory = fs_1.default.statSync(filePath).isDirectory();
     // If it is a file
     if (!isDirectory) {

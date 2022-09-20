@@ -7609,6 +7609,7 @@ var app = (function () {
     		// If no Animated Art Container found, create it and append it the the Art Container.
     		if (artAnimationElement === null) {
     			artAnimationElement = document.createElement('art-animation');
+    			artAnimationElement.style.transition = 'transform 200ms ease-out';
     			element.appendChild(artAnimationElement);
     		}
 
@@ -7638,14 +7639,23 @@ var app = (function () {
     			artAnimationElement.appendChild(staticImgElement);
     		}
 
-    		// If data has artAlt, it means that it contains a base64 static image.
-    		// If there is no artAlt, it means that there no static image for this animation yet.
-    		// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
-    		// Sets the static source of the animation art.
-    		if (data === null || data === void 0 ? void 0 : data.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
+    		artAnimationElement.style.transform = 'scale(0)';
 
-    		// Sets the animated source of the animation art.
-    		animatedImgElement.src = `${data.artPath}?time=${generateId()}`;
+    		setTimeout(
+    			() => {
+    				// If data has artAlt, it means that it contains a base64 static image.
+    				// If there is no artAlt, it means that there no static image for this animation yet.
+    				// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
+    				// Sets the static source of the animation art.
+    				if (data === null || data === void 0 ? void 0 : data.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
+
+    				// Sets the animated source of the animation art.
+    				animatedImgElement.src = `${data.artPath}?time=${generateId()}`;
+
+    				artAnimationElement.style.transform = 'scale(1)';
+    			},
+    			200
+    		);
     	}
 
     	/**
@@ -7675,13 +7685,23 @@ var app = (function () {
     		if (videoElement === null) {
     			videoElement = document.createElement('video');
     			videoElement.loop = true;
+    			videoElement.style.transition = 'transform 200ms ease-out';
 
     			// Add the video element to the Main Element
     			element.appendChild(videoElement);
     		}
 
-    		// Sets the source of the video art.
-    		videoElement.src = `${data.artPath}?time=${generateId()}`;
+    		videoElement.style.transform = 'scale(0)';
+
+    		setTimeout(
+    			() => {
+    				// Sets the source of the video art.
+    				videoElement.src = `${data.artPath}?time=${generateId()}`;
+
+    				videoElement.style.transform = 'scale(1)';
+    			},
+    			200
+    		);
 
     		// If the window is in focus, start playing the video.
     		if (document.hasFocus() === true) {
@@ -7711,11 +7731,21 @@ var app = (function () {
     		// If no image element, create it.
     		if (imgElement === null) {
     			imgElement = document.createElement('img');
+    			imgElement.style.transition = 'transform 200ms ease-out';
     			element.appendChild(imgElement);
     		}
 
-    		// Sets the source of the image art.
-    		imgElement.src = `${data.artPath}?time=${generateId()}`;
+    		imgElement.style.transform = 'scale(0)';
+
+    		setTimeout(
+    			() => {
+    				// Sets the source of the image art.
+    				imgElement.src = `${data.artPath}?time=${generateId()}`;
+
+    				imgElement.style.transform = 'scale(1)';
+    			},
+    			200
+    		);
     	}
 
     	const writable_props = [];
@@ -9198,7 +9228,7 @@ var app = (function () {
     			props: {
     				style: "" + ((/*$layoutToShow*/ ctx[0] === 'Library'
     				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-    				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: 48px;width: 48px;padding: .5rem;")
+    				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: var(--icon-size);width: var(--icon-size);padding: .5rem;")
     			},
     			$$inline: true
     		});
@@ -9207,7 +9237,7 @@ var app = (function () {
     			props: {
     				style: "" + ((/*$layoutToShow*/ ctx[0] === 'Playback'
     				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-    				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: 48px;width: 48px;padding: .5rem;")
+    				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: var(--icon-size);width: var(--icon-size);padding: .5rem;")
     			},
     			$$inline: true
     		});
@@ -9216,7 +9246,7 @@ var app = (function () {
     			props: {
     				style: "" + ((/*$layoutToShow*/ ctx[0] === 'Config'
     				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-    				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: 48px;width: 48px;padding: .5rem;")
+    				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: var(--icon-size);width: var(--icon-size);padding: .5rem;")
     			},
     			$$inline: true
     		});
@@ -9234,15 +9264,15 @@ var app = (function () {
     			t2 = space();
     			nav_button2 = element("nav-button");
     			create_component(cogicon.$$.fragment);
-    			set_custom_element_data(nav_button0, "class", "svelte-1i2zwua");
-    			add_location(nav_button0, file$15, 7, 1, 281);
-    			set_custom_element_data(nav_button1, "class", "svelte-1i2zwua");
-    			add_location(nav_button1, file$15, 14, 1, 582);
-    			add_location(separator, file$15, 21, 1, 885);
-    			set_custom_element_data(nav_button2, "class", "configButton svelte-1i2zwua");
-    			add_location(nav_button2, file$15, 22, 1, 900);
-    			set_custom_element_data(navigation_svlt, "class", "dark-theme svelte-1i2zwua");
-    			add_location(navigation_svlt, file$15, 6, 0, 243);
+    			set_custom_element_data(nav_button0, "class", "svelte-12bnyqj");
+    			add_location(nav_button0, file$15, 8, 1, 304);
+    			set_custom_element_data(nav_button1, "class", "svelte-12bnyqj");
+    			add_location(nav_button1, file$15, 15, 1, 629);
+    			add_location(separator, file$15, 22, 1, 956);
+    			set_custom_element_data(nav_button2, "class", "configButton svelte-12bnyqj");
+    			add_location(nav_button2, file$15, 23, 1, 971);
+    			set_custom_element_data(navigation_svlt, "class", "dark-theme svelte-12bnyqj");
+    			add_location(navigation_svlt, file$15, 7, 0, 266);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9276,21 +9306,21 @@ var app = (function () {
 
     			if (dirty & /*$layoutToShow*/ 1) playlisticon_changes.style = "" + ((/*$layoutToShow*/ ctx[0] === 'Library'
     			? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-    			: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: 48px;width: 48px;padding: .5rem;");
+    			: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: var(--icon-size);width: var(--icon-size);padding: .5rem;");
 
     			playlisticon.$set(playlisticon_changes);
     			const playbackicon_changes = {};
 
     			if (dirty & /*$layoutToShow*/ 1) playbackicon_changes.style = "" + ((/*$layoutToShow*/ ctx[0] === 'Playback'
     			? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-    			: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: 48px;width: 48px;padding: .5rem;");
+    			: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: var(--icon-size);width: var(--icon-size);padding: .5rem;");
 
     			playbackicon.$set(playbackicon_changes);
     			const cogicon_changes = {};
 
     			if (dirty & /*$layoutToShow*/ 1) cogicon_changes.style = "" + ((/*$layoutToShow*/ ctx[0] === 'Config'
     			? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
-    			: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: 48px;width: 48px;padding: .5rem;");
+    			: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);') + ";height: var(--icon-size);width: var(--icon-size);padding: .5rem;");
 
     			cogicon.$set(cogicon_changes);
     		},
@@ -9334,6 +9364,7 @@ var app = (function () {
     	component_subscribe($$self, layoutToShow, $$value => $$invalidate(0, $layoutToShow = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Navigation', slots, []);
+    	let iconSize = '32px';
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -9349,8 +9380,17 @@ var app = (function () {
     		PlaybackIcon,
     		PlayListIcon,
     		layoutToShow,
+    		iconSize,
     		$layoutToShow
     	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('iconSize' in $$props) iconSize = $$props.iconSize;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
 
     	return [$layoutToShow, click_handler, click_handler_1, click_handler_2];
     }
@@ -23459,7 +23499,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-8d8l9"));
+    			: null) + " svelte-zpua8o"));
 
     			add_location(group_value, file$D, 54, 4, 1699);
     		},
@@ -23487,7 +23527,7 @@ var app = (function () {
 
     			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-8d8l9"))) {
+    			: null) + " svelte-zpua8o"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
 
@@ -23558,7 +23598,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-8d8l9"));
+    			: null) + " svelte-zpua8o"));
 
     			add_location(group_value, file$D, 61, 5, 1977);
     		},
@@ -23578,7 +23618,7 @@ var app = (function () {
 
     			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-8d8l9"))) {
+    			: null) + " svelte-zpua8o"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
     		},
@@ -23627,10 +23667,10 @@ var app = (function () {
     			t2 = space();
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_name, "class", "svelte-8d8l9");
+    			set_custom_element_data(group_name, "class", "svelte-zpua8o");
     			add_location(group_name, file$D, 51, 3, 1550);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_svlt, "class", "svelte-8d8l9");
+    			set_custom_element_data(group_svlt, "class", "svelte-zpua8o");
     			add_location(group_svlt, file$D, 50, 2, 1515);
     			this.first = group_svlt;
     		},
@@ -23718,7 +23758,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(tag_group_svlt, "class", "svelte-8d8l9");
+    			set_custom_element_data(tag_group_svlt, "class", "svelte-zpua8o");
     			add_location(tag_group_svlt, file$D, 48, 0, 1435);
     		},
     		l: function claim(nodes) {
@@ -24017,7 +24057,7 @@ var app = (function () {
     			create_component(tagedit.$$.fragment);
     			t3 = space();
     			create_component(songlistbackground.$$.fragment);
-    			set_custom_element_data(library_layout, "class", "layout svelte-16c4lhj");
+    			set_custom_element_data(library_layout, "class", "layout svelte-ygcc4y");
     			add_location(library_layout, file$C, 18, 0, 748);
     		},
     		l: function claim(nodes) {
@@ -38158,9 +38198,9 @@ var app = (function () {
     			create_component(rangeinputservice.$$.fragment);
     			t13 = space();
     			create_component(storageservice.$$.fragment);
-    			set_custom_element_data(current_window_svlt, "class", "svelte-syvpm2");
+    			set_custom_element_data(current_window_svlt, "class", "svelte-gvvlpk");
     			add_location(current_window_svlt, file, 56, 1, 2276);
-    			set_custom_element_data(main_app, "class", "svelte-syvpm2");
+    			set_custom_element_data(main_app, "class", "svelte-gvvlpk");
     			add_location(main_app, file, 51, 0, 2216);
     		},
     		l: function claim(nodes) {
