@@ -37,7 +37,7 @@
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
 	function setupSongs(from: string) {
-		if (from === 'songListStoreUpdate' && $songSyncQueueProgress.currentLength > 0) {
+		if (from === 'songListStoreUpdate' && $songSyncQueueProgress.currentLength > 1) {
 			return
 		}
 
@@ -516,7 +516,7 @@
 		flex-direction: row;
 		justify-content: space-evenly;
 		align-items: end;
-		margin: .5rem 0;
+		margin: 0.5rem 0;
 	}
 
 	:global(tag-suggestions) {

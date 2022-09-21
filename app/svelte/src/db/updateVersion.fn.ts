@@ -1,11 +1,12 @@
 import { dbVersionStore } from '../stores/main.store'
 
-let dbVersion = 0
+let dbVersion = Date.now()
 let isVersionUpdating = false
 
 export default function () {
-	dbVersion++
+	dbVersion = Date.now()
 
+	// Prevents the app from refreshing too often.
 	if (isVersionUpdating === false) {
 		isVersionUpdating = true
 		updateStoreVersion()
@@ -13,6 +14,7 @@ export default function () {
 }
 
 function updateStoreVersion() {
+	// Saves the store value locally
 	let dbVersionStoreLocal = undefined
 
 	dbVersionStore.subscribe(value => (dbVersionStoreLocal = value))()
@@ -22,7 +24,7 @@ function updateStoreVersion() {
 
 		setTimeout(() => {
 			updateStoreVersion()
-		}, 500)
+		}, 250)
 	} else {
 		isVersionUpdating = false
 	}

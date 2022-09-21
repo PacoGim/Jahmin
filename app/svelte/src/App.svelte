@@ -27,7 +27,7 @@
 
 	import { getDB } from './db/!dbObject'
 
-	import { dbSongsStore, appTitle, layoutToShow, reloadArts } from './stores/main.store'
+	import { dbSongsStore, appTitle, layoutToShow, reloadArts, dbVersionStore } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 	import { equalizerService, confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import EqualizerService from './svelte_services/EqualizerService.svelte'
@@ -35,7 +35,6 @@
 	import ConfirmService from './svelte_services/ConfirmService.svelte'
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
-	import cssVariablesService from './services/cssVariables.service'
 
 	liveQuery(async () => {
 		return await getDB().songs.toArray()

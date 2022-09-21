@@ -57,6 +57,7 @@ function processQueue() {
 	// For each process, get a task.
 	processesRunning.forEach((process, processIndex) => getTask(processIndex, processesRunning))
 }
+
 // Shifts a task from array and gets the tags.
 function getTask(processIndex: number, processesRunning: boolean[]) {
 	taskQueue = removeDuplicateObjectsFromArrayFn(taskQueue)
@@ -139,7 +140,10 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 		})
 		.catch()
 		.finally(() => {
-			watchPaths([task.path])
+			setTimeout(() => {
+				watchPaths([task.path])
+			}, 10000)
+
 			getTask(processIndex, processesRunning)
 		})
 }

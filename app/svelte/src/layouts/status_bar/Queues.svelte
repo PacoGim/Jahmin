@@ -13,27 +13,23 @@
 	import notifyService from '../../services/notify.service'
 	import cssVariablesService from '../../services/cssVariables.service'
 
+	let isMounted = false
+
 	let currentSongSyncProgress = 0
 	let tippySongUpdateId = generateId()
 
 	$: calculateProgress($songSyncQueueProgress)
 
-	$: {
-		if ($songSyncQueueProgress.isSongUpdating === true) {
-			loadSongUpdateTippy($songSyncQueueProgress.isSongUpdating)
-		}
-	}
+	$: if (isMounted) loadSongUpdateTippy($songSyncQueueProgress.isSongUpdating)
 
 	function calculateProgress(songSyncQueueProgress) {
-		let progress = 100 - Math.ceil((100 / songSyncQueueProgress.maxLength) * songSyncQueueProgress.currentLength)
+		currentSongSyncProgress = 100 - Math.ceil((100 / songSyncQueueProgress.maxLength) * songSyncQueueProgress.currentLength)
 
-		if (Math.abs(progress) === Infinity || isNaN(progress)) {
+		if (Math.abs(currentSongSyncProgress) === Infinity || isNaN(currentSongSyncProgress)) {
 			currentSongSyncProgress = 100
-		} else {
-			currentSongSyncProgress = progress
 		}
 
-		cssVariablesService.set('song-sync-queue-progress', progress || 100 + 'px')
+		cssVariablesService.set('song-sync-queue-progress', currentSongSyncProgress + 'px')
 	}
 
 	function stopSongUpdate() {
@@ -47,7 +43,7 @@
 	function loadSongUpdateTippy(isSongUpdating) {
 		if (isSongUpdating) {
 			tippyService(tippySongUpdateId, 'song-update', {
-				content: 'Stop song update'
+				content: 'Stop songs update'
 			})
 		} else {
 			tippyService(tippySongUpdateId, 'song-update', {
@@ -57,9 +53,7 @@
 	}
 
 	onMount(() => {
-		tippyService(tippySongUpdateId, 'song-update', {
-			content: 'No songs updating'
-		})
+		isMounted = true
 	})
 </script>
 

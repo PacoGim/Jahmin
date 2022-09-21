@@ -9,6 +9,7 @@ const isAudioFile_fn_1 = __importDefault(require("../functions/isAudioFile.fn"))
 const librarySongs_service_1 = require("./librarySongs.service");
 let watcher;
 let foundPaths = [];
+let ignoredPaths = [];
 function startChokidarWatch(rootDirectories, excludeDirectories = []) {
     if (watcher) {
         watcher.close();
@@ -20,12 +21,16 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
     });
     watcher.unwatch(excludeDirectories);
     watcher.on('add', (path) => {
+        if (ignoredPaths.indexOf(path) !== -1)
+            return;
         if ((0, isAudioFile_fn_1.default)(path)) {
             foundPaths.push(path);
         }
     });
     watcher.on('ready', () => {
         watcher.on('all', (eventName, path) => {
+            if (ignoredPaths.indexOf(path) !== -1)
+                return;
             if (!(0, isAudioFile_fn_1.default)(path))
                 return;
             if (eventName === 'change')
@@ -43,14 +48,18 @@ function getRootDirFolderWatcher() {
 }
 exports.getRootDirFolderWatcher = getRootDirFolderWatcher;
 function unwatchPaths(paths) {
-    if (watcher) {
-        paths.forEach(path => watcher.unwatch(path));
-    }
+    paths.forEach(path => {
+        if (ignoredPaths.indexOf(path) === -1) {
+            ignoredPaths.push(path);
+        }
+    });
 }
 exports.unwatchPaths = unwatchPaths;
 function watchPaths(paths) {
-    if (watcher) {
-        paths.forEach(path => watcher.add(path));
-    }
+    paths.forEach(path => {
+        if (ignoredPaths.indexOf(path) !== -1) {
+            ignoredPaths.splice(ignoredPaths.indexOf(path), 1);
+        }
+    });
 }
 exports.watchPaths = watchPaths;

@@ -19,7 +19,6 @@ export class JahminDb extends Dexie {
 	}
 }
 
-// export const db =
 setDB(new JahminDb())
 
 let taskQueue = []

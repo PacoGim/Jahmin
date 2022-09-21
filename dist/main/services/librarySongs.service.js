@@ -136,7 +136,9 @@ function handleUpdateTask(task, processIndex, processesRunning) {
         })
             .catch()
             .finally(() => {
-            (0, chokidar_service_1.watchPaths)([task.path]);
+            setTimeout(() => {
+                (0, chokidar_service_1.watchPaths)([task.path]);
+            }, 10000);
             getTask(processIndex, processesRunning);
         });
     });

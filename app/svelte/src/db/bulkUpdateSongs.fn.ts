@@ -1,9 +1,13 @@
-import type { PartialSongType } from '../../../types/song.type'
-import { getDB } from './!dbObject';
-import updateVersionFn from './updateVersion.fn';
+import deepmerge from 'deepmerge'
+import type { PartialSongType, SongType } from '../../../types/song.type'
+import { songListStore } from '../stores/main.store'
+import { getDB } from './!dbObject'
+import updateVersionFn from './updateVersion.fn'
 
 export default function (songs: { id: string | number; newTags: PartialSongType }[]) {
 	return new Promise((resolve, reject) => {
+		updateVariables(songs)
+
 		// Will contain songs grouped by the same new tags to update.
 		let updateGroups = []
 
@@ -48,4 +52,20 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 				resolve(undefined)
 			})
 	})
+}
+
+function updateVariables(songs: { id: string | number; newTags: PartialSongType }[]) {
+	let songListStoreLocal: SongType[] = undefined
+
+	songListStore.subscribe(value => (songListStoreLocal = value))()
+
+	songs.forEach(song => {
+		let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id)
+
+		if (arraySongIndex !== -1) {
+			songListStoreLocal[arraySongIndex] = deepmerge(songListStoreLocal[arraySongIndex], song.newTags)
+		}
+	})
+
+	songListStore.set(songListStoreLocal)
 }

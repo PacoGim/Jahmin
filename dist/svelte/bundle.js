@@ -7124,7 +7124,7 @@ var app = (function () {
     let config = writable(undefined);
     /********************** Database **********************/
     let dbSongsStore = writable([]);
-    let dbVersionStore = writable(undefined);
+    let dbVersionStore = writable(Date.now());
     /********************** Keyboard Events **********************/
     let keyPressed = writable(undefined);
     let appTitle = writable('Jahmin');
@@ -7335,23 +7335,25 @@ var app = (function () {
         }, 60000);
     }
 
-    let dbVersion = 0;
+    let dbVersion = Date.now();
     let isVersionUpdating = false;
     function updateVersionFn () {
-        dbVersion++;
+        dbVersion = Date.now();
+        // Prevents the app from refreshing too often.
         if (isVersionUpdating === false) {
             isVersionUpdating = true;
             updateStoreVersion();
         }
     }
     function updateStoreVersion() {
+        // Saves the store value locally
         let dbVersionStoreLocal = undefined;
         dbVersionStore.subscribe(value => (dbVersionStoreLocal = value))();
         if (dbVersionStoreLocal !== dbVersion) {
             dbVersionStore.set(dbVersion);
             setTimeout(() => {
                 updateStoreVersion();
-            }, 500);
+            }, 250);
         }
         else {
             isVersionUpdating = false;
@@ -7396,8 +7398,141 @@ var app = (function () {
         });
     }
 
+    var isMergeableObject = function isMergeableObject(value) {
+    	return isNonNullObject(value)
+    		&& !isSpecial(value)
+    };
+
+    function isNonNullObject(value) {
+    	return !!value && typeof value === 'object'
+    }
+
+    function isSpecial(value) {
+    	var stringValue = Object.prototype.toString.call(value);
+
+    	return stringValue === '[object RegExp]'
+    		|| stringValue === '[object Date]'
+    		|| isReactElement(value)
+    }
+
+    // see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+    var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
+    var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
+
+    function isReactElement(value) {
+    	return value.$$typeof === REACT_ELEMENT_TYPE
+    }
+
+    function emptyTarget(val) {
+    	return Array.isArray(val) ? [] : {}
+    }
+
+    function cloneUnlessOtherwiseSpecified(value, options) {
+    	return (options.clone !== false && options.isMergeableObject(value))
+    		? deepmerge(emptyTarget(value), value, options)
+    		: value
+    }
+
+    function defaultArrayMerge(target, source, options) {
+    	return target.concat(source).map(function(element) {
+    		return cloneUnlessOtherwiseSpecified(element, options)
+    	})
+    }
+
+    function getMergeFunction(key, options) {
+    	if (!options.customMerge) {
+    		return deepmerge
+    	}
+    	var customMerge = options.customMerge(key);
+    	return typeof customMerge === 'function' ? customMerge : deepmerge
+    }
+
+    function getEnumerableOwnPropertySymbols(target) {
+    	return Object.getOwnPropertySymbols
+    		? Object.getOwnPropertySymbols(target).filter(function(symbol) {
+    			return target.propertyIsEnumerable(symbol)
+    		})
+    		: []
+    }
+
+    function getKeys(target) {
+    	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+    }
+
+    function propertyIsOnObject(object, property) {
+    	try {
+    		return property in object
+    	} catch(_) {
+    		return false
+    	}
+    }
+
+    // Protects from prototype poisoning and unexpected merging up the prototype chain.
+    function propertyIsUnsafe(target, key) {
+    	return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+    		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+    			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+    }
+
+    function mergeObject(target, source, options) {
+    	var destination = {};
+    	if (options.isMergeableObject(target)) {
+    		getKeys(target).forEach(function(key) {
+    			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+    		});
+    	}
+    	getKeys(source).forEach(function(key) {
+    		if (propertyIsUnsafe(target, key)) {
+    			return
+    		}
+
+    		if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
+    			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
+    		} else {
+    			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
+    		}
+    	});
+    	return destination
+    }
+
+    function deepmerge(target, source, options) {
+    	options = options || {};
+    	options.arrayMerge = options.arrayMerge || defaultArrayMerge;
+    	options.isMergeableObject = options.isMergeableObject || isMergeableObject;
+    	// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
+    	// implementations can use it. The caller may not replace it.
+    	options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
+
+    	var sourceIsArray = Array.isArray(source);
+    	var targetIsArray = Array.isArray(target);
+    	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
+
+    	if (!sourceAndTargetTypesMatch) {
+    		return cloneUnlessOtherwiseSpecified(source, options)
+    	} else if (sourceIsArray) {
+    		return options.arrayMerge(target, source, options)
+    	} else {
+    		return mergeObject(target, source, options)
+    	}
+    }
+
+    deepmerge.all = function deepmergeAll(array, options) {
+    	if (!Array.isArray(array)) {
+    		throw new Error('first argument should be an array')
+    	}
+
+    	return array.reduce(function(prev, next) {
+    		return deepmerge(prev, next, options)
+    	}, {})
+    };
+
+    var deepmerge_1 = deepmerge;
+
+    var cjs = deepmerge_1;
+
     function bulkUpdateSongsFn (songs) {
         return new Promise((resolve, reject) => {
+            updateVariables(songs);
             // Will contain songs grouped by the same new tags to update.
             let updateGroups = [];
             // Iterates through each song gets the id and new tags to update.
@@ -7438,6 +7573,17 @@ var app = (function () {
             });
         });
     }
+    function updateVariables(songs) {
+        let songListStoreLocal = undefined;
+        songListStore.subscribe(value => (songListStoreLocal = value))();
+        songs.forEach(song => {
+            let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id);
+            if (arraySongIndex !== -1) {
+                songListStoreLocal[arraySongIndex] = cjs(songListStoreLocal[arraySongIndex], song.newTags);
+            }
+        });
+        songListStore.set(songListStoreLocal);
+    }
 
     class JahminDb extends Dexie$1 {
         constructor() {
@@ -7447,7 +7593,6 @@ var app = (function () {
             });
         }
     }
-    // export const db =
     setDB(new JahminDb());
     let taskQueue = [];
     let isQueueRunning = false;
@@ -7549,8 +7694,8 @@ var app = (function () {
     		});
     	});
 
-    	window.ipc.handleWebStorage((_, data) => {
-    		addTaskToQueue(data.data, data.type);
+    	window.ipc.handleWebStorage((_, response) => {
+    		addTaskToQueue(response.data, response.type);
     	});
 
     	window.ipc.handleNewImageArt((_, data) => {
@@ -7609,7 +7754,6 @@ var app = (function () {
     		// If no Animated Art Container found, create it and append it the the Art Container.
     		if (artAnimationElement === null) {
     			artAnimationElement = document.createElement('art-animation');
-    			artAnimationElement.style.transition = 'transform 200ms ease-out';
     			element.appendChild(artAnimationElement);
     		}
 
@@ -7639,23 +7783,14 @@ var app = (function () {
     			artAnimationElement.appendChild(staticImgElement);
     		}
 
-    		artAnimationElement.style.transform = 'scale(0)';
+    		// If data has artAlt, it means that it contains a base64 static image.
+    		// If there is no artAlt, it means that there no static image for this animation yet.
+    		// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
+    		// Sets the static source of the animation art.
+    		if (data === null || data === void 0 ? void 0 : data.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
 
-    		setTimeout(
-    			() => {
-    				// If data has artAlt, it means that it contains a base64 static image.
-    				// If there is no artAlt, it means that there no static image for this animation yet.
-    				// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
-    				// Sets the static source of the animation art.
-    				if (data === null || data === void 0 ? void 0 : data.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
-
-    				// Sets the animated source of the animation art.
-    				animatedImgElement.src = `${data.artPath}?time=${generateId()}`;
-
-    				artAnimationElement.style.transform = 'scale(1)';
-    			},
-    			200
-    		);
+    		// Sets the animated source of the animation art.
+    		animatedImgElement.src = `${data.artPath}?time=${generateId()}`;
     	}
 
     	/**
@@ -7685,23 +7820,13 @@ var app = (function () {
     		if (videoElement === null) {
     			videoElement = document.createElement('video');
     			videoElement.loop = true;
-    			videoElement.style.transition = 'transform 200ms ease-out';
 
     			// Add the video element to the Main Element
     			element.appendChild(videoElement);
     		}
 
-    		videoElement.style.transform = 'scale(0)';
-
-    		setTimeout(
-    			() => {
-    				// Sets the source of the video art.
-    				videoElement.src = `${data.artPath}?time=${generateId()}`;
-
-    				videoElement.style.transform = 'scale(1)';
-    			},
-    			200
-    		);
+    		// Sets the source of the video art.
+    		videoElement.src = `${data.artPath}?time=${generateId()}`;
 
     		// If the window is in focus, start playing the video.
     		if (document.hasFocus() === true) {
@@ -7731,21 +7856,11 @@ var app = (function () {
     		// If no image element, create it.
     		if (imgElement === null) {
     			imgElement = document.createElement('img');
-    			imgElement.style.transition = 'transform 200ms ease-out';
     			element.appendChild(imgElement);
     		}
 
-    		imgElement.style.transform = 'scale(0)';
-
-    		setTimeout(
-    			() => {
-    				// Sets the source of the image art.
-    				imgElement.src = `${data.artPath}?time=${generateId()}`;
-
-    				imgElement.style.transform = 'scale(1)';
-    			},
-    			200
-    		);
+    		// Sets the source of the image art.
+    		imgElement.src = `${data.artPath}?time=${generateId()}`;
     	}
 
     	const writable_props = [];
@@ -16442,24 +16557,24 @@ var app = (function () {
     			song_update = element("song-update");
     			song_update_icon = element("song-update-icon");
     			create_component(refreshicon.$$.fragment);
-    			add_location(span0, file$V, 56, 2, 2032);
-    			add_location(span1, file$V, 57, 2, 2090);
+    			add_location(span0, file$V, 49, 2, 1911);
+    			add_location(span1, file$V, 50, 2, 1969);
     			set_custom_element_data(art_compress_queue, "class", "svelte-53qjea");
-    			add_location(art_compress_queue, file$V, 54, 1, 1912);
+    			add_location(art_compress_queue, file$V, 47, 1, 1791);
     			attr_dev(span2, "class", "svelte-53qjea");
-    			add_location(span2, file$V, 61, 2, 2286);
+    			add_location(span2, file$V, 54, 2, 2165);
     			set_custom_element_data(song_sync_queue_progress, "data-progress", /*currentSongSyncProgress*/ ctx[1]);
     			set_custom_element_data(song_sync_queue_progress, "class", "svelte-53qjea");
-    			add_location(song_sync_queue_progress, file$V, 64, 2, 2335);
+    			add_location(song_sync_queue_progress, file$V, 57, 2, 2214);
     			set_custom_element_data(song_sync_queue, "class", "svelte-53qjea");
-    			add_location(song_sync_queue, file$V, 59, 1, 2165);
+    			add_location(song_sync_queue, file$V, 52, 1, 2044);
     			set_custom_element_data(song_update_icon, "data-is-song-updating", song_update_icon_data_is_song_updating_value = /*$songSyncQueueProgress*/ ctx[0].isSongUpdating);
     			set_custom_element_data(song_update_icon, "class", "svelte-53qjea");
-    			add_location(song_update_icon, file$V, 67, 2, 2475);
+    			add_location(song_update_icon, file$V, 60, 2, 2354);
     			set_custom_element_data(song_update, "class", "svelte-53qjea");
-    			add_location(song_update, file$V, 66, 1, 2425);
+    			add_location(song_update, file$V, 59, 1, 2304);
     			set_custom_element_data(queue_processes, "class", "svelte-53qjea");
-    			add_location(queue_processes, file$V, 53, 0, 1893);
+    			add_location(queue_processes, file$V, 46, 0, 1772);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16490,7 +16605,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(song_update, "click", /*click_handler*/ ctx[4], false, false, false);
+    				dispose = listen_dev(song_update, "click", /*click_handler*/ ctx[5], false, false, false);
     				mounted = true;
     			}
     		},
@@ -16550,19 +16665,18 @@ var app = (function () {
     	component_subscribe($$self, artCompressQueueProgress, $$value => $$invalidate(2, $artCompressQueueProgress = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Queues', slots, []);
+    	let isMounted = false;
     	let currentSongSyncProgress = 0;
     	let tippySongUpdateId = generateId();
 
     	function calculateProgress(songSyncQueueProgress) {
-    		let progress = 100 - Math.ceil(100 / songSyncQueueProgress.maxLength * songSyncQueueProgress.currentLength);
+    		$$invalidate(1, currentSongSyncProgress = 100 - Math.ceil(100 / songSyncQueueProgress.maxLength * songSyncQueueProgress.currentLength));
 
-    		if (Math.abs(progress) === Infinity || isNaN(progress)) {
+    		if (Math.abs(currentSongSyncProgress) === Infinity || isNaN(currentSongSyncProgress)) {
     			$$invalidate(1, currentSongSyncProgress = 100);
-    		} else {
-    			$$invalidate(1, currentSongSyncProgress = progress);
     		}
 
-    		cssVariablesService.set('song-sync-queue-progress', progress || 100 + 'px');
+    		cssVariablesService.set('song-sync-queue-progress', currentSongSyncProgress + 'px');
     	}
 
     	function stopSongUpdate() {
@@ -16575,14 +16689,14 @@ var app = (function () {
 
     	function loadSongUpdateTippy(isSongUpdating) {
     		if (isSongUpdating) {
-    			tippyService(tippySongUpdateId, 'song-update', { content: 'Stop song update' });
+    			tippyService(tippySongUpdateId, 'song-update', { content: 'Stop songs update' });
     		} else {
     			tippyService(tippySongUpdateId, 'song-update', { content: 'No songs updating' });
     		}
     	}
 
     	onMount(() => {
-    		tippyService(tippySongUpdateId, 'song-update', { content: 'No songs updating' });
+    		$$invalidate(4, isMounted = true);
     	});
 
     	const writable_props = [];
@@ -16604,6 +16718,7 @@ var app = (function () {
     		RefreshIcon,
     		notifyService,
     		cssVariablesService,
+    		isMounted,
     		currentSongSyncProgress,
     		tippySongUpdateId,
     		calculateProgress,
@@ -16614,6 +16729,7 @@ var app = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
+    		if ('isMounted' in $$props) $$invalidate(4, isMounted = $$props.isMounted);
     		if ('currentSongSyncProgress' in $$props) $$invalidate(1, currentSongSyncProgress = $$props.currentSongSyncProgress);
     		if ('tippySongUpdateId' in $$props) tippySongUpdateId = $$props.tippySongUpdateId;
     	};
@@ -16627,12 +16743,8 @@ var app = (function () {
     			calculateProgress($songSyncQueueProgress);
     		}
 
-    		if ($$self.$$.dirty & /*$songSyncQueueProgress*/ 1) {
-    			{
-    				if ($songSyncQueueProgress.isSongUpdating === true) {
-    					loadSongUpdateTippy($songSyncQueueProgress.isSongUpdating);
-    				}
-    			}
+    		if ($$self.$$.dirty & /*isMounted, $songSyncQueueProgress*/ 17) {
+    			if (isMounted) loadSongUpdateTippy($songSyncQueueProgress.isSongUpdating);
     		}
     	};
 
@@ -16641,6 +16753,7 @@ var app = (function () {
     		currentSongSyncProgress,
     		$artCompressQueueProgress,
     		stopSongUpdate,
+    		isMounted,
     		click_handler
     	];
     }
@@ -22628,103 +22741,103 @@ var app = (function () {
     			button1 = element("button");
     			create_component(updateicon.$$.fragment);
     			t49 = text("\n\t\t\tUpdate");
-    			set_custom_element_data(songs_to_edit, "class", "svelte-58oab7");
+    			set_custom_element_data(songs_to_edit, "class", "svelte-vj0jal");
     			add_location(songs_to_edit, file$E, 193, 1, 7915);
-    			set_custom_element_data(tag_name0, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name0, "class", "svelte-vj0jal");
     			add_location(tag_name0, file$E, 198, 2, 8092);
-    			attr_dev(textarea0, "class", "svelte-58oab7");
+    			attr_dev(textarea0, "class", "svelte-vj0jal");
     			add_location(textarea0, file$E, 199, 2, 8135);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
-    			set_custom_element_data(tag_container0, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container0, "class", "svelte-vj0jal");
     			add_location(tag_container0, file$E, 197, 1, 8057);
-    			set_custom_element_data(tag_name1, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name1, "class", "svelte-vj0jal");
     			add_location(tag_name1, file$E, 203, 2, 8234);
-    			attr_dev(textarea1, "class", "svelte-58oab7");
+    			attr_dev(textarea1, "class", "svelte-vj0jal");
     			add_location(textarea1, file$E, 204, 2, 8277);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
-    			set_custom_element_data(tag_container1, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container1, "class", "svelte-vj0jal");
     			add_location(tag_container1, file$E, 202, 1, 8199);
-    			set_custom_element_data(tag_name2, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name2, "class", "svelte-vj0jal");
     			add_location(tag_name2, file$E, 208, 2, 8395);
-    			attr_dev(textarea2, "class", "svelte-58oab7");
+    			attr_dev(textarea2, "class", "svelte-vj0jal");
     			add_location(textarea2, file$E, 209, 2, 8440);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
-    			set_custom_element_data(tag_container2, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container2, "class", "svelte-vj0jal");
     			add_location(tag_container2, file$E, 207, 1, 8341);
-    			set_custom_element_data(tag_name3, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name3, "class", "svelte-vj0jal");
     			add_location(tag_name3, file$E, 213, 2, 8563);
-    			attr_dev(textarea3, "class", "svelte-58oab7");
+    			attr_dev(textarea3, "class", "svelte-vj0jal");
     			add_location(textarea3, file$E, 214, 2, 8607);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
-    			set_custom_element_data(tag_container3, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container3, "class", "svelte-vj0jal");
     			add_location(tag_container3, file$E, 212, 1, 8504);
-    			set_custom_element_data(tag_name4, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name4, "class", "svelte-vj0jal");
     			add_location(tag_name4, file$E, 218, 2, 8712);
-    			attr_dev(textarea4, "class", "svelte-58oab7");
+    			attr_dev(textarea4, "class", "svelte-vj0jal");
     			add_location(textarea4, file$E, 219, 2, 8756);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
-    			set_custom_element_data(tag_container4, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container4, "class", "svelte-vj0jal");
     			add_location(tag_container4, file$E, 217, 1, 8676);
-    			set_custom_element_data(tag_name5, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name5, "class", "svelte-vj0jal");
     			add_location(tag_name5, file$E, 223, 2, 8862);
-    			attr_dev(textarea5, "class", "svelte-58oab7");
+    			attr_dev(textarea5, "class", "svelte-vj0jal");
     			add_location(textarea5, file$E, 224, 2, 8912);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
-    			set_custom_element_data(tag_container5, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container5, "class", "svelte-vj0jal");
     			add_location(tag_container5, file$E, 222, 1, 8821);
-    			set_custom_element_data(tag_name6, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name6, "class", "svelte-vj0jal");
     			add_location(tag_name6, file$E, 228, 2, 9017);
-    			attr_dev(textarea6, "class", "svelte-58oab7");
+    			attr_dev(textarea6, "class", "svelte-vj0jal");
     			add_location(textarea6, file$E, 229, 2, 9060);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
-    			set_custom_element_data(tag_container6, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container6, "class", "svelte-vj0jal");
     			add_location(tag_container6, file$E, 227, 1, 8982);
-    			set_custom_element_data(tag_name7, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name7, "class", "svelte-vj0jal");
     			add_location(tag_name7, file$E, 233, 2, 9162);
-    			attr_dev(textarea7, "class", "svelte-58oab7");
+    			attr_dev(textarea7, "class", "svelte-vj0jal");
     			add_location(textarea7, file$E, 234, 2, 9208);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
-    			set_custom_element_data(tag_container7, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container7, "class", "svelte-vj0jal");
     			add_location(tag_container7, file$E, 232, 1, 9124);
-    			set_custom_element_data(tag_name8, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name8, "class", "svelte-vj0jal");
     			add_location(tag_name8, file$E, 238, 2, 9312);
-    			attr_dev(textarea8, "class", "svelte-58oab7");
+    			attr_dev(textarea8, "class", "svelte-vj0jal");
     			add_location(textarea8, file$E, 239, 2, 9357);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
-    			set_custom_element_data(tag_container8, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container8, "class", "svelte-vj0jal");
     			add_location(tag_container8, file$E, 237, 1, 9275);
-    			set_custom_element_data(tag_name9, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name9, "class", "svelte-vj0jal");
     			add_location(tag_name9, file$E, 243, 2, 9481);
-    			attr_dev(textarea9, "class", "svelte-58oab7");
+    			attr_dev(textarea9, "class", "svelte-vj0jal");
     			add_location(textarea9, file$E, 244, 2, 9523);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
-    			set_custom_element_data(tag_container9, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container9, "class", "svelte-vj0jal");
     			add_location(tag_container9, file$E, 242, 1, 9423);
-    			set_custom_element_data(tag_name10, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name10, "class", "svelte-vj0jal");
     			add_location(tag_name10, file$E, 248, 2, 9650);
-    			attr_dev(textarea10, "class", "svelte-58oab7");
+    			attr_dev(textarea10, "class", "svelte-vj0jal");
     			add_location(textarea10, file$E, 249, 2, 9693);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
-    			set_custom_element_data(tag_container10, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container10, "class", "svelte-vj0jal");
     			add_location(tag_container10, file$E, 247, 1, 9591);
-    			set_custom_element_data(tag_name11, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name11, "class", "svelte-vj0jal");
     			add_location(tag_name11, file$E, 253, 2, 9819);
-    			attr_dev(textarea11, "class", "svelte-58oab7");
+    			attr_dev(textarea11, "class", "svelte-vj0jal");
     			add_location(textarea11, file$E, 254, 2, 9860);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
-    			set_custom_element_data(tag_container11, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container11, "class", "svelte-vj0jal");
     			add_location(tag_container11, file$E, 252, 1, 9762);
-    			set_custom_element_data(tag_name12, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_name12, "class", "svelte-vj0jal");
     			add_location(tag_name12, file$E, 258, 2, 9963);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
-    			set_custom_element_data(tag_container12, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_container12, "class", "svelte-vj0jal");
     			add_location(tag_container12, file$E, 257, 1, 9927);
-    			set_custom_element_data(album_art, "class", "svelte-58oab7");
+    			set_custom_element_data(album_art, "class", "svelte-vj0jal");
     			add_location(album_art, file$E, 262, 1, 10143);
     			attr_dev(button0, "class", "danger");
     			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
@@ -22732,9 +22845,9 @@ var app = (function () {
     			attr_dev(button1, "class", "info");
     			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
     			add_location(button1, file$E, 271, 2, 10491);
-    			set_custom_element_data(button_container, "class", "svelte-58oab7");
+    			set_custom_element_data(button_container, "class", "svelte-vj0jal");
     			add_location(button_container, file$E, 266, 1, 10264);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-58oab7");
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-vj0jal");
     			add_location(tag_edit_svlt, file$E, 192, 0, 7898);
     		},
     		l: function claim(nodes) {
@@ -23081,7 +23194,7 @@ var app = (function () {
     	let newTags = {};
 
     	function setupSongs(from) {
-    		if (from === 'songListStoreUpdate' && $songSyncQueueProgress.currentLength > 0) {
+    		if (from === 'songListStoreUpdate' && $songSyncQueueProgress.currentLength > 1) {
     			return;
     		}
 
@@ -25398,138 +25511,6 @@ var app = (function () {
     		throw new Error("<SystemIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
-
-    var isMergeableObject = function isMergeableObject(value) {
-    	return isNonNullObject(value)
-    		&& !isSpecial(value)
-    };
-
-    function isNonNullObject(value) {
-    	return !!value && typeof value === 'object'
-    }
-
-    function isSpecial(value) {
-    	var stringValue = Object.prototype.toString.call(value);
-
-    	return stringValue === '[object RegExp]'
-    		|| stringValue === '[object Date]'
-    		|| isReactElement(value)
-    }
-
-    // see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
-    var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
-    var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
-
-    function isReactElement(value) {
-    	return value.$$typeof === REACT_ELEMENT_TYPE
-    }
-
-    function emptyTarget(val) {
-    	return Array.isArray(val) ? [] : {}
-    }
-
-    function cloneUnlessOtherwiseSpecified(value, options) {
-    	return (options.clone !== false && options.isMergeableObject(value))
-    		? deepmerge(emptyTarget(value), value, options)
-    		: value
-    }
-
-    function defaultArrayMerge(target, source, options) {
-    	return target.concat(source).map(function(element) {
-    		return cloneUnlessOtherwiseSpecified(element, options)
-    	})
-    }
-
-    function getMergeFunction(key, options) {
-    	if (!options.customMerge) {
-    		return deepmerge
-    	}
-    	var customMerge = options.customMerge(key);
-    	return typeof customMerge === 'function' ? customMerge : deepmerge
-    }
-
-    function getEnumerableOwnPropertySymbols(target) {
-    	return Object.getOwnPropertySymbols
-    		? Object.getOwnPropertySymbols(target).filter(function(symbol) {
-    			return target.propertyIsEnumerable(symbol)
-    		})
-    		: []
-    }
-
-    function getKeys(target) {
-    	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
-    }
-
-    function propertyIsOnObject(object, property) {
-    	try {
-    		return property in object
-    	} catch(_) {
-    		return false
-    	}
-    }
-
-    // Protects from prototype poisoning and unexpected merging up the prototype chain.
-    function propertyIsUnsafe(target, key) {
-    	return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-    		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-    			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
-    }
-
-    function mergeObject(target, source, options) {
-    	var destination = {};
-    	if (options.isMergeableObject(target)) {
-    		getKeys(target).forEach(function(key) {
-    			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
-    		});
-    	}
-    	getKeys(source).forEach(function(key) {
-    		if (propertyIsUnsafe(target, key)) {
-    			return
-    		}
-
-    		if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
-    			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
-    		} else {
-    			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
-    		}
-    	});
-    	return destination
-    }
-
-    function deepmerge(target, source, options) {
-    	options = options || {};
-    	options.arrayMerge = options.arrayMerge || defaultArrayMerge;
-    	options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-    	// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
-    	// implementations can use it. The caller may not replace it.
-    	options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
-
-    	var sourceIsArray = Array.isArray(source);
-    	var targetIsArray = Array.isArray(target);
-    	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
-
-    	if (!sourceAndTargetTypesMatch) {
-    		return cloneUnlessOtherwiseSpecified(source, options)
-    	} else if (sourceIsArray) {
-    		return options.arrayMerge(target, source, options)
-    	} else {
-    		return mergeObject(target, source, options)
-    	}
-    }
-
-    deepmerge.all = function deepmergeAll(array, options) {
-    	if (!Array.isArray(array)) {
-    		throw new Error('first argument should be an array')
-    	}
-
-    	return array.reduce(function(prev, next) {
-    		return deepmerge(prev, next, options)
-    	}, {})
-    };
-
-    var deepmerge_1 = deepmerge;
-
-    var cjs = deepmerge_1;
 
     function updateConfigFn (newConfig) {
         let mergedConfig;
@@ -37951,7 +37932,7 @@ var app = (function () {
     /* src/App.svelte generated by Svelte v3.49.0 */
     const file = "src/App.svelte";
 
-    // (62:41) 
+    // (61:41) 
     function create_if_block_2(ctx) {
     	let playbacklayout;
     	let current;
@@ -37983,14 +37964,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(62:41) ",
+    		source: "(61:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (60:39) 
+    // (59:39) 
     function create_if_block_1(ctx) {
     	let configlayout;
     	let current;
@@ -38022,14 +38003,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(60:39) ",
+    		source: "(59:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (58:2) {#if $layoutToShow === 'Library'}
+    // (57:2) {#if $layoutToShow === 'Library'}
     function create_if_block(ctx) {
     	let librarylayout;
     	let current;
@@ -38061,7 +38042,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(58:2) {#if $layoutToShow === 'Library'}",
+    		source: "(57:2) {#if $layoutToShow === 'Library'}",
     		ctx
     	});
 
@@ -38199,9 +38180,9 @@ var app = (function () {
     			t13 = space();
     			create_component(storageservice.$$.fragment);
     			set_custom_element_data(current_window_svlt, "class", "svelte-gvvlpk");
-    			add_location(current_window_svlt, file, 56, 1, 2276);
+    			add_location(current_window_svlt, file, 55, 1, 2234);
     			set_custom_element_data(main_app, "class", "svelte-gvvlpk");
-    			add_location(main_app, file, 51, 0, 2216);
+    			add_location(main_app, file, 50, 0, 2174);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

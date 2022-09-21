@@ -8,3 +8,4 @@
 * Remove album art traces if song removed.
 * Select multiple albums.
 * Fix song updating bug in status bar and bd
+* Get album colors
