@@ -6,7 +6,9 @@ export type ColorType = {
 	lightnessDark: number
 }
 
-export function ColorTypeShell(): ColorType {
+
+
+export function ColorTypeDefault(): ColorType {
 	return {
 		hue: 0,
 		saturation: 0,

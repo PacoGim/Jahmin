@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllowedFiles = exports.handleArtService = void 0;
+exports.handleArtService = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const music_metadata_1 = __importDefault(require("music-metadata"));
@@ -14,34 +14,11 @@ const hashString_fn_1 = __importDefault(require("../functions/hashString.fn"));
 const workers_service_1 = require("./workers.service");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const getAllFilesInFoldersDeep_fn_1 = __importDefault(require("../functions/getAllFilesInFoldersDeep.fn"));
-const videoFormats = ['mp4', 'webm'];
-const animatedFormats = ['apng', 'avif', 'webp', 'gif'];
-const vectorFormats = ['svg'];
-const imageFormats = ['png', 'jpg', 'jpeg'];
-const validFormats = [...videoFormats, ...animatedFormats, ...vectorFormats, ...imageFormats];
-const validNames = ['cover', 'folder', 'front', 'art', 'album'];
-const allowedFiles = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat();
+const getAllowedArts_fn_1 = __importDefault(require("../functions/getAllowedArts.fn"));
+const allowedArts_var_1 = require("../global/allowedArts.var");
+const getFileExtension_fn_1 = __importDefault(require("../functions/getFileExtension.fn"));
 let sharpWorker;
-(0, workers_service_1.getWorker)('sharp').then(worker => {
-    if (!sharpWorker) {
-        sharpWorker = worker;
-        sharpWorker.on('message', handleSharpWorkerResponse);
-    }
-});
 let ffmpegImageWorker;
-(0, workers_service_1.getWorker)('ffmpegImage').then(worker => {
-    if (!ffmpegImageWorker) {
-        ffmpegImageWorker = worker;
-        ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse);
-    }
-});
-function handleSharpWorkerResponse(data) {
-    delete data.artData;
-    (0, sendWebContents_fn_1.default)('new-image-art', data);
-}
-function handleFfmpegImageWorkerResponse(data) {
-    (0, sendWebContents_fn_1.default)('new-animation-art', data);
-}
 function handleArtService(filePath, elementId, size) {
     if (isNaN(size) || !filePath || !elementId)
         return;
@@ -75,77 +52,24 @@ function handleFolderArt(folderPath, elementId, size) {
         });
         return;
     }
-    let allowedArtFiles = getAllowedFiles(folderPath);
-    let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getExtension(file)));
-    let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getExtension(file)));
-    let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getExtension(file)));
+    let allowedArtFiles = (0, getAllowedArts_fn_1.default)(folderPath);
+    let videoArts = allowedArtFiles.filter(file => allowedArts_var_1.videoFormats.includes((0, getFileExtension_fn_1.default)(file)));
+    let animatedArts = allowedArtFiles.filter(file => allowedArts_var_1.animatedFormats.includes((0, getFileExtension_fn_1.default)(file)));
+    let imageArts = allowedArtFiles.filter(file => allowedArts_var_1.imageFormats.includes((0, getFileExtension_fn_1.default)(file)));
     if (videoArts.length !== 0) {
-        return handleFolderVideoArt(videoArts, elementId);
+        return handleVideoArt(videoArts, elementId);
     }
     if (animatedArts.length !== 0) {
-        return handleFolderAnimatedArt(animatedArts, elementId, size);
+        return handleAnimatedArt(animatedArts, elementId, size);
     }
     if (imageArts.length !== 0) {
-        return handleFolderImageArt(imageArts, artOutputPath, elementId, size);
+        return handleImageArt(imageArts, artOutputPath, elementId, size);
     }
+    // If no proper art found, send to renderer a null art path.
     (0, sendWebContents_fn_1.default)('new-image-art', {
         artPath: null,
         elementId
     });
-}
-function handleFolderImageArt(artPaths, artOutputPath, elementId, size) {
-    let bestArtFile = artPaths.sort((fileA, fileB) => fs_1.default.statSync(fileB).size - fs_1.default.statSync(fileA).size)[0] || undefined;
-    if (!bestArtFile) {
-        (0, sendWebContents_fn_1.default)('new-image-art', {
-            artPath: null,
-            elementId
-        });
-        return;
-    }
-    (0, sendWebContents_fn_1.default)('new-image-art', {
-        artPath: bestArtFile,
-        elementId
-    });
-    let extension = getExtension(bestArtFile);
-    if (imageFormats.includes(extension)) {
-        compressArt(bestArtFile, artOutputPath, elementId, size);
-    }
-}
-function handleFolderVideoArt(artPaths, elementId) {
-    let artPath = artPaths[0];
-    if (artPath !== undefined) {
-        (0, sendWebContents_fn_1.default)('new-video-art', {
-            artPath,
-            elementId
-        });
-    }
-    else {
-        (0, sendWebContents_fn_1.default)('new-video-art', {
-            artPath: null,
-            elementId
-        });
-    }
-}
-function handleFolderAnimatedArt(artPaths, elementId, size) {
-    let artPath = artPaths[1];
-    if (artPath) {
-        (0, sendWebContents_fn_1.default)('new-animation-art', {
-            artPath: artPaths[1],
-            elementId
-        });
-        ffmpegImageWorker.postMessage({
-            artPath: artPaths[1],
-            elementId,
-            size,
-            appDataPath: (0, getAppDataPath_fn_1.default)()
-        });
-    }
-    else {
-        (0, sendWebContents_fn_1.default)('new-animation-art', {
-            artPath: null,
-            elementId
-        });
-    }
 }
 function handleFileArt(filePath, elementId, size) {
     const fileNameHash = (0, hashString_fn_1.default)(filePath);
@@ -188,6 +112,61 @@ function handleFileArt(filePath, elementId, size) {
         fs_1.default.writeFileSync(path_1.default.join(artDirectory, `${artHash}.${fileNameHash}`), '');
     });
 }
+function handleImageArt(artPaths, artOutputPath, elementId, size) {
+    let bestArtFile = artPaths.sort((fileA, fileB) => fs_1.default.statSync(fileB).size - fs_1.default.statSync(fileA).size)[0] || undefined;
+    if (!bestArtFile) {
+        (0, sendWebContents_fn_1.default)('new-image-art', {
+            artPath: null,
+            elementId
+        });
+        return;
+    }
+    (0, sendWebContents_fn_1.default)('new-image-art', {
+        artPath: bestArtFile,
+        elementId
+    });
+    let extension = (0, getFileExtension_fn_1.default)(bestArtFile);
+    if (allowedArts_var_1.imageFormats.includes(extension)) {
+        compressArt(bestArtFile, artOutputPath, elementId, size);
+    }
+}
+function handleVideoArt(artPaths, elementId) {
+    let artPath = artPaths[0];
+    if (artPath !== undefined) {
+        (0, sendWebContents_fn_1.default)('new-video-art', {
+            artPath,
+            elementId
+        });
+    }
+    else {
+        (0, sendWebContents_fn_1.default)('new-video-art', {
+            artPath: null,
+            elementId
+        });
+    }
+}
+function handleAnimatedArt(artPaths, elementId, size) {
+    let artPath = artPaths[0];
+    if (artPath) {
+        (0, sendWebContents_fn_1.default)('new-animation-art', {
+            artPath,
+            elementId
+        });
+        ffmpegImageWorker.postMessage({
+            artPath,
+            elementId,
+            size,
+            appDataPath: (0, getAppDataPath_fn_1.default)(),
+            type: 'handle-art-compression'
+        });
+    }
+    else {
+        (0, sendWebContents_fn_1.default)('new-animation-art', {
+            artPath: null,
+            elementId
+        });
+    }
+}
 function compressArt(artData, artPath, elementId, size) {
     sharpWorker.postMessage({
         artData,
@@ -196,22 +175,25 @@ function compressArt(artData, artPath, elementId, size) {
         size
     });
 }
-// Returns all images sorted by priority.
-function getAllowedFiles(rootDir) {
-    let allowedArtFiles = fs_1.default
-        .readdirSync(rootDir)
-        .filter(file => allowedFiles.includes(file.toLowerCase()))
-        .map(file => path_1.default.join(rootDir, file))
-        .sort((a, b) => {
-        // Gets the priority from the index of the valid formats above.
-        // mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.
-        let aExtension = validFormats.indexOf(getExtension(a));
-        let bExtension = validFormats.indexOf(getExtension(b));
-        return aExtension - bExtension;
-    });
-    return allowedArtFiles;
+/********************** Workers **********************/
+(0, workers_service_1.getWorker)('sharp').then(worker => {
+    if (!sharpWorker) {
+        sharpWorker = worker;
+        sharpWorker.on('message', handleSharpWorkerResponse);
+    }
+});
+(0, workers_service_1.getWorker)('ffmpegImage').then(worker => {
+    if (!ffmpegImageWorker) {
+        ffmpegImageWorker = worker;
+        ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse);
+    }
+});
+function handleSharpWorkerResponse(data) {
+    delete data.artData;
+    (0, sendWebContents_fn_1.default)('new-image-art', data);
 }
-exports.getAllowedFiles = getAllowedFiles;
-function getExtension(data) {
-    return data.split('.').pop() || '';
+function handleFfmpegImageWorkerResponse(data) {
+    if (data.type === 'handle-art-compression') {
+        (0, sendWebContents_fn_1.default)('new-animation-art', data);
+    }
 }

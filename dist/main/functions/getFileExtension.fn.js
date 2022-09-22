@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function default_1(filePath) {
+    if (filePath === undefined)
+        return '';
     let filePathSplit = filePath.split('.');
     if (filePathSplit && filePathSplit.length > 1) {
         let extension = filePathSplit.pop();
@@ -8,6 +10,6 @@ function default_1(filePath) {
             return extension.toLowerCase();
         }
     }
-    return undefined;
+    return '';
 }
 exports.default = default_1;

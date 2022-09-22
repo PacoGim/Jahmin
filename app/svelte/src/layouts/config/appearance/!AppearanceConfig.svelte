@@ -7,7 +7,7 @@
 	import DayNightThemeConfig from './DayNightThemeConfig.svelte'
 	import FontSizeConfig from './FontSizeConfig.svelte'
 	import GridArtSize from './GridArtSize.svelte'
-  import RebuildArtCacheConfig from './RebuildArtCacheConfig.svelte'
+	import RebuildArtCacheConfig from './RebuildArtCacheConfig.svelte'
 </script>
 
 <config-section>
@@ -18,6 +18,8 @@
 	<OptionSection title="Color Contrast Ratio">
 		<ColorContrastConfig />
 	</OptionSection>
+
+	<OptionSection title="Other Options" />
 
 	<OptionSectionCompact title="Font Size: {$config.userOptions.fontSize}">
 		<FontSizeConfig />

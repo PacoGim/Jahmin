@@ -12,11 +12,11 @@
 		margin-bottom: 1rem;
 		display: flex;
 		flex-direction: row;
-		/* border-bottom: 2px var(--color-fg-1) solid; */
+		align-items: center;
 	}
 
 	section-title {
-		font-size: 1.2rem;
+		font-size: 1rem;
 		margin-right: 0.5rem;
 	}
 </style>

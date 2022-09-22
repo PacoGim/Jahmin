@@ -61,6 +61,7 @@
 	}
 
 	:global(art-svlt img, art-svlt video) {
+		object-fit: fill;
 		width: 100%;
 		height: 100%;
 	}

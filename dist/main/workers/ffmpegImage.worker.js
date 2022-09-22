@@ -12,7 +12,15 @@ const fs_1 = __importDefault(require("fs"));
 let os /* Operating system */ = (0, getOs_fn_1.default)();
 let ffmpegPath = (0, path_1.join)(__dirname, `../../binaries/${os}/ffmpeg`);
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', message => {
-    let { artPath, elementId, size, appDataPath } = message;
+    if (message.type === 'handle-art-compression') {
+        handleArtCompression(message);
+    }
+    if (message.type === 'handle-art-color') {
+        handleArtColor(message);
+    }
+});
+function handleArtCompression(message) {
+    let { artPath, elementId, size, appDataPath, type } = message;
     let tempFolder = (0, path_1.join)(appDataPath, '/temp');
     let id = (0, generateId_fn_1.default)();
     let tempFilePath = `${tempFolder}/${id}.jpg`;
@@ -24,9 +32,29 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
             worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
                 artPath,
                 elementId,
+                type,
                 artAlt: Buffer.from(fs_1.default.readFileSync(tempFilePath)).toString('base64')
             });
             fs_1.default.unlink(tempFilePath, () => { });
         }
     });
-});
+}
+function handleArtColor(message) {
+    let { id, type, artPath, contrastRatio, appDataPath } = message;
+    let tempFolder = (0, path_1.join)(appDataPath, '/temp');
+    let tempFilePath = `${tempFolder}/${id}.jpg`;
+    if (!fs_1.default.existsSync(tempFolder)) {
+        fs_1.default.mkdirSync(tempFolder, { recursive: true });
+    }
+    (0, child_process_1.spawn)(`"${ffmpegPath}" -i "${artPath}" "${tempFilePath}"`, [], { shell: true }).on('close', code => {
+        if (code === 1) {
+            worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage({
+                type,
+                id,
+                contrastRatio,
+                fileBuffer: Buffer.from(fs_1.default.readFileSync(tempFilePath))
+            });
+            fs_1.default.unlink(tempFilePath, () => { });
+        }
+    });
+}

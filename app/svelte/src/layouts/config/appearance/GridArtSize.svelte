@@ -53,8 +53,6 @@
 	}
 </script>
 
-<grid-art-size-config>
-	<button on:click={() => setGridSize()}
-		>Change Art Size<UpdateIcon style="height: 1rem;margin-left: 0.5rem;fill:#fff;" />
-	</button>
+<grid-art-size-config on:click={() => setGridSize()}>
+	<config-edit-button>···</config-edit-button>
 </grid-art-size-config>

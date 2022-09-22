@@ -7130,7 +7130,7 @@ var app = (function () {
     let appTitle = writable('Jahmin');
     let elementMap = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Library');
+    let layoutToShow = writable('Config');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -10485,7 +10485,7 @@ var app = (function () {
     			set_custom_element_data(art_svlt, "id", /*elementId*/ ctx[0]);
     			set_style(art_svlt, "height", /*elementHeight*/ ctx[3] + "px");
     			set_style(art_svlt, "width", /*elementWidth*/ ctx[2] + "px");
-    			set_custom_element_data(art_svlt, "class", "svelte-r1jesa");
+    			set_custom_element_data(art_svlt, "class", "svelte-1v223uh");
     			add_location(art_svlt, file$$, 38, 1, 1268);
     		},
     		m: function mount(target, anchor) {
@@ -24331,10 +24331,10 @@ var app = (function () {
     			t0 = text(/*title*/ ctx[0]);
     			t1 = space();
     			if (default_slot) default_slot.c();
-    			set_custom_element_data(section_title, "class", "svelte-wd12vi");
+    			set_custom_element_data(section_title, "class", "svelte-kkhm3p");
     			add_location(section_title, file$B, 4, 1, 74);
     			attr_dev(section, "id", /*title*/ ctx[0]);
-    			attr_dev(section, "class", "svelte-wd12vi");
+    			attr_dev(section, "class", "svelte-kkhm3p");
     			add_location(section, file$B, 3, 0, 52);
     		},
     		l: function claim(nodes) {
@@ -24470,10 +24470,10 @@ var app = (function () {
     			t0 = text(/*title*/ ctx[0]);
     			t1 = space();
     			if (default_slot) default_slot.c();
-    			set_custom_element_data(section_title, "class", "svelte-1zqger");
+    			set_custom_element_data(section_title, "class", "svelte-180ebqu");
     			add_location(section_title, file$A, 4, 1, 74);
     			attr_dev(section, "id", /*title*/ ctx[0]);
-    			attr_dev(section, "class", "svelte-1zqger");
+    			attr_dev(section, "class", "svelte-180ebqu");
     			add_location(section, file$A, 3, 0, 52);
     		},
     		l: function claim(nodes) {
@@ -25902,57 +25902,35 @@ var app = (function () {
 
     function create_fragment$v(ctx) {
     	let font_size_config;
-    	let button;
-    	let t;
-    	let updateicon;
-    	let current;
+    	let config_edit_button;
     	let mounted;
     	let dispose;
-
-    	updateicon = new UpdateIcon({
-    			props: {
-    				style: "height: 1rem;margin-left: 0.5rem;fill:#fff;"
-    			},
-    			$$inline: true
-    		});
 
     	const block = {
     		c: function create() {
     			font_size_config = element("font-size-config");
-    			button = element("button");
-    			t = text("Change Font Size ");
-    			create_component(updateicon.$$.fragment);
-    			add_location(button, file$q, 38, 1, 1139);
-    			add_location(font_size_config, file$q, 37, 0, 1119);
+    			config_edit_button = element("config-edit-button");
+    			config_edit_button.textContent = "···";
+    			add_location(config_edit_button, file$q, 37, 50, 1153);
+    			add_location(font_size_config, file$q, 37, 0, 1103);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, font_size_config, anchor);
-    			append_dev(font_size_config, button);
-    			append_dev(button, t);
-    			mount_component(updateicon, button, null);
-    			current = true;
+    			append_dev(font_size_config, config_edit_button);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler*/ ctx[1], false, false, false);
+    				dispose = listen_dev(font_size_config, "click", /*click_handler*/ ctx[1], false, false, false);
     				mounted = true;
     			}
     		},
     		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(updateicon.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(updateicon.$$.fragment, local);
-    			current = false;
-    		},
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(font_size_config);
-    			destroy_component(updateicon);
     			mounted = false;
     			dispose();
     		}
@@ -26021,7 +25999,6 @@ var app = (function () {
     	const click_handler = () => setFontSize();
 
     	$$self.$capture_state = () => ({
-    		UpdateIcon,
     		config,
     		layoutToShow,
     		rangeInputService,
@@ -26062,57 +26039,35 @@ var app = (function () {
 
     function create_fragment$u(ctx) {
     	let grid_art_size_config;
-    	let button;
-    	let t;
-    	let updateicon;
-    	let current;
+    	let config_edit_button;
     	let mounted;
     	let dispose;
-
-    	updateicon = new UpdateIcon({
-    			props: {
-    				style: "height: 1rem;margin-left: 0.5rem;fill:#fff;"
-    			},
-    			$$inline: true
-    		});
 
     	const block = {
     		c: function create() {
     			grid_art_size_config = element("grid-art-size-config");
-    			button = element("button");
-    			t = text("Change Art Size");
-    			create_component(updateicon.$$.fragment);
-    			add_location(button, file$p, 53, 1, 1760);
-    			add_location(grid_art_size_config, file$p, 52, 0, 1736);
+    			config_edit_button = element("config-edit-button");
+    			config_edit_button.textContent = "···";
+    			add_location(config_edit_button, file$p, 53, 1, 1775);
+    			add_location(grid_art_size_config, file$p, 52, 0, 1720);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, grid_art_size_config, anchor);
-    			append_dev(grid_art_size_config, button);
-    			append_dev(button, t);
-    			mount_component(updateicon, button, null);
-    			current = true;
+    			append_dev(grid_art_size_config, config_edit_button);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler*/ ctx[1], false, false, false);
+    				dispose = listen_dev(grid_art_size_config, "click", /*click_handler*/ ctx[1], false, false, false);
     				mounted = true;
     			}
     		},
     		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(updateicon.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(updateicon.$$.fragment, local);
-    			current = false;
-    		},
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(grid_art_size_config);
-    			destroy_component(updateicon);
     			mounted = false;
     			dispose();
     		}
@@ -26198,7 +26153,6 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		isElementInViewportFn,
-    		UpdateIcon,
     		config,
     		layoutToShow,
     		rangeInputService,
@@ -26231,16 +26185,16 @@ var app = (function () {
 
     function create_fragment$t(ctx) {
     	let font_size_config;
-    	let button;
+    	let config_edit_button;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
     			font_size_config = element("font-size-config");
-    			button = element("button");
-    			button.textContent = "Rebuild Art Cache";
-    			add_location(button, file$o, 10, 1, 273);
+    			config_edit_button = element("config-edit-button");
+    			config_edit_button.textContent = "·.·";
+    			add_location(config_edit_button, file$o, 10, 1, 308);
     			add_location(font_size_config, file$o, 9, 0, 253);
     		},
     		l: function claim(nodes) {
@@ -26248,10 +26202,10 @@ var app = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, font_size_config, anchor);
-    			append_dev(font_size_config, button);
+    			append_dev(font_size_config, config_edit_button);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler*/ ctx[1], false, false, false);
+    				dispose = listen_dev(font_size_config, "click", /*click_handler*/ ctx[1], false, false, false);
     				mounted = true;
     			}
     		},
@@ -26408,7 +26362,7 @@ var app = (function () {
     	return block;
     }
 
-    // (20:1) <OptionSectionCompact title="Font Size: {$config.userOptions.fontSize}">
+    // (22:1) <OptionSectionCompact title="Font Size: {$config.userOptions.fontSize}">
     function create_default_slot_2(ctx) {
     	let fontsizeconfig;
     	let current;
@@ -26440,14 +26394,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2.name,
     		type: "slot",
-    		source: "(20:1) <OptionSectionCompact title=\\\"Font Size: {$config.userOptions.fontSize}\\\">",
+    		source: "(22:1) <OptionSectionCompact title=\\\"Font Size: {$config.userOptions.fontSize}\\\">",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:1) <OptionSectionCompact title="Grid Art Size: {$config.userOptions.artSize}">
+    // (26:1) <OptionSectionCompact title="Grid Art Size: {$config.userOptions.artSize}">
     function create_default_slot_1$1(ctx) {
     	let gridartsize;
     	let current;
@@ -26479,14 +26433,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$1.name,
     		type: "slot",
-    		source: "(24:1) <OptionSectionCompact title=\\\"Grid Art Size: {$config.userOptions.artSize}\\\">",
+    		source: "(26:1) <OptionSectionCompact title=\\\"Grid Art Size: {$config.userOptions.artSize}\\\">",
     		ctx
     	});
 
     	return block;
     }
 
-    // (28:1) <OptionSectionCompact title="Rebuild Art Cache">
+    // (30:1) <OptionSectionCompact title="Rebuild Art Cache">
     function create_default_slot$2(ctx) {
     	let rebuildartcacheconfig;
     	let current;
@@ -26518,7 +26472,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$2.name,
     		type: "slot",
-    		source: "(28:1) <OptionSectionCompact title=\\\"Rebuild Art Cache\\\">",
+    		source: "(30:1) <OptionSectionCompact title=\\\"Rebuild Art Cache\\\">",
     		ctx
     	});
 
@@ -26531,10 +26485,12 @@ var app = (function () {
     	let t0;
     	let optionsection1;
     	let t1;
-    	let optionsectioncompact0;
+    	let optionsection2;
     	let t2;
-    	let optionsectioncompact1;
+    	let optionsectioncompact0;
     	let t3;
+    	let optionsectioncompact1;
+    	let t4;
     	let optionsectioncompact2;
     	let current;
 
@@ -26553,6 +26509,11 @@ var app = (function () {
     				$$slots: { default: [create_default_slot_3] },
     				$$scope: { ctx }
     			},
+    			$$inline: true
+    		});
+
+    	optionsection2 = new OptionSection({
+    			props: { title: "Other Options" },
     			$$inline: true
     		});
 
@@ -26590,10 +26551,12 @@ var app = (function () {
     			t0 = space();
     			create_component(optionsection1.$$.fragment);
     			t1 = space();
-    			create_component(optionsectioncompact0.$$.fragment);
+    			create_component(optionsection2.$$.fragment);
     			t2 = space();
-    			create_component(optionsectioncompact1.$$.fragment);
+    			create_component(optionsectioncompact0.$$.fragment);
     			t3 = space();
+    			create_component(optionsectioncompact1.$$.fragment);
+    			t4 = space();
     			create_component(optionsectioncompact2.$$.fragment);
     			add_location(config_section, file$n, 10, 0, 534);
     		},
@@ -26606,10 +26569,12 @@ var app = (function () {
     			append_dev(config_section, t0);
     			mount_component(optionsection1, config_section, null);
     			append_dev(config_section, t1);
-    			mount_component(optionsectioncompact0, config_section, null);
+    			mount_component(optionsection2, config_section, null);
     			append_dev(config_section, t2);
-    			mount_component(optionsectioncompact1, config_section, null);
+    			mount_component(optionsectioncompact0, config_section, null);
     			append_dev(config_section, t3);
+    			mount_component(optionsectioncompact1, config_section, null);
+    			append_dev(config_section, t4);
     			mount_component(optionsectioncompact2, config_section, null);
     			current = true;
     		},
@@ -26656,6 +26621,7 @@ var app = (function () {
     			if (current) return;
     			transition_in(optionsection0.$$.fragment, local);
     			transition_in(optionsection1.$$.fragment, local);
+    			transition_in(optionsection2.$$.fragment, local);
     			transition_in(optionsectioncompact0.$$.fragment, local);
     			transition_in(optionsectioncompact1.$$.fragment, local);
     			transition_in(optionsectioncompact2.$$.fragment, local);
@@ -26664,6 +26630,7 @@ var app = (function () {
     		o: function outro(local) {
     			transition_out(optionsection0.$$.fragment, local);
     			transition_out(optionsection1.$$.fragment, local);
+    			transition_out(optionsection2.$$.fragment, local);
     			transition_out(optionsectioncompact0.$$.fragment, local);
     			transition_out(optionsectioncompact1.$$.fragment, local);
     			transition_out(optionsectioncompact2.$$.fragment, local);
@@ -26673,6 +26640,7 @@ var app = (function () {
     			if (detaching) detach_dev(config_section);
     			destroy_component(optionsection0);
     			destroy_component(optionsection1);
+    			destroy_component(optionsection2);
     			destroy_component(optionsectioncompact0);
     			destroy_component(optionsectioncompact1);
     			destroy_component(optionsectioncompact2);

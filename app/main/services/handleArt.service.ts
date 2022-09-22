@@ -11,48 +11,14 @@ import getArrayBufferHashFn from '../functions/getArrayBufferHash.fn'
 import hashStringFn from '../functions/hashString.fn'
 import { getWorker } from './workers.service'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
-import getAllFilesInFoldersDeep from '../functions/getAllFilesInFoldersDeep.fn'
+import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn'
+import getAllowedArtsFn from '../functions/getAllowedArts.fn'
 
-const videoFormats = ['mp4', 'webm']
-const animatedFormats = ['apng', 'avif', 'webp', 'gif']
-const vectorFormats = ['svg']
-const imageFormats = ['png', 'jpg', 'jpeg']
-
-const validFormats = [...videoFormats, ...animatedFormats, ...vectorFormats, ...imageFormats]
-
-const validNames = ['cover', 'folder', 'front', 'art', 'album']
-
-const allowedFiles = validNames.map(name => validFormats.map(ext => `${name}.${ext}`)).flat()
+import { animatedFormats, imageFormats, videoFormats } from '../global/allowedArts.var'
+import getFileExtensionFn from '../functions/getFileExtension.fn'
 
 let sharpWorker: Worker
-
-getWorker('sharp').then(worker => {
-	if (!sharpWorker) {
-		sharpWorker = worker
-
-		sharpWorker.on('message', handleSharpWorkerResponse)
-	}
-})
-
 let ffmpegImageWorker: Worker
-
-getWorker('ffmpegImage').then(worker => {
-	if (!ffmpegImageWorker) {
-		ffmpegImageWorker = worker
-
-		ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse)
-	}
-})
-
-function handleSharpWorkerResponse(data: any) {
-	delete data.artData
-
-	sendWebContentsFn('new-image-art', data)
-}
-
-function handleFfmpegImageWorkerResponse(data: any) {
-	sendWebContentsFn('new-animation-art', data)
-}
 
 export function handleArtService(filePath: string, elementId: string, size: number) {
 	if (isNaN(size) || !filePath || !elementId) return
@@ -91,90 +57,29 @@ function handleFolderArt(folderPath: string, elementId: string, size: number) {
 		return
 	}
 
-	let allowedArtFiles = getAllowedFiles(folderPath)
+	let allowedArtFiles = getAllowedArtsFn(folderPath)
 
-	let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getExtension(file)))
-	let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getExtension(file)))
-	let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getExtension(file)))
+	let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getFileExtensionFn(file)))
+	let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getFileExtensionFn(file)))
+	let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getFileExtensionFn(file)))
 
 	if (videoArts.length !== 0) {
-		return handleFolderVideoArt(videoArts, elementId)
+		return handleVideoArt(videoArts, elementId)
 	}
 
 	if (animatedArts.length !== 0) {
-		return handleFolderAnimatedArt(animatedArts, elementId, size)
+		return handleAnimatedArt(animatedArts, elementId, size)
 	}
 
 	if (imageArts.length !== 0) {
-		return handleFolderImageArt(imageArts, artOutputPath, elementId, size)
+		return handleImageArt(imageArts, artOutputPath, elementId, size)
 	}
 
+	// If no proper art found, send to renderer a null art path.
 	sendWebContentsFn('new-image-art', {
 		artPath: null,
 		elementId
 	})
-}
-
-function handleFolderImageArt(artPaths: string[], artOutputPath: string, elementId: string, size: number) {
-	let bestArtFile = artPaths.sort((fileA, fileB) => fs.statSync(fileB).size - fs.statSync(fileA).size)[0] || undefined
-
-	if (!bestArtFile) {
-		sendWebContentsFn('new-image-art', {
-			artPath: null,
-			elementId
-		})
-		return
-	}
-
-	sendWebContentsFn('new-image-art', {
-		artPath: bestArtFile,
-		elementId
-	})
-
-	let extension = getExtension(bestArtFile)
-
-	if (imageFormats.includes(extension)) {
-		compressArt(bestArtFile, artOutputPath, elementId, size)
-	}
-}
-
-function handleFolderVideoArt(artPaths: string[], elementId: string) {
-	let artPath = artPaths[0]
-
-	if (artPath !== undefined) {
-		sendWebContentsFn('new-video-art', {
-			artPath,
-			elementId
-		})
-	} else {
-		sendWebContentsFn('new-video-art', {
-			artPath: null,
-			elementId
-		})
-	}
-}
-
-function handleFolderAnimatedArt(artPaths: string[], elementId: string, size: number) {
-	let artPath = artPaths[1]
-
-	if (artPath) {
-		sendWebContentsFn('new-animation-art', {
-			artPath: artPaths[1],
-			elementId
-		})
-
-		ffmpegImageWorker.postMessage({
-			artPath: artPaths[1],
-			elementId,
-			size,
-			appDataPath: getAppDataPathFn()
-		})
-	} else {
-		sendWebContentsFn('new-animation-art', {
-			artPath: null,
-			elementId
-		})
-	}
 }
 
 function handleFileArt(filePath: string, elementId: string, size: number) {
@@ -184,7 +89,7 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 	if (!fs.existsSync(embeddedArtDirectory)) fs.mkdirSync(embeddedArtDirectory, { recursive: true })
 
 	let embeddedArtPath =
-		getAllFilesInFoldersDeep([embeddedArtDirectory])
+		getAllFilesInFoldersDeepFn([embeddedArtDirectory])
 			.filter(file => !file.endsWith('.webp'))
 			.filter(file => !file.endsWith('.DS_Store'))
 			.filter(file => file.endsWith(fileNameHash))[0] || undefined
@@ -227,6 +132,69 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 	})
 }
 
+function handleImageArt(artPaths: string[], artOutputPath: string, elementId: string, size: number) {
+	let bestArtFile = artPaths.sort((fileA, fileB) => fs.statSync(fileB).size - fs.statSync(fileA).size)[0] || undefined
+
+	if (!bestArtFile) {
+		sendWebContentsFn('new-image-art', {
+			artPath: null,
+			elementId
+		})
+		return
+	}
+
+	sendWebContentsFn('new-image-art', {
+		artPath: bestArtFile,
+		elementId
+	})
+
+	let extension = getFileExtensionFn(bestArtFile)
+
+	if (imageFormats.includes(extension)) {
+		compressArt(bestArtFile, artOutputPath, elementId, size)
+	}
+}
+
+function handleVideoArt(artPaths: string[], elementId: string) {
+	let artPath = artPaths[0]
+
+	if (artPath !== undefined) {
+		sendWebContentsFn('new-video-art', {
+			artPath,
+			elementId
+		})
+	} else {
+		sendWebContentsFn('new-video-art', {
+			artPath: null,
+			elementId
+		})
+	}
+}
+
+function handleAnimatedArt(artPaths: string[], elementId: string, size: number) {
+	let artPath = artPaths[0]
+
+	if (artPath) {
+		sendWebContentsFn('new-animation-art', {
+			artPath,
+			elementId
+		})
+
+		ffmpegImageWorker.postMessage({
+			artPath,
+			elementId,
+			size,
+			appDataPath: getAppDataPathFn(),
+			type: 'handle-art-compression'
+		})
+	} else {
+		sendWebContentsFn('new-animation-art', {
+			artPath: null,
+			elementId
+		})
+	}
+}
+
 function compressArt(artData: Buffer | string, artPath: string, elementId: string, size: number) {
 	sharpWorker.postMessage({
 		artData,
@@ -236,24 +204,32 @@ function compressArt(artData: Buffer | string, artPath: string, elementId: strin
 	})
 }
 
-// Returns all images sorted by priority.
-export function getAllowedFiles(rootDir: string) {
-	let allowedArtFiles = fs
-		.readdirSync(rootDir)
-		.filter(file => allowedFiles.includes(file.toLowerCase()))
-		.map(file => path.join(rootDir, file))
-		.sort((a, b) => {
-			// Gets the priority from the index of the valid formats above.
-			// mp4 has a priority of 0 while gif has a priority of 3, lower number is higher priority.
-			let aExtension = validFormats.indexOf(getExtension(a))
-			let bExtension = validFormats.indexOf(getExtension(b))
+/********************** Workers **********************/
 
-			return aExtension - bExtension
-		})
+getWorker('sharp').then(worker => {
+	if (!sharpWorker) {
+		sharpWorker = worker
 
-	return allowedArtFiles
+		sharpWorker.on('message', handleSharpWorkerResponse)
+	}
+})
+
+getWorker('ffmpegImage').then(worker => {
+	if (!ffmpegImageWorker) {
+		ffmpegImageWorker = worker
+
+		ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse)
+	}
+})
+
+function handleSharpWorkerResponse(data: any) {
+	delete data.artData
+
+	sendWebContentsFn('new-image-art', data)
 }
 
-function getExtension(data: string) {
-	return data.split('.').pop() || ''
+function handleFfmpegImageWorkerResponse(data: any) {
+	if (data.type === 'handle-art-compression') {
+		sendWebContentsFn('new-animation-art', data)
+	}
 }

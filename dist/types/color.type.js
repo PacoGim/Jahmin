@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ColorTypeShell = void 0;
-function ColorTypeShell() {
+exports.ColorTypeDefault = void 0;
+function ColorTypeDefault() {
     return {
         hue: 0,
         saturation: 0,
@@ -10,4 +10,4 @@ function ColorTypeShell() {
         lightnessDark: 0
     };
 }
-exports.ColorTypeShell = ColorTypeShell;
+exports.ColorTypeDefault = ColorTypeDefault;

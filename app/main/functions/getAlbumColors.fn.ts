@@ -1,87 +1,89 @@
 const sharp = require('sharp')
-import { ColorType, ColorTypeShell } from '../../types/color.type'
+import { ColorType, ColorTypeDefault } from '../../types/color.type'
 
 import { getConfig } from '../services/config.service'
 
-import * as fs from 'fs'
-import mm from 'music-metadata'
-import * as path from 'path'
-
-import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 import getFileExtensionFn from './getFileExtension.fn'
-import { getAllowedFiles } from '../services/handleArt.service'
+import getAllowedArtsFn from './getAllowedArts.fn'
+import { animatedFormats, imageFormats, videoFormats } from '../global/allowedArts.var'
+import { getWorker } from '../services/workers.service'
 
-let contrastRatio = getConfig().userOptions.contrastRatio!
+import { Worker } from 'worker_threads'
+import generateId from './generateId.fn'
+import getAppDataPathFn from './getAppDataPath.fn'
 
-const notCompress = ['mp4', 'webm', 'apng', 'gif']
+let contrastRatioConfig = getConfig().userOptions.contrastRatio || 4.5
 
 let previousContrastRatio: number | undefined = undefined
 
-export async function getAlbumColors(rootDir: string, contrast: number | undefined): Promise<ColorType | undefined> {
+let ffmpegImageWorker: Worker
+
+let ffmpegDeferredPromises: Map<string, any> = new Map()
+
+export async function getAlbumColors(
+	folderPath: string,
+	contrastRatio: number = contrastRatioConfig
+): Promise<ColorType | undefined> {
 	return new Promise(async (resolve, reject) => {
-		if (contrast) {
-			contrastRatio = contrast
-		}
+		if (folderPath === undefined || folderPath === 'undefined') return resolve(undefined)
 
-		if (rootDir === undefined || rootDir === 'undefined') {
+		let allowedArtFiles = getAllowedArtsFn(folderPath)
+
+		if (allowedArtFiles === undefined) {
 			return resolve(undefined)
 		}
 
-		const imagePaths = getAllowedFiles(rootDir).filter(file => !notCompress.includes(getExtension(file)))
+		let videoArts = allowedArtFiles.filter(file => videoFormats.includes(getFileExtensionFn(file)))
+		let animatedArts = allowedArtFiles.filter(file => animatedFormats.includes(getFileExtensionFn(file)))
+		let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getFileExtensionFn(file)))
 
-		if (imagePaths === undefined) {
-			return resolve(undefined)
+		if (videoArts.length !== 0 || animatedArts.length !== 0) {
+			let promiseId = generateId()
+
+			ffmpegDeferredPromises.set(promiseId, resolve)
+
+			ffmpegImageWorker.postMessage({
+				id: promiseId,
+				type: 'handle-art-color',
+				appDataPath: getAppDataPathFn(),
+				contrastRatio,
+				artPath: [...videoArts, ...animatedArts][0]
+			})
 		}
 
-		let imagePath: string | Buffer = imagePaths[0]
-
-		// If no images found in directory
-		if (imagePath === undefined) {
-			// Find the first valid song file
-			let firstValidFileFound = fs
-				.readdirSync(rootDir)
-				.find(file => allowedSongExtensionsVar.includes(getFileExtensionFn(file) || ''))
-
-			// If valid song file found
-			if (firstValidFileFound) {
-				// Get its album art
-				let common = (await mm.parseFile(path.join(rootDir, firstValidFileFound))).common
-
-				const cover = mm.selectCover(common.picture) // pick the cover image
-
-				// If no cover found, just return
-				if (cover === null) {
-					return resolve(undefined)
-				} else {
-					// Sets the image path to the album art buffer
-					imagePath = cover?.data
-				}
-			} else {
-				// If no valid song file found, just return
-				return resolve(undefined)
-			}
+		if (imageArts.length !== 0) {
+			return getImageArtColors(imageArts[0], contrastRatio).then((hslColorObject: ColorType | undefined) => {
+				resolve(hslColorObject)
+			})
 		}
+	})
+}
 
-		// Check again if imagePath is undefined
-		if (imagePath === undefined) {
-			return resolve(undefined)
-		}
+function getImageArtColors(artPath: string, contrastRatio: number): Promise<ColorType | undefined> {
+	return new Promise((resolve, reject) => {
+		getArtColorFromArtPath(artPath, contrastRatio).then((hslColorObject: ColorType | undefined) => {
+			resolve(hslColorObject)
+		})
+	})
+}
 
-		sharp(imagePath)
+function getArtColorFromArtPath(artPath: string, contrastRatio: number): Promise<ColorType | undefined> {
+	return new Promise((resolve, reject) => {
+		sharp(artPath)
 			.resize(1, 1)
 			.raw()
-			.toBuffer((err:any, buffer:any) => {
+			.toBuffer((err: any, buffer: any) => {
 				if (err) {
 					return resolve(undefined)
 				}
 
 				let hexColor = buffer.toString('hex').substring(0, 6)
 
-				let hslColorObject: ColorType = ColorTypeShell()
+				let hslColorObject: ColorType = ColorTypeDefault()
 
 				let hslColor = hexToHsl(hexColor)!
 
-				getTwoContrastedHslColors(hslColor).then((data: any) => {
+				getTwoContrastedHslColors(hslColor, contrastRatio).then((data: any) => {
 					hslColorObject.hue = hslColor.h
 					hslColorObject.saturation = hslColor.s
 					hslColorObject.lightnessBase = hslColor.l
@@ -94,13 +96,9 @@ export async function getAlbumColors(rootDir: string, contrast: number | undefin
 	})
 }
 
-function getExtension(data: string) {
-	return data.split('.').pop() || ''
-}
-
-function getTwoContrastedHslColors(hslColor: { h: number; s: number; l: number }) {
+function getTwoContrastedHslColors(hslColor: { h: number; s: number; l: number }, contrastRatio: number) {
 	return new Promise((resolve, reject) => {
-		recursiveLuminanceFinder(hslColor).then(data => {
+		recursiveLuminanceFinder(hslColor, 0, contrastRatio).then(data => {
 			resolve(data)
 		})
 	})
@@ -108,7 +106,8 @@ function getTwoContrastedHslColors(hslColor: { h: number; s: number; l: number }
 
 function recursiveLuminanceFinder(
 	hslBaseColor: { h: number; s: number; l: number },
-	luminanceIndex = 0
+	luminanceIndex = 0,
+	contrastRatio: number
 ): Promise<{ colorDark: { h: number; s: number; l: number }; colorLight: { h: number; s: number; l: number } }> {
 	return new Promise((resolve, reject) => {
 		let lowLuminance = hslBaseColor.l - luminanceIndex
@@ -128,7 +127,7 @@ function recursiveLuminanceFinder(
 			return resolve({ colorDark: hslBaseColorDark, colorLight: hslBaseColorLight })
 		} else {
 			previousContrastRatio = ratio
-			return resolve(recursiveLuminanceFinder(hslBaseColor, luminanceIndex + 1))
+			return resolve(recursiveLuminanceFinder(hslBaseColor, luminanceIndex + 1, contrastRatio))
 		}
 	})
 }
@@ -239,5 +238,23 @@ function hexToHsl(hex: string) {
 		h: Math.floor(h * 360),
 		s: Math.floor(s * 100),
 		l: Math.floor(l * 100)
+	}
+}
+
+/********************** Workers **********************/
+getWorker('ffmpegImage').then(worker => {
+	if (!ffmpegImageWorker) {
+		ffmpegImageWorker = worker
+
+		ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse)
+	}
+})
+
+function handleFfmpegImageWorkerResponse(data: any) {
+	if (data.type === 'handle-art-color') {
+		getArtColorFromArtPath(data.fileBuffer, data.contrastRatio).then((hslColorObject: ColorType | undefined) => {
+			ffmpegDeferredPromises.get(data.id)(hslColorObject)
+			ffmpegDeferredPromises.delete(data.id)
+		})
 	}
 }

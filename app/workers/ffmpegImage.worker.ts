@@ -10,7 +10,17 @@ let os /* Operating system */ = getOsFn()
 let ffmpegPath = pathJoin(__dirname, `../../binaries/${os}/ffmpeg`)
 
 parentPort?.on('message', message => {
-	let { artPath, elementId, size, appDataPath } = message
+	if (message.type === 'handle-art-compression') {
+		handleArtCompression(message)
+	}
+
+	if (message.type === 'handle-art-color') {
+		handleArtColor(message)
+	}
+})
+
+function handleArtCompression(message: any) {
+	let { artPath, elementId, size, appDataPath, type } = message
 
 	let tempFolder = pathJoin(appDataPath, '/temp')
 
@@ -29,6 +39,7 @@ parentPort?.on('message', message => {
 				parentPort?.postMessage({
 					artPath,
 					elementId,
+					type,
 					artAlt: Buffer.from(fs.readFileSync(tempFilePath)).toString('base64')
 				})
 
@@ -36,4 +47,29 @@ parentPort?.on('message', message => {
 			}
 		}
 	)
-})
+}
+
+function handleArtColor(message: any) {
+	let { id, type, artPath,contrastRatio, appDataPath } = message
+
+	let tempFolder = pathJoin(appDataPath, '/temp')
+
+	let tempFilePath = `${tempFolder}/${id}.jpg`
+
+	if (!fs.existsSync(tempFolder)) {
+		fs.mkdirSync(tempFolder, { recursive: true })
+	}
+
+	spawn(`"${ffmpegPath}" -i "${artPath}" "${tempFilePath}"`, [], { shell: true }).on('close', code => {
+		if (code === 1) {
+			parentPort?.postMessage({
+				type,
+				id,
+				contrastRatio,
+				fileBuffer: Buffer.from(fs.readFileSync(tempFilePath))
+			})
+
+			fs.unlink(tempFilePath, () => {})
+		}
+	})
+}

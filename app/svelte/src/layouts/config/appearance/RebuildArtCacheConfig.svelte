@@ -10,9 +10,6 @@
 	}
 </script>
 
-<font-size-config>
-	<button on:click={() => rebuildArtCache()}>Rebuild Art Cache</button>
+<font-size-config on:click={() => rebuildArtCache()}>
+	<config-edit-button>·.·</config-edit-button>
 </font-size-config>
-
-<style>
-</style>
