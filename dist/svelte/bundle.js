@@ -26193,7 +26193,8 @@ var app = (function () {
     		c: function create() {
     			font_size_config = element("font-size-config");
     			config_edit_button = element("config-edit-button");
-    			config_edit_button.textContent = "·.·";
+    			config_edit_button.textContent = "Rebuild";
+    			set_custom_element_data(config_edit_button, "class", "svelte-ruxmkx");
     			add_location(config_edit_button, file$o, 10, 1, 308);
     			add_location(font_size_config, file$o, 9, 0, 253);
     		},

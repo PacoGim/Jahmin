@@ -11,5 +11,14 @@
 </script>
 
 <font-size-config on:click={() => rebuildArtCache()}>
-	<config-edit-button>·.·</config-edit-button>
+	<config-edit-button>Rebuild</config-edit-button>
 </font-size-config>
+
+<style>
+	config-edit-button {
+		font-size: 0.9rem;
+		padding: 0 4px;
+		font-variation-settings: 'wght' 600;
+		width: max-content;
+	}
+</style>

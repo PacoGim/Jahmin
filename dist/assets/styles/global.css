@@ -199,6 +199,7 @@ tag-edit select {
 }
 
 config-edit-button {
+	color: var(--color-fg-1);
 	font-size: 1.5rem;
 	display: flex;
 	align-items: center;
@@ -208,4 +209,14 @@ config-edit-button {
 	border: 2px solid var(--color-fg-1);
 	border-radius: 4px;
 	cursor: pointer;
+
+	transition-property: color, background-color;
+	transition-timing-function: ease-in-out;
+
+	transition-duration: 300ms;
+}
+
+config-edit-button:hover {
+	color: var(--color-bg-1);
+	background-color: var(--color-fg-1);
 }
