@@ -3,10 +3,9 @@
 
 	import PlaybackIcon from '../icons/PlaybackIcon.svelte'
 	import PlayListIcon from '../icons/PlayListIcon.svelte'
+	import SpeakIcon from '../icons/SpeakIcon.svelte'
 
 	import { layoutToShow } from '../stores/main.store'
-
-	let iconSize = '32px'
 </script>
 
 <navigation-svlt class="dark-theme">
@@ -20,6 +19,13 @@
 	<nav-button on:click={() => ($layoutToShow = 'Playback')}>
 		<PlaybackIcon
 			style="{$layoutToShow === 'Playback'
+				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
+		/>
+	</nav-button>
+	<nav-button on:click={() => ($layoutToShow = 'Lyrics')}>
+		<SpeakIcon
+			style="{$layoutToShow === 'Lyrics'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
 				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
@@ -39,7 +45,7 @@
 		grid-area: navigation-svlt;
 
 		display: grid;
-		grid-template-rows: repeat(2, max-content) auto max-content;
+		grid-template-rows: repeat(3, max-content) auto max-content;
 
 		border-right: 2px solid #cdcfd3;
 

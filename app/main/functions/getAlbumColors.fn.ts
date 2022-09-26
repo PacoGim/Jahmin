@@ -56,6 +56,8 @@ export async function getAlbumColors(
 				resolve(hslColorObject)
 			})
 		}
+
+		return resolve(undefined)
 	})
 }
 
@@ -253,6 +255,8 @@ getWorker('ffmpegImage').then(worker => {
 function handleFfmpegImageWorkerResponse(data: any) {
 	if (data.type === 'handle-art-color') {
 		getArtColorFromArtPath(data.fileBuffer, data.contrastRatio).then((hslColorObject: ColorType | undefined) => {
+
+			console.log(hslColorObject)
 			ffmpegDeferredPromises.get(data.id)(hslColorObject)
 			ffmpegDeferredPromises.delete(data.id)
 		})

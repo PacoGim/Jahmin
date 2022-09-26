@@ -32,8 +32,7 @@ const ipcFunctions = {
     handleNewVideoArt: (callback) => electron_1.ipcRenderer.on('new-video-art', callback),
     handleNewAnimationArt: (callback) => electron_1.ipcRenderer.on('new-animation-art', callback),
     songSyncQueueProgress: (callback) => electron_1.ipcRenderer.on('song-sync-queue-progress', callback),
-    // Gets a Base64 encoded album art
-    sendSingleSongArt: (callback) => electron_1.ipcRenderer.on('send-single-song-art', callback)
+    onArtQueueChange: (callback) => electron_1.ipcRenderer.on('art-queue-length', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
 function getConfig() {

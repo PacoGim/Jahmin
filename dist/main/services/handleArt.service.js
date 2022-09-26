@@ -188,9 +188,14 @@ function compressArt(artData, artPath, elementId, size) {
         ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse);
     }
 });
-function handleSharpWorkerResponse(data) {
-    delete data.artData;
-    (0, sendWebContents_fn_1.default)('new-image-art', data);
+function handleSharpWorkerResponse(message) {
+    if (message.type === 'imageCompression') {
+        delete message.data.artData;
+        (0, sendWebContents_fn_1.default)('new-image-art', message.data);
+    }
+    else if (message.type === 'artQueueLength') {
+        (0, sendWebContents_fn_1.default)('art-queue-length', message.data);
+    }
 }
 function handleFfmpegImageWorkerResponse(data) {
     if (data.type === 'handle-art-compression') {

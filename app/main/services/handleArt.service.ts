@@ -222,10 +222,14 @@ getWorker('ffmpegImage').then(worker => {
 	}
 })
 
-function handleSharpWorkerResponse(data: any) {
-	delete data.artData
+function handleSharpWorkerResponse(message: any) {
+	if (message.type === 'imageCompression') {
+		delete message.data.artData
 
-	sendWebContentsFn('new-image-art', data)
+		sendWebContentsFn('new-image-art', message.data)
+	} else if (message.type === 'artQueueLength') {
+		sendWebContentsFn('art-queue-length', message.data)
+	}
 }
 
 function handleFfmpegImageWorkerResponse(data: any) {

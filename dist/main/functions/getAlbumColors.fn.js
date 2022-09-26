@@ -54,6 +54,7 @@ function getAlbumColors(folderPath, contrastRatio = contrastRatioConfig) {
                     resolve(hslColorObject);
                 });
             }
+            return resolve(undefined);
         }));
     });
 }
@@ -218,6 +219,7 @@ function hexToHsl(hex) {
 function handleFfmpegImageWorkerResponse(data) {
     if (data.type === 'handle-art-color') {
         getArtColorFromArtPath(data.fileBuffer, data.contrastRatio).then((hslColorObject) => {
+            console.log(hslColorObject);
             ffmpegDeferredPromises.get(data.id)(hslColorObject);
             ffmpegDeferredPromises.delete(data.id);
         });

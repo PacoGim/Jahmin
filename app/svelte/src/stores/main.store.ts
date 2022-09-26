@@ -44,7 +44,7 @@ export let appTitle: Writable<string> = writable('Jahmin')
 export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable(undefined)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config'> = writable('Config')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Lyrics')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
@@ -68,10 +68,8 @@ export let albumArtMapStore: Writable<
 > = writable(new Map<string, []>())
 
 /********************** Queue Progress **********************/
-export let artCompressQueueProgress: Writable<{ maxLength: number; currentLength: number }> = writable({
-	maxLength: 0,
-	currentLength: 0
-})
+export let artCompressQueueLength: Writable<number> = writable(0)
+
 export let songSyncQueueProgress: Writable<{
 	isSongUpdating: boolean
 	maxLength: number

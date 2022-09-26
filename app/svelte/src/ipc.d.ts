@@ -40,6 +40,7 @@ declare global {
 			onGetAllSongsFromRenderer: (callback: any) => void
 			handleWebStorage: (callback: any) => void
 			songSyncQueueProgress: (callback: any) => void
+			onArtQueueChange: (callback: any) => void
 		}
 	}
 }

@@ -21,6 +21,9 @@ getWorker('ffmpeg').then(worker => {
 
 	ffmpegWorker.on('message', async (response: any) => {
 		if (response.id === ffmpegDeferredPromiseId) {
+
+			// TODO Add Size matching check just in case
+
 			if (fs.existsSync(response.tempFileName)) {
 				fs.unlinkSync(response.filePath)
 				fs.renameSync(response.tempFileName, response.filePath)

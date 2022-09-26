@@ -12,12 +12,10 @@ html {
 }
 
 body {
-	background-color: #f8f9fa;
-
 	font-size: var(--font-size);
 
 	color: var(--color-fg-1);
-	/* background-color: var(--color-art-bg); */
+	background-color: var(--color-bg-1);
 	height: 100%;
 	display: block;
 	font-variation-settings: 'wght' var(--default-weight);

@@ -4,8 +4,34 @@ import sharp from 'sharp'
 
 import typeOfFn from '../functions/typeOf.fn'
 
+let sharpQueue: { artData: string; artPath: string; elementId: string; size: number }[] = []
+let isSharpQueueRunning = false
+
 parentPort?.on('message', (data: any) => {
-	const { artData, artPath, elementId, size } = data
+	sharpQueue.push(data)
+
+	if (isSharpQueueRunning === true) {
+		return
+	} else {
+		isSharpQueueRunning = true
+		compressImage()
+	}
+})
+
+function compressImage() {
+	parentPort?.postMessage({
+		type: 'artQueueLength',
+		data: sharpQueue.length
+	})
+
+	let task = sharpQueue.shift()
+
+	if (task === undefined) {
+		isSharpQueueRunning = false
+		return
+	}
+
+	const { artData, artPath, elementId, size } = task
 
 	let sharpData = undefined
 
@@ -23,9 +49,13 @@ parentPort?.on('message', (data: any) => {
 		})
 		.toFile(artPath)
 		.then(() => {
-			parentPort?.postMessage(data)
+			setTimeout(() => compressImage(), 100)
+			parentPort?.postMessage({
+				type: 'imageCompression',
+				data: task
+			})
 		})
 		.catch((err: any) => {
 			console.log(err)
 		})
-})
+}

@@ -26,6 +26,7 @@
 
 	import { currentPlayerTime, songToPlayUrlStore } from '../stores/player.store'
 	import type { SongType } from '../../../types/song.type'
+	import encodeURLFn from '../functions/encodeURL.fn'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -128,7 +129,7 @@
 			// Sets the new song to play.
 
 			$mainAudioElement.setAttribute('data-song-id', String(hash(songUrl, 'number')))
-			$mainAudioElement.src = songUrl
+			$mainAudioElement.src = encodeURLFn(songUrl)
 
 			// Stops the next audio element from playing.
 			$altAudioElement.setAttribute('data-song-id', '')
@@ -234,7 +235,7 @@
 		}
 
 		audioElements[nextAudioElementId].domElement.setAttribute('data-song-id', nextSongToPlay?.ID || '')
-		audioElements[nextAudioElementId].domElement.src = nextSongToPlay?.SourceFile || ''
+		audioElements[nextAudioElementId].domElement.src = encodeURLFn(nextSongToPlay?.SourceFile) || ''
 	}
 
 	function hookEventListeners() {

@@ -2,7 +2,7 @@
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import generateId from '../functions/generateId.fn'
-	import { songSyncQueueProgress } from '../stores/main.store'
+	import { artCompressQueueLength, songSyncQueueProgress } from '../stores/main.store'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {
@@ -28,6 +28,10 @@
 
 	window.ipc.songSyncQueueProgress((_, data) => {
 		$songSyncQueueProgress = data
+	})
+
+	window.ipc.onArtQueueChange((_, artQueueLength) => {
+		$artCompressQueueLength = artQueueLength
 	})
 
 	/**

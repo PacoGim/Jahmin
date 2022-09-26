@@ -39,8 +39,7 @@ const ipcFunctions = {
 	handleNewVideoArt: (callback: any) => ipcRenderer.on('new-video-art', callback),
 	handleNewAnimationArt: (callback: any) => ipcRenderer.on('new-animation-art', callback),
 	songSyncQueueProgress: (callback: any) => ipcRenderer.on('song-sync-queue-progress', callback),
-	// Gets a Base64 encoded album art
-	sendSingleSongArt: (callback: any) => ipcRenderer.on('send-single-song-art', callback)
+	onArtQueueChange: (callback: any) => ipcRenderer.on('art-queue-length', callback)
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)

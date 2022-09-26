@@ -49,6 +49,7 @@ let ffmpegWorker;
     ffmpegWorker = worker;
     ffmpegWorker.on('message', (response) => __awaiter(void 0, void 0, void 0, function* () {
         if (response.id === ffmpegDeferredPromiseId) {
+            // TODO Add Size matching check just in case
             if (fs.existsSync(response.tempFileName)) {
                 fs.unlinkSync(response.filePath);
                 fs.renameSync(response.tempFileName, response.filePath);

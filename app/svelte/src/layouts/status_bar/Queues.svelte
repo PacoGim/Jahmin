@@ -5,7 +5,7 @@
 
 	import tippyService from '../../services/tippy.service'
 
-	import { artCompressQueueProgress, songSyncQueueProgress } from '../../stores/main.store'
+	import { artCompressQueueLength, songSyncQueueProgress } from '../../stores/main.store'
 
 	import ImageIcon from '../../icons/ImageIcon.svelte'
 	import MusicNoteIcon from '../../icons/MusicNoteIcon.svelte'
@@ -60,8 +60,7 @@
 <queue-processes>
 	<art-compress-queue>
 		<ImageIcon style="fill:var(--art-color-dark);height: 20px;width: 20px;margin-right: .5rem;" />
-		<span>{$artCompressQueueProgress.currentLength}</span>/
-		<span>{$artCompressQueueProgress.maxLength}</span>
+		<span>{$artCompressQueueLength}</span>
 	</art-compress-queue>
 	<song-sync-queue>
 		<MusicNoteIcon style="fill:var(--art-color-dark);height: 20px;width: 20px;margin-right: .5rem;" />

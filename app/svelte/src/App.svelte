@@ -35,6 +35,7 @@
 	import ConfirmService from './svelte_services/ConfirmService.svelte'
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
+	import LyricsLayout from './layouts/lyrics/!LyricsLayout.svelte'
 
 	liveQuery(async () => {
 		return await getDB().songs.toArray()
@@ -70,6 +71,8 @@
 			<ConfigLayout />
 		{:else if $layoutToShow === 'Playback'}
 			<PlaybackLayout />
+		{:else if $layoutToShow === 'Lyrics'}
+			<LyricsLayout />
 		{/if}
 	</current-window-svlt>
 </main-app>
