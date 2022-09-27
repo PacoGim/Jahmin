@@ -3,7 +3,7 @@ import { ConfigType, ThemeOptions } from '../../types/config.type'
 import * as fs from 'fs'
 import * as path from 'path'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
-import isJsonFn from '../functions/isJson.fn'
+import verifyConfigFileFn from '../functions/verifyConfigFile.fn'
 
 const deepmerge = require('deepmerge')
 
@@ -22,8 +22,9 @@ function getConfigPathFile() {
 export function getConfig(): ConfigType {
 	if (fs.existsSync(getConfigPathFile())) {
 		try {
-			let configFile: ConfigType = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
-			return verifyConfigFile(configFile)
+			let config = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
+
+			return verifyConfigFileFn(config, getDefaultConfigFile())
 		} catch (error) {
 			return getDefaultConfigFile()
 		}
@@ -31,82 +32,6 @@ export function getConfig(): ConfigType {
 		return getDefaultConfigFile()
 	}
 }
-
-function verifyConfigFile(configFile: ConfigType): ConfigType {
-	configFile = iterateProperties(configFile)
-
-	console.log(configFile)
-
-	return configFile
-}
-
-function iterateProperties(o: object) {
-	const entries = Object.entries(o)
-
-	console.log(entries[1])
-
-	// if (isJsonFn(entries[1])) {
-		// iterateProperties(entries[1])
-	// }
-
-	return o
-}
-
-/* 	if (config?.group?.groupBy === undefined || config?.group?.groupBy?.length === 0) {
-		config.group = getDefaultConfigFile().group
-	}
-
-	if (config?.songListTags === undefined || config?.songListTags?.length === 0) {
-		config.songListTags = getDefaultConfigFile().songListTags
-	}
-
-	if (config?.userOptions === undefined) {
-		config.userOptions = getDefaultConfigFile().userOptions
-	} else {
-		if (config?.userOptions?.contrastRatio === undefined) {
-			config.userOptions.contrastRatio = getDefaultConfigFile().userOptions?.contrastRatio
-		}
-
-		if (config?.userOptions?.fontSize === undefined) {
-			config.userOptions.fontSize = getDefaultConfigFile().userOptions?.fontSize
-		}
-
-		if (config?.userOptions?.sortBy === undefined) {
-			config.userOptions.sortBy = getDefaultConfigFile().userOptions?.sortBy
-		}
-
-		if (config?.userOptions?.sortOrder === undefined) {
-			config.userOptions.sortOrder = getDefaultConfigFile().userOptions?.sortOrder
-		}
-
-		if (config?.userOptions?.songAmount === undefined) {
-			config.userOptions.songAmount = getDefaultConfigFile().userOptions?.songAmount
-		}
-
-		if (config?.userOptions?.artSize === undefined) {
-			config.userOptions.artSize = getDefaultConfigFile().userOptions?.artSize
-		}
-
-		if (config?.userOptions?.gridGap === undefined) {
-			config.userOptions.gridGap = getDefaultConfigFile().userOptions?.gridGap
-		}
-
-		if (config?.userOptions?.theme === undefined) {
-			config.userOptions.theme = getDefaultConfigFile().userOptions?.theme
-		}
-
-		if (config?.directories === undefined) {
-			config.directories = getDefaultConfigFile().directories
-		}
-
-		if (config?.directories?.add === undefined) {
-			config.directories!.add = getDefaultConfigFile().directories?.add
-		}
-
-		if (config?.directories?.exclude === undefined) {
-			config.directories!.exclude = getDefaultConfigFile().directories?.exclude
-		}
-	} */
 
 export function saveConfig(newConfig: any) {
 	let config = getConfig()

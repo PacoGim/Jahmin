@@ -63,7 +63,7 @@
 		{#if isEditModeOn === true}
 			<textarea bind:value={lyricsText} />
 		{:else}
-			<!-- <lyrics-container style='text-align: {$config.};' bind:this={lyricsContainer} /> -->
+			<lyrics-container bind:this={lyricsContainer} />
 		{/if}
 	</lyrics-layout-body>
 </lyrics-layout>

@@ -38058,7 +38058,24 @@ var app = (function () {
 
     // (58:2) {:else}
     function create_else_block(ctx) {
-    	const block = { c: noop, m: noop, p: noop, d: noop };
+    	let lyrics_container;
+
+    	const block = {
+    		c: function create() {
+    			lyrics_container = element("lyrics-container");
+    			set_custom_element_data(lyrics_container, "class", "svelte-1fxog6n");
+    			add_location(lyrics_container, file$1, 58, 3, 1731);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, lyrics_container, anchor);
+    			/*lyrics_container_binding*/ ctx[8](lyrics_container);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(lyrics_container);
+    			/*lyrics_container_binding*/ ctx[8](null);
+    		}
+    	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
@@ -38088,7 +38105,7 @@ var app = (function () {
     			set_input_value(textarea, /*lyricsText*/ ctx[1]);
 
     			if (!mounted) {
-    				dispose = listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[6]);
+    				dispose = listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[7]);
     				mounted = true;
     			}
     		},
@@ -38209,8 +38226,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(event_wrapper0, "click", /*click_handler*/ ctx[4], false, false, false),
-    					listen_dev(event_wrapper1, "click", /*click_handler_1*/ ctx[5], false, false, false)
+    					listen_dev(event_wrapper0, "click", /*click_handler*/ ctx[5], false, false, false),
+    					listen_dev(event_wrapper1, "click", /*click_handler_1*/ ctx[6], false, false, false)
     				];
 
     				mounted = true;
@@ -38304,6 +38321,13 @@ var app = (function () {
     		$$invalidate(1, lyricsText);
     	}
 
+    	function lyrics_container_binding($$value) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			lyricsContainer = $$value;
+    			$$invalidate(3, lyricsContainer);
+    		});
+    	}
+
     	$$self.$capture_state = () => ({
     		parseLyricsFn,
     		SaveIcon,
@@ -38321,7 +38345,7 @@ var app = (function () {
     	$$self.$inject_state = $$props => {
     		if ('lyricsText' in $$props) $$invalidate(1, lyricsText = $$props.lyricsText);
     		if ('isEditModeOn' in $$props) $$invalidate(2, isEditModeOn = $$props.isEditModeOn);
-    		if ('lyricsContainer' in $$props) lyricsContainer = $$props.lyricsContainer;
+    		if ('lyricsContainer' in $$props) $$invalidate(3, lyricsContainer = $$props.lyricsContainer);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -38342,10 +38366,12 @@ var app = (function () {
     		$playingSongStore,
     		lyricsText,
     		isEditModeOn,
+    		lyricsContainer,
     		saveLyrics,
     		click_handler,
     		click_handler_1,
-    		textarea_input_handler
+    		textarea_input_handler,
+    		lyrics_container_binding
     	];
     }
 
