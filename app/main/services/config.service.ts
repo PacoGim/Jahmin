@@ -3,6 +3,7 @@ import { ConfigType, ThemeOptions } from '../../types/config.type'
 import * as fs from 'fs'
 import * as path from 'path'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
+import isJsonFn from '../functions/isJson.fn'
 
 const deepmerge = require('deepmerge')
 
@@ -19,19 +20,39 @@ function getConfigPathFile() {
 }
 
 export function getConfig(): ConfigType {
-	let config: ConfigType
-
 	if (fs.existsSync(getConfigPathFile())) {
 		try {
-			config = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
+			let configFile: ConfigType = JSON.parse(fs.readFileSync(getConfigPathFile(), { encoding: 'utf-8' })) as ConfigType
+			return verifyConfigFile(configFile)
 		} catch (error) {
-			config = getDefaultConfigFile()
+			return getDefaultConfigFile()
 		}
 	} else {
-		config = getDefaultConfigFile()
+		return getDefaultConfigFile()
 	}
+}
 
-	if (config?.group?.groupBy === undefined || config?.group?.groupBy?.length === 0) {
+function verifyConfigFile(configFile: ConfigType): ConfigType {
+	configFile = iterateProperties(configFile)
+
+	console.log(configFile)
+
+	return configFile
+}
+
+function iterateProperties(o: object) {
+	const entries = Object.entries(o)
+
+	console.log(entries[1])
+
+	// if (isJsonFn(entries[1])) {
+		// iterateProperties(entries[1])
+	// }
+
+	return o
+}
+
+/* 	if (config?.group?.groupBy === undefined || config?.group?.groupBy?.length === 0) {
 		config.group = getDefaultConfigFile().group
 	}
 
@@ -85,10 +106,7 @@ export function getConfig(): ConfigType {
 		if (config?.directories?.exclude === undefined) {
 			config.directories!.exclude = getDefaultConfigFile().directories?.exclude
 		}
-	}
-
-	return config
-}
+	} */
 
 export function saveConfig(newConfig: any) {
 	let config = getConfig()
@@ -123,7 +141,8 @@ function getDefaultConfigFile(): ConfigType {
 			fontSize: 16,
 			sortBy: 'Track',
 			sortOrder: 'asc',
-			pauseAnimatedArtWhenAppUnfocused:false
+			pauseAnimatedArtWhenAppUnfocused: false,
+			lyricsTextAlign: 'left'
 		},
 		songListTags: [
 			{

@@ -14,6 +14,8 @@ const ipcFunctions = {
     renameEqualizer,
     stopSongUpdate,
     rebuildArtCache,
+    saveLyrics,
+    getLyrics,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -35,6 +37,22 @@ const ipcFunctions = {
     onArtQueueChange: (callback) => electron_1.ipcRenderer.on('art-queue-length', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
+function saveLyrics(lyrics, songTile, songArtist, songDuration) {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('save-lyrics', lyrics, songTile, songArtist, songDuration)
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
+function getLyrics(songTile, songArtist, songDuration) {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('get-lyrics', songTile, songArtist, songDuration)
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
 function getConfig() {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer

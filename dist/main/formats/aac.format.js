@@ -22,15 +22,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -54,7 +45,7 @@ function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
         tagWriteDeferredPromise = resolve;
-        exifToolWriteWorker === null || exifToolWriteWorker === void 0 ? void 0 : exifToolWriteWorker.postMessage({ filePath, newTags });
+        exifToolWriteWorker?.postMessage({ filePath, newTags });
     });
 }
 exports.writeAacTags = writeAacTags;
@@ -69,10 +60,10 @@ let exifToolReadWorker;
 });
 let tagReadDeferredPromises = new Map();
 function getAacTags(filePath) {
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-        const METADATA = yield new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        const METADATA = await new Promise((resolve, reject) => {
             tagReadDeferredPromises.set(filePath, resolve);
-            exifToolReadWorker === null || exifToolReadWorker === void 0 ? void 0 : exifToolReadWorker.postMessage(filePath);
+            exifToolReadWorker?.postMessage(filePath);
         });
         const STATS = fs.statSync(filePath);
         let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));
@@ -101,7 +92,7 @@ function getAacTags(filePath) {
             SampleRate: METADATA.AudioSampleRate || null,
             Size: STATS.size
         });
-    }));
+    });
 }
 exports.getAacTags = getAacTags;
 function normalizeNewTags(newTags) {

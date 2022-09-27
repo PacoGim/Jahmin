@@ -48,7 +48,7 @@ function default_1(data) {
 }
 exports.default = default_1;
 function handleEnableDisableSongs({ enable }, selectedSongs, clickedSong) {
-    let isClickedSongInSelectedSongs = selectedSongs.find(song => song.ID === (clickedSong === null || clickedSong === void 0 ? void 0 : clickedSong.ID)) ? true : false;
+    let isClickedSongInSelectedSongs = selectedSongs.find(song => song.ID === clickedSong?.ID) ? true : false;
     if (isClickedSongInSelectedSongs === false && clickedSong !== undefined) {
         clickedSong.isEnabled = enable;
         selectedSongs.push(clickedSong);
@@ -90,12 +90,11 @@ function getSongAmountMenu() {
     return submenu;
 }
 function getSortMenu() {
-    var _a;
     let submenu = [];
-    let options = (_a = (0, config_service_1.getConfig)().songListTags) === null || _a === void 0 ? void 0 : _a.map(tag => tag.value);
-    options === null || options === void 0 ? void 0 : options.splice(options.indexOf('DynamicArtists'), 1);
-    options === null || options === void 0 ? void 0 : options.splice(options.indexOf('PlayCount'), 1, 'Play Count');
-    options === null || options === void 0 ? void 0 : options.splice(options.indexOf('SampleRate'), 1, 'Sample Rate');
+    let options = (0, config_service_1.getConfig)().songListTags?.map(tag => tag.value);
+    options?.splice(options.indexOf('DynamicArtists'), 1);
+    options?.splice(options.indexOf('PlayCount'), 1, 'Play Count');
+    options?.splice(options.indexOf('SampleRate'), 1, 'Sample Rate');
     let sortByConfig = (0, config_service_1.getConfig)().userOptions.sortBy;
     let sortOrderConfig = (0, config_service_1.getConfig)().userOptions.sortOrder;
     if (options === undefined) {

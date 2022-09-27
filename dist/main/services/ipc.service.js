@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -15,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.startIPC = void 0;
 const electron_1 = require("electron");
 const contextMenu_1 = require("../context_menu/contextMenu");
+/********************** Functions **********************/
 const getAlbumColors_fn_1 = require("../functions/getAlbumColors.fn");
 const clearArtCache_fn_1 = __importDefault(require("../functions/clearArtCache.fn"));
+/********************** Services **********************/
 const handleArt_service_1 = require("./handleArt.service");
 const appReady_service_1 = __importDefault(require("./appReady.service"));
 const chokidar_service_1 = require("./chokidar.service");
@@ -25,6 +18,7 @@ const config_service_1 = require("./config.service");
 const equalizer_service_1 = require("./equalizer.service");
 const librarySongs_service_1 = require("./librarySongs.service");
 const peaks_service_1 = require("./peaks.service");
+const lyrics_service_1 = require("./lyrics.service");
 let saveConfigDebounce;
 function startIPC() {
     /********************** One-way **********************/
@@ -65,30 +59,36 @@ function startIPC() {
     });
     /********************** Two-way **********************/
     electron_1.ipcMain.handle('get-config', config_service_1.getConfig);
-    electron_1.ipcMain.handle('get-album-colors', (evt, rootDir, contrastRatio) => __awaiter(this, void 0, void 0, function* () { return yield (0, getAlbumColors_fn_1.getAlbumColors)(rootDir, contrastRatio); }));
-    electron_1.ipcMain.handle('get-peaks', (evt, sourceFile) => __awaiter(this, void 0, void 0, function* () { return yield (0, peaks_service_1.getPeaks)(sourceFile); }));
-    electron_1.ipcMain.handle('get-equalizers', (evt) => __awaiter(this, void 0, void 0, function* () { return (0, equalizer_service_1.getEqualizers)(); }));
+    electron_1.ipcMain.handle('get-album-colors', async (evt, rootDir, contrastRatio) => await (0, getAlbumColors_fn_1.getAlbumColors)(rootDir, contrastRatio));
+    electron_1.ipcMain.handle('get-peaks', async (evt, sourceFile) => await (0, peaks_service_1.getPeaks)(sourceFile));
+    electron_1.ipcMain.handle('get-equalizers', async (evt) => (0, equalizer_service_1.getEqualizers)());
     electron_1.ipcMain.handle('save-config', (evt, newConfig) => {
         return (0, config_service_1.saveConfig)(newConfig);
     });
-    electron_1.ipcMain.handle('add-new-equalizer-profile', (evt, newProfile) => __awaiter(this, void 0, void 0, function* () {
+    electron_1.ipcMain.handle('add-new-equalizer-profile', async (evt, newProfile) => {
         return (0, equalizer_service_1.addEqualizer)(newProfile);
-    }));
-    electron_1.ipcMain.handle('rename-equalizer', (evt, eqName, newName) => __awaiter(this, void 0, void 0, function* () {
+    });
+    electron_1.ipcMain.handle('rename-equalizer', async (evt, eqName, newName) => {
         return (0, equalizer_service_1.renameEqualizer)(eqName, newName);
-    }));
-    electron_1.ipcMain.handle('delete-equalizer', (evt, eqName) => __awaiter(this, void 0, void 0, function* () {
+    });
+    electron_1.ipcMain.handle('delete-equalizer', async (evt, eqName) => {
         return (0, equalizer_service_1.deleteEqualizer)(eqName);
-    }));
-    electron_1.ipcMain.handle('update-equalizer-values', (evt, eqName, newValues) => __awaiter(this, void 0, void 0, function* () {
+    });
+    electron_1.ipcMain.handle('update-equalizer-values', async (evt, eqName, newValues) => {
         return (0, equalizer_service_1.updateEqualizerValues)(eqName, newValues);
-    }));
-    electron_1.ipcMain.handle('stop-song-update', (evt) => __awaiter(this, void 0, void 0, function* () {
-        return yield (0, librarySongs_service_1.stopSongsUpdating)();
-    }));
-    electron_1.ipcMain.handle('rebuild-art-cache', (evt) => __awaiter(this, void 0, void 0, function* () {
-        return yield (0, clearArtCache_fn_1.default)();
-    }));
+    });
+    electron_1.ipcMain.handle('stop-song-update', async (evt) => {
+        return await (0, librarySongs_service_1.stopSongsUpdating)();
+    });
+    electron_1.ipcMain.handle('rebuild-art-cache', async (evt) => {
+        return await (0, clearArtCache_fn_1.default)();
+    });
+    electron_1.ipcMain.handle('save-lyrics', async (evt, lyrics, songTile, songArtist, songDuration) => {
+        return await (0, lyrics_service_1.saveLyrics)(lyrics, songTile, songArtist, songDuration);
+    });
+    electron_1.ipcMain.handle('get-lyrics', async (evt, songTile, songArtist, songDuration) => {
+        return await (0, lyrics_service_1.getLyrics)(songTile, songArtist, songDuration);
+    });
 }
 exports.startIPC = startIPC;
 function windowResize(event) {

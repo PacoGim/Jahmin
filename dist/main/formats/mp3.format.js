@@ -22,15 +22,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -54,7 +45,7 @@ function writeMp3Tags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
         tagWriteDeferredPromise = resolve;
-        nodeId3Worker === null || nodeId3Worker === void 0 ? void 0 : nodeId3Worker.postMessage({ filePath, newTags });
+        nodeId3Worker?.postMessage({ filePath, newTags });
     });
 }
 exports.writeMp3Tags = writeMp3Tags;
@@ -70,42 +61,39 @@ let mmWorker;
         }
     });
 });
-function getMp3Tags(filePath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
-            const METADATA = yield new Promise((resolve, reject) => {
-                deferredPromise.set(filePath, resolve);
-                mmWorker === null || mmWorker === void 0 ? void 0 : mmWorker.postMessage(filePath);
-            });
-            let tags = {
-                ID: stringHash(filePath),
-                Extension: 'mp3',
-                SourceFile: filePath
-            };
-            const STATS = fs.statSync(filePath);
-            let nativeTags = mergeNatives(METADATA.native);
-            let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER));
-            tags.Album = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TALB) || null;
-            tags.AlbumArtist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE2) || null;
-            tags.Artist = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPE1) || null;
-            tags.Comment = ((_a = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.COMM) === null || _a === void 0 ? void 0 : _a.text) || null;
-            tags.Composer = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCOM) || null;
-            tags.Date_Year = dateParsed.year || null;
-            tags.Date_Month = dateParsed.month || null;
-            tags.Date_Day = dateParsed.day || null;
-            tags.DiscNumber = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TPOS) || null;
-            tags.Genre = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TCON) || null;
-            tags.Rating = convertRating('Jahmin', (_b = nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.POPM) === null || _b === void 0 ? void 0 : _b.rating) || null;
-            tags.Title = (nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TIT2) || null;
-            tags.Track = Number(nativeTags === null || nativeTags === void 0 ? void 0 : nativeTags.TRCK) || null;
-            tags.BitRate = METADATA.format.bitrate / 1000 || null;
-            tags.Duration = (0, truncToDecimalPoint_fn_1.default)(METADATA.format.duration, 3) || null;
-            tags.LastModified = STATS.mtimeMs;
-            tags.SampleRate = METADATA.format.sampleRate || null;
-            tags.Size = STATS.size;
-            resolve(tags);
-        }));
+async function getMp3Tags(filePath) {
+    return new Promise(async (resolve, reject) => {
+        const METADATA = await new Promise((resolve, reject) => {
+            deferredPromise.set(filePath, resolve);
+            mmWorker?.postMessage(filePath);
+        });
+        let tags = {
+            ID: stringHash(filePath),
+            Extension: 'mp3',
+            SourceFile: filePath
+        };
+        const STATS = fs.statSync(filePath);
+        let nativeTags = mergeNatives(METADATA.native);
+        let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER));
+        tags.Album = nativeTags?.TALB || null;
+        tags.AlbumArtist = nativeTags?.TPE2 || null;
+        tags.Artist = nativeTags?.TPE1 || null;
+        tags.Comment = nativeTags?.COMM?.text || null;
+        tags.Composer = nativeTags?.TCOM || null;
+        tags.Date_Year = dateParsed.year || null;
+        tags.Date_Month = dateParsed.month || null;
+        tags.Date_Day = dateParsed.day || null;
+        tags.DiscNumber = Number(nativeTags?.TPOS) || null;
+        tags.Genre = nativeTags?.TCON || null;
+        tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || null;
+        tags.Title = nativeTags?.TIT2 || null;
+        tags.Track = Number(nativeTags?.TRCK) || null;
+        tags.BitRate = METADATA.format.bitrate / 1000 || null;
+        tags.Duration = (0, truncToDecimalPoint_fn_1.default)(METADATA.format.duration, 3) || null;
+        tags.LastModified = STATS.mtimeMs;
+        tags.SampleRate = METADATA.format.sampleRate || null;
+        tags.Size = STATS.size;
+        resolve(tags);
     });
 }
 exports.getMp3Tags = getMp3Tags;

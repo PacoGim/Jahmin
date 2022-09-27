@@ -1,9 +1,15 @@
 import { BrowserWindow, dialog, ipcMain, IpcMainEvent } from 'electron'
 import { loadContextMenu } from '../context_menu/contextMenu'
+
+/********************** Types **********************/
+import { SongType } from '../../types/song.type'
+import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
+
+/********************** Functions **********************/
 import { getAlbumColors } from '../functions/getAlbumColors.fn'
 import cleanArtCacheFn from '../functions/clearArtCache.fn'
 
-import { SongType } from '../../types/song.type'
+/********************** Services **********************/
 import { handleArtService } from './handleArt.service'
 import appReadyService from './appReady.service'
 import { unwatchPaths } from './chokidar.service'
@@ -12,7 +18,7 @@ import { getConfig, saveConfig } from './config.service'
 import { addEqualizer, deleteEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
 import { addToTaskQueue, fetchSongsTag, stopSongsUpdating } from './librarySongs.service'
 import { getPeaks, savePeaks } from './peaks.service'
-import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
+import { getLyrics, saveLyrics } from './lyrics.service'
 
 let saveConfigDebounce: NodeJS.Timeout
 
@@ -88,6 +94,14 @@ export function startIPC() {
 
 	ipcMain.handle('rebuild-art-cache', async evt => {
 		return await cleanArtCacheFn()
+	})
+
+	ipcMain.handle('save-lyrics', async (evt, lyrics, songTile, songArtist, songDuration) => {
+		return await saveLyrics(lyrics, songTile, songArtist, songDuration)
+	})
+
+	ipcMain.handle('get-lyrics', async (evt, songTile, songArtist, songDuration) => {
+		return await getLyrics(songTile, songArtist, songDuration)
 	})
 }
 

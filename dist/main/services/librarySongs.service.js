@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -32,23 +23,21 @@ const TOTAL_CPUS = (0, os_1.cpus)().length;
 let isQueueRunning = false;
 let taskQueue = [];
 exports.maxTaskQueueLength = 0;
-function fetchSongsTag(dbSongs) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const config = (0, config_service_1.getConfig)();
-        if ((config === null || config === void 0 ? void 0 : config.directories) === undefined) {
-            return;
-        }
-        isQueueRunning = false;
-        taskQueue = [];
-        exports.maxTaskQueueLength = 0;
-        let filesInFolders = (0, getAllFilesInFoldersDeep_fn_1.default)(config.directories.add);
-        let audioFiles = filesInFolders
-            .filter(path => (0, isExcludedPaths_fn_1.default)(path, config.directories.exclude))
-            .filter(file => (0, isAudioFile_fn_1.default)(file))
-            .sort((a, b) => a.localeCompare(b));
-        filterSongs(audioFiles, dbSongs);
-        (0, chokidar_service_1.startChokidarWatch)(config.directories.add, config.directories.exclude);
-    });
+async function fetchSongsTag(dbSongs) {
+    const config = (0, config_service_1.getConfig)();
+    if (config?.directories === undefined) {
+        return;
+    }
+    isQueueRunning = false;
+    taskQueue = [];
+    exports.maxTaskQueueLength = 0;
+    let filesInFolders = (0, getAllFilesInFoldersDeep_fn_1.default)(config.directories.add);
+    let audioFiles = filesInFolders
+        .filter(path => (0, isExcludedPaths_fn_1.default)(path, config.directories.exclude))
+        .filter(file => (0, isAudioFile_fn_1.default)(file))
+        .sort((a, b) => a.localeCompare(b));
+    filterSongs(audioFiles, dbSongs);
+    (0, chokidar_service_1.startChokidarWatch)(config.directories.add, config.directories.exclude);
 }
 exports.fetchSongsTag = fetchSongsTag;
 // Splits excecution based on the amount of cpus.
@@ -100,62 +89,58 @@ function getTask(processIndex, processesRunning) {
         getTask(processIndex, processesRunning);
     }
 }
-function handleUpdateTask(task, processIndex, processesRunning) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let newTags = undefined;
-        if (task.data !== undefined) {
-            newTags = task.data;
+async function handleUpdateTask(task, processIndex, processesRunning) {
+    let newTags = undefined;
+    if (task.data !== undefined) {
+        newTags = task.data;
+    }
+    else {
+        newTags = await (0, getSongTags_fn_1.default)(task.path).catch();
+        console.log('newTags', newTags);
+    }
+    (0, updateSongTags_fn_1.default)(task.path, { ...newTags })
+        .then(result => {
+        // Result can be 0 | 1 | -1
+        // -1 means error.
+        if (result === -1) {
+            (0, sendWebContents_fn_1.default)('web-storage', {
+                type: task.type,
+                data: undefined
+            });
         }
         else {
-            newTags = yield (0, getSongTags_fn_1.default)(task.path).catch();
-            console.log('newTags', newTags);
-        }
-        (0, updateSongTags_fn_1.default)(task.path, Object.assign({}, newTags))
-            .then(result => {
-            // Result can be 0 | 1 | -1
-            // -1 means error.
-            if (result === -1) {
-                (0, sendWebContents_fn_1.default)('web-storage', {
-                    type: task.type,
-                    data: undefined
-                });
+            // Removes Mp3 Popularimeter (Rating) tag.
+            if (newTags?.popularimeter) {
+                delete newTags.popularimeter;
             }
-            else {
-                // Removes Mp3 Popularimeter (Rating) tag.
-                if (newTags === null || newTags === void 0 ? void 0 : newTags.popularimeter) {
-                    delete newTags.popularimeter;
+            (0, sendWebContents_fn_1.default)('web-storage', {
+                type: task.type,
+                data: {
+                    id: (0, hashString_fn_1.default)(task.path, 'number'),
+                    newTags
                 }
-                (0, sendWebContents_fn_1.default)('web-storage', {
-                    type: task.type,
-                    data: {
-                        id: (0, hashString_fn_1.default)(task.path, 'number'),
-                        newTags
-                    }
-                });
-            }
-        })
-            .catch()
-            .finally(() => {
-            setTimeout(() => {
-                (0, chokidar_service_1.watchPaths)([task.path]);
-            }, 10000);
-            getTask(processIndex, processesRunning);
-        });
-    });
-}
-function handleExternalUpdateTask(task, processIndex, processesRunning) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let newTags = undefined;
-        newTags = yield (0, getSongTags_fn_1.default)(task.path).catch();
-        (0, sendWebContents_fn_1.default)('web-storage', {
-            type: task.type,
-            data: {
-                id: (0, hashString_fn_1.default)(task.path, 'number'),
-                newTags
-            }
-        });
+            });
+        }
+    })
+        .catch()
+        .finally(() => {
+        setTimeout(() => {
+            (0, chokidar_service_1.watchPaths)([task.path]);
+        }, 10000);
         getTask(processIndex, processesRunning);
     });
+}
+async function handleExternalUpdateTask(task, processIndex, processesRunning) {
+    let newTags = undefined;
+    newTags = await (0, getSongTags_fn_1.default)(task.path).catch();
+    (0, sendWebContents_fn_1.default)('web-storage', {
+        type: task.type,
+        data: {
+            id: (0, hashString_fn_1.default)(task.path, 'number'),
+            newTags
+        }
+    });
+    getTask(processIndex, processesRunning);
 }
 function addToTaskQueue(path, type, data = undefined) {
     let newTask = {
@@ -195,8 +180,8 @@ function stopSongsUpdating() {
 }
 exports.stopSongsUpdating = stopSongsUpdating;
 function filterSongs(audioFilesFound = [], dbSongs) {
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-        let worker = (yield (0, workers_service_1.getWorker)('songFilter'));
+    return new Promise(async (resolve, reject) => {
+        let worker = (await (0, workers_service_1.getWorker)('songFilter'));
         worker.on('message', (data) => {
             if (data.type === 'songsToAdd') {
                 data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
@@ -211,7 +196,7 @@ function filterSongs(audioFilesFound = [], dbSongs) {
             dbSongs,
             userSongs: audioFilesFound
         });
-    }));
+    });
 }
 function getMaxTaskQueueLength() {
     return exports.maxTaskQueueLength;

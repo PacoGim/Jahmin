@@ -21,6 +21,8 @@ declare global {
 			deleteEqualizer: (eqName: string) => Promise<ReturnMessageType>
 			stopSongUpdate: () => Promise<>
 			rebuildArtCache: () => Promise<>
+			saveLyrics: (lyrics: string, songTile: string, songArtist: string, songDuration: number) => Promise<string>
+			getLyrics: (songTile: string, songArtist: string, songDuration: number) => Promise<string>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void

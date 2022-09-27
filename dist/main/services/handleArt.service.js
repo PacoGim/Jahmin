@@ -90,7 +90,6 @@ function handleFileArt(filePath, elementId, size) {
         }
     }
     music_metadata_1.default.parseFile(filePath).then(({ common }) => {
-        var _a;
         const cover = music_metadata_1.default.selectCover(common.picture);
         if (cover === null) {
             return handleArtService((0, getDirectory_fn_1.default)(filePath), elementId, size);
@@ -100,7 +99,7 @@ function handleFileArt(filePath, elementId, size) {
         if (!fs_1.default.existsSync(artDirectory))
             fs_1.default.mkdirSync(artDirectory, { recursive: true });
         // If the art is the same as the one saved it was already sent before
-        if (((_a = embeddedArtPath === null || embeddedArtPath === void 0 ? void 0 : embeddedArtPath.split('/').at(-1)) === null || _a === void 0 ? void 0 : _a.split('.')[0]) === artHash) {
+        if (embeddedArtPath?.split('/').at(-1)?.split('.')[0] === artHash) {
             return;
         }
         else {

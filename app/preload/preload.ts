@@ -18,6 +18,8 @@ const ipcFunctions = {
 	renameEqualizer,
 	stopSongUpdate,
 	rebuildArtCache,
+	saveLyrics,
+	getLyrics,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -43,6 +45,24 @@ const ipcFunctions = {
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
+
+function saveLyrics(lyrics: string, songTile: string, songArtist: string, songDuration: number): Promise<string> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('save-lyrics', lyrics, songTile, songArtist, songDuration)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function getLyrics(songTile: string, songArtist: string, songDuration: number): Promise<string> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('get-lyrics', songTile, songArtist, songDuration)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
 
 function getConfig(): Promise<ConfigType> {
 	return new Promise((resolve, reject) => {

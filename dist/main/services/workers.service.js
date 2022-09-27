@@ -27,7 +27,7 @@ function getWorker(workerName) {
             resolve(newWorker);
         }
         else {
-            resolve(worker === null || worker === void 0 ? void 0 : worker.worker);
+            resolve(worker?.worker);
         }
     });
 }

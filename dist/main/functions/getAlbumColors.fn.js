@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -26,36 +17,34 @@ let contrastRatioConfig = (0, config_service_1.getConfig)().userOptions.contrast
 let previousContrastRatio = undefined;
 let ffmpegImageWorker;
 let ffmpegDeferredPromises = new Map();
-function getAlbumColors(folderPath, contrastRatio = contrastRatioConfig) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            if (folderPath === undefined || folderPath === 'undefined')
-                return resolve(undefined);
-            let allowedArtFiles = (0, getAllowedArts_fn_1.default)(folderPath);
-            if (allowedArtFiles === undefined) {
-                return resolve(undefined);
-            }
-            let videoArts = allowedArtFiles.filter(file => allowedArts_var_1.videoFormats.includes((0, getFileExtension_fn_1.default)(file)));
-            let animatedArts = allowedArtFiles.filter(file => allowedArts_var_1.animatedFormats.includes((0, getFileExtension_fn_1.default)(file)));
-            let imageArts = allowedArtFiles.filter(file => allowedArts_var_1.imageFormats.includes((0, getFileExtension_fn_1.default)(file)));
-            if (videoArts.length !== 0 || animatedArts.length !== 0) {
-                let promiseId = (0, generateId_fn_1.default)();
-                ffmpegDeferredPromises.set(promiseId, resolve);
-                ffmpegImageWorker.postMessage({
-                    id: promiseId,
-                    type: 'handle-art-color',
-                    appDataPath: (0, getAppDataPath_fn_1.default)(),
-                    contrastRatio,
-                    artPath: [...videoArts, ...animatedArts][0]
-                });
-            }
-            if (imageArts.length !== 0) {
-                return getImageArtColors(imageArts[0], contrastRatio).then((hslColorObject) => {
-                    resolve(hslColorObject);
-                });
-            }
+async function getAlbumColors(folderPath, contrastRatio = contrastRatioConfig) {
+    return new Promise(async (resolve, reject) => {
+        if (folderPath === undefined || folderPath === 'undefined')
             return resolve(undefined);
-        }));
+        let allowedArtFiles = (0, getAllowedArts_fn_1.default)(folderPath);
+        if (allowedArtFiles === undefined) {
+            return resolve(undefined);
+        }
+        let videoArts = allowedArtFiles.filter(file => allowedArts_var_1.videoFormats.includes((0, getFileExtension_fn_1.default)(file)));
+        let animatedArts = allowedArtFiles.filter(file => allowedArts_var_1.animatedFormats.includes((0, getFileExtension_fn_1.default)(file)));
+        let imageArts = allowedArtFiles.filter(file => allowedArts_var_1.imageFormats.includes((0, getFileExtension_fn_1.default)(file)));
+        if (videoArts.length !== 0 || animatedArts.length !== 0) {
+            let promiseId = (0, generateId_fn_1.default)();
+            ffmpegDeferredPromises.set(promiseId, resolve);
+            ffmpegImageWorker.postMessage({
+                id: promiseId,
+                type: 'handle-art-color',
+                appDataPath: (0, getAppDataPath_fn_1.default)(),
+                contrastRatio,
+                artPath: [...videoArts, ...animatedArts][0]
+            });
+        }
+        if (imageArts.length !== 0) {
+            return getImageArtColors(imageArts[0], contrastRatio).then((hslColorObject) => {
+                resolve(hslColorObject);
+            });
+        }
+        return resolve(undefined);
     });
 }
 exports.getAlbumColors = getAlbumColors;
@@ -104,8 +93,8 @@ function recursiveLuminanceFinder(hslBaseColor, luminanceIndex = 0, contrastRati
             lowLuminance = 0;
         if (highLuminance > 100)
             highLuminance = 100;
-        let hslBaseColorDark = Object.assign(Object.assign({}, hslBaseColor), { l: lowLuminance });
-        let hslBaseColorLight = Object.assign(Object.assign({}, hslBaseColor), { l: highLuminance });
+        let hslBaseColorDark = { ...hslBaseColor, l: lowLuminance };
+        let hslBaseColorLight = { ...hslBaseColor, l: highLuminance };
         let ratio = getTwoHslColorsContrastRatio(hslBaseColorDark, hslBaseColorLight);
         if (ratio < 1 / contrastRatio || previousContrastRatio === ratio) {
             previousContrastRatio = undefined;

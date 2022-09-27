@@ -23,6 +23,7 @@ type UserOptionsType = {
 	sortBy?: string
 	sortOrder?: 'asc' | 'desc'
 	pauseAnimatedArtWhenAppUnfocused: boolean
+	lyricsTextAlign: 'left' | 'center' | 'right'
 }
 
 export enum ThemeOptions {
