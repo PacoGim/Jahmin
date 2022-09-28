@@ -6,7 +6,7 @@ export default function (lyrics: string, lyricsContainerElement: HTMLElement) {
 	lyricsLines.forEach(line => {
 		let paragraphElement = document.createElement('p')
 
-		paragraphElement.innerHTML = line
+		paragraphElement.innerHTML = line || '...'
 
 		lyricsContainerElement.appendChild(paragraphElement)
 	})

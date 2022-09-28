@@ -1,17 +1,18 @@
 <script lang="ts">
-	import iziToast from 'izitoast'
-	import { onMount } from 'svelte'
 	import parseLyricsFn from '../../functions/parseLyrics.fn'
+	import EyeIcon from '../../icons/EyeIcon.svelte'
 	import SaveIcon from '../../icons/SaveIcon.svelte'
+	import TimerIcon from '../../icons/TimerIcon.svelte'
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import notifyService from '../../services/notify.service'
-	import { config, currentSongProgressStore, playingSongStore } from '../../stores/main.store'
+	import { config, currentSongProgressStore, keyModifier, keyPressed, playingSongStore } from '../../stores/main.store'
+	import LyricsRead from './LyricsRead.svelte'
+	import LyricsEdit from './LyricsEdit.svelte'
+	import LyricsTiming from './LyricsTiming.svelte'
 
-	let lyricsText = ''
+	let lyrics
 
-	let isEditModeOn: boolean = false
-
-	let lyricsContainer: HTMLElement
+	let selectedView: 'read' | 'edit' | 'time' = 'read'
 
 	$: {
 		if ($playingSongStore) {
@@ -19,9 +20,22 @@
 		}
 	}
 
+	$: if ($keyPressed === 's' && $keyModifier === 'ctrlKey') saveLyrics()
+
+	function loadLyrics() {
+		window.ipc
+			.getLyrics($playingSongStore.Title, $playingSongStore.Artist, $playingSongStore.Duration)
+			.then(response => {
+				lyrics = response
+			})
+			.catch(err => {
+				notifyService.error(String(err))
+			})
+	}
+
 	function saveLyrics() {
 		window.ipc
-			.saveLyrics(lyricsText, $playingSongStore.Title, $playingSongStore.Artist, $playingSongStore.Duration)
+			.saveLyrics(lyrics, $playingSongStore.Title, $playingSongStore.Artist, $playingSongStore.Duration)
 			.then(response => {
 				notifyService.success(response)
 			})
@@ -30,16 +44,8 @@
 			})
 	}
 
-	function loadLyrics() {
-		window.ipc
-			.getLyrics($playingSongStore.Title, $playingSongStore.Artist, $playingSongStore.Duration)
-			.then(lyrics => {
-				lyricsText = lyrics
-				parseLyricsFn(lyrics, lyricsContainer)
-			})
-			.catch(err => {
-				notifyService.error(String(err))
-			})
+	function onLyricsUpdate({ detail }) {
+		lyrics = detail
 	}
 </script>
 
@@ -50,29 +56,36 @@
 		</song-information>
 
 		<lyrics-controls>
-			<event-wrapper on:click={() => (isEditModeOn = !isEditModeOn)}>
+			<event-wrapper disabled={selectedView === 'read'} on:click={() => (selectedView = 'read')}>
+				<EyeIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
+			</event-wrapper>
+			<event-wrapper disabled={selectedView === 'time'} on:click={() => (selectedView = 'time')}>
+				<TimerIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
+			</event-wrapper>
+			<event-wrapper disabled={selectedView === 'edit'} on:click={() => (selectedView = 'edit')}>
 				<UpdateIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
-			<event-wrapper on:click={() => saveLyrics()}>
+			<event-wrapper disabled={selectedView !== 'edit'} on:click={() => saveLyrics()}>
 				<SaveIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
 		</lyrics-controls>
 	</lyrics-layout-header>
 
 	<lyrics-layout-body>
-		{#if isEditModeOn === true}
-			<textarea bind:value={lyricsText} />
-		{:else}
-			<lyrics-container bind:this={lyricsContainer} />
+		{#if selectedView === 'edit'}
+			<LyricsEdit {lyrics} on:lyricsUpdate={onLyricsUpdate} />
+		{:else if selectedView === 'read'}
+			<LyricsRead {lyrics} />
+		{:else if selectedView === 'time'}
+			<LyricsTiming />
 		{/if}
 	</lyrics-layout-body>
 </lyrics-layout>
 
 <style>
 	lyrics-layout {
-		height: 100%;
+		/* height: 100%; */
 		display: flex;
-		/* overflow-y: hidden; */
 		flex-direction: column;
 	}
 
@@ -106,29 +119,16 @@
 		align-items: center;
 		padding: 0.25rem;
 		border-radius: 3px;
-	}
-
-	event-wrapper:first-of-type {
 		margin-right: 1rem;
 	}
 
-	textarea {
-		font-family: inherit;
-		font-size: inherit;
-		resize: vertical;
-		width: 100%;
-		height: 100%;
-		padding: 1rem;
-		outline: none;
+	event-wrapper[disabled='true'] {
+		opacity: 0.5;
+		cursor: not-allowed;
+		pointer-events: none;
 	}
 
-	lyrics-container {
-		display: block;
-		margin: 1rem;
-	}
-
-	:global(lyrics-container p) {
-		font-size: 1.25rem;
-		line-height: normal;
+	event-wrapper:last-of-type {
+		margin-right: 0rem;
 	}
 </style>

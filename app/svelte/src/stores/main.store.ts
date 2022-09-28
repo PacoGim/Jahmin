@@ -38,6 +38,7 @@ export let dbVersionStore: Writable<number | undefined> = writable(Date.now())
 
 /********************** Keyboard Events **********************/
 export let keyPressed: Writable<string | undefined> = writable(undefined)
+export let keyModifier: Writable<'altKey' | 'ctrlKey' | 'shiftKey' | undefined> = writable(undefined)
 
 export let appTitle: Writable<string> = writable('Jahmin')
 

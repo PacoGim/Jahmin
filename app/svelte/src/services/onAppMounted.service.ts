@@ -1,5 +1,5 @@
 import iziToast from 'izitoast'
-import { isAppIdle, keyPressed } from '../stores/main.store'
+import { isAppIdle, keyModifier, keyPressed } from '../stores/main.store'
 import { handleContextMenuEvent } from './contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
@@ -18,9 +18,24 @@ export default function () {
 		cssVariablesService.set('theme-transition-duration', '500ms')
 	}, 2000)
 
-	window.addEventListener('keydown', evt => keyPressed.set(evt.key))
+	window.addEventListener('keydown', evt => {
+		keyPressed.set(evt.key)
 
-	window.addEventListener('keyup', () => keyPressed.set(undefined))
+		if (evt.altKey) {
+			keyModifier.set('altKey')
+		} else if (evt.shiftKey) {
+			keyModifier.set('shiftKey')
+		} else if (evt.metaKey) {
+			keyModifier.set('ctrlKey')
+		} else if (evt.ctrlKey) {
+			keyModifier.set('ctrlKey')
+		}
+	})
+
+	window.addEventListener('keyup', () => {
+		keyPressed.set(undefined)
+		keyModifier.set(undefined)
+	})
 
 	window.addEventListener('mousemove', () => {
 		isAppIdle.set(false)

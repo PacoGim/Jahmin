@@ -12,7 +12,7 @@ type DirectoriesType = {
 	exclude: string[]
 }
 
-type UserOptionsType = {
+export type UserOptionsType = {
 	theme?: ThemeOptions
 	equalizerName?: string
 	songAmount?: number
