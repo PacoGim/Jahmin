@@ -44,7 +44,9 @@ async function getAlbumColors(folderPath, contrastRatio = contrastRatioConfig) {
                 resolve(hslColorObject);
             });
         }
-        return resolve(undefined);
+        if (videoArts.length === 0 && animatedArts.length === 0 && imageArts.length === 0) {
+            return resolve(undefined);
+        }
     });
 }
 exports.getAlbumColors = getAlbumColors;
@@ -208,7 +210,6 @@ function hexToHsl(hex) {
 function handleFfmpegImageWorkerResponse(data) {
     if (data.type === 'handle-art-color') {
         getArtColorFromArtPath(data.fileBuffer, data.contrastRatio).then((hslColorObject) => {
-            console.log(hslColorObject);
             ffmpegDeferredPromises.get(data.id)(hslColorObject);
             ffmpegDeferredPromises.delete(data.id);
         });

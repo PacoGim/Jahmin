@@ -3,11 +3,25 @@ export default function (lyrics: string, lyricsContainerElement: HTMLElement) {
 
 	let lyricsLines = lyrics.split('\n')
 
-	lyricsLines.forEach(line => {
-		let paragraphElement = document.createElement('p')
+	lyricsLines.forEach((line, index) => {
+		let lineElement: HTMLElement
 
-		paragraphElement.innerHTML = line || '...'
+		if (line === '') {
+			lineElement = document.createElement('br')
+		} else {
+			lineElement = document.createElement('p')
 
-		lyricsContainerElement.appendChild(paragraphElement)
+			lineElement.style.opacity = '0'
+			lineElement.style.transform = 'translateX(50%)'
+
+			lineElement.innerHTML = line
+		}
+
+		lyricsContainerElement.appendChild(lineElement)
+
+		setTimeout(() => {
+			lineElement.style.opacity = '1'
+			lineElement.style.transform = 'translateX(0%)'
+		}, 25 * (index + 1))
 	})
 }

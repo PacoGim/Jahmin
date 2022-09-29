@@ -33,7 +33,11 @@ function getLyrics(songTile: string, songArtist: string, songDuration: number) {
 
 		fs.readFile(path.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
 			if (err) {
-				reject(err)
+				if (err.code === 'ENOENT') {
+					resolve('')
+				} else {
+					reject(err)
+				}
 			} else {
 				resolve(lyrics)
 			}

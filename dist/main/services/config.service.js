@@ -89,7 +89,9 @@ function getDefaultConfigFile() {
             sortBy: 'Track',
             sortOrder: 'asc',
             pauseAnimatedArtWhenAppUnfocused: false,
-            lyricsTextAlign: 'left'
+            lyricsTextAlign: 'left',
+            lyricsTextSize: 16,
+            lyricsTextWeight: 0
         },
         songListTags: [
             {

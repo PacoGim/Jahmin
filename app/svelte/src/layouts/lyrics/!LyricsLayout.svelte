@@ -1,14 +1,11 @@
 <script lang="ts">
-	import parseLyricsFn from '../../functions/parseLyrics.fn'
 	import EyeIcon from '../../icons/EyeIcon.svelte'
 	import SaveIcon from '../../icons/SaveIcon.svelte'
-	import TimerIcon from '../../icons/TimerIcon.svelte'
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import notifyService from '../../services/notify.service'
-	import { config, currentSongProgressStore, keyModifier, keyPressed, playingSongStore } from '../../stores/main.store'
+	import { keyModifier, keyPressed, playingSongStore } from '../../stores/main.store'
 	import LyricsRead from './LyricsRead.svelte'
 	import LyricsEdit from './LyricsEdit.svelte'
-	import LyricsTiming from './LyricsTiming.svelte'
 
 	let lyrics
 
@@ -59,9 +56,6 @@
 			<event-wrapper disabled={selectedView === 'read'} on:click={() => (selectedView = 'read')}>
 				<EyeIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
-			<event-wrapper disabled={selectedView === 'time'} on:click={() => (selectedView = 'time')}>
-				<TimerIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
-			</event-wrapper>
 			<event-wrapper disabled={selectedView === 'edit'} on:click={() => (selectedView = 'edit')}>
 				<UpdateIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
@@ -76,24 +70,23 @@
 			<LyricsEdit {lyrics} on:lyricsUpdate={onLyricsUpdate} />
 		{:else if selectedView === 'read'}
 			<LyricsRead {lyrics} />
-		{:else if selectedView === 'time'}
-			<LyricsTiming />
 		{/if}
 	</lyrics-layout-body>
 </lyrics-layout>
 
 <style>
 	lyrics-layout {
-		/* height: 100%; */
-		display: flex;
-		flex-direction: column;
+		height: 100%;
+		display: grid;
+
+		grid-template-rows: max-content auto;
 	}
 
 	lyrics-layout-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin: 1rem;
+		padding: 1rem;
 	}
 
 	song-information {
@@ -102,7 +95,9 @@
 	}
 
 	lyrics-layout-body {
-		height: 100%;
+		display: block;
+		overflow-x: hidden;
+		overflow-y: scroll;
 	}
 
 	lyrics-controls {

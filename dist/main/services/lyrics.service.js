@@ -33,7 +33,12 @@ function getLyrics(songTile, songArtist, songDuration) {
         let lyricsPath = (0, sanitize_filename_1.default)(`${songTile}-${songArtist}-${songDuration}.txt`);
         fs_1.default.readFile(path_1.default.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
             if (err) {
-                reject(err);
+                if (err.code === 'ENOENT') {
+                    resolve('');
+                }
+                else {
+                    reject(err);
+                }
             }
             else {
                 resolve(lyrics);

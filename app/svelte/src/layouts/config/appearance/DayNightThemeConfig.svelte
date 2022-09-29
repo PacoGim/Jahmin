@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
 	import MoonFillIcon from '../../../icons/MoonFillIcon.svelte'
 
 	import MoonIcon from '../../../icons/MoonIcon.svelte'

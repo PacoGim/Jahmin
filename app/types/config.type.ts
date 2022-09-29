@@ -13,17 +13,19 @@ type DirectoriesType = {
 }
 
 export type UserOptionsType = {
-	theme?: ThemeOptions
-	equalizerName?: string
-	songAmount?: number
-	gridGap?: number
-	artSize?: number
-	contrastRatio?: number
-	fontSize?: number
-	sortBy?: string
-	sortOrder?: 'asc' | 'desc'
+	theme: ThemeOptions
+	equalizerName: string
+	songAmount: number
+	gridGap: number
+	artSize: number
+	contrastRatio: number
+	fontSize: number
+	sortBy: string
+	sortOrder: 'asc' | 'desc'
 	pauseAnimatedArtWhenAppUnfocused: boolean
 	lyricsTextAlign: 'left' | 'center' | 'right'
+	lyricsTextSize: number
+	lyricsTextWeight: number
 }
 
 export enum ThemeOptions {
@@ -42,4 +44,8 @@ export type BoundsType = {
 	y: number
 	height: number
 	width: number
+}
+
+export type PartialConfigType<T> = {
+	[P in keyof T]?: PartialConfigType<T[P]>;
 }
