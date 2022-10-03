@@ -1,20 +1,22 @@
-import iziToast from 'izitoast'
+import iziToast, { IziToastSettings } from 'izitoast'
 
-function success(message: string) {
+function success(message: string, customConfig: IziToastSettings = {}) {
 	return iziToast.success({
 		message,
-    messageColor:'#fff',
-    backgroundColor:'var(--color-hl-blue)',
-    icon:'',
+		messageColor: '#fff',
+		backgroundColor: 'var(--color-hl-blue)',
+		icon: '',
+		...customConfig
 	})
 }
 
-function error(message: string) {
+function error(message: string, customConfig: IziToastSettings = {}) {
 	return iziToast.error({
 		message,
-    messageColor:'#fff',
-    backgroundColor:'var(--color-hl-2)',
-    icon:'',
+		messageColor: '#fff',
+		backgroundColor: 'var(--color-hl-2)',
+		icon: '',
+		...customConfig
 	})
 }
 

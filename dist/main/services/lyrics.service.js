@@ -9,10 +9,9 @@ const fs_1 = __importDefault(require("fs"));
 const sanitize_filename_1 = __importDefault(require("sanitize-filename"));
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
 let lyricsFolderPath = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'lyrics');
-function saveLyrics(lyrics, songTile, songArtist, songDuration) {
+function saveLyrics(lyrics, songTile, songArtist) {
     return new Promise((resolve, reject) => {
-        songDuration = Math.trunc(songDuration);
-        let lyricsPath = (0, sanitize_filename_1.default)(`${songTile}-${songArtist}-${songDuration}.txt`);
+        let lyricsPath = (0, sanitize_filename_1.default)(`${songTile}-${songArtist}.txt`);
         if (!fs_1.default.existsSync(lyricsFolderPath)) {
             fs_1.default.mkdirSync(lyricsFolderPath, { recursive: true });
         }
@@ -27,10 +26,9 @@ function saveLyrics(lyrics, songTile, songArtist, songDuration) {
     });
 }
 exports.saveLyrics = saveLyrics;
-function getLyrics(songTile, songArtist, songDuration) {
+function getLyrics(songTile, songArtist) {
     return new Promise((resolve, reject) => {
-        songDuration = Math.trunc(songDuration);
-        let lyricsPath = (0, sanitize_filename_1.default)(`${songTile}-${songArtist}-${songDuration}.txt`);
+        let lyricsPath = (0, sanitize_filename_1.default)(`${songTile}-${songArtist}.txt`);
         fs_1.default.readFile(path_1.default.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
             if (err) {
                 if (err.code === 'ENOENT') {

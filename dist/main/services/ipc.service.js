@@ -83,11 +83,11 @@ function startIPC() {
     electron_1.ipcMain.handle('rebuild-art-cache', async (evt) => {
         return await (0, clearArtCache_fn_1.default)();
     });
-    electron_1.ipcMain.handle('save-lyrics', async (evt, lyrics, songTile, songArtist, songDuration) => {
-        return await (0, lyrics_service_1.saveLyrics)(lyrics, songTile, songArtist, songDuration);
+    electron_1.ipcMain.handle('save-lyrics', async (evt, lyrics, songTile, songArtist) => {
+        return await (0, lyrics_service_1.saveLyrics)(lyrics, songTile, songArtist);
     });
-    electron_1.ipcMain.handle('get-lyrics', async (evt, songTile, songArtist, songDuration) => {
-        return await (0, lyrics_service_1.getLyrics)(songTile, songArtist, songDuration);
+    electron_1.ipcMain.handle('get-lyrics', async (evt, songTile, songArtist) => {
+        return await (0, lyrics_service_1.getLyrics)(songTile, songArtist);
     });
 }
 exports.startIPC = startIPC;

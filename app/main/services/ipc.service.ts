@@ -96,12 +96,12 @@ export function startIPC() {
 		return await cleanArtCacheFn()
 	})
 
-	ipcMain.handle('save-lyrics', async (evt, lyrics, songTile, songArtist, songDuration) => {
-		return await saveLyrics(lyrics, songTile, songArtist, songDuration)
+	ipcMain.handle('save-lyrics', async (evt, lyrics, songTile, songArtist) => {
+		return await saveLyrics(lyrics, songTile, songArtist)
 	})
 
-	ipcMain.handle('get-lyrics', async (evt, songTile, songArtist, songDuration) => {
-		return await getLyrics(songTile, songArtist, songDuration)
+	ipcMain.handle('get-lyrics', async (evt, songTile, songArtist) => {
+		return await getLyrics(songTile, songArtist)
 	})
 }
 

@@ -46,19 +46,19 @@ const ipcFunctions = {
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
 
-function saveLyrics(lyrics: string, songTile: string, songArtist: string, songDuration: number): Promise<string> {
+function saveLyrics(lyrics: string, songTile: string, songArtist: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
-			.invoke('save-lyrics', lyrics, songTile, songArtist, songDuration)
+			.invoke('save-lyrics', lyrics, songTile, songArtist)
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})
 }
 
-function getLyrics(songTile: string, songArtist: string, songDuration: number): Promise<string> {
+function getLyrics(songTile: string, songArtist: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
-			.invoke('get-lyrics', songTile, songArtist, songDuration)
+			.invoke('get-lyrics', songTile, songArtist)
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})
