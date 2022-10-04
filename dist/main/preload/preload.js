@@ -16,6 +16,7 @@ const ipcFunctions = {
     rebuildArtCache,
     saveLyrics,
     getLyrics,
+    getLyricsList,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -49,6 +50,14 @@ function getLyrics(songTile, songArtist) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer
             .invoke('get-lyrics', songTile, songArtist)
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
+function getLyricsList() {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('get-lyrics-list')
             .then(response => resolve(response))
             .catch(err => reject(err));
     });

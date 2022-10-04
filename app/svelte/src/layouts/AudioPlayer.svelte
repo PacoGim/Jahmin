@@ -145,6 +145,9 @@
 				audioElements.alt.isPlaying = false
 				audioElements.alt.isPreloaded = false
 				audioElements.alt.isPreloading = false
+			} else {
+				audioElements.main.isPlaying = false
+				audioElements.alt.isPlaying = false
 			}
 		}
 	}

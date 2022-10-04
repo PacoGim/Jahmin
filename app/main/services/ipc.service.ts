@@ -18,7 +18,7 @@ import { getConfig, saveConfig } from './config.service'
 import { addEqualizer, deleteEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
 import { addToTaskQueue, fetchSongsTag, stopSongsUpdating } from './librarySongs.service'
 import { getPeaks, savePeaks } from './peaks.service'
-import { getLyrics, saveLyrics } from './lyrics.service'
+import { getLyrics, getLyricsList, saveLyrics } from './lyrics.service'
 
 let saveConfigDebounce: NodeJS.Timeout
 
@@ -102,6 +102,10 @@ export function startIPC() {
 
 	ipcMain.handle('get-lyrics', async (evt, songTile, songArtist) => {
 		return await getLyrics(songTile, songArtist)
+	})
+
+	ipcMain.handle('get-lyrics-list', async () => {
+		return await getLyricsList()
 	})
 }
 

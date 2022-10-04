@@ -20,6 +20,7 @@ const ipcFunctions = {
 	rebuildArtCache,
 	saveLyrics,
 	getLyrics,
+	getLyricsList,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -59,6 +60,15 @@ function getLyrics(songTile: string, songArtist: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('get-lyrics', songTile, songArtist)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function getLyricsList(): Promise<{ title: string; artist: string }[]> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('get-lyrics-list')
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})

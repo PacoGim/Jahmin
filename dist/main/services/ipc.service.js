@@ -89,6 +89,9 @@ function startIPC() {
     electron_1.ipcMain.handle('get-lyrics', async (evt, songTile, songArtist) => {
         return await (0, lyrics_service_1.getLyrics)(songTile, songArtist);
     });
+    electron_1.ipcMain.handle('get-lyrics-list', async () => {
+        return await (0, lyrics_service_1.getLyricsList)();
+    });
 }
 exports.startIPC = startIPC;
 function windowResize(event) {

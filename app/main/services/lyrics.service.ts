@@ -41,4 +41,21 @@ function getLyrics(songTile: string, songArtist: string) {
 	})
 }
 
-export { saveLyrics, getLyrics }
+function getLyricsList() {
+	return new Promise((resolve, reject) => {
+		let lyricsList = fs
+			.readdirSync(lyricsFolderPath)
+			.map(file => file.split('.')[0])
+			.map(file => {
+				let fileSplit = file.split('-')
+				return {
+					title: fileSplit[0],
+					artist: fileSplit[1]
+				}
+			})
+
+		resolve(lyricsList)
+	})
+}
+
+export { saveLyrics, getLyrics, getLyricsList }

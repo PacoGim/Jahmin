@@ -9,13 +9,14 @@
 	import notifyService from '../../services/notify.service'
 
 	import { keyModifier, keyPressed, playingSongStore } from '../../stores/main.store'
+	import LyricsList from './LyricsList.svelte'
 
 	let lyrics
 	let tempLyrics
+	let selectedView: 'read' | 'edit' | 'time' = 'read'
+	let triggerUpdateLyricsList = undefined
 
 	$: isLyricsDirty = lyrics !== tempLyrics ? true : false
-
-	let selectedView: 'read' | 'edit' | 'time' = 'read'
 
 	$: {
 		if ($playingSongStore) {
@@ -49,6 +50,11 @@
 					position: 'topCenter',
 					close: false
 				})
+				triggerUpdateLyricsList = true
+
+				setTimeout(() => {
+					triggerUpdateLyricsList = undefined
+				}, 500)
 			})
 			.catch(err => {
 				notifyService.error(String(err))
@@ -61,6 +67,7 @@
 </script>
 
 <lyrics-layout class="layout">
+	<LyricsList updateLyricsList={triggerUpdateLyricsList} />
 	<lyrics-layout-header>
 		<song-information>
 			{`${$playingSongStore?.Title} by ${$playingSongStore?.Artist}`}
@@ -94,7 +101,13 @@
 		height: 100%;
 		display: grid;
 
+		grid-template-areas:
+			'lyrics-list lyrics-layout-header'
+			'lyrics-list lyrics-layout-body';
+
 		grid-template-rows: max-content auto;
+
+		grid-template-columns: max-content auto;
 	}
 
 	lyrics-layout-header {
@@ -102,6 +115,8 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem;
+
+		grid-area: lyrics-layout-header;
 	}
 
 	song-information {
@@ -114,6 +129,8 @@
 		display: block;
 		overflow-x: hidden;
 		overflow-y: scroll;
+
+		grid-area: lyrics-layout-body;
 	}
 
 	lyrics-controls {

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLyrics = exports.saveLyrics = void 0;
+exports.getLyricsList = exports.getLyrics = exports.saveLyrics = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const sanitize_filename_1 = __importDefault(require("sanitize-filename"));
@@ -45,3 +45,19 @@ function getLyrics(songTile, songArtist) {
     });
 }
 exports.getLyrics = getLyrics;
+function getLyricsList() {
+    return new Promise((resolve, reject) => {
+        let lyricsList = fs_1.default
+            .readdirSync(lyricsFolderPath)
+            .map(file => file.split('.')[0])
+            .map(file => {
+            let fileSplit = file.split('-');
+            return {
+                title: fileSplit[0],
+                artist: fileSplit[1]
+            };
+        });
+        resolve(lyricsList);
+    });
+}
+exports.getLyricsList = getLyricsList;
