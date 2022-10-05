@@ -11,18 +11,39 @@ const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath
 let lyricsFolderPath = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'lyrics');
 function saveLyrics(lyrics, songTile, songArtist) {
     return new Promise((resolve, reject) => {
+        if (songTile === null || songTile === undefined || songArtist === null || songArtist === undefined) {
+            return reject('Song Title or Song Artist not defined.');
+        }
         let lyricsPath = (0, sanitize_filename_1.default)(`${songTile}-${songArtist}.txt`);
+        let lyricsFullPath = path_1.default.join(lyricsFolderPath, lyricsPath);
         if (!fs_1.default.existsSync(lyricsFolderPath)) {
             fs_1.default.mkdirSync(lyricsFolderPath, { recursive: true });
         }
-        fs_1.default.writeFile(path_1.default.join(lyricsFolderPath, lyricsPath), lyrics, err => {
-            if (err) {
-                reject(err);
+        if (lyrics === null) {
+            if (!fs_1.default.existsSync(lyricsFullPath)) {
+                fs_1.default.writeFile(lyricsFullPath, '', err => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(`${songTile} lyrics saved!`);
+                    }
+                });
             }
             else {
                 resolve(`${songTile} lyrics saved!`);
             }
-        });
+        }
+        else {
+            fs_1.default.writeFile(lyricsFullPath, lyrics, err => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(`${songTile} lyrics saved!`);
+                }
+            });
+        }
     });
 }
 exports.saveLyrics = saveLyrics;
@@ -49,6 +70,7 @@ function getLyricsList() {
     return new Promise((resolve, reject) => {
         let lyricsList = fs_1.default
             .readdirSync(lyricsFolderPath)
+            .filter(file => file.endsWith('.txt'))
             .map(file => file.split('.')[0])
             .map(file => {
             let fileSplit = file.split('-');

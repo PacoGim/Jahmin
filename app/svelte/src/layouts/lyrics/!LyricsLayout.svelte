@@ -15,11 +15,12 @@
 	let tempLyrics
 	let selectedView: 'read' | 'edit' | 'time' = 'read'
 	let triggerUpdateLyricsList = undefined
+	let autoSwitchSong = false
 
 	$: isLyricsDirty = lyrics !== tempLyrics ? true : false
 
 	$: {
-		if ($playingSongStore) {
+		if ($playingSongStore && autoSwitchSong === true) {
 			loadLyrics()
 		}
 	}

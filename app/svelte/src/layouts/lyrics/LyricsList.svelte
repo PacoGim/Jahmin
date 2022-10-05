@@ -2,7 +2,7 @@
 	import type { SongType } from '../../../../types/song.type'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import setNewPlaybackFn from '../../functions/setNewPlayback.fn'
-	import { dbSongsStore, playingSongStore } from '../../stores/main.store'
+	import { dbSongsStore, playbackStore, playingSongStore } from '../../stores/main.store'
 
 	export let updateLyricsList = undefined
 
@@ -16,11 +16,17 @@
 			songList = lyricsList.map(lyrics =>
 				$dbSongsStore.find(song => song.Title === lyrics.title && song.Artist === lyrics.artist)
 			)
+
 		})
 	}
 
 	function showLyrics(song: SongType, { playNow }: { playNow: boolean }) {
-		setNewPlaybackFn(getDirectoryFn(song.SourceFile), [song], song.ID, { playNow })
+		let isSongInPlayback = $playbackStore.findIndex(value => value.ID === song.ID) === -1 ? false : true
+
+		// If the song is in playback don't change the playback. If it is not on the playback create a new playback.
+		let playbackSongs = isSongInPlayback === true ? $playbackStore : [song]
+
+		setNewPlaybackFn(getDirectoryFn(song.SourceFile), playbackSongs, song.ID, { playNow })
 	}
 </script>
 
@@ -31,7 +37,7 @@
 			on:click={evt => showLyrics(song, { playNow: false })}
 			on:dblclick={evt => showLyrics(song, { playNow: true })}
 		>
-			{song.Artist} - {song.Title}
+			{song.Title} - {song.Artist}
 		</p>
 	{/each}
 </lyrics-list>
@@ -46,6 +52,7 @@
 
 	lyrics-list p {
 		cursor: pointer;
+		margin-bottom: 0.5rem;
 	}
 
 	lyrics-list p[data-active='true'] {

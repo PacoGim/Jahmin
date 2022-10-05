@@ -42,7 +42,8 @@ const ipcFunctions = {
 	handleNewVideoArt: (callback: any) => ipcRenderer.on('new-video-art', callback),
 	handleNewAnimationArt: (callback: any) => ipcRenderer.on('new-animation-art', callback),
 	songSyncQueueProgress: (callback: any) => ipcRenderer.on('song-sync-queue-progress', callback),
-	onArtQueueChange: (callback: any) => ipcRenderer.on('art-queue-length', callback)
+	onArtQueueChange: (callback: any) => ipcRenderer.on('art-queue-length', callback),
+	onShowLyrics: (callback: any) => ipcRenderer.on('show-lyrics', callback)
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)

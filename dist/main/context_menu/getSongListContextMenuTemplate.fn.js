@@ -6,9 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const config_service_1 = require("../services/config.service");
+const lyrics_service_1 = require("../services/lyrics.service");
 function default_1(data) {
     let template = [];
     let { selectedSongsData, clickedSongData } = data;
+    // If songs selected or a song has been clicked.
     if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
         template.push({
             label: 'Enable',
@@ -44,9 +46,21 @@ function default_1(data) {
         type: 'submenu',
         submenu: getSortMenu()
     });
+    if (clickedSongData !== undefined) {
+        addSeparator(template);
+        template.push({
+            label: 'Edit Lyrics',
+            click: () => editLyrics(clickedSongData)
+        });
+    }
     return template;
 }
 exports.default = default_1;
+function editLyrics(song) {
+    (0, lyrics_service_1.saveLyrics)(null, song.Title, song.Artist).then(() => {
+        (0, sendWebContents_fn_1.default)('show-lyrics', { songTitle: song.Title, songArtist: song.Artist });
+    });
+}
 function handleEnableDisableSongs({ enable }, selectedSongs, clickedSong) {
     let isClickedSongInSelectedSongs = selectedSongs.find(song => song.ID === clickedSong?.ID) ? true : false;
     if (isClickedSongInSelectedSongs === false && clickedSong !== undefined) {

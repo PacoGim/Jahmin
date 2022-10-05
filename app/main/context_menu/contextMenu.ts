@@ -1,4 +1,5 @@
 import { Menu, BrowserWindow } from 'electron'
+
 import getAlbumContextMenuTemplateFn from './getAlbumContextMenuTemplate.fn'
 import getGroupNameContextMenuTemplateFn from './getGroupNameContextMenuTemplate.fn'
 import getSongListContextMenuTemplateFn from './getSongListContextMenuTemplate.fn'

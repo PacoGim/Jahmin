@@ -45,7 +45,17 @@ async function getAlbumColors(folderPath, contrastRatio = contrastRatioConfig) {
             });
         }
         if (videoArts.length === 0 && animatedArts.length === 0 && imageArts.length === 0) {
-            return resolve(undefined);
+            let hexColor = '808080';
+            let hslColorObject = (0, color_type_1.ColorTypeDefault)();
+            let hslColor = hexToHsl(hexColor);
+            getTwoContrastedHslColors(hslColor, contrastRatio).then((data) => {
+                hslColorObject.hue = hslColor.h;
+                hslColorObject.saturation = hslColor.s;
+                hslColorObject.lightnessBase = hslColor.l;
+                hslColorObject.lightnessLight = data.colorLight.l;
+                hslColorObject.lightnessDark = data.colorDark.l;
+                return resolve(hslColorObject);
+            });
         }
     });
 }

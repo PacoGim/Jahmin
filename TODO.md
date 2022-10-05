@@ -7,3 +7,4 @@
 * Quick Play.
 * Remove album art traces if song removed.
 * Select multiple albums.
+* Verify album tegrity when user plays it.

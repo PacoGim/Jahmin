@@ -44,6 +44,7 @@ declare global {
 			handleWebStorage: (callback: any) => void
 			songSyncQueueProgress: (callback: any) => void
 			onArtQueueChange: (callback: any) => void
+			onShowLyrics: (callback: any) => void
 		}
 	}
 }

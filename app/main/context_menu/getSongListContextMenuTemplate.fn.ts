@@ -2,6 +2,7 @@ import { MenuItemConstructorOptions, clipboard, shell } from 'electron'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import { getConfig } from '../services/config.service'
 import { SongType } from '../../types/song.type'
+import { saveLyrics } from '../services/lyrics.service'
 
 type dataType = {
 	selectedSongsData: SongType[]
@@ -14,6 +15,7 @@ export default function (data: dataType) {
 
 	let { selectedSongsData, clickedSongData } = data
 
+	// If songs selected or a song has been clicked.
 	if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
 		template.push({
 			label: 'Enable',
@@ -56,7 +58,22 @@ export default function (data: dataType) {
 		submenu: getSortMenu()
 	})
 
+	if (clickedSongData !== undefined) {
+		addSeparator(template)
+
+		template.push({
+			label: 'Edit Lyrics',
+			click: () => editLyrics(clickedSongData!)
+		})
+	}
+
 	return template
+}
+
+function editLyrics(song: SongType) {
+	saveLyrics(null, song.Title, song.Artist).then(() => {
+		sendWebContentsFn('show-lyrics', { songTitle: song.Title, songArtist: song.Artist })
+	})
 }
 
 function handleEnableDisableSongs(

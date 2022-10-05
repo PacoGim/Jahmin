@@ -2,7 +2,7 @@
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import generateId from '../functions/generateId.fn'
-	import { artCompressQueueLength, songSyncQueueProgress } from '../stores/main.store'
+	import { artCompressQueueLength, layoutToShow, songSyncQueueProgress } from '../stores/main.store'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {
@@ -32,6 +32,11 @@
 
 	window.ipc.onArtQueueChange((_, artQueueLength) => {
 		$artCompressQueueLength = artQueueLength
+	})
+
+	window.ipc.onShowLyrics((_, data) => {
+		// console.log(data)
+		$layoutToShow = 'Lyrics'
 	})
 
 	/**
