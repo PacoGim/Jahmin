@@ -86,3 +86,5 @@ export let songListItemElement: Writable<HTMLElement | undefined> = writable(und
 export let songListTagsValuesStore: Writable<string[]> = writable([])
 
 export let reloadArts: Writable<number> = writable(Math.random())
+
+export let songLyricsSelected: Writable<{ title: string; artist: string }> = writable(undefined)

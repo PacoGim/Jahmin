@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import parseLyricsFn from '../../functions/parseLyrics.fn'
+	import renderLyricsFn from '../../functions/renderLyrics.fn'
 	import updateConfigFn from '../../functions/updateConfig.fn'
 	import TextAlignCenterIcon from '../../icons/TextAlignCenterIcon.svelte'
 	import TextAlignLeftcon from '../../icons/TextAlignLeftcon.svelte'
@@ -12,7 +12,7 @@
 
 	let lyricsContainer: HTMLElement
 
-	$: if (lyrics && lyricsContainer) parseLyricsFn(lyrics, lyricsContainer)
+	$: if ((lyrics || lyrics === null) && lyricsContainer) renderLyricsFn(lyrics, lyricsContainer)
 
 	function updateTextAlign(newTextAlign: 'left' | 'center' | 'right') {
 		updateConfigFn({

@@ -8,3 +8,8 @@
 * Remove album art traces if song removed.
 * Select multiple albums.
 * Verify album tegrity when user plays it.
+
+* Disable Autochoose songs when clicking on lyrics.
+* Add autoswitch functionality.
+* When clicking on editing lyrics, auto select it.
+* Add Auto Switch Song configuration.

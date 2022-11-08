@@ -35,8 +35,9 @@
 	})
 
 	window.ipc.onShowLyrics((_, data) => {
-		// console.log(data)
 		$layoutToShow = 'Lyrics'
+
+		console.log(data)
 	})
 
 	/**

@@ -1,4 +1,8 @@
-export default function (lyrics: string, lyricsContainerElement: HTMLElement) {
+export default function (lyrics: string | null, lyricsContainerElement: HTMLElement) {
+	if (lyrics === null) {
+		lyrics = ''
+	}
+
 	lyricsContainerElement.innerHTML = ''
 
 	let lyricsLines = lyrics.split('\n')

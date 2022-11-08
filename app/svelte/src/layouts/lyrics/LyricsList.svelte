@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte'
+
 	import type { SongType } from '../../../../types/song.type'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import setNewPlaybackFn from '../../functions/setNewPlayback.fn'
-	import { dbSongsStore, playbackStore, playingSongStore } from '../../stores/main.store'
+	import { dbSongsStore, playbackStore, playingSongStore, songLyricsSelected } from '../../stores/main.store'
 
 	export let updateLyricsList = undefined
+
+	const dispatch = createEventDispatcher()
 
 	let songList: SongType[] = []
 
@@ -16,26 +20,32 @@
 			songList = lyricsList.map(lyrics =>
 				$dbSongsStore.find(song => song.Title === lyrics.title && song.Artist === lyrics.artist)
 			)
-
 		})
 	}
 
-	function showLyrics(song: SongType, { playNow }: { playNow: boolean }) {
-		let isSongInPlayback = $playbackStore.findIndex(value => value.ID === song.ID) === -1 ? false : true
+	function showLyrics(song: SongType, { updateSong }: { updateSong: boolean }) {
+		dispatch('show-lyrics', {
+			title: song.Title,
+			artist: song.Artist
+		})
 
-		// If the song is in playback don't change the playback. If it is not on the playback create a new playback.
-		let playbackSongs = isSongInPlayback === true ? $playbackStore : [song]
+		if (updateSong === true) {
+			let isSongInPlayback = $playbackStore.findIndex(value => value.ID === song.ID) === -1 ? false : true
 
-		setNewPlaybackFn(getDirectoryFn(song.SourceFile), playbackSongs, song.ID, { playNow })
+			// If the song is in playback don't change the playback. If it is not on the playback create a new playback.
+			let playbackSongs = isSongInPlayback === true ? $playbackStore : [song]
+
+			setNewPlaybackFn(getDirectoryFn(song.SourceFile), playbackSongs, song.ID, { playNow: true })
+		}
 	}
 </script>
 
 <lyrics-list>
 	{#each songList as song, index (index)}
 		<p
-			data-active={$playingSongStore?.ID === song.ID ? 'true' : 'false'}
-			on:click={evt => showLyrics(song, { playNow: false })}
-			on:dblclick={evt => showLyrics(song, { playNow: true })}
+			data-active={$songLyricsSelected?.title === song.Title && $songLyricsSelected?.artist === song.Artist ? 'true' : 'false'}
+			on:click={evt => showLyrics(song, { updateSong: false })}
+			on:dblclick={evt => showLyrics(song, { updateSong: true })}
 		>
 			{song.Title} - {song.Artist}
 		</p>

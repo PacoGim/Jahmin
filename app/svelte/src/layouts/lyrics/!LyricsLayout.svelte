@@ -8,14 +8,15 @@
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import notifyService from '../../services/notify.service'
 
-	import { keyModifier, keyPressed, playingSongStore } from '../../stores/main.store'
+	import { keyModifier, keyPressed, playingSongStore, songLyricsSelected } from '../../stores/main.store'
 	import LyricsList from './LyricsList.svelte'
+	import { onMount } from 'svelte'
 
 	let lyrics
 	let tempLyrics
 	let selectedView: 'read' | 'edit' | 'time' = 'read'
 	let triggerUpdateLyricsList = undefined
-	let autoSwitchSong = false
+	let autoSwitchSong = true
 
 	$: isLyricsDirty = lyrics !== tempLyrics ? true : false
 
@@ -33,6 +34,10 @@
 			.then(response => {
 				lyrics = response
 				tempLyrics = response
+				$songLyricsSelected = {
+					title: $playingSongStore.Title,
+					artist: $playingSongStore.Artist
+				}
 			})
 			.catch(err => {
 				notifyService.error(String(err))
@@ -45,7 +50,7 @@
 		lyrics = tempLyrics
 
 		window.ipc
-			.saveLyrics(lyrics, $playingSongStore.Title, $playingSongStore.Artist)
+			.saveLyrics(lyrics, $songLyricsSelected.title, $songLyricsSelected.artist)
 			.then(response => {
 				notifyService.success(response, {
 					position: 'topCenter',
@@ -65,13 +70,30 @@
 	function onLyricsUpdate({ detail }) {
 		tempLyrics = detail
 	}
+
+	function showLyrics({ detail }) {
+		window.ipc
+			.getLyrics(detail.title, detail.artist)
+			.then(response => {
+				lyrics = response || null
+				tempLyrics = response || null
+
+				$songLyricsSelected = {
+					title: detail.title,
+					artist: detail.artist
+				}
+			})
+			.catch(err => {
+				notifyService.error(String(err))
+			})
+	}
 </script>
 
 <lyrics-layout class="layout">
-	<LyricsList updateLyricsList={triggerUpdateLyricsList} />
+	<LyricsList on:show-lyrics={showLyrics} updateLyricsList={triggerUpdateLyricsList} />
 	<lyrics-layout-header>
 		<song-information>
-			{`${$playingSongStore?.Title} by ${$playingSongStore?.Artist}`}
+			{`${$songLyricsSelected?.title} by ${$songLyricsSelected?.artist}`}
 			<span style="margin-left: 0.5rem;font-size: 1rem;">{isLyricsDirty ? '•' : ''}</span>
 		</song-information>
 
