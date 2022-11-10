@@ -40,12 +40,13 @@
 		const songListElement = $elementMap.get('song-list')
 		const controlBarElement = $elementMap.get('control-bar-svlt')
 		const tagEditElement = $elementMap.get('tag-edit-svlt')
+		const artElement = $elementMap.get('art-svlt')
 
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
 
 		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type)
 
-		if (imgElement && controlBarElement) setAlbumBackInView()
+		if (artElement && controlBarElement) setAlbumBackInView()
 
 		if (songListElement === undefined && tagEditElement === undefined) {
 			$selectedSongsStore = []

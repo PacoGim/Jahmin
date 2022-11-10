@@ -11,7 +11,7 @@ function saveLyrics(lyrics: string | null, songTile: string | null | undefined, 
 			return reject('Song Title or Song Artist not defined.')
 		}
 
-		let lyricsPath = sanitize(`${songTile}-${songArtist}.txt`)
+		let lyricsPath = sanitize(`${songTile})_(${songArtist}.txt`)
 		let lyricsFullPath = path.join(lyricsFolderPath, lyricsPath)
 
 		if (!fs.existsSync(lyricsFolderPath)) {
@@ -44,7 +44,7 @@ function saveLyrics(lyrics: string | null, songTile: string | null | undefined, 
 
 function getLyrics(songTile: string, songArtist: string) {
 	return new Promise((resolve, reject) => {
-		let lyricsPath = sanitize(`${songTile}-${songArtist}.txt`)
+		let lyricsPath = sanitize(`${songTile})_(${songArtist}.txt`)
 
 		fs.readFile(path.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
 			if (err) {
@@ -67,7 +67,7 @@ function getLyricsList() {
 			.filter(file => file.endsWith('.txt'))
 			.map(file => file.split('.')[0])
 			.map(file => {
-				let fileSplit = file.split('-')
+				let fileSplit = file.split(')_(')
 				return {
 					title: fileSplit[0],
 					artist: fileSplit[1]

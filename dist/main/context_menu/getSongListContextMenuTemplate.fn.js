@@ -58,7 +58,7 @@ function default_1(data) {
 exports.default = default_1;
 function editLyrics(song) {
     (0, lyrics_service_1.saveLyrics)(null, song.Title, song.Artist).then(() => {
-        (0, sendWebContents_fn_1.default)('show-lyrics', { songTitle: song.Title, songArtist: song.Artist });
+        (0, sendWebContents_fn_1.default)('show-lyrics', { title: song.Title, artist: song.Artist });
     });
 }
 function handleEnableDisableSongs({ enable }, selectedSongs, clickedSong) {

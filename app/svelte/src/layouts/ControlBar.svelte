@@ -18,7 +18,7 @@
 	} from '../stores/main.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
-  import cssVariablesService from '../services/cssVariables.service'
+	import cssVariablesService from '../services/cssVariables.service'
 
 	let progress: number = 0
 

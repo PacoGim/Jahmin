@@ -2,6 +2,7 @@
 	import { addTaskToQueue } from '../db/!db'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import generateId from '../functions/generateId.fn'
+	import { onNewLyrics } from '../stores/crosscall.store'
 	import { artCompressQueueLength, layoutToShow, songSyncQueueProgress } from '../stores/main.store'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
@@ -37,7 +38,10 @@
 	window.ipc.onShowLyrics((_, data) => {
 		$layoutToShow = 'Lyrics'
 
-		console.log(data)
+		$onNewLyrics = {
+			artist: data.artist,
+			title: data.title
+		}
 	})
 
 	/**

@@ -49,7 +49,7 @@
 
 <style>
 	art-svlt {
-		cursor: default;
+		cursor: inherit;
 		grid-column: 1;
 		grid-row: 1;
 		display: block;

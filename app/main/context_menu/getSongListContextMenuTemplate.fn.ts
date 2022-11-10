@@ -72,7 +72,7 @@ export default function (data: dataType) {
 
 function editLyrics(song: SongType) {
 	saveLyrics(null, song.Title, song.Artist).then(() => {
-		sendWebContentsFn('show-lyrics', { songTitle: song.Title, songArtist: song.Artist })
+		sendWebContentsFn('show-lyrics', { title: song.Title, artist: song.Artist })
 	})
 }
 

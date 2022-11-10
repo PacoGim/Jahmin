@@ -24,6 +24,11 @@
 	}
 
 	function showLyrics(song: SongType, { updateSong }: { updateSong: boolean }) {
+		$songLyricsSelected = {
+			title: song.Title,
+			artist: song.Artist
+		}
+
 		dispatch('show-lyrics', {
 			title: song.Title,
 			artist: song.Artist
@@ -47,6 +52,9 @@
 			on:click={evt => showLyrics(song, { updateSong: false })}
 			on:dblclick={evt => showLyrics(song, { updateSong: true })}
 		>
+			{#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}
+				►
+			{/if}
 			{song.Title} - {song.Artist}
 		</p>
 	{/each}
@@ -61,6 +69,7 @@
 	}
 
 	lyrics-list p {
+		line-height: 1rem;
 		cursor: pointer;
 		margin-bottom: 0.5rem;
 	}

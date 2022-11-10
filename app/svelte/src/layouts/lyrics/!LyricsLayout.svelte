@@ -10,23 +10,37 @@
 
 	import { keyModifier, keyPressed, playingSongStore, songLyricsSelected } from '../../stores/main.store'
 	import LyricsList from './LyricsList.svelte'
+	import { onNewLyrics } from '../../stores/crosscall.store'
 	import { onMount } from 'svelte'
+	import LyricsNotFound from './LyricsNotFound.svelte'
 
 	let lyrics
 	let tempLyrics
-	let selectedView: 'read' | 'edit' | 'time' = 'read'
+	let selectedView: 'read' | 'edit' | 'notFound' = 'read'
 	let triggerUpdateLyricsList = undefined
-	let autoSwitchSong = true
+
+	$: if ($onNewLyrics !== null) showNewLyrics($onNewLyrics)
 
 	$: isLyricsDirty = lyrics !== tempLyrics ? true : false
 
-	$: {
-		if ($playingSongStore && autoSwitchSong === true) {
-			loadLyrics()
+	$: if ($keyPressed === 's' && $keyModifier === 'ctrlKey') saveLyrics()
+
+	$: if (selectedView === 'read') clearLyricsEdit()
+
+	function clearLyricsEdit() {
+		if (isLyricsDirty === true) {
+			isLyricsDirty = false
+
+			tempLyrics = lyrics
 		}
 	}
 
-	$: if ($keyPressed === 's' && $keyModifier === 'ctrlKey') saveLyrics()
+	function showNewLyrics(newLyrics: { title: string; artist: string }) {
+		$onNewLyrics = null
+
+		$songLyricsSelected = newLyrics
+		selectedView = 'edit'
+	}
 
 	function loadLyrics() {
 		window.ipc
@@ -34,10 +48,10 @@
 			.then(response => {
 				lyrics = response
 				tempLyrics = response
-				$songLyricsSelected = {
-					title: $playingSongStore.Title,
-					artist: $playingSongStore.Artist
-				}
+				// $songLyricsSelected = {
+				// 	title: $playingSongStore.Title,
+				// 	artist: $playingSongStore.Artist
+				// }
 			})
 			.catch(err => {
 				notifyService.error(String(err))
@@ -57,6 +71,7 @@
 					close: false
 				})
 				triggerUpdateLyricsList = true
+				isLyricsDirty = false
 
 				setTimeout(() => {
 					triggerUpdateLyricsList = undefined
@@ -78,20 +93,30 @@
 				lyrics = response || null
 				tempLyrics = response || null
 
-				$songLyricsSelected = {
-					title: detail.title,
-					artist: detail.artist
-				}
+				// $songLyricsSelected = {
+				// 	title: detail.title,
+				// 	artist: detail.artist
+				// }
 			})
 			.catch(err => {
 				notifyService.error(String(err))
 			})
 	}
+
+	onMount(() => {
+		if (
+			$songLyricsSelected === undefined ||
+			$songLyricsSelected.artist === undefined ||
+			$songLyricsSelected.title === undefined
+		) {
+			selectedView = 'notFound'
+		}
+	})
 </script>
 
 <lyrics-layout class="layout">
 	<LyricsList on:show-lyrics={showLyrics} updateLyricsList={triggerUpdateLyricsList} />
-	<lyrics-layout-header>
+	<lyrics-layout-header disabled={selectedView === 'notFound' ? 'true' : 'false'}>
 		<song-information>
 			{`${$songLyricsSelected?.title} by ${$songLyricsSelected?.artist}`}
 			<span style="margin-left: 0.5rem;font-size: 1rem;">{isLyricsDirty ? '•' : ''}</span>
@@ -115,6 +140,8 @@
 			<LyricsEdit {lyrics} on:lyricsUpdate={onLyricsUpdate} />
 		{:else if selectedView === 'read'}
 			<LyricsRead {lyrics} />
+		{:else if selectedView === 'notFound'}
+			<LyricsNotFound />
 		{/if}
 	</lyrics-layout-body>
 </lyrics-layout>
@@ -130,7 +157,7 @@
 
 		grid-template-rows: max-content auto;
 
-		grid-template-columns: max-content auto;
+		grid-template-columns: 1fr 4fr;
 	}
 
 	lyrics-layout-header {
@@ -140,6 +167,11 @@
 		padding: 1rem;
 
 		grid-area: lyrics-layout-header;
+	}
+
+	lyrics-layout-header[disabled='true'] {
+		pointer-events: none;
+		opacity: 0;
 	}
 
 	song-information {

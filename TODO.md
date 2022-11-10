@@ -13,3 +13,4 @@
 * Add autoswitch functionality.
 * When clicking on editing lyrics, auto select it.
 * Add Auto Switch Song configuration.
+* Add a playing symbol next to the playing song in lyrics list.
