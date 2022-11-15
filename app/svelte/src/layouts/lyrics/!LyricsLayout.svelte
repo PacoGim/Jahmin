@@ -13,6 +13,7 @@
 	import { onNewLyrics } from '../../stores/crosscall.store'
 	import { onMount } from 'svelte'
 	import LyricsNotFound from './LyricsNotFound.svelte'
+	import DeleteIcon from '../../icons/DeleteIcon.svelte'
 
 	let lyrics
 	let tempLyrics
@@ -26,6 +27,11 @@
 	$: if ($keyPressed === 's' && $keyModifier === 'ctrlKey') saveLyrics()
 
 	$: if (selectedView === 'read') clearLyricsEdit()
+
+	$: {
+		$songLyricsSelected
+		toggleNotFoundComponent()
+	}
 
 	function clearLyricsEdit() {
 		if (isLyricsDirty === true) {
@@ -42,22 +48,6 @@
 		selectedView = 'edit'
 	}
 
-	function loadLyrics() {
-		window.ipc
-			.getLyrics($playingSongStore.Title, $playingSongStore.Artist)
-			.then(response => {
-				lyrics = response
-				tempLyrics = response
-				// $songLyricsSelected = {
-				// 	title: $playingSongStore.Title,
-				// 	artist: $playingSongStore.Artist
-				// }
-			})
-			.catch(err => {
-				notifyService.error(String(err))
-			})
-	}
-
 	function saveLyrics() {
 		if (tempLyrics === lyrics) return
 
@@ -66,10 +56,6 @@
 		window.ipc
 			.saveLyrics(lyrics, $songLyricsSelected.title, $songLyricsSelected.artist)
 			.then(response => {
-				notifyService.success(response, {
-					position: 'topCenter',
-					close: false
-				})
 				triggerUpdateLyricsList = true
 				isLyricsDirty = false
 
@@ -92,26 +78,27 @@
 			.then(response => {
 				lyrics = response || null
 				tempLyrics = response || null
-
-				// $songLyricsSelected = {
-				// 	title: detail.title,
-				// 	artist: detail.artist
-				// }
 			})
 			.catch(err => {
 				notifyService.error(String(err))
 			})
 	}
 
-	onMount(() => {
+	function toggleNotFoundComponent() {
 		if (
 			$songLyricsSelected === undefined ||
 			$songLyricsSelected.artist === undefined ||
 			$songLyricsSelected.title === undefined
 		) {
 			selectedView = 'notFound'
+		} else {
+			selectedView = 'read'
 		}
-	})
+	}
+
+	function deleteLyrics() {
+		console.log($songLyricsSelected)
+	}
 </script>
 
 <lyrics-layout class="layout">
@@ -131,6 +118,9 @@
 			</event-wrapper>
 			<event-wrapper disabled={selectedView !== 'edit' || isLyricsDirty === false} on:click={() => saveLyrics()}>
 				<SaveIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
+			</event-wrapper>
+			<event-wrapper on:click={() => deleteLyrics()}>
+				<DeleteIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
 		</lyrics-controls>
 	</lyrics-layout-header>
@@ -183,7 +173,7 @@
 	lyrics-layout-body {
 		display: block;
 		overflow-x: hidden;
-		overflow-y: scroll;
+		overflow-y: auto;
 
 		grid-area: lyrics-layout-body;
 	}
