@@ -39524,7 +39524,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src/layouts/lyrics/!LyricsLayout.svelte";
 
-    // (114:40) 
+    // (121:40) 
     function create_if_block_2$1(ctx) {
     	let lyricsnotfound;
     	let current;
@@ -39557,14 +39557,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(114:40) ",
+    		source: "(121:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (112:36) 
+    // (119:36) 
     function create_if_block_1$1(ctx) {
     	let lyricsread;
     	let current;
@@ -39605,14 +39605,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(112:36) ",
+    		source: "(119:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (110:2) {#if selectedView === 'edit'}
+    // (117:2) {#if selectedView === 'edit'}
     function create_if_block$1(ctx) {
     	let lyricsedit;
     	let current;
@@ -39655,7 +39655,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(110:2) {#if selectedView === 'edit'}",
+    		source: "(117:2) {#if selectedView === 'edit'}",
     		ctx
     	});
 
@@ -39779,33 +39779,33 @@ var app = (function () {
     			if (if_block) if_block.c();
     			set_style(span, "margin-left", "0.5rem");
     			set_style(span, "font-size", "1rem");
-    			add_location(span, file$1, 89, 3, 2779);
+    			add_location(span, file$1, 96, 3, 2957);
     			set_custom_element_data(song_information, "class", "svelte-1hd8guh");
-    			add_location(song_information, file$1, 87, 2, 2686);
+    			add_location(song_information, file$1, 94, 2, 2864);
     			set_custom_element_data(event_wrapper0, "disabled", event_wrapper0_disabled_value = /*selectedView*/ ctx[1] === 'read');
     			set_custom_element_data(event_wrapper0, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper0, file$1, 93, 3, 2910);
+    			add_location(event_wrapper0, file$1, 100, 3, 3088);
     			set_custom_element_data(event_wrapper1, "disabled", event_wrapper1_disabled_value = /*selectedView*/ ctx[1] === 'edit');
     			set_custom_element_data(event_wrapper1, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper1, file$1, 96, 3, 3087);
+    			add_location(event_wrapper1, file$1, 103, 3, 3265);
     			set_custom_element_data(event_wrapper2, "disabled", event_wrapper2_disabled_value = /*selectedView*/ ctx[1] !== 'edit' || /*isLyricsDirty*/ ctx[4] === false);
     			set_custom_element_data(event_wrapper2, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper2, file$1, 99, 3, 3267);
+    			add_location(event_wrapper2, file$1, 106, 3, 3445);
     			set_custom_element_data(event_wrapper3, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper3, file$1, 102, 3, 3461);
+    			add_location(event_wrapper3, file$1, 109, 3, 3639);
     			set_custom_element_data(lyrics_controls, "class", "svelte-1hd8guh");
-    			add_location(lyrics_controls, file$1, 92, 2, 2889);
+    			add_location(lyrics_controls, file$1, 99, 2, 3067);
 
     			set_custom_element_data(lyrics_layout_header, "disabled", lyrics_layout_header_disabled_value = /*selectedView*/ ctx[1] === 'notFound'
     			? 'true'
     			: 'false');
 
     			set_custom_element_data(lyrics_layout_header, "class", "svelte-1hd8guh");
-    			add_location(lyrics_layout_header, file$1, 86, 1, 2603);
+    			add_location(lyrics_layout_header, file$1, 93, 1, 2781);
     			set_custom_element_data(lyrics_layout_body, "class", "svelte-1hd8guh");
-    			add_location(lyrics_layout_body, file$1, 108, 1, 3642);
+    			add_location(lyrics_layout_body, file$1, 115, 1, 3820);
     			set_custom_element_data(lyrics_layout, "class", "layout svelte-1hd8guh");
-    			add_location(lyrics_layout, file$1, 84, 0, 2484);
+    			add_location(lyrics_layout, file$1, 91, 0, 2662);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -40035,7 +40035,11 @@ var app = (function () {
     	}
 
     	function deleteLyrics() {
-    		console.log($songLyricsSelected);
+    		window.ipc.deleteLyrics($songLyricsSelected.title, $songLyricsSelected.artist).then(response => {
+    			console.log(response);
+    		}).catch(err => {
+    			console.log(err);
+    		});
     	}
 
     	const writable_props = [];

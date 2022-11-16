@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLyricsList = exports.getLyrics = exports.saveLyrics = void 0;
+exports.deleteLyrics = exports.getLyricsList = exports.getLyrics = exports.saveLyrics = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const sanitize_filename_1 = __importDefault(require("sanitize-filename"));
@@ -83,3 +83,23 @@ function getLyricsList() {
     });
 }
 exports.getLyricsList = getLyricsList;
+function deleteLyrics(title, artist) {
+    return new Promise((resolve, reject) => {
+        let lyricsPath = (0, sanitize_filename_1.default)(`${title})_(${artist}.txt`);
+        let lyricsAbsolutePath = path_1.default.join(lyricsFolderPath, lyricsPath);
+        if (fs_1.default.existsSync(lyricsAbsolutePath)) {
+            fs_1.default.unlink(lyricsAbsolutePath, err => {
+                if (err) {
+                    resolve({ isError: true, message: 'Error when deleting' });
+                }
+                else {
+                    resolve({ isError: false, message: 'Deleted successfully' });
+                }
+            });
+        }
+        else {
+            resolve({ isError: true, message: 'Lyrics not found' });
+        }
+    });
+}
+exports.deleteLyrics = deleteLyrics;

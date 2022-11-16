@@ -17,6 +17,7 @@ const ipcFunctions = {
     saveLyrics,
     getLyrics,
     getLyricsList,
+    deleteLyrics,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -39,6 +40,14 @@ const ipcFunctions = {
     onShowLyrics: (callback) => electron_1.ipcRenderer.on('show-lyrics', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
+function deleteLyrics(title, artist) {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('delete-lyrics', title, artist)
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
 function saveLyrics(lyrics, songTile, songArtist) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer

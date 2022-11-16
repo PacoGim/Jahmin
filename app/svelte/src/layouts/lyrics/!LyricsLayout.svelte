@@ -97,7 +97,17 @@
 	}
 
 	function deleteLyrics() {
-		console.log($songLyricsSelected)
+		window.ipc
+			.deleteLyrics($songLyricsSelected.title, $songLyricsSelected.artist)
+			.then(response => {
+
+				if(response.isError===true){
+
+				}else{
+
+				}
+
+			})
 	}
 </script>
 

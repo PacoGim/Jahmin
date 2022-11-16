@@ -92,6 +92,9 @@ function startIPC() {
     electron_1.ipcMain.handle('get-lyrics-list', async () => {
         return await (0, lyrics_service_1.getLyricsList)();
     });
+    electron_1.ipcMain.handle('delete-lyrics', async (evt, title, artist) => {
+        return await (0, lyrics_service_1.deleteLyrics)(title, artist);
+    });
 }
 exports.startIPC = startIPC;
 function windowResize(event) {

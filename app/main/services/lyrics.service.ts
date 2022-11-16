@@ -78,4 +78,23 @@ function getLyricsList() {
 	})
 }
 
-export { saveLyrics, getLyrics, getLyricsList }
+function deleteLyrics(title: string, artist: string) {
+	return new Promise((resolve, reject) => {
+		let lyricsPath = sanitize(`${title})_(${artist}.txt`)
+		let lyricsAbsolutePath = path.join(lyricsFolderPath, lyricsPath)
+
+		if (fs.existsSync(lyricsAbsolutePath)) {
+			fs.unlink(lyricsAbsolutePath, err => {
+				if (err) {
+					resolve({ isError: true, message: 'Error when deleting' })
+				} else {
+					resolve({ isError: false, message: 'Deleted successfully' })
+				}
+			})
+		} else {
+			resolve({ isError: true, message: 'Lyrics not found' })
+		}
+	})
+}
+
+export { saveLyrics, getLyrics, getLyricsList, deleteLyrics }

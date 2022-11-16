@@ -21,6 +21,7 @@ const ipcFunctions = {
 	saveLyrics,
 	getLyrics,
 	getLyricsList,
+	deleteLyrics,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -47,6 +48,15 @@ const ipcFunctions = {
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
+
+function deleteLyrics(title: string, artist: string) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('delete-lyrics', title, artist)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
 
 function saveLyrics(lyrics: string, songTile: string, songArtist: string): Promise<string> {
 	return new Promise((resolve, reject) => {

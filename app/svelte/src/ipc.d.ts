@@ -24,6 +24,7 @@ declare global {
 			saveLyrics: (lyrics: string, songTile: string, songArtist: string) => Promise<string>
 			getLyrics: (songTile: string, songArtist: string) => Promise<string>
 			getLyricsList: () => Promise<{ title: string; artist: string }[]>
+			deleteLyrics: (title: string, artist: string) => Promise<{ title: string; artist: string }>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void
