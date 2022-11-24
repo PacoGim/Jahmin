@@ -93,7 +93,14 @@ function deleteLyrics(title, artist) {
                     resolve({ isError: true, message: 'Error when deleting' });
                 }
                 else {
-                    resolve({ isError: false, message: 'Deleted successfully' });
+                    resolve({
+                        isError: false,
+                        message: 'Deleted successfully',
+                        data: {
+                            title,
+                            artist
+                        }
+                    });
                 }
             });
         }

@@ -97,17 +97,22 @@
 	}
 
 	function deleteLyrics() {
-		window.ipc
-			.deleteLyrics($songLyricsSelected.title, $songLyricsSelected.artist)
-			.then(response => {
+		window.ipc.deleteLyrics($songLyricsSelected.title, $songLyricsSelected.artist).then(response => {
+			if (response.isError === true) {
+				notifyService.error(response.message)
+			} else {
+				notifyService.success(response.message)
+				triggerUpdateLyricsList = true
 
-				if(response.isError===true){
-
-				}else{
-
+				if ($songLyricsSelected.artist === response.data.artist && $songLyricsSelected.title === response.data.title) {
+					$songLyricsSelected = undefined
 				}
 
-			})
+				setTimeout(() => {
+					triggerUpdateLyricsList = undefined
+				}, 500)
+			}
+		})
 	}
 </script>
 
