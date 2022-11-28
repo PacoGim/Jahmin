@@ -72,5 +72,11 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-content: flex-start;
+
+		gap: var(--grid-gap);
+
+		transition-property: padding gap;
+		transition-duration: 150ms;
+		transition-timing-function: linear;
 	}
 </style>

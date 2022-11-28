@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte'
 	import { layoutToShow, reloadArts } from '../../../stores/main.store'
+
+	let artCacheSize = ''
 
 	function rebuildArtCache() {
 		$reloadArts = Math.random()
@@ -8,10 +11,16 @@
 			$layoutToShow = 'Library'
 		})
 	}
+
+	onMount(() => {
+		window.ipc.getArtCacheSize().then(size => {
+			artCacheSize = ` (${size}) `
+		})
+	})
 </script>
 
 <font-size-config on:click={() => rebuildArtCache()}>
-	<config-edit-button>Rebuild</config-edit-button>
+	<config-edit-button>Clean{artCacheSize}</config-edit-button>
 </font-size-config>
 
 <style>

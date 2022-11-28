@@ -9,6 +9,7 @@ const contextMenu_1 = require("../context_menu/contextMenu");
 /********************** Functions **********************/
 const getAlbumColors_fn_1 = require("../functions/getAlbumColors.fn");
 const clearArtCache_fn_1 = __importDefault(require("../functions/clearArtCache.fn"));
+const getArtCacheSize_fn_1 = __importDefault(require("../functions/getArtCacheSize.fn"));
 /********************** Services **********************/
 const handleArt_service_1 = require("./handleArt.service");
 const appReady_service_1 = __importDefault(require("./appReady.service"));
@@ -27,9 +28,6 @@ function startIPC() {
     electron_1.ipcMain.on('send-all-songs-to-main', (evt, songsDb) => (0, librarySongs_service_1.fetchSongsTag)(songsDb));
     electron_1.ipcMain.on('show-context-menu', (evt, menuToOpen, parameters) => (0, contextMenu_1.loadContextMenu)(evt, menuToOpen, parameters));
     electron_1.ipcMain.on('save-peaks', (evt, sourceFile, peaks) => (0, peaks_service_1.savePeaks)(sourceFile, peaks));
-    // ipcMain.on('compress-single-song-album-art', async (evt, path, albumId, artSize) => {
-    // 	compressSingleSongAlbumArtService(path, artSize, albumId)
-    // })
     electron_1.ipcMain.on('update-songs', (evt, songs, newTags) => {
         let sourceFiles = songs.map(song => song.SourceFile);
         (0, chokidar_service_1.unwatchPaths)(sourceFiles);
@@ -94,6 +92,9 @@ function startIPC() {
     });
     electron_1.ipcMain.handle('delete-lyrics', async (evt, title, artist) => {
         return await (0, lyrics_service_1.deleteLyrics)(title, artist);
+    });
+    electron_1.ipcMain.handle('get-art-cache-size', async () => {
+        return (0, getArtCacheSize_fn_1.default)();
     });
 }
 exports.startIPC = startIPC;

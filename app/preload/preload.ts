@@ -22,6 +22,7 @@ const ipcFunctions = {
 	getLyrics,
 	getLyricsList,
 	deleteLyrics,
+	getArtCacheSize,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -177,6 +178,15 @@ function rebuildArtCache() {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('rebuild-art-cache')
+			.then(result => resolve(result))
+			.catch(err => reject(err))
+	})
+}
+
+function getArtCacheSize(): Promise<string> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('get-art-cache-size')
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})

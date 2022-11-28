@@ -7,6 +7,7 @@
 	import DayNightThemeConfig from './DayNightThemeConfig.svelte'
 	import FontSizeConfig from './FontSizeConfig.svelte'
 	import GridArtSize from './GridArtSize.svelte'
+	import GridGapSize from './GridGapSize.svelte'
 	import RebuildArtCacheConfig from './RebuildArtCacheConfig.svelte'
 </script>
 
@@ -29,7 +30,11 @@
 		<GridArtSize />
 	</OptionSectionCompact>
 
-	<OptionSectionCompact title="Rebuild Art Cache">
+	<OptionSectionCompact title="Grid Art Gap: {$config.userOptions.gridGap}">
+		<GridGapSize />
+	</OptionSectionCompact>
+
+	<OptionSectionCompact title="Clean Art Cache">
 		<RebuildArtCacheConfig />
 	</OptionSectionCompact>
 </config-section>

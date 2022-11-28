@@ -1,6 +1,6 @@
 /// <reference types="svelte" />
 
-import type { ConfigType } from '../../types/config.type'
+import type { ConfigType, PartialConfigType } from '../../types/config.type'
 import type { EqualizerProfileType } from '../../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../../types/returnMessage.type'
 import { SongType } from '../../types/song.type'
@@ -14,7 +14,7 @@ declare global {
 			getPeaks
 			getAlbumColors
 			getEqualizers
-			saveConfig
+			saveConfig: (config: PartialConfigType<ConfigType>) => Promise<ConfigType>
 			addNewEqualizerProfile: (newProfile: EqualizerProfileType) => Promise<ReturnMessageType>
 			renameEqualizer: (eqName: string, newName: string) => Promise<ReturnMessageType>
 			updateEqualizerValues: (eqName: string, newValues: any) => Promise<boolean>
@@ -28,6 +28,7 @@ declare global {
 				title: string,
 				artist: string
 			) => Promise<{ isError: boolean; message: string; data: { title: string; artist: string } }>
+			getArtCacheSize: () => Promise<string>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void

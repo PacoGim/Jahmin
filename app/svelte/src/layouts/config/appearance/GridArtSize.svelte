@@ -18,7 +18,7 @@
 			confirmButtonText: 'Confirm',
 			cancelButtonText: 'Close',
 			onChange: value => {
-				$config.userOptions.artSize = value
+				updateArtSize(value)
 			},
 			onConfirm: newArtSize => {
 				saveArtSize(newArtSize)
@@ -27,6 +27,15 @@
 				saveArtSize(previousArtSize)
 				$layoutToShow = 'Config'
 			}
+		})
+	}
+
+	function updateArtSize(newArtSize) {
+		$config.userOptions.artSize = newArtSize
+
+		document.querySelectorAll('art-grid-svlt album art-svlt').forEach((element: HTMLElement) => {
+			element.style.height = `${newArtSize}px`
+			element.style.width = `${newArtSize}px`
 		})
 	}
 
@@ -40,12 +49,13 @@
 			})
 			.then(() => {
 				document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
-					artElement.dataset.artsize = String(newArtSize)
+					let parentAlbumElementRootDir = artElement.closest('album').getAttribute('rootDir')
+
 					if (isElementInViewportFn(artElement)) {
-						window.ipc.compressAlbumArt(artElement.dataset.rootdir, newArtSize, false)
+						window.ipc.handleArt(parentAlbumElementRootDir, artElement.getAttribute('id'), newArtSize)
 					} else {
 						setTimeout(() => {
-							window.ipc.compressAlbumArt(artElement.dataset.rootdir, newArtSize, false)
+							window.ipc.handleArt(parentAlbumElementRootDir, artElement.getAttribute('id'), newArtSize)
 						}, 1000)
 					}
 				})

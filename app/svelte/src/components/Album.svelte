@@ -46,7 +46,7 @@
 	}
 
 	album {
-		margin: var(--grid-gap);
+		/* margin: var(--grid-gap); */
 
 		color: #fff;
 		position: relative;

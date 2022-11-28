@@ -8,6 +8,7 @@ import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
 /********************** Functions **********************/
 import { getAlbumColors } from '../functions/getAlbumColors.fn'
 import cleanArtCacheFn from '../functions/clearArtCache.fn'
+import getArtCacheSizeFn from '../functions/getArtCacheSize.fn'
 
 /********************** Services **********************/
 import { handleArtService } from './handleArt.service'
@@ -29,11 +30,6 @@ export function startIPC() {
 	ipcMain.on('send-all-songs-to-main', (evt, songsDb: SongType[]) => fetchSongsTag(songsDb))
 	ipcMain.on('show-context-menu', (evt, menuToOpen: string, parameters: any) => loadContextMenu(evt, menuToOpen, parameters))
 	ipcMain.on('save-peaks', (evt, sourceFile: string, peaks: number[]) => savePeaks(sourceFile, peaks))
-
-	// ipcMain.on('compress-single-song-album-art', async (evt, path, albumId, artSize) => {
-	// 	compressSingleSongAlbumArtService(path, artSize, albumId)
-	// })
-
 	ipcMain.on('update-songs', (evt, songs: SongType[], newTags) => {
 		let sourceFiles = songs.map(song => song.SourceFile)
 
@@ -110,6 +106,10 @@ export function startIPC() {
 
 	ipcMain.handle('delete-lyrics', async (evt, title: string, artist: string) => {
 		return await deleteLyrics(title, artist)
+	})
+
+	ipcMain.handle('get-art-cache-size', async () => {
+		return getArtCacheSizeFn()
 	})
 }
 
