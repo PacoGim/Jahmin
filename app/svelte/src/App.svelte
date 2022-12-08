@@ -36,6 +36,7 @@
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
 	import LyricsLayout from './layouts/lyrics/!LyricsLayout.svelte'
+	import Tailwind from './layouts/Tailwind.svelte'
 
 	liveQuery(async () => {
 		return await getDB().songs.toArray()
@@ -58,6 +59,7 @@
 <EventsHandlerMiddleware />
 
 <AudioPlayer />
+<Tailwind />
 
 <main-app>
 	<Navigation />
