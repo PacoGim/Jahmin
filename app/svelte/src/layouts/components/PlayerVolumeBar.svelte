@@ -1,5 +1,5 @@
 <script lang="ts">
-  import cssVariablesService from '../../services/cssVariables.service'
+	import cssVariablesService from '../../services/cssVariables.service'
 	import { keyPressed, mainAudioElement, altAudioElement } from '../../stores/main.store'
 
 	let hasVolumeFromStorageLoaded: boolean = false
@@ -62,6 +62,7 @@
 
 		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
 
+		cssVariablesService.set('volume-thumb-color-lightness', `${50 - (25 / 100) * (newVolume * 100)}%`)
 		cssVariablesService.set('volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`)
 	}
 </script>
@@ -119,10 +120,12 @@
 		width: 32px;
 		background-color: #fff;
 		border-radius: 25px;
-		mix-blend-mode: hard-light;
+		/* mix-blend-mode: hard-light; */
 
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-		color: #767676;
+		/* color: #767676; */
+
+		color: hsl(var(--art-hue), var(--art-saturation), var(--volume-thumb-color-lightness));
 
 		font-variation-settings: 'wght' 700;
 	}
@@ -133,7 +136,11 @@
 		top: 0;
 		left: 0;
 		height: 16px;
-		background: linear-gradient(to right, var(--art-color-base), var(--art-color-dark));
+		background: linear-gradient(
+			to right,
+			hsl(var(--art-hue), var(--art-saturation), 50%),
+			hsl(var(--art-hue), var(--art-saturation), 25%)
+		);
 		border-radius: 25px;
 		box-shadow: inset 0 0 0 2px #fff, inset 0 0 5px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.2);
 	}

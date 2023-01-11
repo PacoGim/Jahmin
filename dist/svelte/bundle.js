@@ -10434,14 +10434,14 @@ var app = (function () {
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "1");
     			attr_dev(input, "step", input_step_value = /*$keyPressed*/ ctx[0] === 'Shift' ? '0.05' : '0.01');
-    			attr_dev(input, "class", "svelte-m1gmow");
-    			add_location(input, file$1a, 50, 1, 1966);
-    			attr_dev(background, "class", "svelte-m1gmow");
-    			add_location(background, file$1a, 59, 1, 2112);
-    			set_custom_element_data(volume_thumb, "class", "svelte-m1gmow");
-    			add_location(volume_thumb, file$1a, 60, 1, 2128);
-    			set_custom_element_data(volume_bar, "class", "svelte-m1gmow");
-    			add_location(volume_bar, file$1a, 49, 0, 1952);
+    			attr_dev(input, "class", "svelte-17zbxi3");
+    			add_location(input, file$1a, 51, 1, 2070);
+    			attr_dev(background, "class", "svelte-17zbxi3");
+    			add_location(background, file$1a, 60, 1, 2216);
+    			set_custom_element_data(volume_thumb, "class", "svelte-17zbxi3");
+    			add_location(volume_thumb, file$1a, 61, 1, 2232);
+    			set_custom_element_data(volume_bar, "class", "svelte-17zbxi3");
+    			add_location(volume_bar, file$1a, 50, 0, 2056);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10553,6 +10553,7 @@ var app = (function () {
     		}
 
     		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth;
+    		cssVariablesService.set('volume-thumb-color-lightness', `${50 - 25 / 100 * (newVolume * 100)}%`);
     		cssVariablesService.set('volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`);
     	}
 
