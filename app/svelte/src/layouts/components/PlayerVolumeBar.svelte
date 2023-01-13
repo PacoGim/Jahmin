@@ -8,7 +8,9 @@
 
 	$: if (hasVolumeFromStorageLoaded === false && $mainAudioElement !== undefined && $altAudioElement !== undefined) {
 		hasVolumeFromStorageLoaded = true
-		loadVolumeFromLocalStorage()
+		setTimeout(() => {
+			loadVolumeFromLocalStorage()
+		}, 250)
 	}
 
 	function loadVolumeFromLocalStorage() {
@@ -62,7 +64,35 @@
 
 		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth
 
-		cssVariablesService.set('volume-thumb-color-lightness', `${50 - (25 / 100) * (newVolume * 100)}%`)
+		let minValue = Number(cssVariablesService.get('art-lightness-dark').replace('%', ''))
+
+		let maxValue = Number(cssVariablesService.get('art-lightness-light').replace('%', ''))
+
+		if (maxValue > 70) {
+			maxValue = 70
+		}
+
+		const differenceValue = maxValue - minValue // 80
+		const steps = differenceValue / 100 // 0.8
+
+		/*
+			step * current value + min
+
+			Max 90%
+			Min 10%
+
+			90 - 10 = 80 -> 80 / 100 = 0.8
+
+			100% Volume -> 90%
+			0% Volume -> 10%
+			1% Volume -> 10.9%
+			2% Volume -> 11.8%
+			5% Volume -> 14.5%
+			50% Volume -> 55%
+			90% Volume -> 91%
+		*/
+
+		cssVariablesService.set('volume-thumb-color-lightness', `${maxValue - steps * (newVolume * 100)}%`)
 		cssVariablesService.set('volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`)
 	}
 </script>
@@ -127,6 +157,8 @@
 
 		color: hsl(var(--art-hue), var(--art-saturation), var(--volume-thumb-color-lightness));
 
+		/* text-shadow: 0 0 1px rgba(0,0,0,0.9); */
+
 		font-variation-settings: 'wght' 700;
 	}
 
@@ -138,8 +170,8 @@
 		height: 16px;
 		background: linear-gradient(
 			to right,
-			hsl(var(--art-hue), var(--art-saturation), 50%),
-			hsl(var(--art-hue), var(--art-saturation), 25%)
+			hsl(var(--art-hue), var(--art-saturation), var(--art-lightness-light)),
+			hsl(var(--art-hue), var(--art-saturation), var(--art-lightness-dark))
 		);
 		border-radius: 25px;
 		box-shadow: inset 0 0 0 2px #fff, inset 0 0 5px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.2);

@@ -7131,7 +7131,7 @@ var app = (function () {
     let appTitle = writable('Jahmin');
     let elementMap = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Config');
+    let layoutToShow = writable('Library');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -10434,14 +10434,14 @@ var app = (function () {
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "1");
     			attr_dev(input, "step", input_step_value = /*$keyPressed*/ ctx[0] === 'Shift' ? '0.05' : '0.01');
-    			attr_dev(input, "class", "svelte-17zbxi3");
-    			add_location(input, file$1a, 51, 1, 2070);
-    			attr_dev(background, "class", "svelte-17zbxi3");
-    			add_location(background, file$1a, 60, 1, 2216);
-    			set_custom_element_data(volume_thumb, "class", "svelte-17zbxi3");
-    			add_location(volume_thumb, file$1a, 61, 1, 2232);
-    			set_custom_element_data(volume_bar, "class", "svelte-17zbxi3");
-    			add_location(volume_bar, file$1a, 50, 0, 2056);
+    			attr_dev(input, "class", "svelte-14r825h");
+    			add_location(input, file$1a, 76, 1, 2759);
+    			attr_dev(background, "class", "svelte-14r825h");
+    			add_location(background, file$1a, 85, 1, 2905);
+    			set_custom_element_data(volume_thumb, "class", "svelte-14r825h");
+    			add_location(volume_thumb, file$1a, 86, 1, 2921);
+    			set_custom_element_data(volume_bar, "class", "svelte-14r825h");
+    			add_location(volume_bar, file$1a, 75, 0, 2745);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10553,7 +10553,34 @@ var app = (function () {
     		}
 
     		let volumeThumbWidth = document.querySelector('volume-bar volume-thumb').clientWidth;
-    		cssVariablesService.set('volume-thumb-color-lightness', `${50 - 25 / 100 * (newVolume * 100)}%`);
+    		let minValue = Number(cssVariablesService.get('art-lightness-dark').replace('%', ''));
+    		let maxValue = Number(cssVariablesService.get('art-lightness-light').replace('%', ''));
+
+    		if (maxValue > 70) {
+    			maxValue = 70;
+    		}
+
+    		const differenceValue = maxValue - minValue; // 80
+    		const steps = differenceValue / 100; // 0.8
+
+    		/*
+        step * current value + min
+
+        Max 90%
+        Min 10%
+
+        90 - 10 = 80 -> 80 / 100 = 0.8
+
+        100% Volume -> 90%
+        0% Volume -> 10%
+        1% Volume -> 10.9%
+        2% Volume -> 11.8%
+        5% Volume -> 14.5%
+        50% Volume -> 55%
+        90% Volume -> 91%
+    */
+    		cssVariablesService.set('volume-thumb-color-lightness', `${maxValue - steps * (newVolume * 100)}%`);
+
     		cssVariablesService.set('volume-level', `${(volumeBarWidth - volumeThumbWidth) * newVolume}px`);
     	}
 
@@ -10596,7 +10623,13 @@ var app = (function () {
     		if ($$self.$$.dirty & /*hasVolumeFromStorageLoaded, $mainAudioElement, $altAudioElement*/ 28) {
     			if (hasVolumeFromStorageLoaded === false && $mainAudioElement !== undefined && $altAudioElement !== undefined) {
     				$$invalidate(2, hasVolumeFromStorageLoaded = true);
-    				loadVolumeFromLocalStorage();
+
+    				setTimeout(
+    					() => {
+    						loadVolumeFromLocalStorage();
+    					},
+    					250
+    				);
     			}
     		}
     	};
