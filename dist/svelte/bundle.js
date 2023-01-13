@@ -23840,7 +23840,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-1ye96d5"));
+    			: null) + " svelte-38xrcm"));
 
     			add_location(group_value, file$N, 54, 4, 1699);
     		},
@@ -23868,7 +23868,7 @@ var app = (function () {
 
     			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-1ye96d5"))) {
+    			: null) + " svelte-38xrcm"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
 
@@ -23939,7 +23939,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-1ye96d5"));
+    			: null) + " svelte-38xrcm"));
 
     			add_location(group_value, file$N, 61, 5, 1977);
     		},
@@ -23959,7 +23959,7 @@ var app = (function () {
 
     			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-1ye96d5"))) {
+    			: null) + " svelte-38xrcm"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
     		},
@@ -24008,10 +24008,10 @@ var app = (function () {
     			t2 = space();
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_name, "class", "svelte-1ye96d5");
+    			set_custom_element_data(group_name, "class", "svelte-38xrcm");
     			add_location(group_name, file$N, 51, 3, 1550);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_svlt, "class", "svelte-1ye96d5");
+    			set_custom_element_data(group_svlt, "class", "svelte-38xrcm");
     			add_location(group_svlt, file$N, 50, 2, 1515);
     			this.first = group_svlt;
     		},
@@ -24099,7 +24099,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(tag_group_svlt, "class", "svelte-1ye96d5");
+    			set_custom_element_data(tag_group_svlt, "class", "svelte-38xrcm");
     			add_location(tag_group_svlt, file$N, 48, 0, 1435);
     		},
     		l: function claim(nodes) {

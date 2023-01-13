@@ -88,7 +88,6 @@
 		/* background-color: hsl(var(--art-hue), var(--art-saturation), 20%); */
 		/* color: hsl(var(--art-hue), var(--art-saturation), 80%); */
 
-
 		grid-area: tag-group-svlt;
 
 		display: flex;
@@ -104,18 +103,20 @@
 		display: flex;
 		overflow-y: auto;
 		flex-direction: column;
-		width: min-content;
+		/* width: min-content; */
+		border-right: 2px solid white;
+		width: 150px;
 		/* border-right: 1px var(--color-bg-2) solid; */
 
-		font-size: 0.85rem;
+		/* font-size: 0.85rem; */
 	}
 
 	group-svlt group-name {
-		padding: 0.25rem 0.75rem;
+		padding: 0.5rem 0.66rem;
 
 		/* background-color: var(--color-bg-2); */
 		background-color: rgba(255, 255, 255, 0.05);
-		font-size: 0.95rem;
+		font-size: 1rem;
 
 		text-align: center;
 
@@ -125,41 +126,43 @@
 	}
 
 	group-value {
-		display: flex;
-		align-items: center;
-		padding: 0.25rem 0.75rem;
-		/* background-color: var(--color-bg-2); */
-		/* background-color: rgba(255, 255, 255, 0.025); */
-		/* border-bottom: 1px rgba(255, 255, 255, 0.05) solid; */
-		box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
+		display: block;
+		font-size: 0.95rem;
+		padding: 0.5rem 0.66rem;
 
 		font-variation-settings: 'wght' calc(var(--default-weight));
 
-		/* margin: 0.1rem 0.05rem; */
+		margin: 0.5rem 0.75rem;
+
+		text-align: center;
+
+		background-color: rgba(255, 255, 255, 0.1);
+		border-radius: 2.5px;
 
 		cursor: pointer;
-		max-width: 200px;
-
-		min-height: 2rem;
+		max-width: 150px;
 
 		text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
 
-		transition: background-color 200ms linear;
+		transition-property: background-color, color, font-variation-settings;
+		transition-duration: 200ms;
+		transition-timing-function: linear;
+	}
+
+	group-value:first-of-type {
+		margin-top: 1rem;
 	}
 
 	group-value.selected {
-		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
-	}
-	group-value.selected::before {
-		content: '•';
-		position: absolute;
-
-		transform: translateX(-8px);
+		background-color: hsl(var(--art-hue), var(--art-saturation), 50%);
+		color: hsl(var(--art-hue), var(--art-saturation), 80%);
+		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 	}
 
 	group-value:hover {
-		background-color: rgba(255, 255, 255, 0.05);
+		background-color: hsl(var(--art-hue), var(--art-saturation), 50%);
+		color: hsl(var(--art-hue), var(--art-saturation), 80%);
 	}
 </style>
