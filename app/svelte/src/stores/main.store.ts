@@ -45,7 +45,7 @@ export let appTitle: Writable<string> = writable('Jahmin')
 export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable(undefined)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Playback')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
@@ -88,3 +88,7 @@ export let songListTagsValuesStore: Writable<string[]> = writable([])
 export let reloadArts: Writable<number> = writable(Math.random())
 
 export let songLyricsSelected: Writable<{ title: string; artist: string }> = writable(undefined)
+
+layoutToShow.subscribe(layoutName => {
+	document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin'
+})

@@ -47,7 +47,7 @@
 		display: grid;
 		grid-template-rows: repeat(3, max-content) auto max-content;
 
-		border-right: 2px solid #cdcfd3;
+		border-right: 2px solid rgba(255,255,255,0.05);
 
 		width: max-content;
 

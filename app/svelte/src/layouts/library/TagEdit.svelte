@@ -341,7 +341,7 @@
 
 <style>
 	tag-edit-svlt {
-		background-color: rgba(255, 255, 255, 0.2);
+		background-color: rgba(255, 255, 255, 0.05);
 
 		overflow-y: overlay;
 		display: grid;

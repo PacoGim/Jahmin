@@ -3,8 +3,9 @@
 	import getClosestElementFn from '../../functions/getClosestElement.fn'
 	import SortableService from '../../services/sortable.service'
 
-	import { playbackStore } from '../../stores/main.store'
+	import { playbackStore, playingSongStore } from '../../stores/main.store'
 	import { songToPlayUrlStore } from '../../stores/player.store'
+	import PlayButton from '../components/PlayButton.svelte'
 
 	$: if ($playbackStore.length > 0) createSortableList()
 
@@ -74,13 +75,14 @@
 	<ul id="items">
 		{#each $playbackStore as song, index (song.ID)}
 			<li class={selectedSongsId.includes(song.ID) ? 'selected' : null} data-song-id={song.ID} data-index={index}>
-				<!-- {#if $playingSongStore.ID === song.ID}
-					<play-button>
-						<PlayButton customColor="#fff" customSize="0.75rem" />
-					</play-button>
-				{/if} -->
-
-				<span>{song.Track}</span>
+				<span>
+					{#if $playingSongStore.ID === song.ID}
+						<play-button>
+							<PlayButton customColor="#fff" customSize="0.75rem" />
+						</play-button>
+					{/if}
+					{song.Track}
+				</span>
 				<span>{song.Title}</span>
 				<span>{song.SampleRate}</span>
 			</li>
@@ -93,6 +95,14 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+	}
+
+	playback-layout li play-button {
+		display: inline-block;
+	}
+
+	playback-layout li:has(play-button) {
+		grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
 	}
 
 	playback-layout li {

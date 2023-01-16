@@ -60,8 +60,6 @@
 
 <style>
 	art-grid-svlt {
-		background-color: rgba(255, 255, 255, 0.25);
-
 		padding: var(--grid-gap);
 
 		overflow-y: auto;

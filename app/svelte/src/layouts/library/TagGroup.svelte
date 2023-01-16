@@ -104,7 +104,8 @@
 		overflow-y: auto;
 		flex-direction: column;
 		/* width: min-content; */
-		border-right: 2px solid white;
+		border-right: 2px solid rgba(255, 255, 255, 0.05);
+
 		width: 150px;
 		/* border-right: 1px var(--color-bg-2) solid; */
 
@@ -136,7 +137,7 @@
 
 		text-align: center;
 
-		background-color: rgba(255, 255, 255, 0.1);
+		background-color: rgba(255, 255, 255, 0.05);
 		border-radius: 2.5px;
 
 		cursor: pointer;
