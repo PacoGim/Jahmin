@@ -12,7 +12,7 @@
 	let selectedSongsId = []
 
 	function createSortableList() {
-		let el = document.querySelector('playback-layout ul')
+		let el = document.querySelector('playback-layout table')
 
 		if (el === undefined || el === null) return
 
@@ -35,13 +35,13 @@
 	}
 
 	function onDragEnd(evt) {
-		let ulElement = document.querySelector('playback-layout ul')
+		let ulElement = document.querySelector('playback-layout table')
 
 		if (ulElement === undefined || ulElement === null) return
 
 		let newOrder = []
 
-		ulElement.querySelectorAll('li').forEach(liElement => {
+		ulElement.querySelectorAll('tr').forEach(liElement => {
 			newOrder.push($playbackStore.find(song => song.ID === Number(liElement.dataset.songId)))
 		})
 
@@ -49,7 +49,7 @@
 	}
 
 	function playSong(evt: MouseEvent) {
-		let listElement = getClosestElementFn(evt.target as HTMLElement, 'li')
+		let listElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
 
 		if (listElement === undefined || listElement === null) return
 
@@ -72,7 +72,30 @@
 <selected-songs-preview />
 
 <playback-layout on:dblclick={evt => playSong(evt)}>
-	<ul id="items">
+
+	<main-grid>
+
+		{#each $playbackStore as song, index (song.ID)}
+		<row>
+			<span>{song.Track}</span>
+			<span>{song.Title}</span>
+			<span>{song.SampleRate}</span>
+		</row>
+		{/each}
+
+	</main-grid>
+
+	<!-- <main-grid>
+		{#each $playbackStore as song, index (song.ID)}
+			<sub-grid class={selectedSongsId.includes(song.ID) ? 'selected' : null} data-song-id={song.ID} data-index={index}>
+				<span>{song.Track}</span>
+				<span>{song.Title}</span>
+				<span>{song.SampleRate}</span>
+			</sub-grid>
+		{/each}
+	</main-grid> -->
+
+	<!-- 	<ul id="items">
 		{#each $playbackStore as song, index (song.ID)}
 			<li class={selectedSongsId.includes(song.ID) ? 'selected' : null} data-song-id={song.ID} data-index={index}>
 				<span>
@@ -87,24 +110,63 @@
 				<span>{song.SampleRate}</span>
 			</li>
 		{/each}
-	</ul>
+	</ul> -->
 </playback-layout>
 
 <style>
+
+	main-grid{
+		display: grid;
+		grid-template-columns: max-content auto max-content;
+	}
+
+	row{
+		display: contents;
+	}
+	span{
+
+	}
+
 	playback-layout {
+		/* --row-height: 1.25rem; */
+
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+		overflow-y: scroll;
+
+		/* background: repeating-linear-gradient(
+			transparent,
+			transparent var(--row-height),
+			rgba(255, 255, 255, 0.05) var(--row-height),
+			rgba(255, 255, 255, 0.05) calc(var(--row-height) * 2)
+		); */
+	}
+	playback-layout table {
+		table-layout: fixed;
+		/* width: min-content; */
+		width: 100%;
+	}
+
+	playback-layout table tr {
+		/* height: var(--row-height); */
+		width: 100%;
+	}
+	playback-layout table tr td {
+		/* display: inline-block; */
+		height: 100%;
+		white-space: nowrap;
+		/* width: 100px; */
+		/* max-width: 80px; */
+	}
+
+	playback-layout table tr td:last-of-type {
+		/* column-span: 3; */
 	}
 
 	playback-layout li play-button {
 		display: inline-block;
 	}
-
-	playback-layout li:has(play-button) {
-		grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-	}
-
 	playback-layout li {
 		display: grid;
 		align-items: center;
@@ -112,18 +174,18 @@
 		padding: 0.15rem 0.3rem;
 		cursor: pointer;
 
-		grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+		grid-template-columns: repeat(4, max-content);
 	}
 
-	playback-layout li:nth-child(even) {
+	playback-layout tr:nth-child(even) {
 		background-color: rgba(255, 255, 255, 0.05);
 	}
 
-	playback-layout li:hover {
+	playback-layout tr:hover {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
 
-	playback-layout li.selected {
+	playback-layout tr.selected {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
 
