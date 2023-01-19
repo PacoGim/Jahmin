@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import getClosestElementFn from '../../functions/getClosestElement.fn'
+	import cssVariablesService from '../../services/cssVariables.service'
 	import SortableService from '../../services/sortable.service'
 
-	import { playbackStore, playingSongStore } from '../../stores/main.store'
+	import { layoutToShow, playbackStore, playingSongStore } from '../../stores/main.store'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
 
 	$: if ($playbackStore.length > 0) createSortableList()
 
 	let selectedSongsId = []
+
+	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Artist']
 
 	function createSortableList() {
 		let el = document.querySelector('playback-layout table')
@@ -72,129 +75,56 @@
 <selected-songs-preview />
 
 <playback-layout on:dblclick={evt => playSong(evt)}>
-
-	<main-grid>
+	<table>
+		<tr>
+			{#each tempTags as tag, index (index)}
+				<td>{tag}</td>
+			{/each}
+			<td class="filler" />
+		</tr>
 
 		{#each $playbackStore as song, index (song.ID)}
-		<row>
-			<span>{song.Track}</span>
-			<span>{song.Title}</span>
-			<span>{song.SampleRate}</span>
-		</row>
-		{/each}
+			<tr>
+				{#each tempTags as tag, index (index)}
+					<td>{song[tag]}</td>
+				{/each}
 
-	</main-grid>
-
-	<!-- <main-grid>
-		{#each $playbackStore as song, index (song.ID)}
-			<sub-grid class={selectedSongsId.includes(song.ID) ? 'selected' : null} data-song-id={song.ID} data-index={index}>
-				<span>{song.Track}</span>
-				<span>{song.Title}</span>
-				<span>{song.SampleRate}</span>
-			</sub-grid>
+				<td class="filler" />
+			</tr>
 		{/each}
-	</main-grid> -->
-
-	<!-- 	<ul id="items">
-		{#each $playbackStore as song, index (song.ID)}
-			<li class={selectedSongsId.includes(song.ID) ? 'selected' : null} data-song-id={song.ID} data-index={index}>
-				<span>
-					{#if $playingSongStore.ID === song.ID}
-						<play-button>
-							<PlayButton customColor="#fff" customSize="0.75rem" />
-						</play-button>
-					{/if}
-					{song.Track}
-				</span>
-				<span>{song.Title}</span>
-				<span>{song.SampleRate}</span>
-			</li>
-		{/each}
-	</ul> -->
+	</table>
 </playback-layout>
 
 <style>
-
-	main-grid{
-		display: grid;
-		grid-template-columns: max-content auto max-content;
-	}
-
-	row{
-		display: contents;
-	}
-	span{
-
-	}
-
 	playback-layout {
-		/* --row-height: 1.25rem; */
-
-		height: 100%;
 		display: flex;
-		flex-direction: column;
-		overflow-y: scroll;
-
-		/* background: repeating-linear-gradient(
-			transparent,
-			transparent var(--row-height),
-			rgba(255, 255, 255, 0.05) var(--row-height),
-			rgba(255, 255, 255, 0.05) calc(var(--row-height) * 2)
-		); */
-	}
-	playback-layout table {
-		table-layout: fixed;
-		/* width: min-content; */
-		width: 100%;
-	}
-
-	playback-layout table tr {
-		/* height: var(--row-height); */
-		width: 100%;
-	}
-	playback-layout table tr td {
-		/* display: inline-block; */
 		height: 100%;
-		white-space: nowrap;
-		/* width: 100px; */
-		/* max-width: 80px; */
+		overflow-x: hidden;
+		min-width: 100%;
+		width: max-content;
+		justify-content: center;
 	}
 
-	playback-layout table tr td:last-of-type {
-		/* column-span: 3; */
+	table td {
+		text-align: center;
 	}
 
-	playback-layout li play-button {
-		display: inline-block;
-	}
-	playback-layout li {
-		display: grid;
-		align-items: center;
-		list-style: none;
-		padding: 0.15rem 0.3rem;
-		cursor: pointer;
-
-		grid-template-columns: repeat(4, max-content);
-	}
-
-	playback-layout tr:nth-child(even) {
+	table tr:nth-child(odd) {
 		background-color: rgba(255, 255, 255, 0.05);
 	}
 
-	playback-layout tr:hover {
-		background-color: rgba(255, 255, 255, 0.1);
+	table tr:nth-child(even) {
+		background-color: rgba(255, 255, 255, 0.025);
+	}
+	table tr td {
+		padding: 0.5rem;
 	}
 
-	playback-layout tr.selected {
-		background-color: rgba(255, 255, 255, 0.1);
+	table tr td:last-of-type {
+		width: 40000px;
 	}
 
-	selected-songs-preview {
-		pointer-events: none;
-		position: fixed;
-		opacity: 0;
-		top: 0;
-		left: 0;
-		z-index: 99999;
+	table {
+		/* width: 100%; */
 	}
 </style>

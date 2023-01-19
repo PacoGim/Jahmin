@@ -16,6 +16,7 @@ function set(key, value) {
 	} else {
 		headStyle.push([`--${key}`, value])
 	}
+
 	headStyleElement.innerHTML = `
     :root{
       ${headStyle.map(foo => foo.join(':')).join(';')};
