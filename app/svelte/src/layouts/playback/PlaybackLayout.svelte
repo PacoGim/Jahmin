@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	import getClosestElementFn from '../../functions/getClosestElement.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import SortableService from '../../services/sortable.service'
@@ -8,11 +8,16 @@
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
 
-	$: if ($playbackStore.length > 0) createSortableList()
+	$: if ($playbackStore.length > 0) {
+		createSortableList()
+		calculateTableFillerWidth()
+	}
 
 	let selectedSongsId = []
 
 	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Artist']
+
+	let windowResizeEvent = undefined
 
 	function createSortableList() {
 		let el = document.querySelector('playback-layout table')
@@ -38,14 +43,14 @@
 	}
 
 	function onDragEnd(evt) {
-		let ulElement = document.querySelector('playback-layout table')
+		let tableElement = document.querySelector('playback-layout table')
 
-		if (ulElement === undefined || ulElement === null) return
+		if (tableElement === undefined || tableElement === null) return
 
 		let newOrder = []
 
-		ulElement.querySelectorAll('tr').forEach(liElement => {
-			newOrder.push($playbackStore.find(song => song.ID === Number(liElement.dataset.songId)))
+		tableElement.querySelectorAll('tr[data-song-id]').forEach((trElement: HTMLTableRowElement) => {
+			newOrder.push($playbackStore.find(song => song.ID === Number(trElement.dataset.songId)))
 		})
 
 		$playbackStore = newOrder
@@ -67,8 +72,40 @@
 		songToPlayUrlStore.set([songSourceFile, { playNow: true }])
 	}
 
+	function calculateTableFillerWidth() {
+		let navbarWidth = document.querySelector('navigation-svlt').getBoundingClientRect().width
+
+		let tableHeaderWidth = 0
+
+		document.querySelectorAll('playback-layout table tr.table-header td:not(.filler)').forEach(element => {
+			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width
+		})
+
+		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - window.innerWidth)}px`)
+	}
+
+	function handleWindowResize() {
+		calculateTableFillerWidth()
+	}
+
+	function renameTagName(tagName) {
+		return {
+			Track: '#',
+			Title: 'Title',
+			SampleRate: 'Sample Rate',
+			Artist: 'Artist',
+			Album: 'Album'
+		}[tagName]
+	}
+
 	onMount(() => {
 		createSortableList()
+
+		window.addEventListener('resize', handleWindowResize)
+	})
+
+	onDestroy(() => {
+		window.removeEventListener('resize', handleWindowResize)
 	})
 </script>
 
@@ -76,15 +113,15 @@
 
 <playback-layout on:dblclick={evt => playSong(evt)}>
 	<table>
-		<tr>
+		<tr class="table-header">
 			{#each tempTags as tag, index (index)}
-				<td>{tag}</td>
+				<td>{renameTagName(tag)}</td>
 			{/each}
 			<td class="filler" />
 		</tr>
 
 		{#each $playbackStore as song, index (song.ID)}
-			<tr>
+			<tr class={selectedSongsId.includes(song.ID) ? 'selected' : ''} data-song-id={song.ID} data-index={index}>
 				{#each tempTags as tag, index (index)}
 					<td>{song[tag]}</td>
 				{/each}
@@ -105,8 +142,12 @@
 		justify-content: center;
 	}
 
-	table td {
-		text-align: center;
+	table tr.table-header {
+		pointer-events: none;
+		font-variation-settings: 'wght' 700;
+	}
+	table tr:not(.table-header) {
+		cursor: pointer;
 	}
 
 	table tr:nth-child(odd) {
@@ -116,15 +157,18 @@
 	table tr:nth-child(even) {
 		background-color: rgba(255, 255, 255, 0.025);
 	}
+
+	table tr.selected {
+		background-color: rgba(255, 255, 255, 0.1);
+		box-shadow: inset 0 -1px 0 1px rgba(255, 255, 255, 0.1);
+		font-variation-settings: 'wght' 600;
+	}
 	table tr td {
 		padding: 0.5rem;
+		text-align: center;
 	}
 
 	table tr td:last-of-type {
-		width: 40000px;
-	}
-
-	table {
-		/* width: 100%; */
+		width: var(--table-filler-width);
 	}
 </style>
