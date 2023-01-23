@@ -36574,7 +36574,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (110:3) {#each tempTags as tag, index (index)}
+    // (108:3) {#each tempTags as tag, index (index)}
     function create_each_block_2(key_1, ctx) {
     	let td;
     	let t_value = renameTagName(/*tag*/ ctx[16]) + "";
@@ -36587,7 +36587,7 @@ var app = (function () {
     			td = element("td");
     			t = text(t_value);
     			attr_dev(td, "class", "svelte-cmdk44");
-    			add_location(td, file$e, 110, 4, 3877);
+    			add_location(td, file$e, 108, 4, 4007);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -36606,14 +36606,14 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(110:3) {#each tempTags as tag, index (index)}",
+    		source: "(108:3) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (118:4) {#each tempTags as tag, index (index)}
+    // (116:4) {#each tempTags as tag, index (index)}
     function create_each_block_1(key_1, ctx) {
     	let td;
     	let t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "";
@@ -36626,7 +36626,7 @@ var app = (function () {
     			td = element("td");
     			t = text(t_value);
     			attr_dev(td, "class", "svelte-cmdk44");
-    			add_location(td, file$e, 118, 5, 4160);
+    			add_location(td, file$e, 116, 5, 4290);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -36646,14 +36646,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(118:4) {#each tempTags as tag, index (index)}",
+    		source: "(116:4) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (116:2) {#each $playbackStore as song, index (song.ID)}
+    // (114:2) {#each $playbackStore as song, index (song.ID)}
     function create_each_block$1(key_1, ctx) {
     	let tr;
     	let each_blocks = [];
@@ -36689,7 +36689,7 @@ var app = (function () {
     			td = element("td");
     			t1 = space();
     			attr_dev(td, "class", "filler svelte-cmdk44");
-    			add_location(td, file$e, 121, 4, 4198);
+    			add_location(td, file$e, 119, 4, 4328);
 
     			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[13].ID)
     			? 'selected'
@@ -36697,7 +36697,7 @@ var app = (function () {
 
     			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[13].ID);
     			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[15]);
-    			add_location(tr, file$e, 116, 3, 4005);
+    			add_location(tr, file$e, 114, 3, 4135);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -36748,7 +36748,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(116:2) {#each $playbackStore as song, index (song.ID)}",
+    		source: "(114:2) {#each $playbackStore as song, index (song.ID)}",
     		ctx
     	});
 
@@ -36812,15 +36812,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(selected_songs_preview, file$e, 104, 0, 3713);
+    			add_location(selected_songs_preview, file$e, 102, 0, 3843);
     			attr_dev(td, "class", "filler svelte-cmdk44");
-    			add_location(td, file$e, 112, 3, 3921);
+    			add_location(td, file$e, 110, 3, 4051);
     			attr_dev(tr, "class", "table-header svelte-cmdk44");
-    			add_location(tr, file$e, 108, 2, 3805);
+    			add_location(tr, file$e, 106, 2, 3935);
     			attr_dev(table, "class", "svelte-cmdk44");
-    			add_location(table, file$e, 107, 1, 3795);
+    			add_location(table, file$e, 105, 1, 3925);
     			set_custom_element_data(playback_layout, "class", "svelte-cmdk44");
-    			add_location(playback_layout, file$e, 106, 0, 3741);
+    			add_location(playback_layout, file$e, 104, 0, 3871);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -36930,20 +36930,18 @@ var app = (function () {
     	}
 
     	function onSelect(evt) {
-    		if (evt.originalEvent.shiftKey === false) {
-    			onSelectOne(evt);
-    			return;
+    		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
+    			selectOnlyOne(evt);
     		}
     	}
 
     	function onDeselect(evt) {
-    		if (evt.originalEvent.shiftKey === false) {
-    			onSelectOne(evt);
-    			return;
+    		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
+    			selectOnlyOne(evt);
     		}
     	}
 
-    	function onSelectOne(evt) {
+    	function selectOnlyOne(evt) {
     		document.querySelectorAll('table tr.selected').forEach(el => {
     			Sortable.utils.deselect(el);
     		});
@@ -37041,7 +37039,7 @@ var app = (function () {
     		createSortableList,
     		onSelect,
     		onDeselect,
-    		onSelectOne,
+    		selectOnlyOne,
     		onDragEnd,
     		playSong,
     		calculateTableFillerWidth,

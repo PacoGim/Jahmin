@@ -36,20 +36,18 @@
 	}
 
 	function onSelect(evt) {
-		if (evt.originalEvent.shiftKey === false) {
-			onSelectOne(evt)
-			return
+		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
+			selectOnlyOne(evt)
 		}
 	}
 
 	function onDeselect(evt) {
-		if (evt.originalEvent.shiftKey === false) {
-			onSelectOne(evt)
-			return
+		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
+			selectOnlyOne(evt)
 		}
 	}
 
-	function onSelectOne(evt) {
+	function selectOnlyOne(evt) {
 		document.querySelectorAll('table tr.selected').forEach(el => {
 			Sortable.utils.deselect(el)
 		})
