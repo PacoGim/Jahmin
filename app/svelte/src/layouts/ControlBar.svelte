@@ -100,6 +100,8 @@
 		background-color: var(--art-color-light);
 		color: var(--art-color-dark);
 
+		width: calc(100vw - 58px);/* 58px = Navbar width */
+
 		transition-property: background-color, color;
 		transition-duration: 300ms;
 		transition-timing-function: ease-in-out;

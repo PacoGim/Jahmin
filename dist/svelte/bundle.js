@@ -11019,15 +11019,15 @@ var app = (function () {
     			song_time_left = element("song-time-left");
     			t10 = text("-");
     			t11 = text(t11_value);
-    			set_custom_element_data(album_art, "class", "svelte-3escra");
+    			set_custom_element_data(album_art, "class", "svelte-1ats29x");
     			add_location(album_art, file$18, 44, 1, 1666);
-    			set_custom_element_data(player_buttons, "class", "svelte-3escra");
+    			set_custom_element_data(player_buttons, "class", "svelte-1ats29x");
     			add_location(player_buttons, file$18, 48, 1, 1790);
-    			set_custom_element_data(song_duration, "class", "song-time svelte-3escra");
+    			set_custom_element_data(song_duration, "class", "song-time svelte-1ats29x");
     			add_location(song_duration, file$18, 56, 1, 1905);
-    			set_custom_element_data(song_time_left, "class", "song-time svelte-3escra");
+    			set_custom_element_data(song_time_left, "class", "song-time svelte-1ats29x");
     			add_location(song_time_left, file$18, 62, 1, 2025);
-    			set_custom_element_data(control_bar_svlt, "class", "svelte-3escra");
+    			set_custom_element_data(control_bar_svlt, "class", "svelte-1ats29x");
     			add_location(control_bar_svlt, file$18, 43, 0, 1646);
     		},
     		l: function claim(nodes) {
@@ -17677,9 +17677,9 @@ var app = (function () {
     			create_component(albuminfo.$$.fragment);
     			t2 = space();
     			create_component(playbackoptions.$$.fragment);
-    			set_custom_element_data(song_info, "class", "svelte-1o7y175");
+    			set_custom_element_data(song_info, "class", "svelte-1khigyy");
     			add_location(song_info, file$_, 30, 1, 946);
-    			set_custom_element_data(statusbar_svlt, "class", "svelte-1o7y175");
+    			set_custom_element_data(statusbar_svlt, "class", "svelte-1khigyy");
     			add_location(statusbar_svlt, file$_, 28, 0, 916);
     		},
     		l: function claim(nodes) {
@@ -36555,29 +36555,29 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[12] = list[i];
-    	child_ctx[14] = i;
+    	child_ctx[13] = list[i];
+    	child_ctx[15] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
-    	child_ctx[14] = i;
+    	child_ctx[16] = list[i];
+    	child_ctx[15] = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
-    	child_ctx[14] = i;
+    	child_ctx[16] = list[i];
+    	child_ctx[15] = i;
     	return child_ctx;
     }
 
-    // (91:3) {#each tempTags as tag, index (index)}
+    // (110:3) {#each tempTags as tag, index (index)}
     function create_each_block_2(key_1, ctx) {
     	let td;
-    	let t_value = renameTagName(/*tag*/ ctx[15]) + "";
+    	let t_value = renameTagName(/*tag*/ ctx[16]) + "";
     	let t;
 
     	const block = {
@@ -36587,7 +36587,7 @@ var app = (function () {
     			td = element("td");
     			t = text(t_value);
     			attr_dev(td, "class", "svelte-cmdk44");
-    			add_location(td, file$e, 91, 4, 3388);
+    			add_location(td, file$e, 110, 4, 3877);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -36606,17 +36606,17 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(91:3) {#each tempTags as tag, index (index)}",
+    		source: "(110:3) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (99:4) {#each tempTags as tag, index (index)}
+    // (118:4) {#each tempTags as tag, index (index)}
     function create_each_block_1(key_1, ctx) {
     	let td;
-    	let t_value = /*song*/ ctx[12][/*tag*/ ctx[15]] + "";
+    	let t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "";
     	let t;
 
     	const block = {
@@ -36626,7 +36626,7 @@ var app = (function () {
     			td = element("td");
     			t = text(t_value);
     			attr_dev(td, "class", "svelte-cmdk44");
-    			add_location(td, file$e, 99, 5, 3671);
+    			add_location(td, file$e, 118, 5, 4160);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -36635,7 +36635,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[12][/*tag*/ ctx[15]] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(td);
@@ -36646,14 +36646,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(99:4) {#each tempTags as tag, index (index)}",
+    		source: "(118:4) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (97:2) {#each $playbackStore as song, index (song.ID)}
+    // (116:2) {#each $playbackStore as song, index (song.ID)}
     function create_each_block$1(key_1, ctx) {
     	let tr;
     	let each_blocks = [];
@@ -36666,7 +36666,7 @@ var app = (function () {
     	let tr_data_index_value;
     	let each_value_1 = /*tempTags*/ ctx[2];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*index*/ ctx[14];
+    	const get_key = ctx => /*index*/ ctx[15];
     	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -36689,15 +36689,15 @@ var app = (function () {
     			td = element("td");
     			t1 = space();
     			attr_dev(td, "class", "filler svelte-cmdk44");
-    			add_location(td, file$e, 102, 4, 3709);
+    			add_location(td, file$e, 121, 4, 4198);
 
-    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[12].ID)
+    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[13].ID)
     			? 'selected'
     			: '') + " svelte-cmdk44"));
 
-    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[12].ID);
-    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[14]);
-    			add_location(tr, file$e, 97, 3, 3516);
+    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[13].ID);
+    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[15]);
+    			add_location(tr, file$e, 116, 3, 4005);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -36721,17 +36721,17 @@ var app = (function () {
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value_1, each_1_lookup, tr, destroy_block, create_each_block_1, t0, get_each_context_1);
     			}
 
-    			if (dirty & /*selectedSongsId, $playbackStore*/ 3 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[12].ID)
+    			if (dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[13].ID)
     			? 'selected'
     			: '') + " svelte-cmdk44"))) {
     				attr_dev(tr, "class", tr_class_value);
     			}
 
-    			if (dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[12].ID)) {
+    			if (dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[13].ID)) {
     				attr_dev(tr, "data-song-id", tr_data_song_id_value);
     			}
 
-    			if (dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[14])) {
+    			if (dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[15])) {
     				attr_dev(tr, "data-index", tr_data_index_value);
     			}
     		},
@@ -36748,7 +36748,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(97:2) {#each $playbackStore as song, index (song.ID)}",
+    		source: "(116:2) {#each $playbackStore as song, index (song.ID)}",
     		ctx
     	});
 
@@ -36772,7 +36772,7 @@ var app = (function () {
     	let dispose;
     	let each_value_2 = /*tempTags*/ ctx[2];
     	validate_each_argument(each_value_2);
-    	const get_key = ctx => /*index*/ ctx[14];
+    	const get_key = ctx => /*index*/ ctx[15];
     	validate_each_keys(ctx, each_value_2, get_each_context_2, get_key);
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
@@ -36783,7 +36783,7 @@ var app = (function () {
 
     	let each_value = /*$playbackStore*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*song*/ ctx[12].ID;
+    	const get_key_1 = ctx => /*song*/ ctx[13].ID;
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -36812,15 +36812,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(selected_songs_preview, file$e, 85, 0, 3224);
+    			add_location(selected_songs_preview, file$e, 104, 0, 3713);
     			attr_dev(td, "class", "filler svelte-cmdk44");
-    			add_location(td, file$e, 93, 3, 3432);
+    			add_location(td, file$e, 112, 3, 3921);
     			attr_dev(tr, "class", "table-header svelte-cmdk44");
-    			add_location(tr, file$e, 89, 2, 3316);
+    			add_location(tr, file$e, 108, 2, 3805);
     			attr_dev(table, "class", "svelte-cmdk44");
-    			add_location(table, file$e, 88, 1, 3306);
+    			add_location(table, file$e, 107, 1, 3795);
     			set_custom_element_data(playback_layout, "class", "svelte-cmdk44");
-    			add_location(playback_layout, file$e, 87, 0, 3252);
+    			add_location(playback_layout, file$e, 106, 0, 3741);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -36913,7 +36913,7 @@ var app = (function () {
     	validate_slots('PlaybackLayout', slots, []);
     	let selectedSongsId = [];
     	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Artist'];
-    	let windowResizeEvent = undefined;
+    	let handleWindowResizeRunning = false;
 
     	function createSortableList() {
     		let el = document.querySelector('playback-layout table');
@@ -36922,7 +36922,7 @@ var app = (function () {
     		SortableService.create(el, {
     			multiDrag: true,
     			animation: 150,
-    			selectedClass: null,
+    			selectedClass: 'selected',
     			onEnd: onDragEnd,
     			onSelect,
     			onDeselect
@@ -36930,11 +36930,25 @@ var app = (function () {
     	}
 
     	function onSelect(evt) {
-    		$$invalidate(1, selectedSongsId = evt.items.map(liElement => Number(liElement.dataset.songId)));
+    		if (evt.originalEvent.shiftKey === false) {
+    			onSelectOne(evt);
+    			return;
+    		}
     	}
 
     	function onDeselect(evt) {
-    		$$invalidate(1, selectedSongsId = []);
+    		if (evt.originalEvent.shiftKey === false) {
+    			onSelectOne(evt);
+    			return;
+    		}
+    	}
+
+    	function onSelectOne(evt) {
+    		document.querySelectorAll('table tr.selected').forEach(el => {
+    			Sortable.utils.deselect(el);
+    		});
+
+    		Sortable.utils.select(evt.item);
     	}
 
     	function onDragEnd(evt) {
@@ -36971,6 +36985,7 @@ var app = (function () {
     	}
 
     	function calculateTableFillerWidth() {
+    		let windowWidth = window.innerWidth;
     		let navbarWidth = document.querySelector('navigation-svlt').getBoundingClientRect().width;
     		let tableHeaderWidth = 0;
 
@@ -36978,11 +36993,20 @@ var app = (function () {
     			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width;
     		});
 
-    		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - window.innerWidth)}px`);
+    		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`);
     	}
 
     	function handleWindowResize() {
-    		calculateTableFillerWidth();
+    		if (handleWindowResizeRunning === true) return;
+    		handleWindowResizeRunning = true;
+
+    		setTimeout(
+    			() => {
+    				calculateTableFillerWidth();
+    				handleWindowResizeRunning = false;
+    			},
+    			125
+    		);
     	}
 
     	onMount(() => {
@@ -37008,26 +37032,28 @@ var app = (function () {
     		getClosestElementFn,
     		cssVariablesService,
     		SortableService,
+    		Sortable,
     		playbackStore,
     		songToPlayUrlStore,
     		selectedSongsId,
     		tempTags,
-    		windowResizeEvent,
+    		handleWindowResizeRunning,
     		createSortableList,
     		onSelect,
     		onDeselect,
+    		onSelectOne,
     		onDragEnd,
     		playSong,
     		calculateTableFillerWidth,
-    		handleWindowResize,
     		renameTagName,
+    		handleWindowResize,
     		$playbackStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('selectedSongsId' in $$props) $$invalidate(1, selectedSongsId = $$props.selectedSongsId);
     		if ('tempTags' in $$props) $$invalidate(2, tempTags = $$props.tempTags);
-    		if ('windowResizeEvent' in $$props) windowResizeEvent = $$props.windowResizeEvent;
+    		if ('handleWindowResizeRunning' in $$props) handleWindowResizeRunning = $$props.handleWindowResizeRunning;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -37038,7 +37064,6 @@ var app = (function () {
     		if ($$self.$$.dirty & /*$playbackStore*/ 1) {
     			if ($playbackStore.length > 0) {
     				createSortableList();
-    				calculateTableFillerWidth();
     			}
     		}
     	};

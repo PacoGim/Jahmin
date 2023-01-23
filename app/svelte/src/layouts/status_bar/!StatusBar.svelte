@@ -71,6 +71,8 @@
 
 		overflow: hidden;
 		position: relative;
+
+		width: 100vw;
 	}
 
 	song-info {

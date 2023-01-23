@@ -4,20 +4,21 @@
 	import cssVariablesService from '../../services/cssVariables.service'
 	import SortableService from '../../services/sortable.service'
 
+	import Sortable from 'sortablejs'
+
 	import { layoutToShow, playbackStore, playingSongStore } from '../../stores/main.store'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
 
 	$: if ($playbackStore.length > 0) {
 		createSortableList()
-		calculateTableFillerWidth()
 	}
 
 	let selectedSongsId = []
 
 	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Artist']
 
-	let windowResizeEvent = undefined
+	let handleWindowResizeRunning = false
 
 	function createSortableList() {
 		let el = document.querySelector('playback-layout table')
@@ -27,7 +28,7 @@
 		SortableService.create(el, {
 			multiDrag: true,
 			animation: 150,
-			selectedClass: null,
+			selectedClass: 'selected',
 			onEnd: onDragEnd,
 			onSelect: onSelect,
 			onDeselect: onDeselect
@@ -35,11 +36,25 @@
 	}
 
 	function onSelect(evt) {
-		selectedSongsId = evt.items.map(liElement => Number(liElement.dataset.songId))
+		if (evt.originalEvent.shiftKey === false) {
+			onSelectOne(evt)
+			return
+		}
 	}
 
 	function onDeselect(evt) {
-		selectedSongsId = []
+		if (evt.originalEvent.shiftKey === false) {
+			onSelectOne(evt)
+			return
+		}
+	}
+
+	function onSelectOne(evt) {
+		document.querySelectorAll('table tr.selected').forEach(el => {
+			Sortable.utils.deselect(el)
+		})
+
+		Sortable.utils.select(evt.item)
 	}
 
 	function onDragEnd(evt) {
@@ -73,19 +88,15 @@
 	}
 
 	function calculateTableFillerWidth() {
+		let windowWidth = window.innerWidth
 		let navbarWidth = document.querySelector('navigation-svlt').getBoundingClientRect().width
-
 		let tableHeaderWidth = 0
 
 		document.querySelectorAll('playback-layout table tr.table-header td:not(.filler)').forEach(element => {
 			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width
 		})
 
-		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - window.innerWidth)}px`)
-	}
-
-	function handleWindowResize() {
-		calculateTableFillerWidth()
+		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`)
 	}
 
 	function renameTagName(tagName) {
@@ -96,6 +107,16 @@
 			Artist: 'Artist',
 			Album: 'Album'
 		}[tagName]
+	}
+
+	function handleWindowResize() {
+		if (handleWindowResizeRunning === true) return
+
+		handleWindowResizeRunning = true
+		setTimeout(() => {
+			calculateTableFillerWidth()
+			handleWindowResizeRunning = false
+		}, 125)
 	}
 
 	onMount(() => {
