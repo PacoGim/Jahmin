@@ -30,34 +30,28 @@
 			animation: 150,
 			selectedClass: 'selected',
 			onEnd: onDragEnd,
-			onSelect: onSelect,
-			onDeselect: onDeselect
+			onSelect: onSelectDeselect,
+			onDeselect: onSelectDeselect
 		})
 	}
 
-	function onSelect(evt) {
+	function onSelectDeselect(evt) {
 		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-			deselectAll('onSelect')
-
-			if (evt.item) {
+			deselectAll().then(() => {
 				Sortable.utils.select(evt.item)
-			}
+			})
 		}
 	}
 
-	function onDeselect(evt) {
-		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-			deselectAll('onDeselect')
-			if (evt.item) {
-				Sortable.utils.select(evt.item)
-			}
-		}
-	}
+	function deselectAll() {
+		return new Promise(resolve => {
+			document.querySelectorAll('table tr.selected').forEach((el, index, list) => {
+				Sortable.utils.deselect(el)
 
-	function deselectAll(from) {
-		console.log(from)
-		document.querySelectorAll('table tr.selected').forEach(el => {
-			Sortable.utils.deselect(el)
+				if (index === list.length - 1) {
+					resolve(null)
+				}
+			})
 		})
 	}
 
@@ -78,13 +72,9 @@
 	function playSongFoo(evt: MouseEvent) {
 		let clickedElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
 
-		console.log(clickedElement)
+		if (clickedElement === undefined || clickedElement === null) return
 
-		/* 		let listElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
-
-		if (listElement === undefined || listElement === null) return
-
-		let songId = listElement?.dataset?.songId
+		let songId = clickedElement?.dataset?.songId
 
 		if (songId === undefined || songId === null) return
 
@@ -92,7 +82,7 @@
 
 		if (songSourceFile === undefined || songSourceFile === null) return
 
-		songToPlayUrlStore.set([songSourceFile, { playNow: true }]) */
+		songToPlayUrlStore.set([songSourceFile, { playNow: true }])
 	}
 
 	function calculateTableFillerWidth() {
@@ -155,7 +145,7 @@
 					{#if tag === 'Track' && $playingSongStore.ID === song.ID}
 						<td>
 							<play-button>
-								<PlayButton customColor="#fff" customSize="0.75rem" />
+								<PlayButton customColor="var(--color-fg-1)" customSize="0.75rem" />
 							</play-button>
 							{song[tag]}
 						</td>
