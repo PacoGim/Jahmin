@@ -37,22 +37,28 @@
 
 	function onSelect(evt) {
 		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-			selectOnlyOne(evt)
+			deselectAll('onSelect')
+
+			if (evt.item) {
+				Sortable.utils.select(evt.item)
+			}
 		}
 	}
 
 	function onDeselect(evt) {
 		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-			selectOnlyOne(evt)
+			deselectAll('onDeselect')
+			if (evt.item) {
+				Sortable.utils.select(evt.item)
+			}
 		}
 	}
 
-	function selectOnlyOne(evt) {
+	function deselectAll(from) {
+		console.log(from)
 		document.querySelectorAll('table tr.selected').forEach(el => {
 			Sortable.utils.deselect(el)
 		})
-
-		Sortable.utils.select(evt.item)
 	}
 
 	function onDragEnd(evt) {
@@ -69,8 +75,12 @@
 		$playbackStore = newOrder
 	}
 
-	function playSong(evt: MouseEvent) {
-		let listElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
+	function playSongFoo(evt: MouseEvent) {
+		let clickedElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
+
+		console.log(clickedElement)
+
+		/* 		let listElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
 
 		if (listElement === undefined || listElement === null) return
 
@@ -82,7 +92,7 @@
 
 		if (songSourceFile === undefined || songSourceFile === null) return
 
-		songToPlayUrlStore.set([songSourceFile, { playNow: true }])
+		songToPlayUrlStore.set([songSourceFile, { playNow: true }]) */
 	}
 
 	function calculateTableFillerWidth() {
@@ -130,7 +140,7 @@
 
 <selected-songs-preview />
 
-<playback-layout on:dblclick={evt => playSong(evt)}>
+<playback-layout on:dblclick={evt => playSongFoo(evt)}>
 	<table>
 		<tr class="table-header">
 			{#each tempTags as tag, index (index)}
@@ -142,7 +152,16 @@
 		{#each $playbackStore as song, index (song.ID)}
 			<tr class={selectedSongsId.includes(song.ID) ? 'selected' : ''} data-song-id={song.ID} data-index={index}>
 				{#each tempTags as tag, index (index)}
-					<td>{song[tag]}</td>
+					{#if tag === 'Track' && $playingSongStore.ID === song.ID}
+						<td>
+							<play-button>
+								<PlayButton customColor="#fff" customSize="0.75rem" />
+							</play-button>
+							{song[tag]}
+						</td>
+					{:else}
+						<td>{song[tag]}</td>
+					{/if}
 				{/each}
 
 				<td class="filler" />
@@ -185,6 +204,11 @@
 	table tr td {
 		padding: 0.5rem;
 		text-align: center;
+	}
+
+	table tr td play-button {
+		display: inline-block;
+		margin-right: 0.125rem;
 	}
 
 	table tr td:last-of-type {

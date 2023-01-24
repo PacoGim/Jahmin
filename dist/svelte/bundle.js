@@ -9719,6 +9719,7 @@ var app = (function () {
         }
     });
     function nextSongFn () {
+        // console.log('Hello')
         let playbackStoreValue;
         let songPlayingLocal = undefined;
         playbackStore.subscribe(value => (playbackStoreValue = value))();
@@ -17589,7 +17590,7 @@ var app = (function () {
     const file$_ = "src/layouts/status_bar/!StatusBar.svelte";
 
     // (32:2) {#if currentSong?.Title !== ''}
-    function create_if_block$d(ctx) {
+    function create_if_block$e(ctx) {
     	let bold0;
     	let t0_value = numberZeroPad(/*currentSong*/ ctx[0].Track) + "";
     	let t0;
@@ -17642,7 +17643,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$d.name,
+    		id: create_if_block$e.name,
     		type: "if",
     		source: "(32:2) {#if currentSong?.Title !== ''}",
     		ctx
@@ -17662,7 +17663,7 @@ var app = (function () {
     	let playbackoptions;
     	let current;
     	queues = new Queues({ $$inline: true });
-    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$d(ctx);
+    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$e(ctx);
     	albuminfo = new AlbumInfo({ $$inline: true });
     	playbackoptions = new PlaybackOptions({ $$inline: true });
 
@@ -17702,7 +17703,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$d(ctx);
+    					if_block = create_if_block$e(ctx);
     					if_block.c();
     					if_block.m(song_info, null);
     				}
@@ -17927,7 +17928,7 @@ var app = (function () {
     const file$Z = "src/components/Album.svelte";
 
     // (29:2) {:else}
-    function create_else_block$6(ctx) {
+    function create_else_block$7(ctx) {
     	let album_artist;
 
     	const block = {
@@ -17947,7 +17948,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$6.name,
+    		id: create_else_block$7.name,
     		type: "else",
     		source: "(29:2) {:else}",
     		ctx
@@ -17993,7 +17994,7 @@ var app = (function () {
     }
 
     // (25:2) {#if album['AlbumArtist'] !== undefined}
-    function create_if_block$c(ctx) {
+    function create_if_block$d(ctx) {
     	let album_artist;
     	let t_value = (/*album*/ ctx[0]['AlbumArtist'] || '') + "";
     	let t;
@@ -18019,7 +18020,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$c.name,
+    		id: create_if_block$d.name,
     		type: "if",
     		source: "(25:2) {#if album['AlbumArtist'] !== undefined}",
     		ctx
@@ -18052,9 +18053,9 @@ var app = (function () {
     		});
 
     	function select_block_type(ctx, dirty) {
-    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$c;
+    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$d;
     		if (/*album*/ ctx[0]['DynamicAlbumArtist'] !== undefined) return create_if_block_1$6;
-    		return create_else_block$6;
+    		return create_else_block$7;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -18936,7 +18937,7 @@ var app = (function () {
     const file$V = "src/components/SongTag.svelte";
 
     // (62:0) {:else}
-    function create_else_block$5(ctx) {
+    function create_else_block$6(ctx) {
     	let star;
     	let current;
 
@@ -18979,7 +18980,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$5.name,
+    		id: create_else_block$6.name,
     		type: "else",
     		source: "(62:0) {:else}",
     		ctx
@@ -18989,7 +18990,7 @@ var app = (function () {
     }
 
     // (60:0) {#if tagName !== 'Rating'}
-    function create_if_block$b(ctx) {
+    function create_if_block$c(ctx) {
     	let span;
     	let t_value = /*parseTag*/ ctx[5](/*tagName*/ ctx[1], /*tagValue*/ ctx[2]) + "";
     	let t;
@@ -19032,7 +19033,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$b.name,
+    		id: create_if_block$c.name,
     		type: "if",
     		source: "(60:0) {#if tagName !== 'Rating'}",
     		ctx
@@ -19046,7 +19047,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$b, create_else_block$5];
+    	const if_block_creators = [create_if_block$c, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -19344,7 +19345,7 @@ var app = (function () {
     }
 
     // (81:2) {:else}
-    function create_else_block$4(ctx) {
+    function create_else_block$5(ctx) {
     	let songtag;
     	let current;
 
@@ -19390,7 +19391,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$4.name,
+    		id: create_else_block$5.name,
     		type: "else",
     		source: "(81:2) {:else}",
     		ctx
@@ -19422,7 +19423,7 @@ var app = (function () {
     }
 
     // (72:2) {#if tag.value === 'Title' && $config.songListTags.find(configTag => configTag.value === 'DynamicArtists')}
-    function create_if_block$a(ctx) {
+    function create_if_block$b(ctx) {
     	let songtag;
     	let current;
 
@@ -19468,7 +19469,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$a.name,
+    		id: create_if_block$b.name,
     		type: "if",
     		source: "(72:2) {#if tag.value === 'Title' && $config.songListTags.find(configTag => configTag.value === 'DynamicArtists')}",
     		ctx
@@ -19486,7 +19487,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$a, create_if_block_1$5, create_else_block$4];
+    	const if_block_creators = [create_if_block$b, create_if_block_1$5, create_else_block$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -22688,7 +22689,7 @@ var app = (function () {
 
     /* src/layouts/library/TagEdit.svelte generated by Svelte v3.49.0 */
 
-    const { Object: Object_1$1, console: console_1$1 } = globals;
+    const { Object: Object_1$1, console: console_1$2 } = globals;
     const file$O = "src/layouts/library/TagEdit.svelte";
 
     function create_fragment$U(ctx) {
@@ -23607,7 +23608,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object_1$1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<TagEdit> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<TagEdit> was created with unknown prop '${key}'`);
     	});
 
     	function textarea0_input_handler() {
@@ -23802,7 +23803,7 @@ var app = (function () {
     }
 
     // (54:3) {#if $selectedGroups[index]}
-    function create_if_block$9(ctx) {
+    function create_if_block$a(ctx) {
     	let group_value;
     	let t0;
     	let t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]].length + "";
@@ -23910,7 +23911,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$9.name,
+    		id: create_if_block$a.name,
     		type: "if",
     		source: "(54:3) {#if $selectedGroups[index]}",
     		ctx
@@ -23996,7 +23997,7 @@ var app = (function () {
     	let group_svlt_data_index_value;
     	let mounted;
     	let dispose;
-    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]] && create_if_block$9(ctx);
+    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]] && create_if_block$a(ctx);
 
     	const block = {
     		key: key_1,
@@ -24046,7 +24047,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$9(ctx);
+    					if_block = create_if_block$a(ctx);
     					if_block.c();
     					if_block.m(group_svlt, t2);
     				}
@@ -24283,7 +24284,7 @@ var app = (function () {
     const file$M = "src/layouts/library/!LibraryLayout.svelte";
 
     // (22:1) {:else}
-    function create_else_block$3(ctx) {
+    function create_else_block$4(ctx) {
     	let nosong;
     	let current;
     	nosong = new NoSong({ $$inline: true });
@@ -24312,7 +24313,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$3.name,
+    		id: create_else_block$4.name,
     		type: "else",
     		source: "(22:1) {:else}",
     		ctx
@@ -24322,7 +24323,7 @@ var app = (function () {
     }
 
     // (20:1) {#if $dbSongsStore.length > 0}
-    function create_if_block$8(ctx) {
+    function create_if_block$9(ctx) {
     	let artgrid;
     	let current;
     	artgrid = new ArtGrid({ $$inline: true });
@@ -24351,7 +24352,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$8.name,
+    		id: create_if_block$9.name,
     		type: "if",
     		source: "(20:1) {#if $dbSongsStore.length > 0}",
     		ctx
@@ -24373,7 +24374,7 @@ var app = (function () {
     	let t3;
     	let songlistbackground;
     	let current;
-    	const if_block_creators = [create_if_block$8, create_else_block$3];
+    	const if_block_creators = [create_if_block$9, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -27641,7 +27642,7 @@ var app = (function () {
     const file$s = "src/layouts/config/equalizer/EqualizerButtons.svelte";
 
     // (49:2) {:else}
-    function create_else_block$2(ctx) {
+    function create_else_block$3(ctx) {
     	let toggleofficon;
     	let current;
 
@@ -27676,7 +27677,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$2.name,
+    		id: create_else_block$3.name,
     		type: "else",
     		source: "(49:2) {:else}",
     		ctx
@@ -27686,7 +27687,7 @@ var app = (function () {
     }
 
     // (47:2) {#if $isEqualizerOn === true}
-    function create_if_block$7(ctx) {
+    function create_if_block$8(ctx) {
     	let toggleonicon;
     	let current;
 
@@ -27721,7 +27722,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$7.name,
+    		id: create_if_block$8.name,
     		type: "if",
     		source: "(47:2) {#if $isEqualizerOn === true}",
     		ctx
@@ -27755,7 +27756,7 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	const if_block_creators = [create_if_block$7, create_else_block$2];
+    	const if_block_creators = [create_if_block$8, create_else_block$3];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -29528,7 +29529,7 @@ var app = (function () {
     }
 
     // (39:2) {#if $config.directories}
-    function create_if_block$6(ctx) {
+    function create_if_block$7(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -29597,7 +29598,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$6.name,
+    		id: create_if_block$7.name,
     		type: "if",
     		source: "(39:2) {#if $config.directories}",
     		ctx
@@ -29730,7 +29731,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	let if_block1 = /*$config*/ ctx[0].directories && create_if_block$6(ctx);
+    	let if_block1 = /*$config*/ ctx[0].directories && create_if_block$7(ctx);
 
     	addicon1 = new AddIcon({
     			props: {
@@ -29845,7 +29846,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block$6(ctx);
+    					if_block1 = create_if_block$7(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(section_body1, null);
@@ -30108,7 +30109,7 @@ var app = (function () {
     }
 
     // (25:4) {#if !$songListTagsValuesStore.includes(tag.value)}
-    function create_if_block$5(ctx) {
+    function create_if_block$6(ctx) {
     	let option;
     	let t_value = /*tag*/ ctx[7].name + "";
     	let t;
@@ -30133,7 +30134,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$5.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(25:4) {#if !$songListTagsValuesStore.includes(tag.value)}",
     		ctx
@@ -30147,7 +30148,7 @@ var app = (function () {
     	let first;
     	let show_if = !/*$songListTagsValuesStore*/ ctx[1].includes(/*tag*/ ctx[7].value);
     	let if_block_anchor;
-    	let if_block = show_if && create_if_block$5(ctx);
+    	let if_block = show_if && create_if_block$6(ctx);
 
     	const block = {
     		key: key_1,
@@ -30171,7 +30172,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$5(ctx);
+    					if_block = create_if_block$6(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -30520,7 +30521,7 @@ var app = (function () {
     }
 
     // (78:0) {:else}
-    function create_else_block$1(ctx) {
+    function create_else_block$2(ctx) {
     	let li;
     	let li_data_align_value;
     	let li_data_is_expanded_value;
@@ -30565,7 +30566,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$1.name,
+    		id: create_else_block$2.name,
     		type: "else",
     		source: "(78:0) {:else}",
     		ctx
@@ -30575,7 +30576,7 @@ var app = (function () {
     }
 
     // (33:0) {#if tag.value !== 'DynamicArtists'}
-    function create_if_block$4(ctx) {
+    function create_if_block$5(ctx) {
     	let li;
     	let tag_name;
     	let t0_value = /*getTagNameFromValue*/ ctx[4](/*tag*/ ctx[0].value) + "";
@@ -30950,7 +30951,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(33:0) {#if tag.value !== 'DynamicArtists'}",
     		ctx
@@ -31057,7 +31058,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$4, create_else_block$1];
+    	const if_block_creators = [create_if_block$5, create_else_block$2];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -35460,7 +35461,7 @@ var app = (function () {
     }
 
     // (79:3) {:else}
-    function create_else_block(ctx) {
+    function create_else_block$1(ctx) {
     	let span;
     	let t;
     	let toggleofficon;
@@ -35504,7 +35505,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
+    		id: create_else_block$1.name,
     		type: "else",
     		source: "(79:3) {:else}",
     		ctx
@@ -35514,7 +35515,7 @@ var app = (function () {
     }
 
     // (77:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}
-    function create_if_block$3(ctx) {
+    function create_if_block$4(ctx) {
     	let span;
     	let t;
     	let toggleonicon;
@@ -35558,7 +35559,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(77:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}",
     		ctx
@@ -35592,7 +35593,7 @@ var app = (function () {
     		each_1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
-    	const if_block_creators = [create_if_block$3, create_else_block];
+    	const if_block_creators = [create_if_block$4, create_else_block$1];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -36382,20 +36383,18 @@ var app = (function () {
     		$elementMap.get('img');
     		const albumElement = $elementMap.get('album');
     		const songListItemElement = $elementMap.get('song-list-item');
-    		const songListElement = $elementMap.get('song-list');
+    		$elementMap.get('song-list');
     		const controlBarElement = $elementMap.get('control-bar-svlt');
-    		const tagEditElement = $elementMap.get('tag-edit-svlt');
+    		$elementMap.get('tag-edit-svlt');
     		const artElement = $elementMap.get('art-svlt');
     		if (albumElement) handleAlbumEvent(albumElement, evt.type);
     		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type);
     		if (artElement && controlBarElement) setAlbumBackInView();
+    	} // if (songListElement === undefined && tagEditElement === undefined) {
+    	// 	$selectedSongsStore = []
 
-    		if (songListElement === undefined && tagEditElement === undefined) {
-    			set_store_value(selectedSongsStore, $selectedSongsStore = [], $selectedSongsStore);
-    			set_store_value(activeSongStore, $activeSongStore = undefined, $activeSongStore);
-    		}
-    	}
-
+    	// 	$activeSongStore = undefined
+    	// }
     	function handleKeyboardEvents(evt) {
     		let keyModifier = {
     			ctrl: evt.ctrlKey || evt.metaKey,
@@ -36551,33 +36550,35 @@ var app = (function () {
     }
 
     /* src/layouts/playback/PlaybackLayout.svelte generated by Svelte v3.49.0 */
+
+    const { console: console_1$1 } = globals;
     const file$e = "src/layouts/playback/PlaybackLayout.svelte";
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[13] = list[i];
-    	child_ctx[15] = i;
+    	child_ctx[14] = list[i];
+    	child_ctx[16] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
-    	child_ctx[15] = i;
+    	child_ctx[17] = list[i];
+    	child_ctx[16] = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
-    	child_ctx[15] = i;
+    	child_ctx[17] = list[i];
+    	child_ctx[16] = i;
     	return child_ctx;
     }
 
-    // (108:3) {#each tempTags as tag, index (index)}
+    // (118:3) {#each tempTags as tag, index (index)}
     function create_each_block_2(key_1, ctx) {
     	let td;
-    	let t_value = renameTagName(/*tag*/ ctx[16]) + "";
+    	let t_value = renameTagName(/*tag*/ ctx[17]) + "";
     	let t;
 
     	const block = {
@@ -36586,8 +36587,8 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-cmdk44");
-    			add_location(td, file$e, 108, 4, 4007);
+    			attr_dev(td, "class", "svelte-1tk78er");
+    			add_location(td, file$e, 118, 4, 4104);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -36606,37 +36607,35 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(108:3) {#each tempTags as tag, index (index)}",
+    		source: "(118:3) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (116:4) {#each tempTags as tag, index (index)}
-    function create_each_block_1(key_1, ctx) {
+    // (134:5) {:else}
+    function create_else_block(ctx) {
     	let td;
-    	let t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "";
+    	let t_value = /*song*/ ctx[14][/*tag*/ ctx[17]] + "";
     	let t;
 
     	const block = {
-    		key: key_1,
-    		first: null,
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-cmdk44");
-    			add_location(td, file$e, 116, 5, 4290);
-    			this.first = td;
+    			attr_dev(td, "class", "svelte-1tk78er");
+    			add_location(td, file$e, 134, 6, 4612);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
     			append_dev(td, t);
     		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "")) set_data_dev(t, t_value);
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[14][/*tag*/ ctx[17]] + "")) set_data_dev(t, t_value);
     		},
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(td);
     		}
@@ -36644,16 +36643,171 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1.name,
-    		type: "each",
-    		source: "(116:4) {#each tempTags as tag, index (index)}",
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(134:5) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (114:2) {#each $playbackStore as song, index (song.ID)}
+    // (127:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
+    function create_if_block$3(ctx) {
+    	let td;
+    	let play_button;
+    	let playbutton;
+    	let t0;
+    	let t1_value = /*song*/ ctx[14][/*tag*/ ctx[17]] + "";
+    	let t1;
+    	let current;
+
+    	playbutton = new PlayButton({
+    			props: {
+    				customColor: "#fff",
+    				customSize: "0.75rem"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			td = element("td");
+    			play_button = element("play-button");
+    			create_component(playbutton.$$.fragment);
+    			t0 = space();
+    			t1 = text(t1_value);
+    			set_custom_element_data(play_button, "class", "svelte-1tk78er");
+    			add_location(play_button, file$e, 128, 7, 4463);
+    			attr_dev(td, "class", "svelte-1tk78er");
+    			add_location(td, file$e, 127, 6, 4451);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, td, anchor);
+    			append_dev(td, play_button);
+    			mount_component(playbutton, play_button, null);
+    			append_dev(td, t0);
+    			append_dev(td, t1);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if ((!current || dirty & /*$playbackStore*/ 1) && t1_value !== (t1_value = /*song*/ ctx[14][/*tag*/ ctx[17]] + "")) set_data_dev(t1, t1_value);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(playbutton.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(playbutton.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(td);
+    			destroy_component(playbutton);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(127:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (126:4) {#each tempTags as tag, index (index)}
+    function create_each_block_1(key_1, ctx) {
+    	let first;
+    	let current_block_type_index;
+    	let if_block;
+    	let if_block_anchor;
+    	let current;
+    	const if_block_creators = [create_if_block$3, create_else_block];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*tag*/ ctx[17] === 'Track' && /*$playingSongStore*/ ctx[1].ID === /*song*/ ctx[14].ID) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	const block = {
+    		key: key_1,
+    		first: null,
+    		c: function create() {
+    			first = empty();
+    			if_block.c();
+    			if_block_anchor = empty();
+    			this.first = first;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, first, anchor);
+    			if_blocks[current_block_type_index].m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(first);
+    			if_blocks[current_block_type_index].d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(126:4) {#each tempTags as tag, index (index)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (124:2) {#each $playbackStore as song, index (song.ID)}
     function create_each_block$1(key_1, ctx) {
     	let tr;
     	let each_blocks = [];
@@ -36664,9 +36818,10 @@ var app = (function () {
     	let tr_class_value;
     	let tr_data_song_id_value;
     	let tr_data_index_value;
-    	let each_value_1 = /*tempTags*/ ctx[2];
+    	let current;
+    	let each_value_1 = /*tempTags*/ ctx[3];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*index*/ ctx[15];
+    	const get_key = ctx => /*index*/ ctx[16];
     	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -36688,16 +36843,16 @@ var app = (function () {
     			t0 = space();
     			td = element("td");
     			t1 = space();
-    			attr_dev(td, "class", "filler svelte-cmdk44");
-    			add_location(td, file$e, 119, 4, 4328);
+    			attr_dev(td, "class", "filler svelte-1tk78er");
+    			add_location(td, file$e, 138, 4, 4661);
 
-    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[13].ID)
+    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[14].ID)
     			? 'selected'
-    			: '') + " svelte-cmdk44"));
+    			: '') + " svelte-1tk78er"));
 
-    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[13].ID);
-    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[15]);
-    			add_location(tr, file$e, 114, 3, 4135);
+    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[14].ID);
+    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[16]);
+    			add_location(tr, file$e, 124, 3, 4232);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -36710,30 +36865,49 @@ var app = (function () {
     			append_dev(tr, t0);
     			append_dev(tr, td);
     			append_dev(tr, t1);
+    			current = true;
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*$playbackStore, tempTags*/ 5) {
-    				each_value_1 = /*tempTags*/ ctx[2];
+    			if (dirty & /*$playbackStore, tempTags, $playingSongStore*/ 11) {
+    				each_value_1 = /*tempTags*/ ctx[3];
     				validate_each_argument(each_value_1);
+    				group_outros();
     				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value_1, each_1_lookup, tr, destroy_block, create_each_block_1, t0, get_each_context_1);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value_1, each_1_lookup, tr, outro_and_destroy_block, create_each_block_1, t0, get_each_context_1);
+    				check_outros();
     			}
 
-    			if (dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[1].includes(/*song*/ ctx[13].ID)
+    			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[14].ID)
     			? 'selected'
-    			: '') + " svelte-cmdk44"))) {
+    			: '') + " svelte-1tk78er"))) {
     				attr_dev(tr, "class", tr_class_value);
     			}
 
-    			if (dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[13].ID)) {
+    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[14].ID)) {
     				attr_dev(tr, "data-song-id", tr_data_song_id_value);
     			}
 
-    			if (dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[15])) {
+    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[16])) {
     				attr_dev(tr, "data-index", tr_data_index_value);
     			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value_1.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(tr);
@@ -36748,7 +36922,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(114:2) {#each $playbackStore as song, index (song.ID)}",
+    		source: "(124:2) {#each $playbackStore as song, index (song.ID)}",
     		ctx
     	});
 
@@ -36768,11 +36942,12 @@ var app = (function () {
     	let t2;
     	let each_blocks = [];
     	let each1_lookup = new Map();
+    	let current;
     	let mounted;
     	let dispose;
-    	let each_value_2 = /*tempTags*/ ctx[2];
+    	let each_value_2 = /*tempTags*/ ctx[3];
     	validate_each_argument(each_value_2);
-    	const get_key = ctx => /*index*/ ctx[15];
+    	const get_key = ctx => /*index*/ ctx[16];
     	validate_each_keys(ctx, each_value_2, get_each_context_2, get_key);
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
@@ -36783,7 +36958,7 @@ var app = (function () {
 
     	let each_value = /*$playbackStore*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*song*/ ctx[13].ID;
+    	const get_key_1 = ctx => /*song*/ ctx[14].ID;
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -36812,15 +36987,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(selected_songs_preview, file$e, 102, 0, 3843);
-    			attr_dev(td, "class", "filler svelte-cmdk44");
-    			add_location(td, file$e, 110, 3, 4051);
-    			attr_dev(tr, "class", "table-header svelte-cmdk44");
-    			add_location(tr, file$e, 106, 2, 3935);
-    			attr_dev(table, "class", "svelte-cmdk44");
-    			add_location(table, file$e, 105, 1, 3925);
-    			set_custom_element_data(playback_layout, "class", "svelte-cmdk44");
-    			add_location(playback_layout, file$e, 104, 0, 3871);
+    			add_location(selected_songs_preview, file$e, 112, 0, 3937);
+    			attr_dev(td, "class", "filler svelte-1tk78er");
+    			add_location(td, file$e, 120, 3, 4148);
+    			attr_dev(tr, "class", "table-header svelte-1tk78er");
+    			add_location(tr, file$e, 116, 2, 4032);
+    			attr_dev(table, "class", "svelte-1tk78er");
+    			add_location(table, file$e, 115, 1, 4022);
+    			set_custom_element_data(playback_layout, "class", "svelte-1tk78er");
+    			add_location(playback_layout, file$e, 114, 0, 3965);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -36844,28 +37019,46 @@ var app = (function () {
     				each_blocks[i].m(table, null);
     			}
 
+    			current = true;
+
     			if (!mounted) {
-    				dispose = listen_dev(playback_layout, "dblclick", /*dblclick_handler*/ ctx[4], false, false, false);
+    				dispose = listen_dev(playback_layout, "dblclick", /*dblclick_handler*/ ctx[5], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*renameTagName, tempTags*/ 4) {
-    				each_value_2 = /*tempTags*/ ctx[2];
+    			if (dirty & /*renameTagName, tempTags*/ 8) {
+    				each_value_2 = /*tempTags*/ ctx[3];
     				validate_each_argument(each_value_2);
     				validate_each_keys(ctx, each_value_2, get_each_context_2, get_key);
     				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_2, each0_lookup, tr, destroy_block, create_each_block_2, t1, get_each_context_2);
     			}
 
-    			if (dirty & /*selectedSongsId, $playbackStore, tempTags*/ 7) {
+    			if (dirty & /*selectedSongsId, $playbackStore, tempTags, $playingSongStore*/ 15) {
     				each_value = /*$playbackStore*/ ctx[0];
     				validate_each_argument(each_value);
+    				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, table, destroy_block, create_each_block$1, null, get_each_context$1);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, table, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
+    				check_outros();
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(selected_songs_preview);
     			if (detaching) detach_dev(t0);
@@ -36907,8 +37100,11 @@ var app = (function () {
 
     function instance$h($$self, $$props, $$invalidate) {
     	let $playbackStore;
+    	let $playingSongStore;
     	validate_store(playbackStore, 'playbackStore');
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(0, $playbackStore = $$value));
+    	validate_store(playingSongStore, 'playingSongStore');
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(1, $playingSongStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlaybackLayout', slots, []);
     	let selectedSongsId = [];
@@ -36931,22 +37127,30 @@ var app = (function () {
 
     	function onSelect(evt) {
     		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-    			selectOnlyOne(evt);
+    			deselectAll('onSelect');
+
+    			if (evt.item) {
+    				Sortable.utils.select(evt.item);
+    			}
     		}
     	}
 
     	function onDeselect(evt) {
     		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-    			selectOnlyOne(evt);
+    			deselectAll('onDeselect');
+
+    			if (evt.item) {
+    				Sortable.utils.select(evt.item);
+    			}
     		}
     	}
 
-    	function selectOnlyOne(evt) {
+    	function deselectAll(from) {
+    		console.log(from);
+
     		document.querySelectorAll('table tr.selected').forEach(el => {
     			Sortable.utils.deselect(el);
     		});
-
-    		Sortable.utils.select(evt.item);
     	}
 
     	function onDragEnd(evt) {
@@ -36961,26 +37165,22 @@ var app = (function () {
     		set_store_value(playbackStore, $playbackStore = newOrder, $playbackStore);
     	}
 
-    	function playSong(evt) {
-    		var _a, _b;
-    		let listElement = getClosestElementFn(evt.target, 'tr');
-    		if (listElement === undefined || listElement === null) return;
+    	function playSongFoo(evt) {
+    		let clickedElement = getClosestElementFn(evt.target, 'tr');
+    		console.log(clickedElement);
+    	} /* 		let listElement = getClosestElementFn(evt.target as HTMLElement, 'tr')
 
-    		let songId = (_a = listElement === null || listElement === void 0
-    		? void 0
-    		: listElement.dataset) === null || _a === void 0
-    		? void 0
-    		: _a.songId;
+    if (listElement === undefined || listElement === null) return
 
-    		if (songId === undefined || songId === null) return;
+    let songId = listElement?.dataset?.songId
 
-    		let songSourceFile = (_b = $playbackStore.find(song => song.ID === Number(songId))) === null || _b === void 0
-    		? void 0
-    		: _b.SourceFile;
+    if (songId === undefined || songId === null) return
 
-    		if (songSourceFile === undefined || songSourceFile === null) return;
-    		songToPlayUrlStore.set([songSourceFile, { playNow: true }]);
-    	}
+    let songSourceFile = $playbackStore.find(song => song.ID === Number(songId))?.SourceFile
+
+    if (songSourceFile === undefined || songSourceFile === null) return
+
+    songToPlayUrlStore.set([songSourceFile, { playNow: true }]) */
 
     	function calculateTableFillerWidth() {
     		let windowWidth = window.innerWidth;
@@ -37019,10 +37219,10 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<PlaybackLayout> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<PlaybackLayout> was created with unknown prop '${key}'`);
     	});
 
-    	const dblclick_handler = evt => playSong(evt);
+    	const dblclick_handler = evt => playSongFoo(evt);
 
     	$$self.$capture_state = () => ({
     		onDestroy,
@@ -37032,25 +37232,27 @@ var app = (function () {
     		SortableService,
     		Sortable,
     		playbackStore,
-    		songToPlayUrlStore,
+    		playingSongStore,
+    		PlayButton,
     		selectedSongsId,
     		tempTags,
     		handleWindowResizeRunning,
     		createSortableList,
     		onSelect,
     		onDeselect,
-    		selectOnlyOne,
+    		deselectAll,
     		onDragEnd,
-    		playSong,
+    		playSongFoo,
     		calculateTableFillerWidth,
     		renameTagName,
     		handleWindowResize,
-    		$playbackStore
+    		$playbackStore,
+    		$playingSongStore
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('selectedSongsId' in $$props) $$invalidate(1, selectedSongsId = $$props.selectedSongsId);
-    		if ('tempTags' in $$props) $$invalidate(2, tempTags = $$props.tempTags);
+    		if ('selectedSongsId' in $$props) $$invalidate(2, selectedSongsId = $$props.selectedSongsId);
+    		if ('tempTags' in $$props) $$invalidate(3, tempTags = $$props.tempTags);
     		if ('handleWindowResizeRunning' in $$props) handleWindowResizeRunning = $$props.handleWindowResizeRunning;
     	};
 
@@ -37066,7 +37268,14 @@ var app = (function () {
     		}
     	};
 
-    	return [$playbackStore, selectedSongsId, tempTags, playSong, dblclick_handler];
+    	return [
+    		$playbackStore,
+    		$playingSongStore,
+    		selectedSongsId,
+    		tempTags,
+    		playSongFoo,
+    		dblclick_handler
+    	];
     }
 
     class PlaybackLayout extends SvelteComponentDev {

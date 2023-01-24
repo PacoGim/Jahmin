@@ -19,6 +19,9 @@ let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
 })
 
 export default function () {
+
+	// console.log('Hello')
+
 	let playbackStoreValue: SongType[]
 	let songPlayingLocal: SongType = undefined
 

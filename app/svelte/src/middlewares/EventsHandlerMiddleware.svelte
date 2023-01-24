@@ -48,10 +48,10 @@
 
 		if (artElement && controlBarElement) setAlbumBackInView()
 
-		if (songListElement === undefined && tagEditElement === undefined) {
-			$selectedSongsStore = []
-			$activeSongStore = undefined
-		}
+		// if (songListElement === undefined && tagEditElement === undefined) {
+		// 	$selectedSongsStore = []
+		// 	$activeSongStore = undefined
+		// }
 	}
 
 	function handleKeyboardEvents(evt: KeyboardEvent) {
