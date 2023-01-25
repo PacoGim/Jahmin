@@ -6,9 +6,10 @@
 
 	import Sortable from 'sortablejs'
 
-	import { layoutToShow, playbackStore, playingSongStore } from '../../stores/main.store'
+	import { config, playbackStore, playingSongStore } from '../../stores/main.store'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
+  import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
 
 	$: if ($playbackStore.length > 0) {
 		createSortableList()
@@ -29,9 +30,13 @@
 			multiDrag: true,
 			animation: 150,
 			selectedClass: 'selected',
+			filter: '.static',
 			onEnd: onDragEnd,
 			onSelect: onSelectDeselect,
-			onDeselect: onSelectDeselect
+			onDeselect: onSelectDeselect,
+			onMove: function (e) {
+				return e.related.className.indexOf('static') === -1
+			}
 		})
 	}
 
@@ -117,6 +122,12 @@
 		}, 125)
 	}
 
+	function onTableHeaderClick(evt: MouseEvent) {
+		let tdElement = evt.composedPath().filter((element: HTMLElement) => element.tagName === 'TD')[0] as HTMLElement
+
+		$playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.sortOrder)
+	}
+
 	onMount(() => {
 		createSortableList()
 
@@ -132,7 +143,7 @@
 
 <playback-layout on:dblclick={evt => playSongFoo(evt)}>
 	<table>
-		<tr class="table-header">
+		<tr class="table-header static" on:click={onTableHeaderClick}>
 			{#each tempTags as tag, index (index)}
 				<td>{renameTagName(tag)}</td>
 			{/each}
@@ -170,9 +181,18 @@
 		justify-content: center;
 	}
 
+	playback-layout table {
+		border-spacing: 0px;
+	}
+
 	table tr.table-header {
-		pointer-events: none;
+		/* pointer-events: none; */
 		font-variation-settings: 'wght' 700;
+	}
+
+	table tr.table-header td {
+		pointer-events: all;
+		cursor: pointer;
 	}
 	table tr:not(.table-header) {
 		cursor: pointer;

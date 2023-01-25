@@ -116,7 +116,9 @@ var app = (function () {
         target.insertBefore(node, anchor || null);
     }
     function detach(node) {
-        node.parentNode.removeChild(node);
+        if (node.parentNode) {
+            node.parentNode.removeChild(node);
+        }
     }
     function destroy_each(iterations, detaching) {
         for (let i = 0; i < iterations.length; i += 1) {
@@ -203,12 +205,41 @@ var app = (function () {
             throw new Error('Function called outside component initialization');
         return current_component;
     }
+    /**
+     * The `onMount` function schedules a callback to run as soon as the component has been mounted to the DOM.
+     * It must be called during the component's initialisation (but doesn't need to live *inside* the component;
+     * it can be called from an external module).
+     *
+     * `onMount` does not run inside a [server-side component](/docs#run-time-server-side-component-api).
+     *
+     * https://svelte.dev/docs#run-time-svelte-onmount
+     */
     function onMount(fn) {
         get_current_component().$$.on_mount.push(fn);
     }
+    /**
+     * Schedules a callback to run immediately before the component is unmounted.
+     *
+     * Out of `onMount`, `beforeUpdate`, `afterUpdate` and `onDestroy`, this is the
+     * only one that runs inside a server-side component.
+     *
+     * https://svelte.dev/docs#run-time-svelte-ondestroy
+     */
     function onDestroy(fn) {
         get_current_component().$$.on_destroy.push(fn);
     }
+    /**
+     * Creates an event dispatcher that can be used to dispatch [component events](/docs#template-syntax-component-directives-on-eventname).
+     * Event dispatchers are functions that can take two arguments: `name` and `detail`.
+     *
+     * Component events created with `createEventDispatcher` create a
+     * [CustomEvent](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent).
+     * These events do not [bubble](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#Event_bubbling_and_capture).
+     * The `detail` argument corresponds to the [CustomEvent.detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail)
+     * property and can contain any type of data.
+     *
+     * https://svelte.dev/docs#run-time-svelte-createeventdispatcher
+     */
     function createEventDispatcher() {
         const component = get_current_component();
         return (type, detail, { cancelable = false } = {}) => {
@@ -262,15 +293,29 @@ var app = (function () {
     const seen_callbacks = new Set();
     let flushidx = 0; // Do *not* move this inside the flush() function
     function flush() {
+        // Do not reenter flush while dirty components are updated, as this can
+        // result in an infinite loop. Instead, let the inner flush handle it.
+        // Reentrancy is ok afterwards for bindings etc.
+        if (flushidx !== 0) {
+            return;
+        }
         const saved_component = current_component;
         do {
             // first, call beforeUpdate functions
             // and update components
-            while (flushidx < dirty_components.length) {
-                const component = dirty_components[flushidx];
-                flushidx++;
-                set_current_component(component);
-                update(component.$$);
+            try {
+                while (flushidx < dirty_components.length) {
+                    const component = dirty_components[flushidx];
+                    flushidx++;
+                    set_current_component(component);
+                    update(component.$$);
+                }
+            }
+            catch (e) {
+                // reset dirty state to not end up in a deadlocked state and then rethrow
+                dirty_components.length = 0;
+                flushidx = 0;
+                throw e;
             }
             set_current_component(null);
             dirty_components.length = 0;
@@ -452,14 +497,17 @@ var app = (function () {
         block && block.c();
     }
     function mount_component(component, target, anchor, customElement) {
-        const { fragment, on_mount, on_destroy, after_update } = component.$$;
+        const { fragment, after_update } = component.$$;
         fragment && fragment.m(target, anchor);
         if (!customElement) {
             // onMount happens before the initial afterUpdate
             add_render_callback(() => {
-                const new_on_destroy = on_mount.map(run).filter(is_function);
-                if (on_destroy) {
-                    on_destroy.push(...new_on_destroy);
+                const new_on_destroy = component.$$.on_mount.map(run).filter(is_function);
+                // if the component was destroyed immediately
+                // it will update the `$$.on_destroy` reference to `null`.
+                // the destructured on_destroy may still reference to the old array
+                if (component.$$.on_destroy) {
+                    component.$$.on_destroy.push(...new_on_destroy);
                 }
                 else {
                     // Edge case - component was destroyed immediately,
@@ -495,7 +543,7 @@ var app = (function () {
         set_current_component(component);
         const $$ = component.$$ = {
             fragment: null,
-            ctx: null,
+            ctx: [],
             // state
             props,
             update: noop,
@@ -560,6 +608,9 @@ var app = (function () {
             this.$destroy = noop;
         }
         $on(type, callback) {
+            if (!is_function(callback)) {
+                return noop;
+            }
             const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
             callbacks.push(callback);
             return () => {
@@ -578,7 +629,7 @@ var app = (function () {
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.49.0' }, detail), { bubbles: true }));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.55.1' }, detail), { bubbles: true }));
     }
     function append_dev(target, node) {
         dispatch_dev('SvelteDOMInsert', { target, node });
@@ -639,6 +690,25 @@ var app = (function () {
             }
         }
     }
+    function construct_svelte_component_dev(component, props) {
+        const error_message = 'this={...} of <svelte:component> should specify a Svelte component.';
+        try {
+            const instance = new component(props);
+            if (!instance.$$ || !instance.$set || !instance.$on || !instance.$destroy) {
+                throw new Error(error_message);
+            }
+            return instance;
+        }
+        catch (err) {
+            const { message } = err;
+            if (typeof message === 'string' && message.indexOf('is not a constructor') !== -1) {
+                throw new Error(error_message);
+            }
+            else {
+                throw err;
+            }
+        }
+    }
     /**
      * Base class for Svelte components with some minor dev-enhancements. Used when dev=true.
      */
@@ -665,7 +735,7 @@ var app = (function () {
      *
      * By David Fahlander, david.fahlander@gmail.com
      *
-     * Version 3.2.2, Wed Apr 27 2022
+     * Version 3.2.3, Mon Jan 23 2023
      *
      * https://dexie.org
      *
@@ -1903,7 +1973,7 @@ var app = (function () {
         }
     }
 
-    const DEXIE_VERSION = '3.2.2';
+    const DEXIE_VERSION = '3.2.3';
     const maxString = String.fromCharCode(65535);
     const minKey = -Infinity;
     const INVALID_KEY_ARGUMENT = "Invalid key provided. Keys must be of type string, number, Date or Array<string | number | Date>.";
@@ -5698,6 +5768,9 @@ var app = (function () {
 
     if (typeof BroadcastChannel !== 'undefined') {
         const bc = new BroadcastChannel(STORAGE_MUTATED_DOM_EVENT_NAME);
+        if (typeof bc.unref === 'function') {
+            bc.unref();
+        }
         globalEvents(DEXIE_STORAGE_MUTATED_EVENT_NAME, (changedParts) => {
             if (!propagatingLocally) {
                 bc.postMessage(changedParts);
@@ -5757,10 +5830,11 @@ var app = (function () {
     	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
     }
 
-    function createCommonjsModule(fn) {
-      var module = { exports: {} };
-    	return fn(module, module.exports), module.exports;
-    }
+    var iziToastExports = {};
+    var iziToast$1 = {
+      get exports(){ return iziToastExports; },
+      set exports(v){ iziToastExports = v; },
+    };
 
     /*
     * iziToast | v1.4.0
@@ -5768,482 +5842,539 @@ var app = (function () {
     * by Marcelo Dolce.
     */
 
-    var iziToast = createCommonjsModule(function (module, exports) {
-    (function (root, factory) {
-    	{
-    		module.exports = factory(root);
-    	}
-    })(typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : window || commonjsGlobal.window || commonjsGlobal.global, function (root) {
-
-    	//
-    	// Variables
-    	//
-    	var $iziToast = {},
-    		PLUGIN_NAME = 'iziToast';
-    		document.querySelector('body');
-    		var ISMOBILE = (/Mobi/.test(navigator.userAgent)) ? true : false,
-    		ISCHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor),
-    		ISFIREFOX = typeof InstallTrigger !== 'undefined',
-    		ACCEPTSTOUCH = 'ontouchstart' in document.documentElement,
-    		POSITIONS = ['bottomRight','bottomLeft','bottomCenter','topRight','topLeft','topCenter','center'],
-    		THEMES = {
-    			info: {
-    				color: 'blue',
-    				icon: 'ico-info'
-    			},
-    			success: {
-    				color: 'green',
-    				icon: 'ico-success'
-    			},
-    			warning: {
-    				color: 'orange',
-    				icon: 'ico-warning'
-    			},
-    			error: {
-    				color: 'red',
-    				icon: 'ico-error'
-    			},
-    			question: {
-    				color: 'yellow',
-    				icon: 'ico-question'
-    			}
-    		},
-    		MOBILEWIDTH = 568,
-    		CONFIG = {};
-
-    	$iziToast.children = {};
-
-    	// Default settings
-    	var defaults = {
-    		id: null, 
-    		class: '',
-    		title: '',
-    		titleColor: '',
-    		titleSize: '',
-    		titleLineHeight: '',
-    		message: '',
-    		messageColor: '',
-    		messageSize: '',
-    		messageLineHeight: '',
-    		backgroundColor: '',
-    		theme: 'light', // dark
-    		color: '', // blue, red, green, yellow
-    		icon: '',
-    		iconText: '',
-    		iconColor: '',
-    		iconUrl: null,
-    		image: '',
-    		imageWidth: 50,
-    		maxWidth: null,
-    		zindex: null,
-    		layout: 1,
-    		balloon: false,
-    		close: true,
-    		closeOnEscape: false,
-    		closeOnClick: false,
-    		displayMode: 0,
-    		position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter, center
-    		target: '',
-    		targetFirst: true,
-    		timeout: 5000,
-    		rtl: false,
-    		animateInside: true,
-    		drag: true,
-    		pauseOnHover: true,
-    		resetOnHover: false,
-    		progressBar: true,
-    		progressBarColor: '',
-    		progressBarEasing: 'linear',
-    		overlay: false,
-    		overlayClose: false,
-    		overlayColor: 'rgba(0, 0, 0, 0.6)',
-    		transitionIn: 'fadeInUp', // bounceInLeft, bounceInRight, bounceInUp, bounceInDown, fadeIn, fadeInDown, fadeInUp, fadeInLeft, fadeInRight, flipInX
-    		transitionOut: 'fadeOut', // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
-    		transitionInMobile: 'fadeInUp',
-    		transitionOutMobile: 'fadeOutDown',
-    		buttons: {},
-    		inputs: {},
-    		onOpening: function () {},
-    		onOpened: function () {},
-    		onClosing: function () {},
-    		onClosed: function () {}
-    	};
-
-    	//
-    	// Methods
-    	//
-
-
-    	/**
-    	 * Polyfill for remove() method
-    	 */
-    	if(!('remove' in Element.prototype)) {
-    	    Element.prototype.remove = function() {
-    	        if(this.parentNode) {
-    	            this.parentNode.removeChild(this);
-    	        }
-    	    };
-    	}
-
-    	/*
-         * Polyfill for CustomEvent for IE >= 9
-         * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent#Polyfill
-         */
-        if(typeof window.CustomEvent !== 'function') {
-            var CustomEventPolyfill = function (event, params) {
-                params = params || { bubbles: false, cancelable: false, detail: undefined };
-                var evt = document.createEvent('CustomEvent');
-                evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-                return evt;
-            };
-
-            CustomEventPolyfill.prototype = window.Event.prototype;
-
-            window.CustomEvent = CustomEventPolyfill;
-        }
-
-    	/**
-    	 * A simple forEach() implementation for Arrays, Objects and NodeLists
-    	 * @private
-    	 * @param {Array|Object|NodeList} collection Collection of items to iterate
-    	 * @param {Function} callback Callback function for each iteration
-    	 * @param {Array|Object|NodeList} scope Object/NodeList/Array that forEach is iterating over (aka `this`)
-    	 */
-    	var forEach = function (collection, callback, scope) {
-    		if(Object.prototype.toString.call(collection) === '[object Object]') {
-    			for (var prop in collection) {
-    				if(Object.prototype.hasOwnProperty.call(collection, prop)) {
-    					callback.call(scope, collection[prop], prop, collection);
-    				}
-    			}
-    		} else {
-    			if(collection){
-    				for (var i = 0, len = collection.length; i < len; i++) {
-    					callback.call(scope, collection[i], i, collection);
-    				}
-    			}
+    (function (module, exports) {
+    	(function (root, factory) {
+    		{
+    			module.exports = factory(root);
     		}
-    	};
+    	})(typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : window || commonjsGlobal.window || commonjsGlobal.global, function (root) {
 
-    	/**
-    	 * Merge defaults with user options
-    	 * @private
-    	 * @param {Object} defaults Default settings
-    	 * @param {Object} options User options
-    	 * @returns {Object} Merged values of defaults and options
-    	 */
-    	var extend = function (defaults, options) {
-    		var extended = {};
-    		forEach(defaults, function (value, prop) {
-    			extended[prop] = defaults[prop];
-    		});
-    		forEach(options, function (value, prop) {
-    			extended[prop] = options[prop];
-    		});
-    		return extended;
-    	};
-
-
-    	/**
-    	 * Create a fragment DOM elements
-    	 * @private
-    	 */
-    	var createFragElem = function(htmlStr) {
-    		var frag = document.createDocumentFragment(),
-    			temp = document.createElement('div');
-    		temp.innerHTML = htmlStr;
-    		while (temp.firstChild) {
-    			frag.appendChild(temp.firstChild);
-    		}
-    		return frag;
-    	};
-
-
-    	/**
-    	 * Generate new ID
-    	 * @private
-    	 */
-    	var generateId = function(params) {
-    		var newId = btoa(encodeURIComponent(params));
-    		return newId.replace(/=/g, "");
-    	};
-
-
-    	/**
-    	 * Check if is a color
-    	 * @private
-    	 */
-    	var isColor = function(color){
-    		if( color.substring(0,1) == '#' || color.substring(0,3) == 'rgb' || color.substring(0,3) == 'hsl' ){
-    			return true;
-    		} else {
-    			return false;
-    		}
-    	};
-
-
-    	/**
-    	 * Check if is a Base64 string
-    	 * @private
-    	 */
-    	var isBase64 = function(str) {
-    	    try {
-    	        return btoa(atob(str)) == str;
-    	    } catch (err) {
-    	        return false;
-    	    }
-    	};
-
-
-    	/**
-    	 * Drag method of toasts
-    	 * @private
-    	 */
-    	var drag = function() {
-    	    
-    	    return {
-    	        move: function(toast, instance, settings, xpos) {
-
-    	        	var opacity,
-    	        		opacityRange = 0.3,
-    	        		distance = 180;
-    	            
-    	            if(xpos !== 0){
-    	            	
-    	            	toast.classList.add(PLUGIN_NAME+'-dragged');
-
-    	            	toast.style.transform = 'translateX('+xpos + 'px)';
-
-    		            if(xpos > 0){
-    		            	opacity = (distance-xpos) / distance;
-    		            	if(opacity < opacityRange){
-    							instance.hide(extend(settings, { transitionOut: 'fadeOutRight', transitionOutMobile: 'fadeOutRight' }), toast, 'drag');
-    						}
-    		            } else {
-    		            	opacity = (distance+xpos) / distance;
-    		            	if(opacity < opacityRange){
-    							instance.hide(extend(settings, { transitionOut: 'fadeOutLeft', transitionOutMobile: 'fadeOutLeft' }), toast, 'drag');
-    						}
-    		            }
-    					toast.style.opacity = opacity;
-    			
-    					if(opacity < opacityRange){
-
-    						if(ISCHROME || ISFIREFOX)
-    							toast.style.left = xpos+'px';
-
-    						toast.parentNode.style.opacity = opacityRange;
-
-    		                this.stopMoving(toast, null);
-    					}
-    	            }
-
-    				
-    	        },
-    	        startMoving: function(toast, instance, settings, e) {
-
-    	            e = e || window.event;
-    	            var posX = ((ACCEPTSTOUCH) ? e.touches[0].clientX : e.clientX),
-    	                toastLeft = toast.style.transform.replace('px)', '');
-    	                toastLeft = toastLeft.replace('translateX(', '');
-    	            var offsetX = posX - toastLeft;
-
-    				if(settings.transitionIn){
-    					toast.classList.remove(settings.transitionIn);
+    		//
+    		// Variables
+    		//
+    		var $iziToast = {},
+    			PLUGIN_NAME = 'iziToast';
+    			document.querySelector('body');
+    			var ISMOBILE = (/Mobi/.test(navigator.userAgent)) ? true : false,
+    			ISCHROME = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor),
+    			ISFIREFOX = typeof InstallTrigger !== 'undefined',
+    			ACCEPTSTOUCH = 'ontouchstart' in document.documentElement,
+    			POSITIONS = ['bottomRight','bottomLeft','bottomCenter','topRight','topLeft','topCenter','center'],
+    			THEMES = {
+    				info: {
+    					color: 'blue',
+    					icon: 'ico-info'
+    				},
+    				success: {
+    					color: 'green',
+    					icon: 'ico-success'
+    				},
+    				warning: {
+    					color: 'orange',
+    					icon: 'ico-warning'
+    				},
+    				error: {
+    					color: 'red',
+    					icon: 'ico-error'
+    				},
+    				question: {
+    					color: 'yellow',
+    					icon: 'ico-question'
     				}
-    				if(settings.transitionInMobile){
-    					toast.classList.remove(settings.transitionInMobile);
-    				}
-    				toast.style.transition = '';
+    			},
+    			MOBILEWIDTH = 568,
+    			CONFIG = {};
 
-    	            if(ACCEPTSTOUCH) {
-    	                document.ontouchmove = function(e) {
-    	                    e.preventDefault();
-    	                    e = e || window.event;
-    	                    var posX = e.touches[0].clientX,
-    	                        finalX = posX - offsetX;
-                            drag.move(toast, instance, settings, finalX);
-    	                };
-    	            } else {
-    	                document.onmousemove = function(e) {
-    	                    e.preventDefault();
-    	                    e = e || window.event;
-    	                    var posX = e.clientX,
-    	                        finalX = posX - offsetX;
-                            drag.move(toast, instance, settings, finalX);
-    	                };
-    	            }
+    		$iziToast.children = {};
 
-    	        },
-    	        stopMoving: function(toast, e) {
-
-    	            if(ACCEPTSTOUCH) {
-    	                document.ontouchmove = function() {};
-    	            } else {
-    	            	document.onmousemove = function() {};
-    	            }
-
-    				toast.style.opacity = '';
-    				toast.style.transform = '';
-
-    	            if(toast.classList.contains(PLUGIN_NAME+'-dragged')){
-    	            	
-    	            	toast.classList.remove(PLUGIN_NAME+'-dragged');
-
-    					toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-    					setTimeout(function() {
-    						toast.style.transition = '';
-    					}, 400);
-    	            }
-
-    	        }
-    	    };
-
-    	}();
-
-
-
-
-
-    	$iziToast.setSetting = function (ref, option, value) {
-
-    		$iziToast.children[ref][option] = value;
-
-    	};
-
-
-    	$iziToast.getSetting = function (ref, option) {
-
-    		return $iziToast.children[ref][option];
-
-    	};
-
-
-    	/**
-    	 * Destroy the current initialization.
-    	 * @public
-    	 */
-    	$iziToast.destroy = function () {
-
-    		forEach(document.querySelectorAll('.'+PLUGIN_NAME+'-overlay'), function(element, index) {
-    			element.remove();
-    		});
-
-    		forEach(document.querySelectorAll('.'+PLUGIN_NAME+'-wrapper'), function(element, index) {
-    			element.remove();
-    		});
-
-    		forEach(document.querySelectorAll('.'+PLUGIN_NAME), function(element, index) {
-    			element.remove();
-    		});
-
-    		this.children = {};
-
-    		// Remove event listeners
-    		document.removeEventListener(PLUGIN_NAME+'-opened', {}, false);
-    		document.removeEventListener(PLUGIN_NAME+'-opening', {}, false);
-    		document.removeEventListener(PLUGIN_NAME+'-closing', {}, false);
-    		document.removeEventListener(PLUGIN_NAME+'-closed', {}, false);
-    		document.removeEventListener('keyup', {}, false);
-
-    		// Reset variables
-    		CONFIG = {};
-    	};
-
-    	/**
-    	 * Initialize Plugin
-    	 * @public
-    	 * @param {Object} options User settings
-    	 */
-    	$iziToast.settings = function (options) {
-
-    		// Destroy any existing initializations
-    		$iziToast.destroy();
-
-    		CONFIG = options;
-    		defaults = extend(defaults, options || {});
-    	};
-
-
-    	/**
-    	 * Building themes functions.
-    	 * @public
-    	 * @param {Object} options User settings
-    	 */
-    	forEach(THEMES, function (theme, name) {
-
-    		$iziToast[name] = function (options) {
-
-    			var settings = extend(CONFIG, options || {});
-    			settings = extend(theme, settings || {});
-
-    			this.show(settings);
+    		// Default settings
+    		var defaults = {
+    			id: null, 
+    			class: '',
+    			title: '',
+    			titleColor: '',
+    			titleSize: '',
+    			titleLineHeight: '',
+    			message: '',
+    			messageColor: '',
+    			messageSize: '',
+    			messageLineHeight: '',
+    			backgroundColor: '',
+    			theme: 'light', // dark
+    			color: '', // blue, red, green, yellow
+    			icon: '',
+    			iconText: '',
+    			iconColor: '',
+    			iconUrl: null,
+    			image: '',
+    			imageWidth: 50,
+    			maxWidth: null,
+    			zindex: null,
+    			layout: 1,
+    			balloon: false,
+    			close: true,
+    			closeOnEscape: false,
+    			closeOnClick: false,
+    			displayMode: 0,
+    			position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter, center
+    			target: '',
+    			targetFirst: true,
+    			timeout: 5000,
+    			rtl: false,
+    			animateInside: true,
+    			drag: true,
+    			pauseOnHover: true,
+    			resetOnHover: false,
+    			progressBar: true,
+    			progressBarColor: '',
+    			progressBarEasing: 'linear',
+    			overlay: false,
+    			overlayClose: false,
+    			overlayColor: 'rgba(0, 0, 0, 0.6)',
+    			transitionIn: 'fadeInUp', // bounceInLeft, bounceInRight, bounceInUp, bounceInDown, fadeIn, fadeInDown, fadeInUp, fadeInLeft, fadeInRight, flipInX
+    			transitionOut: 'fadeOut', // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
+    			transitionInMobile: 'fadeInUp',
+    			transitionOutMobile: 'fadeOutDown',
+    			buttons: {},
+    			inputs: {},
+    			onOpening: function () {},
+    			onOpened: function () {},
+    			onClosing: function () {},
+    			onClosed: function () {}
     		};
 
-    	});
+    		//
+    		// Methods
+    		//
 
 
-    	/**
-    	 * Do the calculation to move the progress bar
-    	 * @private
-    	 */
-    	$iziToast.progress = function (options, $toast, callback) {
+    		/**
+    		 * Polyfill for remove() method
+    		 */
+    		if(!('remove' in Element.prototype)) {
+    		    Element.prototype.remove = function() {
+    		        if(this.parentNode) {
+    		            this.parentNode.removeChild(this);
+    		        }
+    		    };
+    		}
 
+    		/*
+    	     * Polyfill for CustomEvent for IE >= 9
+    	     * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent#Polyfill
+    	     */
+    	    if(typeof window.CustomEvent !== 'function') {
+    	        var CustomEventPolyfill = function (event, params) {
+    	            params = params || { bubbles: false, cancelable: false, detail: undefined };
+    	            var evt = document.createEvent('CustomEvent');
+    	            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+    	            return evt;
+    	        };
 
-    		var that = this,
-    			ref = $toast.getAttribute('data-iziToast-ref'),
-    			settings = extend(this.children[ref], options || {}),
-    			$elem = $toast.querySelector('.'+PLUGIN_NAME+'-progressbar div');
+    	        CustomEventPolyfill.prototype = window.Event.prototype;
 
-    	    return {
-    	        start: function() {
+    	        window.CustomEvent = CustomEventPolyfill;
+    	    }
 
-    	        	if(typeof settings.time.REMAINING == 'undefined'){
-
-    	        		$toast.classList.remove(PLUGIN_NAME+'-reseted');
-
-    		        	if($elem !== null){
-    						$elem.style.transition = 'width '+ settings.timeout +'ms '+settings.progressBarEasing;
-    						$elem.style.width = '0%';
+    		/**
+    		 * A simple forEach() implementation for Arrays, Objects and NodeLists
+    		 * @private
+    		 * @param {Array|Object|NodeList} collection Collection of items to iterate
+    		 * @param {Function} callback Callback function for each iteration
+    		 * @param {Array|Object|NodeList} scope Object/NodeList/Array that forEach is iterating over (aka `this`)
+    		 */
+    		var forEach = function (collection, callback, scope) {
+    			if(Object.prototype.toString.call(collection) === '[object Object]') {
+    				for (var prop in collection) {
+    					if(Object.prototype.hasOwnProperty.call(collection, prop)) {
+    						callback.call(scope, collection[prop], prop, collection);
     					}
+    				}
+    			} else {
+    				if(collection){
+    					for (var i = 0, len = collection.length; i < len; i++) {
+    						callback.call(scope, collection[i], i, collection);
+    					}
+    				}
+    			}
+    		};
 
-    		        	settings.time.START = new Date().getTime();
-    		        	settings.time.END = settings.time.START + settings.timeout;
-    					settings.time.TIMER = setTimeout(function() {
+    		/**
+    		 * Merge defaults with user options
+    		 * @private
+    		 * @param {Object} defaults Default settings
+    		 * @param {Object} options User options
+    		 * @returns {Object} Merged values of defaults and options
+    		 */
+    		var extend = function (defaults, options) {
+    			var extended = {};
+    			forEach(defaults, function (value, prop) {
+    				extended[prop] = defaults[prop];
+    			});
+    			forEach(options, function (value, prop) {
+    				extended[prop] = options[prop];
+    			});
+    			return extended;
+    		};
+
+
+    		/**
+    		 * Create a fragment DOM elements
+    		 * @private
+    		 */
+    		var createFragElem = function(htmlStr) {
+    			var frag = document.createDocumentFragment(),
+    				temp = document.createElement('div');
+    			temp.innerHTML = htmlStr;
+    			while (temp.firstChild) {
+    				frag.appendChild(temp.firstChild);
+    			}
+    			return frag;
+    		};
+
+
+    		/**
+    		 * Generate new ID
+    		 * @private
+    		 */
+    		var generateId = function(params) {
+    			var newId = btoa(encodeURIComponent(params));
+    			return newId.replace(/=/g, "");
+    		};
+
+
+    		/**
+    		 * Check if is a color
+    		 * @private
+    		 */
+    		var isColor = function(color){
+    			if( color.substring(0,1) == '#' || color.substring(0,3) == 'rgb' || color.substring(0,3) == 'hsl' ){
+    				return true;
+    			} else {
+    				return false;
+    			}
+    		};
+
+
+    		/**
+    		 * Check if is a Base64 string
+    		 * @private
+    		 */
+    		var isBase64 = function(str) {
+    		    try {
+    		        return btoa(atob(str)) == str;
+    		    } catch (err) {
+    		        return false;
+    		    }
+    		};
+
+
+    		/**
+    		 * Drag method of toasts
+    		 * @private
+    		 */
+    		var drag = function() {
+    		    
+    		    return {
+    		        move: function(toast, instance, settings, xpos) {
+
+    		        	var opacity,
+    		        		opacityRange = 0.3,
+    		        		distance = 180;
+    		            
+    		            if(xpos !== 0){
+    		            	
+    		            	toast.classList.add(PLUGIN_NAME+'-dragged');
+
+    		            	toast.style.transform = 'translateX('+xpos + 'px)';
+
+    			            if(xpos > 0){
+    			            	opacity = (distance-xpos) / distance;
+    			            	if(opacity < opacityRange){
+    								instance.hide(extend(settings, { transitionOut: 'fadeOutRight', transitionOutMobile: 'fadeOutRight' }), toast, 'drag');
+    							}
+    			            } else {
+    			            	opacity = (distance+xpos) / distance;
+    			            	if(opacity < opacityRange){
+    								instance.hide(extend(settings, { transitionOut: 'fadeOutLeft', transitionOutMobile: 'fadeOutLeft' }), toast, 'drag');
+    							}
+    			            }
+    						toast.style.opacity = opacity;
+    				
+    						if(opacity < opacityRange){
+
+    							if(ISCHROME || ISFIREFOX)
+    								toast.style.left = xpos+'px';
+
+    							toast.parentNode.style.opacity = opacityRange;
+
+    			                this.stopMoving(toast, null);
+    						}
+    		            }
+
+    					
+    		        },
+    		        startMoving: function(toast, instance, settings, e) {
+
+    		            e = e || window.event;
+    		            var posX = ((ACCEPTSTOUCH) ? e.touches[0].clientX : e.clientX),
+    		                toastLeft = toast.style.transform.replace('px)', '');
+    		                toastLeft = toastLeft.replace('translateX(', '');
+    		            var offsetX = posX - toastLeft;
+
+    					if(settings.transitionIn){
+    						toast.classList.remove(settings.transitionIn);
+    					}
+    					if(settings.transitionInMobile){
+    						toast.classList.remove(settings.transitionInMobile);
+    					}
+    					toast.style.transition = '';
+
+    		            if(ACCEPTSTOUCH) {
+    		                document.ontouchmove = function(e) {
+    		                    e.preventDefault();
+    		                    e = e || window.event;
+    		                    var posX = e.touches[0].clientX,
+    		                        finalX = posX - offsetX;
+    	                        drag.move(toast, instance, settings, finalX);
+    		                };
+    		            } else {
+    		                document.onmousemove = function(e) {
+    		                    e.preventDefault();
+    		                    e = e || window.event;
+    		                    var posX = e.clientX,
+    		                        finalX = posX - offsetX;
+    	                        drag.move(toast, instance, settings, finalX);
+    		                };
+    		            }
+
+    		        },
+    		        stopMoving: function(toast, e) {
+
+    		            if(ACCEPTSTOUCH) {
+    		                document.ontouchmove = function() {};
+    		            } else {
+    		            	document.onmousemove = function() {};
+    		            }
+
+    					toast.style.opacity = '';
+    					toast.style.transform = '';
+
+    		            if(toast.classList.contains(PLUGIN_NAME+'-dragged')){
+    		            	
+    		            	toast.classList.remove(PLUGIN_NAME+'-dragged');
+
+    						toast.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+    						setTimeout(function() {
+    							toast.style.transition = '';
+    						}, 400);
+    		            }
+
+    		        }
+    		    };
+
+    		}();
+
+
+
+
+
+    		$iziToast.setSetting = function (ref, option, value) {
+
+    			$iziToast.children[ref][option] = value;
+
+    		};
+
+
+    		$iziToast.getSetting = function (ref, option) {
+
+    			return $iziToast.children[ref][option];
+
+    		};
+
+
+    		/**
+    		 * Destroy the current initialization.
+    		 * @public
+    		 */
+    		$iziToast.destroy = function () {
+
+    			forEach(document.querySelectorAll('.'+PLUGIN_NAME+'-overlay'), function(element, index) {
+    				element.remove();
+    			});
+
+    			forEach(document.querySelectorAll('.'+PLUGIN_NAME+'-wrapper'), function(element, index) {
+    				element.remove();
+    			});
+
+    			forEach(document.querySelectorAll('.'+PLUGIN_NAME), function(element, index) {
+    				element.remove();
+    			});
+
+    			this.children = {};
+
+    			// Remove event listeners
+    			document.removeEventListener(PLUGIN_NAME+'-opened', {}, false);
+    			document.removeEventListener(PLUGIN_NAME+'-opening', {}, false);
+    			document.removeEventListener(PLUGIN_NAME+'-closing', {}, false);
+    			document.removeEventListener(PLUGIN_NAME+'-closed', {}, false);
+    			document.removeEventListener('keyup', {}, false);
+
+    			// Reset variables
+    			CONFIG = {};
+    		};
+
+    		/**
+    		 * Initialize Plugin
+    		 * @public
+    		 * @param {Object} options User settings
+    		 */
+    		$iziToast.settings = function (options) {
+
+    			// Destroy any existing initializations
+    			$iziToast.destroy();
+
+    			CONFIG = options;
+    			defaults = extend(defaults, options || {});
+    		};
+
+
+    		/**
+    		 * Building themes functions.
+    		 * @public
+    		 * @param {Object} options User settings
+    		 */
+    		forEach(THEMES, function (theme, name) {
+
+    			$iziToast[name] = function (options) {
+
+    				var settings = extend(CONFIG, options || {});
+    				settings = extend(theme, settings || {});
+
+    				this.show(settings);
+    			};
+
+    		});
+
+
+    		/**
+    		 * Do the calculation to move the progress bar
+    		 * @private
+    		 */
+    		$iziToast.progress = function (options, $toast, callback) {
+
+
+    			var that = this,
+    				ref = $toast.getAttribute('data-iziToast-ref'),
+    				settings = extend(this.children[ref], options || {}),
+    				$elem = $toast.querySelector('.'+PLUGIN_NAME+'-progressbar div');
+
+    		    return {
+    		        start: function() {
+
+    		        	if(typeof settings.time.REMAINING == 'undefined'){
+
+    		        		$toast.classList.remove(PLUGIN_NAME+'-reseted');
+
+    			        	if($elem !== null){
+    							$elem.style.transition = 'width '+ settings.timeout +'ms '+settings.progressBarEasing;
+    							$elem.style.width = '0%';
+    						}
+
+    			        	settings.time.START = new Date().getTime();
+    			        	settings.time.END = settings.time.START + settings.timeout;
+    						settings.time.TIMER = setTimeout(function() {
+
+    							clearTimeout(settings.time.TIMER);
+
+    							if(!$toast.classList.contains(PLUGIN_NAME+'-closing')){
+
+    								that.hide(settings, $toast, 'timeout');
+
+    								if(typeof callback === 'function'){
+    									callback.apply(that);
+    								}
+    							}
+
+    						}, settings.timeout);			
+    			        	that.setSetting(ref, 'time', settings.time);
+    		        	}
+    		        },
+    		        pause: function() {
+
+    		        	if(typeof settings.time.START !== 'undefined' && !$toast.classList.contains(PLUGIN_NAME+'-paused') && !$toast.classList.contains(PLUGIN_NAME+'-reseted')){
+
+    	        			$toast.classList.add(PLUGIN_NAME+'-paused');
+
+    						settings.time.REMAINING = settings.time.END - new Date().getTime();
 
     						clearTimeout(settings.time.TIMER);
 
-    						if(!$toast.classList.contains(PLUGIN_NAME+'-closing')){
+    						that.setSetting(ref, 'time', settings.time);
 
-    							that.hide(settings, $toast, 'timeout');
+    						if($elem !== null){
+    							var computedStyle = window.getComputedStyle($elem),
+    								propertyWidth = computedStyle.getPropertyValue('width');
 
-    							if(typeof callback === 'function'){
-    								callback.apply(that);
-    							}
+    							$elem.style.transition = 'none';
+    							$elem.style.width = propertyWidth;					
     						}
 
-    					}, settings.timeout);			
-    		        	that.setSetting(ref, 'time', settings.time);
-    	        	}
-    	        },
-    	        pause: function() {
+    						if(typeof callback === 'function'){
+    							setTimeout(function() {
+    								callback.apply(that);						
+    							}, 10);
+    						}
+    	        		}
+    		        },
+    		        resume: function() {
 
-    	        	if(typeof settings.time.START !== 'undefined' && !$toast.classList.contains(PLUGIN_NAME+'-paused') && !$toast.classList.contains(PLUGIN_NAME+'-reseted')){
+    					if(typeof settings.time.REMAINING !== 'undefined'){
 
-            			$toast.classList.add(PLUGIN_NAME+'-paused');
+    						$toast.classList.remove(PLUGIN_NAME+'-paused');
 
-    					settings.time.REMAINING = settings.time.END - new Date().getTime();
+    			        	if($elem !== null){
+    							$elem.style.transition = 'width '+ settings.time.REMAINING +'ms '+settings.progressBarEasing;
+    							$elem.style.width = '0%';
+    						}
+
+    			        	settings.time.END = new Date().getTime() + settings.time.REMAINING;
+    						settings.time.TIMER = setTimeout(function() {
+
+    							clearTimeout(settings.time.TIMER);
+
+    							if(!$toast.classList.contains(PLUGIN_NAME+'-closing')){
+
+    								that.hide(settings, $toast, 'timeout');
+
+    								if(typeof callback === 'function'){
+    									callback.apply(that);
+    								}
+    							}
+
+
+    						}, settings.time.REMAINING);
+
+    						that.setSetting(ref, 'time', settings.time);
+    					} else {
+    						this.start();
+    					}
+    		        },
+    		        reset: function(){
 
     					clearTimeout(settings.time.TIMER);
 
+    					delete settings.time.REMAINING;
+
     					that.setSetting(ref, 'time', settings.time);
 
-    					if($elem !== null){
-    						var computedStyle = window.getComputedStyle($elem),
-    							propertyWidth = computedStyle.getPropertyValue('width');
+    					$toast.classList.add(PLUGIN_NAME+'-reseted');
 
+    					$toast.classList.remove(PLUGIN_NAME+'-paused');
+
+    					if($elem !== null){
     						$elem.style.transition = 'none';
-    						$elem.style.width = propertyWidth;					
+    						$elem.style.width = '100%';
     					}
 
     					if(typeof callback === 'function'){
@@ -6251,806 +6382,751 @@ var app = (function () {
     							callback.apply(that);						
     						}, 10);
     					}
-            		}
-    	        },
-    	        resume: function() {
+    		        }
+    		    };
 
-    				if(typeof settings.time.REMAINING !== 'undefined'){
-
-    					$toast.classList.remove(PLUGIN_NAME+'-paused');
-
-    		        	if($elem !== null){
-    						$elem.style.transition = 'width '+ settings.time.REMAINING +'ms '+settings.progressBarEasing;
-    						$elem.style.width = '0%';
-    					}
-
-    		        	settings.time.END = new Date().getTime() + settings.time.REMAINING;
-    					settings.time.TIMER = setTimeout(function() {
-
-    						clearTimeout(settings.time.TIMER);
-
-    						if(!$toast.classList.contains(PLUGIN_NAME+'-closing')){
-
-    							that.hide(settings, $toast, 'timeout');
-
-    							if(typeof callback === 'function'){
-    								callback.apply(that);
-    							}
-    						}
-
-
-    					}, settings.time.REMAINING);
-
-    					that.setSetting(ref, 'time', settings.time);
-    				} else {
-    					this.start();
-    				}
-    	        },
-    	        reset: function(){
-
-    				clearTimeout(settings.time.TIMER);
-
-    				delete settings.time.REMAINING;
-
-    				that.setSetting(ref, 'time', settings.time);
-
-    				$toast.classList.add(PLUGIN_NAME+'-reseted');
-
-    				$toast.classList.remove(PLUGIN_NAME+'-paused');
-
-    				if($elem !== null){
-    					$elem.style.transition = 'none';
-    					$elem.style.width = '100%';
-    				}
-
-    				if(typeof callback === 'function'){
-    					setTimeout(function() {
-    						callback.apply(that);						
-    					}, 10);
-    				}
-    	        }
-    	    };
-
-    	};
-
-
-    	/**
-    	 * Close the specific Toast
-    	 * @public
-    	 * @param {Object} options User settings
-    	 */
-    	$iziToast.hide = function (options, $toast, closedBy) {
-
-    		if(typeof $toast != 'object'){
-    			$toast = document.querySelector($toast);
-    		}		
-
-    		var that = this,
-    			settings = extend(this.children[$toast.getAttribute('data-iziToast-ref')], options || {});
-    			settings.closedBy = closedBy || null;
-
-    		delete settings.time.REMAINING;
-
-    		$toast.classList.add(PLUGIN_NAME+'-closing');
-
-    		// Overlay
-    		(function(){
-
-    			var $overlay = document.querySelector('.'+PLUGIN_NAME+'-overlay');
-    			if($overlay !== null){
-    				var refs = $overlay.getAttribute('data-iziToast-ref');		
-    					refs = refs.split(',');
-    				var index = refs.indexOf(String(settings.ref));
-
-    				if(index !== -1){
-    					refs.splice(index, 1);			
-    				}
-    				$overlay.setAttribute('data-iziToast-ref', refs.join());
-
-    				if(refs.length === 0){
-    					$overlay.classList.remove('fadeIn');
-    					$overlay.classList.add('fadeOut');
-    					setTimeout(function() {
-    						$overlay.remove();
-    					}, 700);
-    				}
-    			}
-
-    		})();
-
-    		if(settings.transitionIn){
-    			$toast.classList.remove(settings.transitionIn);
-    		} 
-
-    		if(settings.transitionInMobile){
-    			$toast.classList.remove(settings.transitionInMobile);
-    		}
-
-    		if(ISMOBILE || window.innerWidth <= MOBILEWIDTH){
-    			if(settings.transitionOutMobile)
-    				$toast.classList.add(settings.transitionOutMobile);
-    		} else {
-    			if(settings.transitionOut)
-    				$toast.classList.add(settings.transitionOut);
-    		}
-    		var H = $toast.parentNode.offsetHeight;
-    				$toast.parentNode.style.height = H+'px';
-    				$toast.style.pointerEvents = 'none';
-    		
-    		if(!ISMOBILE || window.innerWidth > MOBILEWIDTH){
-    			$toast.parentNode.style.transitionDelay = '0.2s';
-    		}
-
-    		try {
-    			var event = new CustomEvent(PLUGIN_NAME+'-closing', {detail: settings, bubbles: true, cancelable: true});
-    			document.dispatchEvent(event);
-    		} catch(ex){
-    			console.warn(ex);
-    		}
-
-    		setTimeout(function() {
-    			
-    			$toast.parentNode.style.height = '0px';
-    			$toast.parentNode.style.overflow = '';
-
-    			setTimeout(function(){
-    				
-    				delete that.children[settings.ref];
-
-    				$toast.parentNode.remove();
-
-    				try {
-    					var event = new CustomEvent(PLUGIN_NAME+'-closed', {detail: settings, bubbles: true, cancelable: true});
-    					document.dispatchEvent(event);
-    				} catch(ex){
-    					console.warn(ex);
-    				}
-
-    				if(typeof settings.onClosed !== 'undefined'){
-    					settings.onClosed.apply(null, [settings, $toast, closedBy]);
-    				}
-
-    			}, 1000);
-    		}, 200);
-
-
-    		if(typeof settings.onClosing !== 'undefined'){
-    			settings.onClosing.apply(null, [settings, $toast, closedBy]);
-    		}
-    	};
-
-    	/**
-    	 * Create and show the Toast
-    	 * @public
-    	 * @param {Object} options User settings
-    	 */
-    	$iziToast.show = function (options) {
-
-    		var that = this;
-
-    		// Merge user options with defaults
-    		var settings = extend(CONFIG, options || {});
-    			settings = extend(defaults, settings);
-    			settings.time = {};
-
-    		if(settings.id === null){
-    			settings.id = generateId(settings.title+settings.message+settings.color);
-    		}
-
-    		if(settings.displayMode === 1 || settings.displayMode == 'once'){
-    			try {
-    				if(document.querySelectorAll('.'+PLUGIN_NAME+'#'+settings.id).length > 0){
-    					return false;
-    				}
-    			} catch (exc) {
-    				console.warn('['+PLUGIN_NAME+'] Could not find an element with this selector: '+'#'+settings.id+'. Try to set an valid id.');
-    			}
-    		}
-
-    		if(settings.displayMode === 2 || settings.displayMode == 'replace'){
-    			try {
-    				forEach(document.querySelectorAll('.'+PLUGIN_NAME+'#'+settings.id), function(element, index) {
-    					that.hide(settings, element, 'replaced');
-    				});
-    			} catch (exc) {
-    				console.warn('['+PLUGIN_NAME+'] Could not find an element with this selector: '+'#'+settings.id+'. Try to set an valid id.');
-    			}
-    		}
-
-    		settings.ref = new Date().getTime() + Math.floor((Math.random() * 10000000) + 1);
-
-    		$iziToast.children[settings.ref] = settings;
-
-    		var $DOM = {
-    			body: document.querySelector('body'),
-    			overlay: document.createElement('div'),
-    			toast: document.createElement('div'),
-    			toastBody: document.createElement('div'),
-    			toastTexts: document.createElement('div'),
-    			toastCapsule: document.createElement('div'),
-    			cover: document.createElement('div'),
-    			buttons: document.createElement('div'),
-    			inputs: document.createElement('div'),
-    			icon: !settings.iconUrl ? document.createElement('i') : document.createElement('img'),
-    			wrapper: null
     		};
 
-    		$DOM.toast.setAttribute('data-iziToast-ref', settings.ref);
-    		$DOM.toast.appendChild($DOM.toastBody);
-    		$DOM.toastCapsule.appendChild($DOM.toast);
 
-    		// CSS Settings
-    		(function(){
+    		/**
+    		 * Close the specific Toast
+    		 * @public
+    		 * @param {Object} options User settings
+    		 */
+    		$iziToast.hide = function (options, $toast, closedBy) {
 
-    			$DOM.toast.classList.add(PLUGIN_NAME);
-    			$DOM.toast.classList.add(PLUGIN_NAME+'-opening');
-    			$DOM.toastCapsule.classList.add(PLUGIN_NAME+'-capsule');
-    			$DOM.toastBody.classList.add(PLUGIN_NAME + '-body');
-    			$DOM.toastTexts.classList.add(PLUGIN_NAME + '-texts');
+    			if(typeof $toast != 'object'){
+    				$toast = document.querySelector($toast);
+    			}		
+
+    			var that = this,
+    				settings = extend(this.children[$toast.getAttribute('data-iziToast-ref')], options || {});
+    				settings.closedBy = closedBy || null;
+
+    			delete settings.time.REMAINING;
+
+    			$toast.classList.add(PLUGIN_NAME+'-closing');
+
+    			// Overlay
+    			(function(){
+
+    				var $overlay = document.querySelector('.'+PLUGIN_NAME+'-overlay');
+    				if($overlay !== null){
+    					var refs = $overlay.getAttribute('data-iziToast-ref');		
+    						refs = refs.split(',');
+    					var index = refs.indexOf(String(settings.ref));
+
+    					if(index !== -1){
+    						refs.splice(index, 1);			
+    					}
+    					$overlay.setAttribute('data-iziToast-ref', refs.join());
+
+    					if(refs.length === 0){
+    						$overlay.classList.remove('fadeIn');
+    						$overlay.classList.add('fadeOut');
+    						setTimeout(function() {
+    							$overlay.remove();
+    						}, 700);
+    					}
+    				}
+
+    			})();
+
+    			if(settings.transitionIn){
+    				$toast.classList.remove(settings.transitionIn);
+    			} 
+
+    			if(settings.transitionInMobile){
+    				$toast.classList.remove(settings.transitionInMobile);
+    			}
 
     			if(ISMOBILE || window.innerWidth <= MOBILEWIDTH){
-    				if(settings.transitionInMobile)
-    					$DOM.toast.classList.add(settings.transitionInMobile);
+    				if(settings.transitionOutMobile)
+    					$toast.classList.add(settings.transitionOutMobile);
     			} else {
-    				if(settings.transitionIn)
-    					$DOM.toast.classList.add(settings.transitionIn);
+    				if(settings.transitionOut)
+    					$toast.classList.add(settings.transitionOut);
+    			}
+    			var H = $toast.parentNode.offsetHeight;
+    					$toast.parentNode.style.height = H+'px';
+    					$toast.style.pointerEvents = 'none';
+    			
+    			if(!ISMOBILE || window.innerWidth > MOBILEWIDTH){
+    				$toast.parentNode.style.transitionDelay = '0.2s';
     			}
 
-    			if(settings.class){
-    				var classes = settings.class.split(' ');
-    				forEach(classes, function (value, index) {
-    					$DOM.toast.classList.add(value);
-    				});
+    			try {
+    				var event = new CustomEvent(PLUGIN_NAME+'-closing', {detail: settings, bubbles: true, cancelable: true});
+    				document.dispatchEvent(event);
+    			} catch(ex){
+    				console.warn(ex);
     			}
 
-    			if(settings.id){ $DOM.toast.id = settings.id; }
-
-    			if(settings.rtl){
-    				$DOM.toast.classList.add(PLUGIN_NAME + '-rtl');
-    				$DOM.toast.setAttribute('dir', 'rtl');
-    			}
-
-    			if(settings.layout > 1){ $DOM.toast.classList.add(PLUGIN_NAME+'-layout'+settings.layout); }
-
-    			if(settings.balloon){ $DOM.toast.classList.add(PLUGIN_NAME+'-balloon'); }
-
-    			if(settings.maxWidth){
-    				if( !isNaN(settings.maxWidth) ){
-    					$DOM.toast.style.maxWidth = settings.maxWidth+'px';
-    				} else {
-    					$DOM.toast.style.maxWidth = settings.maxWidth;
-    				}
-    			}
-
-    			if(settings.theme !== '' || settings.theme !== 'light') {
-
-    				$DOM.toast.classList.add(PLUGIN_NAME+'-theme-'+settings.theme);
-    			}
-
-    			if(settings.color) { //#, rgb, rgba, hsl
-    				
-    				if( isColor(settings.color) ){
-    					$DOM.toast.style.background = settings.color;
-    				} else {
-    					$DOM.toast.classList.add(PLUGIN_NAME+'-color-'+settings.color);
-    				}
-    			}
-
-    			if(settings.backgroundColor) {
-    				$DOM.toast.style.background = settings.backgroundColor;
-    				if(settings.balloon){
-    					$DOM.toast.style.borderColor = settings.backgroundColor;				
-    				}
-    			}
-    		})();
-
-    		// Cover image
-    		(function(){
-    			if(settings.image) {
-    				$DOM.cover.classList.add(PLUGIN_NAME + '-cover');
-    				$DOM.cover.style.width = settings.imageWidth + 'px';
-
-    				if(isBase64(settings.image.replace(/ /g,''))){
-    					$DOM.cover.style.backgroundImage = 'url(data:image/png;base64,' + settings.image.replace(/ /g,'') + ')';
-    				} else {
-    					$DOM.cover.style.backgroundImage = 'url(' + settings.image + ')';
-    				}
-
-    				if(settings.rtl){
-    					$DOM.toastBody.style.marginRight = (settings.imageWidth + 10) + 'px';
-    				} else {
-    					$DOM.toastBody.style.marginLeft = (settings.imageWidth + 10) + 'px';				
-    				}
-    				$DOM.toast.appendChild($DOM.cover);
-    			}
-    		})();
-
-    		// Button close
-    		(function(){
-    			if(settings.close){
-    				
-    				$DOM.buttonClose = document.createElement('button');
-    				$DOM.buttonClose.type = 'button';
-    				$DOM.buttonClose.classList.add(PLUGIN_NAME + '-close');
-    				$DOM.buttonClose.addEventListener('click', function (e) {
-    					e.target;
-    					that.hide(settings, $DOM.toast, 'button');
-    				});
-    				$DOM.toast.appendChild($DOM.buttonClose);
-    			} else {
-    				if(settings.rtl){
-    					$DOM.toast.style.paddingLeft = '18px';
-    				} else {
-    					$DOM.toast.style.paddingRight = '18px';
-    				}
-    			}
-    		})();
-
-    		// Progress Bar & Timeout
-    		(function(){
-
-    			if(settings.progressBar){
-    				$DOM.progressBar = document.createElement('div');
-    				$DOM.progressBarDiv = document.createElement('div');
-    				$DOM.progressBar.classList.add(PLUGIN_NAME + '-progressbar');
-    				$DOM.progressBarDiv.style.background = settings.progressBarColor;
-    				$DOM.progressBar.appendChild($DOM.progressBarDiv);
-    				$DOM.toast.appendChild($DOM.progressBar);
-    			}
-
-    			if(settings.timeout) {
-
-    				if(settings.pauseOnHover && !settings.resetOnHover){
-    					
-    					$DOM.toast.addEventListener('mouseenter', function (e) {
-    						that.progress(settings, $DOM.toast).pause();
-    					});
-    					$DOM.toast.addEventListener('mouseleave', function (e) {
-    						that.progress(settings, $DOM.toast).resume();
-    					});
-    				}
-
-    				if(settings.resetOnHover){
-
-    					$DOM.toast.addEventListener('mouseenter', function (e) {
-    						that.progress(settings, $DOM.toast).reset();
-    					});
-    					$DOM.toast.addEventListener('mouseleave', function (e) {
-    						that.progress(settings, $DOM.toast).start();
-    					});
-    				}
-    			}
-    		})();
-
-    		// Icon
-    		(function(){
-
-    			if(settings.iconUrl) {
-
-    				$DOM.icon.setAttribute('class', PLUGIN_NAME + '-icon');
-    				$DOM.icon.setAttribute('src', settings.iconUrl);
-
-    			} else if(settings.icon) {
-    				$DOM.icon.setAttribute('class', PLUGIN_NAME + '-icon ' + settings.icon);
-    				
-    				if(settings.iconText){
-    					$DOM.icon.appendChild(document.createTextNode(settings.iconText));
-    				}
-    				
-    				if(settings.iconColor){
-    					$DOM.icon.style.color = settings.iconColor;
-    				}				
-    			}
-
-    			if(settings.icon || settings.iconUrl) {
-
-    				if(settings.rtl){
-    					$DOM.toastBody.style.paddingRight = '33px';
-    				} else {
-    					$DOM.toastBody.style.paddingLeft = '33px';				
-    				}
-
-    				$DOM.toastBody.appendChild($DOM.icon);
-    			}
-
-    		})();
-
-    		// Title & Message
-    		(function(){
-    			if(settings.title.length > 0) {
-
-    				$DOM.strong = document.createElement('strong');
-    				$DOM.strong.classList.add(PLUGIN_NAME + '-title');
-    				$DOM.strong.appendChild(createFragElem(settings.title));
-    				$DOM.toastTexts.appendChild($DOM.strong);
-
-    				if(settings.titleColor) {
-    					$DOM.strong.style.color = settings.titleColor;
-    				}
-    				if(settings.titleSize) {
-    					if( !isNaN(settings.titleSize) ){
-    						$DOM.strong.style.fontSize = settings.titleSize+'px';
-    					} else {
-    						$DOM.strong.style.fontSize = settings.titleSize;
-    					}
-    				}
-    				if(settings.titleLineHeight) {
-    					if( !isNaN(settings.titleSize) ){
-    						$DOM.strong.style.lineHeight = settings.titleLineHeight+'px';
-    					} else {
-    						$DOM.strong.style.lineHeight = settings.titleLineHeight;
-    					}
-    				}
-    			}
-
-    			if(settings.message.length > 0) {
-
-    				$DOM.p = document.createElement('p');
-    				$DOM.p.classList.add(PLUGIN_NAME + '-message');
-    				$DOM.p.appendChild(createFragElem(settings.message));
-    				$DOM.toastTexts.appendChild($DOM.p);
-
-    				if(settings.messageColor) {
-    					$DOM.p.style.color = settings.messageColor;
-    				}
-    				if(settings.messageSize) {
-    					if( !isNaN(settings.titleSize) ){
-    						$DOM.p.style.fontSize = settings.messageSize+'px';
-    					} else {
-    						$DOM.p.style.fontSize = settings.messageSize;
-    					}
-    				}
-    				if(settings.messageLineHeight) {
-    					
-    					if( !isNaN(settings.titleSize) ){
-    						$DOM.p.style.lineHeight = settings.messageLineHeight+'px';
-    					} else {
-    						$DOM.p.style.lineHeight = settings.messageLineHeight;
-    					}
-    				}
-    			}
-
-    			if(settings.title.length > 0 && settings.message.length > 0) {
-    				if(settings.rtl){
-    					$DOM.strong.style.marginLeft = '10px';
-    				} else if(settings.layout !== 2 && !settings.rtl) {
-    					$DOM.strong.style.marginRight = '10px';	
-    				}
-    			}
-    		})();
-
-    		$DOM.toastBody.appendChild($DOM.toastTexts);
-
-    		// Inputs
-    		var $inputs;
-    		(function(){
-    			if(settings.inputs.length > 0) {
-
-    				$DOM.inputs.classList.add(PLUGIN_NAME + '-inputs');
-
-    				forEach(settings.inputs, function (value, index) {
-    					$DOM.inputs.appendChild(createFragElem(value[0]));
-
-    					$inputs = $DOM.inputs.childNodes;
-
-    					$inputs[index].classList.add(PLUGIN_NAME + '-inputs-child');
-
-    					if(value[3]){
-    						setTimeout(function() {
-    							$inputs[index].focus();
-    						}, 300);
-    					}
-
-    					$inputs[index].addEventListener(value[1], function (e) {
-    						var ts = value[2];
-    						return ts(that, $DOM.toast, this, e);
-    					});
-    				});
-    				$DOM.toastBody.appendChild($DOM.inputs);
-    			}
-    		})();
-
-    		// Buttons
-    		(function(){
-    			if(settings.buttons.length > 0) {
-
-    				$DOM.buttons.classList.add(PLUGIN_NAME + '-buttons');
-
-    				forEach(settings.buttons, function (value, index) {
-    					$DOM.buttons.appendChild(createFragElem(value[0]));
-
-    					var $btns = $DOM.buttons.childNodes;
-
-    					$btns[index].classList.add(PLUGIN_NAME + '-buttons-child');
-
-    					if(value[2]){
-    						setTimeout(function() {
-    							$btns[index].focus();
-    						}, 300);
-    					}
-
-    					$btns[index].addEventListener('click', function (e) {
-    						e.preventDefault();
-    						var ts = value[1];
-    						return ts(that, $DOM.toast, this, e, $inputs);
-    					});
-    				});
-    			}
-    			$DOM.toastBody.appendChild($DOM.buttons);
-    		})();
-
-    		if(settings.message.length > 0 && (settings.inputs.length > 0 || settings.buttons.length > 0)) {
-    			$DOM.p.style.marginBottom = '0';
-    		}
-
-    		if(settings.inputs.length > 0 || settings.buttons.length > 0){
-    			if(settings.rtl){
-    				$DOM.toastTexts.style.marginLeft = '10px';
-    			} else {
-    				$DOM.toastTexts.style.marginRight = '10px';
-    			}
-    			if(settings.inputs.length > 0 && settings.buttons.length > 0){
-    				if(settings.rtl){
-    					$DOM.inputs.style.marginLeft = '8px';
-    				} else {
-    					$DOM.inputs.style.marginRight = '8px';
-    				}
-    			}
-    		}
-
-    		// Wrap
-    		(function(){
-    			$DOM.toastCapsule.style.visibility = 'hidden';
     			setTimeout(function() {
-    				var H = $DOM.toast.offsetHeight;
-    				var style = $DOM.toast.currentStyle || window.getComputedStyle($DOM.toast);
-    				var marginTop = style.marginTop;
-    					marginTop = marginTop.split('px');
-    					marginTop = parseInt(marginTop[0]);
-    				var marginBottom = style.marginBottom;
-    					marginBottom = marginBottom.split('px');
-    					marginBottom = parseInt(marginBottom[0]);
+    				
+    				$toast.parentNode.style.height = '0px';
+    				$toast.parentNode.style.overflow = '';
 
-    				$DOM.toastCapsule.style.visibility = '';
-    				$DOM.toastCapsule.style.height = (H+marginBottom+marginTop)+'px';
+    				setTimeout(function(){
+    					
+    					delete that.children[settings.ref];
 
-    				setTimeout(function() {
-    					$DOM.toastCapsule.style.height = 'auto';
-    					if(settings.target){
-    						$DOM.toastCapsule.style.overflow = 'visible';
+    					$toast.parentNode.remove();
+
+    					try {
+    						var event = new CustomEvent(PLUGIN_NAME+'-closed', {detail: settings, bubbles: true, cancelable: true});
+    						document.dispatchEvent(event);
+    					} catch(ex){
+    						console.warn(ex);
     					}
-    				}, 500);
 
-    				if(settings.timeout) {
-    					that.progress(settings, $DOM.toast).start();
+    					if(typeof settings.onClosed !== 'undefined'){
+    						settings.onClosed.apply(null, [settings, $toast, closedBy]);
+    					}
+
+    				}, 1000);
+    			}, 200);
+
+
+    			if(typeof settings.onClosing !== 'undefined'){
+    				settings.onClosing.apply(null, [settings, $toast, closedBy]);
+    			}
+    		};
+
+    		/**
+    		 * Create and show the Toast
+    		 * @public
+    		 * @param {Object} options User settings
+    		 */
+    		$iziToast.show = function (options) {
+
+    			var that = this;
+
+    			// Merge user options with defaults
+    			var settings = extend(CONFIG, options || {});
+    				settings = extend(defaults, settings);
+    				settings.time = {};
+
+    			if(settings.id === null){
+    				settings.id = generateId(settings.title+settings.message+settings.color);
+    			}
+
+    			if(settings.displayMode === 1 || settings.displayMode == 'once'){
+    				try {
+    					if(document.querySelectorAll('.'+PLUGIN_NAME+'#'+settings.id).length > 0){
+    						return false;
+    					}
+    				} catch (exc) {
+    					console.warn('['+PLUGIN_NAME+'] Could not find an element with this selector: '+'#'+settings.id+'. Try to set an valid id.');
     				}
-    			}, 100);
-    		})();
+    			}
 
-    		// Target
-    		(function(){
-    			var position = settings.position;
-
-    			if(settings.target){
-
-    				$DOM.wrapper = document.querySelector(settings.target);
-    				$DOM.wrapper.classList.add(PLUGIN_NAME + '-target');
-
-    				if(settings.targetFirst) {
-    					$DOM.wrapper.insertBefore($DOM.toastCapsule, $DOM.wrapper.firstChild);
-    				} else {
-    					$DOM.wrapper.appendChild($DOM.toastCapsule);
+    			if(settings.displayMode === 2 || settings.displayMode == 'replace'){
+    				try {
+    					forEach(document.querySelectorAll('.'+PLUGIN_NAME+'#'+settings.id), function(element, index) {
+    						that.hide(settings, element, 'replaced');
+    					});
+    				} catch (exc) {
+    					console.warn('['+PLUGIN_NAME+'] Could not find an element with this selector: '+'#'+settings.id+'. Try to set an valid id.');
     				}
+    			}
 
-    			} else {
+    			settings.ref = new Date().getTime() + Math.floor((Math.random() * 10000000) + 1);
 
-    				if( POSITIONS.indexOf(settings.position) == -1 ){
-    					console.warn('['+PLUGIN_NAME+'] Incorrect position.\nIt can be › ' + POSITIONS);
-    					return;
-    				}
+    			$iziToast.children[settings.ref] = settings;
+
+    			var $DOM = {
+    				body: document.querySelector('body'),
+    				overlay: document.createElement('div'),
+    				toast: document.createElement('div'),
+    				toastBody: document.createElement('div'),
+    				toastTexts: document.createElement('div'),
+    				toastCapsule: document.createElement('div'),
+    				cover: document.createElement('div'),
+    				buttons: document.createElement('div'),
+    				inputs: document.createElement('div'),
+    				icon: !settings.iconUrl ? document.createElement('i') : document.createElement('img'),
+    				wrapper: null
+    			};
+
+    			$DOM.toast.setAttribute('data-iziToast-ref', settings.ref);
+    			$DOM.toast.appendChild($DOM.toastBody);
+    			$DOM.toastCapsule.appendChild($DOM.toast);
+
+    			// CSS Settings
+    			(function(){
+
+    				$DOM.toast.classList.add(PLUGIN_NAME);
+    				$DOM.toast.classList.add(PLUGIN_NAME+'-opening');
+    				$DOM.toastCapsule.classList.add(PLUGIN_NAME+'-capsule');
+    				$DOM.toastBody.classList.add(PLUGIN_NAME + '-body');
+    				$DOM.toastTexts.classList.add(PLUGIN_NAME + '-texts');
 
     				if(ISMOBILE || window.innerWidth <= MOBILEWIDTH){
-    					if(settings.position == 'bottomLeft' || settings.position == 'bottomRight' || settings.position == 'bottomCenter'){
-    						position = PLUGIN_NAME+'-wrapper-bottomCenter';
-    					}
-    					else if(settings.position == 'topLeft' || settings.position == 'topRight' || settings.position == 'topCenter'){
-    						position = PLUGIN_NAME+'-wrapper-topCenter';
-    					}
-    					else {
-    						position = PLUGIN_NAME+'-wrapper-center';
-    					}
+    					if(settings.transitionInMobile)
+    						$DOM.toast.classList.add(settings.transitionInMobile);
     				} else {
-    					position = PLUGIN_NAME+'-wrapper-'+position;
-    				}
-    				$DOM.wrapper = document.querySelector('.' + PLUGIN_NAME + '-wrapper.'+position);
-
-    				if(!$DOM.wrapper) {
-    					$DOM.wrapper = document.createElement('div');
-    					$DOM.wrapper.classList.add(PLUGIN_NAME + '-wrapper');
-    					$DOM.wrapper.classList.add(position);
-    					document.body.appendChild($DOM.wrapper);
-    				}
-    				if(settings.position == 'topLeft' || settings.position == 'topCenter' || settings.position == 'topRight'){
-    					$DOM.wrapper.insertBefore($DOM.toastCapsule, $DOM.wrapper.firstChild);
-    				} else {
-    					$DOM.wrapper.appendChild($DOM.toastCapsule);
-    				}
-    			}
-
-    			if(!isNaN(settings.zindex)) {
-    				$DOM.wrapper.style.zIndex = settings.zindex;
-    			} else {
-    				console.warn('['+PLUGIN_NAME+'] Invalid zIndex.');
-    			}
-    		})();
-
-    		// Overlay
-    		(function(){
-
-    			if(settings.overlay) {
-
-    				if( document.querySelector('.'+PLUGIN_NAME+'-overlay.fadeIn') !== null ){
-
-    					$DOM.overlay = document.querySelector('.'+PLUGIN_NAME+'-overlay');
-    					$DOM.overlay.setAttribute('data-iziToast-ref', $DOM.overlay.getAttribute('data-iziToast-ref') + ',' + settings.ref);
-
-    					if(!isNaN(settings.zindex) && settings.zindex !== null) {
-    						$DOM.overlay.style.zIndex = settings.zindex-1;
-    					}
-
-    				} else {
-
-    					$DOM.overlay.classList.add(PLUGIN_NAME+'-overlay');
-    					$DOM.overlay.classList.add('fadeIn');
-    					$DOM.overlay.style.background = settings.overlayColor;
-    					$DOM.overlay.setAttribute('data-iziToast-ref', settings.ref);
-    					if(!isNaN(settings.zindex) && settings.zindex !== null) {
-    						$DOM.overlay.style.zIndex = settings.zindex-1;
-    					}
-    					document.querySelector('body').appendChild($DOM.overlay);
+    					if(settings.transitionIn)
+    						$DOM.toast.classList.add(settings.transitionIn);
     				}
 
-    				if(settings.overlayClose) {
-
-    					$DOM.overlay.removeEventListener('click', {});
-    					$DOM.overlay.addEventListener('click', function (e) {
-    						that.hide(settings, $DOM.toast, 'overlay');
+    				if(settings.class){
+    					var classes = settings.class.split(' ');
+    					forEach(classes, function (value, index) {
+    						$DOM.toast.classList.add(value);
     					});
+    				}
+
+    				if(settings.id){ $DOM.toast.id = settings.id; }
+
+    				if(settings.rtl){
+    					$DOM.toast.classList.add(PLUGIN_NAME + '-rtl');
+    					$DOM.toast.setAttribute('dir', 'rtl');
+    				}
+
+    				if(settings.layout > 1){ $DOM.toast.classList.add(PLUGIN_NAME+'-layout'+settings.layout); }
+
+    				if(settings.balloon){ $DOM.toast.classList.add(PLUGIN_NAME+'-balloon'); }
+
+    				if(settings.maxWidth){
+    					if( !isNaN(settings.maxWidth) ){
+    						$DOM.toast.style.maxWidth = settings.maxWidth+'px';
+    					} else {
+    						$DOM.toast.style.maxWidth = settings.maxWidth;
+    					}
+    				}
+
+    				if(settings.theme !== '' || settings.theme !== 'light') {
+
+    					$DOM.toast.classList.add(PLUGIN_NAME+'-theme-'+settings.theme);
+    				}
+
+    				if(settings.color) { //#, rgb, rgba, hsl
+    					
+    					if( isColor(settings.color) ){
+    						$DOM.toast.style.background = settings.color;
+    					} else {
+    						$DOM.toast.classList.add(PLUGIN_NAME+'-color-'+settings.color);
+    					}
+    				}
+
+    				if(settings.backgroundColor) {
+    					$DOM.toast.style.background = settings.backgroundColor;
+    					if(settings.balloon){
+    						$DOM.toast.style.borderColor = settings.backgroundColor;				
+    					}
+    				}
+    			})();
+
+    			// Cover image
+    			(function(){
+    				if(settings.image) {
+    					$DOM.cover.classList.add(PLUGIN_NAME + '-cover');
+    					$DOM.cover.style.width = settings.imageWidth + 'px';
+
+    					if(isBase64(settings.image.replace(/ /g,''))){
+    						$DOM.cover.style.backgroundImage = 'url(data:image/png;base64,' + settings.image.replace(/ /g,'') + ')';
+    					} else {
+    						$DOM.cover.style.backgroundImage = 'url(' + settings.image + ')';
+    					}
+
+    					if(settings.rtl){
+    						$DOM.toastBody.style.marginRight = (settings.imageWidth + 10) + 'px';
+    					} else {
+    						$DOM.toastBody.style.marginLeft = (settings.imageWidth + 10) + 'px';				
+    					}
+    					$DOM.toast.appendChild($DOM.cover);
+    				}
+    			})();
+
+    			// Button close
+    			(function(){
+    				if(settings.close){
+    					
+    					$DOM.buttonClose = document.createElement('button');
+    					$DOM.buttonClose.type = 'button';
+    					$DOM.buttonClose.classList.add(PLUGIN_NAME + '-close');
+    					$DOM.buttonClose.addEventListener('click', function (e) {
+    						e.target;
+    						that.hide(settings, $DOM.toast, 'button');
+    					});
+    					$DOM.toast.appendChild($DOM.buttonClose);
     				} else {
-    					$DOM.overlay.removeEventListener('click', {});
+    					if(settings.rtl){
+    						$DOM.toast.style.paddingLeft = '18px';
+    					} else {
+    						$DOM.toast.style.paddingRight = '18px';
+    					}
     				}
-    			}			
-    		})();
+    			})();
 
-    		// Inside animations
-    		(function(){
-    			if(settings.animateInside){
-    				$DOM.toast.classList.add(PLUGIN_NAME+'-animateInside');
-    			
-    				var animationTimes = [200, 100, 300];
-    				if(settings.transitionIn == 'bounceInLeft' || settings.transitionIn == 'bounceInRight'){
-    					animationTimes = [400, 200, 400];
+    			// Progress Bar & Timeout
+    			(function(){
+
+    				if(settings.progressBar){
+    					$DOM.progressBar = document.createElement('div');
+    					$DOM.progressBarDiv = document.createElement('div');
+    					$DOM.progressBar.classList.add(PLUGIN_NAME + '-progressbar');
+    					$DOM.progressBarDiv.style.background = settings.progressBarColor;
+    					$DOM.progressBar.appendChild($DOM.progressBarDiv);
+    					$DOM.toast.appendChild($DOM.progressBar);
     				}
 
-    				if(settings.title.length > 0) {
-    					setTimeout(function(){
-    						$DOM.strong.classList.add('slideIn');
-    					}, animationTimes[0]);
-    				}
+    				if(settings.timeout) {
 
-    				if(settings.message.length > 0) {
-    					setTimeout(function(){
-    						$DOM.p.classList.add('slideIn');
-    					}, animationTimes[1]);
+    					if(settings.pauseOnHover && !settings.resetOnHover){
+    						
+    						$DOM.toast.addEventListener('mouseenter', function (e) {
+    							that.progress(settings, $DOM.toast).pause();
+    						});
+    						$DOM.toast.addEventListener('mouseleave', function (e) {
+    							that.progress(settings, $DOM.toast).resume();
+    						});
+    					}
+
+    					if(settings.resetOnHover){
+
+    						$DOM.toast.addEventListener('mouseenter', function (e) {
+    							that.progress(settings, $DOM.toast).reset();
+    						});
+    						$DOM.toast.addEventListener('mouseleave', function (e) {
+    							that.progress(settings, $DOM.toast).start();
+    						});
+    					}
+    				}
+    			})();
+
+    			// Icon
+    			(function(){
+
+    				if(settings.iconUrl) {
+
+    					$DOM.icon.setAttribute('class', PLUGIN_NAME + '-icon');
+    					$DOM.icon.setAttribute('src', settings.iconUrl);
+
+    				} else if(settings.icon) {
+    					$DOM.icon.setAttribute('class', PLUGIN_NAME + '-icon ' + settings.icon);
+    					
+    					if(settings.iconText){
+    						$DOM.icon.appendChild(document.createTextNode(settings.iconText));
+    					}
+    					
+    					if(settings.iconColor){
+    						$DOM.icon.style.color = settings.iconColor;
+    					}				
     				}
 
     				if(settings.icon || settings.iconUrl) {
-    					setTimeout(function(){
-    						$DOM.icon.classList.add('revealIn');
-    					}, animationTimes[2]);
+
+    					if(settings.rtl){
+    						$DOM.toastBody.style.paddingRight = '33px';
+    					} else {
+    						$DOM.toastBody.style.paddingLeft = '33px';				
+    					}
+
+    					$DOM.toastBody.appendChild($DOM.icon);
     				}
 
-    				var counter = 150;
-    				if(settings.buttons.length > 0 && $DOM.buttons) {
+    			})();
 
-    					setTimeout(function(){
+    			// Title & Message
+    			(function(){
+    				if(settings.title.length > 0) {
 
-    						forEach($DOM.buttons.childNodes, function(element, index) {
+    					$DOM.strong = document.createElement('strong');
+    					$DOM.strong.classList.add(PLUGIN_NAME + '-title');
+    					$DOM.strong.appendChild(createFragElem(settings.title));
+    					$DOM.toastTexts.appendChild($DOM.strong);
+
+    					if(settings.titleColor) {
+    						$DOM.strong.style.color = settings.titleColor;
+    					}
+    					if(settings.titleSize) {
+    						if( !isNaN(settings.titleSize) ){
+    							$DOM.strong.style.fontSize = settings.titleSize+'px';
+    						} else {
+    							$DOM.strong.style.fontSize = settings.titleSize;
+    						}
+    					}
+    					if(settings.titleLineHeight) {
+    						if( !isNaN(settings.titleSize) ){
+    							$DOM.strong.style.lineHeight = settings.titleLineHeight+'px';
+    						} else {
+    							$DOM.strong.style.lineHeight = settings.titleLineHeight;
+    						}
+    					}
+    				}
+
+    				if(settings.message.length > 0) {
+
+    					$DOM.p = document.createElement('p');
+    					$DOM.p.classList.add(PLUGIN_NAME + '-message');
+    					$DOM.p.appendChild(createFragElem(settings.message));
+    					$DOM.toastTexts.appendChild($DOM.p);
+
+    					if(settings.messageColor) {
+    						$DOM.p.style.color = settings.messageColor;
+    					}
+    					if(settings.messageSize) {
+    						if( !isNaN(settings.titleSize) ){
+    							$DOM.p.style.fontSize = settings.messageSize+'px';
+    						} else {
+    							$DOM.p.style.fontSize = settings.messageSize;
+    						}
+    					}
+    					if(settings.messageLineHeight) {
+    						
+    						if( !isNaN(settings.titleSize) ){
+    							$DOM.p.style.lineHeight = settings.messageLineHeight+'px';
+    						} else {
+    							$DOM.p.style.lineHeight = settings.messageLineHeight;
+    						}
+    					}
+    				}
+
+    				if(settings.title.length > 0 && settings.message.length > 0) {
+    					if(settings.rtl){
+    						$DOM.strong.style.marginLeft = '10px';
+    					} else if(settings.layout !== 2 && !settings.rtl) {
+    						$DOM.strong.style.marginRight = '10px';	
+    					}
+    				}
+    			})();
+
+    			$DOM.toastBody.appendChild($DOM.toastTexts);
+
+    			// Inputs
+    			var $inputs;
+    			(function(){
+    				if(settings.inputs.length > 0) {
+
+    					$DOM.inputs.classList.add(PLUGIN_NAME + '-inputs');
+
+    					forEach(settings.inputs, function (value, index) {
+    						$DOM.inputs.appendChild(createFragElem(value[0]));
+
+    						$inputs = $DOM.inputs.childNodes;
+
+    						$inputs[index].classList.add(PLUGIN_NAME + '-inputs-child');
+
+    						if(value[3]){
+    							setTimeout(function() {
+    								$inputs[index].focus();
+    							}, 300);
+    						}
+
+    						$inputs[index].addEventListener(value[1], function (e) {
+    							var ts = value[2];
+    							return ts(that, $DOM.toast, this, e);
+    						});
+    					});
+    					$DOM.toastBody.appendChild($DOM.inputs);
+    				}
+    			})();
+
+    			// Buttons
+    			(function(){
+    				if(settings.buttons.length > 0) {
+
+    					$DOM.buttons.classList.add(PLUGIN_NAME + '-buttons');
+
+    					forEach(settings.buttons, function (value, index) {
+    						$DOM.buttons.appendChild(createFragElem(value[0]));
+
+    						var $btns = $DOM.buttons.childNodes;
+
+    						$btns[index].classList.add(PLUGIN_NAME + '-buttons-child');
+
+    						if(value[2]){
+    							setTimeout(function() {
+    								$btns[index].focus();
+    							}, 300);
+    						}
+
+    						$btns[index].addEventListener('click', function (e) {
+    							e.preventDefault();
+    							var ts = value[1];
+    							return ts(that, $DOM.toast, this, e, $inputs);
+    						});
+    					});
+    				}
+    				$DOM.toastBody.appendChild($DOM.buttons);
+    			})();
+
+    			if(settings.message.length > 0 && (settings.inputs.length > 0 || settings.buttons.length > 0)) {
+    				$DOM.p.style.marginBottom = '0';
+    			}
+
+    			if(settings.inputs.length > 0 || settings.buttons.length > 0){
+    				if(settings.rtl){
+    					$DOM.toastTexts.style.marginLeft = '10px';
+    				} else {
+    					$DOM.toastTexts.style.marginRight = '10px';
+    				}
+    				if(settings.inputs.length > 0 && settings.buttons.length > 0){
+    					if(settings.rtl){
+    						$DOM.inputs.style.marginLeft = '8px';
+    					} else {
+    						$DOM.inputs.style.marginRight = '8px';
+    					}
+    				}
+    			}
+
+    			// Wrap
+    			(function(){
+    				$DOM.toastCapsule.style.visibility = 'hidden';
+    				setTimeout(function() {
+    					var H = $DOM.toast.offsetHeight;
+    					var style = $DOM.toast.currentStyle || window.getComputedStyle($DOM.toast);
+    					var marginTop = style.marginTop;
+    						marginTop = marginTop.split('px');
+    						marginTop = parseInt(marginTop[0]);
+    					var marginBottom = style.marginBottom;
+    						marginBottom = marginBottom.split('px');
+    						marginBottom = parseInt(marginBottom[0]);
+
+    					$DOM.toastCapsule.style.visibility = '';
+    					$DOM.toastCapsule.style.height = (H+marginBottom+marginTop)+'px';
+
+    					setTimeout(function() {
+    						$DOM.toastCapsule.style.height = 'auto';
+    						if(settings.target){
+    							$DOM.toastCapsule.style.overflow = 'visible';
+    						}
+    					}, 500);
+
+    					if(settings.timeout) {
+    						that.progress(settings, $DOM.toast).start();
+    					}
+    				}, 100);
+    			})();
+
+    			// Target
+    			(function(){
+    				var position = settings.position;
+
+    				if(settings.target){
+
+    					$DOM.wrapper = document.querySelector(settings.target);
+    					$DOM.wrapper.classList.add(PLUGIN_NAME + '-target');
+
+    					if(settings.targetFirst) {
+    						$DOM.wrapper.insertBefore($DOM.toastCapsule, $DOM.wrapper.firstChild);
+    					} else {
+    						$DOM.wrapper.appendChild($DOM.toastCapsule);
+    					}
+
+    				} else {
+
+    					if( POSITIONS.indexOf(settings.position) == -1 ){
+    						console.warn('['+PLUGIN_NAME+'] Incorrect position.\nIt can be › ' + POSITIONS);
+    						return;
+    					}
+
+    					if(ISMOBILE || window.innerWidth <= MOBILEWIDTH){
+    						if(settings.position == 'bottomLeft' || settings.position == 'bottomRight' || settings.position == 'bottomCenter'){
+    							position = PLUGIN_NAME+'-wrapper-bottomCenter';
+    						}
+    						else if(settings.position == 'topLeft' || settings.position == 'topRight' || settings.position == 'topCenter'){
+    							position = PLUGIN_NAME+'-wrapper-topCenter';
+    						}
+    						else {
+    							position = PLUGIN_NAME+'-wrapper-center';
+    						}
+    					} else {
+    						position = PLUGIN_NAME+'-wrapper-'+position;
+    					}
+    					$DOM.wrapper = document.querySelector('.' + PLUGIN_NAME + '-wrapper.'+position);
+
+    					if(!$DOM.wrapper) {
+    						$DOM.wrapper = document.createElement('div');
+    						$DOM.wrapper.classList.add(PLUGIN_NAME + '-wrapper');
+    						$DOM.wrapper.classList.add(position);
+    						document.body.appendChild($DOM.wrapper);
+    					}
+    					if(settings.position == 'topLeft' || settings.position == 'topCenter' || settings.position == 'topRight'){
+    						$DOM.wrapper.insertBefore($DOM.toastCapsule, $DOM.wrapper.firstChild);
+    					} else {
+    						$DOM.wrapper.appendChild($DOM.toastCapsule);
+    					}
+    				}
+
+    				if(!isNaN(settings.zindex)) {
+    					$DOM.wrapper.style.zIndex = settings.zindex;
+    				} else {
+    					console.warn('['+PLUGIN_NAME+'] Invalid zIndex.');
+    				}
+    			})();
+
+    			// Overlay
+    			(function(){
+
+    				if(settings.overlay) {
+
+    					if( document.querySelector('.'+PLUGIN_NAME+'-overlay.fadeIn') !== null ){
+
+    						$DOM.overlay = document.querySelector('.'+PLUGIN_NAME+'-overlay');
+    						$DOM.overlay.setAttribute('data-iziToast-ref', $DOM.overlay.getAttribute('data-iziToast-ref') + ',' + settings.ref);
+
+    						if(!isNaN(settings.zindex) && settings.zindex !== null) {
+    							$DOM.overlay.style.zIndex = settings.zindex-1;
+    						}
+
+    					} else {
+
+    						$DOM.overlay.classList.add(PLUGIN_NAME+'-overlay');
+    						$DOM.overlay.classList.add('fadeIn');
+    						$DOM.overlay.style.background = settings.overlayColor;
+    						$DOM.overlay.setAttribute('data-iziToast-ref', settings.ref);
+    						if(!isNaN(settings.zindex) && settings.zindex !== null) {
+    							$DOM.overlay.style.zIndex = settings.zindex-1;
+    						}
+    						document.querySelector('body').appendChild($DOM.overlay);
+    					}
+
+    					if(settings.overlayClose) {
+
+    						$DOM.overlay.removeEventListener('click', {});
+    						$DOM.overlay.addEventListener('click', function (e) {
+    							that.hide(settings, $DOM.toast, 'overlay');
+    						});
+    					} else {
+    						$DOM.overlay.removeEventListener('click', {});
+    					}
+    				}			
+    			})();
+
+    			// Inside animations
+    			(function(){
+    				if(settings.animateInside){
+    					$DOM.toast.classList.add(PLUGIN_NAME+'-animateInside');
+    				
+    					var animationTimes = [200, 100, 300];
+    					if(settings.transitionIn == 'bounceInLeft' || settings.transitionIn == 'bounceInRight'){
+    						animationTimes = [400, 200, 400];
+    					}
+
+    					if(settings.title.length > 0) {
+    						setTimeout(function(){
+    							$DOM.strong.classList.add('slideIn');
+    						}, animationTimes[0]);
+    					}
+
+    					if(settings.message.length > 0) {
+    						setTimeout(function(){
+    							$DOM.p.classList.add('slideIn');
+    						}, animationTimes[1]);
+    					}
+
+    					if(settings.icon || settings.iconUrl) {
+    						setTimeout(function(){
+    							$DOM.icon.classList.add('revealIn');
+    						}, animationTimes[2]);
+    					}
+
+    					var counter = 150;
+    					if(settings.buttons.length > 0 && $DOM.buttons) {
+
+    						setTimeout(function(){
+
+    							forEach($DOM.buttons.childNodes, function(element, index) {
+
+    								setTimeout(function(){
+    									element.classList.add('revealIn');
+    								}, counter);
+    								counter = counter + 150;
+    							});
+
+    						}, settings.inputs.length > 0 ? 150 : 0);
+    					}
+
+    					if(settings.inputs.length > 0 && $DOM.inputs) {
+    						counter = 150;
+    						forEach($DOM.inputs.childNodes, function(element, index) {
 
     							setTimeout(function(){
     								element.classList.add('revealIn');
     							}, counter);
     							counter = counter + 150;
     						});
-
-    					}, settings.inputs.length > 0 ? 150 : 0);
+    					}
     				}
+    			})();
 
-    				if(settings.inputs.length > 0 && $DOM.inputs) {
-    					counter = 150;
-    					forEach($DOM.inputs.childNodes, function(element, index) {
-
-    						setTimeout(function(){
-    							element.classList.add('revealIn');
-    						}, counter);
-    						counter = counter + 150;
-    					});
-    				}
-    			}
-    		})();
-
-    		settings.onOpening.apply(null, [settings, $DOM.toast]);
-
-    		try {
-    			var event = new CustomEvent(PLUGIN_NAME + '-opening', {detail: settings, bubbles: true, cancelable: true});
-    			document.dispatchEvent(event);
-    		} catch(ex){
-    			console.warn(ex);
-    		}
-
-    		setTimeout(function() {
-
-    			$DOM.toast.classList.remove(PLUGIN_NAME+'-opening');
-    			$DOM.toast.classList.add(PLUGIN_NAME+'-opened');
+    			settings.onOpening.apply(null, [settings, $DOM.toast]);
 
     			try {
-    				var event = new CustomEvent(PLUGIN_NAME + '-opened', {detail: settings, bubbles: true, cancelable: true});
+    				var event = new CustomEvent(PLUGIN_NAME + '-opening', {detail: settings, bubbles: true, cancelable: true});
     				document.dispatchEvent(event);
     			} catch(ex){
     				console.warn(ex);
     			}
 
-    			settings.onOpened.apply(null, [settings, $DOM.toast]);
-    		}, 1000);
+    			setTimeout(function() {
 
-    		if(settings.drag){
+    				$DOM.toast.classList.remove(PLUGIN_NAME+'-opening');
+    				$DOM.toast.classList.add(PLUGIN_NAME+'-opened');
 
-    			if(ACCEPTSTOUCH) {
-
-    			    $DOM.toast.addEventListener('touchstart', function(e) {
-    			        drag.startMoving(this, that, settings, e);
-    			    }, false);
-
-    			    $DOM.toast.addEventListener('touchend', function(e) {
-    			        drag.stopMoving(this, e);
-    			    }, false);
-    			} else {
-
-    			    $DOM.toast.addEventListener('mousedown', function(e) {
-    			    	e.preventDefault();
-    			        drag.startMoving(this, that, settings, e);
-    			    }, false);
-
-    			    $DOM.toast.addEventListener('mouseup', function(e) {
-    			    	e.preventDefault();
-    			        drag.stopMoving(this, e);
-    			    }, false);
-    			}
-    		}
-
-    		if(settings.closeOnEscape) {
-
-    			document.addEventListener('keyup', function (evt) {
-    				evt = evt || window.event;
-    				if(evt.keyCode == 27) {
-    				    that.hide(settings, $DOM.toast, 'esc');
+    				try {
+    					var event = new CustomEvent(PLUGIN_NAME + '-opened', {detail: settings, bubbles: true, cancelable: true});
+    					document.dispatchEvent(event);
+    				} catch(ex){
+    					console.warn(ex);
     				}
-    			});
-    		}
 
-    		if(settings.closeOnClick) {
-    			$DOM.toast.addEventListener('click', function (evt) {
-    				that.hide(settings, $DOM.toast, 'toast');
-    			});
-    		}
+    				settings.onOpened.apply(null, [settings, $DOM.toast]);
+    			}, 1000);
 
-    		that.toast = $DOM.toast;		
-    	};
-    	
+    			if(settings.drag){
 
-    	return $iziToast;
-    });
-    });
+    				if(ACCEPTSTOUCH) {
+
+    				    $DOM.toast.addEventListener('touchstart', function(e) {
+    				        drag.startMoving(this, that, settings, e);
+    				    }, false);
+
+    				    $DOM.toast.addEventListener('touchend', function(e) {
+    				        drag.stopMoving(this, e);
+    				    }, false);
+    				} else {
+
+    				    $DOM.toast.addEventListener('mousedown', function(e) {
+    				    	e.preventDefault();
+    				        drag.startMoving(this, that, settings, e);
+    				    }, false);
+
+    				    $DOM.toast.addEventListener('mouseup', function(e) {
+    				    	e.preventDefault();
+    				        drag.stopMoving(this, e);
+    				    }, false);
+    				}
+    			}
+
+    			if(settings.closeOnEscape) {
+
+    				document.addEventListener('keyup', function (evt) {
+    					evt = evt || window.event;
+    					if(evt.keyCode == 27) {
+    					    that.hide(settings, $DOM.toast, 'esc');
+    					}
+    				});
+    			}
+
+    			if(settings.closeOnClick) {
+    				$DOM.toast.addEventListener('click', function (evt) {
+    					that.hide(settings, $DOM.toast, 'toast');
+    				});
+    			}
+
+    			that.toast = $DOM.toast;		
+    		};
+    		
+
+    		return $iziToast;
+    	});
+    } (iziToast$1));
+
+    var iziToast = iziToastExports;
 
     const subscriber_queue = [];
     /**
@@ -7675,9 +7751,9 @@ var app = (function () {
 
     let onNewLyrics = writable(null);
 
-    /* src/middlewares/IpcMiddleware.svelte generated by Svelte v3.49.0 */
+    /* src/middlewares/IpcMiddleware.svelte generated by Svelte v3.55.1 */
 
-    function create_fragment$1t(ctx) {
+    function create_fragment$1s(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -7692,7 +7768,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1t.name,
+    		id: create_fragment$1s.name,
     		type: "component",
     		source: "",
     		ctx
@@ -7701,7 +7777,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1t($$self, $$props, $$invalidate) {
+    function instance$1s($$self, $$props, $$invalidate) {
     	let $onNewLyrics;
     	let $layoutToShow;
     	let $artCompressQueueLength;
@@ -7930,13 +8006,13 @@ var app = (function () {
     class IpcMiddleware extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1t, create_fragment$1t, safe_not_equal, {});
+    		init(this, options, instance$1s, create_fragment$1s, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "IpcMiddleware",
     			options,
-    			id: create_fragment$1t.name
+    			id: create_fragment$1s.name
     		});
     	}
     }
@@ -8000,18 +8076,24 @@ var app = (function () {
         return data;
     }
 
+    var wavesurfer_minExports = {};
+    var wavesurfer_min = {
+      get exports(){ return wavesurfer_minExports; },
+      set exports(v){ wavesurfer_minExports = v; },
+    };
+
     /*!
      * wavesurfer.js 6.1.0 (2022-07-14)
      * https://wavesurfer-js.org
      * @license BSD-3-Clause
      */
 
-    var wavesurfer_min = createCommonjsModule(function (module, exports) {
-    !function(e,t){module.exports=t();}(self,(()=>(()=>{var e={296:e=>{function t(e,t,s){var i,r,a,n,o;function h(){var l=Date.now()-n;l<t&&l>=0?i=setTimeout(h,t-l):(i=null,s||(o=e.apply(a,r),a=r=null));}null==t&&(t=100);var l=function(){a=this,r=arguments,n=Date.now();var l=s&&!i;return i||(i=setTimeout(h,t)),l&&(o=e.apply(a,r),a=r=null),o};return l.clear=function(){i&&(clearTimeout(i),i=null);},l.flush=function(){i&&(o=e.apply(a,r),a=r=null,clearTimeout(i),i=null);},l}t.debounce=t,e.exports=t;}},t={};function s(i){var r=t[i];if(void 0!==r)return r.exports;var a=t[i]={exports:{}};return e[i](a,a.exports,s),a.exports}s.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return s.d(t,{a:t}),t},s.d=(e,t)=>{for(var i in t)s.o(t,i)&&!s.o(e,i)&&Object.defineProperty(e,i,{enumerable:!0,get:t[i]});},s.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),s.r=e=>{"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0});};var i={};return (()=>{s.r(i),s.d(i,{default:()=>L});var e={};function t(e){return void 0===e&&(e="wavesurfer_"),e+Math.random().toString(32).substring(2)}function r(e){let t=-1/0;return Object.keys(e).forEach((s=>{e[s]>t&&(t=e[s]);})),t}function a(e){let t=Number(1/0);return Object.keys(e).forEach((s=>{e[s]<t&&(t=e[s]);})),t}function n(e){const t=r(e),s=a(e);return -s>t?-s:t}s.r(e),s.d(e,{Observer:()=>o,absMax:()=>n,clamp:()=>g,debounce:()=>u(),fetchFile:()=>A,frame:()=>d,getId:()=>t,ignoreSilenceMode:()=>y,max:()=>r,min:()=>a,preventClick:()=>m,requestAnimationFrame:()=>l,style:()=>h,withOrientation:()=>b});class o{constructor(){this._disabledEventEmissions=[],this.handlers=null;}on(e,t){this.handlers||(this.handlers={});let s=this.handlers[e];return s||(s=this.handlers[e]=[]),s.push(t),{name:e,callback:t,un:(e,t)=>this.un(e,t)}}un(e,t){if(!this.handlers)return;const s=this.handlers[e];let i;if(s)if(t)for(i=s.length-1;i>=0;i--)s[i]==t&&s.splice(i,1);else s.length=0;}unAll(){this.handlers=null;}once(e,t){const s=(...i)=>{t.apply(this,i),setTimeout((()=>{this.un(e,s);}),0);};return this.on(e,s)}setDisabledEventEmissions(e){this._disabledEventEmissions=e;}_isDisabledEventEmission(e){return this._disabledEventEmissions&&this._disabledEventEmissions.includes(e)}fireEvent(e,...t){if(!this.handlers||this._isDisabledEventEmission(e))return;const s=this.handlers[e];s&&s.forEach((e=>{e(...t);}));}}function h(e,t){return Object.keys(t).forEach((s=>{e.style[s]!==t[s]&&(e.style[s]=t[s]);})),e}const l=(window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||((e,t)=>setTimeout(e,1e3/60))).bind(window);function d(e){return (...t)=>l((()=>e(...t)))}var c=s(296),u=s.n(c);function p(e){e.stopPropagation(),document.body.removeEventListener("click",p,!0);}function m(e){document.body.addEventListener("click",p,!0);}class f{constructor(e,t,s){this.instance=e,this.instance._reader=s.body.getReader(),this.total=parseInt(t,10),this.loaded=0;}start(e){const t=()=>{this.instance._reader.read().then((({done:s,value:i})=>{if(s)return 0===this.total&&this.instance.onProgress.call(this.instance,{loaded:this.loaded,total:this.total,lengthComputable:!1}),void e.close();this.loaded+=i.byteLength,this.instance.onProgress.call(this.instance,{loaded:this.loaded,total:this.total,lengthComputable:!(0===this.total)}),e.enqueue(i),t();})).catch((t=>{e.error(t);}));};t();}}function A(e){if(!e)throw new Error("fetch options missing");if(!e.url)throw new Error("fetch url missing");const t=new o,s=new Headers,i=new Request(e.url);t.controller=new AbortController,e&&e.requestHeaders&&e.requestHeaders.forEach((e=>{s.append(e.key,e.value);}));const r=e.responseType||"json",a={method:e.method||"GET",headers:s,mode:e.mode||"cors",credentials:e.credentials||"same-origin",cache:e.cache||"default",redirect:e.redirect||"follow",referrer:e.referrer||"client",signal:t.controller.signal};return fetch(i,a).then((e=>{t.response=e;let s=!0;e.body||(s=!1);const i=e.headers.get("content-length");return null===i&&(s=!1),s?(t.onProgress=e=>{t.fireEvent("progress",e);},new Response(new ReadableStream(new f(t,i,e)),a)):e})).then((e=>{let t;if(e.ok)switch(r){case"arraybuffer":return e.arrayBuffer();case"json":return e.json();case"blob":return e.blob();case"text":return e.text();default:t="Unknown responseType: "+r;}throw t||(t="HTTP error status: "+e.status),new Error(t)})).then((e=>{t.fireEvent("success",e);})).catch((e=>{t.fireEvent("error",e);})),t.fetchRequest=i,t}function g(e,t,s){return Math.min(Math.max(t,e),s)}const v={width:"height",height:"width",overflowX:"overflowY",overflowY:"overflowX",clientWidth:"clientHeight",clientHeight:"clientWidth",clientX:"clientY",clientY:"clientX",scrollWidth:"scrollHeight",scrollLeft:"scrollTop",offsetLeft:"offsetTop",offsetTop:"offsetLeft",offsetHeight:"offsetWidth",offsetWidth:"offsetHeight",left:"top",right:"bottom",top:"left",bottom:"right",borderRightStyle:"borderBottomStyle",borderRightWidth:"borderBottomWidth",borderRightColor:"borderBottomColor"};function w(e,t){return Object.prototype.hasOwnProperty.call(v,e)&&t?v[e]:e}const C=Symbol("isProxy");function b(e,t){return e[C]?e:new Proxy(e,{get:function(e,s,i){if(s===C)return !0;if("domElement"===s)return e;if("style"===s)return b(e.style,t);if("canvas"===s)return b(e.canvas,t);if("getBoundingClientRect"===s)return function(...s){return b(e.getBoundingClientRect(...s),t)};if("getContext"===s)return function(...s){return b(e.getContext(...s),t)};{let i=e[w(s,t)];return "function"==typeof i?i.bind(e):i}},set:function(e,s,i){return e[w(s,t)]=i,!0}})}function y(){let e=document.createElement("div");e.innerHTML='<audio x-webkit-airplay="deny"></audio>';let t=e.children.item(0);t.src="data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA//////////////////////////////////////////////////////////////////8AAABhTEFNRTMuMTAwA8MAAAAAAAAAABQgJAUHQQAB9AAAAnGMHkkIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADgnABGiAAQBCqgCRMAAgEAH///////////////7+n/9FTuQsQH//////2NG0jWUGlio5gLQTOtIoeR2WX////X4s9Atb/JRVCbBUpeRUq//////////////////9RUi0f2jn/+xDECgPCjAEQAABN4AAANIAAAAQVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==",t.preload="auto",t.type="audio/mpeg",t.disableRemotePlayback=!0,t.play(),t.remove(),e.remove();}class k extends o{constructor(e,t){super(),this.container=b(e,t.vertical),this.params=t,this.width=0,this.height=t.height*this.params.pixelRatio,this.lastPos=0,this.wrapper=null;}style(e,t){return h(e,t)}createWrapper(){this.wrapper=b(this.container.appendChild(document.createElement("wave")),this.params.vertical),this.style(this.wrapper,{display:"block",position:"relative",userSelect:"none",webkitUserSelect:"none",height:this.params.height+"px"}),(this.params.fillParent||this.params.scrollParent)&&this.style(this.wrapper,{width:"100%",cursor:this.params.hideCursor?"none":"auto",overflowX:this.params.hideScrollbar?"hidden":"auto",overflowY:"hidden"}),this.setupWrapperEvents();}handleEvent(e,t){!t&&e.preventDefault();const s=b(e.targetTouches?e.targetTouches[0]:e,this.params.vertical).clientX,i=this.wrapper.getBoundingClientRect(),r=this.width,a=this.getWidth(),n=this.getProgressPixels(i,s);let o;return o=!this.params.fillParent&&r<a?n*(this.params.pixelRatio/r)||0:(n+this.wrapper.scrollLeft)/this.wrapper.scrollWidth||0,g(o,0,1)}getProgressPixels(e,t){return this.params.rtl?e.right-t:t-e.left}setupWrapperEvents(){this.wrapper.addEventListener("click",(e=>{const t=b(e,this.params.vertical),s=this.wrapper.offsetHeight-this.wrapper.clientHeight;if(0!==s){const e=this.wrapper.getBoundingClientRect();if(t.clientY>=e.bottom-s)return}this.params.interact&&this.fireEvent("click",e,this.handleEvent(e));})),this.wrapper.addEventListener("dblclick",(e=>{this.params.interact&&this.fireEvent("dblclick",e,this.handleEvent(e));})),this.wrapper.addEventListener("scroll",(e=>this.fireEvent("scroll",e)));}drawPeaks(e,t,s,i){this.setWidth(t)||this.clearWave(),this.params.barWidth?this.drawBars(e,0,s,i):this.drawWave(e,0,s,i);}resetScroll(){null!==this.wrapper&&(this.wrapper.scrollLeft=0);}recenter(e){const t=this.wrapper.scrollWidth*e;this.recenterOnPosition(t,!0);}recenterOnPosition(e,t){const s=this.wrapper.scrollLeft,i=~~(this.wrapper.clientWidth/2),r=this.wrapper.scrollWidth-this.wrapper.clientWidth;let a=e-i,n=a-s;if(0!=r){if(!t&&-i<=n&&n<i){let e=this.params.autoCenterRate;e/=i,e*=r,n=Math.max(-e,Math.min(e,n)),a=s+n;}a=Math.max(0,Math.min(r,a)),a!=s&&(this.wrapper.scrollLeft=a);}}getScrollX(){let e=0;if(this.wrapper){const t=this.params.pixelRatio;if(e=Math.round(this.wrapper.scrollLeft*t),this.params.scrollParent){const s=~~(this.wrapper.scrollWidth*t-this.getWidth());e=Math.min(s,Math.max(0,e));}}return e}getWidth(){return Math.round(this.container.clientWidth*this.params.pixelRatio)}setWidth(e){if(this.width==e)return !1;if(this.width=e,this.params.fillParent||this.params.scrollParent)this.style(this.wrapper,{width:""});else {const e=~~(this.width/this.params.pixelRatio)+"px";this.style(this.wrapper,{width:e});}return this.updateSize(),!0}setHeight(e){return e!=this.height&&(this.height=e,this.style(this.wrapper,{height:~~(this.height/this.params.pixelRatio)+"px"}),this.updateSize(),!0)}progress(e){const t=1/this.params.pixelRatio,s=Math.round(e*this.width)*t;if(s<this.lastPos||s-this.lastPos>=t){if(this.lastPos=s,this.params.scrollParent&&this.params.autoCenter){const t=~~(this.wrapper.scrollWidth*e);this.recenterOnPosition(t,this.params.autoCenterImmediately);}this.updateProgress(s);}}destroy(){this.unAll(),this.wrapper&&(this.wrapper.parentNode==this.container.domElement&&this.container.removeChild(this.wrapper.domElement),this.wrapper=null);}updateCursor(){}updateSize(){}drawBars(e,t,s,i){}drawWave(e,t,s,i){}clearWave(){}updateProgress(e){}}class P{constructor(){this.wave=null,this.waveCtx=null,this.progress=null,this.progressCtx=null,this.start=0,this.end=1,this.id=t(void 0!==this.constructor.name?this.constructor.name.toLowerCase()+"_":"canvasentry_"),this.canvasContextAttributes={};}initWave(e){this.wave=e,this.waveCtx=this.wave.getContext("2d",this.canvasContextAttributes);}initProgress(e){this.progress=e,this.progressCtx=this.progress.getContext("2d",this.canvasContextAttributes);}updateDimensions(e,t,s,i){this.start=this.wave.offsetLeft/t||0,this.end=this.start+e/t,this.wave.width=s,this.wave.height=i;let r={width:e+"px"};h(this.wave,r),this.hasProgressCanvas&&(this.progress.width=s,this.progress.height=i,h(this.progress,r));}clearWave(){this.waveCtx.clearRect(0,0,this.waveCtx.canvas.width,this.waveCtx.canvas.height),this.hasProgressCanvas&&this.progressCtx.clearRect(0,0,this.progressCtx.canvas.width,this.progressCtx.canvas.height);}setFillStyles(e,t){this.waveCtx.fillStyle=this.getFillStyle(this.waveCtx,e),this.hasProgressCanvas&&(this.progressCtx.fillStyle=this.getFillStyle(this.progressCtx,t));}getFillStyle(e,t){if("string"==typeof t||t instanceof CanvasGradient)return t;const s=e.createLinearGradient(0,0,0,e.canvas.height);return t.forEach(((e,i)=>s.addColorStop(i/t.length,e))),s}applyCanvasTransforms(e){e&&(this.waveCtx.setTransform(0,1,1,0,0,0),this.hasProgressCanvas&&this.progressCtx.setTransform(0,1,1,0,0,0));}fillRects(e,t,s,i,r){this.fillRectToContext(this.waveCtx,e,t,s,i,r),this.hasProgressCanvas&&this.fillRectToContext(this.progressCtx,e,t,s,i,r);}fillRectToContext(e,t,s,i,r,a){e&&(a?this.drawRoundedRect(e,t,s,i,r,a):e.fillRect(t,s,i,r));}drawRoundedRect(e,t,s,i,r,a){0!==r&&(r<0&&(s-=r*=-1),e.beginPath(),e.moveTo(t+a,s),e.lineTo(t+i-a,s),e.quadraticCurveTo(t+i,s,t+i,s+a),e.lineTo(t+i,s+r-a),e.quadraticCurveTo(t+i,s+r,t+i-a,s+r),e.lineTo(t+a,s+r),e.quadraticCurveTo(t,s+r,t,s+r-a),e.lineTo(t,s+a),e.quadraticCurveTo(t,s,t+a,s),e.closePath(),e.fill());}drawLines(e,t,s,i,r,a){this.drawLineToContext(this.waveCtx,e,t,s,i,r,a),this.hasProgressCanvas&&this.drawLineToContext(this.progressCtx,e,t,s,i,r,a);}drawLineToContext(e,t,s,i,r,a,n){if(!e)return;const o=t.length/2,h=Math.round(o*this.start),l=h,d=Math.round(o*this.end)+1,c=this.wave.width/(d-l-1),u=i+r,p=s/i;let m,f,A;for(e.beginPath(),e.moveTo((l-h)*c,u),e.lineTo((l-h)*c,u-Math.round((t[2*l]||0)/p)),m=l;m<d;m++)f=t[2*m]||0,A=Math.round(f/p),e.lineTo((m-h)*c+this.halfPixel,u-A);let g=d-1;for(;g>=l;g--)f=t[2*g+1]||0,A=Math.round(f/p),e.lineTo((g-h)*c+this.halfPixel,u-A);e.lineTo((l-h)*c,u-Math.round((t[2*l+1]||0)/p)),e.closePath(),e.fill();}destroy(){this.waveCtx=null,this.wave=null,this.progressCtx=null,this.progress=null;}getImage(e,t,s){return "blob"===s?new Promise((s=>{this.wave.toBlob(s,e,t);})):"dataURL"===s?this.wave.toDataURL(e,t):void 0}}class E extends k{constructor(e,t){super(e,t),this.maxCanvasWidth=t.maxCanvasWidth,this.maxCanvasElementWidth=Math.round(t.maxCanvasWidth/t.pixelRatio),this.hasProgressCanvas=t.waveColor!=t.progressColor,this.halfPixel=.5/t.pixelRatio,this.canvases=[],this.progressWave=null,this.EntryClass=P,this.canvasContextAttributes=t.drawingContextAttributes,this.overlap=2*Math.ceil(t.pixelRatio/2),this.barRadius=t.barRadius||0,this.vertical=t.vertical;}init(){this.createWrapper(),this.createElements();}createElements(){this.progressWave=b(this.wrapper.appendChild(document.createElement("wave")),this.params.vertical),this.style(this.progressWave,{position:"absolute",zIndex:3,left:0,top:0,bottom:0,overflow:"hidden",width:"0",display:"none",boxSizing:"border-box",borderRightStyle:"solid",pointerEvents:"none"}),this.addCanvas(),this.updateCursor();}updateCursor(){this.style(this.progressWave,{borderRightWidth:this.params.cursorWidth+"px",borderRightColor:this.params.cursorColor});}updateSize(){const e=Math.round(this.width/this.params.pixelRatio),t=Math.ceil(e/(this.maxCanvasElementWidth+this.overlap));for(;this.canvases.length<t;)this.addCanvas();for(;this.canvases.length>t;)this.removeCanvas();let s=this.maxCanvasWidth+this.overlap;const i=this.canvases.length-1;this.canvases.forEach(((e,t)=>{t==i&&(s=this.width-this.maxCanvasWidth*i),this.updateDimensions(e,s,this.height),e.clearWave();}));}addCanvas(){const e=new this.EntryClass;e.canvasContextAttributes=this.canvasContextAttributes,e.hasProgressCanvas=this.hasProgressCanvas,e.halfPixel=this.halfPixel;const t=this.maxCanvasElementWidth*this.canvases.length;let s=b(this.wrapper.appendChild(document.createElement("canvas")),this.params.vertical);if(this.style(s,{position:"absolute",zIndex:2,left:t+"px",top:0,bottom:0,height:"100%",pointerEvents:"none"}),e.initWave(s),this.hasProgressCanvas){let s=b(this.progressWave.appendChild(document.createElement("canvas")),this.params.vertical);this.style(s,{position:"absolute",left:t+"px",top:0,bottom:0,height:"100%"}),e.initProgress(s);}this.canvases.push(e);}removeCanvas(){let e=this.canvases[this.canvases.length-1];e.wave.parentElement.removeChild(e.wave.domElement),this.hasProgressCanvas&&e.progress.parentElement.removeChild(e.progress.domElement),e&&(e.destroy(),e=null),this.canvases.pop();}updateDimensions(e,t,s){const i=Math.round(t/this.params.pixelRatio),r=Math.round(this.width/this.params.pixelRatio);e.updateDimensions(i,r,t,s),this.style(this.progressWave,{display:"block"});}clearWave(){d((()=>{this.canvases.forEach((e=>e.clearWave()));}))();}drawBars(e,t,s,i){return this.prepareDraw(e,t,s,i,(({absmax:e,hasMinVals:t,height:r,offsetY:a,halfH:n,peaks:o,channelIndex:h})=>{if(void 0===s)return;const l=t?2:1,d=o.length/l/this.width,c=i;let u=s;for(;u<c;u+=.1){let t=0,s=Math.floor(u*d)*l;const i=Math.floor((u+.1)*d)*l;do{const e=Math.abs(o[s]);e>t&&(t=e),s+=l;}while(s<i);let r=Math.round(t/e*n);0==r&&this.params.barMinHeight&&(r=this.params.barMinHeight),this.fillRect(u+this.halfPixel,n-r+a,.1+this.halfPixel,2*r,0,h);}}))}drawWave(e,t,s,i){return this.prepareDraw(e,t,s,i,(({absmax:e,hasMinVals:t,height:r,offsetY:a,halfH:n,peaks:o,channelIndex:h})=>{if(!t){const e=[],t=o.length;let s=0;for(;s<t;s++)e[2*s]=o[s],e[2*s+1]=-o[s];o=e;}void 0!==s&&this.drawLine(o,e,n,a,s,i,h),this.fillRect(0,n+a-this.halfPixel,this.width,this.halfPixel,this.barRadius,h);}))}drawLine(e,t,s,i,r,a,n){const{waveColor:o,progressColor:h}=this.params.splitChannelsOptions.channelColors[n]||{};this.canvases.forEach(((n,l)=>{this.setFillStyles(n,o,h),this.applyCanvasTransforms(n,this.params.vertical),n.drawLines(e,t,s,i,r,a);}));}fillRect(e,t,s,i,r,a){const n=Math.floor(e/this.maxCanvasWidth),o=Math.min(Math.ceil((e+s)/this.maxCanvasWidth)+1,this.canvases.length);let h=n;for(;h<o;h++){const n=this.canvases[h],o=h*this.maxCanvasWidth,l={x1:Math.max(e,h*this.maxCanvasWidth),y1:t,x2:Math.min(e+s,h*this.maxCanvasWidth+n.wave.width),y2:t+i};if(l.x1<l.x2){const{waveColor:e,progressColor:t}=this.params.splitChannelsOptions.channelColors[a]||{};this.setFillStyles(n,e,t),this.applyCanvasTransforms(n,this.params.vertical),n.fillRects(l.x1-o,l.y1,l.x2-l.x1,l.y2-l.y1,r);}}}hideChannel(e){return this.params.splitChannels&&this.params.splitChannelsOptions.filterChannels.includes(e)}prepareDraw(e,t,s,i,a,o,h){return d((()=>{if(e[0]instanceof Array){const t=e;if(this.params.splitChannels){const e=t.filter(((e,t)=>!this.hideChannel(t)));let o;return this.params.splitChannelsOptions.overlay||this.setHeight(Math.max(e.length,1)*this.params.height*this.params.pixelRatio),this.params.splitChannelsOptions&&this.params.splitChannelsOptions.relativeNormalization&&(o=r(t.map((e=>n(e))))),t.forEach(((t,r)=>this.prepareDraw(t,r,s,i,a,e.indexOf(t),o)))}e=t[0];}if(this.hideChannel(t))return;let l=1/this.params.barHeight;this.params.normalize&&(l=void 0===h?n(e):h);const d=[].some.call(e,(e=>e<0)),c=this.params.height*this.params.pixelRatio,u=c/2;let p=c*o||0;return this.params.splitChannelsOptions&&this.params.splitChannelsOptions.overlay&&(p=0),a({absmax:l,hasMinVals:d,height:c,offsetY:p,halfH:u,peaks:e,channelIndex:t})}))()}setFillStyles(e,t=this.params.waveColor,s=this.params.progressColor){e.setFillStyles(t,s);}applyCanvasTransforms(e,t=!1){e.applyCanvasTransforms(t);}getImage(e,t,s){if("blob"===s)return Promise.all(this.canvases.map((i=>i.getImage(e,t,s))));if("dataURL"===s){let i=this.canvases.map((i=>i.getImage(e,t,s)));return i.length>1?i:i[0]}}updateProgress(e){this.style(this.progressWave,{width:e+"px"});}}const x="playing",R="paused",V="finished";class M extends o{static scriptBufferSize=256;audioContext=null;offlineAudioContext=null;stateBehaviors={[x]:{init(){this.addOnAudioProcess();},getPlayedPercents(){const e=this.getDuration();return this.getCurrentTime()/e||0},getCurrentTime(){return this.startPosition+this.getPlayedTime()}},[R]:{init(){this.removeOnAudioProcess();},getPlayedPercents(){const e=this.getDuration();return this.getCurrentTime()/e||0},getCurrentTime(){return this.startPosition}},[V]:{init(){this.removeOnAudioProcess(),this.fireEvent("finish");},getPlayedPercents:()=>1,getCurrentTime(){return this.getDuration()}}};supportsWebAudio(){return !(!window.AudioContext&&!window.webkitAudioContext)}getAudioContext(){return window.WaveSurferAudioContext||(window.WaveSurferAudioContext=new(window.AudioContext||window.webkitAudioContext)),window.WaveSurferAudioContext}getOfflineAudioContext(e){return window.WaveSurferOfflineAudioContext||(window.WaveSurferOfflineAudioContext=new(window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,2,e)),window.WaveSurferOfflineAudioContext}constructor(e){super(),this.params=e,this.ac=e.audioContext||(this.supportsWebAudio()?this.getAudioContext():{}),this.lastPlay=this.ac.currentTime,this.startPosition=0,this.scheduledPause=null,this.states={[x]:Object.create(this.stateBehaviors.playing),[R]:Object.create(this.stateBehaviors.paused),[V]:Object.create(this.stateBehaviors.finished)},this.buffer=null,this.filters=[],this.gainNode=null,this.mergedPeaks=null,this.offlineAc=null,this.peaks=null,this.playbackRate=1,this.analyser=null,this.scriptNode=null,this.source=null,this.splitPeaks=[],this.state=null,this.explicitDuration=e.duration,this.sinkStreamDestination=null,this.sinkAudioElement=null,this.destroyed=!1;}init(){this.createVolumeNode(),this.createScriptNode(),this.createAnalyserNode(),this.setState(R),this.setPlaybackRate(this.params.audioRate),this.setLength(0);}disconnectFilters(){this.filters&&(this.filters.forEach((e=>{e&&e.disconnect();})),this.filters=null,this.analyser.connect(this.gainNode));}setState(e){this.state!==this.states[e]&&(this.state=this.states[e],this.state.init.call(this));}setFilter(...e){this.setFilters(e);}setFilters(e){this.disconnectFilters(),e&&e.length&&(this.filters=e,this.analyser.disconnect(),e.reduce(((e,t)=>(e.connect(t),t)),this.analyser).connect(this.gainNode));}createScriptNode(){this.params.audioScriptProcessor?this.scriptNode=this.params.audioScriptProcessor:this.ac.createScriptProcessor?this.scriptNode=this.ac.createScriptProcessor(M.scriptBufferSize):this.scriptNode=this.ac.createJavaScriptNode(M.scriptBufferSize),this.scriptNode.connect(this.ac.destination);}addOnAudioProcess(){this.scriptNode.onaudioprocess=()=>{const e=this.getCurrentTime();e>=this.getDuration()?(this.setState(V),this.fireEvent("pause")):e>=this.scheduledPause?this.pause():this.state===this.states.playing&&this.fireEvent("audioprocess",e);};}removeOnAudioProcess(){this.scriptNode.onaudioprocess=null;}createAnalyserNode(){this.analyser=this.ac.createAnalyser(),this.analyser.connect(this.gainNode);}createVolumeNode(){this.ac.createGain?this.gainNode=this.ac.createGain():this.gainNode=this.ac.createGainNode(),this.gainNode.connect(this.ac.destination);}setSinkId(e){return e?(this.sinkAudioElement||(this.sinkAudioElement=new window.Audio,this.sinkAudioElement.autoplay=!0),this.sinkAudioElement.setSinkId?(this.sinkStreamDestination||(this.sinkStreamDestination=this.ac.createMediaStreamDestination()),this.gainNode.disconnect(),this.gainNode.connect(this.sinkStreamDestination),this.sinkAudioElement.srcObject=this.sinkStreamDestination.stream,this.sinkAudioElement.setSinkId(e)):Promise.reject(new Error("setSinkId is not supported in your browser"))):Promise.reject(new Error("Invalid deviceId: "+e))}setVolume(e){this.gainNode.gain.setValueAtTime(e,this.ac.currentTime);}getVolume(){return this.gainNode.gain.value}decodeArrayBuffer(e,t,s){this.offlineAc||(this.offlineAc=this.getOfflineAudioContext(this.ac&&this.ac.sampleRate?this.ac.sampleRate:44100)),"webkitAudioContext"in window?this.offlineAc.decodeAudioData(e,(e=>t(e)),s):this.offlineAc.decodeAudioData(e).then((e=>t(e))).catch((e=>s(e)));}setPeaks(e,t){null!=t&&(this.explicitDuration=t),this.peaks=e;}setLength(e){if(this.mergedPeaks&&e==2*this.mergedPeaks.length-1+2)return;this.splitPeaks=[],this.mergedPeaks=[];const t=this.buffer?this.buffer.numberOfChannels:1;let s;for(s=0;s<t;s++)this.splitPeaks[s]=[],this.splitPeaks[s][2*(e-1)]=0,this.splitPeaks[s][2*(e-1)+1]=0;this.mergedPeaks[2*(e-1)]=0,this.mergedPeaks[2*(e-1)+1]=0;}getPeaks(e,t,s){if(this.peaks)return this.peaks;if(!this.buffer)return [];if(t=t||0,s=s||e-1,this.setLength(e),!this.buffer)return this.params.splitChannels?this.splitPeaks:this.mergedPeaks;if(!this.buffer.length){const e=this.createBuffer(1,4096,this.sampleRate);this.buffer=e.buffer;}const i=this.buffer.length/e,r=~~(i/10)||1,a=this.buffer.numberOfChannels;let n;for(n=0;n<a;n++){const e=this.splitPeaks[n],a=this.buffer.getChannelData(n);let o;for(o=t;o<=s;o++){const t=~~(o*i),s=~~(t+i);let h,l=a[t],d=l;for(h=t;h<s;h+=r){const e=a[h];e>d&&(d=e),e<l&&(l=e);}e[2*o]=d,e[2*o+1]=l,(0==n||d>this.mergedPeaks[2*o])&&(this.mergedPeaks[2*o]=d),(0==n||l<this.mergedPeaks[2*o+1])&&(this.mergedPeaks[2*o+1]=l);}}return this.params.splitChannels?this.splitPeaks:this.mergedPeaks}getPlayedPercents(){return this.state.getPlayedPercents.call(this)}disconnectSource(){this.source&&this.source.disconnect();}destroyWebAudio(){this.disconnectFilters(),this.disconnectSource(),this.gainNode.disconnect(),this.scriptNode.disconnect(),this.analyser.disconnect(),this.params.closeAudioContext&&("function"==typeof this.ac.close&&"closed"!=this.ac.state&&this.ac.close(),this.ac=null,this.params.audioContext?this.params.audioContext=null:window.WaveSurferAudioContext=null,window.WaveSurferOfflineAudioContext=null),this.sinkStreamDestination&&(this.sinkAudioElement.pause(),this.sinkAudioElement.srcObject=null,this.sinkStreamDestination.disconnect(),this.sinkStreamDestination=null);}destroy(){this.isPaused()||this.pause(),this.unAll(),this.buffer=null,this.destroyed=!0,this.destroyWebAudio();}load(e){this.startPosition=0,this.lastPlay=this.ac.currentTime,this.buffer=e,this.createSource();}createSource(){this.disconnectSource(),this.source=this.ac.createBufferSource(),this.source.start=this.source.start||this.source.noteGrainOn,this.source.stop=this.source.stop||this.source.noteOff,this.setPlaybackRate(this.playbackRate),this.source.buffer=this.buffer,this.source.connect(this.analyser);}resumeAudioContext(){"suspended"==this.ac.state&&this.ac.resume&&this.ac.resume();}isPaused(){return this.state!==this.states.playing}getDuration(){return this.explicitDuration?this.explicitDuration:this.buffer?this.buffer.duration:0}seekTo(e,t){if(this.buffer)return this.scheduledPause=null,null==e&&(e=this.getCurrentTime())>=this.getDuration()&&(e=0),null==t&&(t=this.getDuration()),this.startPosition=e,this.lastPlay=this.ac.currentTime,this.state===this.states.finished&&this.setState(R),{start:e,end:t}}getPlayedTime(){return (this.ac.currentTime-this.lastPlay)*this.playbackRate}play(e,t){if(!this.buffer)return;this.createSource();const s=this.seekTo(e,t);e=s.start,t=s.end,this.scheduledPause=t,this.source.start(0,e),this.resumeAudioContext(),this.setState(x),this.fireEvent("play");}pause(){this.scheduledPause=null,this.startPosition+=this.getPlayedTime();try{this.source&&this.source.stop(0);}catch(e){}this.setState(R),this.fireEvent("pause");}getCurrentTime(){return this.state.getCurrentTime.call(this)}getPlaybackRate(){return this.playbackRate}setPlaybackRate(e){this.playbackRate=e||1,this.source&&this.source.playbackRate.setValueAtTime(this.playbackRate,this.ac.currentTime);}setPlayEnd(e){this.scheduledPause=e;}}class T extends M{constructor(e){super(e),this.params=e,this.media={currentTime:0,duration:0,paused:!0,playbackRate:1,play(){},pause(){},volume:0},this.mediaType=e.mediaType.toLowerCase(),this.elementPosition=e.elementPosition,this.peaks=null,this.playbackRate=1,this.volume=1,this.isMuted=!1,this.buffer=null,this.onPlayEnd=null,this.mediaListeners={};}init(){this.setPlaybackRate(this.params.audioRate),this.createTimer();}_setupMediaListeners(){this.mediaListeners.error=()=>{this.fireEvent("error","Error loading media element");},this.mediaListeners.canplay=()=>{this.fireEvent("canplay");},this.mediaListeners.ended=()=>{this.fireEvent("finish");},this.mediaListeners.play=()=>{this.fireEvent("play");},this.mediaListeners.pause=()=>{this.fireEvent("pause");},this.mediaListeners.seeked=e=>{this.fireEvent("seek");},this.mediaListeners.volumechange=e=>{this.isMuted=this.media.muted,this.isMuted?this.volume=0:this.volume=this.media.volume,this.fireEvent("volume");},Object.keys(this.mediaListeners).forEach((e=>{this.media.removeEventListener(e,this.mediaListeners[e]),this.media.addEventListener(e,this.mediaListeners[e]);}));}createTimer(){const e=()=>{this.isPaused()||(this.fireEvent("audioprocess",this.getCurrentTime()),d(e)());};this.on("play",e),this.on("pause",(()=>{this.fireEvent("audioprocess",this.getCurrentTime());}));}load(e,t,s,i){const r=document.createElement(this.mediaType);r.controls=this.params.mediaControls,r.autoplay=this.params.autoplay||!1,r.preload=null==i?"auto":i,r.src=e,r.style.width="100%";const a=t.querySelector(this.mediaType);a&&t.removeChild(a),t.appendChild(r),this._load(r,s,i);}loadElt(e,t){e.controls=this.params.mediaControls,e.autoplay=this.params.autoplay||!1,this._load(e,t,e.preload);}_load(e,t,s){if(!(e instanceof HTMLMediaElement)||void 0===e.addEventListener)throw new Error("media parameter is not a valid media element");"function"!=typeof e.load||t&&"none"==s||e.load(),this.media=e,this._setupMediaListeners(),this.peaks=t,this.onPlayEnd=null,this.buffer=null,this.isMuted=e.muted,this.setPlaybackRate(this.playbackRate),this.setVolume(this.volume);}isPaused(){return !this.media||this.media.paused}getDuration(){if(this.explicitDuration)return this.explicitDuration;let e=(this.buffer||this.media).duration;return e>=1/0&&(e=this.media.seekable.end(0)),e}getCurrentTime(){return this.media&&this.media.currentTime}getPlayedPercents(){return this.getCurrentTime()/this.getDuration()||0}getPlaybackRate(){return this.playbackRate||this.media.playbackRate}setPlaybackRate(e){this.playbackRate=e||1,this.media.playbackRate=this.playbackRate;}seekTo(e){null==e||isNaN(e)||(this.media.currentTime=e),this.clearPlayEnd();}play(e,t){this.seekTo(e);const s=this.media.play();return t&&this.setPlayEnd(t),s}pause(){let e;return this.media&&(e=this.media.pause()),this.clearPlayEnd(),e}setPlayEnd(e){this.clearPlayEnd(),this._onPlayEnd=t=>{t>=e&&(this.pause(),this.seekTo(e));},this.on("audioprocess",this._onPlayEnd);}clearPlayEnd(){this._onPlayEnd&&(this.un("audioprocess",this._onPlayEnd),this._onPlayEnd=null);}getPeaks(e,t,s){return this.buffer?super.getPeaks(e,t,s):this.peaks||[]}setSinkId(e){return e?this.media.setSinkId?this.media.setSinkId(e):Promise.reject(new Error("setSinkId is not supported in your browser")):Promise.reject(new Error("Invalid deviceId: "+e))}getVolume(){return this.volume}setVolume(e){this.volume=e,this.media.volume!==this.volume&&(this.media.volume=this.volume);}setMute(e){this.isMuted=this.media.muted=e;}destroy(){this.pause(),this.unAll(),this.destroyed=!0,Object.keys(this.mediaListeners).forEach((e=>{this.media&&this.media.removeEventListener(e,this.mediaListeners[e]);})),this.params.removeMediaElementOnDestroy&&this.media&&this.media.parentNode&&this.media.parentNode.removeChild(this.media),this.media=null;}}class S{constructor(){this.clearPeakCache();}clearPeakCache(){this.peakCacheRanges=[],this.peakCacheLength=-1;}addRangeToPeakCache(e,t,s){e!=this.peakCacheLength&&(this.clearPeakCache(),this.peakCacheLength=e);let i=[],r=0;for(;r<this.peakCacheRanges.length&&this.peakCacheRanges[r]<t;)r++;for(r%2==0&&i.push(t);r<this.peakCacheRanges.length&&this.peakCacheRanges[r]<=s;)i.push(this.peakCacheRanges[r]),r++;r%2==0&&i.push(s),i=i.filter(((e,t,s)=>0==t?e!=s[t+1]:t==s.length-1?e!=s[t-1]:e!=s[t-1]&&e!=s[t+1])),this.peakCacheRanges=this.peakCacheRanges.concat(i),this.peakCacheRanges=this.peakCacheRanges.sort(((e,t)=>e-t)).filter(((e,t,s)=>0==t?e!=s[t+1]:t==s.length-1?e!=s[t-1]:e!=s[t-1]&&e!=s[t+1]));const a=[];for(r=0;r<i.length;r+=2)a.push([i[r],i[r+1]]);return a}getCacheRanges(){const e=[];let t;for(t=0;t<this.peakCacheRanges.length;t+=2)e.push([this.peakCacheRanges[t],this.peakCacheRanges[t+1]]);return e}}class W extends T{constructor(e){super(e),this.params=e,this.sourceMediaElement=null;}init(){this.setPlaybackRate(this.params.audioRate),this.createTimer(),this.createVolumeNode(),this.createScriptNode(),this.createAnalyserNode();}_load(e,t,s){super._load(e,t,s),this.createMediaElementSource(e);}createMediaElementSource(e){this.sourceMediaElement=this.ac.createMediaElementSource(e),this.sourceMediaElement.connect(this.analyser);}play(e,t){return this.resumeAudioContext(),super.play(e,t)}destroy(){super.destroy(),this.destroyWebAudio();}}class L extends o{defaultParams={audioContext:null,audioScriptProcessor:null,audioRate:1,autoCenter:!0,autoCenterRate:5,autoCenterImmediately:!1,backend:"WebAudio",backgroundColor:null,barHeight:1,barRadius:0,barGap:null,barMinHeight:null,container:null,cursorColor:"#333",cursorWidth:1,dragSelection:!0,drawingContextAttributes:{desynchronized:!1},duration:null,fillParent:!0,forceDecode:!1,height:128,hideScrollbar:!1,hideCursor:!1,ignoreSilenceMode:!1,interact:!0,loopSelection:!0,maxCanvasWidth:4e3,mediaContainer:null,mediaControls:!1,mediaType:"audio",minPxPerSec:20,normalize:!1,partialRender:!1,pixelRatio:window.devicePixelRatio||screen.deviceXDPI/screen.logicalXDPI,plugins:[],progressColor:"#555",removeMediaElementOnDestroy:!0,renderer:E,responsive:!1,rtl:!1,scrollParent:!1,skipLength:2,splitChannels:!1,splitChannelsOptions:{overlay:!1,channelColors:{},filterChannels:[],relativeNormalization:!1},vertical:!1,waveColor:"#999",xhr:{}};backends={MediaElement:T,WebAudio:M,MediaElementWebAudio:W};static create(e){return new L(e).init()}static VERSION="6.1.0";util=e;static util=e;constructor(e){if(super(),this.params=Object.assign({},this.defaultParams,e),this.params.splitChannelsOptions=Object.assign({},this.defaultParams.splitChannelsOptions,e.splitChannelsOptions),this.container="string"==typeof e.container?document.querySelector(this.params.container):this.params.container,!this.container)throw new Error("Container element not found");if(null==this.params.mediaContainer?this.mediaContainer=this.container:"string"==typeof this.params.mediaContainer?this.mediaContainer=document.querySelector(this.params.mediaContainer):this.mediaContainer=this.params.mediaContainer,!this.mediaContainer)throw new Error("Media Container element not found");if(this.params.maxCanvasWidth<=1)throw new Error("maxCanvasWidth must be greater than 1");if(this.params.maxCanvasWidth%2==1)throw new Error("maxCanvasWidth must be an even number");if(!0===this.params.rtl&&(!0===this.params.vertical?h(this.container,{transform:"rotateX(180deg)"}):h(this.container,{transform:"rotateY(180deg)"})),this.params.backgroundColor&&this.setBackgroundColor(this.params.backgroundColor),this.savedVolume=0,this.isMuted=!1,this.tmpEvents=[],this.currentRequest=null,this.arraybuffer=null,this.drawer=null,this.backend=null,this.peakCache=null,"function"!=typeof this.params.renderer)throw new Error("Renderer parameter is invalid");this.Drawer=this.params.renderer,"AudioElement"==this.params.backend&&(this.params.backend="MediaElement"),"WebAudio"!=this.params.backend&&"MediaElementWebAudio"!==this.params.backend||M.prototype.supportsWebAudio.call(null)||(this.params.backend="MediaElement"),this.Backend=this.backends[this.params.backend],this.initialisedPluginList={},this.isDestroyed=!1,this.isReady=!1;let t=0;return this._onResize=u()((()=>{t==this.drawer.wrapper.clientWidth||this.params.scrollParent||(t=this.drawer.wrapper.clientWidth,t&&this.drawer.fireEvent("redraw"));}),"number"==typeof this.params.responsive?this.params.responsive:100),this}init(){return this.registerPlugins(this.params.plugins),this.createDrawer(),this.createBackend(),this.createPeakCache(),this}registerPlugins(e){return e.forEach((e=>this.addPlugin(e))),e.forEach((e=>{e.deferInit||this.initPlugin(e.name);})),this.fireEvent("plugins-registered",e),this}getActivePlugins(){return this.initialisedPluginList}addPlugin(e){if(!e.name)throw new Error("Plugin does not have a name!");if(!e.instance)throw new Error(`Plugin ${e.name} does not have an instance property!`);e.staticProps&&Object.keys(e.staticProps).forEach((t=>{this[t]=e.staticProps[t];}));const t=e.instance;return Object.getOwnPropertyNames(o.prototype).forEach((e=>{t.prototype[e]=o.prototype[e];})),this[e.name]=new t(e.params||{},this),this.fireEvent("plugin-added",e.name),this}initPlugin(e){if(!this[e])throw new Error(`Plugin ${e} has not been added yet!`);return this.initialisedPluginList[e]&&this.destroyPlugin(e),this[e].init(),this.initialisedPluginList[e]=!0,this.fireEvent("plugin-initialised",e),this}destroyPlugin(e){if(!this[e])throw new Error(`Plugin ${e} has not been added yet and cannot be destroyed!`);if(!this.initialisedPluginList[e])throw new Error(`Plugin ${e} is not active and cannot be destroyed!`);if("function"!=typeof this[e].destroy)throw new Error(`Plugin ${e} does not have a destroy function!`);return this[e].destroy(),delete this.initialisedPluginList[e],this.fireEvent("plugin-destroyed",e),this}destroyAllPlugins(){Object.keys(this.initialisedPluginList).forEach((e=>this.destroyPlugin(e)));}createDrawer(){this.drawer=new this.Drawer(this.container,this.params),this.drawer.init(),this.fireEvent("drawer-created",this.drawer),!1!==this.params.responsive&&(window.addEventListener("resize",this._onResize,!0),window.addEventListener("orientationchange",this._onResize,!0)),this.drawer.on("redraw",(()=>{this.drawBuffer(),this.drawer.progress(this.backend.getPlayedPercents());})),this.drawer.on("click",((e,t)=>{setTimeout((()=>this.seekTo(t)),0);})),this.drawer.on("scroll",(e=>{this.params.partialRender&&this.drawBuffer(),this.fireEvent("scroll",e);}));}createBackend(){this.backend&&this.backend.destroy(),this.backend=new this.Backend(this.params),this.backend.init(),this.fireEvent("backend-created",this.backend),this.backend.on("finish",(()=>{this.drawer.progress(this.backend.getPlayedPercents()),this.fireEvent("finish");})),this.backend.on("play",(()=>this.fireEvent("play"))),this.backend.on("pause",(()=>this.fireEvent("pause"))),this.backend.on("audioprocess",(e=>{this.drawer.progress(this.backend.getPlayedPercents()),this.fireEvent("audioprocess",e);})),"MediaElement"!==this.params.backend&&"MediaElementWebAudio"!==this.params.backend||(this.backend.on("seek",(()=>{this.drawer.progress(this.backend.getPlayedPercents());})),this.backend.on("volume",(()=>{let e=this.getVolume();this.fireEvent("volume",e),this.backend.isMuted!==this.isMuted&&(this.isMuted=this.backend.isMuted,this.fireEvent("mute",this.isMuted));})));}createPeakCache(){this.params.partialRender&&(this.peakCache=new S);}getDuration(){return this.backend.getDuration()}getCurrentTime(){return this.backend.getCurrentTime()}setCurrentTime(e){e>=this.getDuration()?this.seekTo(1):this.seekTo(e/this.getDuration());}play(e,t){return this.params.ignoreSilenceMode&&y(),this.fireEvent("interaction",(()=>this.play(e,t))),this.backend.play(e,t)}setPlayEnd(e){this.backend.setPlayEnd(e);}pause(){if(!this.backend.isPaused())return this.backend.pause()}playPause(){return this.backend.isPaused()?this.play():this.pause()}isPlaying(){return !this.backend.isPaused()}skipBackward(e){this.skip(-e||-this.params.skipLength);}skipForward(e){this.skip(e||this.params.skipLength);}skip(e){const t=this.getDuration()||1;let s=this.getCurrentTime()||0;s=Math.max(0,Math.min(t,s+(e||0))),this.seekAndCenter(s/t);}seekAndCenter(e){this.seekTo(e),this.drawer.recenter(e);}seekTo(e){if("number"!=typeof e||!isFinite(e)||e<0||e>1)throw new Error("Error calling wavesurfer.seekTo, parameter must be a number between 0 and 1!");this.fireEvent("interaction",(()=>this.seekTo(e)));const t="WebAudio"===this.params.backend,s=this.backend.isPaused();t&&!s&&this.backend.pause();const i=this.params.scrollParent;this.params.scrollParent=!1,this.backend.seekTo(e*this.getDuration()),this.drawer.progress(e),t&&!s&&this.backend.play(),this.params.scrollParent=i,this.fireEvent("seek",e);}stop(){this.pause(),this.seekTo(0),this.drawer.progress(0);}setSinkId(e){return this.backend.setSinkId(e)}setVolume(e){this.backend.setVolume(e),this.fireEvent("volume",e);}getVolume(){return this.backend.getVolume()}setPlaybackRate(e){this.backend.setPlaybackRate(e);}getPlaybackRate(){return this.backend.getPlaybackRate()}toggleMute(){this.setMute(!this.isMuted);}setMute(e){e!==this.isMuted?(this.backend.setMute?(this.backend.setMute(e),this.isMuted=e):e?(this.savedVolume=this.backend.getVolume(),this.backend.setVolume(0),this.isMuted=!0,this.fireEvent("volume",0)):(this.backend.setVolume(this.savedVolume),this.isMuted=!1,this.fireEvent("volume",this.savedVolume)),this.fireEvent("mute",this.isMuted)):this.fireEvent("mute",this.isMuted);}getMute(){return this.isMuted}getFilters(){return this.backend.filters||[]}toggleScroll(){this.params.scrollParent=!this.params.scrollParent,this.drawBuffer();}toggleInteraction(){this.params.interact=!this.params.interact;}getWaveColor(e=null){return this.params.splitChannelsOptions.channelColors[e]?this.params.splitChannelsOptions.channelColors[e].waveColor:this.params.waveColor}setWaveColor(e,t=null){this.params.splitChannelsOptions.channelColors[t]?this.params.splitChannelsOptions.channelColors[t].waveColor=e:this.params.waveColor=e,this.drawBuffer();}getProgressColor(e=null){return this.params.splitChannelsOptions.channelColors[e]?this.params.splitChannelsOptions.channelColors[e].progressColor:this.params.progressColor}setProgressColor(e,t){this.params.splitChannelsOptions.channelColors[t]?this.params.splitChannelsOptions.channelColors[t].progressColor=e:this.params.progressColor=e,this.drawBuffer();}getBackgroundColor(){return this.params.backgroundColor}setBackgroundColor(e){this.params.backgroundColor=e,h(this.container,{background:this.params.backgroundColor});}getCursorColor(){return this.params.cursorColor}setCursorColor(e){this.params.cursorColor=e,this.drawer.updateCursor();}getHeight(){return this.params.height}setHeight(e){this.params.height=e,this.drawer.setHeight(e*this.params.pixelRatio),this.drawBuffer();}setFilteredChannels(e){this.params.splitChannelsOptions.filterChannels=e,this.drawBuffer();}drawBuffer(){const e=Math.round(this.getDuration()*this.params.minPxPerSec*this.params.pixelRatio),t=this.drawer.getWidth();let s,i=e,r=0,a=Math.max(r+t,i);if(this.params.fillParent&&(!this.params.scrollParent||e<t)&&(i=t,r=0,a=i),this.params.partialRender){const e=this.peakCache.addRangeToPeakCache(i,r,a);let t;for(t=0;t<e.length;t++)s=this.backend.getPeaks(i,e[t][0],e[t][1]),this.drawer.drawPeaks(s,i,e[t][0],e[t][1]);}else s=this.backend.getPeaks(i,r,a),this.drawer.drawPeaks(s,i,r,a);this.fireEvent("redraw",s,i);}zoom(e){e?(this.params.minPxPerSec=e,this.params.scrollParent=!0):(this.params.minPxPerSec=this.defaultParams.minPxPerSec,this.params.scrollParent=!1),this.drawBuffer(),this.drawer.progress(this.backend.getPlayedPercents()),this.drawer.recenter(this.getCurrentTime()/this.getDuration()),this.fireEvent("zoom",e);}loadArrayBuffer(e){this.decodeArrayBuffer(e,(e=>{this.isDestroyed||this.loadDecodedBuffer(e);}));}loadDecodedBuffer(e){this.backend.load(e),this.drawBuffer(),this.isReady=!0,this.fireEvent("ready");}loadBlob(e){const t=new FileReader;t.addEventListener("progress",(e=>this.onProgress(e))),t.addEventListener("load",(e=>this.loadArrayBuffer(e.target.result))),t.addEventListener("error",(()=>this.fireEvent("error","Error reading file"))),t.readAsArrayBuffer(e),this.empty();}load(e,t,s,i){if(!e)throw new Error("url parameter cannot be empty");if(this.empty(),s){const i={"Preload is not 'auto', 'none' or 'metadata'":-1===["auto","metadata","none"].indexOf(s),"Peaks are not provided":!t,"Backend is not of type 'MediaElement' or 'MediaElementWebAudio'":-1===["MediaElement","MediaElementWebAudio"].indexOf(this.params.backend),"Url is not of type string":"string"!=typeof e},r=Object.keys(i).filter((e=>i[e]));r.length&&(console.warn("Preload parameter of wavesurfer.load will be ignored because:\n\t- "+r.join("\n\t- ")),s=null);}switch("WebAudio"===this.params.backend&&e instanceof HTMLMediaElement&&(e=e.src),this.params.backend){case"WebAudio":return this.loadBuffer(e,t,i);case"MediaElement":case"MediaElementWebAudio":return this.loadMediaElement(e,t,s,i)}}loadBuffer(e,t,s){const i=t=>(t&&this.tmpEvents.push(this.once("ready",t)),this.getArrayBuffer(e,(e=>this.loadArrayBuffer(e))));if(!t)return i();this.backend.setPeaks(t,s),this.drawBuffer(),this.fireEvent("waveform-ready"),this.tmpEvents.push(this.once("interaction",i));}loadMediaElement(e,t,s,i){let r=e;if("string"==typeof e)this.backend.load(r,this.mediaContainer,t,s);else {const s=e;this.backend.loadElt(s,t),r=s.src;}this.tmpEvents.push(this.backend.once("canplay",(()=>{this.backend.destroyed||(this.drawBuffer(),this.isReady=!0,this.fireEvent("ready"));})),this.backend.once("error",(e=>this.fireEvent("error",e)))),t&&(this.backend.setPeaks(t,i),this.drawBuffer(),this.fireEvent("waveform-ready")),t&&!this.params.forceDecode||!this.backend.supportsWebAudio()||this.getArrayBuffer(r,(e=>{this.decodeArrayBuffer(e,(e=>{this.backend.buffer=e,this.backend.setPeaks(null),this.drawBuffer(),this.fireEvent("waveform-ready");}));}));}decodeArrayBuffer(e,t){this.isDestroyed||(this.arraybuffer=e,this.backend.decodeArrayBuffer(e,(s=>{this.isDestroyed||this.arraybuffer!=e||(t(s),this.arraybuffer=null);}),(()=>this.fireEvent("error","Error decoding audiobuffer"))));}getArrayBuffer(e,t){const s=A(Object.assign({url:e,responseType:"arraybuffer"},this.params.xhr));return this.currentRequest=s,this.tmpEvents.push(s.on("progress",(e=>{this.onProgress(e);})),s.on("success",(e=>{t(e),this.currentRequest=null;})),s.on("error",(e=>{this.fireEvent("error",e),this.currentRequest=null;}))),s}onProgress(e){let t;t=e.lengthComputable?e.loaded/e.total:e.loaded/(e.loaded+1e6),this.fireEvent("loading",Math.round(100*t),e.target);}exportPCM(e,t,s,i,r){e=e||1024,i=i||0,t=t||1e4,s=s||!1;const a=this.backend.getPeaks(e,i,r),n=[].map.call(a,(e=>Math.round(e*t)/t));return new Promise(((e,t)=>{if(!s){const e=new Blob([JSON.stringify(n)],{type:"application/json;charset=utf-8"}),t=URL.createObjectURL(e);window.open(t),URL.revokeObjectURL(t);}e(n);}))}exportImage(e,t,s){return e||(e="image/png"),t||(t=1),s||(s="dataURL"),this.drawer.getImage(e,t,s)}cancelAjax(){this.currentRequest&&this.currentRequest.controller&&(this.currentRequest._reader&&this.currentRequest._reader.cancel().catch((e=>{})),this.currentRequest.controller.abort(),this.currentRequest=null);}clearTmpEvents(){this.tmpEvents.forEach((e=>e.un()));}empty(){this.backend.isPaused()||(this.stop(),this.backend.disconnectSource()),this.isReady=!1,this.cancelAjax(),this.clearTmpEvents(),this.drawer.progress(0),this.drawer.setWidth(0),this.drawer.drawPeaks({length:this.drawer.getWidth()},0);}destroy(){this.destroyAllPlugins(),this.fireEvent("destroy"),this.cancelAjax(),this.clearTmpEvents(),this.unAll(),!1!==this.params.responsive&&(window.removeEventListener("resize",this._onResize,!0),window.removeEventListener("orientationchange",this._onResize,!0)),this.backend&&(this.backend.destroy(),this.backend=null),this.drawer&&this.drawer.destroy(),this.isDestroyed=!0,this.isReady=!1,this.arraybuffer=null;}}})(),i})()));
+    (function (module, exports) {
+    	!function(e,t){module.exports=t();}(self,(()=>(()=>{var e={296:e=>{function t(e,t,s){var i,r,a,n,o;function h(){var l=Date.now()-n;l<t&&l>=0?i=setTimeout(h,t-l):(i=null,s||(o=e.apply(a,r),a=r=null));}null==t&&(t=100);var l=function(){a=this,r=arguments,n=Date.now();var l=s&&!i;return i||(i=setTimeout(h,t)),l&&(o=e.apply(a,r),a=r=null),o};return l.clear=function(){i&&(clearTimeout(i),i=null);},l.flush=function(){i&&(o=e.apply(a,r),a=r=null,clearTimeout(i),i=null);},l}t.debounce=t,e.exports=t;}},t={};function s(i){var r=t[i];if(void 0!==r)return r.exports;var a=t[i]={exports:{}};return e[i](a,a.exports,s),a.exports}s.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return s.d(t,{a:t}),t},s.d=(e,t)=>{for(var i in t)s.o(t,i)&&!s.o(e,i)&&Object.defineProperty(e,i,{enumerable:!0,get:t[i]});},s.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),s.r=e=>{"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0});};var i={};return (()=>{s.r(i),s.d(i,{default:()=>L});var e={};function t(e){return void 0===e&&(e="wavesurfer_"),e+Math.random().toString(32).substring(2)}function r(e){let t=-1/0;return Object.keys(e).forEach((s=>{e[s]>t&&(t=e[s]);})),t}function a(e){let t=Number(1/0);return Object.keys(e).forEach((s=>{e[s]<t&&(t=e[s]);})),t}function n(e){const t=r(e),s=a(e);return -s>t?-s:t}s.r(e),s.d(e,{Observer:()=>o,absMax:()=>n,clamp:()=>g,debounce:()=>u(),fetchFile:()=>A,frame:()=>d,getId:()=>t,ignoreSilenceMode:()=>y,max:()=>r,min:()=>a,preventClick:()=>m,requestAnimationFrame:()=>l,style:()=>h,withOrientation:()=>b});class o{constructor(){this._disabledEventEmissions=[],this.handlers=null;}on(e,t){this.handlers||(this.handlers={});let s=this.handlers[e];return s||(s=this.handlers[e]=[]),s.push(t),{name:e,callback:t,un:(e,t)=>this.un(e,t)}}un(e,t){if(!this.handlers)return;const s=this.handlers[e];let i;if(s)if(t)for(i=s.length-1;i>=0;i--)s[i]==t&&s.splice(i,1);else s.length=0;}unAll(){this.handlers=null;}once(e,t){const s=(...i)=>{t.apply(this,i),setTimeout((()=>{this.un(e,s);}),0);};return this.on(e,s)}setDisabledEventEmissions(e){this._disabledEventEmissions=e;}_isDisabledEventEmission(e){return this._disabledEventEmissions&&this._disabledEventEmissions.includes(e)}fireEvent(e,...t){if(!this.handlers||this._isDisabledEventEmission(e))return;const s=this.handlers[e];s&&s.forEach((e=>{e(...t);}));}}function h(e,t){return Object.keys(t).forEach((s=>{e.style[s]!==t[s]&&(e.style[s]=t[s]);})),e}const l=(window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||((e,t)=>setTimeout(e,1e3/60))).bind(window);function d(e){return (...t)=>l((()=>e(...t)))}var c=s(296),u=s.n(c);function p(e){e.stopPropagation(),document.body.removeEventListener("click",p,!0);}function m(e){document.body.addEventListener("click",p,!0);}class f{constructor(e,t,s){this.instance=e,this.instance._reader=s.body.getReader(),this.total=parseInt(t,10),this.loaded=0;}start(e){const t=()=>{this.instance._reader.read().then((({done:s,value:i})=>{if(s)return 0===this.total&&this.instance.onProgress.call(this.instance,{loaded:this.loaded,total:this.total,lengthComputable:!1}),void e.close();this.loaded+=i.byteLength,this.instance.onProgress.call(this.instance,{loaded:this.loaded,total:this.total,lengthComputable:!(0===this.total)}),e.enqueue(i),t();})).catch((t=>{e.error(t);}));};t();}}function A(e){if(!e)throw new Error("fetch options missing");if(!e.url)throw new Error("fetch url missing");const t=new o,s=new Headers,i=new Request(e.url);t.controller=new AbortController,e&&e.requestHeaders&&e.requestHeaders.forEach((e=>{s.append(e.key,e.value);}));const r=e.responseType||"json",a={method:e.method||"GET",headers:s,mode:e.mode||"cors",credentials:e.credentials||"same-origin",cache:e.cache||"default",redirect:e.redirect||"follow",referrer:e.referrer||"client",signal:t.controller.signal};return fetch(i,a).then((e=>{t.response=e;let s=!0;e.body||(s=!1);const i=e.headers.get("content-length");return null===i&&(s=!1),s?(t.onProgress=e=>{t.fireEvent("progress",e);},new Response(new ReadableStream(new f(t,i,e)),a)):e})).then((e=>{let t;if(e.ok)switch(r){case"arraybuffer":return e.arrayBuffer();case"json":return e.json();case"blob":return e.blob();case"text":return e.text();default:t="Unknown responseType: "+r;}throw t||(t="HTTP error status: "+e.status),new Error(t)})).then((e=>{t.fireEvent("success",e);})).catch((e=>{t.fireEvent("error",e);})),t.fetchRequest=i,t}function g(e,t,s){return Math.min(Math.max(t,e),s)}const v={width:"height",height:"width",overflowX:"overflowY",overflowY:"overflowX",clientWidth:"clientHeight",clientHeight:"clientWidth",clientX:"clientY",clientY:"clientX",scrollWidth:"scrollHeight",scrollLeft:"scrollTop",offsetLeft:"offsetTop",offsetTop:"offsetLeft",offsetHeight:"offsetWidth",offsetWidth:"offsetHeight",left:"top",right:"bottom",top:"left",bottom:"right",borderRightStyle:"borderBottomStyle",borderRightWidth:"borderBottomWidth",borderRightColor:"borderBottomColor"};function w(e,t){return Object.prototype.hasOwnProperty.call(v,e)&&t?v[e]:e}const C=Symbol("isProxy");function b(e,t){return e[C]?e:new Proxy(e,{get:function(e,s,i){if(s===C)return !0;if("domElement"===s)return e;if("style"===s)return b(e.style,t);if("canvas"===s)return b(e.canvas,t);if("getBoundingClientRect"===s)return function(...s){return b(e.getBoundingClientRect(...s),t)};if("getContext"===s)return function(...s){return b(e.getContext(...s),t)};{let i=e[w(s,t)];return "function"==typeof i?i.bind(e):i}},set:function(e,s,i){return e[w(s,t)]=i,!0}})}function y(){let e=document.createElement("div");e.innerHTML='<audio x-webkit-airplay="deny"></audio>';let t=e.children.item(0);t.src="data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA//////////////////////////////////////////////////////////////////8AAABhTEFNRTMuMTAwA8MAAAAAAAAAABQgJAUHQQAB9AAAAnGMHkkIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADgnABGiAAQBCqgCRMAAgEAH///////////////7+n/9FTuQsQH//////2NG0jWUGlio5gLQTOtIoeR2WX////X4s9Atb/JRVCbBUpeRUq//////////////////9RUi0f2jn/+xDECgPCjAEQAABN4AAANIAAAAQVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==",t.preload="auto",t.type="audio/mpeg",t.disableRemotePlayback=!0,t.play(),t.remove(),e.remove();}class k extends o{constructor(e,t){super(),this.container=b(e,t.vertical),this.params=t,this.width=0,this.height=t.height*this.params.pixelRatio,this.lastPos=0,this.wrapper=null;}style(e,t){return h(e,t)}createWrapper(){this.wrapper=b(this.container.appendChild(document.createElement("wave")),this.params.vertical),this.style(this.wrapper,{display:"block",position:"relative",userSelect:"none",webkitUserSelect:"none",height:this.params.height+"px"}),(this.params.fillParent||this.params.scrollParent)&&this.style(this.wrapper,{width:"100%",cursor:this.params.hideCursor?"none":"auto",overflowX:this.params.hideScrollbar?"hidden":"auto",overflowY:"hidden"}),this.setupWrapperEvents();}handleEvent(e,t){!t&&e.preventDefault();const s=b(e.targetTouches?e.targetTouches[0]:e,this.params.vertical).clientX,i=this.wrapper.getBoundingClientRect(),r=this.width,a=this.getWidth(),n=this.getProgressPixels(i,s);let o;return o=!this.params.fillParent&&r<a?n*(this.params.pixelRatio/r)||0:(n+this.wrapper.scrollLeft)/this.wrapper.scrollWidth||0,g(o,0,1)}getProgressPixels(e,t){return this.params.rtl?e.right-t:t-e.left}setupWrapperEvents(){this.wrapper.addEventListener("click",(e=>{const t=b(e,this.params.vertical),s=this.wrapper.offsetHeight-this.wrapper.clientHeight;if(0!==s){const e=this.wrapper.getBoundingClientRect();if(t.clientY>=e.bottom-s)return}this.params.interact&&this.fireEvent("click",e,this.handleEvent(e));})),this.wrapper.addEventListener("dblclick",(e=>{this.params.interact&&this.fireEvent("dblclick",e,this.handleEvent(e));})),this.wrapper.addEventListener("scroll",(e=>this.fireEvent("scroll",e)));}drawPeaks(e,t,s,i){this.setWidth(t)||this.clearWave(),this.params.barWidth?this.drawBars(e,0,s,i):this.drawWave(e,0,s,i);}resetScroll(){null!==this.wrapper&&(this.wrapper.scrollLeft=0);}recenter(e){const t=this.wrapper.scrollWidth*e;this.recenterOnPosition(t,!0);}recenterOnPosition(e,t){const s=this.wrapper.scrollLeft,i=~~(this.wrapper.clientWidth/2),r=this.wrapper.scrollWidth-this.wrapper.clientWidth;let a=e-i,n=a-s;if(0!=r){if(!t&&-i<=n&&n<i){let e=this.params.autoCenterRate;e/=i,e*=r,n=Math.max(-e,Math.min(e,n)),a=s+n;}a=Math.max(0,Math.min(r,a)),a!=s&&(this.wrapper.scrollLeft=a);}}getScrollX(){let e=0;if(this.wrapper){const t=this.params.pixelRatio;if(e=Math.round(this.wrapper.scrollLeft*t),this.params.scrollParent){const s=~~(this.wrapper.scrollWidth*t-this.getWidth());e=Math.min(s,Math.max(0,e));}}return e}getWidth(){return Math.round(this.container.clientWidth*this.params.pixelRatio)}setWidth(e){if(this.width==e)return !1;if(this.width=e,this.params.fillParent||this.params.scrollParent)this.style(this.wrapper,{width:""});else {const e=~~(this.width/this.params.pixelRatio)+"px";this.style(this.wrapper,{width:e});}return this.updateSize(),!0}setHeight(e){return e!=this.height&&(this.height=e,this.style(this.wrapper,{height:~~(this.height/this.params.pixelRatio)+"px"}),this.updateSize(),!0)}progress(e){const t=1/this.params.pixelRatio,s=Math.round(e*this.width)*t;if(s<this.lastPos||s-this.lastPos>=t){if(this.lastPos=s,this.params.scrollParent&&this.params.autoCenter){const t=~~(this.wrapper.scrollWidth*e);this.recenterOnPosition(t,this.params.autoCenterImmediately);}this.updateProgress(s);}}destroy(){this.unAll(),this.wrapper&&(this.wrapper.parentNode==this.container.domElement&&this.container.removeChild(this.wrapper.domElement),this.wrapper=null);}updateCursor(){}updateSize(){}drawBars(e,t,s,i){}drawWave(e,t,s,i){}clearWave(){}updateProgress(e){}}class P{constructor(){this.wave=null,this.waveCtx=null,this.progress=null,this.progressCtx=null,this.start=0,this.end=1,this.id=t(void 0!==this.constructor.name?this.constructor.name.toLowerCase()+"_":"canvasentry_"),this.canvasContextAttributes={};}initWave(e){this.wave=e,this.waveCtx=this.wave.getContext("2d",this.canvasContextAttributes);}initProgress(e){this.progress=e,this.progressCtx=this.progress.getContext("2d",this.canvasContextAttributes);}updateDimensions(e,t,s,i){this.start=this.wave.offsetLeft/t||0,this.end=this.start+e/t,this.wave.width=s,this.wave.height=i;let r={width:e+"px"};h(this.wave,r),this.hasProgressCanvas&&(this.progress.width=s,this.progress.height=i,h(this.progress,r));}clearWave(){this.waveCtx.clearRect(0,0,this.waveCtx.canvas.width,this.waveCtx.canvas.height),this.hasProgressCanvas&&this.progressCtx.clearRect(0,0,this.progressCtx.canvas.width,this.progressCtx.canvas.height);}setFillStyles(e,t){this.waveCtx.fillStyle=this.getFillStyle(this.waveCtx,e),this.hasProgressCanvas&&(this.progressCtx.fillStyle=this.getFillStyle(this.progressCtx,t));}getFillStyle(e,t){if("string"==typeof t||t instanceof CanvasGradient)return t;const s=e.createLinearGradient(0,0,0,e.canvas.height);return t.forEach(((e,i)=>s.addColorStop(i/t.length,e))),s}applyCanvasTransforms(e){e&&(this.waveCtx.setTransform(0,1,1,0,0,0),this.hasProgressCanvas&&this.progressCtx.setTransform(0,1,1,0,0,0));}fillRects(e,t,s,i,r){this.fillRectToContext(this.waveCtx,e,t,s,i,r),this.hasProgressCanvas&&this.fillRectToContext(this.progressCtx,e,t,s,i,r);}fillRectToContext(e,t,s,i,r,a){e&&(a?this.drawRoundedRect(e,t,s,i,r,a):e.fillRect(t,s,i,r));}drawRoundedRect(e,t,s,i,r,a){0!==r&&(r<0&&(s-=r*=-1),e.beginPath(),e.moveTo(t+a,s),e.lineTo(t+i-a,s),e.quadraticCurveTo(t+i,s,t+i,s+a),e.lineTo(t+i,s+r-a),e.quadraticCurveTo(t+i,s+r,t+i-a,s+r),e.lineTo(t+a,s+r),e.quadraticCurveTo(t,s+r,t,s+r-a),e.lineTo(t,s+a),e.quadraticCurveTo(t,s,t+a,s),e.closePath(),e.fill());}drawLines(e,t,s,i,r,a){this.drawLineToContext(this.waveCtx,e,t,s,i,r,a),this.hasProgressCanvas&&this.drawLineToContext(this.progressCtx,e,t,s,i,r,a);}drawLineToContext(e,t,s,i,r,a,n){if(!e)return;const o=t.length/2,h=Math.round(o*this.start),l=h,d=Math.round(o*this.end)+1,c=this.wave.width/(d-l-1),u=i+r,p=s/i;let m,f,A;for(e.beginPath(),e.moveTo((l-h)*c,u),e.lineTo((l-h)*c,u-Math.round((t[2*l]||0)/p)),m=l;m<d;m++)f=t[2*m]||0,A=Math.round(f/p),e.lineTo((m-h)*c+this.halfPixel,u-A);let g=d-1;for(;g>=l;g--)f=t[2*g+1]||0,A=Math.round(f/p),e.lineTo((g-h)*c+this.halfPixel,u-A);e.lineTo((l-h)*c,u-Math.round((t[2*l+1]||0)/p)),e.closePath(),e.fill();}destroy(){this.waveCtx=null,this.wave=null,this.progressCtx=null,this.progress=null;}getImage(e,t,s){return "blob"===s?new Promise((s=>{this.wave.toBlob(s,e,t);})):"dataURL"===s?this.wave.toDataURL(e,t):void 0}}class E extends k{constructor(e,t){super(e,t),this.maxCanvasWidth=t.maxCanvasWidth,this.maxCanvasElementWidth=Math.round(t.maxCanvasWidth/t.pixelRatio),this.hasProgressCanvas=t.waveColor!=t.progressColor,this.halfPixel=.5/t.pixelRatio,this.canvases=[],this.progressWave=null,this.EntryClass=P,this.canvasContextAttributes=t.drawingContextAttributes,this.overlap=2*Math.ceil(t.pixelRatio/2),this.barRadius=t.barRadius||0,this.vertical=t.vertical;}init(){this.createWrapper(),this.createElements();}createElements(){this.progressWave=b(this.wrapper.appendChild(document.createElement("wave")),this.params.vertical),this.style(this.progressWave,{position:"absolute",zIndex:3,left:0,top:0,bottom:0,overflow:"hidden",width:"0",display:"none",boxSizing:"border-box",borderRightStyle:"solid",pointerEvents:"none"}),this.addCanvas(),this.updateCursor();}updateCursor(){this.style(this.progressWave,{borderRightWidth:this.params.cursorWidth+"px",borderRightColor:this.params.cursorColor});}updateSize(){const e=Math.round(this.width/this.params.pixelRatio),t=Math.ceil(e/(this.maxCanvasElementWidth+this.overlap));for(;this.canvases.length<t;)this.addCanvas();for(;this.canvases.length>t;)this.removeCanvas();let s=this.maxCanvasWidth+this.overlap;const i=this.canvases.length-1;this.canvases.forEach(((e,t)=>{t==i&&(s=this.width-this.maxCanvasWidth*i),this.updateDimensions(e,s,this.height),e.clearWave();}));}addCanvas(){const e=new this.EntryClass;e.canvasContextAttributes=this.canvasContextAttributes,e.hasProgressCanvas=this.hasProgressCanvas,e.halfPixel=this.halfPixel;const t=this.maxCanvasElementWidth*this.canvases.length;let s=b(this.wrapper.appendChild(document.createElement("canvas")),this.params.vertical);if(this.style(s,{position:"absolute",zIndex:2,left:t+"px",top:0,bottom:0,height:"100%",pointerEvents:"none"}),e.initWave(s),this.hasProgressCanvas){let s=b(this.progressWave.appendChild(document.createElement("canvas")),this.params.vertical);this.style(s,{position:"absolute",left:t+"px",top:0,bottom:0,height:"100%"}),e.initProgress(s);}this.canvases.push(e);}removeCanvas(){let e=this.canvases[this.canvases.length-1];e.wave.parentElement.removeChild(e.wave.domElement),this.hasProgressCanvas&&e.progress.parentElement.removeChild(e.progress.domElement),e&&(e.destroy(),e=null),this.canvases.pop();}updateDimensions(e,t,s){const i=Math.round(t/this.params.pixelRatio),r=Math.round(this.width/this.params.pixelRatio);e.updateDimensions(i,r,t,s),this.style(this.progressWave,{display:"block"});}clearWave(){d((()=>{this.canvases.forEach((e=>e.clearWave()));}))();}drawBars(e,t,s,i){return this.prepareDraw(e,t,s,i,(({absmax:e,hasMinVals:t,height:r,offsetY:a,halfH:n,peaks:o,channelIndex:h})=>{if(void 0===s)return;const l=t?2:1,d=o.length/l/this.width,c=i;let u=s;for(;u<c;u+=.1){let t=0,s=Math.floor(u*d)*l;const i=Math.floor((u+.1)*d)*l;do{const e=Math.abs(o[s]);e>t&&(t=e),s+=l;}while(s<i);let r=Math.round(t/e*n);0==r&&this.params.barMinHeight&&(r=this.params.barMinHeight),this.fillRect(u+this.halfPixel,n-r+a,.1+this.halfPixel,2*r,0,h);}}))}drawWave(e,t,s,i){return this.prepareDraw(e,t,s,i,(({absmax:e,hasMinVals:t,height:r,offsetY:a,halfH:n,peaks:o,channelIndex:h})=>{if(!t){const e=[],t=o.length;let s=0;for(;s<t;s++)e[2*s]=o[s],e[2*s+1]=-o[s];o=e;}void 0!==s&&this.drawLine(o,e,n,a,s,i,h),this.fillRect(0,n+a-this.halfPixel,this.width,this.halfPixel,this.barRadius,h);}))}drawLine(e,t,s,i,r,a,n){const{waveColor:o,progressColor:h}=this.params.splitChannelsOptions.channelColors[n]||{};this.canvases.forEach(((n,l)=>{this.setFillStyles(n,o,h),this.applyCanvasTransforms(n,this.params.vertical),n.drawLines(e,t,s,i,r,a);}));}fillRect(e,t,s,i,r,a){const n=Math.floor(e/this.maxCanvasWidth),o=Math.min(Math.ceil((e+s)/this.maxCanvasWidth)+1,this.canvases.length);let h=n;for(;h<o;h++){const n=this.canvases[h],o=h*this.maxCanvasWidth,l={x1:Math.max(e,h*this.maxCanvasWidth),y1:t,x2:Math.min(e+s,h*this.maxCanvasWidth+n.wave.width),y2:t+i};if(l.x1<l.x2){const{waveColor:e,progressColor:t}=this.params.splitChannelsOptions.channelColors[a]||{};this.setFillStyles(n,e,t),this.applyCanvasTransforms(n,this.params.vertical),n.fillRects(l.x1-o,l.y1,l.x2-l.x1,l.y2-l.y1,r);}}}hideChannel(e){return this.params.splitChannels&&this.params.splitChannelsOptions.filterChannels.includes(e)}prepareDraw(e,t,s,i,a,o,h){return d((()=>{if(e[0]instanceof Array){const t=e;if(this.params.splitChannels){const e=t.filter(((e,t)=>!this.hideChannel(t)));let o;return this.params.splitChannelsOptions.overlay||this.setHeight(Math.max(e.length,1)*this.params.height*this.params.pixelRatio),this.params.splitChannelsOptions&&this.params.splitChannelsOptions.relativeNormalization&&(o=r(t.map((e=>n(e))))),t.forEach(((t,r)=>this.prepareDraw(t,r,s,i,a,e.indexOf(t),o)))}e=t[0];}if(this.hideChannel(t))return;let l=1/this.params.barHeight;this.params.normalize&&(l=void 0===h?n(e):h);const d=[].some.call(e,(e=>e<0)),c=this.params.height*this.params.pixelRatio,u=c/2;let p=c*o||0;return this.params.splitChannelsOptions&&this.params.splitChannelsOptions.overlay&&(p=0),a({absmax:l,hasMinVals:d,height:c,offsetY:p,halfH:u,peaks:e,channelIndex:t})}))()}setFillStyles(e,t=this.params.waveColor,s=this.params.progressColor){e.setFillStyles(t,s);}applyCanvasTransforms(e,t=!1){e.applyCanvasTransforms(t);}getImage(e,t,s){if("blob"===s)return Promise.all(this.canvases.map((i=>i.getImage(e,t,s))));if("dataURL"===s){let i=this.canvases.map((i=>i.getImage(e,t,s)));return i.length>1?i:i[0]}}updateProgress(e){this.style(this.progressWave,{width:e+"px"});}}const x="playing",R="paused",V="finished";class M extends o{static scriptBufferSize=256;audioContext=null;offlineAudioContext=null;stateBehaviors={[x]:{init(){this.addOnAudioProcess();},getPlayedPercents(){const e=this.getDuration();return this.getCurrentTime()/e||0},getCurrentTime(){return this.startPosition+this.getPlayedTime()}},[R]:{init(){this.removeOnAudioProcess();},getPlayedPercents(){const e=this.getDuration();return this.getCurrentTime()/e||0},getCurrentTime(){return this.startPosition}},[V]:{init(){this.removeOnAudioProcess(),this.fireEvent("finish");},getPlayedPercents:()=>1,getCurrentTime(){return this.getDuration()}}};supportsWebAudio(){return !(!window.AudioContext&&!window.webkitAudioContext)}getAudioContext(){return window.WaveSurferAudioContext||(window.WaveSurferAudioContext=new(window.AudioContext||window.webkitAudioContext)),window.WaveSurferAudioContext}getOfflineAudioContext(e){return window.WaveSurferOfflineAudioContext||(window.WaveSurferOfflineAudioContext=new(window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,2,e)),window.WaveSurferOfflineAudioContext}constructor(e){super(),this.params=e,this.ac=e.audioContext||(this.supportsWebAudio()?this.getAudioContext():{}),this.lastPlay=this.ac.currentTime,this.startPosition=0,this.scheduledPause=null,this.states={[x]:Object.create(this.stateBehaviors.playing),[R]:Object.create(this.stateBehaviors.paused),[V]:Object.create(this.stateBehaviors.finished)},this.buffer=null,this.filters=[],this.gainNode=null,this.mergedPeaks=null,this.offlineAc=null,this.peaks=null,this.playbackRate=1,this.analyser=null,this.scriptNode=null,this.source=null,this.splitPeaks=[],this.state=null,this.explicitDuration=e.duration,this.sinkStreamDestination=null,this.sinkAudioElement=null,this.destroyed=!1;}init(){this.createVolumeNode(),this.createScriptNode(),this.createAnalyserNode(),this.setState(R),this.setPlaybackRate(this.params.audioRate),this.setLength(0);}disconnectFilters(){this.filters&&(this.filters.forEach((e=>{e&&e.disconnect();})),this.filters=null,this.analyser.connect(this.gainNode));}setState(e){this.state!==this.states[e]&&(this.state=this.states[e],this.state.init.call(this));}setFilter(...e){this.setFilters(e);}setFilters(e){this.disconnectFilters(),e&&e.length&&(this.filters=e,this.analyser.disconnect(),e.reduce(((e,t)=>(e.connect(t),t)),this.analyser).connect(this.gainNode));}createScriptNode(){this.params.audioScriptProcessor?this.scriptNode=this.params.audioScriptProcessor:this.ac.createScriptProcessor?this.scriptNode=this.ac.createScriptProcessor(M.scriptBufferSize):this.scriptNode=this.ac.createJavaScriptNode(M.scriptBufferSize),this.scriptNode.connect(this.ac.destination);}addOnAudioProcess(){this.scriptNode.onaudioprocess=()=>{const e=this.getCurrentTime();e>=this.getDuration()?(this.setState(V),this.fireEvent("pause")):e>=this.scheduledPause?this.pause():this.state===this.states.playing&&this.fireEvent("audioprocess",e);};}removeOnAudioProcess(){this.scriptNode.onaudioprocess=null;}createAnalyserNode(){this.analyser=this.ac.createAnalyser(),this.analyser.connect(this.gainNode);}createVolumeNode(){this.ac.createGain?this.gainNode=this.ac.createGain():this.gainNode=this.ac.createGainNode(),this.gainNode.connect(this.ac.destination);}setSinkId(e){return e?(this.sinkAudioElement||(this.sinkAudioElement=new window.Audio,this.sinkAudioElement.autoplay=!0),this.sinkAudioElement.setSinkId?(this.sinkStreamDestination||(this.sinkStreamDestination=this.ac.createMediaStreamDestination()),this.gainNode.disconnect(),this.gainNode.connect(this.sinkStreamDestination),this.sinkAudioElement.srcObject=this.sinkStreamDestination.stream,this.sinkAudioElement.setSinkId(e)):Promise.reject(new Error("setSinkId is not supported in your browser"))):Promise.reject(new Error("Invalid deviceId: "+e))}setVolume(e){this.gainNode.gain.setValueAtTime(e,this.ac.currentTime);}getVolume(){return this.gainNode.gain.value}decodeArrayBuffer(e,t,s){this.offlineAc||(this.offlineAc=this.getOfflineAudioContext(this.ac&&this.ac.sampleRate?this.ac.sampleRate:44100)),"webkitAudioContext"in window?this.offlineAc.decodeAudioData(e,(e=>t(e)),s):this.offlineAc.decodeAudioData(e).then((e=>t(e))).catch((e=>s(e)));}setPeaks(e,t){null!=t&&(this.explicitDuration=t),this.peaks=e;}setLength(e){if(this.mergedPeaks&&e==2*this.mergedPeaks.length-1+2)return;this.splitPeaks=[],this.mergedPeaks=[];const t=this.buffer?this.buffer.numberOfChannels:1;let s;for(s=0;s<t;s++)this.splitPeaks[s]=[],this.splitPeaks[s][2*(e-1)]=0,this.splitPeaks[s][2*(e-1)+1]=0;this.mergedPeaks[2*(e-1)]=0,this.mergedPeaks[2*(e-1)+1]=0;}getPeaks(e,t,s){if(this.peaks)return this.peaks;if(!this.buffer)return [];if(t=t||0,s=s||e-1,this.setLength(e),!this.buffer)return this.params.splitChannels?this.splitPeaks:this.mergedPeaks;if(!this.buffer.length){const e=this.createBuffer(1,4096,this.sampleRate);this.buffer=e.buffer;}const i=this.buffer.length/e,r=~~(i/10)||1,a=this.buffer.numberOfChannels;let n;for(n=0;n<a;n++){const e=this.splitPeaks[n],a=this.buffer.getChannelData(n);let o;for(o=t;o<=s;o++){const t=~~(o*i),s=~~(t+i);let h,l=a[t],d=l;for(h=t;h<s;h+=r){const e=a[h];e>d&&(d=e),e<l&&(l=e);}e[2*o]=d,e[2*o+1]=l,(0==n||d>this.mergedPeaks[2*o])&&(this.mergedPeaks[2*o]=d),(0==n||l<this.mergedPeaks[2*o+1])&&(this.mergedPeaks[2*o+1]=l);}}return this.params.splitChannels?this.splitPeaks:this.mergedPeaks}getPlayedPercents(){return this.state.getPlayedPercents.call(this)}disconnectSource(){this.source&&this.source.disconnect();}destroyWebAudio(){this.disconnectFilters(),this.disconnectSource(),this.gainNode.disconnect(),this.scriptNode.disconnect(),this.analyser.disconnect(),this.params.closeAudioContext&&("function"==typeof this.ac.close&&"closed"!=this.ac.state&&this.ac.close(),this.ac=null,this.params.audioContext?this.params.audioContext=null:window.WaveSurferAudioContext=null,window.WaveSurferOfflineAudioContext=null),this.sinkStreamDestination&&(this.sinkAudioElement.pause(),this.sinkAudioElement.srcObject=null,this.sinkStreamDestination.disconnect(),this.sinkStreamDestination=null);}destroy(){this.isPaused()||this.pause(),this.unAll(),this.buffer=null,this.destroyed=!0,this.destroyWebAudio();}load(e){this.startPosition=0,this.lastPlay=this.ac.currentTime,this.buffer=e,this.createSource();}createSource(){this.disconnectSource(),this.source=this.ac.createBufferSource(),this.source.start=this.source.start||this.source.noteGrainOn,this.source.stop=this.source.stop||this.source.noteOff,this.setPlaybackRate(this.playbackRate),this.source.buffer=this.buffer,this.source.connect(this.analyser);}resumeAudioContext(){"suspended"==this.ac.state&&this.ac.resume&&this.ac.resume();}isPaused(){return this.state!==this.states.playing}getDuration(){return this.explicitDuration?this.explicitDuration:this.buffer?this.buffer.duration:0}seekTo(e,t){if(this.buffer)return this.scheduledPause=null,null==e&&(e=this.getCurrentTime())>=this.getDuration()&&(e=0),null==t&&(t=this.getDuration()),this.startPosition=e,this.lastPlay=this.ac.currentTime,this.state===this.states.finished&&this.setState(R),{start:e,end:t}}getPlayedTime(){return (this.ac.currentTime-this.lastPlay)*this.playbackRate}play(e,t){if(!this.buffer)return;this.createSource();const s=this.seekTo(e,t);e=s.start,t=s.end,this.scheduledPause=t,this.source.start(0,e),this.resumeAudioContext(),this.setState(x),this.fireEvent("play");}pause(){this.scheduledPause=null,this.startPosition+=this.getPlayedTime();try{this.source&&this.source.stop(0);}catch(e){}this.setState(R),this.fireEvent("pause");}getCurrentTime(){return this.state.getCurrentTime.call(this)}getPlaybackRate(){return this.playbackRate}setPlaybackRate(e){this.playbackRate=e||1,this.source&&this.source.playbackRate.setValueAtTime(this.playbackRate,this.ac.currentTime);}setPlayEnd(e){this.scheduledPause=e;}}class T extends M{constructor(e){super(e),this.params=e,this.media={currentTime:0,duration:0,paused:!0,playbackRate:1,play(){},pause(){},volume:0},this.mediaType=e.mediaType.toLowerCase(),this.elementPosition=e.elementPosition,this.peaks=null,this.playbackRate=1,this.volume=1,this.isMuted=!1,this.buffer=null,this.onPlayEnd=null,this.mediaListeners={};}init(){this.setPlaybackRate(this.params.audioRate),this.createTimer();}_setupMediaListeners(){this.mediaListeners.error=()=>{this.fireEvent("error","Error loading media element");},this.mediaListeners.canplay=()=>{this.fireEvent("canplay");},this.mediaListeners.ended=()=>{this.fireEvent("finish");},this.mediaListeners.play=()=>{this.fireEvent("play");},this.mediaListeners.pause=()=>{this.fireEvent("pause");},this.mediaListeners.seeked=e=>{this.fireEvent("seek");},this.mediaListeners.volumechange=e=>{this.isMuted=this.media.muted,this.isMuted?this.volume=0:this.volume=this.media.volume,this.fireEvent("volume");},Object.keys(this.mediaListeners).forEach((e=>{this.media.removeEventListener(e,this.mediaListeners[e]),this.media.addEventListener(e,this.mediaListeners[e]);}));}createTimer(){const e=()=>{this.isPaused()||(this.fireEvent("audioprocess",this.getCurrentTime()),d(e)());};this.on("play",e),this.on("pause",(()=>{this.fireEvent("audioprocess",this.getCurrentTime());}));}load(e,t,s,i){const r=document.createElement(this.mediaType);r.controls=this.params.mediaControls,r.autoplay=this.params.autoplay||!1,r.preload=null==i?"auto":i,r.src=e,r.style.width="100%";const a=t.querySelector(this.mediaType);a&&t.removeChild(a),t.appendChild(r),this._load(r,s,i);}loadElt(e,t){e.controls=this.params.mediaControls,e.autoplay=this.params.autoplay||!1,this._load(e,t,e.preload);}_load(e,t,s){if(!(e instanceof HTMLMediaElement)||void 0===e.addEventListener)throw new Error("media parameter is not a valid media element");"function"!=typeof e.load||t&&"none"==s||e.load(),this.media=e,this._setupMediaListeners(),this.peaks=t,this.onPlayEnd=null,this.buffer=null,this.isMuted=e.muted,this.setPlaybackRate(this.playbackRate),this.setVolume(this.volume);}isPaused(){return !this.media||this.media.paused}getDuration(){if(this.explicitDuration)return this.explicitDuration;let e=(this.buffer||this.media).duration;return e>=1/0&&(e=this.media.seekable.end(0)),e}getCurrentTime(){return this.media&&this.media.currentTime}getPlayedPercents(){return this.getCurrentTime()/this.getDuration()||0}getPlaybackRate(){return this.playbackRate||this.media.playbackRate}setPlaybackRate(e){this.playbackRate=e||1,this.media.playbackRate=this.playbackRate;}seekTo(e){null==e||isNaN(e)||(this.media.currentTime=e),this.clearPlayEnd();}play(e,t){this.seekTo(e);const s=this.media.play();return t&&this.setPlayEnd(t),s}pause(){let e;return this.media&&(e=this.media.pause()),this.clearPlayEnd(),e}setPlayEnd(e){this.clearPlayEnd(),this._onPlayEnd=t=>{t>=e&&(this.pause(),this.seekTo(e));},this.on("audioprocess",this._onPlayEnd);}clearPlayEnd(){this._onPlayEnd&&(this.un("audioprocess",this._onPlayEnd),this._onPlayEnd=null);}getPeaks(e,t,s){return this.buffer?super.getPeaks(e,t,s):this.peaks||[]}setSinkId(e){return e?this.media.setSinkId?this.media.setSinkId(e):Promise.reject(new Error("setSinkId is not supported in your browser")):Promise.reject(new Error("Invalid deviceId: "+e))}getVolume(){return this.volume}setVolume(e){this.volume=e,this.media.volume!==this.volume&&(this.media.volume=this.volume);}setMute(e){this.isMuted=this.media.muted=e;}destroy(){this.pause(),this.unAll(),this.destroyed=!0,Object.keys(this.mediaListeners).forEach((e=>{this.media&&this.media.removeEventListener(e,this.mediaListeners[e]);})),this.params.removeMediaElementOnDestroy&&this.media&&this.media.parentNode&&this.media.parentNode.removeChild(this.media),this.media=null;}}class S{constructor(){this.clearPeakCache();}clearPeakCache(){this.peakCacheRanges=[],this.peakCacheLength=-1;}addRangeToPeakCache(e,t,s){e!=this.peakCacheLength&&(this.clearPeakCache(),this.peakCacheLength=e);let i=[],r=0;for(;r<this.peakCacheRanges.length&&this.peakCacheRanges[r]<t;)r++;for(r%2==0&&i.push(t);r<this.peakCacheRanges.length&&this.peakCacheRanges[r]<=s;)i.push(this.peakCacheRanges[r]),r++;r%2==0&&i.push(s),i=i.filter(((e,t,s)=>0==t?e!=s[t+1]:t==s.length-1?e!=s[t-1]:e!=s[t-1]&&e!=s[t+1])),this.peakCacheRanges=this.peakCacheRanges.concat(i),this.peakCacheRanges=this.peakCacheRanges.sort(((e,t)=>e-t)).filter(((e,t,s)=>0==t?e!=s[t+1]:t==s.length-1?e!=s[t-1]:e!=s[t-1]&&e!=s[t+1]));const a=[];for(r=0;r<i.length;r+=2)a.push([i[r],i[r+1]]);return a}getCacheRanges(){const e=[];let t;for(t=0;t<this.peakCacheRanges.length;t+=2)e.push([this.peakCacheRanges[t],this.peakCacheRanges[t+1]]);return e}}class W extends T{constructor(e){super(e),this.params=e,this.sourceMediaElement=null;}init(){this.setPlaybackRate(this.params.audioRate),this.createTimer(),this.createVolumeNode(),this.createScriptNode(),this.createAnalyserNode();}_load(e,t,s){super._load(e,t,s),this.createMediaElementSource(e);}createMediaElementSource(e){this.sourceMediaElement=this.ac.createMediaElementSource(e),this.sourceMediaElement.connect(this.analyser);}play(e,t){return this.resumeAudioContext(),super.play(e,t)}destroy(){super.destroy(),this.destroyWebAudio();}}class L extends o{defaultParams={audioContext:null,audioScriptProcessor:null,audioRate:1,autoCenter:!0,autoCenterRate:5,autoCenterImmediately:!1,backend:"WebAudio",backgroundColor:null,barHeight:1,barRadius:0,barGap:null,barMinHeight:null,container:null,cursorColor:"#333",cursorWidth:1,dragSelection:!0,drawingContextAttributes:{desynchronized:!1},duration:null,fillParent:!0,forceDecode:!1,height:128,hideScrollbar:!1,hideCursor:!1,ignoreSilenceMode:!1,interact:!0,loopSelection:!0,maxCanvasWidth:4e3,mediaContainer:null,mediaControls:!1,mediaType:"audio",minPxPerSec:20,normalize:!1,partialRender:!1,pixelRatio:window.devicePixelRatio||screen.deviceXDPI/screen.logicalXDPI,plugins:[],progressColor:"#555",removeMediaElementOnDestroy:!0,renderer:E,responsive:!1,rtl:!1,scrollParent:!1,skipLength:2,splitChannels:!1,splitChannelsOptions:{overlay:!1,channelColors:{},filterChannels:[],relativeNormalization:!1},vertical:!1,waveColor:"#999",xhr:{}};backends={MediaElement:T,WebAudio:M,MediaElementWebAudio:W};static create(e){return new L(e).init()}static VERSION="6.1.0";util=e;static util=e;constructor(e){if(super(),this.params=Object.assign({},this.defaultParams,e),this.params.splitChannelsOptions=Object.assign({},this.defaultParams.splitChannelsOptions,e.splitChannelsOptions),this.container="string"==typeof e.container?document.querySelector(this.params.container):this.params.container,!this.container)throw new Error("Container element not found");if(null==this.params.mediaContainer?this.mediaContainer=this.container:"string"==typeof this.params.mediaContainer?this.mediaContainer=document.querySelector(this.params.mediaContainer):this.mediaContainer=this.params.mediaContainer,!this.mediaContainer)throw new Error("Media Container element not found");if(this.params.maxCanvasWidth<=1)throw new Error("maxCanvasWidth must be greater than 1");if(this.params.maxCanvasWidth%2==1)throw new Error("maxCanvasWidth must be an even number");if(!0===this.params.rtl&&(!0===this.params.vertical?h(this.container,{transform:"rotateX(180deg)"}):h(this.container,{transform:"rotateY(180deg)"})),this.params.backgroundColor&&this.setBackgroundColor(this.params.backgroundColor),this.savedVolume=0,this.isMuted=!1,this.tmpEvents=[],this.currentRequest=null,this.arraybuffer=null,this.drawer=null,this.backend=null,this.peakCache=null,"function"!=typeof this.params.renderer)throw new Error("Renderer parameter is invalid");this.Drawer=this.params.renderer,"AudioElement"==this.params.backend&&(this.params.backend="MediaElement"),"WebAudio"!=this.params.backend&&"MediaElementWebAudio"!==this.params.backend||M.prototype.supportsWebAudio.call(null)||(this.params.backend="MediaElement"),this.Backend=this.backends[this.params.backend],this.initialisedPluginList={},this.isDestroyed=!1,this.isReady=!1;let t=0;return this._onResize=u()((()=>{t==this.drawer.wrapper.clientWidth||this.params.scrollParent||(t=this.drawer.wrapper.clientWidth,t&&this.drawer.fireEvent("redraw"));}),"number"==typeof this.params.responsive?this.params.responsive:100),this}init(){return this.registerPlugins(this.params.plugins),this.createDrawer(),this.createBackend(),this.createPeakCache(),this}registerPlugins(e){return e.forEach((e=>this.addPlugin(e))),e.forEach((e=>{e.deferInit||this.initPlugin(e.name);})),this.fireEvent("plugins-registered",e),this}getActivePlugins(){return this.initialisedPluginList}addPlugin(e){if(!e.name)throw new Error("Plugin does not have a name!");if(!e.instance)throw new Error(`Plugin ${e.name} does not have an instance property!`);e.staticProps&&Object.keys(e.staticProps).forEach((t=>{this[t]=e.staticProps[t];}));const t=e.instance;return Object.getOwnPropertyNames(o.prototype).forEach((e=>{t.prototype[e]=o.prototype[e];})),this[e.name]=new t(e.params||{},this),this.fireEvent("plugin-added",e.name),this}initPlugin(e){if(!this[e])throw new Error(`Plugin ${e} has not been added yet!`);return this.initialisedPluginList[e]&&this.destroyPlugin(e),this[e].init(),this.initialisedPluginList[e]=!0,this.fireEvent("plugin-initialised",e),this}destroyPlugin(e){if(!this[e])throw new Error(`Plugin ${e} has not been added yet and cannot be destroyed!`);if(!this.initialisedPluginList[e])throw new Error(`Plugin ${e} is not active and cannot be destroyed!`);if("function"!=typeof this[e].destroy)throw new Error(`Plugin ${e} does not have a destroy function!`);return this[e].destroy(),delete this.initialisedPluginList[e],this.fireEvent("plugin-destroyed",e),this}destroyAllPlugins(){Object.keys(this.initialisedPluginList).forEach((e=>this.destroyPlugin(e)));}createDrawer(){this.drawer=new this.Drawer(this.container,this.params),this.drawer.init(),this.fireEvent("drawer-created",this.drawer),!1!==this.params.responsive&&(window.addEventListener("resize",this._onResize,!0),window.addEventListener("orientationchange",this._onResize,!0)),this.drawer.on("redraw",(()=>{this.drawBuffer(),this.drawer.progress(this.backend.getPlayedPercents());})),this.drawer.on("click",((e,t)=>{setTimeout((()=>this.seekTo(t)),0);})),this.drawer.on("scroll",(e=>{this.params.partialRender&&this.drawBuffer(),this.fireEvent("scroll",e);}));}createBackend(){this.backend&&this.backend.destroy(),this.backend=new this.Backend(this.params),this.backend.init(),this.fireEvent("backend-created",this.backend),this.backend.on("finish",(()=>{this.drawer.progress(this.backend.getPlayedPercents()),this.fireEvent("finish");})),this.backend.on("play",(()=>this.fireEvent("play"))),this.backend.on("pause",(()=>this.fireEvent("pause"))),this.backend.on("audioprocess",(e=>{this.drawer.progress(this.backend.getPlayedPercents()),this.fireEvent("audioprocess",e);})),"MediaElement"!==this.params.backend&&"MediaElementWebAudio"!==this.params.backend||(this.backend.on("seek",(()=>{this.drawer.progress(this.backend.getPlayedPercents());})),this.backend.on("volume",(()=>{let e=this.getVolume();this.fireEvent("volume",e),this.backend.isMuted!==this.isMuted&&(this.isMuted=this.backend.isMuted,this.fireEvent("mute",this.isMuted));})));}createPeakCache(){this.params.partialRender&&(this.peakCache=new S);}getDuration(){return this.backend.getDuration()}getCurrentTime(){return this.backend.getCurrentTime()}setCurrentTime(e){e>=this.getDuration()?this.seekTo(1):this.seekTo(e/this.getDuration());}play(e,t){return this.params.ignoreSilenceMode&&y(),this.fireEvent("interaction",(()=>this.play(e,t))),this.backend.play(e,t)}setPlayEnd(e){this.backend.setPlayEnd(e);}pause(){if(!this.backend.isPaused())return this.backend.pause()}playPause(){return this.backend.isPaused()?this.play():this.pause()}isPlaying(){return !this.backend.isPaused()}skipBackward(e){this.skip(-e||-this.params.skipLength);}skipForward(e){this.skip(e||this.params.skipLength);}skip(e){const t=this.getDuration()||1;let s=this.getCurrentTime()||0;s=Math.max(0,Math.min(t,s+(e||0))),this.seekAndCenter(s/t);}seekAndCenter(e){this.seekTo(e),this.drawer.recenter(e);}seekTo(e){if("number"!=typeof e||!isFinite(e)||e<0||e>1)throw new Error("Error calling wavesurfer.seekTo, parameter must be a number between 0 and 1!");this.fireEvent("interaction",(()=>this.seekTo(e)));const t="WebAudio"===this.params.backend,s=this.backend.isPaused();t&&!s&&this.backend.pause();const i=this.params.scrollParent;this.params.scrollParent=!1,this.backend.seekTo(e*this.getDuration()),this.drawer.progress(e),t&&!s&&this.backend.play(),this.params.scrollParent=i,this.fireEvent("seek",e);}stop(){this.pause(),this.seekTo(0),this.drawer.progress(0);}setSinkId(e){return this.backend.setSinkId(e)}setVolume(e){this.backend.setVolume(e),this.fireEvent("volume",e);}getVolume(){return this.backend.getVolume()}setPlaybackRate(e){this.backend.setPlaybackRate(e);}getPlaybackRate(){return this.backend.getPlaybackRate()}toggleMute(){this.setMute(!this.isMuted);}setMute(e){e!==this.isMuted?(this.backend.setMute?(this.backend.setMute(e),this.isMuted=e):e?(this.savedVolume=this.backend.getVolume(),this.backend.setVolume(0),this.isMuted=!0,this.fireEvent("volume",0)):(this.backend.setVolume(this.savedVolume),this.isMuted=!1,this.fireEvent("volume",this.savedVolume)),this.fireEvent("mute",this.isMuted)):this.fireEvent("mute",this.isMuted);}getMute(){return this.isMuted}getFilters(){return this.backend.filters||[]}toggleScroll(){this.params.scrollParent=!this.params.scrollParent,this.drawBuffer();}toggleInteraction(){this.params.interact=!this.params.interact;}getWaveColor(e=null){return this.params.splitChannelsOptions.channelColors[e]?this.params.splitChannelsOptions.channelColors[e].waveColor:this.params.waveColor}setWaveColor(e,t=null){this.params.splitChannelsOptions.channelColors[t]?this.params.splitChannelsOptions.channelColors[t].waveColor=e:this.params.waveColor=e,this.drawBuffer();}getProgressColor(e=null){return this.params.splitChannelsOptions.channelColors[e]?this.params.splitChannelsOptions.channelColors[e].progressColor:this.params.progressColor}setProgressColor(e,t){this.params.splitChannelsOptions.channelColors[t]?this.params.splitChannelsOptions.channelColors[t].progressColor=e:this.params.progressColor=e,this.drawBuffer();}getBackgroundColor(){return this.params.backgroundColor}setBackgroundColor(e){this.params.backgroundColor=e,h(this.container,{background:this.params.backgroundColor});}getCursorColor(){return this.params.cursorColor}setCursorColor(e){this.params.cursorColor=e,this.drawer.updateCursor();}getHeight(){return this.params.height}setHeight(e){this.params.height=e,this.drawer.setHeight(e*this.params.pixelRatio),this.drawBuffer();}setFilteredChannels(e){this.params.splitChannelsOptions.filterChannels=e,this.drawBuffer();}drawBuffer(){const e=Math.round(this.getDuration()*this.params.minPxPerSec*this.params.pixelRatio),t=this.drawer.getWidth();let s,i=e,r=0,a=Math.max(r+t,i);if(this.params.fillParent&&(!this.params.scrollParent||e<t)&&(i=t,r=0,a=i),this.params.partialRender){const e=this.peakCache.addRangeToPeakCache(i,r,a);let t;for(t=0;t<e.length;t++)s=this.backend.getPeaks(i,e[t][0],e[t][1]),this.drawer.drawPeaks(s,i,e[t][0],e[t][1]);}else s=this.backend.getPeaks(i,r,a),this.drawer.drawPeaks(s,i,r,a);this.fireEvent("redraw",s,i);}zoom(e){e?(this.params.minPxPerSec=e,this.params.scrollParent=!0):(this.params.minPxPerSec=this.defaultParams.minPxPerSec,this.params.scrollParent=!1),this.drawBuffer(),this.drawer.progress(this.backend.getPlayedPercents()),this.drawer.recenter(this.getCurrentTime()/this.getDuration()),this.fireEvent("zoom",e);}loadArrayBuffer(e){this.decodeArrayBuffer(e,(e=>{this.isDestroyed||this.loadDecodedBuffer(e);}));}loadDecodedBuffer(e){this.backend.load(e),this.drawBuffer(),this.isReady=!0,this.fireEvent("ready");}loadBlob(e){const t=new FileReader;t.addEventListener("progress",(e=>this.onProgress(e))),t.addEventListener("load",(e=>this.loadArrayBuffer(e.target.result))),t.addEventListener("error",(()=>this.fireEvent("error","Error reading file"))),t.readAsArrayBuffer(e),this.empty();}load(e,t,s,i){if(!e)throw new Error("url parameter cannot be empty");if(this.empty(),s){const i={"Preload is not 'auto', 'none' or 'metadata'":-1===["auto","metadata","none"].indexOf(s),"Peaks are not provided":!t,"Backend is not of type 'MediaElement' or 'MediaElementWebAudio'":-1===["MediaElement","MediaElementWebAudio"].indexOf(this.params.backend),"Url is not of type string":"string"!=typeof e},r=Object.keys(i).filter((e=>i[e]));r.length&&(console.warn("Preload parameter of wavesurfer.load will be ignored because:\n\t- "+r.join("\n\t- ")),s=null);}switch("WebAudio"===this.params.backend&&e instanceof HTMLMediaElement&&(e=e.src),this.params.backend){case"WebAudio":return this.loadBuffer(e,t,i);case"MediaElement":case"MediaElementWebAudio":return this.loadMediaElement(e,t,s,i)}}loadBuffer(e,t,s){const i=t=>(t&&this.tmpEvents.push(this.once("ready",t)),this.getArrayBuffer(e,(e=>this.loadArrayBuffer(e))));if(!t)return i();this.backend.setPeaks(t,s),this.drawBuffer(),this.fireEvent("waveform-ready"),this.tmpEvents.push(this.once("interaction",i));}loadMediaElement(e,t,s,i){let r=e;if("string"==typeof e)this.backend.load(r,this.mediaContainer,t,s);else {const s=e;this.backend.loadElt(s,t),r=s.src;}this.tmpEvents.push(this.backend.once("canplay",(()=>{this.backend.destroyed||(this.drawBuffer(),this.isReady=!0,this.fireEvent("ready"));})),this.backend.once("error",(e=>this.fireEvent("error",e)))),t&&(this.backend.setPeaks(t,i),this.drawBuffer(),this.fireEvent("waveform-ready")),t&&!this.params.forceDecode||!this.backend.supportsWebAudio()||this.getArrayBuffer(r,(e=>{this.decodeArrayBuffer(e,(e=>{this.backend.buffer=e,this.backend.setPeaks(null),this.drawBuffer(),this.fireEvent("waveform-ready");}));}));}decodeArrayBuffer(e,t){this.isDestroyed||(this.arraybuffer=e,this.backend.decodeArrayBuffer(e,(s=>{this.isDestroyed||this.arraybuffer!=e||(t(s),this.arraybuffer=null);}),(()=>this.fireEvent("error","Error decoding audiobuffer"))));}getArrayBuffer(e,t){const s=A(Object.assign({url:e,responseType:"arraybuffer"},this.params.xhr));return this.currentRequest=s,this.tmpEvents.push(s.on("progress",(e=>{this.onProgress(e);})),s.on("success",(e=>{t(e),this.currentRequest=null;})),s.on("error",(e=>{this.fireEvent("error",e),this.currentRequest=null;}))),s}onProgress(e){let t;t=e.lengthComputable?e.loaded/e.total:e.loaded/(e.loaded+1e6),this.fireEvent("loading",Math.round(100*t),e.target);}exportPCM(e,t,s,i,r){e=e||1024,i=i||0,t=t||1e4,s=s||!1;const a=this.backend.getPeaks(e,i,r),n=[].map.call(a,(e=>Math.round(e*t)/t));return new Promise(((e,t)=>{if(!s){const e=new Blob([JSON.stringify(n)],{type:"application/json;charset=utf-8"}),t=URL.createObjectURL(e);window.open(t),URL.revokeObjectURL(t);}e(n);}))}exportImage(e,t,s){return e||(e="image/png"),t||(t=1),s||(s="dataURL"),this.drawer.getImage(e,t,s)}cancelAjax(){this.currentRequest&&this.currentRequest.controller&&(this.currentRequest._reader&&this.currentRequest._reader.cancel().catch((e=>{})),this.currentRequest.controller.abort(),this.currentRequest=null);}clearTmpEvents(){this.tmpEvents.forEach((e=>e.un()));}empty(){this.backend.isPaused()||(this.stop(),this.backend.disconnectSource()),this.isReady=!1,this.cancelAjax(),this.clearTmpEvents(),this.drawer.progress(0),this.drawer.setWidth(0),this.drawer.drawPeaks({length:this.drawer.getWidth()},0);}destroy(){this.destroyAllPlugins(),this.fireEvent("destroy"),this.cancelAjax(),this.clearTmpEvents(),this.unAll(),!1!==this.params.responsive&&(window.removeEventListener("resize",this._onResize,!0),window.removeEventListener("orientationchange",this._onResize,!0)),this.backend&&(this.backend.destroy(),this.backend=null),this.drawer&&this.drawer.destroy(),this.isDestroyed=!0,this.isReady=!1,this.arraybuffer=null;}}})(),i})()));
+    	
+    } (wavesurfer_min));
 
-    });
-
-    var WaveSurfer = /*@__PURE__*/getDefaultExportFromCjs(wavesurfer_min);
+    var WaveSurfer = /*@__PURE__*/getDefaultExportFromCjs(wavesurfer_minExports);
 
     let waveformTransitionDuration = Number(getComputedStyle(document.body).getPropertyValue('--waveform-transition-duration').replace('ms', ''));
     let waveSurfer = undefined;
@@ -8147,9 +8229,9 @@ var app = (function () {
         return songsArrayCopy;
     };
 
-    /* src/middlewares/PlayerMiddleware.svelte generated by Svelte v3.49.0 */
+    /* src/middlewares/PlayerMiddleware.svelte generated by Svelte v3.55.1 */
 
-    function create_fragment$1s(ctx) {
+    function create_fragment$1r(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -8164,7 +8246,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1s.name,
+    		id: create_fragment$1r.name,
     		type: "component",
     		source: "",
     		ctx
@@ -8173,7 +8255,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1s($$self, $$props, $$invalidate) {
+    function instance$1r($$self, $$props, $$invalidate) {
     	let $songListStore;
     	let $config;
     	let $selectedAlbumDir;
@@ -8262,13 +8344,13 @@ var app = (function () {
     class PlayerMiddleware extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1s, create_fragment$1s, safe_not_equal, {});
+    		init(this, options, instance$1r, create_fragment$1r, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerMiddleware",
     			options,
-    			id: create_fragment$1s.name
+    			id: create_fragment$1r.name
     		});
     	}
     }
@@ -8283,9 +8365,9 @@ var app = (function () {
     let isEqualizerOn = writable(true);
     let isEqualizerDirty = writable(false);
 
-    /* src/middlewares/EqualizerMiddleware.svelte generated by Svelte v3.49.0 */
+    /* src/middlewares/EqualizerMiddleware.svelte generated by Svelte v3.55.1 */
 
-    function create_fragment$1r(ctx) {
+    function create_fragment$1q(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -8300,7 +8382,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1r.name,
+    		id: create_fragment$1q.name,
     		type: "component",
     		source: "",
     		ctx
@@ -8309,7 +8391,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1r($$self, $$props, $$invalidate) {
+    function instance$1q($$self, $$props, $$invalidate) {
     	let $selectedEqName;
     	let $equalizerProfiles;
     	let $config;
@@ -8487,13 +8569,13 @@ var app = (function () {
     class EqualizerMiddleware extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1r, create_fragment$1r, safe_not_equal, {});
+    		init(this, options, instance$1q, create_fragment$1q, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EqualizerMiddleware",
     			options,
-    			id: create_fragment$1r.name
+    			id: create_fragment$1q.name
     		});
     	}
     }
@@ -8576,10 +8658,10 @@ var app = (function () {
         return url;
     }
 
-    /* src/layouts/AudioPlayer.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/AudioPlayer.svelte generated by Svelte v3.55.1 */
     const file$1k = "src/layouts/AudioPlayer.svelte";
 
-    function create_fragment$1q(ctx) {
+    function create_fragment$1p(ctx) {
     	let audio0;
     	let track0;
     	let t;
@@ -8596,12 +8678,12 @@ var app = (function () {
     			attr_dev(track0, "kind", "captions");
     			add_location(track0, file$1k, 228, 1, 10321);
     			attr_dev(audio0, "id", "main");
-    			attr_dev(audio0, "class", "svelte-pj0r38");
+    			attr_dev(audio0, "class", "svelte-1afm0n4");
     			add_location(audio0, file$1k, 227, 0, 10302);
     			attr_dev(track1, "kind", "captions");
     			add_location(track1, file$1k, 232, 1, 10375);
     			attr_dev(audio1, "id", "alt");
-    			attr_dev(audio1, "class", "svelte-pj0r38");
+    			attr_dev(audio1, "class", "svelte-1afm0n4");
     			add_location(audio1, file$1k, 231, 0, 10357);
     		},
     		l: function claim(nodes) {
@@ -8626,7 +8708,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1q.name,
+    		id: create_fragment$1p.name,
     		type: "component",
     		source: "",
     		ctx
@@ -8635,7 +8717,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1q($$self, $$props, $$invalidate) {
+    function instance$1p($$self, $$props, $$invalidate) {
     	let $mainAudioElement;
     	let $currentAudioElement;
     	let $altAudioElement;
@@ -9038,22 +9120,22 @@ var app = (function () {
     class AudioPlayer extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1q, create_fragment$1q, safe_not_equal, {});
+    		init(this, options, instance$1p, create_fragment$1p, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AudioPlayer",
     			options,
-    			id: create_fragment$1q.name
+    			id: create_fragment$1p.name
     		});
     	}
     }
 
-    /* src/icons/CogIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/CogIcon.svelte generated by Svelte v3.55.1 */
 
     const file$1j = "src/icons/CogIcon.svelte";
 
-    function create_fragment$1p(ctx) {
+    function create_fragment$1o(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -9095,7 +9177,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1p.name,
+    		id: create_fragment$1o.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9104,10 +9186,17 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1p($$self, $$props, $$invalidate) {
+    function instance$1o($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CogIcon', slots, []);
     	let { style } = $$props;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (style === undefined && !('style' in $$props || $$self.$$.bound[$$self.$$.props['style']])) {
+    			console.warn("<CogIcon> was created without expected prop 'style'");
+    		}
+    	});
+
     	const writable_props = ['style'];
 
     	Object.keys($$props).forEach(key => {
@@ -9134,21 +9223,14 @@ var app = (function () {
     class CogIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1p, create_fragment$1p, safe_not_equal, { style: 0 });
+    		init(this, options, instance$1o, create_fragment$1o, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "CogIcon",
     			options,
-    			id: create_fragment$1p.name
+    			id: create_fragment$1o.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*style*/ ctx[0] === undefined && !('style' in props)) {
-    			console.warn("<CogIcon> was created without expected prop 'style'");
-    		}
     	}
 
     	get style() {
@@ -9160,11 +9242,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/PlaybackIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/PlaybackIcon.svelte generated by Svelte v3.55.1 */
 
     const file$1i = "src/icons/PlaybackIcon.svelte";
 
-    function create_fragment$1o(ctx) {
+    function create_fragment$1n(ctx) {
     	let svg;
     	let path;
 
@@ -9200,7 +9282,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1o.name,
+    		id: create_fragment$1n.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9209,10 +9291,17 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1o($$self, $$props, $$invalidate) {
+    function instance$1n($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlaybackIcon', slots, []);
     	let { style } = $$props;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (style === undefined && !('style' in $$props || $$self.$$.bound[$$self.$$.props['style']])) {
+    			console.warn("<PlaybackIcon> was created without expected prop 'style'");
+    		}
+    	});
+
     	const writable_props = ['style'];
 
     	Object.keys($$props).forEach(key => {
@@ -9239,21 +9328,14 @@ var app = (function () {
     class PlaybackIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1o, create_fragment$1o, safe_not_equal, { style: 0 });
+    		init(this, options, instance$1n, create_fragment$1n, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlaybackIcon",
     			options,
-    			id: create_fragment$1o.name
+    			id: create_fragment$1n.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*style*/ ctx[0] === undefined && !('style' in props)) {
-    			console.warn("<PlaybackIcon> was created without expected prop 'style'");
-    		}
     	}
 
     	get style() {
@@ -9265,11 +9347,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/PlayListIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/PlayListIcon.svelte generated by Svelte v3.55.1 */
 
     const file$1h = "src/icons/PlayListIcon.svelte";
 
-    function create_fragment$1n(ctx) {
+    function create_fragment$1m(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -9311,7 +9393,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1n.name,
+    		id: create_fragment$1m.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9320,10 +9402,17 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1n($$self, $$props, $$invalidate) {
+    function instance$1m($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlayListIcon', slots, []);
     	let { style } = $$props;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (style === undefined && !('style' in $$props || $$self.$$.bound[$$self.$$.props['style']])) {
+    			console.warn("<PlayListIcon> was created without expected prop 'style'");
+    		}
+    	});
+
     	const writable_props = ['style'];
 
     	Object.keys($$props).forEach(key => {
@@ -9350,21 +9439,14 @@ var app = (function () {
     class PlayListIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1n, create_fragment$1n, safe_not_equal, { style: 0 });
+    		init(this, options, instance$1m, create_fragment$1m, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayListIcon",
     			options,
-    			id: create_fragment$1n.name
+    			id: create_fragment$1m.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*style*/ ctx[0] === undefined && !('style' in props)) {
-    			console.warn("<PlayListIcon> was created without expected prop 'style'");
-    		}
     	}
 
     	get style() {
@@ -9376,11 +9458,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/SpeakIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/SpeakIcon.svelte generated by Svelte v3.55.1 */
 
     const file$1g = "src/icons/SpeakIcon.svelte";
 
-    function create_fragment$1m(ctx) {
+    function create_fragment$1l(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -9422,7 +9504,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1m.name,
+    		id: create_fragment$1l.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9431,7 +9513,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1m($$self, $$props, $$invalidate) {
+    function instance$1l($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SpeakIcon', slots, []);
     	let { style = '' } = $$props;
@@ -9461,13 +9543,13 @@ var app = (function () {
     class SpeakIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1m, create_fragment$1m, safe_not_equal, { style: 0 });
+    		init(this, options, instance$1l, create_fragment$1l, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SpeakIcon",
     			options,
-    			id: create_fragment$1m.name
+    			id: create_fragment$1l.name
     		});
     	}
 
@@ -9480,10 +9562,10 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/Navigation.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/Navigation.svelte generated by Svelte v3.55.1 */
     const file$1f = "src/layouts/Navigation.svelte";
 
-    function create_fragment$1l(ctx) {
+    function create_fragment$1k(ctx) {
     	let navigation_svlt;
     	let nav_button0;
     	let playlisticon;
@@ -9554,16 +9636,16 @@ var app = (function () {
     			t3 = space();
     			nav_button3 = element("nav-button");
     			create_component(cogicon.$$.fragment);
-    			set_custom_element_data(nav_button0, "class", "svelte-1uw1k3e");
+    			set_custom_element_data(nav_button0, "class", "svelte-uqzl80");
     			add_location(nav_button0, file$1f, 8, 1, 332);
-    			set_custom_element_data(nav_button1, "class", "svelte-1uw1k3e");
+    			set_custom_element_data(nav_button1, "class", "svelte-uqzl80");
     			add_location(nav_button1, file$1f, 15, 1, 657);
-    			set_custom_element_data(nav_button2, "class", "svelte-1uw1k3e");
+    			set_custom_element_data(nav_button2, "class", "svelte-uqzl80");
     			add_location(nav_button2, file$1f, 22, 1, 984);
     			add_location(separator, file$1f, 29, 1, 1304);
-    			set_custom_element_data(nav_button3, "class", "configButton svelte-1uw1k3e");
+    			set_custom_element_data(nav_button3, "class", "configButton svelte-uqzl80");
     			add_location(nav_button3, file$1f, 30, 1, 1319);
-    			set_custom_element_data(navigation_svlt, "class", "dark-theme svelte-1uw1k3e");
+    			set_custom_element_data(navigation_svlt, "class", "dark-theme svelte-uqzl80");
     			add_location(navigation_svlt, file$1f, 7, 0, 294);
     		},
     		l: function claim(nodes) {
@@ -9655,7 +9737,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1l.name,
+    		id: create_fragment$1k.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9664,7 +9746,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1l($$self, $$props, $$invalidate) {
+    function instance$1k($$self, $$props, $$invalidate) {
     	let $layoutToShow;
     	validate_store(layoutToShow, 'layoutToShow');
     	component_subscribe($$self, layoutToShow, $$value => $$invalidate(0, $layoutToShow = $$value));
@@ -9702,13 +9784,13 @@ var app = (function () {
     class Navigation extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1l, create_fragment$1l, safe_not_equal, {});
+    		init(this, options, instance$1k, create_fragment$1k, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Navigation",
     			options,
-    			id: create_fragment$1l.name
+    			id: create_fragment$1k.name
     		});
     	}
     }
@@ -9738,10 +9820,10 @@ var app = (function () {
         }
     }
 
-    /* src/layouts/components/NextButton.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/components/NextButton.svelte generated by Svelte v3.55.1 */
     const file$1e = "src/layouts/components/NextButton.svelte";
 
-    function create_fragment$1k(ctx) {
+    function create_fragment$1j(ctx) {
     	let svg;
     	let polygon;
     	let rect;
@@ -9796,7 +9878,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1k.name,
+    		id: create_fragment$1j.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9805,7 +9887,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1k($$self, $$props, $$invalidate) {
+    function instance$1j($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('NextButton', slots, []);
     	const writable_props = [];
@@ -9822,13 +9904,13 @@ var app = (function () {
     class NextButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1k, create_fragment$1k, safe_not_equal, {});
+    		init(this, options, instance$1j, create_fragment$1j, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "NextButton",
     			options,
-    			id: create_fragment$1k.name
+    			id: create_fragment$1j.name
     		});
     	}
     }
@@ -9864,10 +9946,10 @@ var app = (function () {
         }
     }
 
-    /* src/layouts/components/PreviousButton.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/components/PreviousButton.svelte generated by Svelte v3.55.1 */
     const file$1d = "src/layouts/components/PreviousButton.svelte";
 
-    function create_fragment$1j(ctx) {
+    function create_fragment$1i(ctx) {
     	let svg;
     	let polygon;
     	let rect;
@@ -9923,7 +10005,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1j.name,
+    		id: create_fragment$1i.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9932,7 +10014,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1j($$self, $$props, $$invalidate) {
+    function instance$1i($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PreviousButton', slots, []);
     	const writable_props = [];
@@ -9949,21 +10031,21 @@ var app = (function () {
     class PreviousButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1j, create_fragment$1j, safe_not_equal, {});
+    		init(this, options, instance$1i, create_fragment$1i, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PreviousButton",
     			options,
-    			id: create_fragment$1j.name
+    			id: create_fragment$1i.name
     		});
     	}
     }
 
-    /* src/layouts/components/PlayButton.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/components/PlayButton.svelte generated by Svelte v3.55.1 */
     const file$1c = "src/layouts/components/PlayButton.svelte";
 
-    function create_fragment$1i(ctx) {
+    function create_fragment$1h(ctx) {
     	let play_pause_button;
     	let left_part;
     	let t;
@@ -9979,14 +10061,14 @@ var app = (function () {
     			t = space();
     			right_part = element("right-part");
     			set_style(left_part, "background-color", /*customColor*/ ctx[1]);
-    			set_custom_element_data(left_part, "class", "svelte-yh36os");
+    			set_custom_element_data(left_part, "class", "svelte-4k1fw7");
     			add_location(left_part, file$1c, 24, 1, 778);
     			set_style(right_part, "background-color", /*customColor*/ ctx[1]);
-    			set_custom_element_data(right_part, "class", "svelte-yh36os");
+    			set_custom_element_data(right_part, "class", "svelte-4k1fw7");
     			add_location(right_part, file$1c, 26, 1, 834);
     			set_style(play_pause_button, "height", /*customSize*/ ctx[0]);
     			set_style(play_pause_button, "width", /*customSize*/ ctx[0]);
-    			set_custom_element_data(play_pause_button, "class", play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[2] ? '' : 'playing') + " svelte-yh36os"));
+    			set_custom_element_data(play_pause_button, "class", play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[2] ? '' : 'playing') + " svelte-4k1fw7"));
     			add_location(play_pause_button, file$1c, 19, 0, 636);
     		},
     		l: function claim(nodes) {
@@ -10020,7 +10102,7 @@ var app = (function () {
     				set_style(play_pause_button, "width", /*customSize*/ ctx[0]);
     			}
 
-    			if (dirty & /*$isPlaying*/ 4 && play_pause_button_class_value !== (play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[2] ? '' : 'playing') + " svelte-yh36os"))) {
+    			if (dirty & /*$isPlaying*/ 4 && play_pause_button_class_value !== (play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[2] ? '' : 'playing') + " svelte-4k1fw7"))) {
     				set_custom_element_data(play_pause_button, "class", play_pause_button_class_value);
     			}
     		},
@@ -10035,7 +10117,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1i.name,
+    		id: create_fragment$1h.name,
     		type: "component",
     		source: "",
     		ctx
@@ -10044,7 +10126,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1i($$self, $$props, $$invalidate) {
+    function instance$1h($$self, $$props, $$invalidate) {
     	let $playingSongStore;
     	let $songToPlayUrlStore;
     	let $currentAudioElement;
@@ -10116,13 +10198,13 @@ var app = (function () {
     class PlayButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1i, create_fragment$1i, safe_not_equal, { customSize: 0, customColor: 1 });
+    		init(this, options, instance$1h, create_fragment$1h, safe_not_equal, { customSize: 0, customColor: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayButton",
     			options,
-    			id: create_fragment$1i.name
+    			id: create_fragment$1h.name
     		});
     	}
 
@@ -10143,11 +10225,11 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/components/PlayerProgress.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/components/PlayerProgress.svelte generated by Svelte v3.55.1 */
 
     const file$1b = "src/layouts/components/PlayerProgress.svelte";
 
-    function create_fragment$1h(ctx) {
+    function create_fragment$1g(ctx) {
     	let player_progress;
     	let player_gloss;
     	let t0;
@@ -10163,14 +10245,14 @@ var app = (function () {
     			player_progress_fill = element("player-progress-fill");
     			t1 = space();
     			div = element("div");
-    			set_custom_element_data(player_gloss, "class", "svelte-1ptvmao");
+    			set_custom_element_data(player_gloss, "class", "svelte-nv3uec");
     			add_location(player_gloss, file$1b, 98, 1, 3934);
-    			set_custom_element_data(player_progress_fill, "class", "svelte-1ptvmao");
+    			set_custom_element_data(player_progress_fill, "class", "svelte-nv3uec");
     			add_location(player_progress_fill, file$1b, 99, 1, 3952);
     			attr_dev(div, "id", "waveform-data");
-    			attr_dev(div, "class", "svelte-1ptvmao");
+    			attr_dev(div, "class", "svelte-nv3uec");
     			add_location(div, file$1b, 100, 1, 3978);
-    			set_custom_element_data(player_progress, "class", "svelte-1ptvmao");
+    			set_custom_element_data(player_progress, "class", "svelte-nv3uec");
     			add_location(player_progress, file$1b, 97, 0, 3915);
     		},
     		l: function claim(nodes) {
@@ -10194,7 +10276,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1h.name,
+    		id: create_fragment$1g.name,
     		type: "component",
     		source: "",
     		ctx
@@ -10203,7 +10285,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1h($$self, $$props, $$invalidate) {
+    function instance$1g($$self, $$props, $$invalidate) {
     	let $currentAudioElement;
     	let $playingSongStore;
     	let $currentSongProgressStore;
@@ -10398,22 +10480,22 @@ var app = (function () {
     class PlayerProgress extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1h, create_fragment$1h, safe_not_equal, {});
+    		init(this, options, instance$1g, create_fragment$1g, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerProgress",
     			options,
-    			id: create_fragment$1h.name
+    			id: create_fragment$1g.name
     		});
     	}
     }
 
-    /* src/layouts/components/PlayerVolumeBar.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/components/PlayerVolumeBar.svelte generated by Svelte v3.55.1 */
 
     const file$1a = "src/layouts/components/PlayerVolumeBar.svelte";
 
-    function create_fragment$1g(ctx) {
+    function create_fragment$1f(ctx) {
     	let volume_bar;
     	let input;
     	let input_step_value;
@@ -10437,13 +10519,13 @@ var app = (function () {
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "1");
     			attr_dev(input, "step", input_step_value = /*$keyPressed*/ ctx[0] === 'Shift' ? '0.05' : '0.01');
-    			attr_dev(input, "class", "svelte-14r825h");
+    			attr_dev(input, "class", "svelte-16nywg1");
     			add_location(input, file$1a, 76, 1, 2759);
-    			attr_dev(background, "class", "svelte-14r825h");
+    			attr_dev(background, "class", "svelte-16nywg1");
     			add_location(background, file$1a, 85, 1, 2905);
-    			set_custom_element_data(volume_thumb, "class", "svelte-14r825h");
+    			set_custom_element_data(volume_thumb, "class", "svelte-16nywg1");
     			add_location(volume_thumb, file$1a, 86, 1, 2921);
-    			set_custom_element_data(volume_bar, "class", "svelte-14r825h");
+    			set_custom_element_data(volume_bar, "class", "svelte-16nywg1");
     			add_location(volume_bar, file$1a, 75, 0, 2745);
     		},
     		l: function claim(nodes) {
@@ -10478,7 +10560,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1g.name,
+    		id: create_fragment$1f.name,
     		type: "component",
     		source: "",
     		ctx
@@ -10487,7 +10569,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1g($$self, $$props, $$invalidate) {
+    function instance$1f($$self, $$props, $$invalidate) {
     	let $altAudioElement;
     	let $mainAudioElement;
     	let $keyPressed;
@@ -10650,13 +10732,13 @@ var app = (function () {
     class PlayerVolumeBar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1g, create_fragment$1g, safe_not_equal, {});
+    		init(this, options, instance$1f, create_fragment$1f, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlayerVolumeBar",
     			options,
-    			id: create_fragment$1g.name
+    			id: create_fragment$1f.name
     		});
     	}
     }
@@ -10696,7 +10778,7 @@ var app = (function () {
         });
     }
 
-    /* src/components/AlbumArt.svelte generated by Svelte v3.49.0 */
+    /* src/components/AlbumArt.svelte generated by Svelte v3.55.1 */
     const file$19 = "src/components/AlbumArt.svelte";
 
     // (38:0) {#key $reloadArts}
@@ -10709,7 +10791,7 @@ var app = (function () {
     			set_custom_element_data(art_svlt, "id", /*elementId*/ ctx[0]);
     			set_style(art_svlt, "height", /*elementHeight*/ ctx[3] + "px");
     			set_style(art_svlt, "width", /*elementWidth*/ ctx[2] + "px");
-    			set_custom_element_data(art_svlt, "class", "svelte-151imbt");
+    			set_custom_element_data(art_svlt, "class", "svelte-q19a9j");
     			add_location(art_svlt, file$19, 38, 1, 1268);
     		},
     		m: function mount(target, anchor) {
@@ -10746,7 +10828,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$1f(ctx) {
+    function create_fragment$1e(ctx) {
     	let previous_key = /*$reloadArts*/ ctx[4];
     	let key_block_anchor;
     	let key_block = create_key_block(ctx);
@@ -10783,7 +10865,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1f.name,
+    		id: create_fragment$1e.name,
     		type: "component",
     		source: "",
     		ctx
@@ -10792,7 +10874,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1f($$self, $$props, $$invalidate) {
+    function instance$1e($$self, $$props, $$invalidate) {
     	let $reloadArts;
     	validate_store(reloadArts, 'reloadArts');
     	component_subscribe($$self, reloadArts, $$value => $$invalidate(4, $reloadArts = $$value));
@@ -10901,7 +10983,7 @@ var app = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$1f, create_fragment$1f, safe_not_equal, {
+    		init(this, options, instance$1e, create_fragment$1e, safe_not_equal, {
     			intersectionRoot: 5,
     			imageSourceLocation: 6
     		});
@@ -10910,7 +10992,7 @@ var app = (function () {
     			component: this,
     			tagName: "AlbumArt",
     			options,
-    			id: create_fragment$1f.name
+    			id: create_fragment$1e.name
     		});
     	}
 
@@ -10949,10 +11031,10 @@ var app = (function () {
         }
     }
 
-    /* src/layouts/ControlBar.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/ControlBar.svelte generated by Svelte v3.55.1 */
     const file$18 = "src/layouts/ControlBar.svelte";
 
-    function create_fragment$1e(ctx) {
+    function create_fragment$1d(ctx) {
     	let control_bar_svlt;
     	let album_art;
     	let albumart;
@@ -11020,16 +11102,16 @@ var app = (function () {
     			song_time_left = element("song-time-left");
     			t10 = text("-");
     			t11 = text(t11_value);
-    			set_custom_element_data(album_art, "class", "svelte-1ats29x");
-    			add_location(album_art, file$18, 44, 1, 1666);
-    			set_custom_element_data(player_buttons, "class", "svelte-1ats29x");
-    			add_location(player_buttons, file$18, 48, 1, 1790);
-    			set_custom_element_data(song_duration, "class", "song-time svelte-1ats29x");
-    			add_location(song_duration, file$18, 56, 1, 1905);
-    			set_custom_element_data(song_time_left, "class", "song-time svelte-1ats29x");
-    			add_location(song_time_left, file$18, 62, 1, 2025);
-    			set_custom_element_data(control_bar_svlt, "class", "svelte-1ats29x");
-    			add_location(control_bar_svlt, file$18, 43, 0, 1646);
+    			set_custom_element_data(album_art, "class", "svelte-b3f23d");
+    			add_location(album_art, file$18, 44, 1, 1688);
+    			set_custom_element_data(player_buttons, "class", "svelte-b3f23d");
+    			add_location(player_buttons, file$18, 48, 1, 1812);
+    			set_custom_element_data(song_duration, "class", "song-time svelte-b3f23d");
+    			add_location(song_duration, file$18, 56, 1, 1927);
+    			set_custom_element_data(song_time_left, "class", "song-time svelte-b3f23d");
+    			add_location(song_time_left, file$18, 62, 1, 2047);
+    			set_custom_element_data(control_bar_svlt, "class", "svelte-b3f23d");
+    			add_location(control_bar_svlt, file$18, 43, 0, 1668);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11100,7 +11182,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1e.name,
+    		id: create_fragment$1d.name,
     		type: "component",
     		source: "",
     		ctx
@@ -11109,7 +11191,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1e($$self, $$props, $$invalidate) {
+    function instance$1d($$self, $$props, $$invalidate) {
     	let $playingSongStore;
     	let $currentSongProgressStore;
     	let $currentSongDurationStore;
@@ -11174,6 +11256,7 @@ var app = (function () {
     		PlayerVolumeBar,
     		AlbumArt,
     		playingSongStore,
+    		albumPlayingDirStore,
     		currentSongDurationStore,
     		currentSongProgressStore,
     		parseDuration,
@@ -11219,13 +11302,13 @@ var app = (function () {
     class ControlBar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1e, create_fragment$1e, safe_not_equal, {});
+    		init(this, options, instance$1d, create_fragment$1d, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ControlBar",
     			options,
-    			id: create_fragment$1e.name
+    			id: create_fragment$1d.name
     		});
     	}
     }
@@ -14535,1703 +14618,1711 @@ var app = (function () {
       render: render
     });
 
-    /*! @license DOMPurify 2.4.1 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.4.1/LICENSE */
-
-    var purify = createCommonjsModule(function (module, exports) {
-    (function (global, factory) {
-      module.exports = factory() ;
-    })(commonjsGlobal, (function () {
-      function _typeof(obj) {
-        "@babel/helpers - typeof";
-
-        return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-          return typeof obj;
-        } : function (obj) {
-          return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-        }, _typeof(obj);
-      }
-
-      function _setPrototypeOf(o, p) {
-        _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-          o.__proto__ = p;
-          return o;
-        };
-
-        return _setPrototypeOf(o, p);
-      }
-
-      function _isNativeReflectConstruct() {
-        if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-        if (Reflect.construct.sham) return false;
-        if (typeof Proxy === "function") return true;
-
-        try {
-          Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-          return true;
-        } catch (e) {
-          return false;
-        }
-      }
-
-      function _construct(Parent, args, Class) {
-        if (_isNativeReflectConstruct()) {
-          _construct = Reflect.construct;
-        } else {
-          _construct = function _construct(Parent, args, Class) {
-            var a = [null];
-            a.push.apply(a, args);
-            var Constructor = Function.bind.apply(Parent, a);
-            var instance = new Constructor();
-            if (Class) _setPrototypeOf(instance, Class.prototype);
-            return instance;
-          };
-        }
-
-        return _construct.apply(null, arguments);
-      }
-
-      function _toConsumableArray(arr) {
-        return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-      }
-
-      function _arrayWithoutHoles(arr) {
-        if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-      }
-
-      function _iterableToArray(iter) {
-        if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-      }
-
-      function _unsupportedIterableToArray(o, minLen) {
-        if (!o) return;
-        if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-        var n = Object.prototype.toString.call(o).slice(8, -1);
-        if (n === "Object" && o.constructor) n = o.constructor.name;
-        if (n === "Map" || n === "Set") return Array.from(o);
-        if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-      }
-
-      function _arrayLikeToArray(arr, len) {
-        if (len == null || len > arr.length) len = arr.length;
-
-        for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-        return arr2;
-      }
-
-      function _nonIterableSpread() {
-        throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-      }
-
-      var hasOwnProperty = Object.hasOwnProperty,
-          setPrototypeOf = Object.setPrototypeOf,
-          isFrozen = Object.isFrozen,
-          getPrototypeOf = Object.getPrototypeOf,
-          getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-      var freeze = Object.freeze,
-          seal = Object.seal,
-          create = Object.create; // eslint-disable-line import/no-mutable-exports
-
-      var _ref = typeof Reflect !== 'undefined' && Reflect,
-          apply = _ref.apply,
-          construct = _ref.construct;
-
-      if (!apply) {
-        apply = function apply(fun, thisValue, args) {
-          return fun.apply(thisValue, args);
-        };
-      }
-
-      if (!freeze) {
-        freeze = function freeze(x) {
-          return x;
-        };
-      }
-
-      if (!seal) {
-        seal = function seal(x) {
-          return x;
-        };
-      }
-
-      if (!construct) {
-        construct = function construct(Func, args) {
-          return _construct(Func, _toConsumableArray(args));
-        };
-      }
-
-      var arrayForEach = unapply(Array.prototype.forEach);
-      var arrayPop = unapply(Array.prototype.pop);
-      var arrayPush = unapply(Array.prototype.push);
-      var stringToLowerCase = unapply(String.prototype.toLowerCase);
-      var stringToString = unapply(String.prototype.toString);
-      var stringMatch = unapply(String.prototype.match);
-      var stringReplace = unapply(String.prototype.replace);
-      var stringIndexOf = unapply(String.prototype.indexOf);
-      var stringTrim = unapply(String.prototype.trim);
-      var regExpTest = unapply(RegExp.prototype.test);
-      var typeErrorCreate = unconstruct(TypeError);
-      function unapply(func) {
-        return function (thisArg) {
-          for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-            args[_key - 1] = arguments[_key];
-          }
-
-          return apply(func, thisArg, args);
-        };
-      }
-      function unconstruct(func) {
-        return function () {
-          for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
-          }
-
-          return construct(func, args);
-        };
-      }
-      /* Add properties to a lookup table */
-
-      function addToSet(set, array, transformCaseFunc) {
-        transformCaseFunc = transformCaseFunc ? transformCaseFunc : stringToLowerCase;
-
-        if (setPrototypeOf) {
-          // Make 'in' and truthy checks like Boolean(set.constructor)
-          // independent of any properties defined on Object.prototype.
-          // Prevent prototype setters from intercepting set as a this value.
-          setPrototypeOf(set, null);
-        }
-
-        var l = array.length;
-
-        while (l--) {
-          var element = array[l];
-
-          if (typeof element === 'string') {
-            var lcElement = transformCaseFunc(element);
-
-            if (lcElement !== element) {
-              // Config presets (e.g. tags.js, attrs.js) are immutable.
-              if (!isFrozen(array)) {
-                array[l] = lcElement;
-              }
-
-              element = lcElement;
-            }
-          }
-
-          set[element] = true;
-        }
-
-        return set;
-      }
-      /* Shallow clone an object */
-
-      function clone(object) {
-        var newObject = create(null);
-        var property;
-
-        for (property in object) {
-          if (apply(hasOwnProperty, object, [property])) {
-            newObject[property] = object[property];
-          }
-        }
-
-        return newObject;
-      }
-      /* IE10 doesn't support __lookupGetter__ so lets'
-       * simulate it. It also automatically checks
-       * if the prop is function or getter and behaves
-       * accordingly. */
-
-      function lookupGetter(object, prop) {
-        while (object !== null) {
-          var desc = getOwnPropertyDescriptor(object, prop);
-
-          if (desc) {
-            if (desc.get) {
-              return unapply(desc.get);
-            }
-
-            if (typeof desc.value === 'function') {
-              return unapply(desc.value);
-            }
-          }
-
-          object = getPrototypeOf(object);
-        }
-
-        function fallbackValue(element) {
-          console.warn('fallback value for', element);
-          return null;
-        }
-
-        return fallbackValue;
-      }
-
-      var html$1 = freeze(['a', 'abbr', 'acronym', 'address', 'area', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'big', 'blink', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'dir', 'div', 'dl', 'dt', 'element', 'em', 'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'marquee', 'menu', 'menuitem', 'meter', 'nav', 'nobr', 'ol', 'optgroup', 'option', 'output', 'p', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'select', 'shadow', 'small', 'source', 'spacer', 'span', 'strike', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'tr', 'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr']); // SVG
-
-      var svg$1 = freeze(['svg', 'a', 'altglyph', 'altglyphdef', 'altglyphitem', 'animatecolor', 'animatemotion', 'animatetransform', 'circle', 'clippath', 'defs', 'desc', 'ellipse', 'filter', 'font', 'g', 'glyph', 'glyphref', 'hkern', 'image', 'line', 'lineargradient', 'marker', 'mask', 'metadata', 'mpath', 'path', 'pattern', 'polygon', 'polyline', 'radialgradient', 'rect', 'stop', 'style', 'switch', 'symbol', 'text', 'textpath', 'title', 'tref', 'tspan', 'view', 'vkern']);
-      var svgFilters = freeze(['feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feDistantLight', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMerge', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile', 'feTurbulence']); // List of SVG elements that are disallowed by default.
-      // We still need to know them so that we can do namespace
-      // checks properly in case one wants to add them to
-      // allow-list.
-
-      var svgDisallowed = freeze(['animate', 'color-profile', 'cursor', 'discard', 'fedropshadow', 'font-face', 'font-face-format', 'font-face-name', 'font-face-src', 'font-face-uri', 'foreignobject', 'hatch', 'hatchpath', 'mesh', 'meshgradient', 'meshpatch', 'meshrow', 'missing-glyph', 'script', 'set', 'solidcolor', 'unknown', 'use']);
-      var mathMl$1 = freeze(['math', 'menclose', 'merror', 'mfenced', 'mfrac', 'mglyph', 'mi', 'mlabeledtr', 'mmultiscripts', 'mn', 'mo', 'mover', 'mpadded', 'mphantom', 'mroot', 'mrow', 'ms', 'mspace', 'msqrt', 'mstyle', 'msub', 'msup', 'msubsup', 'mtable', 'mtd', 'mtext', 'mtr', 'munder', 'munderover']); // Similarly to SVG, we want to know all MathML elements,
-      // even those that we disallow by default.
-
-      var mathMlDisallowed = freeze(['maction', 'maligngroup', 'malignmark', 'mlongdiv', 'mscarries', 'mscarry', 'msgroup', 'mstack', 'msline', 'msrow', 'semantics', 'annotation', 'annotation-xml', 'mprescripts', 'none']);
-      var text = freeze(['#text']);
-
-      var html = freeze(['accept', 'action', 'align', 'alt', 'autocapitalize', 'autocomplete', 'autopictureinpicture', 'autoplay', 'background', 'bgcolor', 'border', 'capture', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'controls', 'controlslist', 'coords', 'crossorigin', 'datetime', 'decoding', 'default', 'dir', 'disabled', 'disablepictureinpicture', 'disableremoteplayback', 'download', 'draggable', 'enctype', 'enterkeyhint', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'inputmode', 'integrity', 'ismap', 'kind', 'label', 'lang', 'list', 'loading', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'minlength', 'multiple', 'muted', 'name', 'nonce', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder', 'playsinline', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'sizes', 'span', 'srclang', 'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex', 'title', 'translate', 'type', 'usemap', 'valign', 'value', 'width', 'xmlns', 'slot']);
-      var svg = freeze(['accent-height', 'accumulate', 'additive', 'alignment-baseline', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clippathunits', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dur', 'edgemode', 'elevation', 'end', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'filterunits', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'preserveaspectratio', 'primitiveunits', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'specularconstant', 'specularexponent', 'spreadmethod', 'startoffset', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'systemlanguage', 'tabindex', 'targetx', 'targety', 'transform', 'transform-origin', 'text-anchor', 'text-decoration', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'version', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan']);
-      var mathMl = freeze(['accent', 'accentunder', 'align', 'bevelled', 'close', 'columnsalign', 'columnlines', 'columnspan', 'denomalign', 'depth', 'dir', 'display', 'displaystyle', 'encoding', 'fence', 'frame', 'height', 'href', 'id', 'largeop', 'length', 'linethickness', 'lspace', 'lquote', 'mathbackground', 'mathcolor', 'mathsize', 'mathvariant', 'maxsize', 'minsize', 'movablelimits', 'notation', 'numalign', 'open', 'rowalign', 'rowlines', 'rowspacing', 'rowspan', 'rspace', 'rquote', 'scriptlevel', 'scriptminsize', 'scriptsizemultiplier', 'selection', 'separator', 'separators', 'stretchy', 'subscriptshift', 'supscriptshift', 'symmetric', 'voffset', 'width', 'xmlns']);
-      var xml = freeze(['xlink:href', 'xml:id', 'xlink:title', 'xml:space', 'xmlns:xlink']);
-
-      var MUSTACHE_EXPR = seal(/\{\{[\w\W]*|[\w\W]*\}\}/gm); // Specify template detection regex for SAFE_FOR_TEMPLATES mode
-
-      var ERB_EXPR = seal(/<%[\w\W]*|[\w\W]*%>/gm);
-      var TMPLIT_EXPR = seal(/\${[\w\W]*}/gm);
-      var DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]/); // eslint-disable-line no-useless-escape
-
-      var ARIA_ATTR = seal(/^aria-[\-\w]+$/); // eslint-disable-line no-useless-escape
-
-      var IS_ALLOWED_URI = seal(/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i // eslint-disable-line no-useless-escape
-      );
-      var IS_SCRIPT_OR_DATA = seal(/^(?:\w+script|data):/i);
-      var ATTR_WHITESPACE = seal(/[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g // eslint-disable-line no-control-regex
-      );
-      var DOCTYPE_NAME = seal(/^html$/i);
-
-      var getGlobal = function getGlobal() {
-        return typeof window === 'undefined' ? null : window;
-      };
-      /**
-       * Creates a no-op policy for internal use only.
-       * Don't export this function outside this module!
-       * @param {?TrustedTypePolicyFactory} trustedTypes The policy factory.
-       * @param {Document} document The document object (to determine policy name suffix)
-       * @return {?TrustedTypePolicy} The policy created (or null, if Trusted Types
-       * are not supported).
-       */
-
-
-      var _createTrustedTypesPolicy = function _createTrustedTypesPolicy(trustedTypes, document) {
-        if (_typeof(trustedTypes) !== 'object' || typeof trustedTypes.createPolicy !== 'function') {
-          return null;
-        } // Allow the callers to control the unique policy name
-        // by adding a data-tt-policy-suffix to the script element with the DOMPurify.
-        // Policy creation with duplicate names throws in Trusted Types.
-
-
-        var suffix = null;
-        var ATTR_NAME = 'data-tt-policy-suffix';
-
-        if (document.currentScript && document.currentScript.hasAttribute(ATTR_NAME)) {
-          suffix = document.currentScript.getAttribute(ATTR_NAME);
-        }
-
-        var policyName = 'dompurify' + (suffix ? '#' + suffix : '');
-
-        try {
-          return trustedTypes.createPolicy(policyName, {
-            createHTML: function createHTML(html) {
-              return html;
-            },
-            createScriptURL: function createScriptURL(scriptUrl) {
-              return scriptUrl;
-            }
-          });
-        } catch (_) {
-          // Policy creation failed (most likely another DOMPurify script has
-          // already run). Skip creating the policy, as this will only cause errors
-          // if TT are enforced.
-          console.warn('TrustedTypes policy ' + policyName + ' could not be created.');
-          return null;
-        }
-      };
-
-      function createDOMPurify() {
-        var window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getGlobal();
-
-        var DOMPurify = function DOMPurify(root) {
-          return createDOMPurify(root);
-        };
-        /**
-         * Version label, exposed for easier checks
-         * if DOMPurify is up to date or not
-         */
-
-
-        DOMPurify.version = '2.4.1';
-        /**
-         * Array of elements that DOMPurify removed during sanitation.
-         * Empty if nothing was removed.
-         */
-
-        DOMPurify.removed = [];
-
-        if (!window || !window.document || window.document.nodeType !== 9) {
-          // Not running in a browser, provide a factory function
-          // so that you can pass your own Window
-          DOMPurify.isSupported = false;
-          return DOMPurify;
-        }
-
-        var originalDocument = window.document;
-        var document = window.document;
-        var DocumentFragment = window.DocumentFragment,
-            HTMLTemplateElement = window.HTMLTemplateElement,
-            Node = window.Node,
-            Element = window.Element,
-            NodeFilter = window.NodeFilter,
-            _window$NamedNodeMap = window.NamedNodeMap,
-            NamedNodeMap = _window$NamedNodeMap === void 0 ? window.NamedNodeMap || window.MozNamedAttrMap : _window$NamedNodeMap,
-            HTMLFormElement = window.HTMLFormElement,
-            DOMParser = window.DOMParser,
-            trustedTypes = window.trustedTypes;
-        var ElementPrototype = Element.prototype;
-        var cloneNode = lookupGetter(ElementPrototype, 'cloneNode');
-        var getNextSibling = lookupGetter(ElementPrototype, 'nextSibling');
-        var getChildNodes = lookupGetter(ElementPrototype, 'childNodes');
-        var getParentNode = lookupGetter(ElementPrototype, 'parentNode'); // As per issue #47, the web-components registry is inherited by a
-        // new document created via createHTMLDocument. As per the spec
-        // (http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries)
-        // a new empty registry is used when creating a template contents owner
-        // document, so we use that as our parent document to ensure nothing
-        // is inherited.
-
-        if (typeof HTMLTemplateElement === 'function') {
-          var template = document.createElement('template');
-
-          if (template.content && template.content.ownerDocument) {
-            document = template.content.ownerDocument;
-          }
-        }
-
-        var trustedTypesPolicy = _createTrustedTypesPolicy(trustedTypes, originalDocument);
-
-        var emptyHTML = trustedTypesPolicy ? trustedTypesPolicy.createHTML('') : '';
-        var _document = document,
-            implementation = _document.implementation,
-            createNodeIterator = _document.createNodeIterator,
-            createDocumentFragment = _document.createDocumentFragment,
-            getElementsByTagName = _document.getElementsByTagName;
-        var importNode = originalDocument.importNode;
-        var documentMode = {};
-
-        try {
-          documentMode = clone(document).documentMode ? document.documentMode : {};
-        } catch (_) {}
-
-        var hooks = {};
-        /**
-         * Expose whether this browser supports running the full DOMPurify.
-         */
-
-        DOMPurify.isSupported = typeof getParentNode === 'function' && implementation && typeof implementation.createHTMLDocument !== 'undefined' && documentMode !== 9;
-        var MUSTACHE_EXPR$1 = MUSTACHE_EXPR,
-            ERB_EXPR$1 = ERB_EXPR,
-            TMPLIT_EXPR$1 = TMPLIT_EXPR,
-            DATA_ATTR$1 = DATA_ATTR,
-            ARIA_ATTR$1 = ARIA_ATTR,
-            IS_SCRIPT_OR_DATA$1 = IS_SCRIPT_OR_DATA,
-            ATTR_WHITESPACE$1 = ATTR_WHITESPACE;
-        var IS_ALLOWED_URI$1 = IS_ALLOWED_URI;
-        /**
-         * We consider the elements and attributes below to be safe. Ideally
-         * don't add any new ones but feel free to remove unwanted ones.
-         */
-
-        /* allowed element names */
-
-        var ALLOWED_TAGS = null;
-        var DEFAULT_ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray(html$1), _toConsumableArray(svg$1), _toConsumableArray(svgFilters), _toConsumableArray(mathMl$1), _toConsumableArray(text)));
-        /* Allowed attribute names */
-
-        var ALLOWED_ATTR = null;
-        var DEFAULT_ALLOWED_ATTR = addToSet({}, [].concat(_toConsumableArray(html), _toConsumableArray(svg), _toConsumableArray(mathMl), _toConsumableArray(xml)));
-        /*
-         * Configure how DOMPUrify should handle custom elements and their attributes as well as customized built-in elements.
-         * @property {RegExp|Function|null} tagNameCheck one of [null, regexPattern, predicate]. Default: `null` (disallow any custom elements)
-         * @property {RegExp|Function|null} attributeNameCheck one of [null, regexPattern, predicate]. Default: `null` (disallow any attributes not on the allow list)
-         * @property {boolean} allowCustomizedBuiltInElements allow custom elements derived from built-ins if they pass CUSTOM_ELEMENT_HANDLING.tagNameCheck. Default: `false`.
-         */
-
-        var CUSTOM_ELEMENT_HANDLING = Object.seal(Object.create(null, {
-          tagNameCheck: {
-            writable: true,
-            configurable: false,
-            enumerable: true,
-            value: null
-          },
-          attributeNameCheck: {
-            writable: true,
-            configurable: false,
-            enumerable: true,
-            value: null
-          },
-          allowCustomizedBuiltInElements: {
-            writable: true,
-            configurable: false,
-            enumerable: true,
-            value: false
-          }
-        }));
-        /* Explicitly forbidden tags (overrides ALLOWED_TAGS/ADD_TAGS) */
-
-        var FORBID_TAGS = null;
-        /* Explicitly forbidden attributes (overrides ALLOWED_ATTR/ADD_ATTR) */
-
-        var FORBID_ATTR = null;
-        /* Decide if ARIA attributes are okay */
-
-        var ALLOW_ARIA_ATTR = true;
-        /* Decide if custom data attributes are okay */
-
-        var ALLOW_DATA_ATTR = true;
-        /* Decide if unknown protocols are okay */
-
-        var ALLOW_UNKNOWN_PROTOCOLS = false;
-        /* Output should be safe for common template engines.
-         * This means, DOMPurify removes data attributes, mustaches and ERB
-         */
-
-        var SAFE_FOR_TEMPLATES = false;
-        /* Decide if document with <html>... should be returned */
-
-        var WHOLE_DOCUMENT = false;
-        /* Track whether config is already set on this instance of DOMPurify. */
-
-        var SET_CONFIG = false;
-        /* Decide if all elements (e.g. style, script) must be children of
-         * document.body. By default, browsers might move them to document.head */
-
-        var FORCE_BODY = false;
-        /* Decide if a DOM `HTMLBodyElement` should be returned, instead of a html
-         * string (or a TrustedHTML object if Trusted Types are supported).
-         * If `WHOLE_DOCUMENT` is enabled a `HTMLHtmlElement` will be returned instead
-         */
-
-        var RETURN_DOM = false;
-        /* Decide if a DOM `DocumentFragment` should be returned, instead of a html
-         * string  (or a TrustedHTML object if Trusted Types are supported) */
-
-        var RETURN_DOM_FRAGMENT = false;
-        /* Try to return a Trusted Type object instead of a string, return a string in
-         * case Trusted Types are not supported  */
-
-        var RETURN_TRUSTED_TYPE = false;
-        /* Output should be free from DOM clobbering attacks?
-         * This sanitizes markups named with colliding, clobberable built-in DOM APIs.
-         */
-
-        var SANITIZE_DOM = true;
-        /* Achieve full DOM Clobbering protection by isolating the namespace of named
-         * properties and JS variables, mitigating attacks that abuse the HTML/DOM spec rules.
-         *
-         * HTML/DOM spec rules that enable DOM Clobbering:
-         *   - Named Access on Window (§7.3.3)
-         *   - DOM Tree Accessors (§3.1.5)
-         *   - Form Element Parent-Child Relations (§4.10.3)
-         *   - Iframe srcdoc / Nested WindowProxies (§4.8.5)
-         *   - HTMLCollection (§4.2.10.2)
-         *
-         * Namespace isolation is implemented by prefixing `id` and `name` attributes
-         * with a constant string, i.e., `user-content-`
-         */
-
-        var SANITIZE_NAMED_PROPS = false;
-        var SANITIZE_NAMED_PROPS_PREFIX = 'user-content-';
-        /* Keep element content when removing element? */
-
-        var KEEP_CONTENT = true;
-        /* If a `Node` is passed to sanitize(), then performs sanitization in-place instead
-         * of importing it into a new Document and returning a sanitized copy */
-
-        var IN_PLACE = false;
-        /* Allow usage of profiles like html, svg and mathMl */
-
-        var USE_PROFILES = {};
-        /* Tags to ignore content of when KEEP_CONTENT is true */
-
-        var FORBID_CONTENTS = null;
-        var DEFAULT_FORBID_CONTENTS = addToSet({}, ['annotation-xml', 'audio', 'colgroup', 'desc', 'foreignobject', 'head', 'iframe', 'math', 'mi', 'mn', 'mo', 'ms', 'mtext', 'noembed', 'noframes', 'noscript', 'plaintext', 'script', 'style', 'svg', 'template', 'thead', 'title', 'video', 'xmp']);
-        /* Tags that are safe for data: URIs */
-
-        var DATA_URI_TAGS = null;
-        var DEFAULT_DATA_URI_TAGS = addToSet({}, ['audio', 'video', 'img', 'source', 'image', 'track']);
-        /* Attributes safe for values like "javascript:" */
-
-        var URI_SAFE_ATTRIBUTES = null;
-        var DEFAULT_URI_SAFE_ATTRIBUTES = addToSet({}, ['alt', 'class', 'for', 'id', 'label', 'name', 'pattern', 'placeholder', 'role', 'summary', 'title', 'value', 'style', 'xmlns']);
-        var MATHML_NAMESPACE = 'http://www.w3.org/1998/Math/MathML';
-        var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-        var HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-        /* Document namespace */
-
-        var NAMESPACE = HTML_NAMESPACE;
-        var IS_EMPTY_INPUT = false;
-        /* Allowed XHTML+XML namespaces */
-
-        var ALLOWED_NAMESPACES = null;
-        var DEFAULT_ALLOWED_NAMESPACES = addToSet({}, [MATHML_NAMESPACE, SVG_NAMESPACE, HTML_NAMESPACE], stringToString);
-        /* Parsing of strict XHTML documents */
-
-        var PARSER_MEDIA_TYPE;
-        var SUPPORTED_PARSER_MEDIA_TYPES = ['application/xhtml+xml', 'text/html'];
-        var DEFAULT_PARSER_MEDIA_TYPE = 'text/html';
-        var transformCaseFunc;
-        /* Keep a reference to config to pass to hooks */
-
-        var CONFIG = null;
-        /* Ideally, do not touch anything below this line */
-
-        /* ______________________________________________ */
-
-        var formElement = document.createElement('form');
-
-        var isRegexOrFunction = function isRegexOrFunction(testValue) {
-          return testValue instanceof RegExp || testValue instanceof Function;
-        };
-        /**
-         * _parseConfig
-         *
-         * @param  {Object} cfg optional config literal
-         */
-        // eslint-disable-next-line complexity
-
-
-        var _parseConfig = function _parseConfig(cfg) {
-          if (CONFIG && CONFIG === cfg) {
-            return;
-          }
-          /* Shield configuration object from tampering */
-
-
-          if (!cfg || _typeof(cfg) !== 'object') {
-            cfg = {};
-          }
-          /* Shield configuration object from prototype pollution */
-
-
-          cfg = clone(cfg);
-          PARSER_MEDIA_TYPE = // eslint-disable-next-line unicorn/prefer-includes
-          SUPPORTED_PARSER_MEDIA_TYPES.indexOf(cfg.PARSER_MEDIA_TYPE) === -1 ? PARSER_MEDIA_TYPE = DEFAULT_PARSER_MEDIA_TYPE : PARSER_MEDIA_TYPE = cfg.PARSER_MEDIA_TYPE; // HTML tags and attributes are not case-sensitive, converting to lowercase. Keeping XHTML as is.
-
-          transformCaseFunc = PARSER_MEDIA_TYPE === 'application/xhtml+xml' ? stringToString : stringToLowerCase;
-          /* Set configuration parameters */
-
-          ALLOWED_TAGS = 'ALLOWED_TAGS' in cfg ? addToSet({}, cfg.ALLOWED_TAGS, transformCaseFunc) : DEFAULT_ALLOWED_TAGS;
-          ALLOWED_ATTR = 'ALLOWED_ATTR' in cfg ? addToSet({}, cfg.ALLOWED_ATTR, transformCaseFunc) : DEFAULT_ALLOWED_ATTR;
-          ALLOWED_NAMESPACES = 'ALLOWED_NAMESPACES' in cfg ? addToSet({}, cfg.ALLOWED_NAMESPACES, stringToString) : DEFAULT_ALLOWED_NAMESPACES;
-          URI_SAFE_ATTRIBUTES = 'ADD_URI_SAFE_ATTR' in cfg ? addToSet(clone(DEFAULT_URI_SAFE_ATTRIBUTES), // eslint-disable-line indent
-          cfg.ADD_URI_SAFE_ATTR, // eslint-disable-line indent
-          transformCaseFunc // eslint-disable-line indent
-          ) // eslint-disable-line indent
-          : DEFAULT_URI_SAFE_ATTRIBUTES;
-          DATA_URI_TAGS = 'ADD_DATA_URI_TAGS' in cfg ? addToSet(clone(DEFAULT_DATA_URI_TAGS), // eslint-disable-line indent
-          cfg.ADD_DATA_URI_TAGS, // eslint-disable-line indent
-          transformCaseFunc // eslint-disable-line indent
-          ) // eslint-disable-line indent
-          : DEFAULT_DATA_URI_TAGS;
-          FORBID_CONTENTS = 'FORBID_CONTENTS' in cfg ? addToSet({}, cfg.FORBID_CONTENTS, transformCaseFunc) : DEFAULT_FORBID_CONTENTS;
-          FORBID_TAGS = 'FORBID_TAGS' in cfg ? addToSet({}, cfg.FORBID_TAGS, transformCaseFunc) : {};
-          FORBID_ATTR = 'FORBID_ATTR' in cfg ? addToSet({}, cfg.FORBID_ATTR, transformCaseFunc) : {};
-          USE_PROFILES = 'USE_PROFILES' in cfg ? cfg.USE_PROFILES : false;
-          ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false; // Default true
-
-          ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
-
-          ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
-
-          SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
-
-          WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
-
-          RETURN_DOM = cfg.RETURN_DOM || false; // Default false
-
-          RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
-
-          RETURN_TRUSTED_TYPE = cfg.RETURN_TRUSTED_TYPE || false; // Default false
-
-          FORCE_BODY = cfg.FORCE_BODY || false; // Default false
-
-          SANITIZE_DOM = cfg.SANITIZE_DOM !== false; // Default true
-
-          SANITIZE_NAMED_PROPS = cfg.SANITIZE_NAMED_PROPS || false; // Default false
-
-          KEEP_CONTENT = cfg.KEEP_CONTENT !== false; // Default true
-
-          IN_PLACE = cfg.IN_PLACE || false; // Default false
-
-          IS_ALLOWED_URI$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI$1;
-          NAMESPACE = cfg.NAMESPACE || HTML_NAMESPACE;
-
-          if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck)) {
-            CUSTOM_ELEMENT_HANDLING.tagNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck;
-          }
-
-          if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck)) {
-            CUSTOM_ELEMENT_HANDLING.attributeNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck;
-          }
-
-          if (cfg.CUSTOM_ELEMENT_HANDLING && typeof cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements === 'boolean') {
-            CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements = cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements;
-          }
-
-          if (SAFE_FOR_TEMPLATES) {
-            ALLOW_DATA_ATTR = false;
-          }
-
-          if (RETURN_DOM_FRAGMENT) {
-            RETURN_DOM = true;
-          }
-          /* Parse profile info */
-
-
-          if (USE_PROFILES) {
-            ALLOWED_TAGS = addToSet({}, _toConsumableArray(text));
-            ALLOWED_ATTR = [];
-
-            if (USE_PROFILES.html === true) {
-              addToSet(ALLOWED_TAGS, html$1);
-              addToSet(ALLOWED_ATTR, html);
-            }
-
-            if (USE_PROFILES.svg === true) {
-              addToSet(ALLOWED_TAGS, svg$1);
-              addToSet(ALLOWED_ATTR, svg);
-              addToSet(ALLOWED_ATTR, xml);
-            }
-
-            if (USE_PROFILES.svgFilters === true) {
-              addToSet(ALLOWED_TAGS, svgFilters);
-              addToSet(ALLOWED_ATTR, svg);
-              addToSet(ALLOWED_ATTR, xml);
-            }
-
-            if (USE_PROFILES.mathMl === true) {
-              addToSet(ALLOWED_TAGS, mathMl$1);
-              addToSet(ALLOWED_ATTR, mathMl);
-              addToSet(ALLOWED_ATTR, xml);
-            }
-          }
-          /* Merge configuration parameters */
-
-
-          if (cfg.ADD_TAGS) {
-            if (ALLOWED_TAGS === DEFAULT_ALLOWED_TAGS) {
-              ALLOWED_TAGS = clone(ALLOWED_TAGS);
-            }
-
-            addToSet(ALLOWED_TAGS, cfg.ADD_TAGS, transformCaseFunc);
-          }
-
-          if (cfg.ADD_ATTR) {
-            if (ALLOWED_ATTR === DEFAULT_ALLOWED_ATTR) {
-              ALLOWED_ATTR = clone(ALLOWED_ATTR);
-            }
-
-            addToSet(ALLOWED_ATTR, cfg.ADD_ATTR, transformCaseFunc);
-          }
-
-          if (cfg.ADD_URI_SAFE_ATTR) {
-            addToSet(URI_SAFE_ATTRIBUTES, cfg.ADD_URI_SAFE_ATTR, transformCaseFunc);
-          }
-
-          if (cfg.FORBID_CONTENTS) {
-            if (FORBID_CONTENTS === DEFAULT_FORBID_CONTENTS) {
-              FORBID_CONTENTS = clone(FORBID_CONTENTS);
-            }
-
-            addToSet(FORBID_CONTENTS, cfg.FORBID_CONTENTS, transformCaseFunc);
-          }
-          /* Add #text in case KEEP_CONTENT is set to true */
-
-
-          if (KEEP_CONTENT) {
-            ALLOWED_TAGS['#text'] = true;
-          }
-          /* Add html, head and body to ALLOWED_TAGS in case WHOLE_DOCUMENT is true */
-
-
-          if (WHOLE_DOCUMENT) {
-            addToSet(ALLOWED_TAGS, ['html', 'head', 'body']);
-          }
-          /* Add tbody to ALLOWED_TAGS in case tables are permitted, see #286, #365 */
-
-
-          if (ALLOWED_TAGS.table) {
-            addToSet(ALLOWED_TAGS, ['tbody']);
-            delete FORBID_TAGS.tbody;
-          } // Prevent further manipulation of configuration.
-          // Not available in IE8, Safari 5, etc.
-
-
-          if (freeze) {
-            freeze(cfg);
-          }
-
-          CONFIG = cfg;
-        };
-
-        var MATHML_TEXT_INTEGRATION_POINTS = addToSet({}, ['mi', 'mo', 'mn', 'ms', 'mtext']);
-        var HTML_INTEGRATION_POINTS = addToSet({}, ['foreignobject', 'desc', 'title', 'annotation-xml']); // Certain elements are allowed in both SVG and HTML
-        // namespace. We need to specify them explicitly
-        // so that they don't get erroneously deleted from
-        // HTML namespace.
-
-        var COMMON_SVG_AND_HTML_ELEMENTS = addToSet({}, ['title', 'style', 'font', 'a', 'script']);
-        /* Keep track of all possible SVG and MathML tags
-         * so that we can perform the namespace checks
-         * correctly. */
-
-        var ALL_SVG_TAGS = addToSet({}, svg$1);
-        addToSet(ALL_SVG_TAGS, svgFilters);
-        addToSet(ALL_SVG_TAGS, svgDisallowed);
-        var ALL_MATHML_TAGS = addToSet({}, mathMl$1);
-        addToSet(ALL_MATHML_TAGS, mathMlDisallowed);
-        /**
-         *
-         *
-         * @param  {Element} element a DOM element whose namespace is being checked
-         * @returns {boolean} Return false if the element has a
-         *  namespace that a spec-compliant parser would never
-         *  return. Return true otherwise.
-         */
-
-        var _checkValidNamespace = function _checkValidNamespace(element) {
-          var parent = getParentNode(element); // In JSDOM, if we're inside shadow DOM, then parentNode
-          // can be null. We just simulate parent in this case.
-
-          if (!parent || !parent.tagName) {
-            parent = {
-              namespaceURI: NAMESPACE,
-              tagName: 'template'
-            };
-          }
-
-          var tagName = stringToLowerCase(element.tagName);
-          var parentTagName = stringToLowerCase(parent.tagName);
-
-          if (!ALLOWED_NAMESPACES[element.namespaceURI]) {
-            return false;
-          }
-
-          if (element.namespaceURI === SVG_NAMESPACE) {
-            // The only way to switch from HTML namespace to SVG
-            // is via <svg>. If it happens via any other tag, then
-            // it should be killed.
-            if (parent.namespaceURI === HTML_NAMESPACE) {
-              return tagName === 'svg';
-            } // The only way to switch from MathML to SVG is via`
-            // svg if parent is either <annotation-xml> or MathML
-            // text integration points.
-
-
-            if (parent.namespaceURI === MATHML_NAMESPACE) {
-              return tagName === 'svg' && (parentTagName === 'annotation-xml' || MATHML_TEXT_INTEGRATION_POINTS[parentTagName]);
-            } // We only allow elements that are defined in SVG
-            // spec. All others are disallowed in SVG namespace.
-
-
-            return Boolean(ALL_SVG_TAGS[tagName]);
-          }
-
-          if (element.namespaceURI === MATHML_NAMESPACE) {
-            // The only way to switch from HTML namespace to MathML
-            // is via <math>. If it happens via any other tag, then
-            // it should be killed.
-            if (parent.namespaceURI === HTML_NAMESPACE) {
-              return tagName === 'math';
-            } // The only way to switch from SVG to MathML is via
-            // <math> and HTML integration points
-
-
-            if (parent.namespaceURI === SVG_NAMESPACE) {
-              return tagName === 'math' && HTML_INTEGRATION_POINTS[parentTagName];
-            } // We only allow elements that are defined in MathML
-            // spec. All others are disallowed in MathML namespace.
-
-
-            return Boolean(ALL_MATHML_TAGS[tagName]);
-          }
-
-          if (element.namespaceURI === HTML_NAMESPACE) {
-            // The only way to switch from SVG to HTML is via
-            // HTML integration points, and from MathML to HTML
-            // is via MathML text integration points
-            if (parent.namespaceURI === SVG_NAMESPACE && !HTML_INTEGRATION_POINTS[parentTagName]) {
-              return false;
-            }
-
-            if (parent.namespaceURI === MATHML_NAMESPACE && !MATHML_TEXT_INTEGRATION_POINTS[parentTagName]) {
-              return false;
-            } // We disallow tags that are specific for MathML
-            // or SVG and should never appear in HTML namespace
-
-
-            return !ALL_MATHML_TAGS[tagName] && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]);
-          } // For XHTML and XML documents that support custom namespaces
-
-
-          if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && ALLOWED_NAMESPACES[element.namespaceURI]) {
-            return true;
-          } // The code should never reach this place (this means
-          // that the element somehow got namespace that is not
-          // HTML, SVG, MathML or allowed via ALLOWED_NAMESPACES).
-          // Return false just in case.
-
-
-          return false;
-        };
-        /**
-         * _forceRemove
-         *
-         * @param  {Node} node a DOM node
-         */
-
-
-        var _forceRemove = function _forceRemove(node) {
-          arrayPush(DOMPurify.removed, {
-            element: node
-          });
-
-          try {
-            // eslint-disable-next-line unicorn/prefer-dom-node-remove
-            node.parentNode.removeChild(node);
-          } catch (_) {
-            try {
-              node.outerHTML = emptyHTML;
-            } catch (_) {
-              node.remove();
-            }
-          }
-        };
-        /**
-         * _removeAttribute
-         *
-         * @param  {String} name an Attribute name
-         * @param  {Node} node a DOM node
-         */
-
-
-        var _removeAttribute = function _removeAttribute(name, node) {
-          try {
-            arrayPush(DOMPurify.removed, {
-              attribute: node.getAttributeNode(name),
-              from: node
-            });
-          } catch (_) {
-            arrayPush(DOMPurify.removed, {
-              attribute: null,
-              from: node
-            });
-          }
-
-          node.removeAttribute(name); // We void attribute values for unremovable "is"" attributes
-
-          if (name === 'is' && !ALLOWED_ATTR[name]) {
-            if (RETURN_DOM || RETURN_DOM_FRAGMENT) {
-              try {
-                _forceRemove(node);
-              } catch (_) {}
-            } else {
-              try {
-                node.setAttribute(name, '');
-              } catch (_) {}
-            }
-          }
-        };
-        /**
-         * _initDocument
-         *
-         * @param  {String} dirty a string of dirty markup
-         * @return {Document} a DOM, filled with the dirty markup
-         */
-
-
-        var _initDocument = function _initDocument(dirty) {
-          /* Create a HTML document */
-          var doc;
-          var leadingWhitespace;
-
-          if (FORCE_BODY) {
-            dirty = '<remove></remove>' + dirty;
-          } else {
-            /* If FORCE_BODY isn't used, leading whitespace needs to be preserved manually */
-            var matches = stringMatch(dirty, /^[\r\n\t ]+/);
-            leadingWhitespace = matches && matches[0];
-          }
-
-          if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && NAMESPACE === HTML_NAMESPACE) {
-            // Root of XHTML doc must contain xmlns declaration (see https://www.w3.org/TR/xhtml1/normative.html#strict)
-            dirty = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + dirty + '</body></html>';
-          }
-
-          var dirtyPayload = trustedTypesPolicy ? trustedTypesPolicy.createHTML(dirty) : dirty;
-          /*
-           * Use the DOMParser API by default, fallback later if needs be
-           * DOMParser not work for svg when has multiple root element.
-           */
-
-          if (NAMESPACE === HTML_NAMESPACE) {
-            try {
-              doc = new DOMParser().parseFromString(dirtyPayload, PARSER_MEDIA_TYPE);
-            } catch (_) {}
-          }
-          /* Use createHTMLDocument in case DOMParser is not available */
-
-
-          if (!doc || !doc.documentElement) {
-            doc = implementation.createDocument(NAMESPACE, 'template', null);
-
-            try {
-              doc.documentElement.innerHTML = IS_EMPTY_INPUT ? '' : dirtyPayload;
-            } catch (_) {// Syntax error if dirtyPayload is invalid xml
-            }
-          }
-
-          var body = doc.body || doc.documentElement;
-
-          if (dirty && leadingWhitespace) {
-            body.insertBefore(document.createTextNode(leadingWhitespace), body.childNodes[0] || null);
-          }
-          /* Work on whole document or just its body */
-
-
-          if (NAMESPACE === HTML_NAMESPACE) {
-            return getElementsByTagName.call(doc, WHOLE_DOCUMENT ? 'html' : 'body')[0];
-          }
-
-          return WHOLE_DOCUMENT ? doc.documentElement : body;
-        };
-        /**
-         * _createIterator
-         *
-         * @param  {Document} root document/fragment to create iterator for
-         * @return {Iterator} iterator instance
-         */
-
-
-        var _createIterator = function _createIterator(root) {
-          return createNodeIterator.call(root.ownerDocument || root, root, // eslint-disable-next-line no-bitwise
-          NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT, null, false);
-        };
-        /**
-         * _isClobbered
-         *
-         * @param  {Node} elm element to check for clobbering attacks
-         * @return {Boolean} true if clobbered, false if safe
-         */
-
-
-        var _isClobbered = function _isClobbered(elm) {
-          return elm instanceof HTMLFormElement && (typeof elm.nodeName !== 'string' || typeof elm.textContent !== 'string' || typeof elm.removeChild !== 'function' || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== 'function' || typeof elm.setAttribute !== 'function' || typeof elm.namespaceURI !== 'string' || typeof elm.insertBefore !== 'function' || typeof elm.hasChildNodes !== 'function');
-        };
-        /**
-         * _isNode
-         *
-         * @param  {Node} obj object to check whether it's a DOM node
-         * @return {Boolean} true is object is a DOM node
-         */
-
-
-        var _isNode = function _isNode(object) {
-          return _typeof(Node) === 'object' ? object instanceof Node : object && _typeof(object) === 'object' && typeof object.nodeType === 'number' && typeof object.nodeName === 'string';
-        };
-        /**
-         * _executeHook
-         * Execute user configurable hooks
-         *
-         * @param  {String} entryPoint  Name of the hook's entry point
-         * @param  {Node} currentNode node to work on with the hook
-         * @param  {Object} data additional hook parameters
-         */
-
-
-        var _executeHook = function _executeHook(entryPoint, currentNode, data) {
-          if (!hooks[entryPoint]) {
-            return;
-          }
-
-          arrayForEach(hooks[entryPoint], function (hook) {
-            hook.call(DOMPurify, currentNode, data, CONFIG);
-          });
-        };
-        /**
-         * _sanitizeElements
-         *
-         * @protect nodeName
-         * @protect textContent
-         * @protect removeChild
-         *
-         * @param   {Node} currentNode to check for permission to exist
-         * @return  {Boolean} true if node was killed, false if left alive
-         */
-
-
-        var _sanitizeElements = function _sanitizeElements(currentNode) {
-          var content;
-          /* Execute a hook if present */
-
-          _executeHook('beforeSanitizeElements', currentNode, null);
-          /* Check if element is clobbered or can clobber */
-
-
-          if (_isClobbered(currentNode)) {
-            _forceRemove(currentNode);
-
-            return true;
-          }
-          /* Check if tagname contains Unicode */
-
-
-          if (regExpTest(/[\u0080-\uFFFF]/, currentNode.nodeName)) {
-            _forceRemove(currentNode);
-
-            return true;
-          }
-          /* Now let's check the element's type and name */
-
-
-          var tagName = transformCaseFunc(currentNode.nodeName);
-          /* Execute a hook if present */
-
-          _executeHook('uponSanitizeElement', currentNode, {
-            tagName: tagName,
-            allowedTags: ALLOWED_TAGS
-          });
-          /* Detect mXSS attempts abusing namespace confusion */
-
-
-          if (currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && (!_isNode(currentNode.content) || !_isNode(currentNode.content.firstElementChild)) && regExpTest(/<[/\w]/g, currentNode.innerHTML) && regExpTest(/<[/\w]/g, currentNode.textContent)) {
-            _forceRemove(currentNode);
-
-            return true;
-          }
-          /* Mitigate a problem with templates inside select */
-
-
-          if (tagName === 'select' && regExpTest(/<template/i, currentNode.innerHTML)) {
-            _forceRemove(currentNode);
-
-            return true;
-          }
-          /* Remove element if anything forbids its presence */
-
-
-          if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
-            /* Check if we have a custom element to handle */
-            if (!FORBID_TAGS[tagName] && _basicCustomElementTest(tagName)) {
-              if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName)) return false;
-              if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName)) return false;
-            }
-            /* Keep content except for bad-listed elements */
-
-
-            if (KEEP_CONTENT && !FORBID_CONTENTS[tagName]) {
-              var parentNode = getParentNode(currentNode) || currentNode.parentNode;
-              var childNodes = getChildNodes(currentNode) || currentNode.childNodes;
-
-              if (childNodes && parentNode) {
-                var childCount = childNodes.length;
-
-                for (var i = childCount - 1; i >= 0; --i) {
-                  parentNode.insertBefore(cloneNode(childNodes[i], true), getNextSibling(currentNode));
-                }
-              }
-            }
-
-            _forceRemove(currentNode);
-
-            return true;
-          }
-          /* Check whether element has a valid namespace */
-
-
-          if (currentNode instanceof Element && !_checkValidNamespace(currentNode)) {
-            _forceRemove(currentNode);
-
-            return true;
-          }
-
-          if ((tagName === 'noscript' || tagName === 'noembed') && regExpTest(/<\/no(script|embed)/i, currentNode.innerHTML)) {
-            _forceRemove(currentNode);
-
-            return true;
-          }
-          /* Sanitize element content to be template-safe */
-
-
-          if (SAFE_FOR_TEMPLATES && currentNode.nodeType === 3) {
-            /* Get the element's text content */
-            content = currentNode.textContent;
-            content = stringReplace(content, MUSTACHE_EXPR$1, ' ');
-            content = stringReplace(content, ERB_EXPR$1, ' ');
-            content = stringReplace(content, TMPLIT_EXPR$1, ' ');
-
-            if (currentNode.textContent !== content) {
-              arrayPush(DOMPurify.removed, {
-                element: currentNode.cloneNode()
-              });
-              currentNode.textContent = content;
-            }
-          }
-          /* Execute a hook if present */
-
-
-          _executeHook('afterSanitizeElements', currentNode, null);
-
-          return false;
-        };
-        /**
-         * _isValidAttribute
-         *
-         * @param  {string} lcTag Lowercase tag name of containing element.
-         * @param  {string} lcName Lowercase attribute name.
-         * @param  {string} value Attribute value.
-         * @return {Boolean} Returns true if `value` is valid, otherwise false.
-         */
-        // eslint-disable-next-line complexity
-
-
-        var _isValidAttribute = function _isValidAttribute(lcTag, lcName, value) {
-          /* Make sure attribute cannot clobber */
-          if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in document || value in formElement)) {
-            return false;
-          }
-          /* Allow valid data-* attributes: At least one character after "-"
-              (https://html.spec.whatwg.org/multipage/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes)
-              XML-compatible (https://html.spec.whatwg.org/multipage/infrastructure.html#xml-compatible and http://www.w3.org/TR/xml/#d0e804)
-              We don't need to check the value; it's always URI safe. */
-
-
-          if (ALLOW_DATA_ATTR && !FORBID_ATTR[lcName] && regExpTest(DATA_ATTR$1, lcName)) ; else if (ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR$1, lcName)) ; else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
-            if ( // First condition does a very basic check if a) it's basically a valid custom element tagname AND
-            // b) if the tagName passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
-            // and c) if the attribute name passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.attributeNameCheck
-            _basicCustomElementTest(lcTag) && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, lcTag) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(lcTag)) && (CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.attributeNameCheck, lcName) || CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.attributeNameCheck(lcName)) || // Alternative, second condition checks if it's an `is`-attribute, AND
-            // the value passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
-            lcName === 'is' && CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, value) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(value))) ; else {
-              return false;
-            }
-            /* Check value is safe. First, is attr inert? If so, is safe */
-
-          } else if (URI_SAFE_ATTRIBUTES[lcName]) ; else if (regExpTest(IS_ALLOWED_URI$1, stringReplace(value, ATTR_WHITESPACE$1, ''))) ; else if ((lcName === 'src' || lcName === 'xlink:href' || lcName === 'href') && lcTag !== 'script' && stringIndexOf(value, 'data:') === 0 && DATA_URI_TAGS[lcTag]) ; else if (ALLOW_UNKNOWN_PROTOCOLS && !regExpTest(IS_SCRIPT_OR_DATA$1, stringReplace(value, ATTR_WHITESPACE$1, ''))) ; else if (!value) ; else {
-            return false;
-          }
-
-          return true;
-        };
-        /**
-         * _basicCustomElementCheck
-         * checks if at least one dash is included in tagName, and it's not the first char
-         * for more sophisticated checking see https://github.com/sindresorhus/validate-element-name
-         * @param {string} tagName name of the tag of the node to sanitize
-         */
-
-
-        var _basicCustomElementTest = function _basicCustomElementTest(tagName) {
-          return tagName.indexOf('-') > 0;
-        };
-        /**
-         * _sanitizeAttributes
-         *
-         * @protect attributes
-         * @protect nodeName
-         * @protect removeAttribute
-         * @protect setAttribute
-         *
-         * @param  {Node} currentNode to sanitize
-         */
-
-
-        var _sanitizeAttributes = function _sanitizeAttributes(currentNode) {
-          var attr;
-          var value;
-          var lcName;
-          var l;
-          /* Execute a hook if present */
-
-          _executeHook('beforeSanitizeAttributes', currentNode, null);
-
-          var attributes = currentNode.attributes;
-          /* Check if we have attributes; if not we might have a text node */
-
-          if (!attributes) {
-            return;
-          }
-
-          var hookEvent = {
-            attrName: '',
-            attrValue: '',
-            keepAttr: true,
-            allowedAttributes: ALLOWED_ATTR
-          };
-          l = attributes.length;
-          /* Go backwards over all attributes; safely remove bad ones */
-
-          while (l--) {
-            attr = attributes[l];
-            var _attr = attr,
-                name = _attr.name,
-                namespaceURI = _attr.namespaceURI;
-            value = name === 'value' ? attr.value : stringTrim(attr.value);
-            lcName = transformCaseFunc(name);
-            /* Execute a hook if present */
-
-            hookEvent.attrName = lcName;
-            hookEvent.attrValue = value;
-            hookEvent.keepAttr = true;
-            hookEvent.forceKeepAttr = undefined; // Allows developers to see this is a property they can set
-
-            _executeHook('uponSanitizeAttribute', currentNode, hookEvent);
-
-            value = hookEvent.attrValue;
-            /* Did the hooks approve of the attribute? */
-
-            if (hookEvent.forceKeepAttr) {
-              continue;
-            }
-            /* Remove attribute */
-
-
-            _removeAttribute(name, currentNode);
-            /* Did the hooks approve of the attribute? */
-
-
-            if (!hookEvent.keepAttr) {
-              continue;
-            }
-            /* Work around a security issue in jQuery 3.0 */
-
-
-            if (regExpTest(/\/>/i, value)) {
-              _removeAttribute(name, currentNode);
-
-              continue;
-            }
-            /* Sanitize attribute content to be template-safe */
-
-
-            if (SAFE_FOR_TEMPLATES) {
-              value = stringReplace(value, MUSTACHE_EXPR$1, ' ');
-              value = stringReplace(value, ERB_EXPR$1, ' ');
-              value = stringReplace(value, TMPLIT_EXPR$1, ' ');
-            }
-            /* Is `value` valid for this attribute? */
-
-
-            var lcTag = transformCaseFunc(currentNode.nodeName);
-
-            if (!_isValidAttribute(lcTag, lcName, value)) {
-              continue;
-            }
-            /* Full DOM Clobbering protection via namespace isolation,
-             * Prefix id and name attributes with `user-content-`
-             */
-
-
-            if (SANITIZE_NAMED_PROPS && (lcName === 'id' || lcName === 'name')) {
-              // Remove the attribute with this value
-              _removeAttribute(name, currentNode); // Prefix the value and later re-create the attribute with the sanitized value
-
-
-              value = SANITIZE_NAMED_PROPS_PREFIX + value;
-            }
-            /* Handle attributes that require Trusted Types */
-
-
-            if (trustedTypesPolicy && _typeof(trustedTypes) === 'object' && typeof trustedTypes.getAttributeType === 'function') {
-              if (namespaceURI) ; else {
-                switch (trustedTypes.getAttributeType(lcTag, lcName)) {
-                  case 'TrustedHTML':
-                    value = trustedTypesPolicy.createHTML(value);
-                    break;
-
-                  case 'TrustedScriptURL':
-                    value = trustedTypesPolicy.createScriptURL(value);
-                    break;
-                }
-              }
-            }
-            /* Handle invalid data-* attribute set by try-catching it */
-
-
-            try {
-              if (namespaceURI) {
-                currentNode.setAttributeNS(namespaceURI, name, value);
-              } else {
-                /* Fallback to setAttribute() for browser-unrecognized namespaces e.g. "x-schema". */
-                currentNode.setAttribute(name, value);
-              }
-
-              arrayPop(DOMPurify.removed);
-            } catch (_) {}
-          }
-          /* Execute a hook if present */
-
-
-          _executeHook('afterSanitizeAttributes', currentNode, null);
-        };
-        /**
-         * _sanitizeShadowDOM
-         *
-         * @param  {DocumentFragment} fragment to iterate over recursively
-         */
-
-
-        var _sanitizeShadowDOM = function _sanitizeShadowDOM(fragment) {
-          var shadowNode;
-
-          var shadowIterator = _createIterator(fragment);
-          /* Execute a hook if present */
-
-
-          _executeHook('beforeSanitizeShadowDOM', fragment, null);
-
-          while (shadowNode = shadowIterator.nextNode()) {
-            /* Execute a hook if present */
-            _executeHook('uponSanitizeShadowNode', shadowNode, null);
-            /* Sanitize tags and elements */
-
-
-            if (_sanitizeElements(shadowNode)) {
-              continue;
-            }
-            /* Deep shadow DOM detected */
-
-
-            if (shadowNode.content instanceof DocumentFragment) {
-              _sanitizeShadowDOM(shadowNode.content);
-            }
-            /* Check attributes, sanitize if necessary */
-
-
-            _sanitizeAttributes(shadowNode);
-          }
-          /* Execute a hook if present */
-
-
-          _executeHook('afterSanitizeShadowDOM', fragment, null);
-        };
-        /**
-         * Sanitize
-         * Public method providing core sanitation functionality
-         *
-         * @param {String|Node} dirty string or DOM node
-         * @param {Object} configuration object
-         */
-        // eslint-disable-next-line complexity
-
-
-        DOMPurify.sanitize = function (dirty) {
-          var cfg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-          var body;
-          var importedNode;
-          var currentNode;
-          var oldNode;
-          var returnNode;
-          /* Make sure we have a string to sanitize.
-            DO NOT return early, as this will return the wrong type if
-            the user has requested a DOM object rather than a string */
-
-          IS_EMPTY_INPUT = !dirty;
-
-          if (IS_EMPTY_INPUT) {
-            dirty = '<!-->';
-          }
-          /* Stringify, in case dirty is an object */
-
-
-          if (typeof dirty !== 'string' && !_isNode(dirty)) {
-            // eslint-disable-next-line no-negated-condition
-            if (typeof dirty.toString !== 'function') {
-              throw typeErrorCreate('toString is not a function');
-            } else {
-              dirty = dirty.toString();
-
-              if (typeof dirty !== 'string') {
-                throw typeErrorCreate('dirty is not a string, aborting');
-              }
-            }
-          }
-          /* Check we can run. Otherwise fall back or ignore */
-
-
-          if (!DOMPurify.isSupported) {
-            if (_typeof(window.toStaticHTML) === 'object' || typeof window.toStaticHTML === 'function') {
-              if (typeof dirty === 'string') {
-                return window.toStaticHTML(dirty);
-              }
-
-              if (_isNode(dirty)) {
-                return window.toStaticHTML(dirty.outerHTML);
-              }
-            }
-
-            return dirty;
-          }
-          /* Assign config vars */
-
-
-          if (!SET_CONFIG) {
-            _parseConfig(cfg);
-          }
-          /* Clean up removed elements */
-
-
-          DOMPurify.removed = [];
-          /* Check if dirty is correctly typed for IN_PLACE */
-
-          if (typeof dirty === 'string') {
-            IN_PLACE = false;
-          }
-
-          if (IN_PLACE) {
-            /* Do some early pre-sanitization to avoid unsafe root nodes */
-            if (dirty.nodeName) {
-              var tagName = transformCaseFunc(dirty.nodeName);
-
-              if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
-                throw typeErrorCreate('root node is forbidden and cannot be sanitized in-place');
-              }
-            }
-          } else if (dirty instanceof Node) {
-            /* If dirty is a DOM element, append to an empty document to avoid
-               elements being stripped by the parser */
-            body = _initDocument('<!---->');
-            importedNode = body.ownerDocument.importNode(dirty, true);
-
-            if (importedNode.nodeType === 1 && importedNode.nodeName === 'BODY') {
-              /* Node is already a body, use as is */
-              body = importedNode;
-            } else if (importedNode.nodeName === 'HTML') {
-              body = importedNode;
-            } else {
-              // eslint-disable-next-line unicorn/prefer-dom-node-append
-              body.appendChild(importedNode);
-            }
-          } else {
-            /* Exit directly if we have nothing to do */
-            if (!RETURN_DOM && !SAFE_FOR_TEMPLATES && !WHOLE_DOCUMENT && // eslint-disable-next-line unicorn/prefer-includes
-            dirty.indexOf('<') === -1) {
-              return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(dirty) : dirty;
-            }
-            /* Initialize the document to work on */
-
-
-            body = _initDocument(dirty);
-            /* Check we have a DOM node from the data */
-
-            if (!body) {
-              return RETURN_DOM ? null : RETURN_TRUSTED_TYPE ? emptyHTML : '';
-            }
-          }
-          /* Remove first element node (ours) if FORCE_BODY is set */
-
-
-          if (body && FORCE_BODY) {
-            _forceRemove(body.firstChild);
-          }
-          /* Get node iterator */
-
-
-          var nodeIterator = _createIterator(IN_PLACE ? dirty : body);
-          /* Now start iterating over the created document */
-
-
-          while (currentNode = nodeIterator.nextNode()) {
-            /* Fix IE's strange behavior with manipulated textNodes #89 */
-            if (currentNode.nodeType === 3 && currentNode === oldNode) {
-              continue;
-            }
-            /* Sanitize tags and elements */
-
-
-            if (_sanitizeElements(currentNode)) {
-              continue;
-            }
-            /* Shadow DOM detected, sanitize it */
-
-
-            if (currentNode.content instanceof DocumentFragment) {
-              _sanitizeShadowDOM(currentNode.content);
-            }
-            /* Check attributes, sanitize if necessary */
-
-
-            _sanitizeAttributes(currentNode);
-
-            oldNode = currentNode;
-          }
-
-          oldNode = null;
-          /* If we sanitized `dirty` in-place, return it. */
-
-          if (IN_PLACE) {
-            return dirty;
-          }
-          /* Return sanitized string or DOM */
-
-
-          if (RETURN_DOM) {
-            if (RETURN_DOM_FRAGMENT) {
-              returnNode = createDocumentFragment.call(body.ownerDocument);
-
-              while (body.firstChild) {
-                // eslint-disable-next-line unicorn/prefer-dom-node-append
-                returnNode.appendChild(body.firstChild);
-              }
-            } else {
-              returnNode = body;
-            }
-
-            if (ALLOWED_ATTR.shadowroot) {
-              /*
-                AdoptNode() is not used because internal state is not reset
-                (e.g. the past names map of a HTMLFormElement), this is safe
-                in theory but we would rather not risk another attack vector.
-                The state that is cloned by importNode() is explicitly defined
-                by the specs.
-              */
-              returnNode = importNode.call(originalDocument, returnNode, true);
-            }
-
-            return returnNode;
-          }
-
-          var serializedHTML = WHOLE_DOCUMENT ? body.outerHTML : body.innerHTML;
-          /* Serialize doctype if allowed */
-
-          if (WHOLE_DOCUMENT && ALLOWED_TAGS['!doctype'] && body.ownerDocument && body.ownerDocument.doctype && body.ownerDocument.doctype.name && regExpTest(DOCTYPE_NAME, body.ownerDocument.doctype.name)) {
-            serializedHTML = '<!DOCTYPE ' + body.ownerDocument.doctype.name + '>\n' + serializedHTML;
-          }
-          /* Sanitize final string template-safe */
-
-
-          if (SAFE_FOR_TEMPLATES) {
-            serializedHTML = stringReplace(serializedHTML, MUSTACHE_EXPR$1, ' ');
-            serializedHTML = stringReplace(serializedHTML, ERB_EXPR$1, ' ');
-            serializedHTML = stringReplace(serializedHTML, TMPLIT_EXPR$1, ' ');
-          }
-
-          return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(serializedHTML) : serializedHTML;
-        };
-        /**
-         * Public method to set the configuration once
-         * setConfig
-         *
-         * @param {Object} cfg configuration object
-         */
-
-
-        DOMPurify.setConfig = function (cfg) {
-          _parseConfig(cfg);
-
-          SET_CONFIG = true;
-        };
-        /**
-         * Public method to remove the configuration
-         * clearConfig
-         *
-         */
-
-
-        DOMPurify.clearConfig = function () {
-          CONFIG = null;
-          SET_CONFIG = false;
-        };
-        /**
-         * Public method to check if an attribute value is valid.
-         * Uses last set config, if any. Otherwise, uses config defaults.
-         * isValidAttribute
-         *
-         * @param  {string} tag Tag name of containing element.
-         * @param  {string} attr Attribute name.
-         * @param  {string} value Attribute value.
-         * @return {Boolean} Returns true if `value` is valid. Otherwise, returns false.
-         */
-
-
-        DOMPurify.isValidAttribute = function (tag, attr, value) {
-          /* Initialize shared config vars if necessary. */
-          if (!CONFIG) {
-            _parseConfig({});
-          }
-
-          var lcTag = transformCaseFunc(tag);
-          var lcName = transformCaseFunc(attr);
-          return _isValidAttribute(lcTag, lcName, value);
-        };
-        /**
-         * AddHook
-         * Public method to add DOMPurify hooks
-         *
-         * @param {String} entryPoint entry point for the hook to add
-         * @param {Function} hookFunction function to execute
-         */
-
-
-        DOMPurify.addHook = function (entryPoint, hookFunction) {
-          if (typeof hookFunction !== 'function') {
-            return;
-          }
-
-          hooks[entryPoint] = hooks[entryPoint] || [];
-          arrayPush(hooks[entryPoint], hookFunction);
-        };
-        /**
-         * RemoveHook
-         * Public method to remove a DOMPurify hook at a given entryPoint
-         * (pops it from the stack of hooks if more are present)
-         *
-         * @param {String} entryPoint entry point for the hook to remove
-         * @return {Function} removed(popped) hook
-         */
-
-
-        DOMPurify.removeHook = function (entryPoint) {
-          if (hooks[entryPoint]) {
-            return arrayPop(hooks[entryPoint]);
-          }
-        };
-        /**
-         * RemoveHooks
-         * Public method to remove all DOMPurify hooks at a given entryPoint
-         *
-         * @param  {String} entryPoint entry point for the hooks to remove
-         */
-
-
-        DOMPurify.removeHooks = function (entryPoint) {
-          if (hooks[entryPoint]) {
-            hooks[entryPoint] = [];
-          }
-        };
-        /**
-         * RemoveAllHooks
-         * Public method to remove all DOMPurify hooks
-         *
-         */
-
-
-        DOMPurify.removeAllHooks = function () {
-          hooks = {};
-        };
-
-        return DOMPurify;
-      }
-
-      var purify = createDOMPurify();
-
-      return purify;
-
-    }));
-
-    });
+    var purifyExports = {};
+    var purify = {
+      get exports(){ return purifyExports; },
+      set exports(v){ purifyExports = v; },
+    };
+
+    /*! @license DOMPurify 2.4.3 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.4.3/LICENSE */
+
+    (function (module, exports) {
+    	(function (global, factory) {
+    	  module.exports = factory() ;
+    	})(commonjsGlobal, (function () {
+    	  function _typeof(obj) {
+    	    "@babel/helpers - typeof";
+
+    	    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    	      return typeof obj;
+    	    } : function (obj) {
+    	      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    	    }, _typeof(obj);
+    	  }
+
+    	  function _setPrototypeOf(o, p) {
+    	    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    	      o.__proto__ = p;
+    	      return o;
+    	    };
+
+    	    return _setPrototypeOf(o, p);
+    	  }
+
+    	  function _isNativeReflectConstruct() {
+    	    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    	    if (Reflect.construct.sham) return false;
+    	    if (typeof Proxy === "function") return true;
+
+    	    try {
+    	      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+    	      return true;
+    	    } catch (e) {
+    	      return false;
+    	    }
+    	  }
+
+    	  function _construct(Parent, args, Class) {
+    	    if (_isNativeReflectConstruct()) {
+    	      _construct = Reflect.construct;
+    	    } else {
+    	      _construct = function _construct(Parent, args, Class) {
+    	        var a = [null];
+    	        a.push.apply(a, args);
+    	        var Constructor = Function.bind.apply(Parent, a);
+    	        var instance = new Constructor();
+    	        if (Class) _setPrototypeOf(instance, Class.prototype);
+    	        return instance;
+    	      };
+    	    }
+
+    	    return _construct.apply(null, arguments);
+    	  }
+
+    	  function _toConsumableArray(arr) {
+    	    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+    	  }
+
+    	  function _arrayWithoutHoles(arr) {
+    	    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+    	  }
+
+    	  function _iterableToArray(iter) {
+    	    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+    	  }
+
+    	  function _unsupportedIterableToArray(o, minLen) {
+    	    if (!o) return;
+    	    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    	    var n = Object.prototype.toString.call(o).slice(8, -1);
+    	    if (n === "Object" && o.constructor) n = o.constructor.name;
+    	    if (n === "Map" || n === "Set") return Array.from(o);
+    	    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+    	  }
+
+    	  function _arrayLikeToArray(arr, len) {
+    	    if (len == null || len > arr.length) len = arr.length;
+
+    	    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    	    return arr2;
+    	  }
+
+    	  function _nonIterableSpread() {
+    	    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    	  }
+
+    	  var hasOwnProperty = Object.hasOwnProperty,
+    	      setPrototypeOf = Object.setPrototypeOf,
+    	      isFrozen = Object.isFrozen,
+    	      getPrototypeOf = Object.getPrototypeOf,
+    	      getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+    	  var freeze = Object.freeze,
+    	      seal = Object.seal,
+    	      create = Object.create; // eslint-disable-line import/no-mutable-exports
+
+    	  var _ref = typeof Reflect !== 'undefined' && Reflect,
+    	      apply = _ref.apply,
+    	      construct = _ref.construct;
+
+    	  if (!apply) {
+    	    apply = function apply(fun, thisValue, args) {
+    	      return fun.apply(thisValue, args);
+    	    };
+    	  }
+
+    	  if (!freeze) {
+    	    freeze = function freeze(x) {
+    	      return x;
+    	    };
+    	  }
+
+    	  if (!seal) {
+    	    seal = function seal(x) {
+    	      return x;
+    	    };
+    	  }
+
+    	  if (!construct) {
+    	    construct = function construct(Func, args) {
+    	      return _construct(Func, _toConsumableArray(args));
+    	    };
+    	  }
+
+    	  var arrayForEach = unapply(Array.prototype.forEach);
+    	  var arrayPop = unapply(Array.prototype.pop);
+    	  var arrayPush = unapply(Array.prototype.push);
+    	  var stringToLowerCase = unapply(String.prototype.toLowerCase);
+    	  var stringToString = unapply(String.prototype.toString);
+    	  var stringMatch = unapply(String.prototype.match);
+    	  var stringReplace = unapply(String.prototype.replace);
+    	  var stringIndexOf = unapply(String.prototype.indexOf);
+    	  var stringTrim = unapply(String.prototype.trim);
+    	  var regExpTest = unapply(RegExp.prototype.test);
+    	  var typeErrorCreate = unconstruct(TypeError);
+    	  function unapply(func) {
+    	    return function (thisArg) {
+    	      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    	        args[_key - 1] = arguments[_key];
+    	      }
+
+    	      return apply(func, thisArg, args);
+    	    };
+    	  }
+    	  function unconstruct(func) {
+    	    return function () {
+    	      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    	        args[_key2] = arguments[_key2];
+    	      }
+
+    	      return construct(func, args);
+    	    };
+    	  }
+    	  /* Add properties to a lookup table */
+
+    	  function addToSet(set, array, transformCaseFunc) {
+    	    transformCaseFunc = transformCaseFunc ? transformCaseFunc : stringToLowerCase;
+
+    	    if (setPrototypeOf) {
+    	      // Make 'in' and truthy checks like Boolean(set.constructor)
+    	      // independent of any properties defined on Object.prototype.
+    	      // Prevent prototype setters from intercepting set as a this value.
+    	      setPrototypeOf(set, null);
+    	    }
+
+    	    var l = array.length;
+
+    	    while (l--) {
+    	      var element = array[l];
+
+    	      if (typeof element === 'string') {
+    	        var lcElement = transformCaseFunc(element);
+
+    	        if (lcElement !== element) {
+    	          // Config presets (e.g. tags.js, attrs.js) are immutable.
+    	          if (!isFrozen(array)) {
+    	            array[l] = lcElement;
+    	          }
+
+    	          element = lcElement;
+    	        }
+    	      }
+
+    	      set[element] = true;
+    	    }
+
+    	    return set;
+    	  }
+    	  /* Shallow clone an object */
+
+    	  function clone(object) {
+    	    var newObject = create(null);
+    	    var property;
+
+    	    for (property in object) {
+    	      if (apply(hasOwnProperty, object, [property]) === true) {
+    	        newObject[property] = object[property];
+    	      }
+    	    }
+
+    	    return newObject;
+    	  }
+    	  /* IE10 doesn't support __lookupGetter__ so lets'
+    	   * simulate it. It also automatically checks
+    	   * if the prop is function or getter and behaves
+    	   * accordingly. */
+
+    	  function lookupGetter(object, prop) {
+    	    while (object !== null) {
+    	      var desc = getOwnPropertyDescriptor(object, prop);
+
+    	      if (desc) {
+    	        if (desc.get) {
+    	          return unapply(desc.get);
+    	        }
+
+    	        if (typeof desc.value === 'function') {
+    	          return unapply(desc.value);
+    	        }
+    	      }
+
+    	      object = getPrototypeOf(object);
+    	    }
+
+    	    function fallbackValue(element) {
+    	      console.warn('fallback value for', element);
+    	      return null;
+    	    }
+
+    	    return fallbackValue;
+    	  }
+
+    	  var html$1 = freeze(['a', 'abbr', 'acronym', 'address', 'area', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'big', 'blink', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'dir', 'div', 'dl', 'dt', 'element', 'em', 'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'marquee', 'menu', 'menuitem', 'meter', 'nav', 'nobr', 'ol', 'optgroup', 'option', 'output', 'p', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'select', 'shadow', 'small', 'source', 'spacer', 'span', 'strike', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'tr', 'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr']); // SVG
+
+    	  var svg$1 = freeze(['svg', 'a', 'altglyph', 'altglyphdef', 'altglyphitem', 'animatecolor', 'animatemotion', 'animatetransform', 'circle', 'clippath', 'defs', 'desc', 'ellipse', 'filter', 'font', 'g', 'glyph', 'glyphref', 'hkern', 'image', 'line', 'lineargradient', 'marker', 'mask', 'metadata', 'mpath', 'path', 'pattern', 'polygon', 'polyline', 'radialgradient', 'rect', 'stop', 'style', 'switch', 'symbol', 'text', 'textpath', 'title', 'tref', 'tspan', 'view', 'vkern']);
+    	  var svgFilters = freeze(['feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feDistantLight', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMerge', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile', 'feTurbulence']); // List of SVG elements that are disallowed by default.
+    	  // We still need to know them so that we can do namespace
+    	  // checks properly in case one wants to add them to
+    	  // allow-list.
+
+    	  var svgDisallowed = freeze(['animate', 'color-profile', 'cursor', 'discard', 'fedropshadow', 'font-face', 'font-face-format', 'font-face-name', 'font-face-src', 'font-face-uri', 'foreignobject', 'hatch', 'hatchpath', 'mesh', 'meshgradient', 'meshpatch', 'meshrow', 'missing-glyph', 'script', 'set', 'solidcolor', 'unknown', 'use']);
+    	  var mathMl$1 = freeze(['math', 'menclose', 'merror', 'mfenced', 'mfrac', 'mglyph', 'mi', 'mlabeledtr', 'mmultiscripts', 'mn', 'mo', 'mover', 'mpadded', 'mphantom', 'mroot', 'mrow', 'ms', 'mspace', 'msqrt', 'mstyle', 'msub', 'msup', 'msubsup', 'mtable', 'mtd', 'mtext', 'mtr', 'munder', 'munderover']); // Similarly to SVG, we want to know all MathML elements,
+    	  // even those that we disallow by default.
+
+    	  var mathMlDisallowed = freeze(['maction', 'maligngroup', 'malignmark', 'mlongdiv', 'mscarries', 'mscarry', 'msgroup', 'mstack', 'msline', 'msrow', 'semantics', 'annotation', 'annotation-xml', 'mprescripts', 'none']);
+    	  var text = freeze(['#text']);
+
+    	  var html = freeze(['accept', 'action', 'align', 'alt', 'autocapitalize', 'autocomplete', 'autopictureinpicture', 'autoplay', 'background', 'bgcolor', 'border', 'capture', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'controls', 'controlslist', 'coords', 'crossorigin', 'datetime', 'decoding', 'default', 'dir', 'disabled', 'disablepictureinpicture', 'disableremoteplayback', 'download', 'draggable', 'enctype', 'enterkeyhint', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'inputmode', 'integrity', 'ismap', 'kind', 'label', 'lang', 'list', 'loading', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'minlength', 'multiple', 'muted', 'name', 'nonce', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder', 'playsinline', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'sizes', 'span', 'srclang', 'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex', 'title', 'translate', 'type', 'usemap', 'valign', 'value', 'width', 'xmlns', 'slot']);
+    	  var svg = freeze(['accent-height', 'accumulate', 'additive', 'alignment-baseline', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clippathunits', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dur', 'edgemode', 'elevation', 'end', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'filterunits', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'preserveaspectratio', 'primitiveunits', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'specularconstant', 'specularexponent', 'spreadmethod', 'startoffset', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'systemlanguage', 'tabindex', 'targetx', 'targety', 'transform', 'transform-origin', 'text-anchor', 'text-decoration', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'version', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan']);
+    	  var mathMl = freeze(['accent', 'accentunder', 'align', 'bevelled', 'close', 'columnsalign', 'columnlines', 'columnspan', 'denomalign', 'depth', 'dir', 'display', 'displaystyle', 'encoding', 'fence', 'frame', 'height', 'href', 'id', 'largeop', 'length', 'linethickness', 'lspace', 'lquote', 'mathbackground', 'mathcolor', 'mathsize', 'mathvariant', 'maxsize', 'minsize', 'movablelimits', 'notation', 'numalign', 'open', 'rowalign', 'rowlines', 'rowspacing', 'rowspan', 'rspace', 'rquote', 'scriptlevel', 'scriptminsize', 'scriptsizemultiplier', 'selection', 'separator', 'separators', 'stretchy', 'subscriptshift', 'supscriptshift', 'symmetric', 'voffset', 'width', 'xmlns']);
+    	  var xml = freeze(['xlink:href', 'xml:id', 'xlink:title', 'xml:space', 'xmlns:xlink']);
+
+    	  var MUSTACHE_EXPR = seal(/\{\{[\w\W]*|[\w\W]*\}\}/gm); // Specify template detection regex for SAFE_FOR_TEMPLATES mode
+
+    	  var ERB_EXPR = seal(/<%[\w\W]*|[\w\W]*%>/gm);
+    	  var TMPLIT_EXPR = seal(/\${[\w\W]*}/gm);
+    	  var DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]/); // eslint-disable-line no-useless-escape
+
+    	  var ARIA_ATTR = seal(/^aria-[\-\w]+$/); // eslint-disable-line no-useless-escape
+
+    	  var IS_ALLOWED_URI = seal(/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i // eslint-disable-line no-useless-escape
+    	  );
+    	  var IS_SCRIPT_OR_DATA = seal(/^(?:\w+script|data):/i);
+    	  var ATTR_WHITESPACE = seal(/[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g // eslint-disable-line no-control-regex
+    	  );
+    	  var DOCTYPE_NAME = seal(/^html$/i);
+
+    	  var getGlobal = function getGlobal() {
+    	    return typeof window === 'undefined' ? null : window;
+    	  };
+    	  /**
+    	   * Creates a no-op policy for internal use only.
+    	   * Don't export this function outside this module!
+    	   * @param {?TrustedTypePolicyFactory} trustedTypes The policy factory.
+    	   * @param {Document} document The document object (to determine policy name suffix)
+    	   * @return {?TrustedTypePolicy} The policy created (or null, if Trusted Types
+    	   * are not supported).
+    	   */
+
+
+    	  var _createTrustedTypesPolicy = function _createTrustedTypesPolicy(trustedTypes, document) {
+    	    if (_typeof(trustedTypes) !== 'object' || typeof trustedTypes.createPolicy !== 'function') {
+    	      return null;
+    	    } // Allow the callers to control the unique policy name
+    	    // by adding a data-tt-policy-suffix to the script element with the DOMPurify.
+    	    // Policy creation with duplicate names throws in Trusted Types.
+
+
+    	    var suffix = null;
+    	    var ATTR_NAME = 'data-tt-policy-suffix';
+
+    	    if (document.currentScript && document.currentScript.hasAttribute(ATTR_NAME)) {
+    	      suffix = document.currentScript.getAttribute(ATTR_NAME);
+    	    }
+
+    	    var policyName = 'dompurify' + (suffix ? '#' + suffix : '');
+
+    	    try {
+    	      return trustedTypes.createPolicy(policyName, {
+    	        createHTML: function createHTML(html) {
+    	          return html;
+    	        },
+    	        createScriptURL: function createScriptURL(scriptUrl) {
+    	          return scriptUrl;
+    	        }
+    	      });
+    	    } catch (_) {
+    	      // Policy creation failed (most likely another DOMPurify script has
+    	      // already run). Skip creating the policy, as this will only cause errors
+    	      // if TT are enforced.
+    	      console.warn('TrustedTypes policy ' + policyName + ' could not be created.');
+    	      return null;
+    	    }
+    	  };
+
+    	  function createDOMPurify() {
+    	    var window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getGlobal();
+
+    	    var DOMPurify = function DOMPurify(root) {
+    	      return createDOMPurify(root);
+    	    };
+    	    /**
+    	     * Version label, exposed for easier checks
+    	     * if DOMPurify is up to date or not
+    	     */
+
+
+    	    DOMPurify.version = '2.4.3';
+    	    /**
+    	     * Array of elements that DOMPurify removed during sanitation.
+    	     * Empty if nothing was removed.
+    	     */
+
+    	    DOMPurify.removed = [];
+
+    	    if (!window || !window.document || window.document.nodeType !== 9) {
+    	      // Not running in a browser, provide a factory function
+    	      // so that you can pass your own Window
+    	      DOMPurify.isSupported = false;
+    	      return DOMPurify;
+    	    }
+
+    	    var originalDocument = window.document;
+    	    var document = window.document;
+    	    var DocumentFragment = window.DocumentFragment,
+    	        HTMLTemplateElement = window.HTMLTemplateElement,
+    	        Node = window.Node,
+    	        Element = window.Element,
+    	        NodeFilter = window.NodeFilter,
+    	        _window$NamedNodeMap = window.NamedNodeMap,
+    	        NamedNodeMap = _window$NamedNodeMap === void 0 ? window.NamedNodeMap || window.MozNamedAttrMap : _window$NamedNodeMap,
+    	        HTMLFormElement = window.HTMLFormElement,
+    	        DOMParser = window.DOMParser,
+    	        trustedTypes = window.trustedTypes;
+    	    var ElementPrototype = Element.prototype;
+    	    var cloneNode = lookupGetter(ElementPrototype, 'cloneNode');
+    	    var getNextSibling = lookupGetter(ElementPrototype, 'nextSibling');
+    	    var getChildNodes = lookupGetter(ElementPrototype, 'childNodes');
+    	    var getParentNode = lookupGetter(ElementPrototype, 'parentNode'); // As per issue #47, the web-components registry is inherited by a
+    	    // new document created via createHTMLDocument. As per the spec
+    	    // (http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries)
+    	    // a new empty registry is used when creating a template contents owner
+    	    // document, so we use that as our parent document to ensure nothing
+    	    // is inherited.
+
+    	    if (typeof HTMLTemplateElement === 'function') {
+    	      var template = document.createElement('template');
+
+    	      if (template.content && template.content.ownerDocument) {
+    	        document = template.content.ownerDocument;
+    	      }
+    	    }
+
+    	    var trustedTypesPolicy = _createTrustedTypesPolicy(trustedTypes, originalDocument);
+
+    	    var emptyHTML = trustedTypesPolicy ? trustedTypesPolicy.createHTML('') : '';
+    	    var _document = document,
+    	        implementation = _document.implementation,
+    	        createNodeIterator = _document.createNodeIterator,
+    	        createDocumentFragment = _document.createDocumentFragment,
+    	        getElementsByTagName = _document.getElementsByTagName;
+    	    var importNode = originalDocument.importNode;
+    	    var documentMode = {};
+
+    	    try {
+    	      documentMode = clone(document).documentMode ? document.documentMode : {};
+    	    } catch (_) {}
+
+    	    var hooks = {};
+    	    /**
+    	     * Expose whether this browser supports running the full DOMPurify.
+    	     */
+
+    	    DOMPurify.isSupported = typeof getParentNode === 'function' && implementation && typeof implementation.createHTMLDocument !== 'undefined' && documentMode !== 9;
+    	    var MUSTACHE_EXPR$1 = MUSTACHE_EXPR,
+    	        ERB_EXPR$1 = ERB_EXPR,
+    	        TMPLIT_EXPR$1 = TMPLIT_EXPR,
+    	        DATA_ATTR$1 = DATA_ATTR,
+    	        ARIA_ATTR$1 = ARIA_ATTR,
+    	        IS_SCRIPT_OR_DATA$1 = IS_SCRIPT_OR_DATA,
+    	        ATTR_WHITESPACE$1 = ATTR_WHITESPACE;
+    	    var IS_ALLOWED_URI$1 = IS_ALLOWED_URI;
+    	    /**
+    	     * We consider the elements and attributes below to be safe. Ideally
+    	     * don't add any new ones but feel free to remove unwanted ones.
+    	     */
+
+    	    /* allowed element names */
+
+    	    var ALLOWED_TAGS = null;
+    	    var DEFAULT_ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray(html$1), _toConsumableArray(svg$1), _toConsumableArray(svgFilters), _toConsumableArray(mathMl$1), _toConsumableArray(text)));
+    	    /* Allowed attribute names */
+
+    	    var ALLOWED_ATTR = null;
+    	    var DEFAULT_ALLOWED_ATTR = addToSet({}, [].concat(_toConsumableArray(html), _toConsumableArray(svg), _toConsumableArray(mathMl), _toConsumableArray(xml)));
+    	    /*
+    	     * Configure how DOMPUrify should handle custom elements and their attributes as well as customized built-in elements.
+    	     * @property {RegExp|Function|null} tagNameCheck one of [null, regexPattern, predicate]. Default: `null` (disallow any custom elements)
+    	     * @property {RegExp|Function|null} attributeNameCheck one of [null, regexPattern, predicate]. Default: `null` (disallow any attributes not on the allow list)
+    	     * @property {boolean} allowCustomizedBuiltInElements allow custom elements derived from built-ins if they pass CUSTOM_ELEMENT_HANDLING.tagNameCheck. Default: `false`.
+    	     */
+
+    	    var CUSTOM_ELEMENT_HANDLING = Object.seal(Object.create(null, {
+    	      tagNameCheck: {
+    	        writable: true,
+    	        configurable: false,
+    	        enumerable: true,
+    	        value: null
+    	      },
+    	      attributeNameCheck: {
+    	        writable: true,
+    	        configurable: false,
+    	        enumerable: true,
+    	        value: null
+    	      },
+    	      allowCustomizedBuiltInElements: {
+    	        writable: true,
+    	        configurable: false,
+    	        enumerable: true,
+    	        value: false
+    	      }
+    	    }));
+    	    /* Explicitly forbidden tags (overrides ALLOWED_TAGS/ADD_TAGS) */
+
+    	    var FORBID_TAGS = null;
+    	    /* Explicitly forbidden attributes (overrides ALLOWED_ATTR/ADD_ATTR) */
+
+    	    var FORBID_ATTR = null;
+    	    /* Decide if ARIA attributes are okay */
+
+    	    var ALLOW_ARIA_ATTR = true;
+    	    /* Decide if custom data attributes are okay */
+
+    	    var ALLOW_DATA_ATTR = true;
+    	    /* Decide if unknown protocols are okay */
+
+    	    var ALLOW_UNKNOWN_PROTOCOLS = false;
+    	    /* Output should be safe for common template engines.
+    	     * This means, DOMPurify removes data attributes, mustaches and ERB
+    	     */
+
+    	    var SAFE_FOR_TEMPLATES = false;
+    	    /* Decide if document with <html>... should be returned */
+
+    	    var WHOLE_DOCUMENT = false;
+    	    /* Track whether config is already set on this instance of DOMPurify. */
+
+    	    var SET_CONFIG = false;
+    	    /* Decide if all elements (e.g. style, script) must be children of
+    	     * document.body. By default, browsers might move them to document.head */
+
+    	    var FORCE_BODY = false;
+    	    /* Decide if a DOM `HTMLBodyElement` should be returned, instead of a html
+    	     * string (or a TrustedHTML object if Trusted Types are supported).
+    	     * If `WHOLE_DOCUMENT` is enabled a `HTMLHtmlElement` will be returned instead
+    	     */
+
+    	    var RETURN_DOM = false;
+    	    /* Decide if a DOM `DocumentFragment` should be returned, instead of a html
+    	     * string  (or a TrustedHTML object if Trusted Types are supported) */
+
+    	    var RETURN_DOM_FRAGMENT = false;
+    	    /* Try to return a Trusted Type object instead of a string, return a string in
+    	     * case Trusted Types are not supported  */
+
+    	    var RETURN_TRUSTED_TYPE = false;
+    	    /* Output should be free from DOM clobbering attacks?
+    	     * This sanitizes markups named with colliding, clobberable built-in DOM APIs.
+    	     */
+
+    	    var SANITIZE_DOM = true;
+    	    /* Achieve full DOM Clobbering protection by isolating the namespace of named
+    	     * properties and JS variables, mitigating attacks that abuse the HTML/DOM spec rules.
+    	     *
+    	     * HTML/DOM spec rules that enable DOM Clobbering:
+    	     *   - Named Access on Window (§7.3.3)
+    	     *   - DOM Tree Accessors (§3.1.5)
+    	     *   - Form Element Parent-Child Relations (§4.10.3)
+    	     *   - Iframe srcdoc / Nested WindowProxies (§4.8.5)
+    	     *   - HTMLCollection (§4.2.10.2)
+    	     *
+    	     * Namespace isolation is implemented by prefixing `id` and `name` attributes
+    	     * with a constant string, i.e., `user-content-`
+    	     */
+
+    	    var SANITIZE_NAMED_PROPS = false;
+    	    var SANITIZE_NAMED_PROPS_PREFIX = 'user-content-';
+    	    /* Keep element content when removing element? */
+
+    	    var KEEP_CONTENT = true;
+    	    /* If a `Node` is passed to sanitize(), then performs sanitization in-place instead
+    	     * of importing it into a new Document and returning a sanitized copy */
+
+    	    var IN_PLACE = false;
+    	    /* Allow usage of profiles like html, svg and mathMl */
+
+    	    var USE_PROFILES = {};
+    	    /* Tags to ignore content of when KEEP_CONTENT is true */
+
+    	    var FORBID_CONTENTS = null;
+    	    var DEFAULT_FORBID_CONTENTS = addToSet({}, ['annotation-xml', 'audio', 'colgroup', 'desc', 'foreignobject', 'head', 'iframe', 'math', 'mi', 'mn', 'mo', 'ms', 'mtext', 'noembed', 'noframes', 'noscript', 'plaintext', 'script', 'style', 'svg', 'template', 'thead', 'title', 'video', 'xmp']);
+    	    /* Tags that are safe for data: URIs */
+
+    	    var DATA_URI_TAGS = null;
+    	    var DEFAULT_DATA_URI_TAGS = addToSet({}, ['audio', 'video', 'img', 'source', 'image', 'track']);
+    	    /* Attributes safe for values like "javascript:" */
+
+    	    var URI_SAFE_ATTRIBUTES = null;
+    	    var DEFAULT_URI_SAFE_ATTRIBUTES = addToSet({}, ['alt', 'class', 'for', 'id', 'label', 'name', 'pattern', 'placeholder', 'role', 'summary', 'title', 'value', 'style', 'xmlns']);
+    	    var MATHML_NAMESPACE = 'http://www.w3.org/1998/Math/MathML';
+    	    var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+    	    var HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+    	    /* Document namespace */
+
+    	    var NAMESPACE = HTML_NAMESPACE;
+    	    var IS_EMPTY_INPUT = false;
+    	    /* Allowed XHTML+XML namespaces */
+
+    	    var ALLOWED_NAMESPACES = null;
+    	    var DEFAULT_ALLOWED_NAMESPACES = addToSet({}, [MATHML_NAMESPACE, SVG_NAMESPACE, HTML_NAMESPACE], stringToString);
+    	    /* Parsing of strict XHTML documents */
+
+    	    var PARSER_MEDIA_TYPE;
+    	    var SUPPORTED_PARSER_MEDIA_TYPES = ['application/xhtml+xml', 'text/html'];
+    	    var DEFAULT_PARSER_MEDIA_TYPE = 'text/html';
+    	    var transformCaseFunc;
+    	    /* Keep a reference to config to pass to hooks */
+
+    	    var CONFIG = null;
+    	    /* Ideally, do not touch anything below this line */
+
+    	    /* ______________________________________________ */
+
+    	    var formElement = document.createElement('form');
+
+    	    var isRegexOrFunction = function isRegexOrFunction(testValue) {
+    	      return testValue instanceof RegExp || testValue instanceof Function;
+    	    };
+    	    /**
+    	     * _parseConfig
+    	     *
+    	     * @param  {Object} cfg optional config literal
+    	     */
+    	    // eslint-disable-next-line complexity
+
+
+    	    var _parseConfig = function _parseConfig(cfg) {
+    	      if (CONFIG && CONFIG === cfg) {
+    	        return;
+    	      }
+    	      /* Shield configuration object from tampering */
+
+
+    	      if (!cfg || _typeof(cfg) !== 'object') {
+    	        cfg = {};
+    	      }
+    	      /* Shield configuration object from prototype pollution */
+
+
+    	      cfg = clone(cfg);
+    	      PARSER_MEDIA_TYPE = // eslint-disable-next-line unicorn/prefer-includes
+    	      SUPPORTED_PARSER_MEDIA_TYPES.indexOf(cfg.PARSER_MEDIA_TYPE) === -1 ? PARSER_MEDIA_TYPE = DEFAULT_PARSER_MEDIA_TYPE : PARSER_MEDIA_TYPE = cfg.PARSER_MEDIA_TYPE; // HTML tags and attributes are not case-sensitive, converting to lowercase. Keeping XHTML as is.
+
+    	      transformCaseFunc = PARSER_MEDIA_TYPE === 'application/xhtml+xml' ? stringToString : stringToLowerCase;
+    	      /* Set configuration parameters */
+
+    	      ALLOWED_TAGS = 'ALLOWED_TAGS' in cfg ? addToSet({}, cfg.ALLOWED_TAGS, transformCaseFunc) : DEFAULT_ALLOWED_TAGS;
+    	      ALLOWED_ATTR = 'ALLOWED_ATTR' in cfg ? addToSet({}, cfg.ALLOWED_ATTR, transformCaseFunc) : DEFAULT_ALLOWED_ATTR;
+    	      ALLOWED_NAMESPACES = 'ALLOWED_NAMESPACES' in cfg ? addToSet({}, cfg.ALLOWED_NAMESPACES, stringToString) : DEFAULT_ALLOWED_NAMESPACES;
+    	      URI_SAFE_ATTRIBUTES = 'ADD_URI_SAFE_ATTR' in cfg ? addToSet(clone(DEFAULT_URI_SAFE_ATTRIBUTES), // eslint-disable-line indent
+    	      cfg.ADD_URI_SAFE_ATTR, // eslint-disable-line indent
+    	      transformCaseFunc // eslint-disable-line indent
+    	      ) // eslint-disable-line indent
+    	      : DEFAULT_URI_SAFE_ATTRIBUTES;
+    	      DATA_URI_TAGS = 'ADD_DATA_URI_TAGS' in cfg ? addToSet(clone(DEFAULT_DATA_URI_TAGS), // eslint-disable-line indent
+    	      cfg.ADD_DATA_URI_TAGS, // eslint-disable-line indent
+    	      transformCaseFunc // eslint-disable-line indent
+    	      ) // eslint-disable-line indent
+    	      : DEFAULT_DATA_URI_TAGS;
+    	      FORBID_CONTENTS = 'FORBID_CONTENTS' in cfg ? addToSet({}, cfg.FORBID_CONTENTS, transformCaseFunc) : DEFAULT_FORBID_CONTENTS;
+    	      FORBID_TAGS = 'FORBID_TAGS' in cfg ? addToSet({}, cfg.FORBID_TAGS, transformCaseFunc) : {};
+    	      FORBID_ATTR = 'FORBID_ATTR' in cfg ? addToSet({}, cfg.FORBID_ATTR, transformCaseFunc) : {};
+    	      USE_PROFILES = 'USE_PROFILES' in cfg ? cfg.USE_PROFILES : false;
+    	      ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false; // Default true
+
+    	      ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
+
+    	      ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
+
+    	      SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
+
+    	      WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
+
+    	      RETURN_DOM = cfg.RETURN_DOM || false; // Default false
+
+    	      RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
+
+    	      RETURN_TRUSTED_TYPE = cfg.RETURN_TRUSTED_TYPE || false; // Default false
+
+    	      FORCE_BODY = cfg.FORCE_BODY || false; // Default false
+
+    	      SANITIZE_DOM = cfg.SANITIZE_DOM !== false; // Default true
+
+    	      SANITIZE_NAMED_PROPS = cfg.SANITIZE_NAMED_PROPS || false; // Default false
+
+    	      KEEP_CONTENT = cfg.KEEP_CONTENT !== false; // Default true
+
+    	      IN_PLACE = cfg.IN_PLACE || false; // Default false
+
+    	      IS_ALLOWED_URI$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI$1;
+    	      NAMESPACE = cfg.NAMESPACE || HTML_NAMESPACE;
+
+    	      if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck)) {
+    	        CUSTOM_ELEMENT_HANDLING.tagNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck;
+    	      }
+
+    	      if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck)) {
+    	        CUSTOM_ELEMENT_HANDLING.attributeNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck;
+    	      }
+
+    	      if (cfg.CUSTOM_ELEMENT_HANDLING && typeof cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements === 'boolean') {
+    	        CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements = cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements;
+    	      }
+
+    	      if (SAFE_FOR_TEMPLATES) {
+    	        ALLOW_DATA_ATTR = false;
+    	      }
+
+    	      if (RETURN_DOM_FRAGMENT) {
+    	        RETURN_DOM = true;
+    	      }
+    	      /* Parse profile info */
+
+
+    	      if (USE_PROFILES) {
+    	        ALLOWED_TAGS = addToSet({}, _toConsumableArray(text));
+    	        ALLOWED_ATTR = [];
+
+    	        if (USE_PROFILES.html === true) {
+    	          addToSet(ALLOWED_TAGS, html$1);
+    	          addToSet(ALLOWED_ATTR, html);
+    	        }
+
+    	        if (USE_PROFILES.svg === true) {
+    	          addToSet(ALLOWED_TAGS, svg$1);
+    	          addToSet(ALLOWED_ATTR, svg);
+    	          addToSet(ALLOWED_ATTR, xml);
+    	        }
+
+    	        if (USE_PROFILES.svgFilters === true) {
+    	          addToSet(ALLOWED_TAGS, svgFilters);
+    	          addToSet(ALLOWED_ATTR, svg);
+    	          addToSet(ALLOWED_ATTR, xml);
+    	        }
+
+    	        if (USE_PROFILES.mathMl === true) {
+    	          addToSet(ALLOWED_TAGS, mathMl$1);
+    	          addToSet(ALLOWED_ATTR, mathMl);
+    	          addToSet(ALLOWED_ATTR, xml);
+    	        }
+    	      }
+    	      /* Merge configuration parameters */
+
+
+    	      if (cfg.ADD_TAGS) {
+    	        if (ALLOWED_TAGS === DEFAULT_ALLOWED_TAGS) {
+    	          ALLOWED_TAGS = clone(ALLOWED_TAGS);
+    	        }
+
+    	        addToSet(ALLOWED_TAGS, cfg.ADD_TAGS, transformCaseFunc);
+    	      }
+
+    	      if (cfg.ADD_ATTR) {
+    	        if (ALLOWED_ATTR === DEFAULT_ALLOWED_ATTR) {
+    	          ALLOWED_ATTR = clone(ALLOWED_ATTR);
+    	        }
+
+    	        addToSet(ALLOWED_ATTR, cfg.ADD_ATTR, transformCaseFunc);
+    	      }
+
+    	      if (cfg.ADD_URI_SAFE_ATTR) {
+    	        addToSet(URI_SAFE_ATTRIBUTES, cfg.ADD_URI_SAFE_ATTR, transformCaseFunc);
+    	      }
+
+    	      if (cfg.FORBID_CONTENTS) {
+    	        if (FORBID_CONTENTS === DEFAULT_FORBID_CONTENTS) {
+    	          FORBID_CONTENTS = clone(FORBID_CONTENTS);
+    	        }
+
+    	        addToSet(FORBID_CONTENTS, cfg.FORBID_CONTENTS, transformCaseFunc);
+    	      }
+    	      /* Add #text in case KEEP_CONTENT is set to true */
+
+
+    	      if (KEEP_CONTENT) {
+    	        ALLOWED_TAGS['#text'] = true;
+    	      }
+    	      /* Add html, head and body to ALLOWED_TAGS in case WHOLE_DOCUMENT is true */
+
+
+    	      if (WHOLE_DOCUMENT) {
+    	        addToSet(ALLOWED_TAGS, ['html', 'head', 'body']);
+    	      }
+    	      /* Add tbody to ALLOWED_TAGS in case tables are permitted, see #286, #365 */
+
+
+    	      if (ALLOWED_TAGS.table) {
+    	        addToSet(ALLOWED_TAGS, ['tbody']);
+    	        delete FORBID_TAGS.tbody;
+    	      } // Prevent further manipulation of configuration.
+    	      // Not available in IE8, Safari 5, etc.
+
+
+    	      if (freeze) {
+    	        freeze(cfg);
+    	      }
+
+    	      CONFIG = cfg;
+    	    };
+
+    	    var MATHML_TEXT_INTEGRATION_POINTS = addToSet({}, ['mi', 'mo', 'mn', 'ms', 'mtext']);
+    	    var HTML_INTEGRATION_POINTS = addToSet({}, ['foreignobject', 'desc', 'title', 'annotation-xml']); // Certain elements are allowed in both SVG and HTML
+    	    // namespace. We need to specify them explicitly
+    	    // so that they don't get erroneously deleted from
+    	    // HTML namespace.
+
+    	    var COMMON_SVG_AND_HTML_ELEMENTS = addToSet({}, ['title', 'style', 'font', 'a', 'script']);
+    	    /* Keep track of all possible SVG and MathML tags
+    	     * so that we can perform the namespace checks
+    	     * correctly. */
+
+    	    var ALL_SVG_TAGS = addToSet({}, svg$1);
+    	    addToSet(ALL_SVG_TAGS, svgFilters);
+    	    addToSet(ALL_SVG_TAGS, svgDisallowed);
+    	    var ALL_MATHML_TAGS = addToSet({}, mathMl$1);
+    	    addToSet(ALL_MATHML_TAGS, mathMlDisallowed);
+    	    /**
+    	     *
+    	     *
+    	     * @param  {Element} element a DOM element whose namespace is being checked
+    	     * @returns {boolean} Return false if the element has a
+    	     *  namespace that a spec-compliant parser would never
+    	     *  return. Return true otherwise.
+    	     */
+
+    	    var _checkValidNamespace = function _checkValidNamespace(element) {
+    	      var parent = getParentNode(element); // In JSDOM, if we're inside shadow DOM, then parentNode
+    	      // can be null. We just simulate parent in this case.
+
+    	      if (!parent || !parent.tagName) {
+    	        parent = {
+    	          namespaceURI: NAMESPACE,
+    	          tagName: 'template'
+    	        };
+    	      }
+
+    	      var tagName = stringToLowerCase(element.tagName);
+    	      var parentTagName = stringToLowerCase(parent.tagName);
+
+    	      if (!ALLOWED_NAMESPACES[element.namespaceURI]) {
+    	        return false;
+    	      }
+
+    	      if (element.namespaceURI === SVG_NAMESPACE) {
+    	        // The only way to switch from HTML namespace to SVG
+    	        // is via <svg>. If it happens via any other tag, then
+    	        // it should be killed.
+    	        if (parent.namespaceURI === HTML_NAMESPACE) {
+    	          return tagName === 'svg';
+    	        } // The only way to switch from MathML to SVG is via`
+    	        // svg if parent is either <annotation-xml> or MathML
+    	        // text integration points.
+
+
+    	        if (parent.namespaceURI === MATHML_NAMESPACE) {
+    	          return tagName === 'svg' && (parentTagName === 'annotation-xml' || MATHML_TEXT_INTEGRATION_POINTS[parentTagName]);
+    	        } // We only allow elements that are defined in SVG
+    	        // spec. All others are disallowed in SVG namespace.
+
+
+    	        return Boolean(ALL_SVG_TAGS[tagName]);
+    	      }
+
+    	      if (element.namespaceURI === MATHML_NAMESPACE) {
+    	        // The only way to switch from HTML namespace to MathML
+    	        // is via <math>. If it happens via any other tag, then
+    	        // it should be killed.
+    	        if (parent.namespaceURI === HTML_NAMESPACE) {
+    	          return tagName === 'math';
+    	        } // The only way to switch from SVG to MathML is via
+    	        // <math> and HTML integration points
+
+
+    	        if (parent.namespaceURI === SVG_NAMESPACE) {
+    	          return tagName === 'math' && HTML_INTEGRATION_POINTS[parentTagName];
+    	        } // We only allow elements that are defined in MathML
+    	        // spec. All others are disallowed in MathML namespace.
+
+
+    	        return Boolean(ALL_MATHML_TAGS[tagName]);
+    	      }
+
+    	      if (element.namespaceURI === HTML_NAMESPACE) {
+    	        // The only way to switch from SVG to HTML is via
+    	        // HTML integration points, and from MathML to HTML
+    	        // is via MathML text integration points
+    	        if (parent.namespaceURI === SVG_NAMESPACE && !HTML_INTEGRATION_POINTS[parentTagName]) {
+    	          return false;
+    	        }
+
+    	        if (parent.namespaceURI === MATHML_NAMESPACE && !MATHML_TEXT_INTEGRATION_POINTS[parentTagName]) {
+    	          return false;
+    	        } // We disallow tags that are specific for MathML
+    	        // or SVG and should never appear in HTML namespace
+
+
+    	        return !ALL_MATHML_TAGS[tagName] && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]);
+    	      } // For XHTML and XML documents that support custom namespaces
+
+
+    	      if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && ALLOWED_NAMESPACES[element.namespaceURI]) {
+    	        return true;
+    	      } // The code should never reach this place (this means
+    	      // that the element somehow got namespace that is not
+    	      // HTML, SVG, MathML or allowed via ALLOWED_NAMESPACES).
+    	      // Return false just in case.
+
+
+    	      return false;
+    	    };
+    	    /**
+    	     * _forceRemove
+    	     *
+    	     * @param  {Node} node a DOM node
+    	     */
+
+
+    	    var _forceRemove = function _forceRemove(node) {
+    	      arrayPush(DOMPurify.removed, {
+    	        element: node
+    	      });
+
+    	      try {
+    	        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+    	        node.parentNode.removeChild(node);
+    	      } catch (_) {
+    	        try {
+    	          node.outerHTML = emptyHTML;
+    	        } catch (_) {
+    	          node.remove();
+    	        }
+    	      }
+    	    };
+    	    /**
+    	     * _removeAttribute
+    	     *
+    	     * @param  {String} name an Attribute name
+    	     * @param  {Node} node a DOM node
+    	     */
+
+
+    	    var _removeAttribute = function _removeAttribute(name, node) {
+    	      try {
+    	        arrayPush(DOMPurify.removed, {
+    	          attribute: node.getAttributeNode(name),
+    	          from: node
+    	        });
+    	      } catch (_) {
+    	        arrayPush(DOMPurify.removed, {
+    	          attribute: null,
+    	          from: node
+    	        });
+    	      }
+
+    	      node.removeAttribute(name); // We void attribute values for unremovable "is"" attributes
+
+    	      if (name === 'is' && !ALLOWED_ATTR[name]) {
+    	        if (RETURN_DOM || RETURN_DOM_FRAGMENT) {
+    	          try {
+    	            _forceRemove(node);
+    	          } catch (_) {}
+    	        } else {
+    	          try {
+    	            node.setAttribute(name, '');
+    	          } catch (_) {}
+    	        }
+    	      }
+    	    };
+    	    /**
+    	     * _initDocument
+    	     *
+    	     * @param  {String} dirty a string of dirty markup
+    	     * @return {Document} a DOM, filled with the dirty markup
+    	     */
+
+
+    	    var _initDocument = function _initDocument(dirty) {
+    	      /* Create a HTML document */
+    	      var doc;
+    	      var leadingWhitespace;
+
+    	      if (FORCE_BODY) {
+    	        dirty = '<remove></remove>' + dirty;
+    	      } else {
+    	        /* If FORCE_BODY isn't used, leading whitespace needs to be preserved manually */
+    	        var matches = stringMatch(dirty, /^[\r\n\t ]+/);
+    	        leadingWhitespace = matches && matches[0];
+    	      }
+
+    	      if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && NAMESPACE === HTML_NAMESPACE) {
+    	        // Root of XHTML doc must contain xmlns declaration (see https://www.w3.org/TR/xhtml1/normative.html#strict)
+    	        dirty = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + dirty + '</body></html>';
+    	      }
+
+    	      var dirtyPayload = trustedTypesPolicy ? trustedTypesPolicy.createHTML(dirty) : dirty;
+    	      /*
+    	       * Use the DOMParser API by default, fallback later if needs be
+    	       * DOMParser not work for svg when has multiple root element.
+    	       */
+
+    	      if (NAMESPACE === HTML_NAMESPACE) {
+    	        try {
+    	          doc = new DOMParser().parseFromString(dirtyPayload, PARSER_MEDIA_TYPE);
+    	        } catch (_) {}
+    	      }
+    	      /* Use createHTMLDocument in case DOMParser is not available */
+
+
+    	      if (!doc || !doc.documentElement) {
+    	        doc = implementation.createDocument(NAMESPACE, 'template', null);
+
+    	        try {
+    	          doc.documentElement.innerHTML = IS_EMPTY_INPUT ? emptyHTML : dirtyPayload;
+    	        } catch (_) {// Syntax error if dirtyPayload is invalid xml
+    	        }
+    	      }
+
+    	      var body = doc.body || doc.documentElement;
+
+    	      if (dirty && leadingWhitespace) {
+    	        body.insertBefore(document.createTextNode(leadingWhitespace), body.childNodes[0] || null);
+    	      }
+    	      /* Work on whole document or just its body */
+
+
+    	      if (NAMESPACE === HTML_NAMESPACE) {
+    	        return getElementsByTagName.call(doc, WHOLE_DOCUMENT ? 'html' : 'body')[0];
+    	      }
+
+    	      return WHOLE_DOCUMENT ? doc.documentElement : body;
+    	    };
+    	    /**
+    	     * _createIterator
+    	     *
+    	     * @param  {Document} root document/fragment to create iterator for
+    	     * @return {Iterator} iterator instance
+    	     */
+
+
+    	    var _createIterator = function _createIterator(root) {
+    	      return createNodeIterator.call(root.ownerDocument || root, root, // eslint-disable-next-line no-bitwise
+    	      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT, null, false);
+    	    };
+    	    /**
+    	     * _isClobbered
+    	     *
+    	     * @param  {Node} elm element to check for clobbering attacks
+    	     * @return {Boolean} true if clobbered, false if safe
+    	     */
+
+
+    	    var _isClobbered = function _isClobbered(elm) {
+    	      return elm instanceof HTMLFormElement && (typeof elm.nodeName !== 'string' || typeof elm.textContent !== 'string' || typeof elm.removeChild !== 'function' || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== 'function' || typeof elm.setAttribute !== 'function' || typeof elm.namespaceURI !== 'string' || typeof elm.insertBefore !== 'function' || typeof elm.hasChildNodes !== 'function');
+    	    };
+    	    /**
+    	     * _isNode
+    	     *
+    	     * @param  {Node} obj object to check whether it's a DOM node
+    	     * @return {Boolean} true is object is a DOM node
+    	     */
+
+
+    	    var _isNode = function _isNode(object) {
+    	      return _typeof(Node) === 'object' ? object instanceof Node : object && _typeof(object) === 'object' && typeof object.nodeType === 'number' && typeof object.nodeName === 'string';
+    	    };
+    	    /**
+    	     * _executeHook
+    	     * Execute user configurable hooks
+    	     *
+    	     * @param  {String} entryPoint  Name of the hook's entry point
+    	     * @param  {Node} currentNode node to work on with the hook
+    	     * @param  {Object} data additional hook parameters
+    	     */
+
+
+    	    var _executeHook = function _executeHook(entryPoint, currentNode, data) {
+    	      if (!hooks[entryPoint]) {
+    	        return;
+    	      }
+
+    	      arrayForEach(hooks[entryPoint], function (hook) {
+    	        hook.call(DOMPurify, currentNode, data, CONFIG);
+    	      });
+    	    };
+    	    /**
+    	     * _sanitizeElements
+    	     *
+    	     * @protect nodeName
+    	     * @protect textContent
+    	     * @protect removeChild
+    	     *
+    	     * @param   {Node} currentNode to check for permission to exist
+    	     * @return  {Boolean} true if node was killed, false if left alive
+    	     */
+
+
+    	    var _sanitizeElements = function _sanitizeElements(currentNode) {
+    	      var content;
+    	      /* Execute a hook if present */
+
+    	      _executeHook('beforeSanitizeElements', currentNode, null);
+    	      /* Check if element is clobbered or can clobber */
+
+
+    	      if (_isClobbered(currentNode)) {
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+    	      /* Check if tagname contains Unicode */
+
+
+    	      if (regExpTest(/[\u0080-\uFFFF]/, currentNode.nodeName)) {
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+    	      /* Now let's check the element's type and name */
+
+
+    	      var tagName = transformCaseFunc(currentNode.nodeName);
+    	      /* Execute a hook if present */
+
+    	      _executeHook('uponSanitizeElement', currentNode, {
+    	        tagName: tagName,
+    	        allowedTags: ALLOWED_TAGS
+    	      });
+    	      /* Detect mXSS attempts abusing namespace confusion */
+
+
+    	      if (currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && (!_isNode(currentNode.content) || !_isNode(currentNode.content.firstElementChild)) && regExpTest(/<[/\w]/g, currentNode.innerHTML) && regExpTest(/<[/\w]/g, currentNode.textContent)) {
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+    	      /* Mitigate a problem with templates inside select */
+
+
+    	      if (tagName === 'select' && regExpTest(/<template/i, currentNode.innerHTML)) {
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+    	      /* Remove element if anything forbids its presence */
+
+
+    	      if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
+    	        /* Check if we have a custom element to handle */
+    	        if (!FORBID_TAGS[tagName] && _basicCustomElementTest(tagName)) {
+    	          if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName)) return false;
+    	          if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName)) return false;
+    	        }
+    	        /* Keep content except for bad-listed elements */
+
+
+    	        if (KEEP_CONTENT && !FORBID_CONTENTS[tagName]) {
+    	          var parentNode = getParentNode(currentNode) || currentNode.parentNode;
+    	          var childNodes = getChildNodes(currentNode) || currentNode.childNodes;
+
+    	          if (childNodes && parentNode) {
+    	            var childCount = childNodes.length;
+
+    	            for (var i = childCount - 1; i >= 0; --i) {
+    	              parentNode.insertBefore(cloneNode(childNodes[i], true), getNextSibling(currentNode));
+    	            }
+    	          }
+    	        }
+
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+    	      /* Check whether element has a valid namespace */
+
+
+    	      if (currentNode instanceof Element && !_checkValidNamespace(currentNode)) {
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+
+    	      if ((tagName === 'noscript' || tagName === 'noembed') && regExpTest(/<\/no(script|embed)/i, currentNode.innerHTML)) {
+    	        _forceRemove(currentNode);
+
+    	        return true;
+    	      }
+    	      /* Sanitize element content to be template-safe */
+
+
+    	      if (SAFE_FOR_TEMPLATES && currentNode.nodeType === 3) {
+    	        /* Get the element's text content */
+    	        content = currentNode.textContent;
+    	        content = stringReplace(content, MUSTACHE_EXPR$1, ' ');
+    	        content = stringReplace(content, ERB_EXPR$1, ' ');
+    	        content = stringReplace(content, TMPLIT_EXPR$1, ' ');
+
+    	        if (currentNode.textContent !== content) {
+    	          arrayPush(DOMPurify.removed, {
+    	            element: currentNode.cloneNode()
+    	          });
+    	          currentNode.textContent = content;
+    	        }
+    	      }
+    	      /* Execute a hook if present */
+
+
+    	      _executeHook('afterSanitizeElements', currentNode, null);
+
+    	      return false;
+    	    };
+    	    /**
+    	     * _isValidAttribute
+    	     *
+    	     * @param  {string} lcTag Lowercase tag name of containing element.
+    	     * @param  {string} lcName Lowercase attribute name.
+    	     * @param  {string} value Attribute value.
+    	     * @return {Boolean} Returns true if `value` is valid, otherwise false.
+    	     */
+    	    // eslint-disable-next-line complexity
+
+
+    	    var _isValidAttribute = function _isValidAttribute(lcTag, lcName, value) {
+    	      /* Make sure attribute cannot clobber */
+    	      if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in document || value in formElement)) {
+    	        return false;
+    	      }
+    	      /* Allow valid data-* attributes: At least one character after "-"
+    	          (https://html.spec.whatwg.org/multipage/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes)
+    	          XML-compatible (https://html.spec.whatwg.org/multipage/infrastructure.html#xml-compatible and http://www.w3.org/TR/xml/#d0e804)
+    	          We don't need to check the value; it's always URI safe. */
+
+
+    	      if (ALLOW_DATA_ATTR && !FORBID_ATTR[lcName] && regExpTest(DATA_ATTR$1, lcName)) ; else if (ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR$1, lcName)) ; else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
+    	        if ( // First condition does a very basic check if a) it's basically a valid custom element tagname AND
+    	        // b) if the tagName passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
+    	        // and c) if the attribute name passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.attributeNameCheck
+    	        _basicCustomElementTest(lcTag) && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, lcTag) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(lcTag)) && (CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.attributeNameCheck, lcName) || CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.attributeNameCheck(lcName)) || // Alternative, second condition checks if it's an `is`-attribute, AND
+    	        // the value passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
+    	        lcName === 'is' && CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, value) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(value))) ; else {
+    	          return false;
+    	        }
+    	        /* Check value is safe. First, is attr inert? If so, is safe */
+
+    	      } else if (URI_SAFE_ATTRIBUTES[lcName]) ; else if (regExpTest(IS_ALLOWED_URI$1, stringReplace(value, ATTR_WHITESPACE$1, ''))) ; else if ((lcName === 'src' || lcName === 'xlink:href' || lcName === 'href') && lcTag !== 'script' && stringIndexOf(value, 'data:') === 0 && DATA_URI_TAGS[lcTag]) ; else if (ALLOW_UNKNOWN_PROTOCOLS && !regExpTest(IS_SCRIPT_OR_DATA$1, stringReplace(value, ATTR_WHITESPACE$1, ''))) ; else if (!value) ; else {
+    	        return false;
+    	      }
+
+    	      return true;
+    	    };
+    	    /**
+    	     * _basicCustomElementCheck
+    	     * checks if at least one dash is included in tagName, and it's not the first char
+    	     * for more sophisticated checking see https://github.com/sindresorhus/validate-element-name
+    	     * @param {string} tagName name of the tag of the node to sanitize
+    	     */
+
+
+    	    var _basicCustomElementTest = function _basicCustomElementTest(tagName) {
+    	      return tagName.indexOf('-') > 0;
+    	    };
+    	    /**
+    	     * _sanitizeAttributes
+    	     *
+    	     * @protect attributes
+    	     * @protect nodeName
+    	     * @protect removeAttribute
+    	     * @protect setAttribute
+    	     *
+    	     * @param  {Node} currentNode to sanitize
+    	     */
+
+
+    	    var _sanitizeAttributes = function _sanitizeAttributes(currentNode) {
+    	      var attr;
+    	      var value;
+    	      var lcName;
+    	      var l;
+    	      /* Execute a hook if present */
+
+    	      _executeHook('beforeSanitizeAttributes', currentNode, null);
+
+    	      var attributes = currentNode.attributes;
+    	      /* Check if we have attributes; if not we might have a text node */
+
+    	      if (!attributes) {
+    	        return;
+    	      }
+
+    	      var hookEvent = {
+    	        attrName: '',
+    	        attrValue: '',
+    	        keepAttr: true,
+    	        allowedAttributes: ALLOWED_ATTR
+    	      };
+    	      l = attributes.length;
+    	      /* Go backwards over all attributes; safely remove bad ones */
+
+    	      while (l--) {
+    	        attr = attributes[l];
+    	        var _attr = attr,
+    	            name = _attr.name,
+    	            namespaceURI = _attr.namespaceURI;
+    	        value = name === 'value' ? attr.value : stringTrim(attr.value);
+    	        lcName = transformCaseFunc(name);
+    	        /* Execute a hook if present */
+
+    	        hookEvent.attrName = lcName;
+    	        hookEvent.attrValue = value;
+    	        hookEvent.keepAttr = true;
+    	        hookEvent.forceKeepAttr = undefined; // Allows developers to see this is a property they can set
+
+    	        _executeHook('uponSanitizeAttribute', currentNode, hookEvent);
+
+    	        value = hookEvent.attrValue;
+    	        /* Did the hooks approve of the attribute? */
+
+    	        if (hookEvent.forceKeepAttr) {
+    	          continue;
+    	        }
+    	        /* Remove attribute */
+
+
+    	        _removeAttribute(name, currentNode);
+    	        /* Did the hooks approve of the attribute? */
+
+
+    	        if (!hookEvent.keepAttr) {
+    	          continue;
+    	        }
+    	        /* Work around a security issue in jQuery 3.0 */
+
+
+    	        if (regExpTest(/\/>/i, value)) {
+    	          _removeAttribute(name, currentNode);
+
+    	          continue;
+    	        }
+    	        /* Sanitize attribute content to be template-safe */
+
+
+    	        if (SAFE_FOR_TEMPLATES) {
+    	          value = stringReplace(value, MUSTACHE_EXPR$1, ' ');
+    	          value = stringReplace(value, ERB_EXPR$1, ' ');
+    	          value = stringReplace(value, TMPLIT_EXPR$1, ' ');
+    	        }
+    	        /* Is `value` valid for this attribute? */
+
+
+    	        var lcTag = transformCaseFunc(currentNode.nodeName);
+
+    	        if (!_isValidAttribute(lcTag, lcName, value)) {
+    	          continue;
+    	        }
+    	        /* Full DOM Clobbering protection via namespace isolation,
+    	         * Prefix id and name attributes with `user-content-`
+    	         */
+
+
+    	        if (SANITIZE_NAMED_PROPS && (lcName === 'id' || lcName === 'name')) {
+    	          // Remove the attribute with this value
+    	          _removeAttribute(name, currentNode); // Prefix the value and later re-create the attribute with the sanitized value
+
+
+    	          value = SANITIZE_NAMED_PROPS_PREFIX + value;
+    	        }
+    	        /* Handle attributes that require Trusted Types */
+
+
+    	        if (trustedTypesPolicy && _typeof(trustedTypes) === 'object' && typeof trustedTypes.getAttributeType === 'function') {
+    	          if (namespaceURI) ; else {
+    	            switch (trustedTypes.getAttributeType(lcTag, lcName)) {
+    	              case 'TrustedHTML':
+    	                value = trustedTypesPolicy.createHTML(value);
+    	                break;
+
+    	              case 'TrustedScriptURL':
+    	                value = trustedTypesPolicy.createScriptURL(value);
+    	                break;
+    	            }
+    	          }
+    	        }
+    	        /* Handle invalid data-* attribute set by try-catching it */
+
+
+    	        try {
+    	          if (namespaceURI) {
+    	            currentNode.setAttributeNS(namespaceURI, name, value);
+    	          } else {
+    	            /* Fallback to setAttribute() for browser-unrecognized namespaces e.g. "x-schema". */
+    	            currentNode.setAttribute(name, value);
+    	          }
+
+    	          arrayPop(DOMPurify.removed);
+    	        } catch (_) {}
+    	      }
+    	      /* Execute a hook if present */
+
+
+    	      _executeHook('afterSanitizeAttributes', currentNode, null);
+    	    };
+    	    /**
+    	     * _sanitizeShadowDOM
+    	     *
+    	     * @param  {DocumentFragment} fragment to iterate over recursively
+    	     */
+
+
+    	    var _sanitizeShadowDOM = function _sanitizeShadowDOM(fragment) {
+    	      var shadowNode;
+
+    	      var shadowIterator = _createIterator(fragment);
+    	      /* Execute a hook if present */
+
+
+    	      _executeHook('beforeSanitizeShadowDOM', fragment, null);
+
+    	      while (shadowNode = shadowIterator.nextNode()) {
+    	        /* Execute a hook if present */
+    	        _executeHook('uponSanitizeShadowNode', shadowNode, null);
+    	        /* Sanitize tags and elements */
+
+
+    	        if (_sanitizeElements(shadowNode)) {
+    	          continue;
+    	        }
+    	        /* Deep shadow DOM detected */
+
+
+    	        if (shadowNode.content instanceof DocumentFragment) {
+    	          _sanitizeShadowDOM(shadowNode.content);
+    	        }
+    	        /* Check attributes, sanitize if necessary */
+
+
+    	        _sanitizeAttributes(shadowNode);
+    	      }
+    	      /* Execute a hook if present */
+
+
+    	      _executeHook('afterSanitizeShadowDOM', fragment, null);
+    	    };
+    	    /**
+    	     * Sanitize
+    	     * Public method providing core sanitation functionality
+    	     *
+    	     * @param {String|Node} dirty string or DOM node
+    	     * @param {Object} configuration object
+    	     */
+    	    // eslint-disable-next-line complexity
+
+
+    	    DOMPurify.sanitize = function (dirty) {
+    	      var cfg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    	      var body;
+    	      var importedNode;
+    	      var currentNode;
+    	      var oldNode;
+    	      var returnNode;
+    	      /* Make sure we have a string to sanitize.
+    	        DO NOT return early, as this will return the wrong type if
+    	        the user has requested a DOM object rather than a string */
+
+    	      IS_EMPTY_INPUT = !dirty;
+
+    	      if (IS_EMPTY_INPUT) {
+    	        dirty = '<!-->';
+    	      }
+    	      /* Stringify, in case dirty is an object */
+
+
+    	      if (typeof dirty !== 'string' && !_isNode(dirty)) {
+    	        // eslint-disable-next-line no-negated-condition
+    	        if (typeof dirty.toString !== 'function') {
+    	          throw typeErrorCreate('toString is not a function');
+    	        } else {
+    	          dirty = dirty.toString();
+
+    	          if (typeof dirty !== 'string') {
+    	            throw typeErrorCreate('dirty is not a string, aborting');
+    	          }
+    	        }
+    	      }
+    	      /* Check we can run. Otherwise fall back or ignore */
+
+
+    	      if (!DOMPurify.isSupported) {
+    	        if (_typeof(window.toStaticHTML) === 'object' || typeof window.toStaticHTML === 'function') {
+    	          if (typeof dirty === 'string') {
+    	            return window.toStaticHTML(dirty);
+    	          }
+
+    	          if (_isNode(dirty)) {
+    	            return window.toStaticHTML(dirty.outerHTML);
+    	          }
+    	        }
+
+    	        return dirty;
+    	      }
+    	      /* Assign config vars */
+
+
+    	      if (!SET_CONFIG) {
+    	        _parseConfig(cfg);
+    	      }
+    	      /* Clean up removed elements */
+
+
+    	      DOMPurify.removed = [];
+    	      /* Check if dirty is correctly typed for IN_PLACE */
+
+    	      if (typeof dirty === 'string') {
+    	        IN_PLACE = false;
+    	      }
+
+    	      if (IN_PLACE) {
+    	        /* Do some early pre-sanitization to avoid unsafe root nodes */
+    	        if (dirty.nodeName) {
+    	          var tagName = transformCaseFunc(dirty.nodeName);
+
+    	          if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
+    	            throw typeErrorCreate('root node is forbidden and cannot be sanitized in-place');
+    	          }
+    	        }
+    	      } else if (dirty instanceof Node) {
+    	        /* If dirty is a DOM element, append to an empty document to avoid
+    	           elements being stripped by the parser */
+    	        body = _initDocument('<!---->');
+    	        importedNode = body.ownerDocument.importNode(dirty, true);
+
+    	        if (importedNode.nodeType === 1 && importedNode.nodeName === 'BODY') {
+    	          /* Node is already a body, use as is */
+    	          body = importedNode;
+    	        } else if (importedNode.nodeName === 'HTML') {
+    	          body = importedNode;
+    	        } else {
+    	          // eslint-disable-next-line unicorn/prefer-dom-node-append
+    	          body.appendChild(importedNode);
+    	        }
+    	      } else {
+    	        /* Exit directly if we have nothing to do */
+    	        if (!RETURN_DOM && !SAFE_FOR_TEMPLATES && !WHOLE_DOCUMENT && // eslint-disable-next-line unicorn/prefer-includes
+    	        dirty.indexOf('<') === -1) {
+    	          return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(dirty) : dirty;
+    	        }
+    	        /* Initialize the document to work on */
+
+
+    	        body = _initDocument(dirty);
+    	        /* Check we have a DOM node from the data */
+
+    	        if (!body) {
+    	          return RETURN_DOM ? null : RETURN_TRUSTED_TYPE ? emptyHTML : '';
+    	        }
+    	      }
+    	      /* Remove first element node (ours) if FORCE_BODY is set */
+
+
+    	      if (body && FORCE_BODY) {
+    	        _forceRemove(body.firstChild);
+    	      }
+    	      /* Get node iterator */
+
+
+    	      var nodeIterator = _createIterator(IN_PLACE ? dirty : body);
+    	      /* Now start iterating over the created document */
+
+
+    	      while (currentNode = nodeIterator.nextNode()) {
+    	        /* Fix IE's strange behavior with manipulated textNodes #89 */
+    	        if (currentNode.nodeType === 3 && currentNode === oldNode) {
+    	          continue;
+    	        }
+    	        /* Sanitize tags and elements */
+
+
+    	        if (_sanitizeElements(currentNode)) {
+    	          continue;
+    	        }
+    	        /* Shadow DOM detected, sanitize it */
+
+
+    	        if (currentNode.content instanceof DocumentFragment) {
+    	          _sanitizeShadowDOM(currentNode.content);
+    	        }
+    	        /* Check attributes, sanitize if necessary */
+
+
+    	        _sanitizeAttributes(currentNode);
+
+    	        oldNode = currentNode;
+    	      }
+
+    	      oldNode = null;
+    	      /* If we sanitized `dirty` in-place, return it. */
+
+    	      if (IN_PLACE) {
+    	        return dirty;
+    	      }
+    	      /* Return sanitized string or DOM */
+
+
+    	      if (RETURN_DOM) {
+    	        if (RETURN_DOM_FRAGMENT) {
+    	          returnNode = createDocumentFragment.call(body.ownerDocument);
+
+    	          while (body.firstChild) {
+    	            // eslint-disable-next-line unicorn/prefer-dom-node-append
+    	            returnNode.appendChild(body.firstChild);
+    	          }
+    	        } else {
+    	          returnNode = body;
+    	        }
+
+    	        if (ALLOWED_ATTR.shadowroot) {
+    	          /*
+    	            AdoptNode() is not used because internal state is not reset
+    	            (e.g. the past names map of a HTMLFormElement), this is safe
+    	            in theory but we would rather not risk another attack vector.
+    	            The state that is cloned by importNode() is explicitly defined
+    	            by the specs.
+    	          */
+    	          returnNode = importNode.call(originalDocument, returnNode, true);
+    	        }
+
+    	        return returnNode;
+    	      }
+
+    	      var serializedHTML = WHOLE_DOCUMENT ? body.outerHTML : body.innerHTML;
+    	      /* Serialize doctype if allowed */
+
+    	      if (WHOLE_DOCUMENT && ALLOWED_TAGS['!doctype'] && body.ownerDocument && body.ownerDocument.doctype && body.ownerDocument.doctype.name && regExpTest(DOCTYPE_NAME, body.ownerDocument.doctype.name)) {
+    	        serializedHTML = '<!DOCTYPE ' + body.ownerDocument.doctype.name + '>\n' + serializedHTML;
+    	      }
+    	      /* Sanitize final string template-safe */
+
+
+    	      if (SAFE_FOR_TEMPLATES) {
+    	        serializedHTML = stringReplace(serializedHTML, MUSTACHE_EXPR$1, ' ');
+    	        serializedHTML = stringReplace(serializedHTML, ERB_EXPR$1, ' ');
+    	        serializedHTML = stringReplace(serializedHTML, TMPLIT_EXPR$1, ' ');
+    	      }
+
+    	      return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(serializedHTML) : serializedHTML;
+    	    };
+    	    /**
+    	     * Public method to set the configuration once
+    	     * setConfig
+    	     *
+    	     * @param {Object} cfg configuration object
+    	     */
+
+
+    	    DOMPurify.setConfig = function (cfg) {
+    	      _parseConfig(cfg);
+
+    	      SET_CONFIG = true;
+    	    };
+    	    /**
+    	     * Public method to remove the configuration
+    	     * clearConfig
+    	     *
+    	     */
+
+
+    	    DOMPurify.clearConfig = function () {
+    	      CONFIG = null;
+    	      SET_CONFIG = false;
+    	    };
+    	    /**
+    	     * Public method to check if an attribute value is valid.
+    	     * Uses last set config, if any. Otherwise, uses config defaults.
+    	     * isValidAttribute
+    	     *
+    	     * @param  {string} tag Tag name of containing element.
+    	     * @param  {string} attr Attribute name.
+    	     * @param  {string} value Attribute value.
+    	     * @return {Boolean} Returns true if `value` is valid. Otherwise, returns false.
+    	     */
+
+
+    	    DOMPurify.isValidAttribute = function (tag, attr, value) {
+    	      /* Initialize shared config vars if necessary. */
+    	      if (!CONFIG) {
+    	        _parseConfig({});
+    	      }
+
+    	      var lcTag = transformCaseFunc(tag);
+    	      var lcName = transformCaseFunc(attr);
+    	      return _isValidAttribute(lcTag, lcName, value);
+    	    };
+    	    /**
+    	     * AddHook
+    	     * Public method to add DOMPurify hooks
+    	     *
+    	     * @param {String} entryPoint entry point for the hook to add
+    	     * @param {Function} hookFunction function to execute
+    	     */
+
+
+    	    DOMPurify.addHook = function (entryPoint, hookFunction) {
+    	      if (typeof hookFunction !== 'function') {
+    	        return;
+    	      }
+
+    	      hooks[entryPoint] = hooks[entryPoint] || [];
+    	      arrayPush(hooks[entryPoint], hookFunction);
+    	    };
+    	    /**
+    	     * RemoveHook
+    	     * Public method to remove a DOMPurify hook at a given entryPoint
+    	     * (pops it from the stack of hooks if more are present)
+    	     *
+    	     * @param {String} entryPoint entry point for the hook to remove
+    	     * @return {Function} removed(popped) hook
+    	     */
+
+
+    	    DOMPurify.removeHook = function (entryPoint) {
+    	      if (hooks[entryPoint]) {
+    	        return arrayPop(hooks[entryPoint]);
+    	      }
+    	    };
+    	    /**
+    	     * RemoveHooks
+    	     * Public method to remove all DOMPurify hooks at a given entryPoint
+    	     *
+    	     * @param  {String} entryPoint entry point for the hooks to remove
+    	     */
+
+
+    	    DOMPurify.removeHooks = function (entryPoint) {
+    	      if (hooks[entryPoint]) {
+    	        hooks[entryPoint] = [];
+    	      }
+    	    };
+    	    /**
+    	     * RemoveAllHooks
+    	     * Public method to remove all DOMPurify hooks
+    	     *
+    	     */
+
+
+    	    DOMPurify.removeAllHooks = function () {
+    	      hooks = {};
+    	    };
+
+    	    return DOMPurify;
+    	  }
+
+    	  var purify = createDOMPurify();
+
+    	  return purify;
+
+    	}));
+    	
+    } (purify));
+
+    var DomPurify = purifyExports;
 
     let tippyInstances = new Map();
     const defaultTippyOptions = {
@@ -16243,7 +16334,7 @@ var app = (function () {
     function tippyService (id, query, options) {
         let tippyInstance = tippyInstances.get(id);
         if (options === null || options === void 0 ? void 0 : options.content) {
-            options.content = purify.sanitize(options.content, { ALLOWED_TAGS: ['bold'] });
+            options.content = DomPurify.sanitize(options.content, { ALLOWED_TAGS: ['bold'] });
         }
         // If exists, update content.
         if (tippyInstance) {
@@ -16262,10 +16353,10 @@ var app = (function () {
         return num < 10 ? '0' + num : num;
     }
 
-    /* src/layouts/library/AlbumInfo.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/AlbumInfo.svelte generated by Svelte v3.55.1 */
     const file$17 = "src/layouts/library/AlbumInfo.svelte";
 
-    function create_fragment$1d(ctx) {
+    function create_fragment$1c(ctx) {
     	let album_info_svlt;
     	let p;
     	let t0;
@@ -16281,9 +16372,9 @@ var app = (function () {
     			t1 = text(" (-");
     			t2 = text(/*totalDurationLeft*/ ctx[1]);
     			t3 = text(")");
-    			attr_dev(p, "class", "svelte-tk3zmd");
+    			attr_dev(p, "class", "svelte-s1g2tl");
     			add_location(p, file$17, 30, 1, 865);
-    			set_custom_element_data(album_info_svlt, "class", "svelte-tk3zmd");
+    			set_custom_element_data(album_info_svlt, "class", "svelte-s1g2tl");
     			add_location(album_info_svlt, file$17, 29, 0, 846);
     		},
     		l: function claim(nodes) {
@@ -16310,7 +16401,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1d.name,
+    		id: create_fragment$1c.name,
     		type: "component",
     		source: "",
     		ctx
@@ -16319,7 +16410,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1d($$self, $$props, $$invalidate) {
+    function instance$1c($$self, $$props, $$invalidate) {
     	let $playbackStore;
     	let $playbackCursor;
     	validate_store(playbackStore, 'playbackStore');
@@ -16397,22 +16488,22 @@ var app = (function () {
     class AlbumInfo extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1d, create_fragment$1d, safe_not_equal, {});
+    		init(this, options, instance$1c, create_fragment$1c, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AlbumInfo",
     			options,
-    			id: create_fragment$1d.name
+    			id: create_fragment$1c.name
     		});
     	}
     }
 
-    /* src/icons/ImageIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/ImageIcon.svelte generated by Svelte v3.55.1 */
 
     const file$16 = "src/icons/ImageIcon.svelte";
 
-    function create_fragment$1c(ctx) {
+    function create_fragment$1b(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -16430,113 +16521,8 @@ var app = (function () {
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "viewBox", "0 0 24 24");
     			attr_dev(svg, "style", /*style*/ ctx[0]);
-    			attr_dev(svg, "class", "svelte-12x8euw");
+    			attr_dev(svg, "class", "svelte-1bvabh8");
     			add_location(svg, file$16, 5, 0, 89);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, svg, anchor);
-    			append_dev(svg, path0);
-    			append_dev(svg, path1);
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*style*/ 1) {
-    				attr_dev(svg, "style", /*style*/ ctx[0]);
-    			}
-    		},
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(svg);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$1c.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$1c($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('ImageIcon', slots, []);
-    	let { style = '' } = $$props;
-    	const writable_props = ['style'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ImageIcon> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
-    	};
-
-    	$$self.$capture_state = () => ({ style });
-
-    	$$self.$inject_state = $$props => {
-    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [style];
-    }
-
-    class ImageIcon extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$1c, create_fragment$1c, safe_not_equal, { style: 0 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "ImageIcon",
-    			options,
-    			id: create_fragment$1c.name
-    		});
-    	}
-
-    	get style() {
-    		throw new Error("<ImageIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set style(value) {
-    		throw new Error("<ImageIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-    }
-
-    /* src/icons/MusicNoteIcon.svelte generated by Svelte v3.49.0 */
-
-    const file$15 = "src/icons/MusicNoteIcon.svelte";
-
-    function create_fragment$1b(ctx) {
-    	let svg;
-    	let path0;
-    	let path1;
-
-    	const block = {
-    		c: function create() {
-    			svg = svg_element("svg");
-    			path0 = svg_element("path");
-    			path1 = svg_element("path");
-    			attr_dev(path0, "fill", "none");
-    			attr_dev(path0, "d", "M0 0h24v24H0z");
-    			add_location(path0, file$15, 6, 2, 159);
-    			attr_dev(path1, "d", "M12 13.535V3h8v2h-6v12a4 4 0 1 1-2-3.465zM10 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
-    			add_location(path1, file$15, 6, 40, 197);
-    			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
-    			attr_dev(svg, "viewBox", "0 0 24 24");
-    			attr_dev(svg, "style", /*style*/ ctx[0]);
-    			attr_dev(svg, "class", "svelte-12x8euw");
-    			add_location(svg, file$15, 5, 0, 89);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16571,6 +16557,111 @@ var app = (function () {
 
     function instance$1b($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ImageIcon', slots, []);
+    	let { style = '' } = $$props;
+    	const writable_props = ['style'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ImageIcon> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
+    	};
+
+    	$$self.$capture_state = () => ({ style });
+
+    	$$self.$inject_state = $$props => {
+    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [style];
+    }
+
+    class ImageIcon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$1b, create_fragment$1b, safe_not_equal, { style: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ImageIcon",
+    			options,
+    			id: create_fragment$1b.name
+    		});
+    	}
+
+    	get style() {
+    		throw new Error("<ImageIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set style(value) {
+    		throw new Error("<ImageIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/icons/MusicNoteIcon.svelte generated by Svelte v3.55.1 */
+
+    const file$15 = "src/icons/MusicNoteIcon.svelte";
+
+    function create_fragment$1a(ctx) {
+    	let svg;
+    	let path0;
+    	let path1;
+
+    	const block = {
+    		c: function create() {
+    			svg = svg_element("svg");
+    			path0 = svg_element("path");
+    			path1 = svg_element("path");
+    			attr_dev(path0, "fill", "none");
+    			attr_dev(path0, "d", "M0 0h24v24H0z");
+    			add_location(path0, file$15, 6, 2, 159);
+    			attr_dev(path1, "d", "M12 13.535V3h8v2h-6v12a4 4 0 1 1-2-3.465zM10 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z");
+    			add_location(path1, file$15, 6, 40, 197);
+    			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
+    			attr_dev(svg, "viewBox", "0 0 24 24");
+    			attr_dev(svg, "style", /*style*/ ctx[0]);
+    			attr_dev(svg, "class", "svelte-1bvabh8");
+    			add_location(svg, file$15, 5, 0, 89);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, svg, anchor);
+    			append_dev(svg, path0);
+    			append_dev(svg, path1);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*style*/ 1) {
+    				attr_dev(svg, "style", /*style*/ ctx[0]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(svg);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$1a.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$1a($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('MusicNoteIcon', slots, []);
     	let { style = '' } = $$props;
     	const writable_props = ['style'];
@@ -16599,13 +16690,13 @@ var app = (function () {
     class MusicNoteIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1b, create_fragment$1b, safe_not_equal, { style: 0 });
+    		init(this, options, instance$1a, create_fragment$1a, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "MusicNoteIcon",
     			options,
-    			id: create_fragment$1b.name
+    			id: create_fragment$1a.name
     		});
     	}
 
@@ -16618,11 +16709,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/RefreshIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/RefreshIcon.svelte generated by Svelte v3.55.1 */
 
     const file$14 = "src/icons/RefreshIcon.svelte";
 
-    function create_fragment$1a(ctx) {
+    function create_fragment$19(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -16664,7 +16755,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1a.name,
+    		id: create_fragment$19.name,
     		type: "component",
     		source: "",
     		ctx
@@ -16673,7 +16764,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1a($$self, $$props, $$invalidate) {
+    function instance$19($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('RefreshIcon', slots, []);
     	let { style = '' } = $$props;
@@ -16703,13 +16794,13 @@ var app = (function () {
     class RefreshIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1a, create_fragment$1a, safe_not_equal, { style: 0 });
+    		init(this, options, instance$19, create_fragment$19, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "RefreshIcon",
     			options,
-    			id: create_fragment$1a.name
+    			id: create_fragment$19.name
     		});
     	}
 
@@ -16722,10 +16813,10 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/status_bar/Queues.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/status_bar/Queues.svelte generated by Svelte v3.55.1 */
     const file$13 = "src/layouts/status_bar/Queues.svelte";
 
-    function create_fragment$19(ctx) {
+    function create_fragment$18(ctx) {
     	let queue_processes;
     	let art_compress_queue;
     	let imageicon;
@@ -16793,21 +16884,21 @@ var app = (function () {
     			song_update_icon = element("song-update-icon");
     			create_component(refreshicon.$$.fragment);
     			add_location(span0, file$13, 49, 2, 1909);
-    			set_custom_element_data(art_compress_queue, "class", "svelte-1vfduaz");
+    			set_custom_element_data(art_compress_queue, "class", "svelte-1a7pazi");
     			add_location(art_compress_queue, file$13, 47, 1, 1789);
-    			attr_dev(span1, "class", "svelte-1vfduaz");
+    			attr_dev(span1, "class", "svelte-1a7pazi");
     			add_location(span1, file$13, 53, 2, 2093);
     			set_custom_element_data(song_sync_queue_progress, "data-progress", /*currentSongSyncProgress*/ ctx[1]);
-    			set_custom_element_data(song_sync_queue_progress, "class", "svelte-1vfduaz");
+    			set_custom_element_data(song_sync_queue_progress, "class", "svelte-1a7pazi");
     			add_location(song_sync_queue_progress, file$13, 56, 2, 2142);
-    			set_custom_element_data(song_sync_queue, "class", "svelte-1vfduaz");
+    			set_custom_element_data(song_sync_queue, "class", "svelte-1a7pazi");
     			add_location(song_sync_queue, file$13, 51, 1, 1972);
     			set_custom_element_data(song_update_icon, "data-is-song-updating", song_update_icon_data_is_song_updating_value = /*$songSyncQueueProgress*/ ctx[0].isSongUpdating);
-    			set_custom_element_data(song_update_icon, "class", "svelte-1vfduaz");
+    			set_custom_element_data(song_update_icon, "class", "svelte-1a7pazi");
     			add_location(song_update_icon, file$13, 59, 2, 2282);
-    			set_custom_element_data(song_update, "class", "svelte-1vfduaz");
+    			set_custom_element_data(song_update, "class", "svelte-1a7pazi");
     			add_location(song_update, file$13, 58, 1, 2232);
-    			set_custom_element_data(queue_processes, "class", "svelte-1vfduaz");
+    			set_custom_element_data(queue_processes, "class", "svelte-1a7pazi");
     			add_location(queue_processes, file$13, 46, 0, 1770);
     		},
     		l: function claim(nodes) {
@@ -16877,7 +16968,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$19.name,
+    		id: create_fragment$18.name,
     		type: "component",
     		source: "",
     		ctx
@@ -16886,7 +16977,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$19($$self, $$props, $$invalidate) {
+    function instance$18($$self, $$props, $$invalidate) {
     	let $songSyncQueueProgress;
     	let $artCompressQueueLength;
     	validate_store(songSyncQueueProgress, 'songSyncQueueProgress');
@@ -16991,22 +17082,22 @@ var app = (function () {
     class Queues extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$19, create_fragment$19, safe_not_equal, {});
+    		init(this, options, instance$18, create_fragment$18, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Queues",
     			options,
-    			id: create_fragment$19.name
+    			id: create_fragment$18.name
     		});
     	}
     }
 
-    /* src/icons/RepeatIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/RepeatIcon.svelte generated by Svelte v3.55.1 */
 
     const file$12 = "src/icons/RepeatIcon.svelte";
 
-    function create_fragment$18(ctx) {
+    function create_fragment$17(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -17024,113 +17115,8 @@ var app = (function () {
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "viewBox", "0 0 24 24");
     			attr_dev(svg, "style", /*style*/ ctx[0]);
-    			attr_dev(svg, "class", "svelte-1yxkwx0");
+    			attr_dev(svg, "class", "svelte-13y9o3s");
     			add_location(svg, file$12, 5, 0, 89);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, svg, anchor);
-    			append_dev(svg, path0);
-    			append_dev(svg, path1);
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*style*/ 1) {
-    				attr_dev(svg, "style", /*style*/ ctx[0]);
-    			}
-    		},
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(svg);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$18.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$18($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('RepeatIcon', slots, []);
-    	let { style = '' } = $$props;
-    	const writable_props = ['style'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<RepeatIcon> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
-    	};
-
-    	$$self.$capture_state = () => ({ style });
-
-    	$$self.$inject_state = $$props => {
-    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [style];
-    }
-
-    class RepeatIcon extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$18, create_fragment$18, safe_not_equal, { style: 0 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "RepeatIcon",
-    			options,
-    			id: create_fragment$18.name
-    		});
-    	}
-
-    	get style() {
-    		throw new Error("<RepeatIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set style(value) {
-    		throw new Error("<RepeatIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-    }
-
-    /* src/icons/RepeatOneIcon.svelte generated by Svelte v3.49.0 */
-
-    const file$11 = "src/icons/RepeatOneIcon.svelte";
-
-    function create_fragment$17(ctx) {
-    	let svg;
-    	let path0;
-    	let path1;
-
-    	const block = {
-    		c: function create() {
-    			svg = svg_element("svg");
-    			path0 = svg_element("path");
-    			path1 = svg_element("path");
-    			attr_dev(path0, "fill", "none");
-    			attr_dev(path0, "d", "M0 0h24v24H0z");
-    			add_location(path0, file$11, 6, 2, 159);
-    			attr_dev(path1, "d", "M8 20v1.932a.5.5 0 0 1-.82.385l-4.12-3.433A.5.5 0 0 1 3.382 18H18a2 2 0 0 0 2-2V8h2v8a4 4 0 0 1-4 4H8zm8-17.932a.5.5 0 0 1 .82-.385l4.12 3.433a.5.5 0 0 1-.321.884H6a2 2 0 0 0-2 2v8H2V8a4 4 0 0 1 4-4h10V2.068zM11 8h2v8h-2v-6H9V9l2-1z");
-    			add_location(path1, file$11, 6, 40, 197);
-    			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
-    			attr_dev(svg, "viewBox", "0 0 24 24");
-    			attr_dev(svg, "style", /*style*/ ctx[0]);
-    			attr_dev(svg, "class", "svelte-1yxkwx0");
-    			add_location(svg, file$11, 5, 0, 89);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17165,12 +17151,12 @@ var app = (function () {
 
     function instance$17($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('RepeatOneIcon', slots, []);
+    	validate_slots('RepeatIcon', slots, []);
     	let { style = '' } = $$props;
     	const writable_props = ['style'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<RepeatOneIcon> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<RepeatIcon> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
@@ -17190,31 +17176,31 @@ var app = (function () {
     	return [style];
     }
 
-    class RepeatOneIcon extends SvelteComponentDev {
+    class RepeatIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
     		init(this, options, instance$17, create_fragment$17, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "RepeatOneIcon",
+    			tagName: "RepeatIcon",
     			options,
     			id: create_fragment$17.name
     		});
     	}
 
     	get style() {
-    		throw new Error("<RepeatOneIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<RepeatIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set style(value) {
-    		throw new Error("<RepeatOneIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<RepeatIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
-    /* src/icons/ShuffleIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/RepeatOneIcon.svelte generated by Svelte v3.55.1 */
 
-    const file$10 = "src/icons/ShuffleIcon.svelte";
+    const file$11 = "src/icons/RepeatOneIcon.svelte";
 
     function create_fragment$16(ctx) {
     	let svg;
@@ -17228,14 +17214,14 @@ var app = (function () {
     			path1 = svg_element("path");
     			attr_dev(path0, "fill", "none");
     			attr_dev(path0, "d", "M0 0h24v24H0z");
-    			add_location(path0, file$10, 6, 2, 159);
-    			attr_dev(path1, "d", "M18 17.883V16l5 3-5 3v-2.09a9 9 0 0 1-6.997-5.365L11 14.54l-.003.006A9 9 0 0 1 2.725 20H2v-2h.725a7 7 0 0 0 6.434-4.243L9.912 12l-.753-1.757A7 7 0 0 0 2.725 6H2V4h.725a9 9 0 0 1 8.272 5.455L11 9.46l.003-.006A9 9 0 0 1 18 4.09V2l5 3-5 3V6.117a7 7 0 0 0-5.159 4.126L12.088 12l.753 1.757A7 7 0 0 0 18 17.883z");
-    			add_location(path1, file$10, 6, 40, 197);
+    			add_location(path0, file$11, 6, 2, 159);
+    			attr_dev(path1, "d", "M8 20v1.932a.5.5 0 0 1-.82.385l-4.12-3.433A.5.5 0 0 1 3.382 18H18a2 2 0 0 0 2-2V8h2v8a4 4 0 0 1-4 4H8zm8-17.932a.5.5 0 0 1 .82-.385l4.12 3.433a.5.5 0 0 1-.321.884H6a2 2 0 0 0-2 2v8H2V8a4 4 0 0 1 4-4h10V2.068zM11 8h2v8h-2v-6H9V9l2-1z");
+    			add_location(path1, file$11, 6, 40, 197);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "viewBox", "0 0 24 24");
     			attr_dev(svg, "style", /*style*/ ctx[0]);
-    			attr_dev(svg, "class", "svelte-1yxkwx0");
-    			add_location(svg, file$10, 5, 0, 89);
+    			attr_dev(svg, "class", "svelte-13y9o3s");
+    			add_location(svg, file$11, 5, 0, 89);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17270,6 +17256,111 @@ var app = (function () {
 
     function instance$16($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('RepeatOneIcon', slots, []);
+    	let { style = '' } = $$props;
+    	const writable_props = ['style'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<RepeatOneIcon> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
+    	};
+
+    	$$self.$capture_state = () => ({ style });
+
+    	$$self.$inject_state = $$props => {
+    		if ('style' in $$props) $$invalidate(0, style = $$props.style);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [style];
+    }
+
+    class RepeatOneIcon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$16, create_fragment$16, safe_not_equal, { style: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "RepeatOneIcon",
+    			options,
+    			id: create_fragment$16.name
+    		});
+    	}
+
+    	get style() {
+    		throw new Error("<RepeatOneIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set style(value) {
+    		throw new Error("<RepeatOneIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/icons/ShuffleIcon.svelte generated by Svelte v3.55.1 */
+
+    const file$10 = "src/icons/ShuffleIcon.svelte";
+
+    function create_fragment$15(ctx) {
+    	let svg;
+    	let path0;
+    	let path1;
+
+    	const block = {
+    		c: function create() {
+    			svg = svg_element("svg");
+    			path0 = svg_element("path");
+    			path1 = svg_element("path");
+    			attr_dev(path0, "fill", "none");
+    			attr_dev(path0, "d", "M0 0h24v24H0z");
+    			add_location(path0, file$10, 6, 2, 159);
+    			attr_dev(path1, "d", "M18 17.883V16l5 3-5 3v-2.09a9 9 0 0 1-6.997-5.365L11 14.54l-.003.006A9 9 0 0 1 2.725 20H2v-2h.725a7 7 0 0 0 6.434-4.243L9.912 12l-.753-1.757A7 7 0 0 0 2.725 6H2V4h.725a9 9 0 0 1 8.272 5.455L11 9.46l.003-.006A9 9 0 0 1 18 4.09V2l5 3-5 3V6.117a7 7 0 0 0-5.159 4.126L12.088 12l.753 1.757A7 7 0 0 0 18 17.883z");
+    			add_location(path1, file$10, 6, 40, 197);
+    			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
+    			attr_dev(svg, "viewBox", "0 0 24 24");
+    			attr_dev(svg, "style", /*style*/ ctx[0]);
+    			attr_dev(svg, "class", "svelte-13y9o3s");
+    			add_location(svg, file$10, 5, 0, 89);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, svg, anchor);
+    			append_dev(svg, path0);
+    			append_dev(svg, path1);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*style*/ 1) {
+    				attr_dev(svg, "style", /*style*/ ctx[0]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(svg);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$15.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$15($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ShuffleIcon', slots, []);
     	let { style = '' } = $$props;
     	const writable_props = ['style'];
@@ -17298,13 +17389,13 @@ var app = (function () {
     class ShuffleIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$16, create_fragment$16, safe_not_equal, { style: 0 });
+    		init(this, options, instance$15, create_fragment$15, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ShuffleIcon",
     			options,
-    			id: create_fragment$16.name
+    			id: create_fragment$15.name
     		});
     	}
 
@@ -17317,11 +17408,11 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/status_bar/PlaybackOptions.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/status_bar/PlaybackOptions.svelte generated by Svelte v3.55.1 */
 
     const file$$ = "src/layouts/status_bar/PlaybackOptions.svelte";
 
-    function create_fragment$15(ctx) {
+    function create_fragment$14(ctx) {
     	let playback_options;
     	let option_icon0;
     	let shuffleicon;
@@ -17373,16 +17464,16 @@ var app = (function () {
     			t1 = space();
     			option_icon2 = element("option-icon");
     			create_component(repeatoneicon.$$.fragment);
-    			set_custom_element_data(option_icon0, "class", "shuffle svelte-o32u4f");
+    			set_custom_element_data(option_icon0, "class", "shuffle svelte-13cka6b");
     			set_custom_element_data(option_icon0, "data-is-active", /*$isSongShuffleEnabledStore*/ ctx[0]);
     			add_location(option_icon0, file$$, 31, 1, 1484);
     			set_custom_element_data(option_icon1, "data-is-active", /*$isPlaybackRepeatEnabledStore*/ ctx[1]);
-    			set_custom_element_data(option_icon1, "class", "svelte-o32u4f");
+    			set_custom_element_data(option_icon1, "class", "svelte-13cka6b");
     			add_location(option_icon1, file$$, 35, 1, 1697);
     			set_custom_element_data(option_icon2, "data-is-active", /*$isSongRepeatEnabledStore*/ ctx[2]);
-    			set_custom_element_data(option_icon2, "class", "svelte-o32u4f");
+    			set_custom_element_data(option_icon2, "class", "svelte-13cka6b");
     			add_location(option_icon2, file$$, 42, 1, 1987);
-    			set_custom_element_data(playback_options, "class", "svelte-o32u4f");
+    			set_custom_element_data(playback_options, "class", "svelte-13cka6b");
     			add_location(playback_options, file$$, 30, 0, 1464);
     		},
     		l: function claim(nodes) {
@@ -17471,7 +17562,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$15.name,
+    		id: create_fragment$14.name,
     		type: "component",
     		source: "",
     		ctx
@@ -17480,7 +17571,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$15($$self, $$props, $$invalidate) {
+    function instance$14($$self, $$props, $$invalidate) {
     	let $isSongShuffleEnabledStore;
     	let $config;
     	let $playbackStore;
@@ -17575,18 +17666,18 @@ var app = (function () {
     class PlaybackOptions extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$15, create_fragment$15, safe_not_equal, {});
+    		init(this, options, instance$14, create_fragment$14, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlaybackOptions",
     			options,
-    			id: create_fragment$15.name
+    			id: create_fragment$14.name
     		});
     	}
     }
 
-    /* src/layouts/status_bar/!StatusBar.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/status_bar/!StatusBar.svelte generated by Svelte v3.55.1 */
     const file$_ = "src/layouts/status_bar/!StatusBar.svelte";
 
     // (32:2) {#if currentSong?.Title !== ''}
@@ -17652,7 +17743,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$14(ctx) {
+    function create_fragment$13(ctx) {
     	let statusbar_svlt;
     	let queues;
     	let t0;
@@ -17678,9 +17769,9 @@ var app = (function () {
     			create_component(albuminfo.$$.fragment);
     			t2 = space();
     			create_component(playbackoptions.$$.fragment);
-    			set_custom_element_data(song_info, "class", "svelte-1khigyy");
+    			set_custom_element_data(song_info, "class", "svelte-13d9qly");
     			add_location(song_info, file$_, 30, 1, 946);
-    			set_custom_element_data(statusbar_svlt, "class", "svelte-1khigyy");
+    			set_custom_element_data(statusbar_svlt, "class", "svelte-13d9qly");
     			add_location(statusbar_svlt, file$_, 28, 0, 916);
     		},
     		l: function claim(nodes) {
@@ -17736,7 +17827,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$14.name,
+    		id: create_fragment$13.name,
     		type: "component",
     		source: "",
     		ctx
@@ -17745,7 +17836,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$14($$self, $$props, $$invalidate) {
+    function instance$13($$self, $$props, $$invalidate) {
     	let $playingSongStore;
     	validate_store(playingSongStore, 'playingSongStore');
     	component_subscribe($$self, playingSongStore, $$value => $$invalidate(1, $playingSongStore = $$value));
@@ -17808,13 +17899,13 @@ var app = (function () {
     class StatusBar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$14, create_fragment$14, safe_not_equal, {});
+    		init(this, options, instance$13, create_fragment$13, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "StatusBar",
     			options,
-    			id: create_fragment$14.name
+    			id: create_fragment$13.name
     		});
     	}
     }
@@ -17924,7 +18015,7 @@ var app = (function () {
         return groups;
     }
 
-    /* src/components/Album.svelte generated by Svelte v3.49.0 */
+    /* src/components/Album.svelte generated by Svelte v3.55.1 */
     const file$Z = "src/components/Album.svelte";
 
     // (29:2) {:else}
@@ -17934,7 +18025,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			album_artist = element("album-artist");
-    			set_custom_element_data(album_artist, "class", "svelte-m1enn7");
+    			set_custom_element_data(album_artist, "class", "svelte-q7o433");
     			add_location(album_artist, file$Z, 29, 3, 945);
     		},
     		m: function mount(target, anchor) {
@@ -17967,7 +18058,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-m1enn7");
+    			set_custom_element_data(album_artist, "class", "svelte-q7o433");
     			add_location(album_artist, file$Z, 27, 3, 867);
     		},
     		m: function mount(target, anchor) {
@@ -18003,7 +18094,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			t = text(t_value);
-    			set_custom_element_data(album_artist, "class", "svelte-m1enn7");
+    			set_custom_element_data(album_artist, "class", "svelte-q7o433");
     			add_location(album_artist, file$Z, 25, 3, 751);
     		},
     		m: function mount(target, anchor) {
@@ -18029,7 +18120,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$13(ctx) {
+    function create_fragment$12(ctx) {
     	let album_1;
     	let albumart;
     	let t0;
@@ -18073,17 +18164,17 @@ var app = (function () {
     			t2 = text(t2_value);
     			t3 = space();
     			if_block.c();
-    			set_custom_element_data(overlay_gradient, "class", "svelte-m1enn7");
+    			set_custom_element_data(overlay_gradient, "class", "svelte-q7o433");
     			add_location(overlay_gradient, file$Z, 19, 1, 616);
-    			set_custom_element_data(album_name, "class", "svelte-m1enn7");
+    			set_custom_element_data(album_name, "class", "svelte-q7o433");
     			add_location(album_name, file$Z, 22, 2, 657);
-    			set_custom_element_data(album_details, "class", "svelte-m1enn7");
+    			set_custom_element_data(album_details, "class", "svelte-q7o433");
     			add_location(album_details, file$Z, 21, 1, 639);
     			attr_dev(album_1, "rootdir", album_1_rootdir_value = /*album*/ ctx[0].RootDir);
 
     			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbumDir*/ ctx[1] === /*album*/ ctx[0]?.RootDir
     			? 'selected'
-    			: '') + " svelte-m1enn7"));
+    			: '') + " svelte-q7o433"));
 
     			add_location(album_1, file$Z, 16, 0, 435);
     		},
@@ -18127,7 +18218,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$selectedAlbumDir, album*/ 3 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty(/*$selectedAlbumDir*/ ctx[1] === /*album*/ ctx[0]?.RootDir
     			? 'selected'
-    			: '') + " svelte-m1enn7"))) {
+    			: '') + " svelte-q7o433"))) {
     				attr_dev(album_1, "class", album_1_class_value);
     			}
     		},
@@ -18149,7 +18240,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$13.name,
+    		id: create_fragment$12.name,
     		type: "component",
     		source: "",
     		ctx
@@ -18158,7 +18249,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$13($$self, $$props, $$invalidate) {
+    function instance$12($$self, $$props, $$invalidate) {
     	let $selectedAlbumDir;
     	validate_store(selectedAlbumDir, 'selectedAlbumDir');
     	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(1, $selectedAlbumDir = $$value));
@@ -18174,6 +18265,12 @@ var app = (function () {
     	// if (album.ID === lastPlayedAlbumId) {
     	// 	setTimeout(() => {
     	// 		scrollToAlbumFn(album.ID)
+
+    	$$self.$$.on_mount.push(function () {
+    		if (album === undefined && !('album' in $$props || $$self.$$.bound[$$self.$$.props['album']])) {
+    			console.warn("<Album> was created without expected prop 'album'");
+    		}
+    	});
 
     	const writable_props = ['album'];
 
@@ -18211,21 +18308,14 @@ var app = (function () {
     class Album extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$13, create_fragment$13, safe_not_equal, { album: 0 });
+    		init(this, options, instance$12, create_fragment$12, safe_not_equal, { album: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Album",
     			options,
-    			id: create_fragment$13.name
+    			id: create_fragment$12.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*album*/ ctx[0] === undefined && !('album' in props)) {
-    			console.warn("<Album> was created without expected prop 'album'");
-    		}
     	}
 
     	get album() {
@@ -18304,7 +18394,7 @@ var app = (function () {
         return [];
     }
 
-    /* src/layouts/library/ArtGrid.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/ArtGrid.svelte generated by Svelte v3.55.1 */
     const file$Y = "src/layouts/library/ArtGrid.svelte";
 
     function get_each_context$d(ctx, list, i) {
@@ -18369,7 +18459,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$12(ctx) {
+    function create_fragment$11(ctx) {
     	let art_grid_svlt;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -18393,7 +18483,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(art_grid_svlt, "class", "svelte-4dveov");
+    			set_custom_element_data(art_grid_svlt, "class", "svelte-1brq1yb");
     			add_location(art_grid_svlt, file$Y, 43, 0, 1729);
     		},
     		l: function claim(nodes) {
@@ -18445,7 +18535,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$12.name,
+    		id: create_fragment$11.name,
     		type: "component",
     		source: "",
     		ctx
@@ -18454,7 +18544,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$12($$self, $$props, $$invalidate) {
+    function instance$11($$self, $$props, $$invalidate) {
     	let $config;
     	let $dbSongsStore;
     	validate_store(config, 'config');
@@ -18550,13 +18640,13 @@ var app = (function () {
     class ArtGrid extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$12, create_fragment$12, safe_not_equal, {});
+    		init(this, options, instance$11, create_fragment$11, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ArtGrid",
     			options,
-    			id: create_fragment$12.name
+    			id: create_fragment$11.name
     		});
     	}
     }
@@ -18564,10 +18654,10 @@ var app = (function () {
     //TODO Change back to appearance
     let selectedConfigOptionName = writable('Library');
 
-    /* src/layouts/library/NoSong.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/NoSong.svelte generated by Svelte v3.55.1 */
     const file$X = "src/layouts/library/NoSong.svelte";
 
-    function create_fragment$11(ctx) {
+    function create_fragment$10(ctx) {
     	let no_song_svlt;
     	let p;
     	let t1;
@@ -18583,11 +18673,11 @@ var app = (function () {
     			t1 = space();
     			button = element("button");
     			button.textContent = "Click here to add songs";
-    			attr_dev(p, "class", "svelte-ybhhgv");
+    			attr_dev(p, "class", "svelte-sggiir");
     			add_location(p, file$X, 9, 1, 276);
-    			attr_dev(button, "class", "svelte-ybhhgv");
+    			attr_dev(button, "class", "svelte-sggiir");
     			add_location(button, file$X, 10, 1, 300);
-    			set_custom_element_data(no_song_svlt, "class", "svelte-ybhhgv");
+    			set_custom_element_data(no_song_svlt, "class", "svelte-sggiir");
     			add_location(no_song_svlt, file$X, 8, 0, 260);
     		},
     		l: function claim(nodes) {
@@ -18616,7 +18706,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$11.name,
+    		id: create_fragment$10.name,
     		type: "component",
     		source: "",
     		ctx
@@ -18625,7 +18715,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$11($$self, $$props, $$invalidate) {
+    function instance$10($$self, $$props, $$invalidate) {
     	let $layoutToShow;
     	let $selectedConfigOptionName;
     	validate_store(layoutToShow, 'layoutToShow');
@@ -18662,21 +18752,21 @@ var app = (function () {
     class NoSong extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$11, create_fragment$11, safe_not_equal, {});
+    		init(this, options, instance$10, create_fragment$10, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "NoSong",
     			options,
-    			id: create_fragment$11.name
+    			id: create_fragment$10.name
     		});
     	}
     }
 
-    /* src/components/Star.svelte generated by Svelte v3.49.0 */
+    /* src/components/Star.svelte generated by Svelte v3.55.1 */
     const file$W = "src/components/Star.svelte";
 
-    function create_fragment$10(ctx) {
+    function create_fragment$$(ctx) {
     	let stars;
     	let img0;
     	let img0_class_value;
@@ -18695,15 +18785,15 @@ var app = (function () {
     			img0 = element("img");
     			t = space();
     			img1 = element("img");
-    			attr_dev(img0, "class", img0_class_value = "delete-star " + /*klass*/ ctx[0] + " starFilter" + " svelte-1k3f6xu");
+    			attr_dev(img0, "class", img0_class_value = "delete-star " + /*klass*/ ctx[0] + " starFilter" + " svelte-umysnq");
     			if (!src_url_equal(img0.src, img0_src_value = `assets/img/star/star-delete.svg`)) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
     			add_location(img0, file$W, 42, 1, 1272);
-    			attr_dev(img1, "class", img1_class_value = "star starFilter " + /*klass*/ ctx[0] + " svelte-1k3f6xu");
+    			attr_dev(img1, "class", img1_class_value = "star starFilter " + /*klass*/ ctx[0] + " svelte-umysnq");
     			if (!src_url_equal(img1.src, img1_src_value = `assets/img/star/star-${/*starRating*/ ctx[1]}.svg`)) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
     			add_location(img1, file$W, 57, 1, 1779);
-    			attr_dev(stars, "class", stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-1k3f6xu"));
+    			attr_dev(stars, "class", stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-umysnq"));
     			add_location(stars, file$W, 41, 0, 1186);
     		},
     		l: function claim(nodes) {
@@ -18739,11 +18829,11 @@ var app = (function () {
     		p: function update(new_ctx, [dirty]) {
     			ctx = new_ctx;
 
-    			if (dirty & /*klass*/ 1 && img0_class_value !== (img0_class_value = "delete-star " + /*klass*/ ctx[0] + " starFilter" + " svelte-1k3f6xu")) {
+    			if (dirty & /*klass*/ 1 && img0_class_value !== (img0_class_value = "delete-star " + /*klass*/ ctx[0] + " starFilter" + " svelte-umysnq")) {
     				attr_dev(img0, "class", img0_class_value);
     			}
 
-    			if (dirty & /*klass*/ 1 && img1_class_value !== (img1_class_value = "star starFilter " + /*klass*/ ctx[0] + " svelte-1k3f6xu")) {
+    			if (dirty & /*klass*/ 1 && img1_class_value !== (img1_class_value = "star starFilter " + /*klass*/ ctx[0] + " svelte-umysnq")) {
     				attr_dev(img1, "class", img1_class_value);
     			}
 
@@ -18751,7 +18841,7 @@ var app = (function () {
     				attr_dev(img1, "src", img1_src_value);
     			}
 
-    			if (dirty & /*klass*/ 1 && stars_class_value !== (stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-1k3f6xu"))) {
+    			if (dirty & /*klass*/ 1 && stars_class_value !== (stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-umysnq"))) {
     				attr_dev(stars, "class", stars_class_value);
     			}
     		},
@@ -18766,7 +18856,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$10.name,
+    		id: create_fragment$$.name,
     		type: "component",
     		source: "",
     		ctx
@@ -18775,7 +18865,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$10($$self, $$props, $$invalidate) {
+    function instance$$($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Star', slots, []);
     	const dispatch = createEventDispatcher();
@@ -18819,6 +18909,12 @@ var app = (function () {
 
     		$$invalidate(1, starRating = starValue);
     	}
+
+    	$$self.$$.on_mount.push(function () {
+    		if (hook === undefined && !('hook' in $$props || $$self.$$.bound[$$self.$$.props['hook']])) {
+    			console.warn("<Star> was created without expected prop 'hook'");
+    		}
+    	});
 
     	const writable_props = ['songRating', 'hook', 'klass'];
 
@@ -18891,21 +18987,14 @@ var app = (function () {
     class Star extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$10, create_fragment$10, safe_not_equal, { songRating: 5, hook: 6, klass: 0 });
+    		init(this, options, instance$$, create_fragment$$, safe_not_equal, { songRating: 5, hook: 6, klass: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Star",
     			options,
-    			id: create_fragment$10.name
+    			id: create_fragment$$.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*hook*/ ctx[6] === undefined && !('hook' in props)) {
-    			console.warn("<Star> was created without expected prop 'hook'");
-    		}
     	}
 
     	get songRating() {
@@ -18933,7 +19022,7 @@ var app = (function () {
     	}
     }
 
-    /* src/components/SongTag.svelte generated by Svelte v3.49.0 */
+    /* src/components/SongTag.svelte generated by Svelte v3.55.1 */
     const file$V = "src/components/SongTag.svelte";
 
     // (62:0) {:else}
@@ -19000,10 +19089,10 @@ var app = (function () {
     		c: function create() {
     			span = element("span");
     			t = text(t_value);
-    			attr_dev(span, "class", span_class_value = "" + (null_to_empty(/*tagName*/ ctx[1]) + " svelte-1787zh1"));
+    			attr_dev(span, "class", span_class_value = "" + (null_to_empty(/*tagName*/ ctx[1]) + " svelte-zvxxdt"));
     			attr_dev(span, "data-tippy-content", /*originalTagValue*/ ctx[3]);
     			set_style(span, "text-align", /*align*/ ctx[0]);
-    			add_location(span, file$V, 60, 1, 1772);
+    			add_location(span, file$V, 60, 1, 1811);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -19012,7 +19101,7 @@ var app = (function () {
     		p: function update(ctx, dirty) {
     			if (dirty & /*tagName, tagValue*/ 6 && t_value !== (t_value = /*parseTag*/ ctx[5](/*tagName*/ ctx[1], /*tagValue*/ ctx[2]) + "")) set_data_dev(t, t_value);
 
-    			if (dirty & /*tagName*/ 2 && span_class_value !== (span_class_value = "" + (null_to_empty(/*tagName*/ ctx[1]) + " svelte-1787zh1"))) {
+    			if (dirty & /*tagName*/ 2 && span_class_value !== (span_class_value = "" + (null_to_empty(/*tagName*/ ctx[1]) + " svelte-zvxxdt"))) {
     				attr_dev(span, "class", span_class_value);
     			}
 
@@ -19042,7 +19131,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$$(ctx) {
+    function create_fragment$_(ctx) {
     	let current_block_type_index;
     	let if_block;
     	let if_block_anchor;
@@ -19115,7 +19204,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$$.name,
+    		id: create_fragment$_.name,
     		type: "component",
     		source: "",
     		ctx
@@ -19133,7 +19222,7 @@ var app = (function () {
     	return `${value[0]}.${value[1].substring(0, 2)}`;
     }
 
-    function instance$$($$self, $$props, $$invalidate) {
+    function instance$_($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SongTag', slots, []);
     	let { align } = $$props;
@@ -19165,6 +19254,20 @@ var app = (function () {
     		return tagValue;
     	}
 
+    	$$self.$$.on_mount.push(function () {
+    		if (align === undefined && !('align' in $$props || $$self.$$.bound[$$self.$$.props['align']])) {
+    			console.warn("<SongTag> was created without expected prop 'align'");
+    		}
+
+    		if (tagName === undefined && !('tagName' in $$props || $$self.$$.bound[$$self.$$.props['tagName']])) {
+    			console.warn("<SongTag> was created without expected prop 'tagName'");
+    		}
+
+    		if (tagValue === undefined && !('tagValue' in $$props || $$self.$$.bound[$$self.$$.props['tagValue']])) {
+    			console.warn("<SongTag> was created without expected prop 'tagValue'");
+    		}
+    	});
+
     	const writable_props = ['align', 'tagName', 'tagValue'];
 
     	Object.keys($$props).forEach(key => {
@@ -19181,8 +19284,11 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		createEventDispatcher,
+    		onMount,
     		tippy,
+    		generateId,
     		parseDuration,
+    		tippyService,
     		defaultTippyOptions,
     		Star,
     		align,
@@ -19221,29 +19327,14 @@ var app = (function () {
     class SongTag extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$$, create_fragment$$, safe_not_equal, { align: 0, tagName: 1, tagValue: 2 });
+    		init(this, options, instance$_, create_fragment$_, safe_not_equal, { align: 0, tagName: 1, tagValue: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongTag",
     			options,
-    			id: create_fragment$$.name
+    			id: create_fragment$_.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*align*/ ctx[0] === undefined && !('align' in props)) {
-    			console.warn("<SongTag> was created without expected prop 'align'");
-    		}
-
-    		if (/*tagName*/ ctx[1] === undefined && !('tagName' in props)) {
-    			console.warn("<SongTag> was created without expected prop 'tagName'");
-    		}
-
-    		if (/*tagValue*/ ctx[2] === undefined && !('tagValue' in props)) {
-    			console.warn("<SongTag> was created without expected prop 'tagValue'");
-    		}
     	}
 
     	get align() {
@@ -19288,7 +19379,7 @@ var app = (function () {
         return gridStyle;
     }
 
-    /* src/components/SongListItem.svelte generated by Svelte v3.49.0 */
+    /* src/components/SongListItem.svelte generated by Svelte v3.55.1 */
     const file$U = "src/components/SongListItem.svelte";
 
     function get_each_context$c(ctx, list, i) {
@@ -19573,7 +19664,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$_(ctx) {
+    function create_fragment$Z(ctx) {
     	let song_list_item;
     	let t;
     	let each_blocks = [];
@@ -19611,7 +19702,7 @@ var app = (function () {
     			? 'active'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-1hyuubj");
+    			: '') + " svelte-pabtur");
 
     			add_location(song_list_item, file$U, 58, 0, 2057);
     		},
@@ -19676,7 +19767,7 @@ var app = (function () {
     			? 'active'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-1hyuubj")) {
+    			: '') + " svelte-pabtur")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},
@@ -19711,7 +19802,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$_.name,
+    		id: create_fragment$Z.name,
     		type: "component",
     		source: "",
     		ctx
@@ -19723,7 +19814,7 @@ var app = (function () {
     const func = configTag => configTag.value === 'DynamicArtists';
     const func_1 = configTag => configTag.value === 'Title';
 
-    function instance$_($$self, $$props, $$invalidate) {
+    function instance$Z($$self, $$props, $$invalidate) {
     	let $config;
     	let $songListItemElement;
     	let $playingSongStore;
@@ -19788,6 +19879,16 @@ var app = (function () {
     	function setStar(starChangeEvent) {
     		window.ipc.updateSongs([song], { Rating: starChangeEvent.detail.rating });
     	}
+
+    	$$self.$$.on_mount.push(function () {
+    		if (song === undefined && !('song' in $$props || $$self.$$.bound[$$self.$$.props['song']])) {
+    			console.warn("<SongListItem> was created without expected prop 'song'");
+    		}
+
+    		if (index === undefined && !('index' in $$props || $$self.$$.bound[$$self.$$.props['index']])) {
+    			console.warn("<SongListItem> was created without expected prop 'index'");
+    		}
+    	});
 
     	const writable_props = ['song', 'index'];
 
@@ -19874,25 +19975,14 @@ var app = (function () {
     class SongListItem extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$_, create_fragment$_, safe_not_equal, { song: 0, index: 1 });
+    		init(this, options, instance$Z, create_fragment$Z, safe_not_equal, { song: 0, index: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListItem",
     			options,
-    			id: create_fragment$_.name
+    			id: create_fragment$Z.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*song*/ ctx[0] === undefined && !('song' in props)) {
-    			console.warn("<SongListItem> was created without expected prop 'song'");
-    		}
-
-    		if (/*index*/ ctx[1] === undefined && !('index' in props)) {
-    			console.warn("<SongListItem> was created without expected prop 'index'");
-    		}
     	}
 
     	get song() {
@@ -19975,10 +20065,10 @@ var app = (function () {
             .find(tag => validPaths.includes(tag)); // If the tag name matches the array of valid values.
     }
 
-    /* src/layouts/components/SongListScrollBar.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/components/SongListScrollBar.svelte generated by Svelte v3.55.1 */
     const file$T = "src/layouts/components/SongListScrollBar.svelte";
 
-    function create_fragment$Z(ctx) {
+    function create_fragment$Y(ctx) {
     	let song_list_scroll_bar;
     	let scrollbar_fill;
 
@@ -19986,9 +20076,9 @@ var app = (function () {
     		c: function create() {
     			song_list_scroll_bar = element("song-list-scroll-bar");
     			scrollbar_fill = element("scrollbar-fill");
-    			set_custom_element_data(scrollbar_fill, "class", "svelte-rcr1wd");
+    			set_custom_element_data(scrollbar_fill, "class", "svelte-zvtuk9");
     			add_location(scrollbar_fill, file$T, 64, 1, 3247);
-    			set_custom_element_data(song_list_scroll_bar, "class", "svelte-rcr1wd");
+    			set_custom_element_data(song_list_scroll_bar, "class", "svelte-zvtuk9");
     			add_location(song_list_scroll_bar, file$T, 63, 0, 3223);
     		},
     		l: function claim(nodes) {
@@ -20008,7 +20098,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$Z.name,
+    		id: create_fragment$Y.name,
     		type: "component",
     		source: "",
     		ctx
@@ -20017,7 +20107,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$Z($$self, $$props, $$invalidate) {
+    function instance$Y($$self, $$props, $$invalidate) {
     	let $songListStore;
     	validate_store(songListStore, 'songListStore');
     	component_subscribe($$self, songListStore, $$value => $$invalidate(2, $songListStore = $$value));
@@ -20129,18 +20219,18 @@ var app = (function () {
     class SongListScrollBar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$Z, create_fragment$Z, safe_not_equal, {});
+    		init(this, options, instance$Y, create_fragment$Y, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListScrollBar",
     			options,
-    			id: create_fragment$Z.name
+    			id: create_fragment$Y.name
     		});
     	}
     }
 
-    /* src/layouts/library/SongList.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/SongList.svelte generated by Svelte v3.55.1 */
     const file$S = "src/layouts/library/SongList.svelte";
 
     function get_each_context$b(ctx, list, i) {
@@ -20210,7 +20300,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$Y(ctx) {
+    function create_fragment$X(ctx) {
     	let song_list_svlt;
     	let song_list;
     	let each_blocks = [];
@@ -20245,9 +20335,9 @@ var app = (function () {
 
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
-    			set_custom_element_data(song_list, "class", "svelte-91mkw9");
+    			set_custom_element_data(song_list, "class", "svelte-y11uul");
     			add_location(song_list, file$S, 81, 1, 2701);
-    			set_custom_element_data(song_list_svlt, "class", "svelte-91mkw9");
+    			set_custom_element_data(song_list_svlt, "class", "svelte-y11uul");
     			add_location(song_list_svlt, file$S, 80, 0, 2591);
     		},
     		l: function claim(nodes) {
@@ -20317,7 +20407,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$Y.name,
+    		id: create_fragment$X.name,
     		type: "component",
     		source: "",
     		ctx
@@ -20326,7 +20416,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$Y($$self, $$props, $$invalidate) {
+    function instance$X($$self, $$props, $$invalidate) {
     	let $config;
     	let $songListStore;
     	let $triggerScrollToSongEvent;
@@ -20496,21 +20586,21 @@ var app = (function () {
     class SongList extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$Y, create_fragment$Y, safe_not_equal, {});
+    		init(this, options, instance$X, create_fragment$X, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongList",
     			options,
-    			id: create_fragment$Y.name
+    			id: create_fragment$X.name
     		});
     	}
     }
 
-    /* src/layouts/library/SongListBackground.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/SongListBackground.svelte generated by Svelte v3.55.1 */
     const file$R = "src/layouts/library/SongListBackground.svelte";
 
-    function create_fragment$X(ctx) {
+    function create_fragment$W(ctx) {
     	let song_list_background_svlt;
     	let backdrop;
     	let t;
@@ -20530,9 +20620,9 @@ var app = (function () {
     			backdrop = element("backdrop");
     			t = space();
     			create_component(albumart.$$.fragment);
-    			attr_dev(backdrop, "class", "svelte-fliz45");
+    			attr_dev(backdrop, "class", "svelte-u8vij2");
     			add_location(backdrop, file$R, 5, 1, 175);
-    			set_custom_element_data(song_list_background_svlt, "class", "svelte-fliz45");
+    			set_custom_element_data(song_list_background_svlt, "class", "svelte-u8vij2");
     			add_location(song_list_background_svlt, file$R, 4, 0, 146);
     		},
     		l: function claim(nodes) {
@@ -20567,7 +20657,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$X.name,
+    		id: create_fragment$W.name,
     		type: "component",
     		source: "",
     		ctx
@@ -20576,7 +20666,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$X($$self, $$props, $$invalidate) {
+    function instance$W($$self, $$props, $$invalidate) {
     	let $selectedAlbumDir;
     	validate_store(selectedAlbumDir, 'selectedAlbumDir');
     	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(0, $selectedAlbumDir = $$value));
@@ -20600,13 +20690,13 @@ var app = (function () {
     class SongListBackground extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$X, create_fragment$X, safe_not_equal, {});
+    		init(this, options, instance$W, create_fragment$W, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListBackground",
     			options,
-    			id: create_fragment$X.name
+    			id: create_fragment$W.name
     		});
     	}
     }
@@ -20644,11 +20734,11 @@ var app = (function () {
         return diff;
     }
 
-    /* src/icons/UndoIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/UndoIcon.svelte generated by Svelte v3.55.1 */
 
     const file$Q = "src/icons/UndoIcon.svelte";
 
-    function create_fragment$W(ctx) {
+    function create_fragment$V(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -20666,7 +20756,7 @@ var app = (function () {
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "viewBox", "0 0 24 24");
     			attr_dev(svg, "style", /*style*/ ctx[0]);
-    			attr_dev(svg, "class", "svelte-am54ty");
+    			attr_dev(svg, "class", "svelte-bdc9aq");
     			add_location(svg, file$Q, 5, 0, 89);
     		},
     		l: function claim(nodes) {
@@ -20691,7 +20781,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$W.name,
+    		id: create_fragment$V.name,
     		type: "component",
     		source: "",
     		ctx
@@ -20700,7 +20790,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$W($$self, $$props, $$invalidate) {
+    function instance$V($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('UndoIcon', slots, []);
     	let { style = '' } = $$props;
@@ -20730,13 +20820,13 @@ var app = (function () {
     class UndoIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$W, create_fragment$W, safe_not_equal, { style: 0 });
+    		init(this, options, instance$V, create_fragment$V, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "UndoIcon",
     			options,
-    			id: create_fragment$W.name
+    			id: create_fragment$V.name
     		});
     	}
 
@@ -20749,11 +20839,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/UpdateIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/UpdateIcon.svelte generated by Svelte v3.55.1 */
 
     const file$P = "src/icons/UpdateIcon.svelte";
 
-    function create_fragment$V(ctx) {
+    function create_fragment$U(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -20795,7 +20885,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$V.name,
+    		id: create_fragment$U.name,
     		type: "component",
     		source: "",
     		ctx
@@ -20804,7 +20894,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$V($$self, $$props, $$invalidate) {
+    function instance$U($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('UpdateIcon', slots, []);
     	let { style = '' } = $$props;
@@ -20834,13 +20924,13 @@ var app = (function () {
     class UpdateIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$V, create_fragment$V, safe_not_equal, { style: 0 });
+    		init(this, options, instance$U, create_fragment$U, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "UpdateIcon",
     			options,
-    			id: create_fragment$V.name
+    			id: create_fragment$U.name
     		});
     	}
 
@@ -22687,12 +22777,12 @@ var app = (function () {
         return array.map(item => item[key]).filter((item, index, self) => self.indexOf(item) === index);
     }
 
-    /* src/layouts/library/TagEdit.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/TagEdit.svelte generated by Svelte v3.55.1 */
 
     const { Object: Object_1$1, console: console_1$1 } = globals;
     const file$O = "src/layouts/library/TagEdit.svelte";
 
-    function create_fragment$U(ctx) {
+    function create_fragment$T(ctx) {
     	let tag_edit_svlt;
     	let songs_to_edit;
     	let t0;
@@ -22972,114 +23062,114 @@ var app = (function () {
     			button1 = element("button");
     			create_component(updateicon.$$.fragment);
     			t49 = text("\n\t\t\tUpdate");
-    			set_custom_element_data(songs_to_edit, "class", "svelte-rfjd0d");
-    			add_location(songs_to_edit, file$O, 193, 1, 7915);
-    			set_custom_element_data(tag_name0, "class", "svelte-rfjd0d");
-    			add_location(tag_name0, file$O, 198, 2, 8092);
-    			attr_dev(textarea0, "class", "svelte-rfjd0d");
-    			add_location(textarea0, file$O, 199, 2, 8135);
+    			set_custom_element_data(songs_to_edit, "class", "svelte-vp3oog");
+    			add_location(songs_to_edit, file$O, 193, 1, 7933);
+    			set_custom_element_data(tag_name0, "class", "svelte-vp3oog");
+    			add_location(tag_name0, file$O, 198, 2, 8110);
+    			attr_dev(textarea0, "class", "svelte-vp3oog");
+    			add_location(textarea0, file$O, 199, 2, 8153);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
-    			set_custom_element_data(tag_container0, "class", "svelte-rfjd0d");
-    			add_location(tag_container0, file$O, 197, 1, 8057);
-    			set_custom_element_data(tag_name1, "class", "svelte-rfjd0d");
-    			add_location(tag_name1, file$O, 203, 2, 8234);
-    			attr_dev(textarea1, "class", "svelte-rfjd0d");
-    			add_location(textarea1, file$O, 204, 2, 8277);
+    			set_custom_element_data(tag_container0, "class", "svelte-vp3oog");
+    			add_location(tag_container0, file$O, 197, 1, 8075);
+    			set_custom_element_data(tag_name1, "class", "svelte-vp3oog");
+    			add_location(tag_name1, file$O, 203, 2, 8252);
+    			attr_dev(textarea1, "class", "svelte-vp3oog");
+    			add_location(textarea1, file$O, 204, 2, 8295);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
-    			set_custom_element_data(tag_container1, "class", "svelte-rfjd0d");
-    			add_location(tag_container1, file$O, 202, 1, 8199);
-    			set_custom_element_data(tag_name2, "class", "svelte-rfjd0d");
-    			add_location(tag_name2, file$O, 208, 2, 8395);
-    			attr_dev(textarea2, "class", "svelte-rfjd0d");
-    			add_location(textarea2, file$O, 209, 2, 8440);
+    			set_custom_element_data(tag_container1, "class", "svelte-vp3oog");
+    			add_location(tag_container1, file$O, 202, 1, 8217);
+    			set_custom_element_data(tag_name2, "class", "svelte-vp3oog");
+    			add_location(tag_name2, file$O, 208, 2, 8413);
+    			attr_dev(textarea2, "class", "svelte-vp3oog");
+    			add_location(textarea2, file$O, 209, 2, 8458);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
-    			set_custom_element_data(tag_container2, "class", "svelte-rfjd0d");
-    			add_location(tag_container2, file$O, 207, 1, 8341);
-    			set_custom_element_data(tag_name3, "class", "svelte-rfjd0d");
-    			add_location(tag_name3, file$O, 213, 2, 8563);
-    			attr_dev(textarea3, "class", "svelte-rfjd0d");
-    			add_location(textarea3, file$O, 214, 2, 8607);
+    			set_custom_element_data(tag_container2, "class", "svelte-vp3oog");
+    			add_location(tag_container2, file$O, 207, 1, 8359);
+    			set_custom_element_data(tag_name3, "class", "svelte-vp3oog");
+    			add_location(tag_name3, file$O, 213, 2, 8581);
+    			attr_dev(textarea3, "class", "svelte-vp3oog");
+    			add_location(textarea3, file$O, 214, 2, 8625);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
-    			set_custom_element_data(tag_container3, "class", "svelte-rfjd0d");
-    			add_location(tag_container3, file$O, 212, 1, 8504);
-    			set_custom_element_data(tag_name4, "class", "svelte-rfjd0d");
-    			add_location(tag_name4, file$O, 218, 2, 8712);
-    			attr_dev(textarea4, "class", "svelte-rfjd0d");
-    			add_location(textarea4, file$O, 219, 2, 8756);
+    			set_custom_element_data(tag_container3, "class", "svelte-vp3oog");
+    			add_location(tag_container3, file$O, 212, 1, 8522);
+    			set_custom_element_data(tag_name4, "class", "svelte-vp3oog");
+    			add_location(tag_name4, file$O, 218, 2, 8730);
+    			attr_dev(textarea4, "class", "svelte-vp3oog");
+    			add_location(textarea4, file$O, 219, 2, 8774);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
-    			set_custom_element_data(tag_container4, "class", "svelte-rfjd0d");
-    			add_location(tag_container4, file$O, 217, 1, 8676);
-    			set_custom_element_data(tag_name5, "class", "svelte-rfjd0d");
-    			add_location(tag_name5, file$O, 223, 2, 8862);
-    			attr_dev(textarea5, "class", "svelte-rfjd0d");
-    			add_location(textarea5, file$O, 224, 2, 8912);
+    			set_custom_element_data(tag_container4, "class", "svelte-vp3oog");
+    			add_location(tag_container4, file$O, 217, 1, 8694);
+    			set_custom_element_data(tag_name5, "class", "svelte-vp3oog");
+    			add_location(tag_name5, file$O, 223, 2, 8880);
+    			attr_dev(textarea5, "class", "svelte-vp3oog");
+    			add_location(textarea5, file$O, 224, 2, 8930);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
-    			set_custom_element_data(tag_container5, "class", "svelte-rfjd0d");
-    			add_location(tag_container5, file$O, 222, 1, 8821);
-    			set_custom_element_data(tag_name6, "class", "svelte-rfjd0d");
-    			add_location(tag_name6, file$O, 228, 2, 9017);
-    			attr_dev(textarea6, "class", "svelte-rfjd0d");
-    			add_location(textarea6, file$O, 229, 2, 9060);
+    			set_custom_element_data(tag_container5, "class", "svelte-vp3oog");
+    			add_location(tag_container5, file$O, 222, 1, 8839);
+    			set_custom_element_data(tag_name6, "class", "svelte-vp3oog");
+    			add_location(tag_name6, file$O, 228, 2, 9035);
+    			attr_dev(textarea6, "class", "svelte-vp3oog");
+    			add_location(textarea6, file$O, 229, 2, 9078);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
-    			set_custom_element_data(tag_container6, "class", "svelte-rfjd0d");
-    			add_location(tag_container6, file$O, 227, 1, 8982);
-    			set_custom_element_data(tag_name7, "class", "svelte-rfjd0d");
-    			add_location(tag_name7, file$O, 233, 2, 9162);
-    			attr_dev(textarea7, "class", "svelte-rfjd0d");
-    			add_location(textarea7, file$O, 234, 2, 9208);
+    			set_custom_element_data(tag_container6, "class", "svelte-vp3oog");
+    			add_location(tag_container6, file$O, 227, 1, 9000);
+    			set_custom_element_data(tag_name7, "class", "svelte-vp3oog");
+    			add_location(tag_name7, file$O, 233, 2, 9180);
+    			attr_dev(textarea7, "class", "svelte-vp3oog");
+    			add_location(textarea7, file$O, 234, 2, 9226);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
-    			set_custom_element_data(tag_container7, "class", "svelte-rfjd0d");
-    			add_location(tag_container7, file$O, 232, 1, 9124);
-    			set_custom_element_data(tag_name8, "class", "svelte-rfjd0d");
-    			add_location(tag_name8, file$O, 238, 2, 9312);
-    			attr_dev(textarea8, "class", "svelte-rfjd0d");
-    			add_location(textarea8, file$O, 239, 2, 9357);
+    			set_custom_element_data(tag_container7, "class", "svelte-vp3oog");
+    			add_location(tag_container7, file$O, 232, 1, 9142);
+    			set_custom_element_data(tag_name8, "class", "svelte-vp3oog");
+    			add_location(tag_name8, file$O, 238, 2, 9330);
+    			attr_dev(textarea8, "class", "svelte-vp3oog");
+    			add_location(textarea8, file$O, 239, 2, 9375);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
-    			set_custom_element_data(tag_container8, "class", "svelte-rfjd0d");
-    			add_location(tag_container8, file$O, 237, 1, 9275);
-    			set_custom_element_data(tag_name9, "class", "svelte-rfjd0d");
-    			add_location(tag_name9, file$O, 243, 2, 9481);
-    			attr_dev(textarea9, "class", "svelte-rfjd0d");
-    			add_location(textarea9, file$O, 244, 2, 9523);
+    			set_custom_element_data(tag_container8, "class", "svelte-vp3oog");
+    			add_location(tag_container8, file$O, 237, 1, 9293);
+    			set_custom_element_data(tag_name9, "class", "svelte-vp3oog");
+    			add_location(tag_name9, file$O, 243, 2, 9499);
+    			attr_dev(textarea9, "class", "svelte-vp3oog");
+    			add_location(textarea9, file$O, 244, 2, 9541);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
-    			set_custom_element_data(tag_container9, "class", "svelte-rfjd0d");
-    			add_location(tag_container9, file$O, 242, 1, 9423);
-    			set_custom_element_data(tag_name10, "class", "svelte-rfjd0d");
-    			add_location(tag_name10, file$O, 248, 2, 9650);
-    			attr_dev(textarea10, "class", "svelte-rfjd0d");
-    			add_location(textarea10, file$O, 249, 2, 9693);
+    			set_custom_element_data(tag_container9, "class", "svelte-vp3oog");
+    			add_location(tag_container9, file$O, 242, 1, 9441);
+    			set_custom_element_data(tag_name10, "class", "svelte-vp3oog");
+    			add_location(tag_name10, file$O, 248, 2, 9668);
+    			attr_dev(textarea10, "class", "svelte-vp3oog");
+    			add_location(textarea10, file$O, 249, 2, 9711);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
-    			set_custom_element_data(tag_container10, "class", "svelte-rfjd0d");
-    			add_location(tag_container10, file$O, 247, 1, 9591);
-    			set_custom_element_data(tag_name11, "class", "svelte-rfjd0d");
-    			add_location(tag_name11, file$O, 253, 2, 9819);
-    			attr_dev(textarea11, "class", "svelte-rfjd0d");
-    			add_location(textarea11, file$O, 254, 2, 9860);
+    			set_custom_element_data(tag_container10, "class", "svelte-vp3oog");
+    			add_location(tag_container10, file$O, 247, 1, 9609);
+    			set_custom_element_data(tag_name11, "class", "svelte-vp3oog");
+    			add_location(tag_name11, file$O, 253, 2, 9837);
+    			attr_dev(textarea11, "class", "svelte-vp3oog");
+    			add_location(textarea11, file$O, 254, 2, 9878);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
-    			set_custom_element_data(tag_container11, "class", "svelte-rfjd0d");
-    			add_location(tag_container11, file$O, 252, 1, 9762);
-    			set_custom_element_data(tag_name12, "class", "svelte-rfjd0d");
-    			add_location(tag_name12, file$O, 258, 2, 9963);
+    			set_custom_element_data(tag_container11, "class", "svelte-vp3oog");
+    			add_location(tag_container11, file$O, 252, 1, 9780);
+    			set_custom_element_data(tag_name12, "class", "svelte-vp3oog");
+    			add_location(tag_name12, file$O, 258, 2, 9981);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
-    			set_custom_element_data(tag_container12, "class", "svelte-rfjd0d");
-    			add_location(tag_container12, file$O, 257, 1, 9927);
-    			set_custom_element_data(album_art, "class", "svelte-rfjd0d");
-    			add_location(album_art, file$O, 262, 1, 10143);
+    			set_custom_element_data(tag_container12, "class", "svelte-vp3oog");
+    			add_location(tag_container12, file$O, 257, 1, 9945);
+    			set_custom_element_data(album_art, "class", "svelte-vp3oog");
+    			add_location(album_art, file$O, 262, 1, 10161);
     			attr_dev(button0, "class", "danger");
     			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
-    			add_location(button0, file$O, 267, 2, 10285);
+    			add_location(button0, file$O, 267, 2, 10303);
     			attr_dev(button1, "class", "info");
     			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
-    			add_location(button1, file$O, 271, 2, 10491);
-    			set_custom_element_data(button_container, "class", "svelte-rfjd0d");
-    			add_location(button_container, file$O, 266, 1, 10264);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-rfjd0d");
-    			add_location(tag_edit_svlt, file$O, 192, 0, 7898);
+    			add_location(button1, file$O, 271, 2, 10509);
+    			set_custom_element_data(button_container, "class", "svelte-vp3oog");
+    			add_location(button_container, file$O, 266, 1, 10282);
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-vp3oog");
+    			add_location(tag_edit_svlt, file$O, 192, 0, 7916);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -23366,7 +23456,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$U.name,
+    		id: create_fragment$T.name,
     		type: "component",
     		source: "",
     		ctx
@@ -23404,7 +23494,7 @@ var app = (function () {
     	}
     }
 
-    function instance$U($$self, $$props, $$invalidate) {
+    function instance$T($$self, $$props, $$invalidate) {
     	let $selectedSongsStore;
     	let $songListStore;
     	let $songSyncQueueProgress;
@@ -23680,6 +23770,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		elementMap,
+    		selectedAlbumDir,
     		selectedSongsStore,
     		songListStore,
     		songSyncQueueProgress,
@@ -23774,18 +23865,18 @@ var app = (function () {
     class TagEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$U, create_fragment$U, safe_not_equal, {});
+    		init(this, options, instance$T, create_fragment$T, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagEdit",
     			options,
-    			id: create_fragment$U.name
+    			id: create_fragment$T.name
     		});
     	}
     }
 
-    /* src/layouts/library/TagGroup.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/TagGroup.svelte generated by Svelte v3.55.1 */
 
     const file$N = "src/layouts/library/TagGroup.svelte";
 
@@ -23843,7 +23934,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-dtx1xv"));
+    			: null) + " svelte-1cr4wd3"));
 
     			add_location(group_value, file$N, 54, 4, 1699);
     		},
@@ -23871,7 +23962,7 @@ var app = (function () {
 
     			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-dtx1xv"))) {
+    			: null) + " svelte-1cr4wd3"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
 
@@ -23942,7 +24033,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-dtx1xv"));
+    			: null) + " svelte-1cr4wd3"));
 
     			add_location(group_value, file$N, 61, 5, 1977);
     		},
@@ -23962,7 +24053,7 @@ var app = (function () {
 
     			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-dtx1xv"))) {
+    			: null) + " svelte-1cr4wd3"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
     		},
@@ -24011,10 +24102,10 @@ var app = (function () {
     			t2 = space();
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_name, "class", "svelte-dtx1xv");
+    			set_custom_element_data(group_name, "class", "svelte-1cr4wd3");
     			add_location(group_name, file$N, 51, 3, 1550);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_svlt, "class", "svelte-dtx1xv");
+    			set_custom_element_data(group_svlt, "class", "svelte-1cr4wd3");
     			add_location(group_svlt, file$N, 50, 2, 1515);
     			this.first = group_svlt;
     		},
@@ -24079,7 +24170,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$T(ctx) {
+    function create_fragment$S(ctx) {
     	let tag_group_svlt;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -24102,7 +24193,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(tag_group_svlt, "class", "svelte-dtx1xv");
+    			set_custom_element_data(tag_group_svlt, "class", "svelte-1cr4wd3");
     			add_location(tag_group_svlt, file$N, 48, 0, 1435);
     		},
     		l: function claim(nodes) {
@@ -24136,7 +24227,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$T.name,
+    		id: create_fragment$S.name,
     		type: "component",
     		source: "",
     		ctx
@@ -24145,7 +24236,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$T($$self, $$props, $$invalidate) {
+    function instance$S($$self, $$props, $$invalidate) {
     	let $config;
     	let $selectedGroups;
     	let $triggerGroupingChangeEvent;
@@ -24269,18 +24360,18 @@ var app = (function () {
     class TagGroup extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$T, create_fragment$T, safe_not_equal, {});
+    		init(this, options, instance$S, create_fragment$S, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TagGroup",
     			options,
-    			id: create_fragment$T.name
+    			id: create_fragment$S.name
     		});
     	}
     }
 
-    /* src/layouts/library/!LibraryLayout.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/library/!LibraryLayout.svelte generated by Svelte v3.55.1 */
     const file$M = "src/layouts/library/!LibraryLayout.svelte";
 
     // (22:1) {:else}
@@ -24361,7 +24452,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$S(ctx) {
+    function create_fragment$R(ctx) {
     	let library_layout;
     	let current_block_type_index;
     	let if_block;
@@ -24401,7 +24492,7 @@ var app = (function () {
     			create_component(tagedit.$$.fragment);
     			t3 = space();
     			create_component(songlistbackground.$$.fragment);
-    			set_custom_element_data(library_layout, "class", "layout svelte-ygcc4y");
+    			set_custom_element_data(library_layout, "class", "layout svelte-yxubkm");
     			add_location(library_layout, file$M, 18, 0, 748);
     		},
     		l: function claim(nodes) {
@@ -24472,7 +24563,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$S.name,
+    		id: create_fragment$R.name,
     		type: "component",
     		source: "",
     		ctx
@@ -24481,7 +24572,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$S($$self, $$props, $$invalidate) {
+    function instance$R($$self, $$props, $$invalidate) {
     	let $config;
     	let $dbSongsStore;
     	validate_store(config, 'config');
@@ -24531,159 +24622,20 @@ var app = (function () {
     class LibraryLayout extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$S, create_fragment$S, safe_not_equal, {});
+    		init(this, options, instance$R, create_fragment$R, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LibraryLayout",
     			options,
-    			id: create_fragment$S.name
-    		});
-    	}
-    }
-
-    /* src/components/OptionSection.svelte generated by Svelte v3.49.0 */
-
-    const file$L = "src/components/OptionSection.svelte";
-
-    function create_fragment$R(ctx) {
-    	let section;
-    	let section_title;
-    	let t0;
-    	let t1;
-    	let current;
-    	const default_slot_template = /*#slots*/ ctx[2].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[1], null);
-
-    	const block = {
-    		c: function create() {
-    			section = element("section");
-    			section_title = element("section-title");
-    			t0 = text(/*title*/ ctx[0]);
-    			t1 = space();
-    			if (default_slot) default_slot.c();
-    			set_custom_element_data(section_title, "class", "svelte-kkhm3p");
-    			add_location(section_title, file$L, 4, 1, 74);
-    			attr_dev(section, "id", /*title*/ ctx[0]);
-    			attr_dev(section, "class", "svelte-kkhm3p");
-    			add_location(section, file$L, 3, 0, 52);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, section, anchor);
-    			append_dev(section, section_title);
-    			append_dev(section_title, t0);
-    			append_dev(section, t1);
-
-    			if (default_slot) {
-    				default_slot.m(section, null);
-    			}
-
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*title*/ 1) set_data_dev(t0, /*title*/ ctx[0]);
-
-    			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 2)) {
-    					update_slot_base(
-    						default_slot,
-    						default_slot_template,
-    						ctx,
-    						/*$$scope*/ ctx[1],
-    						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[1])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[1], dirty, null),
-    						null
-    					);
-    				}
-    			}
-
-    			if (!current || dirty & /*title*/ 1) {
-    				attr_dev(section, "id", /*title*/ ctx[0]);
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(default_slot, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(default_slot, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(section);
-    			if (default_slot) default_slot.d(detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$R.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$R($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('OptionSection', slots, ['default']);
-    	let { title = '' } = $$props;
-    	const writable_props = ['title'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<OptionSection> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('title' in $$props) $$invalidate(0, title = $$props.title);
-    		if ('$$scope' in $$props) $$invalidate(1, $$scope = $$props.$$scope);
-    	};
-
-    	$$self.$capture_state = () => ({ title });
-
-    	$$self.$inject_state = $$props => {
-    		if ('title' in $$props) $$invalidate(0, title = $$props.title);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [title, $$scope, slots];
-    }
-
-    class OptionSection extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$R, create_fragment$R, safe_not_equal, { title: 0 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "OptionSection",
-    			options,
     			id: create_fragment$R.name
     		});
     	}
-
-    	get title() {
-    		throw new Error("<OptionSection>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set title(value) {
-    		throw new Error("<OptionSection>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
     }
 
-    /* src/components/OptionSectionCompact.svelte generated by Svelte v3.49.0 */
+    /* src/components/OptionSection.svelte generated by Svelte v3.55.1 */
 
-    const file$K = "src/components/OptionSectionCompact.svelte";
+    const file$L = "src/components/OptionSection.svelte";
 
     function create_fragment$Q(ctx) {
     	let section;
@@ -24701,11 +24653,11 @@ var app = (function () {
     			t0 = text(/*title*/ ctx[0]);
     			t1 = space();
     			if (default_slot) default_slot.c();
-    			set_custom_element_data(section_title, "class", "svelte-180ebqu");
-    			add_location(section_title, file$K, 4, 1, 74);
+    			set_custom_element_data(section_title, "class", "svelte-1l3tc8x");
+    			add_location(section_title, file$L, 4, 1, 74);
     			attr_dev(section, "id", /*title*/ ctx[0]);
-    			attr_dev(section, "class", "svelte-180ebqu");
-    			add_location(section, file$K, 3, 0, 52);
+    			attr_dev(section, "class", "svelte-1l3tc8x");
+    			add_location(section, file$L, 3, 0, 52);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24772,6 +24724,145 @@ var app = (function () {
 
     function instance$Q($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('OptionSection', slots, ['default']);
+    	let { title = '' } = $$props;
+    	const writable_props = ['title'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<OptionSection> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('title' in $$props) $$invalidate(0, title = $$props.title);
+    		if ('$$scope' in $$props) $$invalidate(1, $$scope = $$props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({ title });
+
+    	$$self.$inject_state = $$props => {
+    		if ('title' in $$props) $$invalidate(0, title = $$props.title);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [title, $$scope, slots];
+    }
+
+    class OptionSection extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$Q, create_fragment$Q, safe_not_equal, { title: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "OptionSection",
+    			options,
+    			id: create_fragment$Q.name
+    		});
+    	}
+
+    	get title() {
+    		throw new Error("<OptionSection>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set title(value) {
+    		throw new Error("<OptionSection>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/OptionSectionCompact.svelte generated by Svelte v3.55.1 */
+
+    const file$K = "src/components/OptionSectionCompact.svelte";
+
+    function create_fragment$P(ctx) {
+    	let section;
+    	let section_title;
+    	let t0;
+    	let t1;
+    	let current;
+    	const default_slot_template = /*#slots*/ ctx[2].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[1], null);
+
+    	const block = {
+    		c: function create() {
+    			section = element("section");
+    			section_title = element("section-title");
+    			t0 = text(/*title*/ ctx[0]);
+    			t1 = space();
+    			if (default_slot) default_slot.c();
+    			set_custom_element_data(section_title, "class", "svelte-1g6zqea");
+    			add_location(section_title, file$K, 4, 1, 74);
+    			attr_dev(section, "id", /*title*/ ctx[0]);
+    			attr_dev(section, "class", "svelte-1g6zqea");
+    			add_location(section, file$K, 3, 0, 52);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, section, anchor);
+    			append_dev(section, section_title);
+    			append_dev(section_title, t0);
+    			append_dev(section, t1);
+
+    			if (default_slot) {
+    				default_slot.m(section, null);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (!current || dirty & /*title*/ 1) set_data_dev(t0, /*title*/ ctx[0]);
+
+    			if (default_slot) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 2)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[1],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[1])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[1], dirty, null),
+    						null
+    					);
+    				}
+    			}
+
+    			if (!current || dirty & /*title*/ 1) {
+    				attr_dev(section, "id", /*title*/ ctx[0]);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(section);
+    			if (default_slot) default_slot.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$P.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$P($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('OptionSectionCompact', slots, ['default']);
     	let { title = '' } = $$props;
     	const writable_props = ['title'];
@@ -24801,13 +24892,13 @@ var app = (function () {
     class OptionSectionCompact extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$Q, create_fragment$Q, safe_not_equal, { title: 0 });
+    		init(this, options, instance$P, create_fragment$P, safe_not_equal, { title: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "OptionSectionCompact",
     			options,
-    			id: create_fragment$Q.name
+    			id: create_fragment$P.name
     		});
     	}
 
@@ -24820,11 +24911,11 @@ var app = (function () {
     	}
     }
 
-    /* src/components/InputShiftInfo.svelte generated by Svelte v3.49.0 */
+    /* src/components/InputShiftInfo.svelte generated by Svelte v3.55.1 */
 
     const file$J = "src/components/InputShiftInfo.svelte";
 
-    function create_fragment$P(ctx) {
+    function create_fragment$O(ctx) {
     	let input_steps_info;
     	let t0;
     	let shift_button;
@@ -24837,9 +24928,9 @@ var app = (function () {
     			shift_button = element("shift-button");
     			shift_button.textContent = "⇧ Shift";
     			t2 = text(" to be more accurate");
-    			set_custom_element_data(shift_button, "class", "svelte-1vbbgvl");
+    			set_custom_element_data(shift_button, "class", "svelte-10a13t1");
     			add_location(shift_button, file$J, 0, 23, 23);
-    			set_custom_element_data(input_steps_info, "class", "svelte-1vbbgvl");
+    			set_custom_element_data(input_steps_info, "class", "svelte-10a13t1");
     			add_location(input_steps_info, file$J, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -24861,7 +24952,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$P.name,
+    		id: create_fragment$O.name,
     		type: "component",
     		source: "",
     		ctx
@@ -24870,7 +24961,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$P($$self, $$props) {
+    function instance$O($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('InputShiftInfo', slots, []);
     	const writable_props = [];
@@ -24885,22 +24976,22 @@ var app = (function () {
     class InputShiftInfo extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$P, create_fragment$P, safe_not_equal, {});
+    		init(this, options, instance$O, create_fragment$O, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "InputShiftInfo",
     			options,
-    			id: create_fragment$P.name
+    			id: create_fragment$O.name
     		});
     	}
     }
 
-    /* src/layouts/config/appearance/ColorContrastConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/ColorContrastConfig.svelte generated by Svelte v3.55.1 */
 
     const file$I = "src/layouts/config/appearance/ColorContrastConfig.svelte";
 
-    function create_fragment$O(ctx) {
+    function create_fragment$N(ctx) {
     	let color_contrast_config;
     	let current_contrast_value;
     	let t0;
@@ -24937,15 +25028,15 @@ var app = (function () {
     			t5 = space();
     			current_contrast_sample = element("current-contrast-sample");
     			current_contrast_sample.textContent = "Sample";
-    			set_custom_element_data(current_contrast_value, "class", "svelte-mgmo6v");
+    			set_custom_element_data(current_contrast_value, "class", "svelte-1kl3fww");
     			add_location(current_contrast_value, file$I, 30, 1, 1079);
     			attr_dev(input, "type", "range");
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "21");
     			attr_dev(input, "step", input_step_value = /*$keyPressed*/ ctx[1] === 'Shift' ? 0.1 : 0.5);
-    			attr_dev(input, "class", "svelte-mgmo6v");
+    			attr_dev(input, "class", "svelte-1kl3fww");
     			add_location(input, file$I, 34, 1, 1216);
-    			set_custom_element_data(current_contrast_sample, "class", "svelte-mgmo6v");
+    			set_custom_element_data(current_contrast_sample, "class", "svelte-1kl3fww");
     			add_location(current_contrast_sample, file$I, 45, 1, 1410);
     			add_location(color_contrast_config, file$I, 29, 0, 1054);
     		},
@@ -25011,7 +25102,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$O.name,
+    		id: create_fragment$N.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25020,7 +25111,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$O($$self, $$props, $$invalidate) {
+    function instance$N($$self, $$props, $$invalidate) {
     	let $config;
     	let $albumPlayingDirStore;
     	let $keyPressed;
@@ -25108,22 +25199,22 @@ var app = (function () {
     class ColorContrastConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$O, create_fragment$O, safe_not_equal, {});
+    		init(this, options, instance$N, create_fragment$N, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ColorContrastConfig",
     			options,
-    			id: create_fragment$O.name
+    			id: create_fragment$N.name
     		});
     	}
     }
 
-    /* src/icons/MoonFillIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/MoonFillIcon.svelte generated by Svelte v3.55.1 */
 
     const file$H = "src/icons/MoonFillIcon.svelte";
 
-    function create_fragment$N(ctx) {
+    function create_fragment$M(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -25165,7 +25256,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$N.name,
+    		id: create_fragment$M.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25174,7 +25265,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$N($$self, $$props, $$invalidate) {
+    function instance$M($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('MoonFillIcon', slots, []);
     	let { style = '' } = $$props;
@@ -25204,13 +25295,13 @@ var app = (function () {
     class MoonFillIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$N, create_fragment$N, safe_not_equal, { style: 0 });
+    		init(this, options, instance$M, create_fragment$M, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "MoonFillIcon",
     			options,
-    			id: create_fragment$N.name
+    			id: create_fragment$M.name
     		});
     	}
 
@@ -25223,11 +25314,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/MoonIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/MoonIcon.svelte generated by Svelte v3.55.1 */
 
     const file$G = "src/icons/MoonIcon.svelte";
 
-    function create_fragment$M(ctx) {
+    function create_fragment$L(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -25269,7 +25360,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$M.name,
+    		id: create_fragment$L.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25278,7 +25369,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$M($$self, $$props, $$invalidate) {
+    function instance$L($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('MoonIcon', slots, []);
     	let { style = '' } = $$props;
@@ -25308,13 +25399,13 @@ var app = (function () {
     class MoonIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$M, create_fragment$M, safe_not_equal, { style: 0 });
+    		init(this, options, instance$L, create_fragment$L, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "MoonIcon",
     			options,
-    			id: create_fragment$M.name
+    			id: create_fragment$L.name
     		});
     	}
 
@@ -25327,11 +25418,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/SunFillIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/SunFillIcon.svelte generated by Svelte v3.55.1 */
 
     const file$F = "src/icons/SunFillIcon.svelte";
 
-    function create_fragment$L(ctx) {
+    function create_fragment$K(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -25373,7 +25464,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$L.name,
+    		id: create_fragment$K.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25382,7 +25473,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$L($$self, $$props, $$invalidate) {
+    function instance$K($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SunFillIcon', slots, []);
     	let { style = '' } = $$props;
@@ -25412,13 +25503,13 @@ var app = (function () {
     class SunFillIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$L, create_fragment$L, safe_not_equal, { style: 0 });
+    		init(this, options, instance$K, create_fragment$K, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SunFillIcon",
     			options,
-    			id: create_fragment$L.name
+    			id: create_fragment$K.name
     		});
     	}
 
@@ -25431,11 +25522,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/SunIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/SunIcon.svelte generated by Svelte v3.55.1 */
 
     const file$E = "src/icons/SunIcon.svelte";
 
-    function create_fragment$K(ctx) {
+    function create_fragment$J(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -25477,7 +25568,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$K.name,
+    		id: create_fragment$J.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25486,7 +25577,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$K($$self, $$props, $$invalidate) {
+    function instance$J($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SunIcon', slots, []);
     	let { style = '' } = $$props;
@@ -25516,13 +25607,13 @@ var app = (function () {
     class SunIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$K, create_fragment$K, safe_not_equal, { style: 0 });
+    		init(this, options, instance$J, create_fragment$J, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SunIcon",
     			options,
-    			id: create_fragment$K.name
+    			id: create_fragment$J.name
     		});
     	}
 
@@ -25535,11 +25626,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/SystemFillIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/SystemFillIcon.svelte generated by Svelte v3.55.1 */
 
     const file$D = "src/icons/SystemFillIcon.svelte";
 
-    function create_fragment$J(ctx) {
+    function create_fragment$I(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -25581,7 +25672,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$J.name,
+    		id: create_fragment$I.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25590,7 +25681,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$J($$self, $$props, $$invalidate) {
+    function instance$I($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SystemFillIcon', slots, []);
     	let { style = '' } = $$props;
@@ -25620,13 +25711,13 @@ var app = (function () {
     class SystemFillIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$J, create_fragment$J, safe_not_equal, { style: 0 });
+    		init(this, options, instance$I, create_fragment$I, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SystemFillIcon",
     			options,
-    			id: create_fragment$J.name
+    			id: create_fragment$I.name
     		});
     	}
 
@@ -25639,11 +25730,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/SystemIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/SystemIcon.svelte generated by Svelte v3.55.1 */
 
     const file$C = "src/icons/SystemIcon.svelte";
 
-    function create_fragment$I(ctx) {
+    function create_fragment$H(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -25685,7 +25776,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$I.name,
+    		id: create_fragment$H.name,
     		type: "component",
     		source: "",
     		ctx
@@ -25694,7 +25785,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$I($$self, $$props, $$invalidate) {
+    function instance$H($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SystemIcon', slots, []);
     	let { style = '' } = $$props;
@@ -25724,13 +25815,13 @@ var app = (function () {
     class SystemIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$I, create_fragment$I, safe_not_equal, { style: 0 });
+    		init(this, options, instance$H, create_fragment$H, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SystemIcon",
     			options,
-    			id: create_fragment$I.name
+    			id: create_fragment$H.name
     		});
     	}
 
@@ -25750,10 +25841,10 @@ var app = (function () {
         config.set(mergedConfig);
     }
 
-    /* src/layouts/config/appearance/DayNightThemeConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/DayNightThemeConfig.svelte generated by Svelte v3.55.1 */
     const file$B = "src/layouts/config/appearance/DayNightThemeConfig.svelte";
 
-    function create_fragment$H(ctx) {
+    function create_fragment$G(ctx) {
     	let day_night_theme_config;
     	let theme_section0;
     	let section_icon0;
@@ -25868,9 +25959,9 @@ var app = (function () {
     			t9 = space();
     			theme_name2 = element("theme-name");
     			theme_name2.textContent = "Night";
-    			set_custom_element_data(section_icon0, "class", "svelte-bt7drl");
+    			set_custom_element_data(section_icon0, "class", "svelte-1nl5fq5");
     			add_location(section_icon0, file$B, 24, 2, 956);
-    			set_custom_element_data(theme_name0, "class", "svelte-bt7drl");
+    			set_custom_element_data(theme_name0, "class", "svelte-1nl5fq5");
     			add_location(theme_name0, file$B, 29, 2, 1206);
     			set_custom_element_data(theme_section0, "data-theme", "SystemBased");
 
@@ -25878,11 +25969,11 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			set_custom_element_data(theme_section0, "class", "svelte-bt7drl");
+    			set_custom_element_data(theme_section0, "class", "svelte-1nl5fq5");
     			add_location(theme_section0, file$B, 19, 1, 776);
-    			set_custom_element_data(section_icon1, "class", "svelte-bt7drl");
+    			set_custom_element_data(section_icon1, "class", "svelte-1nl5fq5");
     			add_location(section_icon1, file$B, 36, 2, 1419);
-    			set_custom_element_data(theme_name1, "class", "svelte-bt7drl");
+    			set_custom_element_data(theme_name1, "class", "svelte-1nl5fq5");
     			add_location(theme_name1, file$B, 41, 2, 1647);
     			set_custom_element_data(theme_section1, "data-theme", "Day");
 
@@ -25890,11 +25981,11 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			set_custom_element_data(theme_section1, "class", "svelte-bt7drl");
+    			set_custom_element_data(theme_section1, "class", "svelte-1nl5fq5");
     			add_location(theme_section1, file$B, 31, 1, 1263);
-    			set_custom_element_data(section_icon2, "class", "svelte-bt7drl");
+    			set_custom_element_data(section_icon2, "class", "svelte-1nl5fq5");
     			add_location(section_icon2, file$B, 48, 2, 1857);
-    			set_custom_element_data(theme_name2, "class", "svelte-bt7drl");
+    			set_custom_element_data(theme_name2, "class", "svelte-1nl5fq5");
     			add_location(theme_name2, file$B, 54, 2, 2092);
     			set_custom_element_data(theme_section2, "data-theme", "Night");
 
@@ -25902,9 +25993,9 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			set_custom_element_data(theme_section2, "class", "svelte-bt7drl");
+    			set_custom_element_data(theme_section2, "class", "svelte-1nl5fq5");
     			add_location(theme_section2, file$B, 43, 1, 1695);
-    			set_custom_element_data(day_night_theme_config, "class", "svelte-bt7drl");
+    			set_custom_element_data(day_night_theme_config, "class", "svelte-1nl5fq5");
     			add_location(day_night_theme_config, file$B, 18, 0, 750);
     		},
     		l: function claim(nodes) {
@@ -26045,7 +26136,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$H.name,
+    		id: create_fragment$G.name,
     		type: "component",
     		source: "",
     		ctx
@@ -26054,7 +26145,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$H($$self, $$props, $$invalidate) {
+    function instance$G($$self, $$props, $$invalidate) {
     	let $config;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
@@ -26111,13 +26202,13 @@ var app = (function () {
     class DayNightThemeConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$H, create_fragment$H, safe_not_equal, {});
+    		init(this, options, instance$G, create_fragment$G, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "DayNightThemeConfig",
     			options,
-    			id: create_fragment$H.name
+    			id: create_fragment$G.name
     		});
     	}
     }
@@ -26128,10 +26219,10 @@ var app = (function () {
     let rangeInputService = writable(undefined);
     let storageService = writable(undefined);
 
-    /* src/layouts/config/appearance/FontSizeConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/FontSizeConfig.svelte generated by Svelte v3.55.1 */
     const file$A = "src/layouts/config/appearance/FontSizeConfig.svelte";
 
-    function create_fragment$G(ctx) {
+    function create_fragment$F(ctx) {
     	let font_size_config;
     	let config_edit_button;
     	let mounted;
@@ -26142,8 +26233,8 @@ var app = (function () {
     			font_size_config = element("font-size-config");
     			config_edit_button = element("config-edit-button");
     			config_edit_button.textContent = "···";
-    			add_location(config_edit_button, file$A, 37, 50, 1153);
-    			add_location(font_size_config, file$A, 37, 0, 1103);
+    			add_location(config_edit_button, file$A, 37, 50, 1169);
+    			add_location(font_size_config, file$A, 37, 0, 1119);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -26169,7 +26260,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$G.name,
+    		id: create_fragment$F.name,
     		type: "component",
     		source: "",
     		ctx
@@ -26178,7 +26269,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$G($$self, $$props, $$invalidate) {
+    function instance$F($$self, $$props, $$invalidate) {
     	let $config;
     	let $layoutToShow;
     	let $rangeInputService;
@@ -26230,6 +26321,7 @@ var app = (function () {
     	const click_handler = () => setFontSize();
 
     	$$self.$capture_state = () => ({
+    		UpdateIcon,
     		config,
     		layoutToShow,
     		rangeInputService,
@@ -26246,13 +26338,13 @@ var app = (function () {
     class FontSizeConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$G, create_fragment$G, safe_not_equal, {});
+    		init(this, options, instance$F, create_fragment$F, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "FontSizeConfig",
     			options,
-    			id: create_fragment$G.name
+    			id: create_fragment$F.name
     		});
     	}
     }
@@ -26265,10 +26357,10 @@ var app = (function () {
             rect.right <= (window.innerWidth || document.documentElement.clientWidth));
     }
 
-    /* src/layouts/config/appearance/GridArtSize.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/GridArtSize.svelte generated by Svelte v3.55.1 */
     const file$z = "src/layouts/config/appearance/GridArtSize.svelte";
 
-    function create_fragment$F(ctx) {
+    function create_fragment$E(ctx) {
     	let grid_art_size_config;
     	let config_edit_button;
     	let mounted;
@@ -26279,8 +26371,8 @@ var app = (function () {
     			grid_art_size_config = element("grid-art-size-config");
     			config_edit_button = element("config-edit-button");
     			config_edit_button.textContent = "···";
-    			add_location(config_edit_button, file$z, 60, 1, 2105);
-    			add_location(grid_art_size_config, file$z, 59, 0, 2050);
+    			add_location(config_edit_button, file$z, 60, 1, 2121);
+    			add_location(grid_art_size_config, file$z, 59, 0, 2066);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -26306,7 +26398,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$F.name,
+    		id: create_fragment$E.name,
     		type: "component",
     		source: "",
     		ctx
@@ -26315,7 +26407,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$F($$self, $$props, $$invalidate) {
+    function instance$E($$self, $$props, $$invalidate) {
     	let $config;
     	let $layoutToShow;
     	let $rangeInputService;
@@ -26393,6 +26485,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		isElementInViewportFn,
+    		UpdateIcon,
     		config,
     		layoutToShow,
     		rangeInputService,
@@ -26410,21 +26503,21 @@ var app = (function () {
     class GridArtSize extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$F, create_fragment$F, safe_not_equal, {});
+    		init(this, options, instance$E, create_fragment$E, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "GridArtSize",
     			options,
-    			id: create_fragment$F.name
+    			id: create_fragment$E.name
     		});
     	}
     }
 
-    /* src/layouts/config/appearance/GridGapSize.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/GridGapSize.svelte generated by Svelte v3.55.1 */
     const file$y = "src/layouts/config/appearance/GridGapSize.svelte";
 
-    function create_fragment$E(ctx) {
+    function create_fragment$D(ctx) {
     	let grid_art_size_config;
     	let config_edit_button;
     	let mounted;
@@ -26462,7 +26555,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$E.name,
+    		id: create_fragment$D.name,
     		type: "component",
     		source: "",
     		ctx
@@ -26471,7 +26564,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$E($$self, $$props, $$invalidate) {
+    function instance$D($$self, $$props, $$invalidate) {
     	let $config;
     	let $layoutToShow;
     	let $rangeInputService;
@@ -26544,21 +26637,21 @@ var app = (function () {
     class GridGapSize extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$E, create_fragment$E, safe_not_equal, {});
+    		init(this, options, instance$D, create_fragment$D, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "GridGapSize",
     			options,
-    			id: create_fragment$E.name
+    			id: create_fragment$D.name
     		});
     	}
     }
 
-    /* src/layouts/config/appearance/RebuildArtCacheConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/RebuildArtCacheConfig.svelte generated by Svelte v3.55.1 */
     const file$x = "src/layouts/config/appearance/RebuildArtCacheConfig.svelte";
 
-    function create_fragment$D(ctx) {
+    function create_fragment$C(ctx) {
     	let font_size_config;
     	let config_edit_button;
     	let t0;
@@ -26572,7 +26665,7 @@ var app = (function () {
     			config_edit_button = element("config-edit-button");
     			t0 = text("Clean");
     			t1 = text(/*artCacheSize*/ ctx[0]);
-    			set_custom_element_data(config_edit_button, "class", "svelte-1sxtgog");
+    			set_custom_element_data(config_edit_button, "class", "svelte-b6cp85");
     			add_location(config_edit_button, file$x, 17, 1, 479);
     			add_location(font_size_config, file$x, 16, 0, 424);
     		},
@@ -26604,7 +26697,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$D.name,
+    		id: create_fragment$C.name,
     		type: "component",
     		source: "",
     		ctx
@@ -26613,7 +26706,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$D($$self, $$props, $$invalidate) {
+    function instance$C($$self, $$props, $$invalidate) {
     	let $layoutToShow;
     	let $reloadArts;
     	validate_store(layoutToShow, 'layoutToShow');
@@ -26670,18 +26763,18 @@ var app = (function () {
     class RebuildArtCacheConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$D, create_fragment$D, safe_not_equal, {});
+    		init(this, options, instance$C, create_fragment$C, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "RebuildArtCacheConfig",
     			options,
-    			id: create_fragment$D.name
+    			id: create_fragment$C.name
     		});
     	}
     }
 
-    /* src/layouts/config/appearance/!AppearanceConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/appearance/!AppearanceConfig.svelte generated by Svelte v3.55.1 */
     const file$w = "src/layouts/config/appearance/!AppearanceConfig.svelte";
 
     // (13:1) <OptionSection title="Day|Night Mode">
@@ -26918,7 +27011,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$C(ctx) {
+    function create_fragment$B(ctx) {
     	let config_section;
     	let optionsection0;
     	let t0;
@@ -27114,7 +27207,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$C.name,
+    		id: create_fragment$B.name,
     		type: "component",
     		source: "",
     		ctx
@@ -27123,7 +27216,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$C($$self, $$props, $$invalidate) {
+    function instance$B($$self, $$props, $$invalidate) {
     	let $config;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
@@ -27154,13 +27247,13 @@ var app = (function () {
     class AppearanceConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$C, create_fragment$C, safe_not_equal, {});
+    		init(this, options, instance$B, create_fragment$B, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AppearanceConfig",
     			options,
-    			id: create_fragment$C.name
+    			id: create_fragment$B.name
     		});
     	}
     }
@@ -27174,7 +27267,7 @@ var app = (function () {
     }
 
     // Truncate string by size in bytes
-    var truncate = function truncate(getLength, string, byteLength) {
+    var truncate$2 = function truncate(getLength, string, byteLength) {
       if (typeof string !== "string") {
         throw new Error("Input must be string");
       }
@@ -27252,7 +27345,9 @@ var app = (function () {
       return byteLength;
     };
 
-    var browser = truncate.bind(null, browser$1);
+    var truncate$1 = truncate$2;
+    var getLength = browser$1;
+    var browser = truncate$1.bind(null, getLength);
 
     /*jshint node:true*/
 
@@ -27283,7 +27378,7 @@ var app = (function () {
      * @return {String}         Sanitized filename
      */
 
-
+    var truncate = browser;
 
     var illegalRe = /[\/\?<>\\:\*\|"]/g;
     var controlRe = /[\x00-\x1f\x80-\x9f]/g;
@@ -27301,7 +27396,7 @@ var app = (function () {
         .replace(reservedRe, replacement)
         .replace(windowsReservedRe, replacement)
         .replace(windowsTrailingRe, replacement);
-      return browser(sanitized, 255);
+      return truncate(sanitized, 255);
     }
 
     var sanitizeFilename = function (input, options) {
@@ -27326,11 +27421,11 @@ var app = (function () {
         return { isValid: true };
     }
 
-    /* src/icons/SaveIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/SaveIcon.svelte generated by Svelte v3.55.1 */
 
     const file$v = "src/icons/SaveIcon.svelte";
 
-    function create_fragment$B(ctx) {
+    function create_fragment$A(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -27372,7 +27467,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$B.name,
+    		id: create_fragment$A.name,
     		type: "component",
     		source: "",
     		ctx
@@ -27381,7 +27476,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$B($$self, $$props, $$invalidate) {
+    function instance$A($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SaveIcon', slots, []);
     	let { style = '' } = $$props;
@@ -27411,13 +27506,13 @@ var app = (function () {
     class SaveIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$B, create_fragment$B, safe_not_equal, { style: 0 });
+    		init(this, options, instance$A, create_fragment$A, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SaveIcon",
     			options,
-    			id: create_fragment$B.name
+    			id: create_fragment$A.name
     		});
     	}
 
@@ -27430,11 +27525,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/ToggleOffIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/ToggleOffIcon.svelte generated by Svelte v3.55.1 */
 
     const file$u = "src/icons/ToggleOffIcon.svelte";
 
-    function create_fragment$A(ctx) {
+    function create_fragment$z(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -27476,7 +27571,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$A.name,
+    		id: create_fragment$z.name,
     		type: "component",
     		source: "",
     		ctx
@@ -27485,7 +27580,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$A($$self, $$props, $$invalidate) {
+    function instance$z($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ToggleOffIcon', slots, []);
     	let { style = '' } = $$props;
@@ -27515,13 +27610,13 @@ var app = (function () {
     class ToggleOffIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$A, create_fragment$A, safe_not_equal, { style: 0 });
+    		init(this, options, instance$z, create_fragment$z, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ToggleOffIcon",
     			options,
-    			id: create_fragment$A.name
+    			id: create_fragment$z.name
     		});
     	}
 
@@ -27534,11 +27629,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/ToggleOnIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/ToggleOnIcon.svelte generated by Svelte v3.55.1 */
 
     const file$t = "src/icons/ToggleOnIcon.svelte";
 
-    function create_fragment$z(ctx) {
+    function create_fragment$y(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -27580,7 +27675,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$z.name,
+    		id: create_fragment$y.name,
     		type: "component",
     		source: "",
     		ctx
@@ -27589,7 +27684,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$z($$self, $$props, $$invalidate) {
+    function instance$y($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ToggleOnIcon', slots, []);
     	let { style = '' } = $$props;
@@ -27619,13 +27714,13 @@ var app = (function () {
     class ToggleOnIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$z, create_fragment$z, safe_not_equal, { style: 0 });
+    		init(this, options, instance$y, create_fragment$y, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ToggleOnIcon",
     			options,
-    			id: create_fragment$z.name
+    			id: create_fragment$y.name
     		});
     	}
 
@@ -27638,7 +27733,7 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/config/equalizer/EqualizerButtons.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/equalizer/EqualizerButtons.svelte generated by Svelte v3.55.1 */
     const file$s = "src/layouts/config/equalizer/EqualizerButtons.svelte";
 
     // (49:2) {:else}
@@ -27731,7 +27826,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$y(ctx) {
+    function create_fragment$x(ctx) {
     	let equalizer_buttons_config;
     	let button0;
     	let current_block_type_index;
@@ -27806,18 +27901,18 @@ var app = (function () {
     			button3 = element("button");
     			create_component(updateicon.$$.fragment);
     			t6 = text("\n\t\tUpdate");
-    			attr_dev(button0, "class", button0_class_value = "toggleEqButton " + (/*$isEqualizerOn*/ ctx[0] ? 'active' : 'not-active') + " svelte-nhauwk");
+    			attr_dev(button0, "class", button0_class_value = "toggleEqButton " + (/*$isEqualizerOn*/ ctx[0] ? 'active' : 'not-active') + " svelte-162917s");
     			add_location(button0, file$s, 45, 1, 2106);
-    			attr_dev(button1, "class", "resetEqButton svelte-nhauwk");
+    			attr_dev(button1, "class", "resetEqButton svelte-162917s");
     			button1.disabled = button1_disabled_value = /*$isEqualizerDirty*/ ctx[2] === false || /*$isEqualizerOn*/ ctx[0] === false;
     			add_location(button1, file$s, 54, 1, 2475);
     			button2.disabled = button2_disabled_value = /*$isEqualizerOn*/ ctx[0] === false;
-    			attr_dev(button2, "class", "svelte-nhauwk");
+    			attr_dev(button2, "class", "svelte-162917s");
     			add_location(button2, file$s, 62, 1, 2737);
     			button3.disabled = button3_disabled_value = !/*$isEqualizerDirty*/ ctx[2];
-    			attr_dev(button3, "class", "svelte-nhauwk");
+    			attr_dev(button3, "class", "svelte-162917s");
     			add_location(button3, file$s, 66, 1, 2923);
-    			set_custom_element_data(equalizer_buttons_config, "class", "svelte-nhauwk");
+    			set_custom_element_data(equalizer_buttons_config, "class", "svelte-162917s");
     			add_location(equalizer_buttons_config, file$s, 44, 0, 2078);
     		},
     		l: function claim(nodes) {
@@ -27876,7 +27971,7 @@ var app = (function () {
     				if_block.m(button0, t0);
     			}
 
-    			if (!current || dirty & /*$isEqualizerOn*/ 1 && button0_class_value !== (button0_class_value = "toggleEqButton " + (/*$isEqualizerOn*/ ctx[0] ? 'active' : 'not-active') + " svelte-nhauwk")) {
+    			if (!current || dirty & /*$isEqualizerOn*/ 1 && button0_class_value !== (button0_class_value = "toggleEqButton " + (/*$isEqualizerOn*/ ctx[0] ? 'active' : 'not-active') + " svelte-162917s")) {
     				attr_dev(button0, "class", button0_class_value);
     			}
 
@@ -27920,7 +28015,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$y.name,
+    		id: create_fragment$x.name,
     		type: "component",
     		source: "",
     		ctx
@@ -27929,7 +28024,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$y($$self, $$props, $$invalidate) {
+    function instance$x($$self, $$props, $$invalidate) {
     	let $selectedEqName;
     	let $equalizerProfiles;
     	let $equalizer;
@@ -28041,13 +28136,13 @@ var app = (function () {
     class EqualizerButtons extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$y, create_fragment$y, safe_not_equal, {});
+    		init(this, options, instance$x, create_fragment$x, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EqualizerButtons",
     			options,
-    			id: create_fragment$y.name
+    			id: create_fragment$x.name
     		});
     	}
     }
@@ -28060,7 +28155,7 @@ var app = (function () {
         return tempArray;
     }
 
-    /* src/layouts/config/equalizer/EqualizerControls.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/equalizer/EqualizerControls.svelte generated by Svelte v3.55.1 */
     const file$r = "src/layouts/config/equalizer/EqualizerControls.svelte";
 
     function get_each_context$9(ctx, list, i) {
@@ -28111,7 +28206,7 @@ var app = (function () {
     			t4 = text(t4_value);
     			t5 = text(" dB");
     			t6 = space();
-    			set_custom_element_data(filter_frequency, "class", "svelte-lgsrrw");
+    			set_custom_element_data(filter_frequency, "class", "svelte-6zkpj1");
     			add_location(filter_frequency, file$r, 17, 3, 646);
     			attr_dev(input, "type", "range");
     			attr_dev(input, "min", "-8");
@@ -28119,13 +28214,13 @@ var app = (function () {
     			attr_dev(input, "step", "1");
     			input.value = input_value_value = /*equalizerProfile*/ ctx[7].gain.value;
     			input.disabled = input_disabled_value = !/*$isEqualizerOn*/ ctx[2];
-    			attr_dev(input, "class", "svelte-lgsrrw");
+    			attr_dev(input, "class", "svelte-6zkpj1");
     			add_location(input, file$r, 19, 4, 749);
-    			set_custom_element_data(eq_input_container, "class", "svelte-lgsrrw");
+    			set_custom_element_data(eq_input_container, "class", "svelte-6zkpj1");
     			add_location(eq_input_container, file$r, 18, 3, 724);
-    			set_custom_element_data(filter_gain, "class", "svelte-lgsrrw");
+    			set_custom_element_data(filter_gain, "class", "svelte-6zkpj1");
     			add_location(filter_gain, file$r, 29, 3, 1014);
-    			set_custom_element_data(audio_filter_range, "class", "svelte-lgsrrw");
+    			set_custom_element_data(audio_filter_range, "class", "svelte-6zkpj1");
     			add_location(audio_filter_range, file$r, 16, 2, 622);
     			this.first = audio_filter_range;
     		},
@@ -28180,7 +28275,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$x(ctx) {
+    function create_fragment$w(ctx) {
     	let equalizer_controls_config;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -28203,7 +28298,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(equalizer_controls_config, "class", "svelte-lgsrrw");
+    			set_custom_element_data(equalizer_controls_config, "class", "svelte-6zkpj1");
     			add_location(equalizer_controls_config, file$r, 14, 0, 520);
     		},
     		l: function claim(nodes) {
@@ -28237,7 +28332,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$x.name,
+    		id: create_fragment$w.name,
     		type: "component",
     		source: "",
     		ctx
@@ -28246,7 +28341,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$x($$self, $$props, $$invalidate) {
+    function instance$w($$self, $$props, $$invalidate) {
     	let $equalizerService;
     	let $selectedEqName;
     	let $equalizerNameStore;
@@ -28308,22 +28403,22 @@ var app = (function () {
     class EqualizerControls extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$x, create_fragment$x, safe_not_equal, {});
+    		init(this, options, instance$w, create_fragment$w, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EqualizerControls",
     			options,
-    			id: create_fragment$x.name
+    			id: create_fragment$w.name
     		});
     	}
     }
 
-    /* src/icons/AddIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/AddIcon.svelte generated by Svelte v3.55.1 */
 
     const file$q = "src/icons/AddIcon.svelte";
 
-    function create_fragment$w(ctx) {
+    function create_fragment$v(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -28365,7 +28460,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$w.name,
+    		id: create_fragment$v.name,
     		type: "component",
     		source: "",
     		ctx
@@ -28374,7 +28469,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$w($$self, $$props, $$invalidate) {
+    function instance$v($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('AddIcon', slots, []);
     	let { style = '' } = $$props;
@@ -28404,13 +28499,13 @@ var app = (function () {
     class AddIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$w, create_fragment$w, safe_not_equal, { style: 0 });
+    		init(this, options, instance$v, create_fragment$v, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AddIcon",
     			options,
-    			id: create_fragment$w.name
+    			id: create_fragment$v.name
     		});
     	}
 
@@ -28423,11 +28518,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/DeleteIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/DeleteIcon.svelte generated by Svelte v3.55.1 */
 
     const file$p = "src/icons/DeleteIcon.svelte";
 
-    function create_fragment$v(ctx) {
+    function create_fragment$u(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -28469,7 +28564,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$v.name,
+    		id: create_fragment$u.name,
     		type: "component",
     		source: "",
     		ctx
@@ -28478,7 +28573,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$v($$self, $$props, $$invalidate) {
+    function instance$u($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('DeleteIcon', slots, []);
     	let { style = '' } = $$props;
@@ -28508,13 +28603,13 @@ var app = (function () {
     class DeleteIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$v, create_fragment$v, safe_not_equal, { style: 0 });
+    		init(this, options, instance$u, create_fragment$u, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "DeleteIcon",
     			options,
-    			id: create_fragment$v.name
+    			id: create_fragment$u.name
     		});
     	}
 
@@ -28527,11 +28622,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/EditIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/EditIcon.svelte generated by Svelte v3.55.1 */
 
     const file$o = "src/icons/EditIcon.svelte";
 
-    function create_fragment$u(ctx) {
+    function create_fragment$t(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -28573,7 +28668,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$u.name,
+    		id: create_fragment$t.name,
     		type: "component",
     		source: "",
     		ctx
@@ -28582,7 +28677,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$u($$self, $$props, $$invalidate) {
+    function instance$t($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EditIcon', slots, []);
     	let { style = '' } = $$props;
@@ -28612,13 +28707,13 @@ var app = (function () {
     class EditIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$u, create_fragment$u, safe_not_equal, { style: 0 });
+    		init(this, options, instance$t, create_fragment$t, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EditIcon",
     			options,
-    			id: create_fragment$u.name
+    			id: create_fragment$t.name
     		});
     	}
 
@@ -28631,7 +28726,7 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/config/equalizer/EqualizerProfiles.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/equalizer/EqualizerProfiles.svelte generated by Svelte v3.55.1 */
 
     const file$n = "src/layouts/config/equalizer/EqualizerProfiles.svelte";
 
@@ -28712,14 +28807,14 @@ var app = (function () {
     			create_component(deleteicon.$$.fragment);
     			t6 = text("\n\t\t\t\t\tDelete");
     			t7 = space();
-    			set_custom_element_data(equalizer_name, "class", "svelte-1fd54j0");
+    			set_custom_element_data(equalizer_name, "class", "svelte-pgqaxt");
     			add_location(equalizer_name, file$n, 106, 4, 4248);
-    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-1fd54j0");
+    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-pgqaxt");
     			add_location(equalizer_rename, file$n, 109, 4, 4406);
-    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-1fd54j0");
+    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-pgqaxt");
     			add_location(equalizer_delete, file$n, 113, 4, 4605);
     			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = "eq-" + /*eq*/ ctx[13].name);
-    			set_custom_element_data(equalizer_field, "class", "svelte-1fd54j0");
+    			set_custom_element_data(equalizer_field, "class", "svelte-pgqaxt");
     			add_location(equalizer_field, file$n, 105, 3, 4208);
     			this.first = equalizer_field;
     		},
@@ -28794,7 +28889,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$t(ctx) {
+    function create_fragment$s(ctx) {
     	let equalizer_profiles_config;
     	let equalizer_profiles;
     	let each_blocks = [];
@@ -28837,9 +28932,9 @@ var app = (function () {
     			button = element("button");
     			create_component(addicon.$$.fragment);
     			t1 = text(" Add new profile");
-    			set_custom_element_data(equalizer_profiles, "class", "svelte-1fd54j0");
+    			set_custom_element_data(equalizer_profiles, "class", "svelte-pgqaxt");
     			add_location(equalizer_profiles, file$n, 103, 1, 4139);
-    			attr_dev(button, "class", "addProfile svelte-1fd54j0");
+    			attr_dev(button, "class", "addProfile svelte-pgqaxt");
     			add_location(button, file$n, 120, 1, 4858);
     			add_location(equalizer_profiles_config, file$n, 102, 0, 4110);
     		},
@@ -28908,7 +29003,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$t.name,
+    		id: create_fragment$s.name,
     		type: "component",
     		source: "",
     		ctx
@@ -28917,7 +29012,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$t($$self, $$props, $$invalidate) {
+    function instance$s($$self, $$props, $$invalidate) {
     	let $selectedEqName;
     	let $equalizerProfiles;
     	let $equalizer;
@@ -29098,18 +29193,18 @@ var app = (function () {
     class EqualizerProfiles extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$t, create_fragment$t, safe_not_equal, {});
+    		init(this, options, instance$s, create_fragment$s, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EqualizerProfiles",
     			options,
-    			id: create_fragment$t.name
+    			id: create_fragment$s.name
     		});
     	}
     }
 
-    /* src/layouts/config/equalizer/!EqualizerConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/equalizer/!EqualizerConfig.svelte generated by Svelte v3.55.1 */
 
     // (8:0) <OptionSection title="Equalizer Profiles">
     function create_default_slot_1(ctx) {
@@ -29200,7 +29295,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$s(ctx) {
+    function create_fragment$r(ctx) {
     	let optionsection0;
     	let t;
     	let optionsection1;
@@ -29281,7 +29376,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$s.name,
+    		id: create_fragment$r.name,
     		type: "component",
     		source: "",
     		ctx
@@ -29290,7 +29385,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$s($$self, $$props, $$invalidate) {
+    function instance$r($$self, $$props, $$invalidate) {
     	let $equalizerNameStore;
     	let $isEqualizerDirty;
     	let $isEqualizerOn;
@@ -29327,18 +29422,18 @@ var app = (function () {
     class EqualizerConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$s, create_fragment$s, safe_not_equal, {});
+    		init(this, options, instance$r, create_fragment$r, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EqualizerConfig",
     			options,
-    			id: create_fragment$s.name
+    			id: create_fragment$r.name
     		});
     	}
     }
 
-    /* src/layouts/config/library/LibraryFoldersConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/library/LibraryFoldersConfig.svelte generated by Svelte v3.55.1 */
     const file$m = "src/layouts/config/library/LibraryFoldersConfig.svelte";
 
     function get_each_context$7(ctx, list, i) {
@@ -29472,11 +29567,11 @@ var app = (function () {
     			create_component(deleteicon.$$.fragment);
     			t2 = text("\n\t\t\t\t\t\tRemove");
     			t3 = space();
-    			set_custom_element_data(directory_path, "class", "svelte-tvyj17");
+    			set_custom_element_data(directory_path, "class", "svelte-1kfhqfj");
     			add_location(directory_path, file$m, 12, 5, 489);
     			attr_dev(button, "class", "danger");
     			add_location(button, file$m, 13, 5, 539);
-    			set_custom_element_data(section_directory, "class", "svelte-tvyj17");
+    			set_custom_element_data(section_directory, "class", "svelte-1kfhqfj");
     			add_location(section_directory, file$m, 11, 4, 464);
     			this.first = section_directory;
     		},
@@ -29645,11 +29740,11 @@ var app = (function () {
     			create_component(deleteicon.$$.fragment);
     			t2 = text("\n\t\t\t\t\t\tRemove");
     			t3 = space();
-    			set_custom_element_data(directory_path, "class", "svelte-tvyj17");
+    			set_custom_element_data(directory_path, "class", "svelte-1kfhqfj");
     			add_location(directory_path, file$m, 41, 5, 1351);
     			attr_dev(button, "class", "danger");
     			add_location(button, file$m, 42, 5, 1401);
-    			set_custom_element_data(section_directory, "class", "svelte-tvyj17");
+    			set_custom_element_data(section_directory, "class", "svelte-1kfhqfj");
     			add_location(section_directory, file$m, 40, 4, 1326);
     			this.first = section_directory;
     		},
@@ -29701,7 +29796,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$r(ctx) {
+    function create_fragment$q(ctx) {
     	let add_folder_config;
     	let section_title0;
     	let t1;
@@ -29763,21 +29858,21 @@ var app = (function () {
     			button1 = element("button");
     			create_component(addicon1.$$.fragment);
     			t8 = text("\n\t\tExclude Directories");
-    			set_custom_element_data(section_title0, "class", "svelte-tvyj17");
+    			set_custom_element_data(section_title0, "class", "svelte-1kfhqfj");
     			add_location(section_title0, file$m, 7, 1, 292);
-    			set_custom_element_data(section_body0, "class", "svelte-tvyj17");
+    			set_custom_element_data(section_body0, "class", "svelte-1kfhqfj");
     			add_location(section_body0, file$m, 8, 1, 348);
     			attr_dev(button0, "class", "info");
     			add_location(button0, file$m, 24, 1, 853);
-    			set_custom_element_data(add_folder_config, "class", "section-main svelte-tvyj17");
+    			set_custom_element_data(add_folder_config, "class", "section-main svelte-1kfhqfj");
     			add_location(add_folder_config, file$m, 6, 0, 250);
-    			set_custom_element_data(section_title1, "class", "svelte-tvyj17");
+    			set_custom_element_data(section_title1, "class", "svelte-1kfhqfj");
     			add_location(section_title1, file$m, 36, 1, 1146);
-    			set_custom_element_data(section_body1, "class", "svelte-tvyj17");
+    			set_custom_element_data(section_body1, "class", "svelte-1kfhqfj");
     			add_location(section_body1, file$m, 37, 1, 1206);
     			attr_dev(button1, "class", "info");
     			add_location(button1, file$m, 53, 1, 1719);
-    			set_custom_element_data(exclude_folder_config, "class", "section-main svelte-tvyj17");
+    			set_custom_element_data(exclude_folder_config, "class", "section-main svelte-1kfhqfj");
     			add_location(exclude_folder_config, file$m, 35, 0, 1100);
     		},
     		l: function claim(nodes) {
@@ -29891,7 +29986,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$r.name,
+    		id: create_fragment$q.name,
     		type: "component",
     		source: "",
     		ctx
@@ -29900,7 +29995,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$r($$self, $$props, $$invalidate) {
+    function instance$q($$self, $$props, $$invalidate) {
     	let $config;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
@@ -29938,18 +30033,18 @@ var app = (function () {
     class LibraryFoldersConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$r, create_fragment$r, safe_not_equal, {});
+    		init(this, options, instance$q, create_fragment$q, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LibraryFoldersConfig",
     			options,
-    			id: create_fragment$r.name
+    			id: create_fragment$q.name
     		});
     	}
     }
 
-    /* src/layouts/config/library/!LibraryConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/library/!LibraryConfig.svelte generated by Svelte v3.55.1 */
 
     // (5:0) <OptionSection title="Library Folders">
     function create_default_slot(ctx) {
@@ -29990,7 +30085,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$q(ctx) {
+    function create_fragment$p(ctx) {
     	let optionsection;
     	let current;
 
@@ -30039,7 +30134,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$q.name,
+    		id: create_fragment$p.name,
     		type: "component",
     		source: "",
     		ctx
@@ -30048,7 +30143,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$q($$self, $$props, $$invalidate) {
+    function instance$p($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('LibraryConfig', slots, []);
     	const writable_props = [];
@@ -30064,13 +30159,13 @@ var app = (function () {
     class LibraryConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$q, create_fragment$q, safe_not_equal, {});
+    		init(this, options, instance$p, create_fragment$p, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LibraryConfig",
     			options,
-    			id: create_fragment$q.name
+    			id: create_fragment$p.name
     		});
     	}
     }
@@ -30098,7 +30193,7 @@ var app = (function () {
         { value: 'PlayCount', name: 'Play Count' }
     ].sort((a, b) => a.name.localeCompare(b.name));
 
-    /* src/layouts/config/song_list_tags/AddSongListTag.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/song_list_tags/AddSongListTag.svelte generated by Svelte v3.55.1 */
     const file$l = "src/layouts/config/song_list_tags/AddSongListTag.svelte";
 
     function get_each_context$6(ctx, list, i) {
@@ -30199,7 +30294,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$p(ctx) {
+    function create_fragment$o(ctx) {
     	let add_song_list_tag;
     	let tag_to_add;
     	let selected_tag;
@@ -30238,18 +30333,18 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(selected_tag, "class", "svelte-988n1k");
+    			set_custom_element_data(selected_tag, "class", "svelte-1t0o5b0");
     			add_location(selected_tag, file$l, 19, 2, 686);
     			option.__value = "ChooseTag";
     			option.value = option.__value;
     			option.disabled = true;
     			add_location(option, file$l, 22, 3, 818);
-    			attr_dev(select, "class", "svelte-988n1k");
+    			attr_dev(select, "class", "svelte-1t0o5b0");
     			if (/*optionBind*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[4].call(select));
     			add_location(select, file$l, 21, 2, 755);
-    			set_custom_element_data(tag_to_add, "class", "svelte-988n1k");
+    			set_custom_element_data(tag_to_add, "class", "svelte-1t0o5b0");
     			add_location(tag_to_add, file$l, 18, 1, 671);
-    			set_custom_element_data(add_song_list_tag, "class", "svelte-988n1k");
+    			set_custom_element_data(add_song_list_tag, "class", "svelte-1t0o5b0");
     			add_location(add_song_list_tag, file$l, 17, 0, 650);
     		},
     		l: function claim(nodes) {
@@ -30309,7 +30404,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$p.name,
+    		id: create_fragment$o.name,
     		type: "component",
     		source: "",
     		ctx
@@ -30318,7 +30413,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$p($$self, $$props, $$invalidate) {
+    function instance$o($$self, $$props, $$invalidate) {
     	let $config;
     	let $songListTagsValuesStore;
     	validate_store(config, 'config');
@@ -30394,22 +30489,22 @@ var app = (function () {
     class AddSongListTag extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$p, create_fragment$p, safe_not_equal, {});
+    		init(this, options, instance$o, create_fragment$o, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AddSongListTag",
     			options,
-    			id: create_fragment$p.name
+    			id: create_fragment$o.name
     		});
     	}
     }
 
-    /* src/icons/MoveIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/MoveIcon.svelte generated by Svelte v3.55.1 */
 
     const file$k = "src/icons/MoveIcon.svelte";
 
-    function create_fragment$o(ctx) {
+    function create_fragment$n(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -30451,7 +30546,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$o.name,
+    		id: create_fragment$n.name,
     		type: "component",
     		source: "",
     		ctx
@@ -30460,7 +30555,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$o($$self, $$props, $$invalidate) {
+    function instance$n($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('MoveIcon', slots, []);
     	let { style = '' } = $$props;
@@ -30490,13 +30585,13 @@ var app = (function () {
     class MoveIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$o, create_fragment$o, safe_not_equal, { style: 0 });
+    		init(this, options, instance$n, create_fragment$n, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "MoveIcon",
     			options,
-    			id: create_fragment$o.name
+    			id: create_fragment$n.name
     		});
     	}
 
@@ -30509,7 +30604,7 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/config/song_list_tags/SelectedTag.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/song_list_tags/SelectedTag.svelte generated by Svelte v3.55.1 */
 
     const file$j = "src/layouts/config/song_list_tags/SelectedTag.svelte";
 
@@ -30530,7 +30625,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			li = element("li");
-    			attr_dev(li, "class", "not-display svelte-19te95b");
+    			attr_dev(li, "class", "not-display svelte-1azxyjn");
     			attr_dev(li, "data-index", /*index*/ ctx[1]);
     			attr_dev(li, "data-align", li_data_align_value = /*tag*/ ctx[0].align);
     			attr_dev(li, "data-is-expanded", li_data_is_expanded_value = /*tag*/ ctx[0].isExpanded);
@@ -30704,71 +30799,71 @@ var app = (function () {
     			t16 = space();
     			delete_icon = element("delete-icon");
     			create_component(deleteicon.$$.fragment);
-    			set_custom_element_data(tag_name, "class", "svelte-19te95b");
+    			set_custom_element_data(tag_name, "class", "svelte-1azxyjn");
     			add_location(tag_name, file$j, 34, 2, 1514);
-    			attr_dev(select, "class", "svelte-19te95b");
+    			attr_dev(select, "class", "svelte-1azxyjn");
     			if (/*$config*/ ctx[2].songListTags[/*index*/ ctx[1]].value === void 0) add_render_callback(() => /*select_change_handler*/ ctx[6].call(select));
     			add_location(select, file$j, 35, 2, 1570);
-    			set_custom_element_data(tag_empty_space, "class", "svelte-19te95b");
+    			set_custom_element_data(tag_empty_space, "class", "svelte-1azxyjn");
     			add_location(tag_empty_space, file$j, 42, 2, 1833);
     			attr_dev(input0, "id", input0_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-expand"));
     			attr_dev(input0, "type", "checkbox");
-    			attr_dev(input0, "class", "svelte-19te95b");
+    			attr_dev(input0, "class", "svelte-1azxyjn");
     			add_location(input0, file$j, 44, 3, 1929);
     			attr_dev(label0, "for", label0_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-expand"));
-    			attr_dev(label0, "class", "svelte-19te95b");
+    			attr_dev(label0, "class", "svelte-1azxyjn");
     			add_location(label0, file$j, 45, 3, 2044);
     			set_custom_element_data(tag_expand, "data-is-expanded", tag_expand_data_is_expanded_value = /*$config*/ ctx[2].songListTags[/*index*/ ctx[1]].isExpanded);
-    			set_custom_element_data(tag_expand, "class", "svelte-19te95b");
+    			set_custom_element_data(tag_expand, "class", "svelte-1azxyjn");
     			add_location(tag_expand, file$j, 43, 2, 1855);
     			attr_dev(input1, "id", input1_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-l"));
     			attr_dev(input1, "type", "radio");
     			input1.__value = "left";
     			input1.value = input1.__value;
-    			attr_dev(input1, "class", "svelte-19te95b");
+    			attr_dev(input1, "class", "svelte-1azxyjn");
     			/*$$binding_groups*/ ctx[9][0].push(input1);
     			add_location(input1, file$j, 50, 4, 2231);
     			attr_dev(label1, "for", label1_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-l"));
-    			attr_dev(label1, "class", "svelte-19te95b");
+    			attr_dev(label1, "class", "svelte-1azxyjn");
     			add_location(label1, file$j, 51, 4, 2345);
-    			set_custom_element_data(tag_align_left, "class", "tag-align svelte-19te95b");
+    			set_custom_element_data(tag_align_left, "class", "tag-align svelte-1azxyjn");
     			add_location(tag_align_left, file$j, 49, 3, 2192);
     			attr_dev(input2, "id", input2_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-c"));
     			attr_dev(input2, "type", "radio");
     			input2.__value = "center";
     			input2.value = input2.__value;
-    			attr_dev(input2, "class", "svelte-19te95b");
+    			attr_dev(input2, "class", "svelte-1azxyjn");
     			/*$$binding_groups*/ ctx[9][0].push(input2);
     			add_location(input2, file$j, 55, 4, 2456);
     			attr_dev(label2, "for", label2_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-c"));
-    			attr_dev(label2, "class", "svelte-19te95b");
+    			attr_dev(label2, "class", "svelte-1azxyjn");
     			add_location(label2, file$j, 56, 4, 2572);
-    			set_custom_element_data(tag_align_center, "class", "tag-align svelte-19te95b");
+    			set_custom_element_data(tag_align_center, "class", "tag-align svelte-1azxyjn");
     			add_location(tag_align_center, file$j, 54, 3, 2415);
     			attr_dev(input3, "id", input3_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-r"));
     			attr_dev(input3, "type", "radio");
     			input3.__value = "right";
     			input3.value = input3.__value;
-    			attr_dev(input3, "class", "svelte-19te95b");
+    			attr_dev(input3, "class", "svelte-1azxyjn");
     			/*$$binding_groups*/ ctx[9][0].push(input3);
     			add_location(input3, file$j, 60, 4, 2684);
     			attr_dev(label3, "for", label3_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-r"));
-    			attr_dev(label3, "class", "svelte-19te95b");
+    			attr_dev(label3, "class", "svelte-1azxyjn");
     			add_location(label3, file$j, 61, 4, 2799);
-    			set_custom_element_data(tag_align_right, "class", "tag-align svelte-19te95b");
+    			set_custom_element_data(tag_align_right, "class", "tag-align svelte-1azxyjn");
     			add_location(tag_align_right, file$j, 59, 3, 2644);
     			set_custom_element_data(tag_aligns, "data-is-active", tag_aligns_data_is_active_value = /*$config*/ ctx[2].songListTags[/*index*/ ctx[1]].isExpanded);
-    			set_custom_element_data(tag_aligns, "class", "svelte-19te95b");
+    			set_custom_element_data(tag_aligns, "class", "svelte-1azxyjn");
     			add_location(tag_aligns, file$j, 48, 2, 2120);
-    			set_custom_element_data(move_icon, "class", "svelte-19te95b");
+    			set_custom_element_data(move_icon, "class", "svelte-1azxyjn");
     			add_location(move_icon, file$j, 65, 2, 2885);
-    			set_custom_element_data(delete_icon, "class", "svelte-19te95b");
+    			set_custom_element_data(delete_icon, "class", "svelte-1azxyjn");
     			add_location(delete_icon, file$j, 69, 2, 2993);
     			attr_dev(li, "data-index", /*index*/ ctx[1]);
     			attr_dev(li, "data-align", li_data_align_value = /*tag*/ ctx[0].align);
     			attr_dev(li, "data-is-expanded", li_data_is_expanded_value = /*tag*/ ctx[0].isExpanded);
     			attr_dev(li, "data-value", li_data_value_value = /*tag*/ ctx[0].value);
-    			attr_dev(li, "class", "svelte-19te95b");
+    			attr_dev(li, "class", "svelte-1azxyjn");
     			add_location(li, file$j, 33, 1, 1408);
     		},
     		m: function mount(target, anchor) {
@@ -30973,7 +31068,7 @@ var app = (function () {
     			option.__value = /*tag*/ ctx[0].value;
     			option.value = option.__value;
     			attr_dev(option, "checked", false);
-    			attr_dev(option, "class", "svelte-19te95b");
+    			attr_dev(option, "class", "svelte-1azxyjn");
     			add_location(option, file$j, 38, 5, 1736);
     		},
     		m: function mount(target, anchor) {
@@ -31053,7 +31148,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$n(ctx) {
+    function create_fragment$m(ctx) {
     	let current_block_type_index;
     	let if_block;
     	let if_block_anchor;
@@ -31126,7 +31221,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$n.name,
+    		id: create_fragment$m.name,
     		type: "component",
     		source: "",
     		ctx
@@ -31135,7 +31230,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$n($$self, $$props, $$invalidate) {
+    function instance$m($$self, $$props, $$invalidate) {
     	let $config;
     	let $songListTagsValuesStore;
     	validate_store(config, 'config');
@@ -31179,6 +31274,16 @@ var app = (function () {
 
     		config.set($config);
     	}
+
+    	$$self.$$.on_mount.push(function () {
+    		if (tag === undefined && !('tag' in $$props || $$self.$$.bound[$$self.$$.props['tag']])) {
+    			console.warn("<SelectedTag> was created without expected prop 'tag'");
+    		}
+
+    		if (index === undefined && !('index' in $$props || $$self.$$.bound[$$self.$$.props['index']])) {
+    			console.warn("<SelectedTag> was created without expected prop 'index'");
+    		}
+    	});
 
     	const writable_props = ['tag', 'index'];
 
@@ -31265,25 +31370,14 @@ var app = (function () {
     class SelectedTag extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$n, create_fragment$n, safe_not_equal, { tag: 0, index: 1 });
+    		init(this, options, instance$m, create_fragment$m, safe_not_equal, { tag: 0, index: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SelectedTag",
     			options,
-    			id: create_fragment$n.name
+    			id: create_fragment$m.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*tag*/ ctx[0] === undefined && !('tag' in props)) {
-    			console.warn("<SelectedTag> was created without expected prop 'tag'");
-    		}
-
-    		if (/*index*/ ctx[1] === undefined && !('index' in props)) {
-    			console.warn("<SelectedTag> was created without expected prop 'index'");
-    		}
     	}
 
     	get tag() {
@@ -34995,7 +35089,7 @@ var app = (function () {
     Sortable.mount(new MultiDragPlugin());
     let SortableService = Sortable;
 
-    /* src/layouts/config/song_list_tags/SelectedTagList.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/song_list_tags/SelectedTagList.svelte generated by Svelte v3.55.1 */
     const file$i = "src/layouts/config/song_list_tags/SelectedTagList.svelte";
 
     function get_each_context$4(ctx, list, i) {
@@ -35065,7 +35159,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$m(ctx) {
+    function create_fragment$l(ctx) {
     	let selected_tags_list;
     	let ul;
     	let each_blocks = [];
@@ -35093,7 +35187,7 @@ var app = (function () {
 
     			attr_dev(ul, "id", "items");
     			add_location(ul, file$i, 36, 1, 1117);
-    			set_custom_element_data(selected_tags_list, "class", "svelte-5bkx7e");
+    			set_custom_element_data(selected_tags_list, "class", "svelte-156huvq");
     			add_location(selected_tags_list, file$i, 35, 0, 1095);
     		},
     		l: function claim(nodes) {
@@ -35146,7 +35240,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$m.name,
+    		id: create_fragment$l.name,
     		type: "component",
     		source: "",
     		ctx
@@ -35155,7 +35249,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$m($$self, $$props, $$invalidate) {
+    function instance$l($$self, $$props, $$invalidate) {
     	let $config;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
@@ -35221,18 +35315,18 @@ var app = (function () {
     class SelectedTagList extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$m, create_fragment$m, safe_not_equal, {});
+    		init(this, options, instance$l, create_fragment$l, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SelectedTagList",
     			options,
-    			id: create_fragment$m.name
+    			id: create_fragment$l.name
     		});
     	}
     }
 
-    /* src/layouts/config/song_list_tags/SongListPreview.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/song_list_tags/SongListPreview.svelte generated by Svelte v3.55.1 */
 
     const file$h = "src/layouts/config/song_list_tags/SongListPreview.svelte";
 
@@ -35479,7 +35573,7 @@ var app = (function () {
     			span = element("span");
     			t = text("Dynamic Artists ");
     			create_component(toggleofficon.$$.fragment);
-    			attr_dev(span, "class", "svelte-1ue41o0");
+    			attr_dev(span, "class", "svelte-1ohu8dw");
     			add_location(span, file$h, 79, 4, 2686);
     		},
     		m: function mount(target, anchor) {
@@ -35533,7 +35627,7 @@ var app = (function () {
     			span = element("span");
     			t = text("Dynamic Artists ");
     			create_component(toggleonicon.$$.fragment);
-    			attr_dev(span, "class", "svelte-1ue41o0");
+    			attr_dev(span, "class", "svelte-1ohu8dw");
     			add_location(span, file$h, 77, 4, 2569);
     		},
     		m: function mount(target, anchor) {
@@ -35568,7 +35662,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$l(ctx) {
+    function create_fragment$k(ctx) {
     	let song_list_preview;
     	let grid_tags;
     	let each_blocks = [];
@@ -35620,12 +35714,12 @@ var app = (function () {
     			button = element("button");
     			if_block.c();
     			set_style(grid_tags, "grid-template-columns", /*gridStyle*/ ctx[1]);
-    			set_custom_element_data(grid_tags, "class", "svelte-1ue41o0");
+    			set_custom_element_data(grid_tags, "class", "svelte-1ohu8dw");
     			add_location(grid_tags, file$h, 57, 1, 1814);
     			add_location(button, file$h, 75, 2, 2463);
-    			set_custom_element_data(enable_dynamic_artists, "class", "svelte-1ue41o0");
+    			set_custom_element_data(enable_dynamic_artists, "class", "svelte-1ohu8dw");
     			add_location(enable_dynamic_artists, file$h, 74, 1, 2436);
-    			set_custom_element_data(song_list_preview, "class", "svelte-1ue41o0");
+    			set_custom_element_data(song_list_preview, "class", "svelte-1ohu8dw");
     			add_location(song_list_preview, file$h, 56, 0, 1793);
     		},
     		l: function claim(nodes) {
@@ -35719,7 +35813,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$l.name,
+    		id: create_fragment$k.name,
     		type: "component",
     		source: "",
     		ctx
@@ -35728,7 +35822,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$l($$self, $$props, $$invalidate) {
+    function instance$k($$self, $$props, $$invalidate) {
     	let $config;
     	let $songListTagsValuesStore;
     	validate_store(config, 'config');
@@ -35830,21 +35924,21 @@ var app = (function () {
     class SongListPreview extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$l, create_fragment$l, safe_not_equal, {});
+    		init(this, options, instance$k, create_fragment$k, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListPreview",
     			options,
-    			id: create_fragment$l.name
+    			id: create_fragment$k.name
     		});
     	}
     }
 
-    /* src/layouts/config/song_list_tags/!SongListTagsConfig.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/song_list_tags/!SongListTagsConfig.svelte generated by Svelte v3.55.1 */
     const file$g = "src/layouts/config/song_list_tags/!SongListTagsConfig.svelte";
 
-    function create_fragment$k(ctx) {
+    function create_fragment$j(ctx) {
     	let song_list_tag_config;
     	let optionsection;
     	let t0;
@@ -35874,7 +35968,7 @@ var app = (function () {
     			create_component(selectedtaglist.$$.fragment);
     			t2 = space();
     			create_component(songlistpreview.$$.fragment);
-    			set_custom_element_data(song_list_tag_config, "class", "svelte-1ubww35");
+    			set_custom_element_data(song_list_tag_config, "class", "svelte-j59to5");
     			add_location(song_list_tag_config, file$g, 21, 0, 678);
     		},
     		l: function claim(nodes) {
@@ -35918,7 +36012,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$k.name,
+    		id: create_fragment$j.name,
     		type: "component",
     		source: "",
     		ctx
@@ -35927,7 +36021,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$k($$self, $$props, $$invalidate) {
+    function instance$j($$self, $$props, $$invalidate) {
     	let $config;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
@@ -35984,18 +36078,18 @@ var app = (function () {
     class SongListTagsConfig extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$k, create_fragment$k, safe_not_equal, {});
+    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "SongListTagsConfig",
     			options,
-    			id: create_fragment$k.name
+    			id: create_fragment$j.name
     		});
     	}
     }
 
-    /* src/layouts/config/ConfigLayout.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/config/ConfigLayout.svelte generated by Svelte v3.55.1 */
     const file$f = "src/layouts/config/ConfigLayout.svelte";
 
     function get_each_context$2(ctx, list, i) {
@@ -36025,7 +36119,7 @@ var app = (function () {
     			option_svlt = element("option-svlt");
     			t = text(t_value);
     			set_custom_element_data(option_svlt, "data-selected", option_svlt_data_selected_value = /*selectedOption*/ ctx[0] === /*option*/ ctx[6].name);
-    			set_custom_element_data(option_svlt, "class", "svelte-1n54e3u");
+    			set_custom_element_data(option_svlt, "class", "svelte-j2kl1i");
     			add_location(option_svlt, file$f, 42, 3, 1240);
     			this.first = option_svlt;
     		},
@@ -36063,7 +36157,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$j(ctx) {
+    function create_fragment$i(ctx) {
     	let config_layout_svlt;
     	let options_list;
     	let each_blocks = [];
@@ -36090,7 +36184,7 @@ var app = (function () {
     	}
 
     	if (switch_value) {
-    		switch_instance = new switch_value(switch_props());
+    		switch_instance = construct_svelte_component_dev(switch_value, switch_props());
     	}
 
     	const block = {
@@ -36105,11 +36199,11 @@ var app = (function () {
     			t = space();
     			current_component_svlt = element("current-component-svlt");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
-    			set_custom_element_data(options_list, "class", "svelte-1n54e3u");
+    			set_custom_element_data(options_list, "class", "svelte-j2kl1i");
     			add_location(options_list, file$f, 40, 1, 1179);
-    			set_custom_element_data(current_component_svlt, "class", "svelte-1n54e3u");
+    			set_custom_element_data(current_component_svlt, "class", "svelte-j2kl1i");
     			add_location(current_component_svlt, file$f, 48, 1, 1410);
-    			set_custom_element_data(config_layout_svlt, "class", "svelte-1n54e3u");
+    			set_custom_element_data(config_layout_svlt, "class", "svelte-j2kl1i");
     			add_location(config_layout_svlt, file$f, 39, 0, 1157);
     		},
     		l: function claim(nodes) {
@@ -36125,11 +36219,7 @@ var app = (function () {
 
     			append_dev(config_layout_svlt, t);
     			append_dev(config_layout_svlt, current_component_svlt);
-
-    			if (switch_instance) {
-    				mount_component(switch_instance, current_component_svlt, null);
-    			}
-
+    			if (switch_instance) mount_component(switch_instance, current_component_svlt, null);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
@@ -36153,7 +36243,7 @@ var app = (function () {
     				}
 
     				if (switch_value) {
-    					switch_instance = new switch_value(switch_props());
+    					switch_instance = construct_svelte_component_dev(switch_value, switch_props());
     					create_component(switch_instance.$$.fragment);
     					transition_in(switch_instance.$$.fragment, 1);
     					mount_component(switch_instance, current_component_svlt, null);
@@ -36184,7 +36274,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$j.name,
+    		id: create_fragment$i.name,
     		type: "component",
     		source: "",
     		ctx
@@ -36193,7 +36283,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$j($$self, $$props, $$invalidate) {
+    function instance$i($$self, $$props, $$invalidate) {
     	let $selectedConfigOptionName;
     	validate_store(selectedConfigOptionName, 'selectedConfigOptionName');
     	component_subscribe($$self, selectedConfigOptionName, $$value => $$invalidate(5, $selectedConfigOptionName = $$value));
@@ -36273,13 +36363,13 @@ var app = (function () {
     class ConfigLayout extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$j, create_fragment$j, safe_not_equal, {});
+    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ConfigLayout",
     			options,
-    			id: create_fragment$j.name
+    			id: create_fragment$i.name
     		});
     	}
     }
@@ -36305,9 +36395,9 @@ var app = (function () {
         }
     }
 
-    /* src/middlewares/EventsHandlerMiddleware.svelte generated by Svelte v3.49.0 */
+    /* src/middlewares/EventsHandlerMiddleware.svelte generated by Svelte v3.55.1 */
 
-    function create_fragment$i(ctx) {
+    function create_fragment$h(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -36322,7 +36412,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$i.name,
+    		id: create_fragment$h.name,
     		type: "component",
     		source: "",
     		ctx
@@ -36331,7 +36421,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$i($$self, $$props, $$invalidate) {
+    function instance$h($$self, $$props, $$invalidate) {
     	let $config;
     	let $activeSongStore;
     	let $songListStore;
@@ -36534,13 +36624,13 @@ var app = (function () {
     class EventsHandlerMiddleware extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$i, create_fragment$i, safe_not_equal, {});
+    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EventsHandlerMiddleware",
     			options,
-    			id: create_fragment$i.name
+    			id: create_fragment$h.name
     		});
     	}
     }
@@ -36549,34 +36639,34 @@ var app = (function () {
         return element.closest(selector);
     }
 
-    /* src/layouts/playback/PlaybackLayout.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/playback/PlaybackLayout.svelte generated by Svelte v3.55.1 */
     const file$e = "src/layouts/playback/PlaybackLayout.svelte";
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[13] = list[i];
-    	child_ctx[15] = i;
+    	child_ctx[15] = list[i];
+    	child_ctx[17] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
-    	child_ctx[15] = i;
+    	child_ctx[18] = list[i];
+    	child_ctx[17] = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
-    	child_ctx[15] = i;
+    	child_ctx[18] = list[i];
+    	child_ctx[17] = i;
     	return child_ctx;
     }
 
-    // (109:3) {#each tempTags as tag, index (index)}
+    // (118:3) {#each tempTags as tag, index (index)}
     function create_each_block_2(key_1, ctx) {
     	let td;
-    	let t_value = renameTagName(/*tag*/ ctx[16]) + "";
+    	let t_value = renameTagName(/*tag*/ ctx[18]) + "";
     	let t;
 
     	const block = {
@@ -36585,8 +36675,8 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-1tk78er");
-    			add_location(td, file$e, 109, 4, 4081);
+    			attr_dev(td, "class", "svelte-iuy66c");
+    			add_location(td, file$e, 118, 4, 4559);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -36605,32 +36695,32 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(109:3) {#each tempTags as tag, index (index)}",
+    		source: "(118:3) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (125:5) {:else}
+    // (134:5) {:else}
     function create_else_block(ctx) {
     	let td;
-    	let t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "";
+    	let t_value = /*song*/ ctx[15][/*tag*/ ctx[18]] + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-1tk78er");
-    			add_location(td, file$e, 125, 6, 4602);
+    			attr_dev(td, "class", "svelte-iuy66c");
+    			add_location(td, file$e, 134, 6, 5080);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
     			append_dev(td, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[15][/*tag*/ ctx[18]] + "")) set_data_dev(t, t_value);
     		},
     		i: noop,
     		o: noop,
@@ -36643,20 +36733,20 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(125:5) {:else}",
+    		source: "(134:5) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (118:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
+    // (127:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
     function create_if_block$3(ctx) {
     	let td;
     	let play_button;
     	let playbutton;
     	let t0;
-    	let t1_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "";
+    	let t1_value = /*song*/ ctx[15][/*tag*/ ctx[18]] + "";
     	let t1;
     	let current;
 
@@ -36675,10 +36765,10 @@ var app = (function () {
     			create_component(playbutton.$$.fragment);
     			t0 = space();
     			t1 = text(t1_value);
-    			set_custom_element_data(play_button, "class", "svelte-1tk78er");
-    			add_location(play_button, file$e, 119, 7, 4440);
-    			attr_dev(td, "class", "svelte-1tk78er");
-    			add_location(td, file$e, 118, 6, 4428);
+    			set_custom_element_data(play_button, "class", "svelte-iuy66c");
+    			add_location(play_button, file$e, 128, 7, 4918);
+    			attr_dev(td, "class", "svelte-iuy66c");
+    			add_location(td, file$e, 127, 6, 4906);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -36689,7 +36779,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if ((!current || dirty & /*$playbackStore*/ 1) && t1_value !== (t1_value = /*song*/ ctx[13][/*tag*/ ctx[16]] + "")) set_data_dev(t1, t1_value);
+    			if ((!current || dirty & /*$playbackStore*/ 1) && t1_value !== (t1_value = /*song*/ ctx[15][/*tag*/ ctx[18]] + "")) set_data_dev(t1, t1_value);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -36710,14 +36800,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(118:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
+    		source: "(127:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (117:4) {#each tempTags as tag, index (index)}
+    // (126:4) {#each tempTags as tag, index (index)}
     function create_each_block_1(key_1, ctx) {
     	let first;
     	let current_block_type_index;
@@ -36728,7 +36818,7 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*tag*/ ctx[16] === 'Track' && /*$playingSongStore*/ ctx[1].ID === /*song*/ ctx[13].ID) return 0;
+    		if (/*tag*/ ctx[18] === 'Track' && /*$playingSongStore*/ ctx[1].ID === /*song*/ ctx[15].ID) return 0;
     		return 1;
     	}
 
@@ -36798,14 +36888,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(117:4) {#each tempTags as tag, index (index)}",
+    		source: "(126:4) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (115:2) {#each $playbackStore as song, index (song.ID)}
+    // (124:2) {#each $playbackStore as song, index (song.ID)}
     function create_each_block$1(key_1, ctx) {
     	let tr;
     	let each_blocks = [];
@@ -36819,7 +36909,7 @@ var app = (function () {
     	let current;
     	let each_value_1 = /*tempTags*/ ctx[3];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*index*/ ctx[15];
+    	const get_key = ctx => /*index*/ ctx[17];
     	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -36841,16 +36931,16 @@ var app = (function () {
     			t0 = space();
     			td = element("td");
     			t1 = space();
-    			attr_dev(td, "class", "filler svelte-1tk78er");
-    			add_location(td, file$e, 129, 4, 4651);
+    			attr_dev(td, "class", "filler svelte-iuy66c");
+    			add_location(td, file$e, 138, 4, 5129);
 
-    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[13].ID)
+    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[15].ID)
     			? 'selected'
-    			: '') + " svelte-1tk78er"));
+    			: '') + " svelte-iuy66c"));
 
-    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[13].ID);
-    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[15]);
-    			add_location(tr, file$e, 115, 3, 4209);
+    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[15].ID);
+    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[17]);
+    			add_location(tr, file$e, 124, 3, 4687);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -36877,17 +36967,17 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[13].ID)
+    			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[15].ID)
     			? 'selected'
-    			: '') + " svelte-1tk78er"))) {
+    			: '') + " svelte-iuy66c"))) {
     				attr_dev(tr, "class", tr_class_value);
     			}
 
-    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[13].ID)) {
+    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[15].ID)) {
     				attr_dev(tr, "data-song-id", tr_data_song_id_value);
     			}
 
-    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[15])) {
+    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[17])) {
     				attr_dev(tr, "data-index", tr_data_index_value);
     			}
     		},
@@ -36920,14 +37010,14 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(115:2) {#each $playbackStore as song, index (song.ID)}",
+    		source: "(124:2) {#each $playbackStore as song, index (song.ID)}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$h(ctx) {
+    function create_fragment$g(ctx) {
     	let selected_songs_preview;
     	let t0;
     	let playback_layout;
@@ -36945,7 +37035,7 @@ var app = (function () {
     	let dispose;
     	let each_value_2 = /*tempTags*/ ctx[3];
     	validate_each_argument(each_value_2);
-    	const get_key = ctx => /*index*/ ctx[15];
+    	const get_key = ctx => /*index*/ ctx[17];
     	validate_each_keys(ctx, each_value_2, get_each_context_2, get_key);
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
@@ -36956,7 +37046,7 @@ var app = (function () {
 
     	let each_value = /*$playbackStore*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*song*/ ctx[13].ID;
+    	const get_key_1 = ctx => /*song*/ ctx[15].ID;
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -36985,15 +37075,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(selected_songs_preview, file$e, 103, 0, 3914);
-    			attr_dev(td, "class", "filler svelte-1tk78er");
-    			add_location(td, file$e, 111, 3, 4125);
-    			attr_dev(tr, "class", "table-header svelte-1tk78er");
-    			add_location(tr, file$e, 107, 2, 4009);
-    			attr_dev(table, "class", "svelte-1tk78er");
-    			add_location(table, file$e, 106, 1, 3999);
-    			set_custom_element_data(playback_layout, "class", "svelte-1tk78er");
-    			add_location(playback_layout, file$e, 105, 0, 3942);
+    			add_location(selected_songs_preview, file$e, 112, 0, 4355);
+    			attr_dev(td, "class", "filler svelte-iuy66c");
+    			add_location(td, file$e, 120, 3, 4603);
+    			attr_dev(tr, "class", "table-header static svelte-iuy66c");
+    			add_location(tr, file$e, 116, 2, 4450);
+    			attr_dev(table, "class", "svelte-iuy66c");
+    			add_location(table, file$e, 115, 1, 4440);
+    			set_custom_element_data(playback_layout, "class", "svelte-iuy66c");
+    			add_location(playback_layout, file$e, 114, 0, 4383);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -37020,7 +37110,11 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(playback_layout, "dblclick", /*dblclick_handler*/ ctx[5], false, false, false);
+    				dispose = [
+    					listen_dev(tr, "click", /*onTableHeaderClick*/ ctx[5], false, false, false),
+    					listen_dev(playback_layout, "dblclick", /*dblclick_handler*/ ctx[6], false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
@@ -37071,13 +37165,13 @@ var app = (function () {
     			}
 
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$h.name,
+    		id: create_fragment$g.name,
     		type: "component",
     		source: "",
     		ctx
@@ -37096,9 +37190,12 @@ var app = (function () {
     	})[tagName];
     }
 
-    function instance$h($$self, $$props, $$invalidate) {
+    function instance$g($$self, $$props, $$invalidate) {
+    	let $config;
     	let $playbackStore;
     	let $playingSongStore;
+    	validate_store(config, 'config');
+    	component_subscribe($$self, config, $$value => $$invalidate(8, $config = $$value));
     	validate_store(playbackStore, 'playbackStore');
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(0, $playbackStore = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
@@ -37117,9 +37214,13 @@ var app = (function () {
     			multiDrag: true,
     			animation: 150,
     			selectedClass: 'selected',
+    			filter: '.static',
     			onEnd: onDragEnd,
     			onSelect: onSelectDeselect,
-    			onDeselect: onSelectDeselect
+    			onDeselect: onSelectDeselect,
+    			onMove(e) {
+    				return e.related.className.indexOf('static') === -1;
+    			}
     		});
     	}
 
@@ -37201,6 +37302,11 @@ var app = (function () {
     		);
     	}
 
+    	function onTableHeaderClick(evt) {
+    		let tdElement = evt.composedPath().filter(element => element.tagName === 'TD')[0];
+    		set_store_value(playbackStore, $playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.sortOrder), $playbackStore);
+    	}
+
     	onMount(() => {
     		createSortableList();
     		window.addEventListener('resize', handleWindowResize);
@@ -37225,10 +37331,12 @@ var app = (function () {
     		cssVariablesService,
     		SortableService,
     		Sortable,
+    		config,
     		playbackStore,
     		playingSongStore,
     		songToPlayUrlStore,
     		PlayButton,
+    		sortSongsArrayFn,
     		selectedSongsId,
     		tempTags,
     		handleWindowResizeRunning,
@@ -37240,6 +37348,8 @@ var app = (function () {
     		calculateTableFillerWidth,
     		renameTagName,
     		handleWindowResize,
+    		onTableHeaderClick,
+    		$config,
     		$playbackStore,
     		$playingSongStore
     	});
@@ -37268,6 +37378,7 @@ var app = (function () {
     		selectedSongsId,
     		tempTags,
     		playSongFoo,
+    		onTableHeaderClick,
     		dblclick_handler
     	];
     }
@@ -37275,20 +37386,20 @@ var app = (function () {
     class PlaybackLayout extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$h, create_fragment$h, safe_not_equal, {});
+    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PlaybackLayout",
     			options,
-    			id: create_fragment$h.name
+    			id: create_fragment$g.name
     		});
     	}
     }
 
-    /* src/svelte_services/EqualizerService.svelte generated by Svelte v3.49.0 */
+    /* src/svelte_services/EqualizerService.svelte generated by Svelte v3.55.1 */
 
-    function create_fragment$g(ctx) {
+    function create_fragment$f(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -37303,7 +37414,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$g.name,
+    		id: create_fragment$f.name,
     		type: "component",
     		source: "",
     		ctx
@@ -37312,7 +37423,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$g($$self, $$props, $$invalidate) {
+    function instance$f($$self, $$props, $$invalidate) {
     	let $isEqualizerDirty;
     	let $equalizer;
     	let $selectedEqName;
@@ -37476,7 +37587,7 @@ var app = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$g, create_fragment$g, safe_not_equal, {
+    		init(this, options, instance$f, create_fragment$f, safe_not_equal, {
     			changeProfile: 0,
     			updateEqualizer: 1,
     			gainChange: 2,
@@ -37489,7 +37600,7 @@ var app = (function () {
     			component: this,
     			tagName: "EqualizerService",
     			options,
-    			id: create_fragment$g.name
+    			id: create_fragment$f.name
     		});
     	}
 
@@ -37542,11 +37653,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/CheckIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/CheckIcon.svelte generated by Svelte v3.55.1 */
 
     const file$d = "src/icons/CheckIcon.svelte";
 
-    function create_fragment$f(ctx) {
+    function create_fragment$e(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -37588,7 +37699,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$f.name,
+    		id: create_fragment$e.name,
     		type: "component",
     		source: "",
     		ctx
@@ -37597,7 +37708,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$f($$self, $$props, $$invalidate) {
+    function instance$e($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CheckIcon', slots, []);
     	let { style = '' } = $$props;
@@ -37627,13 +37738,13 @@ var app = (function () {
     class CheckIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { style: 0 });
+    		init(this, options, instance$e, create_fragment$e, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "CheckIcon",
     			options,
-    			id: create_fragment$f.name
+    			id: create_fragment$e.name
     		});
     	}
 
@@ -37646,12 +37757,12 @@ var app = (function () {
     	}
     }
 
-    /* src/svelte_services/PromptService.svelte generated by Svelte v3.49.0 */
+    /* src/svelte_services/PromptService.svelte generated by Svelte v3.55.1 */
 
     const { Object: Object_1 } = globals;
     const file$c = "src/svelte_services/PromptService.svelte";
 
-    function create_fragment$e(ctx) {
+    function create_fragment$d(ctx) {
     	let prompt_svlt;
     	let prompt_content;
     	let prompt_close;
@@ -37717,27 +37828,27 @@ var app = (function () {
     			create_component(checkicon.$$.fragment);
     			t8 = space();
     			t9 = text(t9_value);
-    			set_custom_element_data(prompt_close, "class", "svelte-kjnz6i");
+    			set_custom_element_data(prompt_close, "class", "svelte-r0gn79");
     			add_location(prompt_close, file$c, 74, 2, 2128);
-    			set_custom_element_data(prompt_title, "class", "svelte-kjnz6i");
+    			set_custom_element_data(prompt_title, "class", "svelte-r0gn79");
     			add_location(prompt_title, file$c, 75, 2, 2192);
     			attr_dev(input, "slot", "body");
     			attr_dev(input, "type", "text");
     			attr_dev(input, "placeholder", input_placeholder_value = /*promptState*/ ctx[2].placeholder);
-    			attr_dev(input, "class", "svelte-kjnz6i");
+    			attr_dev(input, "class", "svelte-r0gn79");
     			add_location(input, file$c, 77, 3, 2260);
-    			set_custom_element_data(prompt_body, "class", "svelte-kjnz6i");
+    			set_custom_element_data(prompt_body, "class", "svelte-r0gn79");
     			add_location(prompt_body, file$c, 76, 2, 2243);
-    			attr_dev(button0, "class", "cancel svelte-kjnz6i");
+    			attr_dev(button0, "class", "cancel svelte-r0gn79");
     			add_location(button0, file$c, 86, 3, 2463);
-    			attr_dev(button1, "class", "confirm svelte-kjnz6i");
+    			attr_dev(button1, "class", "confirm svelte-r0gn79");
     			add_location(button1, file$c, 90, 3, 2651);
-    			set_custom_element_data(prompt_footer, "class", "svelte-kjnz6i");
+    			set_custom_element_data(prompt_footer, "class", "svelte-r0gn79");
     			add_location(prompt_footer, file$c, 85, 2, 2444);
-    			set_custom_element_data(prompt_content, "class", "svelte-kjnz6i");
+    			set_custom_element_data(prompt_content, "class", "svelte-r0gn79");
     			add_location(prompt_content, file$c, 73, 1, 2109);
     			set_custom_element_data(prompt_svlt, "show", /*isPromptVisible*/ ctx[1]);
-    			set_custom_element_data(prompt_svlt, "class", "svelte-kjnz6i");
+    			set_custom_element_data(prompt_svlt, "class", "svelte-r0gn79");
     			add_location(prompt_svlt, file$c, 72, 0, 2027);
     		},
     		l: function claim(nodes) {
@@ -37820,7 +37931,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$e.name,
+    		id: create_fragment$d.name,
     		type: "component",
     		source: "",
     		ctx
@@ -37829,7 +37940,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$e($$self, $$props, $$invalidate) {
+    function instance$d($$self, $$props, $$invalidate) {
     	let $keyPressed;
     	validate_store(keyPressed, 'keyPressed');
     	component_subscribe($$self, keyPressed, $$value => $$invalidate(9, $keyPressed = $$value));
@@ -37997,13 +38108,13 @@ var app = (function () {
     class PromptService extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$e, create_fragment$e, safe_not_equal, { showPrompt: 7, closePrompt: 0 });
+    		init(this, options, instance$d, create_fragment$d, safe_not_equal, { showPrompt: 7, closePrompt: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "PromptService",
     			options,
-    			id: create_fragment$e.name
+    			id: create_fragment$d.name
     		});
     	}
 
@@ -38024,10 +38135,10 @@ var app = (function () {
     	}
     }
 
-    /* src/svelte_services/ConfirmService.svelte generated by Svelte v3.49.0 */
+    /* src/svelte_services/ConfirmService.svelte generated by Svelte v3.55.1 */
     const file$b = "src/svelte_services/ConfirmService.svelte";
 
-    function create_fragment$d(ctx) {
+    function create_fragment$c(ctx) {
     	let confirm_svlt;
     	let confirm_content;
     	let confirm_close;
@@ -38087,22 +38198,22 @@ var app = (function () {
     			button1 = element("button");
     			create_component(checkicon.$$.fragment);
     			t8 = text("\n\t\t\t\tConfirm");
-    			set_custom_element_data(confirm_close, "class", "svelte-k1dbx");
+    			set_custom_element_data(confirm_close, "class", "svelte-q933ue");
     			add_location(confirm_close, file$b, 42, 2, 1237);
-    			set_custom_element_data(confirm_title, "class", "svelte-k1dbx");
+    			set_custom_element_data(confirm_title, "class", "svelte-q933ue");
     			add_location(confirm_title, file$b, 43, 2, 1304);
-    			set_custom_element_data(confirm_body, "class", "svelte-k1dbx");
+    			set_custom_element_data(confirm_body, "class", "svelte-q933ue");
     			add_location(confirm_body, file$b, 44, 2, 1358);
-    			attr_dev(button0, "class", "cancel svelte-k1dbx");
+    			attr_dev(button0, "class", "cancel svelte-q933ue");
     			add_location(button0, file$b, 48, 3, 1445);
-    			attr_dev(button1, "class", "confirm svelte-k1dbx");
+    			attr_dev(button1, "class", "confirm svelte-q933ue");
     			add_location(button1, file$b, 52, 3, 1610);
-    			set_custom_element_data(confirm_footer, "class", "svelte-k1dbx");
+    			set_custom_element_data(confirm_footer, "class", "svelte-q933ue");
     			add_location(confirm_footer, file$b, 47, 2, 1425);
-    			set_custom_element_data(confirm_content, "class", "svelte-k1dbx");
+    			set_custom_element_data(confirm_content, "class", "svelte-q933ue");
     			add_location(confirm_content, file$b, 41, 1, 1217);
     			set_custom_element_data(confirm_svlt, "show", /*isConfirmVisible*/ ctx[1]);
-    			set_custom_element_data(confirm_svlt, "class", "svelte-k1dbx");
+    			set_custom_element_data(confirm_svlt, "class", "svelte-q933ue");
     			add_location(confirm_svlt, file$b, 40, 0, 1133);
     		},
     		l: function claim(nodes) {
@@ -38170,7 +38281,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$d.name,
+    		id: create_fragment$c.name,
     		type: "component",
     		source: "",
     		ctx
@@ -38179,7 +38290,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$d($$self, $$props, $$invalidate) {
+    function instance$c($$self, $$props, $$invalidate) {
     	let $keyPressed;
     	validate_store(keyPressed, 'keyPressed');
     	component_subscribe($$self, keyPressed, $$value => $$invalidate(6, $keyPressed = $$value));
@@ -38281,13 +38392,13 @@ var app = (function () {
     class ConfirmService extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$d, create_fragment$d, safe_not_equal, { showConfirm: 5, closeConfirm: 0 });
+    		init(this, options, instance$c, create_fragment$c, safe_not_equal, { showConfirm: 5, closeConfirm: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ConfirmService",
     			options,
-    			id: create_fragment$d.name
+    			id: create_fragment$c.name
     		});
     	}
 
@@ -38308,10 +38419,10 @@ var app = (function () {
     	}
     }
 
-    /* src/svelte_services/RangeInputService.svelte generated by Svelte v3.49.0 */
+    /* src/svelte_services/RangeInputService.svelte generated by Svelte v3.55.1 */
     const file$a = "src/svelte_services/RangeInputService.svelte";
 
-    function create_fragment$c(ctx) {
+    function create_fragment$b(ctx) {
     	let range_input_svlt;
     	let range_input_container;
     	let range_input_input_title;
@@ -38392,7 +38503,7 @@ var app = (function () {
     			create_component(checkicon.$$.fragment);
     			t13 = space();
     			t14 = text(t14_value);
-    			set_custom_element_data(range_input_input_title, "class", "svelte-1vo00eh");
+    			set_custom_element_data(range_input_input_title, "class", "svelte-h8y7q5");
     			add_location(range_input_input_title, file$a, 65, 2, 1895);
     			attr_dev(input, "type", "range");
     			attr_dev(input, "min", input_min_value = /*rangeInputState*/ ctx[2].min);
@@ -38402,25 +38513,25 @@ var app = (function () {
     			? /*rangeInputState*/ ctx[2].minStep
     			: /*rangeInputState*/ ctx[2].step);
 
-    			attr_dev(input, "class", "svelte-1vo00eh");
+    			attr_dev(input, "class", "svelte-h8y7q5");
     			add_location(input, file$a, 69, 2, 1980);
-    			set_custom_element_data(shift_button, "class", "svelte-1vo00eh");
+    			set_custom_element_data(shift_button, "class", "svelte-h8y7q5");
     			add_location(shift_button, file$a, 77, 31, 2213);
-    			set_custom_element_data(range_input_steps_info, "class", "svelte-1vo00eh");
+    			set_custom_element_data(range_input_steps_info, "class", "svelte-h8y7q5");
     			add_location(range_input_steps_info, file$a, 77, 2, 2184);
-    			set_custom_element_data(range_input_value, "class", "svelte-1vo00eh");
+    			set_custom_element_data(range_input_value, "class", "svelte-h8y7q5");
     			add_location(range_input_value, file$a, 79, 2, 2298);
-    			attr_dev(button0, "class", "cancel svelte-1vo00eh");
+    			attr_dev(button0, "class", "cancel svelte-h8y7q5");
     			add_location(button0, file$a, 82, 3, 2386);
     			attr_dev(button1, "class", "info");
     			button1.disabled = button1_disabled_value = /*rangeInputValue*/ ctx[1] === /*rangeInputState*/ ctx[2].value;
     			add_location(button1, file$a, 86, 3, 2582);
-    			set_custom_element_data(range_input_buttons, "class", "svelte-1vo00eh");
+    			set_custom_element_data(range_input_buttons, "class", "svelte-h8y7q5");
     			add_location(range_input_buttons, file$a, 81, 2, 2361);
-    			set_custom_element_data(range_input_container, "class", "svelte-1vo00eh");
+    			set_custom_element_data(range_input_container, "class", "svelte-h8y7q5");
     			add_location(range_input_container, file$a, 64, 1, 1869);
     			set_custom_element_data(range_input_svlt, "show", /*isRangeInputVisible*/ ctx[3]);
-    			set_custom_element_data(range_input_svlt, "class", "svelte-1vo00eh");
+    			set_custom_element_data(range_input_svlt, "class", "svelte-h8y7q5");
     			add_location(range_input_svlt, file$a, 63, 0, 1822);
     		},
     		l: function claim(nodes) {
@@ -38522,7 +38633,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$c.name,
+    		id: create_fragment$b.name,
     		type: "component",
     		source: "",
     		ctx
@@ -38531,7 +38642,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$c($$self, $$props, $$invalidate) {
+    function instance$b($$self, $$props, $$invalidate) {
     	let $keyPressed;
     	validate_store(keyPressed, 'keyPressed');
     	component_subscribe($$self, keyPressed, $$value => $$invalidate(4, $keyPressed = $$value));
@@ -38679,13 +38790,13 @@ var app = (function () {
     class RangeInputService extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$c, create_fragment$c, safe_not_equal, { showRangeInput: 6, closeRangeInput: 0 });
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, { showRangeInput: 6, closeRangeInput: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "RangeInputService",
     			options,
-    			id: create_fragment$c.name
+    			id: create_fragment$b.name
     		});
     	}
 
@@ -38706,11 +38817,11 @@ var app = (function () {
     	}
     }
 
-    /* src/svelte_services/StorageService.svelte generated by Svelte v3.49.0 */
+    /* src/svelte_services/StorageService.svelte generated by Svelte v3.55.1 */
 
     const { console: console_1 } = globals;
 
-    function create_fragment$b(ctx) {
+    function create_fragment$a(ctx) {
     	const block = {
     		c: noop,
     		l: function claim(nodes) {
@@ -38725,7 +38836,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$b.name,
+    		id: create_fragment$a.name,
     		type: "component",
     		source: "",
     		ctx
@@ -38748,7 +38859,7 @@ var app = (function () {
     	}
     }
 
-    function instance$b($$self, $$props, $$invalidate) {
+    function instance$a($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('StorageService', slots, []);
     	const writable_props = [];
@@ -38764,13 +38875,13 @@ var app = (function () {
     class StorageService extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$b, create_fragment$b, safe_not_equal, { addSong: 0 });
+    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { addSong: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "StorageService",
     			options,
-    			id: create_fragment$b.name
+    			id: create_fragment$a.name
     		});
     	}
 
@@ -38808,11 +38919,11 @@ var app = (function () {
         });
     }
 
-    /* src/icons/TextAlignCenterIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/TextAlignCenterIcon.svelte generated by Svelte v3.55.1 */
 
     const file$9 = "src/icons/TextAlignCenterIcon.svelte";
 
-    function create_fragment$a(ctx) {
+    function create_fragment$9(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -38854,7 +38965,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$a.name,
+    		id: create_fragment$9.name,
     		type: "component",
     		source: "",
     		ctx
@@ -38863,7 +38974,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$a($$self, $$props, $$invalidate) {
+    function instance$9($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TextAlignCenterIcon', slots, []);
     	let { style = '' } = $$props;
@@ -38893,13 +39004,13 @@ var app = (function () {
     class TextAlignCenterIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { style: 0 });
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TextAlignCenterIcon",
     			options,
-    			id: create_fragment$a.name
+    			id: create_fragment$9.name
     		});
     	}
 
@@ -38912,11 +39023,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/TextAlignLeftcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/TextAlignLeftcon.svelte generated by Svelte v3.55.1 */
 
     const file$8 = "src/icons/TextAlignLeftcon.svelte";
 
-    function create_fragment$9(ctx) {
+    function create_fragment$8(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -38958,7 +39069,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$9.name,
+    		id: create_fragment$8.name,
     		type: "component",
     		source: "",
     		ctx
@@ -38967,7 +39078,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$9($$self, $$props, $$invalidate) {
+    function instance$8($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TextAlignLeftcon', slots, []);
     	let { style = '' } = $$props;
@@ -38997,13 +39108,13 @@ var app = (function () {
     class TextAlignLeftcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$9, create_fragment$9, safe_not_equal, { style: 0 });
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TextAlignLeftcon",
     			options,
-    			id: create_fragment$9.name
+    			id: create_fragment$8.name
     		});
     	}
 
@@ -39016,11 +39127,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/TextAlignRightIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/TextAlignRightIcon.svelte generated by Svelte v3.55.1 */
 
     const file$7 = "src/icons/TextAlignRightIcon.svelte";
 
-    function create_fragment$8(ctx) {
+    function create_fragment$7(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -39062,7 +39173,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$8.name,
+    		id: create_fragment$7.name,
     		type: "component",
     		source: "",
     		ctx
@@ -39071,7 +39182,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$8($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TextAlignRightIcon', slots, []);
     	let { style = '' } = $$props;
@@ -39101,13 +39212,13 @@ var app = (function () {
     class TextAlignRightIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { style: 0 });
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "TextAlignRightIcon",
     			options,
-    			id: create_fragment$8.name
+    			id: create_fragment$7.name
     		});
     	}
 
@@ -39120,10 +39231,10 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/lyrics/LyricsRead.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/lyrics/LyricsRead.svelte generated by Svelte v3.55.1 */
     const file$6 = "src/layouts/lyrics/LyricsRead.svelte";
 
-    function create_fragment$7(ctx) {
+    function create_fragment$6(ctx) {
     	let lyrics_read;
     	let lyrics_read_controls;
     	let text_alignment;
@@ -39230,46 +39341,46 @@ var app = (function () {
     			t16 = text(t16_value);
     			t17 = space();
     			lyrics_container = element("lyrics-container");
-    			set_custom_element_data(icon_wrapper0, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(icon_wrapper0, "class", "icon svelte-1u1tp6s");
     			add_location(icon_wrapper0, file$6, 73, 4, 2371);
-    			set_custom_element_data(icon_wrapper1, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(icon_wrapper1, "class", "icon svelte-1u1tp6s");
     			add_location(icon_wrapper1, file$6, 76, 4, 2539);
-    			set_custom_element_data(icon_wrapper2, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(icon_wrapper2, "class", "icon svelte-1u1tp6s");
     			add_location(icon_wrapper2, file$6, 79, 4, 2712);
-    			set_custom_element_data(text_alignment_buttons, "class", "controls-buttons svelte-1pf93vk");
+    			set_custom_element_data(text_alignment_buttons, "class", "controls-buttons svelte-1u1tp6s");
     			add_location(text_alignment_buttons, file$6, 72, 3, 2317);
-    			set_custom_element_data(text_alignment_value, "class", "controls-value svelte-1pf93vk");
+    			set_custom_element_data(text_alignment_value, "class", "controls-value svelte-1u1tp6s");
     			set_style(text_alignment_value, "text-transform", "capitalize");
     			add_location(text_alignment_value, file$6, 83, 3, 2911);
-    			set_custom_element_data(text_alignment, "class", "controls-container svelte-1pf93vk");
+    			set_custom_element_data(text_alignment, "class", "controls-container svelte-1u1tp6s");
     			add_location(text_alignment, file$6, 71, 2, 2270);
-    			set_custom_element_data(custom_icon0, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(custom_icon0, "class", "icon svelte-1u1tp6s");
     			set_style(custom_icon0, "font-size", "0.8rem");
     			add_location(custom_icon0, file$6, 90, 4, 3176);
-    			set_custom_element_data(custom_icon1, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(custom_icon1, "class", "icon svelte-1u1tp6s");
     			set_style(custom_icon1, "font-size", "1.2rem");
     			add_location(custom_icon1, file$6, 91, 4, 3287);
-    			set_custom_element_data(text_size_buttons, "class", "controls-buttons svelte-1pf93vk");
+    			set_custom_element_data(text_size_buttons, "class", "controls-buttons svelte-1u1tp6s");
     			add_location(text_size_buttons, file$6, 89, 3, 3127);
-    			set_custom_element_data(text_size_value, "class", "controls-value svelte-1pf93vk");
+    			set_custom_element_data(text_size_value, "class", "controls-value svelte-1u1tp6s");
     			add_location(text_size_value, file$6, 93, 3, 3421);
-    			set_custom_element_data(text_size, "class", "controls-container svelte-1pf93vk");
+    			set_custom_element_data(text_size, "class", "controls-container svelte-1u1tp6s");
     			add_location(text_size, file$6, 88, 2, 3085);
-    			set_custom_element_data(custom_icon2, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(custom_icon2, "class", "icon svelte-1u1tp6s");
     			set_style(custom_icon2, "font-variation-settings", "'wght' 500");
     			add_location(custom_icon2, file$6, 98, 4, 3633);
-    			set_custom_element_data(custom_icon3, "class", "icon svelte-1pf93vk");
+    			set_custom_element_data(custom_icon3, "class", "icon svelte-1u1tp6s");
     			set_style(custom_icon3, "font-variation-settings", "'wght' 900");
     			add_location(custom_icon3, file$6, 101, 4, 3774);
-    			set_custom_element_data(text_weight_buttons, "class", "controls-buttons svelte-1pf93vk");
+    			set_custom_element_data(text_weight_buttons, "class", "controls-buttons svelte-1u1tp6s");
     			add_location(text_weight_buttons, file$6, 97, 3, 3582);
-    			set_custom_element_data(text_weight_value, "class", "controls-value svelte-1pf93vk");
+    			set_custom_element_data(text_weight_value, "class", "controls-value svelte-1u1tp6s");
     			add_location(text_weight_value, file$6, 106, 3, 3941);
-    			set_custom_element_data(text_weight, "class", "controls-container svelte-1pf93vk");
+    			set_custom_element_data(text_weight, "class", "controls-container svelte-1u1tp6s");
     			add_location(text_weight, file$6, 96, 2, 3538);
-    			set_custom_element_data(lyrics_read_controls, "class", "svelte-1pf93vk");
+    			set_custom_element_data(lyrics_read_controls, "class", "svelte-1u1tp6s");
     			add_location(lyrics_read_controls, file$6, 70, 1, 2245);
-    			set_custom_element_data(lyrics_container, "class", "svelte-1pf93vk");
+    			set_custom_element_data(lyrics_container, "class", "svelte-1u1tp6s");
     			add_location(lyrics_container, file$6, 109, 1, 4087);
     			add_location(lyrics_read, file$6, 69, 0, 2230);
     		},
@@ -39361,7 +39472,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$7.name,
+    		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
@@ -39370,7 +39481,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$7($$self, $$props, $$invalidate) {
+    function instance$6($$self, $$props, $$invalidate) {
     	let $config;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(1, $config = $$value));
@@ -39435,6 +39546,12 @@ var app = (function () {
     		cssVariablesService.set('lyrics-text-align', $config.userOptions.lyricsTextAlign);
     		cssVariablesService.set('lyrics-text-size', $config.userOptions.lyricsTextSize + 'px');
     		cssVariablesService.set('lyrics-text-weight', $config.userOptions.lyricsTextWeight);
+    	});
+
+    	$$self.$$.on_mount.push(function () {
+    		if (lyrics === undefined && !('lyrics' in $$props || $$self.$$.bound[$$self.$$.props['lyrics']])) {
+    			console.warn("<LyricsRead> was created without expected prop 'lyrics'");
+    		}
     	});
 
     	const writable_props = ['lyrics'];
@@ -39515,21 +39632,14 @@ var app = (function () {
     class LyricsRead extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, { lyrics: 5 });
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { lyrics: 5 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LyricsRead",
     			options,
-    			id: create_fragment$7.name
+    			id: create_fragment$6.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*lyrics*/ ctx[5] === undefined && !('lyrics' in props)) {
-    			console.warn("<LyricsRead> was created without expected prop 'lyrics'");
-    		}
     	}
 
     	get lyrics() {
@@ -39541,10 +39651,10 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/lyrics/LyricsEdit.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/lyrics/LyricsEdit.svelte generated by Svelte v3.55.1 */
     const file$5 = "src/layouts/lyrics/LyricsEdit.svelte";
 
-    function create_fragment$6(ctx) {
+    function create_fragment$5(ctx) {
     	let textarea;
     	let mounted;
     	let dispose;
@@ -39552,7 +39662,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			textarea = element("textarea");
-    			attr_dev(textarea, "class", "svelte-m2hnct");
+    			attr_dev(textarea, "class", "svelte-hz9gm9");
     			add_location(textarea, file$5, 15, 0, 342);
     		},
     		l: function claim(nodes) {
@@ -39589,7 +39699,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$6.name,
+    		id: create_fragment$5.name,
     		type: "component",
     		source: "",
     		ctx
@@ -39598,7 +39708,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$6($$self, $$props, $$invalidate) {
+    function instance$5($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('LyricsEdit', slots, []);
     	const dispatcher = createEventDispatcher();
@@ -39612,6 +39722,12 @@ var app = (function () {
 
     	onMount(() => {
     		lyricsEdit.focus();
+    	});
+
+    	$$self.$$.on_mount.push(function () {
+    		if (lyrics === undefined && !('lyrics' in $$props || $$self.$$.bound[$$self.$$.props['lyrics']])) {
+    			console.warn("<LyricsEdit> was created without expected prop 'lyrics'");
+    		}
     	});
 
     	const writable_props = ['lyrics'];
@@ -39678,21 +39794,14 @@ var app = (function () {
     class LyricsEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { lyrics: 3 });
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { lyrics: 3 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LyricsEdit",
     			options,
-    			id: create_fragment$6.name
+    			id: create_fragment$5.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*lyrics*/ ctx[3] === undefined && !('lyrics' in props)) {
-    			console.warn("<LyricsEdit> was created without expected prop 'lyrics'");
-    		}
     	}
 
     	get lyrics() {
@@ -39704,11 +39813,11 @@ var app = (function () {
     	}
     }
 
-    /* src/icons/EyeIcon.svelte generated by Svelte v3.49.0 */
+    /* src/icons/EyeIcon.svelte generated by Svelte v3.55.1 */
 
     const file$4 = "src/icons/EyeIcon.svelte";
 
-    function create_fragment$5(ctx) {
+    function create_fragment$4(ctx) {
     	let svg;
     	let path0;
     	let path1;
@@ -39750,7 +39859,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$5.name,
+    		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
@@ -39759,7 +39868,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$5($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EyeIcon', slots, []);
     	let { style = '' } = $$props;
@@ -39789,13 +39898,13 @@ var app = (function () {
     class EyeIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { style: 0 });
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { style: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "EyeIcon",
     			options,
-    			id: create_fragment$5.name
+    			id: create_fragment$4.name
     		});
     	}
 
@@ -39808,7 +39917,7 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/lyrics/LyricsList.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/lyrics/LyricsList.svelte generated by Svelte v3.55.1 */
 
     const file$3 = "src/layouts/lyrics/LyricsList.svelte";
 
@@ -39885,7 +39994,7 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			attr_dev(p, "class", "svelte-gafwyj");
+    			attr_dev(p, "class", "svelte-da9ygv");
     			add_location(p, file$3, 36, 2, 1484);
     			this.first = p;
     		},
@@ -39949,7 +40058,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$4(ctx) {
+    function create_fragment$3(ctx) {
     	let lyrics_list;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -39972,7 +40081,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(lyrics_list, "class", "svelte-gafwyj");
+    			set_custom_element_data(lyrics_list, "class", "svelte-da9ygv");
     			add_location(lyrics_list, file$3, 34, 0, 1427);
     		},
     		l: function claim(nodes) {
@@ -40006,7 +40115,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$4.name,
+    		id: create_fragment$3.name,
     		type: "component",
     		source: "",
     		ctx
@@ -40015,7 +40124,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$4($$self, $$props, $$invalidate) {
+    function instance$3($$self, $$props, $$invalidate) {
     	let $playbackStore;
     	let $songLyricsSelected;
     	let $dbSongsStore;
@@ -40122,13 +40231,13 @@ var app = (function () {
     class LyricsList extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { updateLyricsList: 4 });
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { updateLyricsList: 4 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LyricsList",
     			options,
-    			id: create_fragment$4.name
+    			id: create_fragment$3.name
     		});
     	}
 
@@ -40141,11 +40250,11 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/lyrics/LyricsNotFound.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/lyrics/LyricsNotFound.svelte generated by Svelte v3.55.1 */
 
     const file$2 = "src/layouts/lyrics/LyricsNotFound.svelte";
 
-    function create_fragment$3(ctx) {
+    function create_fragment$2(ctx) {
     	let lyrics_not_found;
     	let p0;
     	let t1;
@@ -40164,13 +40273,13 @@ var app = (function () {
     			t3 = space();
     			p2 = element("p");
     			p2.textContent = "Add new lyrics by right-clicking the song of your choice in the song list and click edit lyrics";
-    			attr_dev(p0, "class", "svelte-1mgw1dp");
+    			attr_dev(p0, "class", "svelte-1axs0hl");
     			add_location(p0, file$2, 1, 1, 20);
-    			attr_dev(p1, "class", "svelte-1mgw1dp");
+    			attr_dev(p1, "class", "svelte-1axs0hl");
     			add_location(p1, file$2, 2, 1, 59);
-    			attr_dev(p2, "class", "svelte-1mgw1dp");
+    			attr_dev(p2, "class", "svelte-1axs0hl");
     			add_location(p2, file$2, 3, 1, 70);
-    			set_custom_element_data(lyrics_not_found, "class", "svelte-1mgw1dp");
+    			set_custom_element_data(lyrics_not_found, "class", "svelte-1axs0hl");
     			add_location(lyrics_not_found, file$2, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -40194,7 +40303,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
+    		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
@@ -40203,7 +40312,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$3($$self, $$props) {
+    function instance$2($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('LyricsNotFound', slots, []);
     	const writable_props = [];
@@ -40218,18 +40327,18 @@ var app = (function () {
     class LyricsNotFound extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "LyricsNotFound",
     			options,
-    			id: create_fragment$3.name
+    			id: create_fragment$2.name
     		});
     	}
     }
 
-    /* src/layouts/lyrics/!LyricsLayout.svelte generated by Svelte v3.49.0 */
+    /* src/layouts/lyrics/!LyricsLayout.svelte generated by Svelte v3.55.1 */
     const file$1 = "src/layouts/lyrics/!LyricsLayout.svelte";
 
     // (128:40) 
@@ -40370,7 +40479,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$2(ctx) {
+    function create_fragment$1(ctx) {
     	let lyrics_layout;
     	let lyricslist;
     	let t0;
@@ -40487,33 +40596,33 @@ var app = (function () {
     			if (if_block) if_block.c();
     			set_style(span, "margin-left", "0.5rem");
     			set_style(span, "font-size", "1rem");
-    			add_location(span, file$1, 103, 3, 3367);
-    			set_custom_element_data(song_information, "class", "svelte-1hd8guh");
-    			add_location(song_information, file$1, 101, 2, 3274);
+    			add_location(span, file$1, 103, 3, 3402);
+    			set_custom_element_data(song_information, "class", "svelte-1cy3nul");
+    			add_location(song_information, file$1, 101, 2, 3309);
     			set_custom_element_data(event_wrapper0, "disabled", event_wrapper0_disabled_value = /*selectedView*/ ctx[1] === 'read');
-    			set_custom_element_data(event_wrapper0, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper0, file$1, 107, 3, 3498);
+    			set_custom_element_data(event_wrapper0, "class", "svelte-1cy3nul");
+    			add_location(event_wrapper0, file$1, 107, 3, 3533);
     			set_custom_element_data(event_wrapper1, "disabled", event_wrapper1_disabled_value = /*selectedView*/ ctx[1] === 'edit');
-    			set_custom_element_data(event_wrapper1, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper1, file$1, 110, 3, 3675);
+    			set_custom_element_data(event_wrapper1, "class", "svelte-1cy3nul");
+    			add_location(event_wrapper1, file$1, 110, 3, 3710);
     			set_custom_element_data(event_wrapper2, "disabled", event_wrapper2_disabled_value = /*selectedView*/ ctx[1] !== 'edit' || /*isLyricsDirty*/ ctx[4] === false);
-    			set_custom_element_data(event_wrapper2, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper2, file$1, 113, 3, 3855);
-    			set_custom_element_data(event_wrapper3, "class", "svelte-1hd8guh");
-    			add_location(event_wrapper3, file$1, 116, 3, 4049);
-    			set_custom_element_data(lyrics_controls, "class", "svelte-1hd8guh");
-    			add_location(lyrics_controls, file$1, 106, 2, 3477);
+    			set_custom_element_data(event_wrapper2, "class", "svelte-1cy3nul");
+    			add_location(event_wrapper2, file$1, 113, 3, 3890);
+    			set_custom_element_data(event_wrapper3, "class", "svelte-1cy3nul");
+    			add_location(event_wrapper3, file$1, 116, 3, 4084);
+    			set_custom_element_data(lyrics_controls, "class", "svelte-1cy3nul");
+    			add_location(lyrics_controls, file$1, 106, 2, 3512);
 
     			set_custom_element_data(lyrics_layout_header, "disabled", lyrics_layout_header_disabled_value = /*selectedView*/ ctx[1] === 'notFound'
     			? 'true'
     			: 'false');
 
-    			set_custom_element_data(lyrics_layout_header, "class", "svelte-1hd8guh");
-    			add_location(lyrics_layout_header, file$1, 100, 1, 3191);
-    			set_custom_element_data(lyrics_layout_body, "class", "svelte-1hd8guh");
-    			add_location(lyrics_layout_body, file$1, 122, 1, 4230);
-    			set_custom_element_data(lyrics_layout, "class", "layout svelte-1hd8guh");
-    			add_location(lyrics_layout, file$1, 98, 0, 3072);
+    			set_custom_element_data(lyrics_layout_header, "class", "svelte-1cy3nul");
+    			add_location(lyrics_layout_header, file$1, 100, 1, 3226);
+    			set_custom_element_data(lyrics_layout_body, "class", "svelte-1cy3nul");
+    			add_location(lyrics_layout_body, file$1, 122, 1, 4265);
+    			set_custom_element_data(lyrics_layout, "class", "layout svelte-1cy3nul");
+    			add_location(lyrics_layout, file$1, 98, 0, 3107);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -40659,7 +40768,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$2.name,
+    		id: create_fragment$1.name,
     		type: "component",
     		source: "",
     		ctx
@@ -40668,7 +40777,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$2($$self, $$props, $$invalidate) {
+    function instance$1($$self, $$props, $$invalidate) {
     	let isLyricsDirty;
     	let $songLyricsSelected;
     	let $onNewLyrics;
@@ -40784,9 +40893,11 @@ var app = (function () {
     		notifyService,
     		keyModifier,
     		keyPressed,
+    		playingSongStore,
     		songLyricsSelected,
     		LyricsList,
     		onNewLyrics,
+    		onMount,
     		LyricsNotFound,
     		DeleteIcon,
     		lyrics,
@@ -40867,73 +40978,21 @@ var app = (function () {
     class LyricsLayout extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "LyricsLayout",
-    			options,
-    			id: create_fragment$2.name
-    		});
-    	}
-    }
-
-    /* src/layouts/Tailwind.svelte generated by Svelte v3.49.0 */
-
-    function create_fragment$1(ctx) {
-    	const block = {
-    		c: noop,
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: noop,
-    		p: noop,
-    		i: noop,
-    		o: noop,
-    		d: noop
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$1.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$1($$self, $$props) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Tailwind', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Tailwind> was created with unknown prop '${key}'`);
-    	});
-
-    	return [];
-    }
-
-    class Tailwind extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
     		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Tailwind",
+    			tagName: "LyricsLayout",
     			options,
     			id: create_fragment$1.name
     		});
     	}
     }
 
-    /* src/App.svelte generated by Svelte v3.49.0 */
+    /* src/App.svelte generated by Svelte v3.55.1 */
     const file = "src/App.svelte";
 
-    // (62:39) 
+    // (60:39) 
     function create_if_block_3(ctx) {
     	let lyricslayout;
     	let current;
@@ -40965,14 +41024,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(62:39) ",
+    		source: "(60:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (60:41) 
+    // (58:41) 
     function create_if_block_2(ctx) {
     	let playbacklayout;
     	let current;
@@ -41004,14 +41063,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(60:41) ",
+    		source: "(58:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (58:39) 
+    // (56:39) 
     function create_if_block_1(ctx) {
     	let configlayout;
     	let current;
@@ -41043,14 +41102,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(58:39) ",
+    		source: "(56:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:2) {#if $layoutToShow === 'Library'}
+    // (54:2) {#if $layoutToShow === 'Library'}
     function create_if_block(ctx) {
     	let librarylayout;
     	let current;
@@ -41082,7 +41141,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(56:2) {#if $layoutToShow === 'Library'}",
+    		source: "(54:2) {#if $layoutToShow === 'Library'}",
     		ctx
     	});
 
@@ -41100,27 +41159,25 @@ var app = (function () {
     	let t3;
     	let audioplayer;
     	let t4;
-    	let tailwind;
-    	let t5;
     	let main_app;
     	let navigation;
-    	let t6;
+    	let t5;
     	let controlbar;
-    	let t7;
+    	let t6;
     	let statusbar;
-    	let t8;
+    	let t7;
     	let current_window_svlt;
     	let current_block_type_index;
     	let if_block;
-    	let t9;
+    	let t8;
     	let equalizerservice;
-    	let t10;
+    	let t9;
     	let promptservice;
-    	let t11;
+    	let t10;
     	let confirmservice;
-    	let t12;
+    	let t11;
     	let rangeinputservice;
-    	let t13;
+    	let t12;
     	let storageservice;
     	let current;
     	ipcmiddleware = new IpcMiddleware({ $$inline: true });
@@ -41128,7 +41185,6 @@ var app = (function () {
     	equalizermiddleware = new EqualizerMiddleware({ $$inline: true });
     	eventshandlermiddleware = new EventsHandlerMiddleware({ $$inline: true });
     	audioplayer = new AudioPlayer({ $$inline: true });
-    	tailwind = new Tailwind({ $$inline: true });
     	navigation = new Navigation({ $$inline: true });
     	controlbar = new ControlBar({ $$inline: true });
     	statusbar = new StatusBar({ $$inline: true });
@@ -41200,31 +41256,29 @@ var app = (function () {
     			t3 = space();
     			create_component(audioplayer.$$.fragment);
     			t4 = space();
-    			create_component(tailwind.$$.fragment);
-    			t5 = space();
     			main_app = element("main-app");
     			create_component(navigation.$$.fragment);
-    			t6 = space();
+    			t5 = space();
     			create_component(controlbar.$$.fragment);
-    			t7 = space();
+    			t6 = space();
     			create_component(statusbar.$$.fragment);
-    			t8 = space();
+    			t7 = space();
     			current_window_svlt = element("current-window-svlt");
     			if (if_block) if_block.c();
-    			t9 = space();
+    			t8 = space();
     			create_component(equalizerservice.$$.fragment);
-    			t10 = space();
+    			t9 = space();
     			create_component(promptservice.$$.fragment);
-    			t11 = space();
+    			t10 = space();
     			create_component(confirmservice.$$.fragment);
-    			t12 = space();
+    			t11 = space();
     			create_component(rangeinputservice.$$.fragment);
-    			t13 = space();
+    			t12 = space();
     			create_component(storageservice.$$.fragment);
-    			set_custom_element_data(current_window_svlt, "class", "svelte-gvvlpk");
-    			add_location(current_window_svlt, file, 54, 1, 2295);
-    			set_custom_element_data(main_app, "class", "svelte-gvvlpk");
-    			add_location(main_app, file, 49, 0, 2235);
+    			set_custom_element_data(current_window_svlt, "class", "svelte-sx52fo");
+    			add_location(current_window_svlt, file, 52, 1, 2260);
+    			set_custom_element_data(main_app, "class", "svelte-sx52fo");
+    			add_location(main_app, file, 47, 0, 2200);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -41240,30 +41294,28 @@ var app = (function () {
     			insert_dev(target, t3, anchor);
     			mount_component(audioplayer, target, anchor);
     			insert_dev(target, t4, anchor);
-    			mount_component(tailwind, target, anchor);
-    			insert_dev(target, t5, anchor);
     			insert_dev(target, main_app, anchor);
     			mount_component(navigation, main_app, null);
-    			append_dev(main_app, t6);
+    			append_dev(main_app, t5);
     			mount_component(controlbar, main_app, null);
-    			append_dev(main_app, t7);
+    			append_dev(main_app, t6);
     			mount_component(statusbar, main_app, null);
-    			append_dev(main_app, t8);
+    			append_dev(main_app, t7);
     			append_dev(main_app, current_window_svlt);
 
     			if (~current_block_type_index) {
     				if_blocks[current_block_type_index].m(current_window_svlt, null);
     			}
 
-    			insert_dev(target, t9, anchor);
+    			insert_dev(target, t8, anchor);
     			mount_component(equalizerservice, target, anchor);
-    			insert_dev(target, t10, anchor);
+    			insert_dev(target, t9, anchor);
     			mount_component(promptservice, target, anchor);
-    			insert_dev(target, t11, anchor);
+    			insert_dev(target, t10, anchor);
     			mount_component(confirmservice, target, anchor);
-    			insert_dev(target, t12, anchor);
+    			insert_dev(target, t11, anchor);
     			mount_component(rangeinputservice, target, anchor);
-    			insert_dev(target, t13, anchor);
+    			insert_dev(target, t12, anchor);
     			mount_component(storageservice, target, anchor);
     			current = true;
     		},
@@ -41315,7 +41367,6 @@ var app = (function () {
     			transition_in(equalizermiddleware.$$.fragment, local);
     			transition_in(eventshandlermiddleware.$$.fragment, local);
     			transition_in(audioplayer.$$.fragment, local);
-    			transition_in(tailwind.$$.fragment, local);
     			transition_in(navigation.$$.fragment, local);
     			transition_in(controlbar.$$.fragment, local);
     			transition_in(statusbar.$$.fragment, local);
@@ -41333,7 +41384,6 @@ var app = (function () {
     			transition_out(equalizermiddleware.$$.fragment, local);
     			transition_out(eventshandlermiddleware.$$.fragment, local);
     			transition_out(audioplayer.$$.fragment, local);
-    			transition_out(tailwind.$$.fragment, local);
     			transition_out(navigation.$$.fragment, local);
     			transition_out(controlbar.$$.fragment, local);
     			transition_out(statusbar.$$.fragment, local);
@@ -41356,8 +41406,6 @@ var app = (function () {
     			if (detaching) detach_dev(t3);
     			destroy_component(audioplayer, detaching);
     			if (detaching) detach_dev(t4);
-    			destroy_component(tailwind, detaching);
-    			if (detaching) detach_dev(t5);
     			if (detaching) detach_dev(main_app);
     			destroy_component(navigation);
     			destroy_component(controlbar);
@@ -41367,19 +41415,19 @@ var app = (function () {
     				if_blocks[current_block_type_index].d();
     			}
 
-    			if (detaching) detach_dev(t9);
+    			if (detaching) detach_dev(t8);
     			/*equalizerservice_binding*/ ctx[6](null);
     			destroy_component(equalizerservice, detaching);
-    			if (detaching) detach_dev(t10);
+    			if (detaching) detach_dev(t9);
     			/*promptservice_binding*/ ctx[7](null);
     			destroy_component(promptservice, detaching);
-    			if (detaching) detach_dev(t11);
+    			if (detaching) detach_dev(t10);
     			/*confirmservice_binding*/ ctx[8](null);
     			destroy_component(confirmservice, detaching);
-    			if (detaching) detach_dev(t12);
+    			if (detaching) detach_dev(t11);
     			/*rangeinputservice_binding*/ ctx[9](null);
     			destroy_component(rangeinputservice, detaching);
-    			if (detaching) detach_dev(t13);
+    			if (detaching) detach_dev(t12);
     			/*storageservice_binding*/ ctx[10](null);
     			destroy_component(storageservice, detaching);
     		}
@@ -41489,6 +41537,8 @@ var app = (function () {
     		getDB,
     		dbSongsStore,
     		layoutToShow,
+    		reloadArts,
+    		dbVersionStore,
     		PlaybackLayout,
     		equalizerService,
     		confirmService,
@@ -41501,7 +41551,6 @@ var app = (function () {
     		RangeInputService,
     		StorageService,
     		LyricsLayout,
-    		Tailwind,
     		$dbSongsStore,
     		$layoutToShow,
     		$equalizerService,

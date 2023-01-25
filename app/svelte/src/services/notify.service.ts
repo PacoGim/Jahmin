@@ -1,4 +1,4 @@
-import iziToast, { IziToastSettings } from 'izitoast'
+import iziToast, { type IziToastSettings } from 'izitoast'
 
 function success(message: string, customConfig: IziToastSettings = {}) {
 	return iziToast.success({
