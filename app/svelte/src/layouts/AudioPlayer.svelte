@@ -106,6 +106,8 @@
 				return
 			}
 
+			fileNotFoundCheck(song)
+
 			// If the song is disabled, finds the next enabled song to play.
 			if (song.isEnabled === false) {
 				// Gets the current song index in the playlist.
@@ -206,14 +208,21 @@
 					audioElements[altAudioName].isPlaying = true
 					updateCurrentSongData(song)
 				})
-				.catch(err => {
+				.catch((err: Error) => {
+					// If next song gives and error, gets back the "previous" song being played.
 					let previousPlayedSong = $playbackStore.find(
 						song => song.ID === +audioElements[this.id].domElement.getAttribute('data-song-id')
 					)
 
+					// If the "previous" song is found, stop the previous audio player and set the previous as the playing one.
+					// The objectif is to keep the overall app in a working state if an error was found.
 					if (previousPlayedSong) {
 						audioElements[this.id].isPlaying = false
 						$songToPlayUrlStore = [previousPlayedSong.SourceFile, { playNow: false }]
+					}
+
+					if (err.message.includes('The element has no supported sources')) {
+						fileNotFoundCheck(song)
 					}
 				})
 		}
@@ -286,6 +295,14 @@
 		$altAudioElement.addEventListener('canplaythrough', e => {
 			audioElements.alt.isPreloaded = true
 			audioElements.alt.isPreloading = false
+		})
+	}
+
+	function fileNotFoundCheck(song: SongType) {
+		window.ipc.fileExists(song.SourceFile).then(result => {
+			if (result === false) {
+				notifyService.error(`File "${song.SourceFile}" not found!`)
+			}
 		})
 	}
 

@@ -9,6 +9,7 @@ import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
 import { getAlbumColors } from '../functions/getAlbumColors.fn'
 import cleanArtCacheFn from '../functions/clearArtCache.fn'
 import getArtCacheSizeFn from '../functions/getArtCacheSize.fn'
+import fileExistsFn from '../functions/fileExists.fn'
 
 /********************** Services **********************/
 import { handleArtService } from './handleArt.service'
@@ -110,6 +111,10 @@ export function startIPC() {
 
 	ipcMain.handle('get-art-cache-size', async () => {
 		return getArtCacheSizeFn()
+	})
+
+	ipcMain.handle('file-exists', async (evt, filePath: string) => {
+		return fileExistsFn(filePath)
 	})
 }
 

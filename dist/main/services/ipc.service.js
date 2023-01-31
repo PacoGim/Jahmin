@@ -10,6 +10,7 @@ const contextMenu_1 = require("../context_menu/contextMenu");
 const getAlbumColors_fn_1 = require("../functions/getAlbumColors.fn");
 const clearArtCache_fn_1 = __importDefault(require("../functions/clearArtCache.fn"));
 const getArtCacheSize_fn_1 = __importDefault(require("../functions/getArtCacheSize.fn"));
+const fileExists_fn_1 = __importDefault(require("../functions/fileExists.fn"));
 /********************** Services **********************/
 const handleArt_service_1 = require("./handleArt.service");
 const appReady_service_1 = __importDefault(require("./appReady.service"));
@@ -95,6 +96,9 @@ function startIPC() {
     });
     electron_1.ipcMain.handle('get-art-cache-size', async () => {
         return (0, getArtCacheSize_fn_1.default)();
+    });
+    electron_1.ipcMain.handle('file-exists', async (evt, filePath) => {
+        return (0, fileExists_fn_1.default)(filePath);
     });
 }
 exports.startIPC = startIPC;

@@ -8676,15 +8676,15 @@ var app = (function () {
     			audio1 = element("audio");
     			track1 = element("track");
     			attr_dev(track0, "kind", "captions");
-    			add_location(track0, file$1k, 228, 1, 10321);
+    			add_location(track0, file$1k, 242, 1, 11017);
     			attr_dev(audio0, "id", "main");
     			attr_dev(audio0, "class", "svelte-1afm0n4");
-    			add_location(audio0, file$1k, 227, 0, 10302);
+    			add_location(audio0, file$1k, 241, 0, 10998);
     			attr_dev(track1, "kind", "captions");
-    			add_location(track1, file$1k, 232, 1, 10375);
+    			add_location(track1, file$1k, 246, 1, 11071);
     			attr_dev(audio1, "id", "alt");
     			attr_dev(audio1, "class", "svelte-1afm0n4");
-    			add_location(audio1, file$1k, 231, 0, 10357);
+    			add_location(audio1, file$1k, 245, 0, 11053);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8813,6 +8813,8 @@ var app = (function () {
     				return;
     			}
 
+    			fileNotFoundCheck(song);
+
     			// If the song is disabled, finds the next enabled song to play.
     			if (song.isEnabled === false) {
     				// Gets the current song index in the playlist.
@@ -8908,11 +8910,18 @@ var app = (function () {
     				$$invalidate(0, audioElements[altAudioName].isPlaying = true, audioElements);
     				updateCurrentSongData(song);
     			}).catch(err => {
+    				// If next song gives and error, gets back the "previous" song being played.
     				let previousPlayedSong = $playbackStore.find(song => song.ID === +audioElements[this.id].domElement.getAttribute('data-song-id'));
 
+    				// If the "previous" song is found, stop the previous audio player and set the previous as the playing one.
+    				// The objectif is to keep the overall app in a working state if an error was found.
     				if (previousPlayedSong) {
     					$$invalidate(0, audioElements[this.id].isPlaying = false, audioElements);
     					set_store_value(songToPlayUrlStore, $songToPlayUrlStore = [previousPlayedSong.SourceFile, { playNow: false }], $songToPlayUrlStore);
+    				}
+
+    				if (err.message.includes('The element has no supported sources')) {
+    					fileNotFoundCheck(song);
     				}
     			});
     		}
@@ -8989,6 +8998,14 @@ var app = (function () {
     		});
     	}
 
+    	function fileNotFoundCheck(song) {
+    		window.ipc.fileExists(song.SourceFile).then(result => {
+    			if (result === false) {
+    				notifyService.error(`File "${song.SourceFile}" not found!`);
+    			}
+    		});
+    	}
+
     	onMount(() => {
     		set_store_value(mainAudioElement, $mainAudioElement = document.querySelector('audio#main'), $mainAudioElement);
     		set_store_value(altAudioElement, $altAudioElement = document.querySelector('audio#alt'), $altAudioElement);
@@ -9042,6 +9059,7 @@ var app = (function () {
     		handleTimeUpdate,
     		preLoadNextSong,
     		hookEventListeners,
+    		fileNotFoundCheck,
     		$mainAudioElement,
     		$currentAudioElement,
     		$altAudioElement,

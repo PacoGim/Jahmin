@@ -19,6 +19,7 @@ const ipcFunctions = {
     getLyricsList,
     deleteLyrics,
     getArtCacheSize,
+    fileExists,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -41,6 +42,14 @@ const ipcFunctions = {
     onShowLyrics: (callback) => electron_1.ipcRenderer.on('show-lyrics', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
+function fileExists(filePath) {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('file-exists', filePath)
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
 function deleteLyrics(title, artist) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer

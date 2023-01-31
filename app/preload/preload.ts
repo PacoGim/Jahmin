@@ -23,6 +23,7 @@ const ipcFunctions = {
 	getLyricsList,
 	deleteLyrics,
 	getArtCacheSize,
+	fileExists,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -49,6 +50,15 @@ const ipcFunctions = {
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
+
+function fileExists(filePath: string) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('file-exists', filePath)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
 
 function deleteLyrics(title: string, artist: string) {
 	return new Promise((resolve, reject) => {

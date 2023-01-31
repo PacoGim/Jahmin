@@ -29,6 +29,7 @@ declare global {
 				artist: string
 			) => Promise<{ isError: boolean; message: string; data: { title: string; artist: string } }>
 			getArtCacheSize: () => Promise<string>
+			fileExists: (filePath: string) => Promise<boolean>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void
