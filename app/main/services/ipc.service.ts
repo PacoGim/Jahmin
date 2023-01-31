@@ -1,8 +1,6 @@
-import { BrowserWindow, dialog, ipcMain, IpcMainEvent } from 'electron'
-import { loadContextMenu } from '../context_menu/contextMenu'
+import { ipcMain } from 'electron'
 
 /********************** Types **********************/
-import { SongType } from '../../types/song.type'
 import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
 
 /********************** Functions **********************/
@@ -13,52 +11,33 @@ import fileExistsFn from '../functions/fileExists.fn'
 
 /********************** Services **********************/
 import { handleArtService } from './handleArt.service'
-import appReadyService from './appReady.service'
-import { unwatchPaths } from './chokidar.service'
-import directoryHandlerService from './directoryHandler.service'
 import { getConfig, saveConfig } from './config.service'
 import { addEqualizer, deleteEqualizer, getEqualizers, renameEqualizer, updateEqualizerValues } from './equalizer.service'
-import { addToTaskQueue, fetchSongsTag, stopSongsUpdating } from './librarySongs.service'
-import { getPeaks, savePeaks } from './peaks.service'
+import { stopSongsUpdating } from './librarySongs.service'
+import { getPeaks } from './peaks.service'
 import { getLyrics, getLyricsList, saveLyrics, deleteLyrics } from './lyrics.service'
 
-let saveConfigDebounce: NodeJS.Timeout
+/********************** IPC **********************/
+import windowResizeIpc from '../ipc/windowResize.ipc'
+import appReadyIpc from '../ipc/appReady.ipc'
+import sendAllSongsToMainIpc from '../ipc/sendAllSongsToMain.ipc'
+import showContextMenuIpc from '../ipc/showContextMenu.ipc'
+import savePeaksIpc from '../ipc/savePeaks.ipc'
+import updateSongsIpc from '../ipc/updateSongs.ipc'
+import selectDirectoriesIpc from '../ipc/selectDirectories.ipc'
+
+import removeDirectoryIpc from '../ipc/removeDirectory.ipc'
 
 export function startIPC() {
 	/********************** One-way **********************/
-	ipcMain.on('window-resize', event => windowResize(event))
-	ipcMain.on('app-ready', appReadyService)
-	ipcMain.on('send-all-songs-to-main', (evt, songsDb: SongType[]) => fetchSongsTag(songsDb))
-	ipcMain.on('show-context-menu', (evt, menuToOpen: string, parameters: any) => loadContextMenu(evt, menuToOpen, parameters))
-	ipcMain.on('save-peaks', (evt, sourceFile: string, peaks: number[]) => savePeaks(sourceFile, peaks))
-	ipcMain.on('update-songs', (evt, songs: SongType[], newTags) => {
-		let sourceFiles = songs.map(song => song.SourceFile)
-
-		unwatchPaths(sourceFiles)
-
-		songs.forEach(song => {
-			addToTaskQueue(song.SourceFile, 'update', newTags)
-		})
-	})
-
-	ipcMain.on('select-directories', (evt, type, dbSongs) => {
-		dialog
-			.showOpenDialog({
-				properties: ['openDirectory', 'multiSelections']
-			})
-			.then(result => {
-				if (result.canceled === false) {
-					directoryHandlerService(result.filePaths, type, dbSongs)
-				}
-			})
-			.catch(err => {
-				console.log(err)
-			})
-	})
-
-	ipcMain.on('remove-directory', (evt, directory, type: 'remove-add' | 'remove-exclude', dbSongs) => {
-		directoryHandlerService([directory], type, dbSongs)
-	})
+	windowResizeIpc(ipcMain)
+	appReadyIpc(ipcMain)
+	sendAllSongsToMainIpc(ipcMain)
+	showContextMenuIpc(ipcMain)
+	savePeaksIpc(ipcMain)
+	updateSongsIpc(ipcMain)
+	selectDirectoriesIpc(ipcMain)
+	removeDirectoryIpc(ipcMain)
 
 	ipcMain.on('handle-art', (event, filePath: string, elementId: string, size: number) => {
 		handleArtService(filePath, elementId, size)
@@ -116,23 +95,4 @@ export function startIPC() {
 	ipcMain.handle('file-exists', async (evt, filePath: string) => {
 		return fileExistsFn(filePath)
 	})
-}
-
-function windowResize(event: IpcMainEvent) {
-	let window = BrowserWindow.fromId(event.frameId)
-
-	if (window === null) return
-
-	clearTimeout(saveConfigDebounce)
-
-	saveConfigDebounce = setTimeout(() => {
-		saveConfig({
-			bounds: {
-				x: window!.getPosition()[0],
-				y: window!.getPosition()[1],
-				width: window!.getSize()[0],
-				height: window!.getSize()[1]
-			}
-		})
-	}, 250)
 }
