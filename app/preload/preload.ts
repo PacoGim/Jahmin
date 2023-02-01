@@ -46,7 +46,8 @@ const ipcFunctions = {
 	handleNewAnimationArt: (callback: any) => ipcRenderer.on('new-animation-art', callback),
 	songSyncQueueProgress: (callback: any) => ipcRenderer.on('song-sync-queue-progress', callback),
 	onArtQueueChange: (callback: any) => ipcRenderer.on('art-queue-length', callback),
-	onShowLyrics: (callback: any) => ipcRenderer.on('show-lyrics', callback)
+	onShowLyrics: (callback: any) => ipcRenderer.on('show-lyrics', callback),
+	onWebStorageBulkDelete: (callback: any) => ipcRenderer.on('web-storage-bulk-delete', callback)
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)

@@ -7206,7 +7206,7 @@ var app = (function () {
     let keyModifier = writable(undefined);
     let elementMap = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Playback');
+    let layoutToShow = writable('Library');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -7823,6 +7823,10 @@ var app = (function () {
     		set_store_value(artCompressQueueLength, $artCompressQueueLength = artQueueLength, $artCompressQueueLength);
     	});
 
+    	window.ipc.onWebStorageBulkDelete((_, songsToDelete) => {
+    		bulkDeleteSongsFn(songsToDelete);
+    	});
+
     	window.ipc.onShowLyrics((_, data) => {
     		set_store_value(layoutToShow, $layoutToShow = 'Lyrics', $layoutToShow);
     		set_store_value(onNewLyrics, $onNewLyrics = { artist: data.artist, title: data.title }, $onNewLyrics);
@@ -7985,6 +7989,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		addTaskToQueue,
+    		bulkDeleteSongsFn,
     		getAllSongsFn,
     		generateId,
     		onNewLyrics,

@@ -51,6 +51,7 @@ declare global {
 			songSyncQueueProgress: (callback: any) => void
 			onArtQueueChange: (callback: any) => void
 			onShowLyrics: (callback: any) => void
+			onWebStorageBulkDelete: (callback: any) => void
 		}
 	}
 }

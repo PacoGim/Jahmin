@@ -39,7 +39,8 @@ const ipcFunctions = {
     handleNewAnimationArt: (callback) => electron_1.ipcRenderer.on('new-animation-art', callback),
     songSyncQueueProgress: (callback) => electron_1.ipcRenderer.on('song-sync-queue-progress', callback),
     onArtQueueChange: (callback) => electron_1.ipcRenderer.on('art-queue-length', callback),
-    onShowLyrics: (callback) => electron_1.ipcRenderer.on('show-lyrics', callback)
+    onShowLyrics: (callback) => electron_1.ipcRenderer.on('show-lyrics', callback),
+    onWebStorageBulkDelete: (callback) => electron_1.ipcRenderer.on('web-storage-bulk-delete', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
 function fileExists(filePath) {

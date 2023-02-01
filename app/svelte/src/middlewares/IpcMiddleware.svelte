@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { addTaskToQueue } from '../db/!db'
+	import bulkDeleteSongsFn from '../db/bulkDeleteSongs.fn'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import generateId from '../functions/generateId.fn'
 	import { onNewLyrics } from '../stores/crosscall.store'
@@ -33,6 +34,10 @@
 
 	window.ipc.onArtQueueChange((_, artQueueLength) => {
 		$artCompressQueueLength = artQueueLength
+	})
+
+	window.ipc.onWebStorageBulkDelete((_, songsToDelete) => {
+		bulkDeleteSongsFn(songsToDelete)
 	})
 
 	window.ipc.onShowLyrics((_, data) => {
