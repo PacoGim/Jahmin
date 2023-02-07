@@ -9,7 +9,7 @@
 
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
-	import type { PartialSongType } from '../../../../types/song.type'
+	import type { PartialSongType, SongType } from '../../../../types/song.type'
 	import Star from '../../components/Star.svelte'
 	import { onMount } from 'svelte'
 	import UndoIcon from '../../icons/UndoIcon.svelte'
@@ -17,10 +17,12 @@
 	import UpdateIcon from '../../icons/UpdateIcon.svelte'
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 	import tagEditSuggestionFn from '../../services/tagEditSuggestion.fn'
+	import getDirectoryFn from '../../functions/getDirectory.fn'
 
 	let songsToEdit: PartialSongType[] = []
 	let groupedTags: PartialSongType = {}
 	let bindingTags: PartialSongType = {}
+	let imageSourceLocation: string = ''
 
 	let newTags: any = {}
 
@@ -44,6 +46,7 @@
 		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
 		groupedTags = groupSongsByValues(songsToEdit)
 		bindingTags = Object.assign({}, groupedTags)
+		imageSourceLocation = findAlbumArtPath()
 	}
 
 	function setStar(starChangeEvent) {
@@ -241,6 +244,14 @@
 		}
 	}
 
+	function findAlbumArtPath() {
+		if (songsToEdit.length > 1) {
+			return getDirectoryFn(songsToEdit[0]?.SourceFile)
+		} else {
+			return songsToEdit[0]?.SourceFile
+		}
+	}
+
 	onMount(() => {
 		hookUpEventListeners()
 	})
@@ -317,7 +328,7 @@
 	</tag-container>
 
 	<album-art>
-		<AlbumArt imageSourceLocation={songsToEdit[0]?.SourceFile} intersectionRoot={undefined} />
+		<AlbumArt {imageSourceLocation} intersectionRoot={undefined} />
 	</album-art>
 
 	<button-container>

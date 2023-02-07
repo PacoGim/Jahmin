@@ -47,16 +47,20 @@
 
 <lyrics-list>
 	{#each songList as song, index (index)}
-		<p
-			data-active={$songLyricsSelected?.title === song.Title && $songLyricsSelected?.artist === song.Artist ? 'true' : 'false'}
-			on:click={evt => showLyrics(song, { updateSong: false })}
-			on:dblclick={evt => showLyrics(song, { updateSong: true })}
-		>
-			{#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}
-				►
-			{/if}
-			{song.Title} - {song.Artist}
-		</p>
+		{#if song}
+			<p
+				data-active={$songLyricsSelected?.title === song.Title && $songLyricsSelected?.artist === song.Artist
+					? 'true'
+					: 'false'}
+				on:click={evt => showLyrics(song, { updateSong: false })}
+				on:dblclick={evt => showLyrics(song, { updateSong: true })}
+			>
+				{#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}
+					►
+				{/if}
+				{song?.Title} - {song?.Artist}
+			</p>
+		{/if}
 	{/each}
 </lyrics-list>
 

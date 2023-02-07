@@ -36,10 +36,10 @@
 
 		const imgElement = $elementMap.get('img')
 		const albumElement = $elementMap.get('album')
-		const songListItemElement = $elementMap.get('song-list-item')
-		const songListElement = $elementMap.get('song-list')
+		const songListItemElement = $elementMap.get('song-list-item') //! true
+		const songListElement = $elementMap.get('song-list') //! false
 		const controlBarElement = $elementMap.get('control-bar-svlt')
-		const tagEditElement = $elementMap.get('tag-edit-svlt')
+		const tagEditElement = $elementMap.get('tag-edit-svlt') //! false
 		const artElement = $elementMap.get('art-svlt')
 
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
@@ -48,10 +48,9 @@
 
 		if (artElement && controlBarElement) setAlbumBackInView()
 
-		// if (songListElement === undefined && tagEditElement === undefined) {
-		// 	$selectedSongsStore = []
-		// 	$activeSongStore = undefined
-		// }
+		if (songListElement === undefined && tagEditElement === undefined) {
+			$selectedSongsStore = []
+		}
 	}
 
 	function handleKeyboardEvents(evt: KeyboardEvent) {
@@ -123,8 +122,6 @@
 
 			saveGroupingConfig()
 		}
-
-		$activeSongStore = undefined
 	}
 
 	function saveGroupingConfig() {

@@ -25,7 +25,7 @@
 	function calculateProgress(songSyncQueueProgress) {
 		currentSongSyncProgress = 100 - Math.ceil((100 / songSyncQueueProgress.maxLength) * songSyncQueueProgress.currentLength)
 
-		if (Math.abs(currentSongSyncProgress) === Infinity || isNaN(currentSongSyncProgress)) {
+		if (Math.abs(currentSongSyncProgress) === Infinity || isNaN(currentSongSyncProgress) || currentSongSyncProgress < 0) {
 			currentSongSyncProgress = 100
 		}
 

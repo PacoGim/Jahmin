@@ -16906,23 +16906,23 @@ var app = (function () {
     			song_update = element("song-update");
     			song_update_icon = element("song-update-icon");
     			create_component(refreshicon.$$.fragment);
-    			add_location(span0, file$13, 49, 2, 1909);
+    			add_location(span0, file$13, 49, 2, 1940);
     			set_custom_element_data(art_compress_queue, "class", "svelte-1a7pazi");
-    			add_location(art_compress_queue, file$13, 47, 1, 1789);
+    			add_location(art_compress_queue, file$13, 47, 1, 1820);
     			attr_dev(span1, "class", "svelte-1a7pazi");
-    			add_location(span1, file$13, 53, 2, 2093);
+    			add_location(span1, file$13, 53, 2, 2124);
     			set_custom_element_data(song_sync_queue_progress, "data-progress", /*currentSongSyncProgress*/ ctx[1]);
     			set_custom_element_data(song_sync_queue_progress, "class", "svelte-1a7pazi");
-    			add_location(song_sync_queue_progress, file$13, 56, 2, 2142);
+    			add_location(song_sync_queue_progress, file$13, 56, 2, 2173);
     			set_custom_element_data(song_sync_queue, "class", "svelte-1a7pazi");
-    			add_location(song_sync_queue, file$13, 51, 1, 1972);
+    			add_location(song_sync_queue, file$13, 51, 1, 2003);
     			set_custom_element_data(song_update_icon, "data-is-song-updating", song_update_icon_data_is_song_updating_value = /*$songSyncQueueProgress*/ ctx[0].isSongUpdating);
     			set_custom_element_data(song_update_icon, "class", "svelte-1a7pazi");
-    			add_location(song_update_icon, file$13, 59, 2, 2282);
+    			add_location(song_update_icon, file$13, 59, 2, 2313);
     			set_custom_element_data(song_update, "class", "svelte-1a7pazi");
-    			add_location(song_update, file$13, 58, 1, 2232);
+    			add_location(song_update, file$13, 58, 1, 2263);
     			set_custom_element_data(queue_processes, "class", "svelte-1a7pazi");
-    			add_location(queue_processes, file$13, 46, 0, 1770);
+    			add_location(queue_processes, file$13, 46, 0, 1801);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17016,7 +17016,7 @@ var app = (function () {
     	function calculateProgress(songSyncQueueProgress) {
     		$$invalidate(1, currentSongSyncProgress = 100 - Math.ceil(100 / songSyncQueueProgress.maxLength * songSyncQueueProgress.currentLength));
 
-    		if (Math.abs(currentSongSyncProgress) === Infinity || isNaN(currentSongSyncProgress)) {
+    		if (Math.abs(currentSongSyncProgress) === Infinity || isNaN(currentSongSyncProgress) || currentSongSyncProgress < 0) {
     			$$invalidate(1, currentSongSyncProgress = 100);
     		}
 
@@ -18072,7 +18072,7 @@ var app = (function () {
     }
 
     // (27:54) 
-    function create_if_block_1$6(ctx) {
+    function create_if_block_1$7(ctx) {
     	let album_artist;
     	let t_value = (/*album*/ ctx[0]['DynamicAlbumArtist'] || '') + "";
     	let t;
@@ -18098,7 +18098,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$6.name,
+    		id: create_if_block_1$7.name,
     		type: "if",
     		source: "(27:54) ",
     		ctx
@@ -18168,7 +18168,7 @@ var app = (function () {
 
     	function select_block_type(ctx, dirty) {
     		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$d;
-    		if (/*album*/ ctx[0]['DynamicAlbumArtist'] !== undefined) return create_if_block_1$6;
+    		if (/*album*/ ctx[0]['DynamicAlbumArtist'] !== undefined) return create_if_block_1$7;
     		return create_else_block$7;
     	}
 
@@ -19407,7 +19407,7 @@ var app = (function () {
 
     function get_each_context$c(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[12] = list[i];
+    	child_ctx[11] = list[i];
     	child_ctx[1] = i;
     	return child_ctx;
     }
@@ -19465,9 +19465,9 @@ var app = (function () {
 
     	songtag = new SongTag({
     			props: {
-    				tagName: /*tag*/ ctx[12].value,
-    				tagValue: /*song*/ ctx[0][/*tag*/ ctx[12].value] || '',
-    				align: /*tag*/ ctx[12]?.align?.toLowerCase()
+    				tagName: /*tag*/ ctx[11].value,
+    				tagValue: /*song*/ ctx[0][/*tag*/ ctx[11].value] || '',
+    				align: /*tag*/ ctx[11]?.align?.toLowerCase()
     			},
     			$$inline: true
     		});
@@ -19484,9 +19484,9 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const songtag_changes = {};
-    			if (dirty & /*$config*/ 8) songtag_changes.tagName = /*tag*/ ctx[12].value;
-    			if (dirty & /*song, $config*/ 9) songtag_changes.tagValue = /*song*/ ctx[0][/*tag*/ ctx[12].value] || '';
-    			if (dirty & /*$config*/ 8) songtag_changes.align = /*tag*/ ctx[12]?.align?.toLowerCase();
+    			if (dirty & /*$config*/ 8) songtag_changes.tagName = /*tag*/ ctx[11].value;
+    			if (dirty & /*song, $config*/ 9) songtag_changes.tagValue = /*song*/ ctx[0][/*tag*/ ctx[11].value] || '';
+    			if (dirty & /*$config*/ 8) songtag_changes.align = /*tag*/ ctx[11]?.align?.toLowerCase();
     			songtag.$set(songtag_changes);
     		},
     		i: function intro(local) {
@@ -19515,7 +19515,7 @@ var app = (function () {
     }
 
     // (79:115) 
-    function create_if_block_1$5(ctx) {
+    function create_if_block_1$6(ctx) {
     	const block = {
     		c: noop,
     		m: noop,
@@ -19527,7 +19527,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$5.name,
+    		id: create_if_block_1$6.name,
     		type: "if",
     		source: "(79:115) ",
     		ctx
@@ -19543,9 +19543,9 @@ var app = (function () {
 
     	songtag = new SongTag({
     			props: {
-    				tagName: /*tag*/ ctx[12].value,
-    				tagValue: `${/*song*/ ctx[0][/*tag*/ ctx[12].value]} ${/*song*/ ctx[0].DynamicArtists}` || '',
-    				align: /*tag*/ ctx[12]?.align?.toLowerCase()
+    				tagName: /*tag*/ ctx[11].value,
+    				tagValue: `${/*song*/ ctx[0][/*tag*/ ctx[11].value]} ${/*song*/ ctx[0].DynamicArtists}` || '',
+    				align: /*tag*/ ctx[11]?.align?.toLowerCase()
     			},
     			$$inline: true
     		});
@@ -19562,9 +19562,9 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const songtag_changes = {};
-    			if (dirty & /*$config*/ 8) songtag_changes.tagName = /*tag*/ ctx[12].value;
-    			if (dirty & /*song, $config*/ 9) songtag_changes.tagValue = `${/*song*/ ctx[0][/*tag*/ ctx[12].value]} ${/*song*/ ctx[0].DynamicArtists}` || '';
-    			if (dirty & /*$config*/ 8) songtag_changes.align = /*tag*/ ctx[12]?.align?.toLowerCase();
+    			if (dirty & /*$config*/ 8) songtag_changes.tagName = /*tag*/ ctx[11].value;
+    			if (dirty & /*song, $config*/ 9) songtag_changes.tagValue = `${/*song*/ ctx[0][/*tag*/ ctx[11].value]} ${/*song*/ ctx[0].DynamicArtists}` || '';
+    			if (dirty & /*$config*/ 8) songtag_changes.align = /*tag*/ ctx[11]?.align?.toLowerCase();
     			songtag.$set(songtag_changes);
     		},
     		i: function intro(local) {
@@ -19601,15 +19601,15 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$b, create_if_block_1$5, create_else_block$5];
+    	const if_block_creators = [create_if_block$b, create_if_block_1$6, create_else_block$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
     		if (dirty & /*$config*/ 8) show_if = null;
     		if (dirty & /*$config*/ 8) show_if_1 = null;
-    		if (show_if == null) show_if = !!(/*tag*/ ctx[12].value === 'Title' && /*$config*/ ctx[3].songListTags.find(func));
+    		if (show_if == null) show_if = !!(/*tag*/ ctx[11].value === 'Title' && /*$config*/ ctx[3].songListTags.find(func));
     		if (show_if) return 0;
-    		if (show_if_1 == null) show_if_1 = !!(/*tag*/ ctx[12].value === 'DynamicArtists' || !/*$config*/ ctx[3].songListTags.find(func_1));
+    		if (show_if_1 == null) show_if_1 = !!(/*tag*/ ctx[11].value === 'DynamicArtists' || !/*$config*/ ctx[3].songListTags.find(func_1));
     		if (show_if_1) return 1;
     		return 2;
     	}
@@ -19719,13 +19719,13 @@ var app = (function () {
 
     			set_custom_element_data(song_list_item, "data-id", song_list_item_data_id_value = /*song*/ ctx[0].ID);
     			set_custom_element_data(song_list_item, "data-index", /*index*/ ctx[1]);
-    			set_style(song_list_item, "grid-template-columns", /*gridStyle*/ ctx[4]);
+    			set_style(song_list_item, "grid-template-columns", /*gridStyle*/ ctx[5]);
 
-    			set_custom_element_data(song_list_item, "class", song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$activeSongStore*/ ctx[5] === /*song*/ ctx[0].ID
-    			? 'active'
+    			set_custom_element_data(song_list_item, "class", song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$playingSongStore*/ ctx[4].ID === /*song*/ ctx[0].ID
+    			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-pabtur");
+    			: '') + " svelte-40o5xb");
 
     			add_location(song_list_item, file$U, 58, 0, 2057);
     		},
@@ -19782,15 +19782,15 @@ var app = (function () {
     				set_custom_element_data(song_list_item, "data-index", /*index*/ ctx[1]);
     			}
 
-    			if (!current || dirty & /*gridStyle*/ 16) {
-    				set_style(song_list_item, "grid-template-columns", /*gridStyle*/ ctx[4]);
+    			if (!current || dirty & /*gridStyle*/ 32) {
+    				set_style(song_list_item, "grid-template-columns", /*gridStyle*/ ctx[5]);
     			}
 
-    			if (!current || dirty & /*song, $activeSongStore, $selectedSongsStore*/ 97 && song_list_item_class_value !== (song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$activeSongStore*/ ctx[5] === /*song*/ ctx[0].ID
-    			? 'active'
+    			if (!current || dirty & /*song, $playingSongStore, $selectedSongsStore*/ 81 && song_list_item_class_value !== (song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$playingSongStore*/ ctx[4].ID === /*song*/ ctx[0].ID
+    			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-pabtur")) {
+    			: '') + " svelte-40o5xb")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},
@@ -19841,16 +19841,13 @@ var app = (function () {
     	let $config;
     	let $songListItemElement;
     	let $playingSongStore;
-    	let $activeSongStore;
     	let $selectedSongsStore;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(3, $config = $$value));
     	validate_store(songListItemElement, 'songListItemElement');
-    	component_subscribe($$self, songListItemElement, $$value => $$invalidate(9, $songListItemElement = $$value));
+    	component_subscribe($$self, songListItemElement, $$value => $$invalidate(8, $songListItemElement = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(8, $playingSongStore = $$value));
-    	validate_store(activeSongStore, 'activeSongStore');
-    	component_subscribe($$self, activeSongStore, $$value => $$invalidate(5, $activeSongStore = $$value));
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(4, $playingSongStore = $$value));
     	validate_store(selectedSongsStore, 'selectedSongsStore');
     	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(6, $selectedSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -19879,7 +19876,7 @@ var app = (function () {
     			tempGridStyle = 'max-content ' + tempGridStyle;
     		}
 
-    		$$invalidate(4, gridStyle = tempGridStyle);
+    		$$invalidate(5, gridStyle = tempGridStyle);
     	}
 
     	function setDynamicArtists() {
@@ -19944,7 +19941,6 @@ var app = (function () {
     		$config,
     		$songListItemElement,
     		$playingSongStore,
-    		$activeSongStore,
     		$selectedSongsStore
     	});
 
@@ -19952,7 +19948,7 @@ var app = (function () {
     		if ('song' in $$props) $$invalidate(0, song = $$props.song);
     		if ('index' in $$props) $$invalidate(1, index = $$props.index);
     		if ('isSongPlaying' in $$props) $$invalidate(2, isSongPlaying = $$props.isSongPlaying);
-    		if ('gridStyle' in $$props) $$invalidate(4, gridStyle = $$props.gridStyle);
+    		if ('gridStyle' in $$props) $$invalidate(5, gridStyle = $$props.gridStyle);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -19960,7 +19956,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$playingSongStore, song*/ 257) {
+    		if ($$self.$$.dirty & /*$playingSongStore, song*/ 17) {
     			$$invalidate(2, isSongPlaying = ($playingSongStore === null || $playingSongStore === void 0
     			? void 0
     			: $playingSongStore.ID) === (song === null || song === void 0 ? void 0 : song.ID));
@@ -19987,11 +19983,10 @@ var app = (function () {
     		index,
     		isSongPlaying,
     		$config,
+    		$playingSongStore,
     		gridStyle,
-    		$activeSongStore,
     		$selectedSongsStore,
-    		setStar,
-    		$playingSongStore
+    		setStar
     	];
     }
 
@@ -22948,11 +22943,11 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	star.$on("starChange", /*setStar*/ ctx[4]);
+    	star.$on("starChange", /*setStar*/ ctx[5]);
 
     	albumart = new AlbumArt({
     			props: {
-    				imageSourceLocation: /*songsToEdit*/ ctx[1][0]?.SourceFile,
+    				imageSourceLocation: /*imageSourceLocation*/ ctx[2],
     				intersectionRoot: undefined
     			},
     			$$inline: true
@@ -23086,113 +23081,113 @@ var app = (function () {
     			create_component(updateicon.$$.fragment);
     			t49 = text("\n\t\t\tUpdate");
     			set_custom_element_data(songs_to_edit, "class", "svelte-vp3oog");
-    			add_location(songs_to_edit, file$O, 193, 1, 7933);
+    			add_location(songs_to_edit, file$O, 205, 1, 8370);
     			set_custom_element_data(tag_name0, "class", "svelte-vp3oog");
-    			add_location(tag_name0, file$O, 198, 2, 8110);
+    			add_location(tag_name0, file$O, 210, 2, 8547);
     			attr_dev(textarea0, "class", "svelte-vp3oog");
-    			add_location(textarea0, file$O, 199, 2, 8153);
+    			add_location(textarea0, file$O, 211, 2, 8590);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
     			set_custom_element_data(tag_container0, "class", "svelte-vp3oog");
-    			add_location(tag_container0, file$O, 197, 1, 8075);
+    			add_location(tag_container0, file$O, 209, 1, 8512);
     			set_custom_element_data(tag_name1, "class", "svelte-vp3oog");
-    			add_location(tag_name1, file$O, 203, 2, 8252);
+    			add_location(tag_name1, file$O, 215, 2, 8689);
     			attr_dev(textarea1, "class", "svelte-vp3oog");
-    			add_location(textarea1, file$O, 204, 2, 8295);
+    			add_location(textarea1, file$O, 216, 2, 8732);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
     			set_custom_element_data(tag_container1, "class", "svelte-vp3oog");
-    			add_location(tag_container1, file$O, 202, 1, 8217);
+    			add_location(tag_container1, file$O, 214, 1, 8654);
     			set_custom_element_data(tag_name2, "class", "svelte-vp3oog");
-    			add_location(tag_name2, file$O, 208, 2, 8413);
+    			add_location(tag_name2, file$O, 220, 2, 8850);
     			attr_dev(textarea2, "class", "svelte-vp3oog");
-    			add_location(textarea2, file$O, 209, 2, 8458);
+    			add_location(textarea2, file$O, 221, 2, 8895);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
     			set_custom_element_data(tag_container2, "class", "svelte-vp3oog");
-    			add_location(tag_container2, file$O, 207, 1, 8359);
+    			add_location(tag_container2, file$O, 219, 1, 8796);
     			set_custom_element_data(tag_name3, "class", "svelte-vp3oog");
-    			add_location(tag_name3, file$O, 213, 2, 8581);
+    			add_location(tag_name3, file$O, 225, 2, 9018);
     			attr_dev(textarea3, "class", "svelte-vp3oog");
-    			add_location(textarea3, file$O, 214, 2, 8625);
+    			add_location(textarea3, file$O, 226, 2, 9062);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
     			set_custom_element_data(tag_container3, "class", "svelte-vp3oog");
-    			add_location(tag_container3, file$O, 212, 1, 8522);
+    			add_location(tag_container3, file$O, 224, 1, 8959);
     			set_custom_element_data(tag_name4, "class", "svelte-vp3oog");
-    			add_location(tag_name4, file$O, 218, 2, 8730);
+    			add_location(tag_name4, file$O, 230, 2, 9167);
     			attr_dev(textarea4, "class", "svelte-vp3oog");
-    			add_location(textarea4, file$O, 219, 2, 8774);
+    			add_location(textarea4, file$O, 231, 2, 9211);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
     			set_custom_element_data(tag_container4, "class", "svelte-vp3oog");
-    			add_location(tag_container4, file$O, 217, 1, 8694);
+    			add_location(tag_container4, file$O, 229, 1, 9131);
     			set_custom_element_data(tag_name5, "class", "svelte-vp3oog");
-    			add_location(tag_name5, file$O, 223, 2, 8880);
+    			add_location(tag_name5, file$O, 235, 2, 9317);
     			attr_dev(textarea5, "class", "svelte-vp3oog");
-    			add_location(textarea5, file$O, 224, 2, 8930);
+    			add_location(textarea5, file$O, 236, 2, 9367);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
     			set_custom_element_data(tag_container5, "class", "svelte-vp3oog");
-    			add_location(tag_container5, file$O, 222, 1, 8839);
+    			add_location(tag_container5, file$O, 234, 1, 9276);
     			set_custom_element_data(tag_name6, "class", "svelte-vp3oog");
-    			add_location(tag_name6, file$O, 228, 2, 9035);
+    			add_location(tag_name6, file$O, 240, 2, 9472);
     			attr_dev(textarea6, "class", "svelte-vp3oog");
-    			add_location(textarea6, file$O, 229, 2, 9078);
+    			add_location(textarea6, file$O, 241, 2, 9515);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
     			set_custom_element_data(tag_container6, "class", "svelte-vp3oog");
-    			add_location(tag_container6, file$O, 227, 1, 9000);
+    			add_location(tag_container6, file$O, 239, 1, 9437);
     			set_custom_element_data(tag_name7, "class", "svelte-vp3oog");
-    			add_location(tag_name7, file$O, 233, 2, 9180);
+    			add_location(tag_name7, file$O, 245, 2, 9617);
     			attr_dev(textarea7, "class", "svelte-vp3oog");
-    			add_location(textarea7, file$O, 234, 2, 9226);
+    			add_location(textarea7, file$O, 246, 2, 9663);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
     			set_custom_element_data(tag_container7, "class", "svelte-vp3oog");
-    			add_location(tag_container7, file$O, 232, 1, 9142);
+    			add_location(tag_container7, file$O, 244, 1, 9579);
     			set_custom_element_data(tag_name8, "class", "svelte-vp3oog");
-    			add_location(tag_name8, file$O, 238, 2, 9330);
+    			add_location(tag_name8, file$O, 250, 2, 9767);
     			attr_dev(textarea8, "class", "svelte-vp3oog");
-    			add_location(textarea8, file$O, 239, 2, 9375);
+    			add_location(textarea8, file$O, 251, 2, 9812);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
     			set_custom_element_data(tag_container8, "class", "svelte-vp3oog");
-    			add_location(tag_container8, file$O, 237, 1, 9293);
+    			add_location(tag_container8, file$O, 249, 1, 9730);
     			set_custom_element_data(tag_name9, "class", "svelte-vp3oog");
-    			add_location(tag_name9, file$O, 243, 2, 9499);
+    			add_location(tag_name9, file$O, 255, 2, 9936);
     			attr_dev(textarea9, "class", "svelte-vp3oog");
-    			add_location(textarea9, file$O, 244, 2, 9541);
+    			add_location(textarea9, file$O, 256, 2, 9978);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
     			set_custom_element_data(tag_container9, "class", "svelte-vp3oog");
-    			add_location(tag_container9, file$O, 242, 1, 9441);
+    			add_location(tag_container9, file$O, 254, 1, 9878);
     			set_custom_element_data(tag_name10, "class", "svelte-vp3oog");
-    			add_location(tag_name10, file$O, 248, 2, 9668);
+    			add_location(tag_name10, file$O, 260, 2, 10105);
     			attr_dev(textarea10, "class", "svelte-vp3oog");
-    			add_location(textarea10, file$O, 249, 2, 9711);
+    			add_location(textarea10, file$O, 261, 2, 10148);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
     			set_custom_element_data(tag_container10, "class", "svelte-vp3oog");
-    			add_location(tag_container10, file$O, 247, 1, 9609);
+    			add_location(tag_container10, file$O, 259, 1, 10046);
     			set_custom_element_data(tag_name11, "class", "svelte-vp3oog");
-    			add_location(tag_name11, file$O, 253, 2, 9837);
+    			add_location(tag_name11, file$O, 265, 2, 10274);
     			attr_dev(textarea11, "class", "svelte-vp3oog");
-    			add_location(textarea11, file$O, 254, 2, 9878);
+    			add_location(textarea11, file$O, 266, 2, 10315);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
     			set_custom_element_data(tag_container11, "class", "svelte-vp3oog");
-    			add_location(tag_container11, file$O, 252, 1, 9780);
+    			add_location(tag_container11, file$O, 264, 1, 10217);
     			set_custom_element_data(tag_name12, "class", "svelte-vp3oog");
-    			add_location(tag_name12, file$O, 258, 2, 9981);
+    			add_location(tag_name12, file$O, 270, 2, 10418);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
     			set_custom_element_data(tag_container12, "class", "svelte-vp3oog");
-    			add_location(tag_container12, file$O, 257, 1, 9945);
+    			add_location(tag_container12, file$O, 269, 1, 10382);
     			set_custom_element_data(album_art, "class", "svelte-vp3oog");
-    			add_location(album_art, file$O, 262, 1, 10161);
+    			add_location(album_art, file$O, 274, 1, 10598);
     			attr_dev(button0, "class", "danger");
-    			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
-    			add_location(button0, file$O, 267, 2, 10303);
+    			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[3]);
+    			add_location(button0, file$O, 279, 2, 10713);
     			attr_dev(button1, "class", "info");
-    			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[2]);
-    			add_location(button1, file$O, 271, 2, 10509);
+    			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[3]);
+    			add_location(button1, file$O, 283, 2, 10919);
     			set_custom_element_data(button_container, "class", "svelte-vp3oog");
-    			add_location(button_container, file$O, 266, 1, 10282);
+    			add_location(button_container, file$O, 278, 1, 10692);
     			set_custom_element_data(tag_edit_svlt, "class", "svelte-vp3oog");
-    			add_location(tag_edit_svlt, file$O, 192, 0, 7916);
+    			add_location(tag_edit_svlt, file$O, 204, 0, 8353);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -23325,90 +23320,90 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea0, "input", /*textarea0_input_handler*/ ctx[9]),
-    					listen_dev(textarea1, "input", /*textarea1_input_handler*/ ctx[10]),
-    					listen_dev(textarea2, "input", /*textarea2_input_handler*/ ctx[11]),
-    					listen_dev(textarea3, "input", /*textarea3_input_handler*/ ctx[12]),
-    					listen_dev(textarea4, "input", /*textarea4_input_handler*/ ctx[13]),
-    					listen_dev(textarea5, "input", /*textarea5_input_handler*/ ctx[14]),
-    					listen_dev(textarea6, "input", /*textarea6_input_handler*/ ctx[15]),
-    					listen_dev(textarea7, "input", /*textarea7_input_handler*/ ctx[16]),
-    					listen_dev(textarea8, "input", /*textarea8_input_handler*/ ctx[17]),
-    					listen_dev(textarea9, "input", /*textarea9_input_handler*/ ctx[18]),
-    					listen_dev(textarea10, "input", /*textarea10_input_handler*/ ctx[19]),
-    					listen_dev(textarea11, "input", /*textarea11_input_handler*/ ctx[20]),
-    					listen_dev(button0, "click", /*click_handler*/ ctx[21], false, false, false),
-    					listen_dev(button1, "click", /*click_handler_1*/ ctx[22], false, false, false)
+    					listen_dev(textarea0, "input", /*textarea0_input_handler*/ ctx[10]),
+    					listen_dev(textarea1, "input", /*textarea1_input_handler*/ ctx[11]),
+    					listen_dev(textarea2, "input", /*textarea2_input_handler*/ ctx[12]),
+    					listen_dev(textarea3, "input", /*textarea3_input_handler*/ ctx[13]),
+    					listen_dev(textarea4, "input", /*textarea4_input_handler*/ ctx[14]),
+    					listen_dev(textarea5, "input", /*textarea5_input_handler*/ ctx[15]),
+    					listen_dev(textarea6, "input", /*textarea6_input_handler*/ ctx[16]),
+    					listen_dev(textarea7, "input", /*textarea7_input_handler*/ ctx[17]),
+    					listen_dev(textarea8, "input", /*textarea8_input_handler*/ ctx[18]),
+    					listen_dev(textarea9, "input", /*textarea9_input_handler*/ ctx[19]),
+    					listen_dev(textarea10, "input", /*textarea10_input_handler*/ ctx[20]),
+    					listen_dev(textarea11, "input", /*textarea11_input_handler*/ ctx[21]),
+    					listen_dev(button0, "click", /*click_handler*/ ctx[22], false, false, false),
+    					listen_dev(button1, "click", /*click_handler_1*/ ctx[23], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
-    		p: function update(ctx, [dirty]) {
-    			if ((!current || dirty & /*songsToEdit*/ 2) && t1_value !== (t1_value = (/*songsToEdit*/ ctx[1].length > 1 ? 's' : '') + "")) set_data_dev(t1, t1_value);
-    			if ((!current || dirty & /*songsToEdit*/ 2) && t3_value !== (t3_value = (/*songsToEdit*/ ctx[1].length > 0 ? 'ing' : '') + "")) set_data_dev(t3, t3_value);
-    			if ((!current || dirty & /*songsToEdit*/ 2) && t5_value !== (t5_value = /*songsToEdit*/ ctx[1].length + "")) set_data_dev(t5, t5_value);
+    		p: function update(ctx, dirty) {
+    			if ((!current || dirty[0] & /*songsToEdit*/ 2) && t1_value !== (t1_value = (/*songsToEdit*/ ctx[1].length > 1 ? 's' : '') + "")) set_data_dev(t1, t1_value);
+    			if ((!current || dirty[0] & /*songsToEdit*/ 2) && t3_value !== (t3_value = (/*songsToEdit*/ ctx[1].length > 0 ? 'ing' : '') + "")) set_data_dev(t3, t3_value);
+    			if ((!current || dirty[0] & /*songsToEdit*/ 2) && t5_value !== (t5_value = /*songsToEdit*/ ctx[1].length + "")) set_data_dev(t5, t5_value);
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea0, /*bindingTags*/ ctx[0].Title);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea1, /*bindingTags*/ ctx[0].Album);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea2, /*bindingTags*/ ctx[0].Track);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea3, /*bindingTags*/ ctx[0].DiscNumber);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea4, /*bindingTags*/ ctx[0].Artist);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea5, /*bindingTags*/ ctx[0].AlbumArtist);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea6, /*bindingTags*/ ctx[0].Genre);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea7, /*bindingTags*/ ctx[0].Composer);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea8, /*bindingTags*/ ctx[0].Comment);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea9, /*bindingTags*/ ctx[0].Date_Year);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea10, /*bindingTags*/ ctx[0].Date_Month);
     			}
 
-    			if (dirty & /*bindingTags*/ 1) {
+    			if (dirty[0] & /*bindingTags*/ 1) {
     				set_input_value(textarea11, /*bindingTags*/ ctx[0].Date_Day);
     			}
 
     			const star_changes = {};
-    			if (dirty & /*bindingTags*/ 1) star_changes.songRating = Number(/*bindingTags*/ ctx[0].Rating);
+    			if (dirty[0] & /*bindingTags*/ 1) star_changes.songRating = Number(/*bindingTags*/ ctx[0].Rating);
     			star.$set(star_changes);
     			const albumart_changes = {};
-    			if (dirty & /*songsToEdit*/ 2) albumart_changes.imageSourceLocation = /*songsToEdit*/ ctx[1][0]?.SourceFile;
+    			if (dirty[0] & /*imageSourceLocation*/ 4) albumart_changes.imageSourceLocation = /*imageSourceLocation*/ ctx[2];
     			albumart.$set(albumart_changes);
 
-    			if (!current || dirty & /*newTags*/ 4 && button0_disabled_value !== (button0_disabled_value = isEmptyObject(/*newTags*/ ctx[2]))) {
+    			if (!current || dirty[0] & /*newTags*/ 8 && button0_disabled_value !== (button0_disabled_value = isEmptyObject(/*newTags*/ ctx[3]))) {
     				prop_dev(button0, "disabled", button0_disabled_value);
     			}
 
-    			if (!current || dirty & /*newTags*/ 4 && button1_disabled_value !== (button1_disabled_value = isEmptyObject(/*newTags*/ ctx[2]))) {
+    			if (!current || dirty[0] & /*newTags*/ 8 && button1_disabled_value !== (button1_disabled_value = isEmptyObject(/*newTags*/ ctx[3]))) {
     				prop_dev(button1, "disabled", button1_disabled_value);
     			}
     		},
@@ -23523,18 +23518,19 @@ var app = (function () {
     	let $songSyncQueueProgress;
     	let $elementMap;
     	validate_store(selectedSongsStore, 'selectedSongsStore');
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(7, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(8, $selectedSongsStore = $$value));
     	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(8, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(9, $songListStore = $$value));
     	validate_store(songSyncQueueProgress, 'songSyncQueueProgress');
-    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(23, $songSyncQueueProgress = $$value));
+    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(24, $songSyncQueueProgress = $$value));
     	validate_store(elementMap, 'elementMap');
-    	component_subscribe($$self, elementMap, $$value => $$invalidate(3, $elementMap = $$value));
+    	component_subscribe($$self, elementMap, $$value => $$invalidate(4, $elementMap = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TagEdit', slots, []);
     	let songsToEdit = [];
     	let groupedTags = {};
     	let bindingTags = {};
+    	let imageSourceLocation = '';
     	let newTags = {};
 
     	function setupSongs(from) {
@@ -23543,8 +23539,9 @@ var app = (function () {
     		}
 
     		$$invalidate(1, songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore));
-    		$$invalidate(6, groupedTags = groupSongsByValues(songsToEdit));
+    		$$invalidate(7, groupedTags = groupSongsByValues(songsToEdit));
     		$$invalidate(0, bindingTags = Object.assign({}, groupedTags));
+    		$$invalidate(2, imageSourceLocation = findAlbumArtPath());
     	}
 
     	function setStar(starChangeEvent) {
@@ -23714,6 +23711,20 @@ var app = (function () {
     		}
     	}
 
+    	function findAlbumArtPath() {
+    		var _a, _b;
+
+    		if (songsToEdit.length > 1) {
+    			return getDirectoryFn((_a = songsToEdit[0]) === null || _a === void 0
+    			? void 0
+    			: _a.SourceFile);
+    		} else {
+    			return (_b = songsToEdit[0]) === null || _b === void 0
+    			? void 0
+    			: _b.SourceFile;
+    		}
+    	}
+
     	onMount(() => {
     		hookUpEventListeners();
     	});
@@ -23807,9 +23818,11 @@ var app = (function () {
     		UpdateIcon,
     		isEmptyObject,
     		tagEditSuggestionFn,
+    		getDirectoryFn,
     		songsToEdit,
     		groupedTags,
     		bindingTags,
+    		imageSourceLocation,
     		newTags,
     		setupSongs,
     		setStar,
@@ -23823,6 +23836,7 @@ var app = (function () {
     		hookUpEventListeners,
     		selectSuggestion,
     		undoAllTags,
+    		findAlbumArtPath,
     		$selectedSongsStore,
     		$songListStore,
     		$songSyncQueueProgress,
@@ -23831,9 +23845,10 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('songsToEdit' in $$props) $$invalidate(1, songsToEdit = $$props.songsToEdit);
-    		if ('groupedTags' in $$props) $$invalidate(6, groupedTags = $$props.groupedTags);
+    		if ('groupedTags' in $$props) $$invalidate(7, groupedTags = $$props.groupedTags);
     		if ('bindingTags' in $$props) $$invalidate(0, bindingTags = $$props.bindingTags);
-    		if ('newTags' in $$props) $$invalidate(2, newTags = $$props.newTags);
+    		if ('imageSourceLocation' in $$props) $$invalidate(2, imageSourceLocation = $$props.imageSourceLocation);
+    		if ('newTags' in $$props) $$invalidate(3, newTags = $$props.newTags);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -23841,26 +23856,27 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$songListStore*/ 256) {
+    		if ($$self.$$.dirty[0] & /*$songListStore*/ 512) {
     			{
     				setupSongs('songListStoreUpdate');
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$selectedSongsStore*/ 128) {
+    		if ($$self.$$.dirty[0] & /*$selectedSongsStore*/ 256) {
     			{
     				setupSongs('selectedSongsStoreUpdate');
     			}
     		}
 
-    		if ($$self.$$.dirty & /*groupedTags, bindingTags*/ 65) {
-    			$$invalidate(2, newTags = getObjectDifference(groupedTags, bindingTags));
+    		if ($$self.$$.dirty[0] & /*groupedTags, bindingTags*/ 129) {
+    			$$invalidate(3, newTags = getObjectDifference(groupedTags, bindingTags));
     		}
     	};
 
     	return [
     		bindingTags,
     		songsToEdit,
+    		imageSourceLocation,
     		newTags,
     		$elementMap,
     		setStar,
@@ -23888,7 +23904,7 @@ var app = (function () {
     class TagEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$T, create_fragment$T, safe_not_equal, {});
+    		init(this, options, instance$T, create_fragment$T, safe_not_equal, {}, null, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -29474,7 +29490,7 @@ var app = (function () {
     }
 
     // (10:2) {#if $config.directories}
-    function create_if_block_1$4(ctx) {
+    function create_if_block_1$5(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -29543,7 +29559,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$4.name,
+    		id: create_if_block_1$5.name,
     		type: "if",
     		source: "(10:2) {#if $config.directories}",
     		ctx
@@ -29840,7 +29856,7 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*$config*/ ctx[0].directories && create_if_block_1$4(ctx);
+    	let if_block0 = /*$config*/ ctx[0].directories && create_if_block_1$5(ctx);
 
     	addicon0 = new AddIcon({
     			props: {
@@ -29941,7 +29957,7 @@ var app = (function () {
     						transition_in(if_block0, 1);
     					}
     				} else {
-    					if_block0 = create_if_block_1$4(ctx);
+    					if_block0 = create_if_block_1$5(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(section_body0, null);
@@ -31079,7 +31095,7 @@ var app = (function () {
     }
 
     // (38:4) {#if !$songListTagsValuesStore.includes(tag.value)}
-    function create_if_block_1$3(ctx) {
+    function create_if_block_1$4(ctx) {
     	let option;
     	let t_value = /*tag*/ ctx[0].name + "";
     	let t;
@@ -31106,7 +31122,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$3.name,
+    		id: create_if_block_1$4.name,
     		type: "if",
     		source: "(38:4) {#if !$songListTagsValuesStore.includes(tag.value)}",
     		ctx
@@ -31120,7 +31136,7 @@ var app = (function () {
     	let first;
     	let show_if = !/*$songListTagsValuesStore*/ ctx[3].includes(/*tag*/ ctx[0].value);
     	let if_block_anchor;
-    	let if_block = show_if && create_if_block_1$3(ctx);
+    	let if_block = show_if && create_if_block_1$4(ctx);
 
     	const block = {
     		key: key_1,
@@ -31144,7 +31160,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$3(ctx);
+    					if_block = create_if_block_1$4(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -35415,7 +35431,7 @@ var app = (function () {
     }
 
     // (60:3) {#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}
-    function create_if_block_1$2(ctx) {
+    function create_if_block_1$3(ctx) {
     	let songtag;
     	let current;
 
@@ -35458,7 +35474,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
     		source: "(60:3) {#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}",
     		ctx
@@ -35475,7 +35491,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block_1$2, create_if_block_2$2];
+    	const if_block_creators = [create_if_block_1$3, create_if_block_2$2];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -36446,7 +36462,6 @@ var app = (function () {
 
     function instance$h($$self, $$props, $$invalidate) {
     	let $config;
-    	let $activeSongStore;
     	let $songListStore;
     	let $selectedAlbumDir;
     	let $selectedSongsStore;
@@ -36459,28 +36474,26 @@ var app = (function () {
     	let $elementMap;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
-    	validate_store(activeSongStore, 'activeSongStore');
-    	component_subscribe($$self, activeSongStore, $$value => $$invalidate(1, $activeSongStore = $$value));
     	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(2, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(1, $songListStore = $$value));
     	validate_store(selectedAlbumDir, 'selectedAlbumDir');
-    	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(3, $selectedAlbumDir = $$value));
+    	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(2, $selectedAlbumDir = $$value));
     	validate_store(selectedSongsStore, 'selectedSongsStore');
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(4, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(3, $selectedSongsStore = $$value));
     	validate_store(albumPlayingDirStore, 'albumPlayingDirStore');
-    	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(5, $albumPlayingDirStore = $$value));
+    	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(4, $albumPlayingDirStore = $$value));
     	validate_store(triggerScrollToSongEvent, 'triggerScrollToSongEvent');
-    	component_subscribe($$self, triggerScrollToSongEvent, $$value => $$invalidate(6, $triggerScrollToSongEvent = $$value));
+    	component_subscribe($$self, triggerScrollToSongEvent, $$value => $$invalidate(5, $triggerScrollToSongEvent = $$value));
     	validate_store(triggerGroupingChangeEvent, 'triggerGroupingChangeEvent');
-    	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(7, $triggerGroupingChangeEvent = $$value));
+    	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(6, $triggerGroupingChangeEvent = $$value));
     	validate_store(playbackStore, 'playbackStore');
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(8, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(7, $playbackStore = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(9, $playingSongStore = $$value));
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(8, $playingSongStore = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(10, $layoutToShow = $$value));
+    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(9, $layoutToShow = $$value));
     	validate_store(elementMap, 'elementMap');
-    	component_subscribe($$self, elementMap, $$value => $$invalidate(11, $elementMap = $$value));
+    	component_subscribe($$self, elementMap, $$value => $$invalidate(10, $elementMap = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EventsHandlerMiddleware', slots, []);
 
@@ -36495,19 +36508,20 @@ var app = (function () {
 
     		$elementMap.get('img');
     		const albumElement = $elementMap.get('album');
-    		const songListItemElement = $elementMap.get('song-list-item');
-    		$elementMap.get('song-list');
+    		const songListItemElement = $elementMap.get('song-list-item'); //! true
+    		const songListElement = $elementMap.get('song-list'); //! false
     		const controlBarElement = $elementMap.get('control-bar-svlt');
-    		$elementMap.get('tag-edit-svlt');
+    		const tagEditElement = $elementMap.get('tag-edit-svlt'); //! false
     		const artElement = $elementMap.get('art-svlt');
     		if (albumElement) handleAlbumEvent(albumElement, evt.type);
     		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type);
     		if (artElement && controlBarElement) setAlbumBackInView();
-    	} // if (songListElement === undefined && tagEditElement === undefined) {
-    	// 	$selectedSongsStore = []
 
-    	// 	$activeSongStore = undefined
-    	// }
+    		if (songListElement === undefined && tagEditElement === undefined) {
+    			set_store_value(selectedSongsStore, $selectedSongsStore = [], $selectedSongsStore);
+    		}
+    	}
+
     	function handleKeyboardEvents(evt) {
     		let keyModifier = {
     			ctrl: evt.ctrlKey || evt.metaKey,
@@ -36574,8 +36588,6 @@ var app = (function () {
     			setNewPlaybackFn($selectedAlbumDir, $songListStore, songId, { playNow: true });
     			saveGroupingConfig();
     		}
-
-    		set_store_value(activeSongStore, $activeSongStore = undefined, $activeSongStore);
     	}
 
     	function saveGroupingConfig() {
@@ -36628,7 +36640,6 @@ var app = (function () {
     		handleSongListItemEvent,
     		saveGroupingConfig,
     		$config,
-    		$activeSongStore,
     		$songListStore,
     		$selectedAlbumDir,
     		$selectedSongsStore,
@@ -39951,47 +39962,20 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (42:3) {#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}
+    // (37:2) {#if song}
     function create_if_block$2(ctx) {
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			t = text("►");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, t, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(t);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$2.name,
-    		type: "if",
-    		source: "(42:3) {#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (36:1) {#each songList as song, index (index)}
-    function create_each_block(key_1, ctx) {
     	let p;
     	let t0;
-    	let t1_value = /*song*/ ctx[11].Title + "";
+    	let t1_value = /*song*/ ctx[11]?.Title + "";
     	let t1;
     	let t2;
-    	let t3_value = /*song*/ ctx[11].Artist + "";
+    	let t3_value = /*song*/ ctx[11]?.Artist + "";
     	let t3;
     	let t4;
     	let p_data_active_value;
     	let mounted;
     	let dispose;
-    	let if_block = /*$playingSongStore*/ ctx[2]?.Title === /*song*/ ctx[11]?.Title && /*$playingSongStore*/ ctx[2]?.Artist === /*song*/ ctx[11]?.Artist && create_if_block$2(ctx);
+    	let if_block = /*$playingSongStore*/ ctx[2]?.Title === /*song*/ ctx[11]?.Title && /*$playingSongStore*/ ctx[2]?.Artist === /*song*/ ctx[11]?.Artist && create_if_block_1$2(ctx);
 
     	function click_handler(...args) {
     		return /*click_handler*/ ctx[6](/*song*/ ctx[11], ...args);
@@ -40002,8 +39986,6 @@ var app = (function () {
     	}
 
     	const block = {
-    		key: key_1,
-    		first: null,
     		c: function create() {
     			p = element("p");
     			if (if_block) if_block.c();
@@ -40018,8 +40000,7 @@ var app = (function () {
     			: 'false');
 
     			attr_dev(p, "class", "svelte-da9ygv");
-    			add_location(p, file$3, 36, 2, 1484);
-    			this.first = p;
+    			add_location(p, file$3, 37, 3, 1498);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -40044,7 +40025,7 @@ var app = (function () {
 
     			if (/*$playingSongStore*/ ctx[2]?.Title === /*song*/ ctx[11]?.Title && /*$playingSongStore*/ ctx[2]?.Artist === /*song*/ ctx[11]?.Artist) {
     				if (if_block) ; else {
-    					if_block = create_if_block$2(ctx);
+    					if_block = create_if_block_1$2(ctx);
     					if_block.c();
     					if_block.m(p, t0);
     				}
@@ -40053,8 +40034,8 @@ var app = (function () {
     				if_block = null;
     			}
 
-    			if (dirty & /*songList*/ 1 && t1_value !== (t1_value = /*song*/ ctx[11].Title + "")) set_data_dev(t1, t1_value);
-    			if (dirty & /*songList*/ 1 && t3_value !== (t3_value = /*song*/ ctx[11].Artist + "")) set_data_dev(t3, t3_value);
+    			if (dirty & /*songList*/ 1 && t1_value !== (t1_value = /*song*/ ctx[11]?.Title + "")) set_data_dev(t1, t1_value);
+    			if (dirty & /*songList*/ 1 && t3_value !== (t3_value = /*song*/ ctx[11]?.Artist + "")) set_data_dev(t3, t3_value);
 
     			if (dirty & /*$songLyricsSelected, songList*/ 3 && p_data_active_value !== (p_data_active_value = /*$songLyricsSelected*/ ctx[1]?.title === /*song*/ ctx[11].Title && /*$songLyricsSelected*/ ctx[1]?.artist === /*song*/ ctx[11].Artist
     			? 'true'
@@ -40067,6 +40048,87 @@ var app = (function () {
     			if (if_block) if_block.d();
     			mounted = false;
     			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$2.name,
+    		type: "if",
+    		source: "(37:2) {#if song}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (45:4) {#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}
+    function create_if_block_1$2(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("►");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(45:4) {#if $playingSongStore?.Title === song?.Title && $playingSongStore?.Artist === song?.Artist}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (36:1) {#each songList as song, index (index)}
+    function create_each_block(key_1, ctx) {
+    	let first;
+    	let if_block_anchor;
+    	let if_block = /*song*/ ctx[11] && create_if_block$2(ctx);
+
+    	const block = {
+    		key: key_1,
+    		first: null,
+    		c: function create() {
+    			first = empty();
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    			this.first = first;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, first, anchor);
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (/*song*/ ctx[11]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block$2(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(first);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
 

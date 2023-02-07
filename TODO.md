@@ -14,3 +14,6 @@
 * When clicking on editing lyrics, auto select it.
 * Add Auto Switch Song configuration.
 * Add a playing symbol next to the playing song in lyrics list.
+
+* In genre update when song list changes.
+* In song list when album is clicked, update the list when the clicked album is being updated.

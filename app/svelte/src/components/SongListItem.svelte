@@ -82,7 +82,7 @@
 	style="grid-template-columns:{gridStyle};"
 	class="
 	{song.isEnabled === false ? 'disabled' : ''}
-	{$activeSongStore === song.ID ? 'active' : ''}
+	{$playingSongStore.ID === song.ID ? 'playing' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#if isSongPlaying === true}
@@ -150,14 +150,12 @@
 		transition-timing-function: ease-in-out;
 	}
 
-	/* song-list-item.playing {
+	song-list-item.playing {
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
-		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
+		box-shadow: inset 2px 0px 0 0 rgba(255, 255, 255, 0.5), inset -2px 0px 0 0 rgba(255, 255, 255, 0.5);
 		background-color: rgba(255, 255, 255, 0.1);
-	} */
-	song-list-item.active {
-		box-shadow: inset 0 0px 0 1px rgba(255, 255, 255, 0.5);
 	}
+
 	song-list-item.selected {
 		background-color: rgba(255, 255, 255, 0.15);
 	}
