@@ -29,3 +29,4 @@ function updateStoreVersion() {
 		isVersionUpdating = false
 	}
 }
+

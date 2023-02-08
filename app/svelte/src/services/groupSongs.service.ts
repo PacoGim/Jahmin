@@ -1,4 +1,3 @@
-
 import getAllSongsFn from '../db/getAllSongs.fn'
 import { hash } from '../functions/hashString.fn'
 import { selectedGroups } from '../stores/main.store'
@@ -43,6 +42,7 @@ function runGroupSongs(songs: SongType[], groups: string[], groupValues: string[
 		})()
 
 		selectedGroupsLocal[index] = firstIndexGroupedSongs
+
 		selectedGroups.set(selectedGroupsLocal)
 
 		return
@@ -83,6 +83,7 @@ function runGroupSongs(songs: SongType[], groups: string[], groupValues: string[
 			return false
 		}
 	})
+
 	selectedGroups.set(selectedGroupsLocal)
 
 	/********************** Album Grouping **********************/
@@ -207,7 +208,6 @@ function filterSongsByValue(songs: SongType[], groups: string[], groupValues: st
 }
 
 function normalizeGroupNames(groups: string[]) {
-
 	if (!groups) {
 		return groups
 	}

@@ -17,3 +17,8 @@
 
 * In genre update when song list changes.
 * In song list when album is clicked, update the list when the clicked album is being updated.
+
+* When editing tags, the go revert changes buttons does not go away.
+* If a genre is removed the ui does not update
+
+* When grouping songs, group them based on the current grouping. If Electronic Genre then only show albums AND SONGS that have Electronic a genre.

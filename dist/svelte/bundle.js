@@ -7456,15 +7456,16 @@ var app = (function () {
 
     function bulkDeleteSongsFn (songsId) {
         return new Promise((resolve, reject) => {
-            getDB().songs
-                .bulkDelete(songsId)
+            getDB()
+                .songs.bulkDelete(songsId)
                 .then(() => {
-                updateVersionFn();
-                getDB().songs.count().then(count => {
+                getDB()
+                    .songs.count()
+                    .then(count => {
                     if (count === 0) {
                         dbSongsStore.set([]);
-                        updateVersionFn();
                     }
+                    updateVersionFn();
                 });
             })
                 .catch(err => {
@@ -19721,7 +19722,7 @@ var app = (function () {
     			set_custom_element_data(song_list_item, "data-index", /*index*/ ctx[1]);
     			set_style(song_list_item, "grid-template-columns", /*gridStyle*/ ctx[5]);
 
-    			set_custom_element_data(song_list_item, "class", song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$playingSongStore*/ ctx[4].ID === /*song*/ ctx[0].ID
+    			set_custom_element_data(song_list_item, "class", song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$playingSongStore*/ ctx[4]?.ID === /*song*/ ctx[0].ID
     			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
@@ -19786,7 +19787,7 @@ var app = (function () {
     				set_style(song_list_item, "grid-template-columns", /*gridStyle*/ ctx[5]);
     			}
 
-    			if (!current || dirty & /*song, $playingSongStore, $selectedSongsStore*/ 81 && song_list_item_class_value !== (song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$playingSongStore*/ ctx[4].ID === /*song*/ ctx[0].ID
+    			if (!current || dirty & /*song, $playingSongStore, $selectedSongsStore*/ 81 && song_list_item_class_value !== (song_list_item_class_value = "" + (/*song*/ ctx[0].isEnabled === false ? 'disabled' : '') + " " + (/*$playingSongStore*/ ctx[4]?.ID === /*song*/ ctx[0].ID
     			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
@@ -20258,7 +20259,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (83:2) {#each songsToShow as song, index (song.ID)}
+    // (84:2) {#each songsToShow as song, index (song.ID)}
     function create_each_block$b(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -20311,7 +20312,7 @@ var app = (function () {
     		block,
     		id: create_each_block$b.name,
     		type: "each",
-    		source: "(83:2) {#each songsToShow as song, index (song.ID)}",
+    		source: "(84:2) {#each songsToShow as song, index (song.ID)}",
     		ctx
     	});
 
@@ -20354,9 +20355,9 @@ var app = (function () {
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
     			set_custom_element_data(song_list, "class", "svelte-y11uul");
-    			add_location(song_list, file$S, 81, 1, 2701);
+    			add_location(song_list, file$S, 82, 1, 2758);
     			set_custom_element_data(song_list_svlt, "class", "svelte-y11uul");
-    			add_location(song_list_svlt, file$S, 80, 0, 2591);
+    			add_location(song_list_svlt, file$S, 81, 0, 2648);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -23946,7 +23947,7 @@ var app = (function () {
     	let dispose;
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[7](/*index*/ ctx[12]);
+    		return /*click_handler_1*/ ctx[6](/*index*/ ctx[12]);
     	}
 
     	let each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]];
@@ -23975,7 +23976,7 @@ var app = (function () {
     			? 'selected'
     			: null) + " svelte-1cr4wd3"));
 
-    			add_location(group_value, file$N, 54, 4, 1699);
+    			add_location(group_value, file$N, 55, 4, 1813);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -24050,7 +24051,7 @@ var app = (function () {
     	return block;
     }
 
-    // (61:4) {#each $selectedGroups[index] as groupValue}
+    // (62:4) {#each $selectedGroups[index] as groupValue}
     function create_each_block_1$2(ctx) {
     	let group_value;
     	let t0_value = /*groupValue*/ ctx[13] + "";
@@ -24061,7 +24062,7 @@ var app = (function () {
     	let dispose;
 
     	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[8](/*index*/ ctx[12], /*groupValue*/ ctx[13]);
+    		return /*click_handler_2*/ ctx[7](/*index*/ ctx[12], /*groupValue*/ ctx[13]);
     	}
 
     	const block = {
@@ -24074,7 +24075,7 @@ var app = (function () {
     			? 'selected'
     			: null) + " svelte-1cr4wd3"));
 
-    			add_location(group_value, file$N, 61, 5, 1977);
+    			add_location(group_value, file$N, 63, 5, 2153);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -24107,14 +24108,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(61:4) {#each $selectedGroups[index] as groupValue}",
+    		source: "(62:4) {#each $selectedGroups[index] as groupValue}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (50:1) {#each $config.group.groupBy || [] as group, index (index)}
+    // (49:1) {#each $config.group.groupBy || [] as group, index (index)}
     function create_each_block$a(key_1, ctx) {
     	let group_svlt;
     	let group_name;
@@ -24142,10 +24143,10 @@ var app = (function () {
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
     			set_custom_element_data(group_name, "class", "svelte-1cr4wd3");
-    			add_location(group_name, file$N, 51, 3, 1550);
+    			add_location(group_name, file$N, 51, 3, 1603);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
     			set_custom_element_data(group_svlt, "class", "svelte-1cr4wd3");
-    			add_location(group_svlt, file$N, 50, 2, 1515);
+    			add_location(group_svlt, file$N, 49, 2, 1508);
     			this.first = group_svlt;
     		},
     		m: function mount(target, anchor) {
@@ -24157,7 +24158,7 @@ var app = (function () {
     			append_dev(group_svlt, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(group_name, "click", /*click_handler*/ ctx[6], false, false, false);
+    				dispose = listen_dev(group_name, "click", /*click_handler*/ ctx[5], false, false, false);
     				mounted = true;
     			}
     		},
@@ -24202,7 +24203,7 @@ var app = (function () {
     		block,
     		id: create_each_block$a.name,
     		type: "each",
-    		source: "(50:1) {#each $config.group.groupBy || [] as group, index (index)}",
+    		source: "(49:1) {#each $config.group.groupBy || [] as group, index (index)}",
     		ctx
     	});
 
@@ -24233,7 +24234,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(tag_group_svlt, "class", "svelte-1cr4wd3");
-    			add_location(tag_group_svlt, file$N, 48, 0, 1435);
+    			add_location(tag_group_svlt, file$N, 47, 0, 1428);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24285,9 +24286,9 @@ var app = (function () {
     	validate_store(selectedGroups, 'selectedGroups');
     	component_subscribe($$self, selectedGroups, $$value => $$invalidate(1, $selectedGroups = $$value));
     	validate_store(triggerGroupingChangeEvent, 'triggerGroupingChangeEvent');
-    	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(4, $triggerGroupingChangeEvent = $$value));
+    	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(3, $triggerGroupingChangeEvent = $$value));
     	validate_store(dbVersionStore, 'dbVersionStore');
-    	component_subscribe($$self, dbVersionStore, $$value => $$invalidate(5, $dbVersionStore = $$value));
+    	component_subscribe($$self, dbVersionStore, $$value => $$invalidate(4, $dbVersionStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TagGroup', slots, []);
     	let isFirstGroupSongs = true;
@@ -24342,7 +24343,7 @@ var app = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('isFirstGroupSongs' in $$props) $$invalidate(3, isFirstGroupSongs = $$props.isFirstGroupSongs);
+    		if ('isFirstGroupSongs' in $$props) isFirstGroupSongs = $$props.isFirstGroupSongs;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -24350,7 +24351,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$dbVersionStore*/ 32) {
+    		if ($$self.$$.dirty & /*$dbVersionStore*/ 16) {
     			{
     				if ($dbVersionStore) {
     					runSongGroup();
@@ -24358,19 +24359,15 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$config, isFirstGroupSongs*/ 9) {
-    			{
-    				$config.group.groupBy;
-
-    				if (isFirstGroupSongs === true) {
-    					$$invalidate(3, isFirstGroupSongs = false);
-    				} else {
-    					runSongGroup();
-    				}
-    			}
-    		}
-
-    		if ($$self.$$.dirty & /*$triggerGroupingChangeEvent*/ 16) {
+    		if ($$self.$$.dirty & /*$triggerGroupingChangeEvent*/ 8) {
+    			// $: {
+    			// 	$config.group.groupBy
+    			// 	if (isFirstGroupSongs === true) {
+    			// 		isFirstGroupSongs = false
+    			// 	} else {
+    			// 		runSongGroup()
+    			// 	}
+    			// }
     			{
     				if ($triggerGroupingChangeEvent.length > 0) {
     					$triggerGroupingChangeEvent.forEach((grouping, index) => {
@@ -24387,7 +24384,6 @@ var app = (function () {
     		$config,
     		$selectedGroups,
     		setNewGroupValue,
-    		isFirstGroupSongs,
     		$triggerGroupingChangeEvent,
     		$dbVersionStore,
     		click_handler,

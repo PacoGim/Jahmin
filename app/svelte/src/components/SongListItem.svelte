@@ -82,7 +82,7 @@
 	style="grid-template-columns:{gridStyle};"
 	class="
 	{song.isEnabled === false ? 'disabled' : ''}
-	{$playingSongStore.ID === song.ID ? 'playing' : ''}
+	{$playingSongStore?.ID === song.ID ? 'playing' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
 	{#if isSongPlaying === true}
