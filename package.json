@@ -61,6 +61,7 @@
     "chokidar": "^3.5.3",
     "deepmerge": "^4.2.2",
     "dexie": "^3.2.3",
+    "dexie-observable": "^4.0.1-beta.13",
     "dompurify": "^2.4.3",
     "electron-squirrel-startup": "^1.0.0",
     "exiftool-vendored": "^19.0.0",

@@ -13,7 +13,7 @@ export default function (id: number) {
 
 			getDB()
 				.songs.put(song)
-				.then(() => updateVersionFn())
+				.then(() => /*updateVersionFn()*/{})
 
 			// Updates the song list to reflect the new play count changes.
 			let songListStoreLocal: SongType[] = undefined

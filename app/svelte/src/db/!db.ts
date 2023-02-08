@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import 'dexie-observable';
 import type { SongType } from '../../../types/song.type'
 import { setDB } from './!dbObject'
 
@@ -16,6 +17,8 @@ export class JahminDb extends Dexie {
 			songs:
 				'ID,PlayCount,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,Date_Year,Date_Month,Date_Day,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
 		})
+
+		this.version(3).stores({})
 	}
 }
 

@@ -1,6 +1,7 @@
 import type { SongType } from '../../../types/song.type'
+import { config } from '../stores/main.store'
 
-export default (songs: SongType[], tag, order) => {
+export default (songs: SongType[], tag, order, group = undefined) => {
 	let songsArrayCopy = [...songs]
 
 	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
@@ -35,6 +36,12 @@ export default (songs: SongType[], tag, order) => {
 				return dateB - dateA
 			})
 		}
+	}
+
+	if (group) {
+		group.groupBy.forEach((_, index) => {
+			songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index])
+		})
 	}
 
 	return songsArrayCopy

@@ -43,7 +43,7 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 		// When all promises are done, then update version, catch errors and finally resolve.
 		Promise.all(bulkUpdatePromises)
 			.then(x => {
-				updateVersionFn()
+				// updateVersionFn()
 			})
 			.catch(err => {
 				console.log(err)

@@ -14,7 +14,7 @@ export default function (songsId: number[]) {
 							dbSongsStore.set([])
 						}
 
-						updateVersionFn()
+						// updateVersionFn()
 					})
 			})
 			.catch(err => {

@@ -97,14 +97,14 @@
 
 		let songs = await getAlbumSongsFn(rootDir)
 
-		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder)
+		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
 
 		if (evtType === 'dblclick') {
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
-			if ($selectedAlbumDir !== rootDir) {
+			if ($selectedAlbumDir !== rootDir || songs.length !== sortedSongs.length) {
 				$songListStore = sortedSongs
 				$selectedAlbumDir = rootDir
 			}

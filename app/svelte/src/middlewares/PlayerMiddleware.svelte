@@ -10,10 +10,21 @@
 	// import { getAlbumIPC, getAlbumsIPC } from '../services/ipc.service'
 	// import { sortByConfig, sortOrderConfig } from '../store/config.store'
 
-	import { selectedAlbumDir, songListStore } from '../stores/main.store'
+	import { dbVersionStore, playbackStore, selectedAlbumDir, songListStore } from '../stores/main.store'
 	import { config } from '../stores/main.store'
 
-	let firstGroupByAssign = true
+	$: {
+		$dbVersionStore
+		updateSongListStore()
+	}
+
+	async function updateSongListStore() {
+		let songs = await getAlbumSongsFn($selectedAlbumDir)
+
+		if ($songListStore.length !== songs.length) {
+			$songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+		}
+	}
 
 	/* 	$: {
 		if (firstGroupByAssign === true) {
@@ -42,7 +53,7 @@
 				$selectedAlbumDir = lastPlayedDir
 			}
 
-			$songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder)
+			$songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
 
 			setNewPlaybackFn(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
 

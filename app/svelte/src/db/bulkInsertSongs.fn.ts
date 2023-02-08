@@ -7,7 +7,7 @@ export default function (songs: SongType[]): Promise<undefined> {
 		getDB().songs
 			.bulkAdd(songs)
 			.then(() => {
-				updateVersionFn()
+				// updateVersionFn()
 			})
 			.catch(err => {
 				console.log(err)
