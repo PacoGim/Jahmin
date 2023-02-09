@@ -1,6 +1,6 @@
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
-  import cssVariablesService from '../../services/cssVariables.service'
+	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 
 	import { config, selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../stores/main.store'
@@ -74,7 +74,11 @@
 	}
 
 	function changeSongListHeight(songAmount) {
-		cssVariablesService.set('song-list-svlt-height', `${songAmount * 36 + 16}px`)
+		let songListItemHeight = Number(
+			getComputedStyle(document.body).getPropertyValue('--song-list-item-height').replace('px', '')
+		)
+
+		cssVariablesService.set('song-list-svlt-height', `${songAmount * songListItemHeight + 16}px`)
 	}
 
 	function scrollContainer(e: WheelEvent) {

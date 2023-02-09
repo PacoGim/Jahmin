@@ -19,11 +19,12 @@
 	}
 
 	async function updateSongListStore() {
-		let songs = await getAlbumSongsFn($selectedAlbumDir)
+		// let songs = await getAlbumSongsFn($selectedAlbumDir)
+		// let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
 
-		if ($songListStore.length !== songs.length) {
-			$songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-		}
+		// if ($songListStore.length !== sortedSongs.length || songs.length !== sortedSongs.length) {
+		// 	$songListStore = sortedSongs
+		// }
 	}
 
 	/* 	$: {

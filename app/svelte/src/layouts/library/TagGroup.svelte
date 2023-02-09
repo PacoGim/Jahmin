@@ -161,12 +161,13 @@
 
 	group-value.selected {
 		background-color: hsl(var(--art-hue), var(--art-saturation), 50%);
-		color: hsl(var(--art-hue), var(--art-saturation), 80%);
+		color: hsl(var(--art-hue), var(--art-saturation), 90%);
+
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 	}
 
 	group-value:hover {
-		background-color: hsl(var(--art-hue), var(--art-saturation), 50%);
-		color: hsl(var(--art-hue), var(--art-saturation), 80%);
+		background-color: hsl(var(--art-hue), var(--art-saturation), 55%);
+		color: hsl(var(--art-hue), var(--art-saturation), 95%);
 	}
 </style>

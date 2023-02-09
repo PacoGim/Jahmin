@@ -1,7 +1,9 @@
 import deepmerge from 'deepmerge'
+import type { ConfigType, PartialConfigType } from '../../../types/config.type'
 import type { PartialSongType, SongType } from '../../../types/song.type'
-import { songListStore } from '../stores/main.store'
+import { config, selectedAlbumDir, songListStore } from '../stores/main.store'
 import { getDB } from './!dbObject'
+import getAlbumSongsFn from './getAlbumSongs.fn'
 import updateVersionFn from './updateVersion.fn'
 
 export default function (songs: { id: string | number; newTags: PartialSongType }[]) {
@@ -56,8 +58,10 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 
 function updateVariables(songs: { id: string | number; newTags: PartialSongType }[]) {
 	let songListStoreLocal: SongType[] = undefined
+	let groupStoreLocal = undefined
 
 	songListStore.subscribe(value => (songListStoreLocal = value))()
+	config.subscribe(value => (groupStoreLocal = value.group))()
 
 	songs.forEach(song => {
 		let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id)
@@ -67,5 +71,19 @@ function updateVariables(songs: { id: string | number; newTags: PartialSongType 
 		}
 	})
 
-	songListStore.set(songListStoreLocal)
+	songListStoreLocal = songListStoreLocal.filter(song => song[groupStoreLocal.groupBy[0]] === groupStoreLocal.groupByValues[0])
+
+	if (songListStoreLocal.length === 0) {
+		selectedAlbumDir.subscribe(value => {
+			getAlbumSongsFn(value).then(songs => {
+				songListStore.set(songs)
+			})
+		})()
+
+		// getAlbumSongsFn()
+
+		// songListStore.set(songListStoreLocal)
+	} else {
+		songListStore.set(songListStoreLocal)
+	}
 }

@@ -23,7 +23,9 @@
 
 	--icon-size: 40px;
 
-	--table-filler-width:9999px;
+	--table-filler-width: 9999px;
+
+	--song-list-item-height: 40px;
 
 	/********************** Album Color Variables **********************/
 	--art-hue: 0;

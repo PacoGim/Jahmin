@@ -7257,19 +7257,10 @@ var app = (function () {
     let db = undefined;
     function setDB(newDb) {
         db = newDb;
-        db.on('changes', function (changes) {
-            changes.forEach(function (change) {
-                switch (change.type) {
-                    case 1: // CREATED
-                        updateVersionFn();
-                        break;
-                    case 2: // UPDATED
-                        updateVersionFn();
-                        break;
-                    case 3: // DELETED
-                        updateVersionFn();
-                        break;
-                }
+        db.on('changes', changes => {
+            changes.forEach(_ => {
+                // console.log(_)
+                updateVersionFn();
             });
         });
     }
@@ -8646,6 +8637,33 @@ var app = (function () {
 
     var cjs = deepmerge_1;
 
+    function getDirectoryFn (inputString) {
+        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
+    }
+
+    function getAllSongsFn () {
+        return new Promise((resolve, reject) => {
+            dbSongsStore.subscribe((songs) => {
+                if (songs.length === 0) {
+                    getDB().songs.toArray().then((songs) => {
+                        resolve(songs);
+                    });
+                }
+                else {
+                    resolve(songs);
+                }
+            })();
+        });
+    }
+
+    function getAlbumSongsFn (rootDir) {
+        return new Promise((resolve, reject) => {
+            getAllSongsFn().then(songs => {
+                resolve(songs.filter(song => getDirectoryFn(song.SourceFile) === rootDir));
+            });
+        });
+    }
+
     function bulkUpdateSongsFn (songs) {
         return new Promise((resolve, reject) => {
             updateVariables(songs);
@@ -8691,14 +8709,28 @@ var app = (function () {
     }
     function updateVariables(songs) {
         let songListStoreLocal = undefined;
+        let groupStoreLocal = undefined;
         songListStore.subscribe(value => (songListStoreLocal = value))();
+        config.subscribe(value => (groupStoreLocal = value.group))();
         songs.forEach(song => {
             let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id);
             if (arraySongIndex !== -1) {
                 songListStoreLocal[arraySongIndex] = cjs(songListStoreLocal[arraySongIndex], song.newTags);
             }
         });
-        songListStore.set(songListStoreLocal);
+        songListStoreLocal = songListStoreLocal.filter(song => song[groupStoreLocal.groupBy[0]] === groupStoreLocal.groupByValues[0]);
+        if (songListStoreLocal.length === 0) {
+            selectedAlbumDir.subscribe(value => {
+                getAlbumSongsFn(value).then(songs => {
+                    songListStore.set(songs);
+                });
+            })();
+            // getAlbumSongsFn()
+            // songListStore.set(songListStoreLocal)
+        }
+        else {
+            songListStore.set(songListStoreLocal);
+        }
     }
 
     class JahminDb extends Dexie$1 {
@@ -8751,21 +8783,6 @@ var app = (function () {
         setTimeout(() => {
             runQueue();
         }, 250);
-    }
-
-    function getAllSongsFn () {
-        return new Promise((resolve, reject) => {
-            dbSongsStore.subscribe((songs) => {
-                if (songs.length === 0) {
-                    getDB().songs.toArray().then((songs) => {
-                        resolve(songs);
-                    });
-                }
-                else {
-                    resolve(songs);
-                }
-            })();
-        });
     }
 
     function generateId() {
@@ -9045,18 +9062,6 @@ var app = (function () {
     	}
     }
 
-    function getDirectoryFn (inputString) {
-        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
-    }
-
-    function getAlbumSongsFn (rootDir) {
-        return new Promise((resolve, reject) => {
-            getAllSongsFn().then(songs => {
-                resolve(songs.filter(song => getDirectoryFn(song.SourceFile) === rootDir));
-            });
-        });
-    }
-
     function applyColorSchemeFn (color) {
         cssVariablesService.set('art-hue', color.hue);
         cssVariablesService.set('art-saturation', color.saturation + '%');
@@ -9288,6 +9293,11 @@ var app = (function () {
     	return block;
     }
 
+    async function updateSongListStore() {
+    	
+    } // let songs = await getAlbumSongsFn($selectedAlbumDir)
+    // let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
     function instance$1r($$self, $$props, $$invalidate) {
     	let $songListStore;
     	let $config;
@@ -9304,24 +9314,6 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlayerMiddleware', slots, []);
 
-    	async function updateSongListStore() {
-    		let songs = await getAlbumSongsFn($selectedAlbumDir);
-
-    		if ($songListStore.length !== songs.length) {
-    			set_store_value(songListStore, $songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group), $songListStore);
-    		}
-    	}
-
-    	/* 	$: {
-        if (firstGroupByAssign === true) {
-            firstGroupByAssign = false
-        } else {
-            getAlbums($selectedGroupByStore, $selectedGroupByValueStore)
-        }
-    } */
-    	// function getAlbums(groupBy: string, groupByValue: string) {
-    	// 	getAlbumsIPC(groupBy, groupByValue).then(result => ($albumListStore = result))
-    	// }
     	function loadPreviousState() {
     		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'));
     		let lastPlayedDir = localStorage.getItem('LastPlayedDir');
@@ -20766,7 +20758,7 @@ var app = (function () {
     			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-40o5xb");
+    			: '') + " svelte-1ks7s4h");
 
     			add_location(song_list_item, file$U, 58, 0, 2057);
     		},
@@ -20831,7 +20823,7 @@ var app = (function () {
     			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-40o5xb")) {
+    			: '') + " svelte-1ks7s4h")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},
@@ -21299,7 +21291,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (84:2) {#each songsToShow as song, index (song.ID)}
+    // (85:2) {#each songsToShow as song, index (song.ID)}
     function create_each_block$b(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -21352,7 +21344,7 @@ var app = (function () {
     		block,
     		id: create_each_block$b.name,
     		type: "each",
-    		source: "(84:2) {#each songsToShow as song, index (song.ID)}",
+    		source: "(85:2) {#each songsToShow as song, index (song.ID)}",
     		ctx
     	});
 
@@ -21395,9 +21387,9 @@ var app = (function () {
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
     			set_custom_element_data(song_list, "class", "svelte-y11uul");
-    			add_location(song_list, file$S, 82, 1, 2758);
+    			add_location(song_list, file$S, 83, 1, 2906);
     			set_custom_element_data(song_list_svlt, "class", "svelte-y11uul");
-    			add_location(song_list_svlt, file$S, 81, 0, 2648);
+    			add_location(song_list_svlt, file$S, 82, 0, 2796);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21531,7 +21523,8 @@ var app = (function () {
     	}
 
     	function changeSongListHeight(songAmount) {
-    		cssVariablesService.set('song-list-svlt-height', `${songAmount * 36 + 16}px`);
+    		let songListItemHeight = Number(getComputedStyle(document.body).getPropertyValue('--song-list-item-height').replace('px', ''));
+    		cssVariablesService.set('song-list-svlt-height', `${songAmount * songListItemHeight + 16}px`);
     	}
 
     	function scrollContainer(e) {
@@ -25014,7 +25007,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-1cr4wd3"));
+    			: null) + " svelte-1357yc5"));
 
     			add_location(group_value, file$N, 55, 4, 1813);
     		},
@@ -25042,7 +25035,7 @@ var app = (function () {
 
     			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
     			? 'selected'
-    			: null) + " svelte-1cr4wd3"))) {
+    			: null) + " svelte-1357yc5"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
 
@@ -25113,7 +25106,7 @@ var app = (function () {
 
     			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-1cr4wd3"));
+    			: null) + " svelte-1357yc5"));
 
     			add_location(group_value, file$N, 63, 5, 2153);
     		},
@@ -25133,7 +25126,7 @@ var app = (function () {
 
     			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
     			? 'selected'
-    			: null) + " svelte-1cr4wd3"))) {
+    			: null) + " svelte-1357yc5"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
     		},
@@ -25182,10 +25175,10 @@ var app = (function () {
     			t2 = space();
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_name, "class", "svelte-1cr4wd3");
+    			set_custom_element_data(group_name, "class", "svelte-1357yc5");
     			add_location(group_name, file$N, 51, 3, 1603);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
-    			set_custom_element_data(group_svlt, "class", "svelte-1cr4wd3");
+    			set_custom_element_data(group_svlt, "class", "svelte-1357yc5");
     			add_location(group_svlt, file$N, 49, 2, 1508);
     			this.first = group_svlt;
     		},
@@ -25273,7 +25266,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(tag_group_svlt, "class", "svelte-1cr4wd3");
+    			set_custom_element_data(tag_group_svlt, "class", "svelte-1357yc5");
     			add_location(tag_group_svlt, file$N, 47, 0, 1428);
     		},
     		l: function claim(nodes) {

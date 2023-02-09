@@ -17,6 +17,8 @@
 
 	$: isSongPlaying = $playingSongStore?.ID === song?.ID
 
+
+
 	$: {
 		song
 		setDynamicArtists()
@@ -97,27 +99,13 @@
 				on:starChange={setStar}
 			/>
 		{:else if tag.value === 'DynamicArtists' || !$config.songListTags.find(configTag => configTag.value === 'Title')}
-			<!--  -->
+			<!-- Empty -->
 		{:else}
 			<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />
 		{/if}
 	{/each}
 </song-list-item>
 
-<!--
-	{#if tag.value === 'Rating'}
-		<Star on:starChange={setStar} songRating={song.Rating} hook="song-list-item" />
-	{:else if tag.value === 'Title'}
-		<SongTag
-			data="{song[tag.value] || ''} {song.DynamicArtists !== undefined ? song.DynamicArtists : ''}"
-			customStyle={titleTagStyle}
-			tagName={tag.value}
-			align={tag?.align?.toLowerCase()}
-		/>
-	{:else if tag.value === 'PlayCount'}
-		<SongTag data={song[tag.value]} customStyle={playCountTagStyle} tagName={tag.value} align={tag?.align?.toLowerCase()} />
-	{:else}
-	{/if} -->
 <style>
 	song-list-item {
 		position: relative;
@@ -125,24 +113,22 @@
 
 		align-items: center;
 
-		--height: 36px;
-
-		min-height: var(--height);
-		max-height: var(--height);
-		height: var(--height);
+		min-height: var(--song-list-item-height);
+		max-height: var(--song-list-item-height);
+		height: var(--song-list-item-height);
 
 		display: grid;
 		/* grid-template-columns: max-content auto max-content max-content max-content; */
 		grid-template-rows: auto;
 
 		/* margin: 0.25rem 0; */
-		border-bottom: 0.25rem transparent solid;
-		border-top: 0.25rem transparent solid;
+		/* border-bottom: 0.25rem transparent solid; */
+		border: 0.125rem transparent solid;
 		background-clip: padding-box;
-		padding: 0.25rem 0.5rem;
+		padding: 0.5rem 0.5rem;
 		user-select: none;
 
-		border-radius: 5px;
+		border-radius: 10px;
 
 		/* transition-property: font-variation-settings, box-shadow, background-color; */
 		transition-property: font-variation-settings, background-color, box-shadow;
@@ -150,14 +136,22 @@
 		transition-timing-function: ease-in-out;
 	}
 
+	song-list-item:first-of-type {
+		border-top: 0px;
+	}
+
+	song-list-item:last-of-type {
+		border-bottom: 0px;
+	}
+
 	song-list-item.playing {
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
-		box-shadow: inset 2px 0px 0 0 rgba(255, 255, 255, 0.5), inset -2px 0px 0 0 rgba(255, 255, 255, 0.5);
-		background-color: rgba(255, 255, 255, 0.1);
+		box-shadow: inset 0px 0px 0 2px rgba(255, 255, 255, 0.5);
+		/* border-radius: 5px; */
 	}
 
 	song-list-item.selected {
-		background-color: rgba(255, 255, 255, 0.15);
+		background-color: rgba(255, 255, 255, 0.1);
 	}
 
 	song-list-item.disabled {
