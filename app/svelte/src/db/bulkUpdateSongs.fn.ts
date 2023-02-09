@@ -1,6 +1,7 @@
 import deepmerge from 'deepmerge'
 import type { ConfigType, PartialConfigType } from '../../../types/config.type'
 import type { PartialSongType, SongType } from '../../../types/song.type'
+import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import { config, selectedAlbumDir, songListStore } from '../stores/main.store'
 import { getDB } from './!dbObject'
 import getAlbumSongsFn from './getAlbumSongs.fn'
@@ -45,7 +46,7 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 		// When all promises are done, then update version, catch errors and finally resolve.
 		Promise.all(bulkUpdatePromises)
 			.then(x => {
-				// updateVersionFn()
+				updateVersionFn()
 			})
 			.catch(err => {
 				console.log(err)
@@ -58,10 +59,10 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 
 function updateVariables(songs: { id: string | number; newTags: PartialSongType }[]) {
 	let songListStoreLocal: SongType[] = undefined
-	let groupStoreLocal = undefined
+	let configStoreLocal = undefined
 
 	songListStore.subscribe(value => (songListStoreLocal = value))()
-	config.subscribe(value => (groupStoreLocal = value.group))()
+	config.subscribe(value => (configStoreLocal = value))()
 
 	songs.forEach(song => {
 		let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id)
@@ -71,18 +72,20 @@ function updateVariables(songs: { id: string | number; newTags: PartialSongType 
 		}
 	})
 
-	songListStoreLocal = songListStoreLocal.filter(song => song[groupStoreLocal.groupBy[0]] === groupStoreLocal.groupByValues[0])
+	songListStoreLocal = songListStoreLocal.filter(
+		song => song[configStoreLocal.group.groupBy[0]] === configStoreLocal.group.groupByValues[0]
+	)
 
 	if (songListStoreLocal.length === 0) {
-		selectedAlbumDir.subscribe(value => {
-			getAlbumSongsFn(value).then(songs => {
-				songListStore.set(songs)
-			})
-		})()
+		location.reload()
+		// selectedAlbumDir.subscribe(value => {
+		// 	getAlbumSongsFn(value).then(songs => {
+		// 		let sortedSongs = sortSongsArrayFn(songs, configStoreLocal.userOptions.sortBy, configStoreLocal.userOptions.sortOrder)
 
-		// getAlbumSongsFn()
+		// 		songListStore.set(sortedSongs)
 
-		// songListStore.set(songListStoreLocal)
+		// 	})
+		// })()
 	} else {
 		songListStore.set(songListStoreLocal)
 	}

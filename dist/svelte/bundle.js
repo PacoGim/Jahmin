@@ -7259,8 +7259,10 @@ var app = (function () {
         db = newDb;
         db.on('changes', changes => {
             changes.forEach(_ => {
-                // console.log(_)
-                updateVersionFn();
+                if (_.type === 2) ;
+                else {
+                    updateVersionFn();
+                }
             });
         });
     }
@@ -8637,6 +8639,48 @@ var app = (function () {
 
     var cjs = deepmerge_1;
 
+    var sortSongsArrayFn = (songs, tag, order, group = undefined) => {
+        let songsArrayCopy = [...songs];
+        if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
+            if (order === 'asc') {
+                songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0));
+            }
+            else {
+                songsArrayCopy.sort((a, b) => Number(b[tag] || 0) - Number(a[tag || 0]));
+            }
+        }
+        if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
+            if (order === 'asc') {
+                songsArrayCopy.sort((a, b) => String(a[tag]).localeCompare(String(b[tag]), undefined, { numeric: true }));
+            }
+            else {
+                songs = songsArrayCopy.sort((a, b) => String(b[tag]).localeCompare(String(a[tag]), undefined, { numeric: true }));
+            }
+        }
+        if (['Date'].includes(tag)) {
+            if (order === 'asc') {
+                songsArrayCopy.sort((a, b) => {
+                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
+                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
+                    return dateA - dateB;
+                });
+            }
+            else {
+                songsArrayCopy.sort((a, b) => {
+                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
+                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
+                    return dateB - dateA;
+                });
+            }
+        }
+        if (group) {
+            group.groupBy.forEach((_, index) => {
+                songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index]);
+            });
+        }
+        return songsArrayCopy;
+    };
+
     function getDirectoryFn (inputString) {
         return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
     }
@@ -8697,7 +8741,7 @@ var app = (function () {
             // When all promises are done, then update version, catch errors and finally resolve.
             Promise.all(bulkUpdatePromises)
                 .then(x => {
-                // updateVersionFn()
+                updateVersionFn();
             })
                 .catch(err => {
                 console.log(err);
@@ -8709,24 +8753,24 @@ var app = (function () {
     }
     function updateVariables(songs) {
         let songListStoreLocal = undefined;
-        let groupStoreLocal = undefined;
+        let configStoreLocal = undefined;
         songListStore.subscribe(value => (songListStoreLocal = value))();
-        config.subscribe(value => (groupStoreLocal = value.group))();
+        config.subscribe(value => (configStoreLocal = value))();
         songs.forEach(song => {
             let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id);
             if (arraySongIndex !== -1) {
                 songListStoreLocal[arraySongIndex] = cjs(songListStoreLocal[arraySongIndex], song.newTags);
             }
         });
-        songListStoreLocal = songListStoreLocal.filter(song => song[groupStoreLocal.groupBy[0]] === groupStoreLocal.groupByValues[0]);
+        songListStoreLocal = songListStoreLocal.filter(song => song[configStoreLocal.group.groupBy[0]] === configStoreLocal.group.groupByValues[0]);
         if (songListStoreLocal.length === 0) {
-            selectedAlbumDir.subscribe(value => {
-                getAlbumSongsFn(value).then(songs => {
-                    songListStore.set(songs);
-                });
-            })();
-            // getAlbumSongsFn()
-            // songListStore.set(songListStoreLocal)
+            location.reload();
+            // selectedAlbumDir.subscribe(value => {
+            // 	getAlbumSongsFn(value).then(songs => {
+            // 		let sortedSongs = sortSongsArrayFn(songs, configStoreLocal.userOptions.sortBy, configStoreLocal.userOptions.sortOrder)
+            // 		songListStore.set(sortedSongs)
+            // 	})
+            // })()
         }
         else {
             songListStore.set(songListStoreLocal);
@@ -9224,48 +9268,6 @@ var app = (function () {
             applyColorSchemeFn(color);
         });
     }
-
-    var sortSongsArrayFn = (songs, tag, order, group = undefined) => {
-        let songsArrayCopy = [...songs];
-        if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
-            if (order === 'asc') {
-                songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0));
-            }
-            else {
-                songsArrayCopy.sort((a, b) => Number(b[tag] || 0) - Number(a[tag || 0]));
-            }
-        }
-        if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
-            if (order === 'asc') {
-                songsArrayCopy.sort((a, b) => String(a[tag]).localeCompare(String(b[tag]), undefined, { numeric: true }));
-            }
-            else {
-                songs = songsArrayCopy.sort((a, b) => String(b[tag]).localeCompare(String(a[tag]), undefined, { numeric: true }));
-            }
-        }
-        if (['Date'].includes(tag)) {
-            if (order === 'asc') {
-                songsArrayCopy.sort((a, b) => {
-                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
-                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
-                    return dateA - dateB;
-                });
-            }
-            else {
-                songsArrayCopy.sort((a, b) => {
-                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
-                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
-                    return dateB - dateA;
-                });
-            }
-        }
-        if (group) {
-            group.groupBy.forEach((_, index) => {
-                songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index]);
-            });
-        }
-        return songsArrayCopy;
-    };
 
     /* src/middlewares/PlayerMiddleware.svelte generated by Svelte v3.55.1 */
 
