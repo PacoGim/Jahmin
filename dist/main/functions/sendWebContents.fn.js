@@ -6,6 +6,9 @@ function default_1(channel, data) {
     if (browserWindow === undefined) {
         browserWindow = (0, main_1.getMainWindow)();
     }
-    browserWindow?.webContents.send(channel, data);
+    try {
+        browserWindow?.webContents.send(channel, data);
+    }
+    catch (error) { }
 }
 exports.default = default_1;

@@ -14,9 +14,12 @@ import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.f
 
 let browserWindow: BrowserWindow
 
-chokidarWatch([path.join(__dirname, '../svelte'), path.join(__dirname, '../index.html'),path.join(__dirname, '../assets')]).on('change', () => {
-	getMainWindow().reload()
-})
+chokidarWatch([path.join(__dirname, '../svelte'), path.join(__dirname, '../index.html'), path.join(__dirname, '../assets')]).on(
+	'change',
+	() => {
+		getMainWindow().reload()
+	}
+)
 
 function createWindow() {
 	const config = getConfig()
@@ -28,21 +31,21 @@ function createWindow() {
 	browserWindow.loadFile(path.join(__dirname, '../index.html'))
 
 	browserWindow
-		.on('move', () => calculateWindowBoundariesFn(browserWindow))
-		.on('resize', () => calculateWindowBoundariesFn(browserWindow))
+	.on('move', () => calculateWindowBoundariesFn(browserWindow))
+	.on('resize', () => calculateWindowBoundariesFn(browserWindow))
 }
 
 app.whenReady().then(() => {
 	createWindow()
-
 	startIPC()
 
 	app.on('activate', () => {
-		if (BrowserWindow.getAllWindows().length === 0) createWindow()
+		// if (BrowserWindow.getAllWindows().length === 0) createWindow()
 	})
 
 	app.on('window-all-closed', () => {
-		if (process.platform !== 'darwin') app.quit()
+		app.quit()
+		// if (process.platform !== 'darwin') app.quit()
 	})
 })
 

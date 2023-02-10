@@ -142,7 +142,7 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 		.finally(() => {
 			setTimeout(() => {
 				watchPaths([task.path])
-			}, 10000)
+			}, 1)
 
 			getTask(processIndex, processesRunning)
 		})

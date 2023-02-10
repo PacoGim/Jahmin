@@ -9,7 +9,10 @@ import updateVersionFn from './updateVersion.fn'
 
 export default function (songs: { id: string | number; newTags: PartialSongType }[]) {
 	return new Promise((resolve, reject) => {
-		updateVariables(songs)
+		// updateVariables(songs)
+
+		// console.log(JSON.stringify(songs))
+
 
 		// Will contain songs grouped by the same new tags to update.
 		let updateGroups = []
@@ -58,35 +61,47 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 }
 
 function updateVariables(songs: { id: string | number; newTags: PartialSongType }[]) {
-	let songListStoreLocal: SongType[] = undefined
-	let configStoreLocal = undefined
+	// console.log(123)
 
-	songListStore.subscribe(value => (songListStoreLocal = value))()
-	config.subscribe(value => (configStoreLocal = value))()
+	// let songListStoreLocal: SongType[] = undefined
+	// let configStoreLocal = undefined
 
-	songs.forEach(song => {
-		let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id)
+	// songListStore.subscribe(value => (songListStoreLocal = value))()
 
-		if (arraySongIndex !== -1) {
-			songListStoreLocal[arraySongIndex] = deepmerge(songListStoreLocal[arraySongIndex], song.newTags)
-		}
-	})
+	// songListStoreLocal.forEach(songListSong => {
+		// let findSong = songs.find(song => song.id===songListSong.ID)
+		// console.log(songListSong)
+		// console.log(songs)
 
-	songListStoreLocal = songListStoreLocal.filter(
-		song => song[configStoreLocal.group.groupBy[0]] === configStoreLocal.group.groupByValues[0]
-	)
+		// console.log(findSong)
+	// })
 
-	if (songListStoreLocal.length === 0) {
-		location.reload()
-		// selectedAlbumDir.subscribe(value => {
-		// 	getAlbumSongsFn(value).then(songs => {
-		// 		let sortedSongs = sortSongsArrayFn(songs, configStoreLocal.userOptions.sortBy, configStoreLocal.userOptions.sortOrder)
+	// console.log(songs)
+	// config.subscribe(value => (configStoreLocal = value))()
 
-		// 		songListStore.set(sortedSongs)
+	// songs.forEach(song => {
+	// 	let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id)
 
-		// 	})
-		// })()
-	} else {
-		songListStore.set(songListStoreLocal)
-	}
+	// 	if (arraySongIndex !== -1) {
+	// 		songListStoreLocal[arraySongIndex] = deepmerge(songListStoreLocal[arraySongIndex], song.newTags)
+	// 	}
+	// })
+
+	// songListStoreLocal = songListStoreLocal.filter(
+	// 	song => song[configStoreLocal.group.groupBy[0]] === configStoreLocal.group.groupByValues[0]
+	// )
+
+	// if (songListStoreLocal.length === 0) {
+	// location.reload()
+	// selectedAlbumDir.subscribe(value => {
+	// 	getAlbumSongsFn(value).then(songs => {
+	// 		let sortedSongs = sortSongsArrayFn(songs, configStoreLocal.userOptions.sortBy, configStoreLocal.userOptions.sortOrder)
+
+	// 		songListStore.set(sortedSongs)
+
+	// 	})
+	// })()
+	// } else {
+	// songListStore.set(songListStoreLocal)
+	// }
 }

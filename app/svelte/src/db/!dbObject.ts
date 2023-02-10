@@ -11,7 +11,7 @@ export function setDB(newDb: any) {
 	db.on('changes', changes => {
 		changes.forEach(_ => {
 			if (_.type === 2) {
-				// updateData(_.obj)
+				updateData(_.obj)
 			} else {
 				updateVersionFn()
 			}

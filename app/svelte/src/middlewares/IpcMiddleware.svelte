@@ -13,6 +13,8 @@
 	})
 
 	window.ipc.handleWebStorage((_, response) => {
+		console.log(JSON.stringify(response))
+
 		addTaskToQueue(response.data, response.type)
 	})
 
