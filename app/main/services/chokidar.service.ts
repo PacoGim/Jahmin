@@ -34,10 +34,11 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 
 			if (!isAudioFileFn(path)) return
 
+			// console.log(eventName, path)
 			if (eventName === 'change' && ignoredPaths.indexOf(path) === -1) {
-				console.log(eventName, path)
+
 				addToTaskQueue(path, 'external-update')
-			} else {
+			} else if (eventName === 'change') {
 				watchPaths([path])
 			}
 
@@ -54,7 +55,7 @@ export function getRootDirFolderWatcher() {
 export function unwatchPaths(paths: string[]) {
 	paths.forEach(path => {
 		if (ignoredPaths.indexOf(path) === -1) {
-			ignoredPaths.push(path)
+		ignoredPaths.push(path)
 		}
 	})
 

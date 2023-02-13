@@ -33,11 +33,11 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
                 return;
             if (!(0, isAudioFile_fn_1.default)(path))
                 return;
+            // console.log(eventName, path)
             if (eventName === 'change' && ignoredPaths.indexOf(path) === -1) {
-                console.log(eventName, path);
                 (0, librarySongs_service_1.addToTaskQueue)(path, 'external-update');
             }
-            else {
+            else if (eventName === 'change') {
                 watchPaths([path]);
             }
             if (eventName === 'unlink')

@@ -7,7 +7,9 @@ const aac_format_1 = require("../formats/aac.format");
 const flac_format_1 = require("../formats/flac.format");
 const mp3_format_1 = require("../formats/mp3.format");
 const opus_format_1 = require("../formats/opus.format");
+const chokidar_service_1 = require("../services/chokidar.service");
 const getFileExtension_fn_1 = __importDefault(require("./getFileExtension.fn"));
+let processTimeoutMap = new Map();
 function default_1(songPath, newTags) {
     return new Promise((resolve, reject) => {
         let extension = (0, getFileExtension_fn_1.default)(songPath);
@@ -39,6 +41,12 @@ function default_1(songPath, newTags) {
         else {
             return reject(new Error('Invalid file path'));
         }
+        let timeout = processTimeoutMap.get(songPath);
+        if (timeout)
+            clearTimeout(timeout);
+        processTimeoutMap.set(songPath, setTimeout(() => {
+            (0, chokidar_service_1.watchPaths)([songPath]);
+        }, 10000));
     });
 }
 exports.default = default_1;
