@@ -33,8 +33,13 @@ function startChokidarWatch(rootDirectories, excludeDirectories = []) {
                 return;
             if (!(0, isAudioFile_fn_1.default)(path))
                 return;
-            if (eventName === 'change')
+            if (eventName === 'change' && ignoredPaths.indexOf(path) === -1) {
+                console.log(eventName, path);
                 (0, librarySongs_service_1.addToTaskQueue)(path, 'external-update');
+            }
+            else {
+                watchPaths([path]);
+            }
             if (eventName === 'unlink')
                 (0, librarySongs_service_1.addToTaskQueue)(path, 'delete');
             if (eventName === 'add')
@@ -53,6 +58,7 @@ function unwatchPaths(paths) {
             ignoredPaths.push(path);
         }
     });
+    console.log('Unwatch Paths', ignoredPaths);
 }
 exports.unwatchPaths = unwatchPaths;
 function watchPaths(paths) {
@@ -61,5 +67,6 @@ function watchPaths(paths) {
             ignoredPaths.splice(ignoredPaths.indexOf(path), 1);
         }
     });
+    console.log('Watch Paths', ignoredPaths);
 }
 exports.watchPaths = watchPaths;

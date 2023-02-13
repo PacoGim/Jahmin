@@ -31,8 +31,8 @@ function createWindow() {
 	browserWindow.loadFile(path.join(__dirname, '../index.html'))
 
 	browserWindow
-	.on('move', () => calculateWindowBoundariesFn(browserWindow))
-	.on('resize', () => calculateWindowBoundariesFn(browserWindow))
+		.on('move', () => calculateWindowBoundariesFn(browserWindow))
+		.on('resize', () => calculateWindowBoundariesFn(browserWindow))
 }
 
 app.whenReady().then(() => {
@@ -40,12 +40,11 @@ app.whenReady().then(() => {
 	startIPC()
 
 	app.on('activate', () => {
-		// if (BrowserWindow.getAllWindows().length === 0) createWindow()
+		if (BrowserWindow.getAllWindows().length === 0) createWindow()
 	})
 
 	app.on('window-all-closed', () => {
-		app.quit()
-		// if (process.platform !== 'darwin') app.quit()
+		if (process.platform !== 'darwin') app.quit()
 	})
 })
 

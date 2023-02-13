@@ -4,11 +4,9 @@ import { addToTaskQueue } from '../services/librarySongs.service'
 
 export default function (ipcMain: Electron.IpcMain) {
 	ipcMain.on('update-songs', (evt, songs: SongType[], newTags) => {
-		let sourceFiles = songs.map(song => song.SourceFile)
-
-		unwatchPaths(sourceFiles)
-
 		songs.forEach(song => {
+			unwatchPaths([song.SourceFile])
+
 			addToTaskQueue(song.SourceFile, 'update', newTags)
 		})
 	})

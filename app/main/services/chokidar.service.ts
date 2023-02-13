@@ -34,7 +34,13 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 
 			if (!isAudioFileFn(path)) return
 
-			if (eventName === 'change') addToTaskQueue(path, 'external-update')
+			if (eventName === 'change' && ignoredPaths.indexOf(path) === -1) {
+				console.log(eventName, path)
+				addToTaskQueue(path, 'external-update')
+			} else {
+				watchPaths([path])
+			}
+
 			if (eventName === 'unlink') addToTaskQueue(path, 'delete')
 			if (eventName === 'add') addToTaskQueue(path, 'insert')
 		})
@@ -51,6 +57,8 @@ export function unwatchPaths(paths: string[]) {
 			ignoredPaths.push(path)
 		}
 	})
+
+	console.log('Unwatch Paths', ignoredPaths)
 }
 
 export function watchPaths(paths: string[]) {
@@ -59,4 +67,6 @@ export function watchPaths(paths: string[]) {
 			ignoredPaths.splice(ignoredPaths.indexOf(path), 1)
 		}
 	})
+
+	console.log('Watch Paths', ignoredPaths)
 }

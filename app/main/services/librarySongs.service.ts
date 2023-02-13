@@ -140,9 +140,10 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 		})
 		.catch()
 		.finally(() => {
-			setTimeout(() => {
-				watchPaths([task.path])
-			}, 1)
+			console.log('Done')
+			// setTimeout(() => {
+				// watchPaths([task.path])
+			// }, 10000)
 
 			getTask(processIndex, processesRunning)
 		})

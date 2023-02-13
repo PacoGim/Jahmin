@@ -28,11 +28,12 @@ electron_1.app.whenReady().then(() => {
     createWindow();
     (0, ipc_service_1.startIPC)();
     electron_1.app.on('activate', () => {
-        // if (BrowserWindow.getAllWindows().length === 0) createWindow()
+        if (electron_1.BrowserWindow.getAllWindows().length === 0)
+            createWindow();
     });
     electron_1.app.on('window-all-closed', () => {
-        electron_1.app.quit();
-        // if (process.platform !== 'darwin') app.quit()
+        if (process.platform !== 'darwin')
+            electron_1.app.quit();
     });
 });
 function getMainWindow() {

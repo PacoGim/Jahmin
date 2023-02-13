@@ -124,9 +124,10 @@ async function handleUpdateTask(task, processIndex, processesRunning) {
     })
         .catch()
         .finally(() => {
-        setTimeout(() => {
-            (0, chokidar_service_1.watchPaths)([task.path]);
-        }, 1);
+        console.log('Done');
+        // setTimeout(() => {
+        // watchPaths([task.path])
+        // }, 10000)
         getTask(processIndex, processesRunning);
     });
 }
