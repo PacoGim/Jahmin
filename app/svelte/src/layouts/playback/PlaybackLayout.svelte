@@ -99,6 +99,8 @@
 			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width
 		})
 
+		console.log(`${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`)
+
 		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`)
 	}
 
@@ -130,6 +132,7 @@
 
 	onMount(() => {
 		createSortableList()
+		calculateTableFillerWidth()
 
 		window.addEventListener('resize', handleWindowResize)
 	})
@@ -183,10 +186,10 @@
 
 	playback-layout table {
 		border-spacing: 0px;
+		height: max-content;
 	}
 
 	table tr.table-header {
-		/* pointer-events: none; */
 		font-variation-settings: 'wght' 700;
 	}
 

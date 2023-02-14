@@ -8819,11 +8819,133 @@ var app = (function () {
         return BigInt(`${String(Math.random()).substring(2)}${Date.now()}`).toString(36);
     }
 
+    /**
+     * @param data
+     * This function get the art source data from the main process and sets the source to the proper element.
+     *
+     * The data received is:
+     * 	· The Path of the animated art.
+     * 	· The id of the element requesting the art.
+     * 	· (Sometimes) The base64 value of the firt frame of the animated art.
+     *
+     * One of the logic is to show the animated art the the app is focused and show the static first frame of the animated art when not focused.
+     */
+    function handleNewAnimationArt(data) {
+        // Selects the Art Container where to set the art src.
+        let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
+        // If the element returns null, it means that the element is not in the DOM anymore.
+        if (element === null)
+            return;
+        if (data.artPath === null) {
+            element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
+            return;
+        }
+        // Gets the Animated Art Container in the Art Container.
+        let artAnimationElement = element.querySelector('art-animation');
+        // Gets both img elements inside the Animated Art Container.
+        let animatedImgElement = element.querySelector('art-animation img.animated');
+        let staticImgElement = element.querySelector('art-animation img.static');
+        // Removes all the direct image elements (does not remove img elements deeper than the Art Container) from the Art Container.
+        element.querySelectorAll(':scope > img').forEach(imageElement => imageElement.remove());
+        // Removes all video elements from the Art Container.
+        element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
+        // If no Animated Art Container found, create it and append it the the Art Container.
+        if (artAnimationElement === null) {
+            artAnimationElement = document.createElement('art-animation');
+            element.appendChild(artAnimationElement);
+        }
+        // If no Animated Image Element found, create it and append it to the Animated Art Container.
+        if (animatedImgElement === null) {
+            animatedImgElement = document.createElement('img');
+            // This class is used the differentiate between animated and static images.
+            animatedImgElement.classList.add('animated');
+            artAnimationElement.appendChild(animatedImgElement);
+        }
+        // If no Static Image Element found, create it and append it to the Animated Art Container.
+        if (staticImgElement === null) {
+            staticImgElement = document.createElement('img');
+            // When loading the art, don't display the static art if the window is focused.
+            if (document.hasFocus() === true) {
+                staticImgElement.style.display = 'none';
+            }
+            // This class is used the differentiate between animated and static images.
+            staticImgElement.classList.add('static');
+            // Appends the Static Image Element to the Animated Art Container.
+            artAnimationElement.appendChild(staticImgElement);
+        }
+        // If data has artAlt, it means that it contains a base64 static image.
+        // If there is no artAlt, it means that there no static image for this animation yet.
+        // The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
+        // Sets the static source of the animation art.
+        if (data === null || data === void 0 ? void 0 : data.artAlt)
+            staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
+        // Sets the animated source of the animation art.
+        animatedImgElement.src = `${data.artPath}?time=${generateId()}`;
+    }
+    /**
+     * Shows a video as art.
+     */
+    function handleNewVideoArt(data) {
+        // Selects the Art Container where to set the art src.
+        let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
+        // If the element returns null, it means that the element is not in the DOM anymore.
+        if (element === null)
+            return;
+        if (data.artPath === null) {
+            element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
+            return;
+        }
+        // Removes everything that is not the video element inside the element.
+        element.querySelectorAll('img').forEach(imageElement => imageElement.remove());
+        element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
+        // Selects the video element in the Art Container.
+        let videoElement = element.querySelector('video');
+        // If no video element create it and the it's loop atribute to true.
+        if (videoElement === null) {
+            videoElement = document.createElement('video');
+            videoElement.loop = true;
+            // Add the video element to the Main Element
+            element.appendChild(videoElement);
+        }
+        // Sets the source of the video art.
+        videoElement.src = `${data.artPath}?time=${generateId()}`;
+        // If the window is in focus, start playing the video.
+        if (document.hasFocus() === true) {
+            // Plays the video art.
+            videoElement.play();
+        }
+    }
+    function handleNewImageArt(data) {
+        // Selects the Art Container where to set the art src.
+        let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
+        // If the element returns null, it means that the element is not in the DOM anymore.
+        if (element === null)
+            return;
+        if (data.artPath === null) {
+            element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
+            return;
+        }
+        element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
+        element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
+        // Selects the direct image element in the Art Container. The Art Container may contain more img elements from potential animated covers, we don't want to select those.
+        let imgElement = element.querySelector('img');
+        // If no image element, create it.
+        if (imgElement === null) {
+            imgElement = document.createElement('img');
+            element.appendChild(imgElement);
+        }
+        // Sets the source of the image art.
+        imgElement.src = `${data.artPath}?time=${generateId()}`;
+    }
+    var handleArtService = {
+        handleNewAnimationArt,
+        handleNewImageArt,
+        handleNewVideoArt
+    };
+
     let onNewLyrics = writable(null);
 
     /* src/middlewares/IpcMiddleware.svelte generated by Svelte v3.55.1 */
-
-    const { console: console_1$2 } = globals;
 
     function create_fragment$1s(ctx) {
     	const block = {
@@ -8850,18 +8972,21 @@ var app = (function () {
     }
 
     function instance$1s($$self, $$props, $$invalidate) {
+    	let $config;
     	let $onNewLyrics;
     	let $layoutToShow;
     	let $artCompressQueueLength;
     	let $songSyncQueueProgress;
+    	validate_store(config, 'config');
+    	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
     	validate_store(onNewLyrics, 'onNewLyrics');
-    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(0, $onNewLyrics = $$value));
+    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(1, $onNewLyrics = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(1, $layoutToShow = $$value));
+    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(2, $layoutToShow = $$value));
     	validate_store(artCompressQueueLength, 'artCompressQueueLength');
-    	component_subscribe($$self, artCompressQueueLength, $$value => $$invalidate(2, $artCompressQueueLength = $$value));
+    	component_subscribe($$self, artCompressQueueLength, $$value => $$invalidate(3, $artCompressQueueLength = $$value));
     	validate_store(songSyncQueueProgress, 'songSyncQueueProgress');
-    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(3, $songSyncQueueProgress = $$value));
+    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(4, $songSyncQueueProgress = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('IpcMiddleware', slots, []);
 
@@ -8872,20 +8997,19 @@ var app = (function () {
     	});
 
     	window.ipc.handleWebStorage((_, response) => {
-    		console.log(JSON.stringify(response));
     		addTaskToQueue(response.data, response.type);
     	});
 
     	window.ipc.handleNewImageArt((_, data) => {
-    		handleNewImageArt(data);
+    		handleArtService.handleNewImageArt(data);
     	});
 
     	window.ipc.handleNewVideoArt((_, data) => {
-    		handleNewVideoArt(data);
+    		handleArtService.handleNewVideoArt(data);
     	});
 
     	window.ipc.handleNewAnimationArt((_, data) => {
-    		handleNewAnimationArt(data);
+    		handleArtService.handleNewAnimationArt(data);
     	});
 
     	window.ipc.songSyncQueueProgress((_, data) => {
@@ -8905,173 +9029,27 @@ var app = (function () {
     		set_store_value(onNewLyrics, $onNewLyrics = { artist: data.artist, title: data.title }, $onNewLyrics);
     	});
 
-    	/**
-     * @param data
-     * This function get the art source data from the main process and sets the source to the proper element.
-     *
-     * The data received is:
-     * 	· The Path of the animated art.
-     * 	· The id of the element requesting the art.
-     * 	· (Sometimes) The base64 value of the firt frame of the animated art.
-     *
-     * One of the logic is to show the animated art the the app is focused and show the static first frame of the animated art when not focused.
-     */
-    	function handleNewAnimationArt(data) {
-    		// Selects the Art Container where to set the art src.
-    		let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
-
-    		// If the element returns null, it means that the element is not in the DOM anymore.
-    		if (element === null) return;
-
-    		if (data.artPath === null) {
-    			element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
-    			return;
-    		}
-
-    		// Gets the Animated Art Container in the Art Container.
-    		let artAnimationElement = element.querySelector('art-animation');
-
-    		// Gets both img elements inside the Animated Art Container.
-    		let animatedImgElement = element.querySelector('art-animation img.animated');
-
-    		let staticImgElement = element.querySelector('art-animation img.static');
-
-    		// Removes all the direct image elements (does not remove img elements deeper than the Art Container) from the Art Container.
-    		element.querySelectorAll(':scope > img').forEach(imageElement => imageElement.remove());
-
-    		// Removes all video elements from the Art Container.
-    		element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
-
-    		// If no Animated Art Container found, create it and append it the the Art Container.
-    		if (artAnimationElement === null) {
-    			artAnimationElement = document.createElement('art-animation');
-    			element.appendChild(artAnimationElement);
-    		}
-
-    		// If no Animated Image Element found, create it and append it to the Animated Art Container.
-    		if (animatedImgElement === null) {
-    			animatedImgElement = document.createElement('img');
-
-    			// This class is used the differentiate between animated and static images.
-    			animatedImgElement.classList.add('animated');
-
-    			artAnimationElement.appendChild(animatedImgElement);
-    		}
-
-    		// If no Static Image Element found, create it and append it to the Animated Art Container.
-    		if (staticImgElement === null) {
-    			staticImgElement = document.createElement('img');
-
-    			// When loading the art, don't display the static art if the window is focused.
-    			if (document.hasFocus() === true) {
-    				staticImgElement.style.display = 'none';
-    			}
-
-    			// This class is used the differentiate between animated and static images.
-    			staticImgElement.classList.add('static');
-
-    			// Appends the Static Image Element to the Animated Art Container.
-    			artAnimationElement.appendChild(staticImgElement);
-    		}
-
-    		// If data has artAlt, it means that it contains a base64 static image.
-    		// If there is no artAlt, it means that there no static image for this animation yet.
-    		// The first art request sends the animation right away (from the main process), then, the main process gets the first frame of the animation. When the first frame is done, the animation and its first frame (in base64) is sent back and replaced.
-    		// Sets the static source of the animation art.
-    		if (data === null || data === void 0 ? void 0 : data.artAlt) staticImgElement.src = `data:image/jpg;base64,${data.artAlt}`;
-
-    		// Sets the animated source of the animation art.
-    		animatedImgElement.src = `${data.artPath}?time=${generateId()}`;
-    	}
-
-    	/**
-     * Shows a video as art.
-     */
-    	function handleNewVideoArt(data) {
-    		// Selects the Art Container where to set the art src.
-    		let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
-
-    		// If the element returns null, it means that the element is not in the DOM anymore.
-    		if (element === null) return;
-
-    		if (data.artPath === null) {
-    			element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
-    			return;
-    		}
-
-    		// Removes everything that is not the video element inside the element.
-    		element.querySelectorAll('img').forEach(imageElement => imageElement.remove());
-
-    		element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
-
-    		// Selects the video element in the Art Container.
-    		let videoElement = element.querySelector('video');
-
-    		// If no video element create it and the it's loop atribute to true.
-    		if (videoElement === null) {
-    			videoElement = document.createElement('video');
-    			videoElement.loop = true;
-
-    			// Add the video element to the Main Element
-    			element.appendChild(videoElement);
-    		}
-
-    		// Sets the source of the video art.
-    		videoElement.src = `${data.artPath}?time=${generateId()}`;
-
-    		// If the window is in focus, start playing the video.
-    		if (document.hasFocus() === true) {
-    			// Plays the video art.
-    			videoElement.play();
-    		}
-    	}
-
-    	function handleNewImageArt(data) {
-    		// Selects the Art Container where to set the art src.
-    		let element = document.querySelector(`#${CSS.escape(data.elementId)}`);
-
-    		// If the element returns null, it means that the element is not in the DOM anymore.
-    		if (element === null) return;
-
-    		if (data.artPath === null) {
-    			element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
-    			return;
-    		}
-
-    		element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
-    		element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
-
-    		// Selects the direct image element in the Art Container. The Art Container may contain more img elements from potential animated covers, we don't want to select those.
-    		let imgElement = element.querySelector('img');
-
-    		// If no image element, create it.
-    		if (imgElement === null) {
-    			imgElement = document.createElement('img');
-    			element.appendChild(imgElement);
-    		}
-
-    		// Sets the source of the image art.
-    		imgElement.src = `${data.artPath}?time=${generateId()}`;
-    	}
+    	window.ipc.onSelectedDirectories((_, data) => {
+    		set_store_value(config, $config.directories = { add: data.add, exclude: data.exclude }, $config);
+    	});
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<IpcMiddleware> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<IpcMiddleware> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
     		addTaskToQueue,
     		bulkDeleteSongsFn,
     		getAllSongsFn,
-    		generateId,
+    		handleArtService,
     		onNewLyrics,
     		artCompressQueueLength,
+    		config,
     		layoutToShow,
     		songSyncQueueProgress,
-    		handleNewAnimationArt,
-    		handleNewVideoArt,
-    		handleNewImageArt,
+    		$config,
     		$onNewLyrics,
     		$layoutToShow,
     		$artCompressQueueLength,
@@ -23822,7 +23800,7 @@ var app = (function () {
 
     /* src/layouts/library/TagEdit.svelte generated by Svelte v3.55.1 */
 
-    const { Object: Object_1$1, console: console_1$1 } = globals;
+    const { Object: Object_1$1, console: console_1$2 } = globals;
     const file$O = "src/layouts/library/TagEdit.svelte";
 
     function create_fragment$T(ctx) {
@@ -24757,7 +24735,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object_1$1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<TagEdit> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<TagEdit> was created with unknown prop '${key}'`);
     	});
 
     	function textarea0_input_handler() {
@@ -37694,6 +37672,8 @@ var app = (function () {
     }
 
     /* src/layouts/playback/PlaybackLayout.svelte generated by Svelte v3.55.1 */
+
+    const { console: console_1$1 } = globals;
     const file$e = "src/layouts/playback/PlaybackLayout.svelte";
 
     function get_each_context$1(ctx, list, i) {
@@ -37717,7 +37697,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (118:3) {#each tempTags as tag, index (index)}
+    // (120:3) {#each tempTags as tag, index (index)}
     function create_each_block_2(key_1, ctx) {
     	let td;
     	let t_value = renameTagName(/*tag*/ ctx[18]) + "";
@@ -37729,8 +37709,8 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-iuy66c");
-    			add_location(td, file$e, 118, 4, 4559);
+    			attr_dev(td, "class", "svelte-9v6tso");
+    			add_location(td, file$e, 120, 4, 4672);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -37749,14 +37729,14 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(118:3) {#each tempTags as tag, index (index)}",
+    		source: "(120:3) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (134:5) {:else}
+    // (136:5) {:else}
     function create_else_block(ctx) {
     	let td;
     	let t_value = /*song*/ ctx[15][/*tag*/ ctx[18]] + "";
@@ -37766,8 +37746,8 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-iuy66c");
-    			add_location(td, file$e, 134, 6, 5080);
+    			attr_dev(td, "class", "svelte-9v6tso");
+    			add_location(td, file$e, 136, 6, 5193);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -37787,14 +37767,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(134:5) {:else}",
+    		source: "(136:5) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (127:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
+    // (129:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
     function create_if_block$3(ctx) {
     	let td;
     	let play_button;
@@ -37819,10 +37799,10 @@ var app = (function () {
     			create_component(playbutton.$$.fragment);
     			t0 = space();
     			t1 = text(t1_value);
-    			set_custom_element_data(play_button, "class", "svelte-iuy66c");
-    			add_location(play_button, file$e, 128, 7, 4918);
-    			attr_dev(td, "class", "svelte-iuy66c");
-    			add_location(td, file$e, 127, 6, 4906);
+    			set_custom_element_data(play_button, "class", "svelte-9v6tso");
+    			add_location(play_button, file$e, 130, 7, 5031);
+    			attr_dev(td, "class", "svelte-9v6tso");
+    			add_location(td, file$e, 129, 6, 5019);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -37854,14 +37834,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(127:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
+    		source: "(129:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (126:4) {#each tempTags as tag, index (index)}
+    // (128:4) {#each tempTags as tag, index (index)}
     function create_each_block_1(key_1, ctx) {
     	let first;
     	let current_block_type_index;
@@ -37942,14 +37922,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(126:4) {#each tempTags as tag, index (index)}",
+    		source: "(128:4) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (124:2) {#each $playbackStore as song, index (song.ID)}
+    // (126:2) {#each $playbackStore as song, index (song.ID)}
     function create_each_block$1(key_1, ctx) {
     	let tr;
     	let each_blocks = [];
@@ -37985,16 +37965,16 @@ var app = (function () {
     			t0 = space();
     			td = element("td");
     			t1 = space();
-    			attr_dev(td, "class", "filler svelte-iuy66c");
-    			add_location(td, file$e, 138, 4, 5129);
+    			attr_dev(td, "class", "filler svelte-9v6tso");
+    			add_location(td, file$e, 140, 4, 5242);
 
     			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[15].ID)
     			? 'selected'
-    			: '') + " svelte-iuy66c"));
+    			: '') + " svelte-9v6tso"));
 
     			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[15].ID);
     			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[17]);
-    			add_location(tr, file$e, 124, 3, 4687);
+    			add_location(tr, file$e, 126, 3, 4800);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -38023,7 +38003,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[2].includes(/*song*/ ctx[15].ID)
     			? 'selected'
-    			: '') + " svelte-iuy66c"))) {
+    			: '') + " svelte-9v6tso"))) {
     				attr_dev(tr, "class", tr_class_value);
     			}
 
@@ -38064,7 +38044,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(124:2) {#each $playbackStore as song, index (song.ID)}",
+    		source: "(126:2) {#each $playbackStore as song, index (song.ID)}",
     		ctx
     	});
 
@@ -38129,15 +38109,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(selected_songs_preview, file$e, 112, 0, 4355);
-    			attr_dev(td, "class", "filler svelte-iuy66c");
-    			add_location(td, file$e, 120, 3, 4603);
-    			attr_dev(tr, "class", "table-header static svelte-iuy66c");
-    			add_location(tr, file$e, 116, 2, 4450);
-    			attr_dev(table, "class", "svelte-iuy66c");
-    			add_location(table, file$e, 115, 1, 4440);
-    			set_custom_element_data(playback_layout, "class", "svelte-iuy66c");
-    			add_location(playback_layout, file$e, 114, 0, 4383);
+    			add_location(selected_songs_preview, file$e, 114, 0, 4468);
+    			attr_dev(td, "class", "filler svelte-9v6tso");
+    			add_location(td, file$e, 122, 3, 4716);
+    			attr_dev(tr, "class", "table-header static svelte-9v6tso");
+    			add_location(tr, file$e, 118, 2, 4563);
+    			attr_dev(table, "class", "svelte-9v6tso");
+    			add_location(table, file$e, 117, 1, 4553);
+    			set_custom_element_data(playback_layout, "class", "svelte-9v6tso");
+    			add_location(playback_layout, file$e, 116, 0, 4496);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -38340,6 +38320,7 @@ var app = (function () {
     			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width;
     		});
 
+    		console.log(`${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`);
     		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`);
     	}
 
@@ -38363,6 +38344,7 @@ var app = (function () {
 
     	onMount(() => {
     		createSortableList();
+    		calculateTableFillerWidth();
     		window.addEventListener('resize', handleWindowResize);
     	});
 
@@ -38373,7 +38355,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<PlaybackLayout> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<PlaybackLayout> was created with unknown prop '${key}'`);
     	});
 
     	const dblclick_handler = evt => playSongFoo(evt);

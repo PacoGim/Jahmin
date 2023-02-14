@@ -52,6 +52,7 @@ declare global {
 			onArtQueueChange: (callback: any) => void
 			onShowLyrics: (callback: any) => void
 			onWebStorageBulkDelete: (callback: any) => void
+			onSelectedDirectories: (callback: any) => void
 		}
 	}
 }

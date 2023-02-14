@@ -88,4 +88,5 @@ typings/
 # Electron-Forge
 out/
 
+node_modules
 node_modules.nosync
