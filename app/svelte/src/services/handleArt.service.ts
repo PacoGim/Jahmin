@@ -13,14 +13,17 @@ import generateId from '../functions/generateId.fn'
  */
 function handleNewAnimationArt(data) {
 	// Selects the Art Container where to set the art src.
-	let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+	let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
 
 	// If the element returns null, it means that the element is not in the DOM anymore.
 	if (element === null) return
 
 	if (data.artPath === null) {
 		element.querySelectorAll('*').forEach(videoElement => videoElement.remove())
+		addPlaceholder(element)
 		return
+	} else {
+		removePlaceholder(element)
 	}
 
 	// Gets the Animated Art Container in the Art Container.
@@ -82,14 +85,17 @@ function handleNewAnimationArt(data) {
  */
 function handleNewVideoArt(data) {
 	// Selects the Art Container where to set the art src.
-	let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+	let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
 
 	// If the element returns null, it means that the element is not in the DOM anymore.
 	if (element === null) return
 
 	if (data.artPath === null) {
 		element.querySelectorAll('*').forEach(videoElement => videoElement.remove())
+		addPlaceholder(element)
 		return
+	} else {
+		removePlaceholder(element)
 	}
 
 	// Removes everything that is not the video element inside the element.
@@ -120,14 +126,17 @@ function handleNewVideoArt(data) {
 
 function handleNewImageArt(data) {
 	// Selects the Art Container where to set the art src.
-	let element = document.querySelector(`#${CSS.escape(data.elementId)}`)
+	let element = document.querySelector(`#${CSS.escape(data.elementId)}`) as HTMLElement
 
 	// If the element returns null, it means that the element is not in the DOM anymore.
 	if (element === null) return
 
 	if (data.artPath === null) {
 		element.querySelectorAll('*').forEach(videoElement => videoElement.remove())
+		addPlaceholder(element)
 		return
+	} else {
+		removePlaceholder(element)
 	}
 
 	element.querySelectorAll('video').forEach(videoElement => videoElement.remove())
@@ -144,6 +153,16 @@ function handleNewImageArt(data) {
 
 	// Sets the source of the image art.
 	imgElement.src = `${data.artPath}?time=${generateId()}`
+}
+
+function addPlaceholder(element: HTMLElement) {
+	element.style.backgroundImage = "url('./assets/img/disc-line.svg')"
+	element.style.backgroundColor = 'hsla(0, 0%, 50%, 0.5)'
+}
+
+function removePlaceholder(element: HTMLElement) {
+	element.style.backgroundImage = ''
+	element.style.backgroundColor = ''
 }
 
 export default {

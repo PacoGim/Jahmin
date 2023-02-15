@@ -7298,8 +7298,8 @@ var app = (function () {
         let selectedAlbumDirLocal = undefined;
         let songListStoreLocal = undefined;
         selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))();
-        songListStore.subscribe(value => (songListStoreLocal = value))();
         if (selectedAlbumDirLocal === getDirectoryFn(newObjet === null || newObjet === void 0 ? void 0 : newObjet.SourceFile)) {
+            songListStore.subscribe(value => (songListStoreLocal = value))();
             songListStoreLocal.push(newObjet);
             songListStore.set(sortSongsArrayFn(songListStoreLocal, configLocal.userOptions.sortBy, configLocal.userOptions.sortOrder, configLocal.group));
         }
@@ -7308,8 +7308,8 @@ var app = (function () {
         let selectedAlbumDirLocal = undefined;
         let songListStoreLocal = undefined;
         selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))();
-        songListStore.subscribe(value => (songListStoreLocal = value))();
         if (selectedAlbumDirLocal === getDirectoryFn(oldObject === null || oldObject === void 0 ? void 0 : oldObject.SourceFile)) {
+            songListStore.subscribe(value => (songListStoreLocal = value))();
             let itemToDeleteIndex = songListStoreLocal.findIndex(song => song.ID === oldObject.ID);
             if (itemToDeleteIndex !== -1) {
                 songListStoreLocal.splice(itemToDeleteIndex, 1);
@@ -7319,11 +7319,14 @@ var app = (function () {
     }
     function updateData(newObjet) {
         let songListStoreLocal = undefined;
-        songListStore.subscribe(value => (songListStoreLocal = value))();
-        let songIndex = songListStoreLocal.findIndex(song => newObjet.ID === song.ID);
-        songListStoreLocal[songIndex] = newObjet;
-        songListStore.set(songListStoreLocal);
-        // updateVersionFn()
+        let selectedAlbumDirLocal = undefined;
+        selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))();
+        if (selectedAlbumDirLocal === getDirectoryFn(newObjet === null || newObjet === void 0 ? void 0 : newObjet.SourceFile)) {
+            songListStore.subscribe(value => (songListStoreLocal = value))();
+            let songIndex = songListStoreLocal.findIndex(song => newObjet.ID === song.ID);
+            songListStoreLocal[songIndex] = newObjet;
+            songListStore.set(sortSongsArrayFn(songListStoreLocal, configLocal.userOptions.sortBy, configLocal.userOptions.sortOrder, configLocal.group));
+        }
     }
     function getDB() {
         return db;
@@ -8841,7 +8844,11 @@ var app = (function () {
             return;
         if (data.artPath === null) {
             element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
+            addPlaceholder(element);
             return;
+        }
+        else {
+            removePlaceholder(element);
         }
         // Gets the Animated Art Container in the Art Container.
         let artAnimationElement = element.querySelector('art-animation');
@@ -8896,7 +8903,11 @@ var app = (function () {
             return;
         if (data.artPath === null) {
             element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
+            addPlaceholder(element);
             return;
+        }
+        else {
+            removePlaceholder(element);
         }
         // Removes everything that is not the video element inside the element.
         element.querySelectorAll('img').forEach(imageElement => imageElement.remove());
@@ -8926,7 +8937,11 @@ var app = (function () {
             return;
         if (data.artPath === null) {
             element.querySelectorAll('*').forEach(videoElement => videoElement.remove());
+            addPlaceholder(element);
             return;
+        }
+        else {
+            removePlaceholder(element);
         }
         element.querySelectorAll('video').forEach(videoElement => videoElement.remove());
         element.querySelectorAll('art-animation').forEach(artAnimationElement => artAnimationElement.remove());
@@ -8939,6 +8954,14 @@ var app = (function () {
         }
         // Sets the source of the image art.
         imgElement.src = `${data.artPath}?time=${generateId()}`;
+    }
+    function addPlaceholder(element) {
+        element.style.backgroundImage = "url('./assets/img/disc-line.svg')";
+        element.style.backgroundColor = 'hsla(0, 0%, 50%, 0.5)';
+    }
+    function removePlaceholder(element) {
+        element.style.backgroundImage = '';
+        element.style.backgroundColor = '';
     }
     var handleArtService = {
         handleNewAnimationArt,
@@ -11819,7 +11842,7 @@ var app = (function () {
     			set_custom_element_data(art_svlt, "id", /*elementId*/ ctx[0]);
     			set_style(art_svlt, "height", /*elementHeight*/ ctx[3] + "px");
     			set_style(art_svlt, "width", /*elementWidth*/ ctx[2] + "px");
-    			set_custom_element_data(art_svlt, "class", "svelte-q19a9j");
+    			set_custom_element_data(art_svlt, "class", "svelte-1gnmrbt");
     			add_location(art_svlt, file$19, 38, 1, 1268);
     		},
     		m: function mount(target, anchor) {

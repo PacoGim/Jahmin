@@ -58,7 +58,6 @@ function unwatchPaths(paths) {
             ignoredPaths.push(path);
         }
     });
-    console.log('Unwatch Paths', ignoredPaths);
 }
 exports.unwatchPaths = unwatchPaths;
 function watchPaths(paths) {
@@ -67,6 +66,5 @@ function watchPaths(paths) {
             ignoredPaths.splice(ignoredPaths.indexOf(path), 1);
         }
     });
-    console.log('Watch Paths', ignoredPaths);
 }
 exports.watchPaths = watchPaths;

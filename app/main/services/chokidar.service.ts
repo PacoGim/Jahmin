@@ -36,7 +36,6 @@ export function startChokidarWatch(rootDirectories: string[], excludeDirectories
 
 			// console.log(eventName, path)
 			if (eventName === 'change' && ignoredPaths.indexOf(path) === -1) {
-
 				addToTaskQueue(path, 'external-update')
 			} else if (eventName === 'change') {
 				watchPaths([path])
@@ -55,11 +54,9 @@ export function getRootDirFolderWatcher() {
 export function unwatchPaths(paths: string[]) {
 	paths.forEach(path => {
 		if (ignoredPaths.indexOf(path) === -1) {
-		ignoredPaths.push(path)
+			ignoredPaths.push(path)
 		}
 	})
-
-	console.log('Unwatch Paths', ignoredPaths)
 }
 
 export function watchPaths(paths: string[]) {
@@ -68,6 +65,4 @@ export function watchPaths(paths: string[]) {
 			ignoredPaths.splice(ignoredPaths.indexOf(path), 1)
 		}
 	})
-
-	console.log('Watch Paths', ignoredPaths)
 }

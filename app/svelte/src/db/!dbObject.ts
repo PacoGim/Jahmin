@@ -32,9 +32,9 @@ function insertData(newObjet: SongType) {
 	let songListStoreLocal = undefined
 
 	selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))()
-	songListStore.subscribe(value => (songListStoreLocal = value))()
 
 	if (selectedAlbumDirLocal === getDirectoryFn(newObjet?.SourceFile)) {
+		songListStore.subscribe(value => (songListStoreLocal = value))()
 		songListStoreLocal.push(newObjet)
 
 		songListStore.set(
@@ -48,9 +48,10 @@ function deleteData(oldObject: SongType) {
 	let songListStoreLocal: SongType[] = undefined
 
 	selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))()
-	songListStore.subscribe(value => (songListStoreLocal = value))()
 
 	if (selectedAlbumDirLocal === getDirectoryFn(oldObject?.SourceFile)) {
+		songListStore.subscribe(value => (songListStoreLocal = value))()
+
 		let itemToDeleteIndex = songListStoreLocal.findIndex(song => song.ID === oldObject.ID)
 
 		if (itemToDeleteIndex !== -1) {
@@ -62,16 +63,21 @@ function deleteData(oldObject: SongType) {
 
 function updateData(newObjet: SongType) {
 	let songListStoreLocal: SongType[] = undefined
+	let selectedAlbumDirLocal = undefined
 
-	songListStore.subscribe(value => (songListStoreLocal = value))()
+	selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))()
 
-	let songIndex = songListStoreLocal.findIndex(song => newObjet.ID === song.ID)
+	if (selectedAlbumDirLocal === getDirectoryFn(newObjet?.SourceFile)) {
+		songListStore.subscribe(value => (songListStoreLocal = value))()
 
-	songListStoreLocal[songIndex] = newObjet
+		let songIndex = songListStoreLocal.findIndex(song => newObjet.ID === song.ID)
 
-	songListStore.set(songListStoreLocal)
+		songListStoreLocal[songIndex] = newObjet
 
-	// updateVersionFn()
+		songListStore.set(
+			sortSongsArrayFn(songListStoreLocal, configLocal.userOptions.sortBy, configLocal.userOptions.sortOrder, configLocal.group)
+		)
+	}
 }
 
 export function getDB(): JahminDb {
