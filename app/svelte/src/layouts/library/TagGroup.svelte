@@ -2,12 +2,12 @@
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
 	import { groupSongs } from '../../services/groupSongs.service'
 
-	import { config, dbVersionStore, selectedGroups, triggerGroupingChangeEvent } from '../../stores/main.store'
+	import { config, dbSongsStore, dbVersionStore, selectedGroups, triggerGroupingChangeEvent } from '../../stores/main.store'
 
 	let isFirstGroupSongs = true
 
 	$: {
-		if ($dbVersionStore) {
+		if ($dbSongsStore) {
 			runSongGroup()
 		}
 	}

@@ -7229,44 +7229,93 @@ var app = (function () {
         document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin';
     });
 
-    let dbVersion = Date.now();
-    let isVersionUpdating = false;
-    function updateVersionFn () {
-        dbVersion = Date.now();
-        // Prevents the app from refreshing too often.
-        if (isVersionUpdating === false) {
-            isVersionUpdating = true;
-            updateStoreVersion();
-        }
-    }
-    function updateStoreVersion() {
-        // Saves the store value locally
-        let dbVersionStoreLocal = undefined;
-        dbVersionStore.subscribe(value => (dbVersionStoreLocal = value))();
-        if (dbVersionStoreLocal !== dbVersion) {
-            dbVersionStore.set(dbVersion);
-            setTimeout(() => {
-                updateStoreVersion();
-            }, 250);
-        }
-        else {
-            isVersionUpdating = false;
-        }
+    function getDirectoryFn (inputString) {
+        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
     }
 
+    var sortSongsArrayFn = (songs, tag, order, group = undefined) => {
+        let songsArrayCopy = [...songs];
+        if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
+            if (order === 'asc') {
+                songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0));
+            }
+            else {
+                songsArrayCopy.sort((a, b) => Number(b[tag] || 0) - Number(a[tag || 0]));
+            }
+        }
+        if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
+            if (order === 'asc') {
+                songsArrayCopy.sort((a, b) => String(a[tag]).localeCompare(String(b[tag]), undefined, { numeric: true }));
+            }
+            else {
+                songs = songsArrayCopy.sort((a, b) => String(b[tag]).localeCompare(String(a[tag]), undefined, { numeric: true }));
+            }
+        }
+        if (['Date'].includes(tag)) {
+            if (order === 'asc') {
+                songsArrayCopy.sort((a, b) => {
+                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
+                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
+                    return dateA - dateB;
+                });
+            }
+            else {
+                songsArrayCopy.sort((a, b) => {
+                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
+                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
+                    return dateB - dateA;
+                });
+            }
+        }
+        if (group) {
+            group.groupBy.forEach((_, index) => {
+                songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index]);
+            });
+        }
+        return songsArrayCopy;
+    };
+
     let db = undefined;
+    let configLocal = undefined;
+    config.subscribe(value => (configLocal = value));
     function setDB(newDb) {
         db = newDb;
         db.on('changes', changes => {
             changes.forEach(_ => {
-                if (_.type === 2) {
+                if (_.type === 2 /* Type 2 === Update */) {
                     updateData(_.obj);
                 }
-                else {
-                    updateVersionFn();
+                else if (_.type === 3 /* Type 3 === Delete */) {
+                    deleteData(_.oldObj);
+                }
+                else if (_.type === 1 /* Type 1 === Insert */) {
+                    insertData(_.obj);
                 }
             });
         });
+    }
+    function insertData(newObjet) {
+        let selectedAlbumDirLocal = undefined;
+        let songListStoreLocal = undefined;
+        selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))();
+        songListStore.subscribe(value => (songListStoreLocal = value))();
+        if (selectedAlbumDirLocal === getDirectoryFn(newObjet === null || newObjet === void 0 ? void 0 : newObjet.SourceFile)) {
+            songListStoreLocal.push(newObjet);
+            songListStore.set(sortSongsArrayFn(songListStoreLocal, configLocal.userOptions.sortBy, configLocal.userOptions.sortOrder, configLocal.group));
+        }
+    }
+    function deleteData(oldObject) {
+        let selectedAlbumDirLocal = undefined;
+        let songListStoreLocal = undefined;
+        selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))();
+        songListStore.subscribe(value => (songListStoreLocal = value))();
+        if (selectedAlbumDirLocal === getDirectoryFn(oldObject === null || oldObject === void 0 ? void 0 : oldObject.SourceFile)) {
+            let itemToDeleteIndex = songListStoreLocal.findIndex(song => song.ID === oldObject.ID);
+            if (itemToDeleteIndex !== -1) {
+                songListStoreLocal.splice(itemToDeleteIndex, 1);
+                songListStore.set(songListStoreLocal);
+            }
+        }
     }
     function updateData(newObjet) {
         let songListStoreLocal = undefined;
@@ -7274,7 +7323,7 @@ var app = (function () {
         let songIndex = songListStoreLocal.findIndex(song => newObjet.ID === song.ID);
         songListStoreLocal[songIndex] = newObjet;
         songListStore.set(songListStoreLocal);
-        updateVersionFn();
+        // updateVersionFn()
     }
     function getDB() {
         return db;
@@ -8649,52 +8698,6 @@ var app = (function () {
 
     var cjs = deepmerge_1;
 
-    var sortSongsArrayFn = (songs, tag, order, group = undefined) => {
-        let songsArrayCopy = [...songs];
-        if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
-            if (order === 'asc') {
-                songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0));
-            }
-            else {
-                songsArrayCopy.sort((a, b) => Number(b[tag] || 0) - Number(a[tag || 0]));
-            }
-        }
-        if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
-            if (order === 'asc') {
-                songsArrayCopy.sort((a, b) => String(a[tag]).localeCompare(String(b[tag]), undefined, { numeric: true }));
-            }
-            else {
-                songs = songsArrayCopy.sort((a, b) => String(b[tag]).localeCompare(String(a[tag]), undefined, { numeric: true }));
-            }
-        }
-        if (['Date'].includes(tag)) {
-            if (order === 'asc') {
-                songsArrayCopy.sort((a, b) => {
-                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
-                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
-                    return dateA - dateB;
-                });
-            }
-            else {
-                songsArrayCopy.sort((a, b) => {
-                    let dateA = Date.UTC(a.Date_Year, (a.Date_Month | 1) - 1, a.Date_Day | 1);
-                    let dateB = Date.UTC(b.Date_Year, (b.Date_Month | 1) - 1, b.Date_Day | 1);
-                    return dateB - dateA;
-                });
-            }
-        }
-        if (group) {
-            group.groupBy.forEach((_, index) => {
-                songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index]);
-            });
-        }
-        return songsArrayCopy;
-    };
-
-    function getDirectoryFn (inputString) {
-        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
-    }
-
     function getAllSongsFn () {
         return new Promise((resolve, reject) => {
             dbSongsStore.subscribe((songs) => {
@@ -8752,7 +8755,7 @@ var app = (function () {
             // When all promises are done, then update version, catch errors and finally resolve.
             Promise.all(bulkUpdatePromises)
                 .then(x => {
-                updateVersionFn();
+                // updateVersionFn()
             })
                 .catch(err => {
                 console.log(err);
@@ -21356,9 +21359,9 @@ var app = (function () {
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
     			set_custom_element_data(song_list, "class", "svelte-y11uul");
-    			add_location(song_list, file$S, 83, 1, 2906);
+    			add_location(song_list, file$S, 83, 1, 2922);
     			set_custom_element_data(song_list_svlt, "class", "svelte-y11uul");
-    			add_location(song_list_svlt, file$S, 82, 0, 2796);
+    			add_location(song_list_svlt, file$S, 82, 0, 2812);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21528,6 +21531,7 @@ var app = (function () {
     		cssVariablesService,
     		songListClickEventHandlerService,
     		config,
+    		dbVersionStore,
     		selectedAlbumDir,
     		songListStore,
     		triggerScrollToSongEvent,
@@ -24978,7 +24982,7 @@ var app = (function () {
     			? 'selected'
     			: null) + " svelte-1357yc5"));
 
-    			add_location(group_value, file$N, 55, 4, 1813);
+    			add_location(group_value, file$N, 55, 4, 1825);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -25077,7 +25081,7 @@ var app = (function () {
     			? 'selected'
     			: null) + " svelte-1357yc5"));
 
-    			add_location(group_value, file$N, 63, 5, 2153);
+    			add_location(group_value, file$N, 63, 5, 2165);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -25145,10 +25149,10 @@ var app = (function () {
     			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
     			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
     			set_custom_element_data(group_name, "class", "svelte-1357yc5");
-    			add_location(group_name, file$N, 51, 3, 1603);
+    			add_location(group_name, file$N, 51, 3, 1615);
     			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
     			set_custom_element_data(group_svlt, "class", "svelte-1357yc5");
-    			add_location(group_svlt, file$N, 49, 2, 1508);
+    			add_location(group_svlt, file$N, 49, 2, 1520);
     			this.first = group_svlt;
     		},
     		m: function mount(target, anchor) {
@@ -25236,7 +25240,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(tag_group_svlt, "class", "svelte-1357yc5");
-    			add_location(tag_group_svlt, file$N, 47, 0, 1428);
+    			add_location(tag_group_svlt, file$N, 47, 0, 1440);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -25282,15 +25286,15 @@ var app = (function () {
     	let $config;
     	let $selectedGroups;
     	let $triggerGroupingChangeEvent;
-    	let $dbVersionStore;
+    	let $dbSongsStore;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
     	validate_store(selectedGroups, 'selectedGroups');
     	component_subscribe($$self, selectedGroups, $$value => $$invalidate(1, $selectedGroups = $$value));
     	validate_store(triggerGroupingChangeEvent, 'triggerGroupingChangeEvent');
     	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(3, $triggerGroupingChangeEvent = $$value));
-    	validate_store(dbVersionStore, 'dbVersionStore');
-    	component_subscribe($$self, dbVersionStore, $$value => $$invalidate(4, $dbVersionStore = $$value));
+    	validate_store(dbSongsStore, 'dbSongsStore');
+    	component_subscribe($$self, dbSongsStore, $$value => $$invalidate(4, $dbSongsStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TagGroup', slots, []);
     	let isFirstGroupSongs = true;
@@ -25332,6 +25336,7 @@ var app = (function () {
     		handleContextMenuEvent,
     		groupSongs,
     		config,
+    		dbSongsStore,
     		dbVersionStore,
     		selectedGroups,
     		triggerGroupingChangeEvent,
@@ -25341,7 +25346,7 @@ var app = (function () {
     		$config,
     		$selectedGroups,
     		$triggerGroupingChangeEvent,
-    		$dbVersionStore
+    		$dbSongsStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -25353,9 +25358,9 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$dbVersionStore*/ 16) {
+    		if ($$self.$$.dirty & /*$dbSongsStore*/ 16) {
     			{
-    				if ($dbVersionStore) {
+    				if ($dbSongsStore) {
     					runSongGroup();
     				}
     			}
@@ -25387,7 +25392,7 @@ var app = (function () {
     		$selectedGroups,
     		setNewGroupValue,
     		$triggerGroupingChangeEvent,
-    		$dbVersionStore,
+    		$dbSongsStore,
     		click_handler,
     		click_handler_1,
     		click_handler_2
