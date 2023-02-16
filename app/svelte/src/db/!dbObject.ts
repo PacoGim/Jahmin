@@ -2,7 +2,8 @@ import type { ConfigType } from '../../../types/config.type'
 import type { SongType } from '../../../types/song.type'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-import { config, selectedAlbumDir, songListStore } from '../stores/main.store'
+import stopSongFn from '../functions/stopSong.fn'
+import { config, playingSongStore, selectedAlbumDir, songListStore } from '../stores/main.store'
 import type { JahminDb } from './!db'
 import updateVersionFn from './updateVersion.fn'
 
@@ -46,6 +47,7 @@ function insertData(newObjet: SongType) {
 function deleteData(oldObject: SongType) {
 	let selectedAlbumDirLocal = undefined
 	let songListStoreLocal: SongType[] = undefined
+	let playingSongLocal: SongType = undefined
 
 	selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))()
 
@@ -57,6 +59,12 @@ function deleteData(oldObject: SongType) {
 		if (itemToDeleteIndex !== -1) {
 			songListStoreLocal.splice(itemToDeleteIndex, 1)
 			songListStore.set(songListStoreLocal)
+
+			playingSongStore.subscribe(value => (playingSongLocal = value))()
+
+			if (oldObject.ID === playingSongLocal.ID) {
+				stopSongFn()
+			}
 		}
 	}
 }

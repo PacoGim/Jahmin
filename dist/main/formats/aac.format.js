@@ -61,6 +61,9 @@ let exifToolReadWorker;
 let tagReadDeferredPromises = new Map();
 function getAacTags(filePath) {
     return new Promise(async (resolve, reject) => {
+        if (!fs.existsSync(filePath)) {
+            return reject('File not found');
+        }
         const METADATA = await new Promise((resolve, reject) => {
             tagReadDeferredPromises.set(filePath, resolve);
             exifToolReadWorker?.postMessage(filePath);

@@ -97,7 +97,7 @@
 	}
 
 	function playSong(songUrl: string | undefined, { playNow }) {
-		if (songUrl) {
+		if (songUrl && songUrl!=='Stop Playing') {
 			$songToPlayUrlStore = undefined
 
 			let song = $playbackStore.find(song => song.SourceFile === songUrl)
@@ -151,6 +151,16 @@
 				audioElements.main.isPlaying = false
 				audioElements.alt.isPlaying = false
 			}
+		} else if (songUrl === 'Stop Playing') {
+			// stop everything!
+			console.log('Stop everything')
+
+
+			updateCurrentSongData({
+				ID: undefined,
+				SourceFile: '',
+				Duration: 0
+			})
 		}
 	}
 

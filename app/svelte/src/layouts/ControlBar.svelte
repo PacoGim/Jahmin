@@ -8,28 +8,32 @@
 	import PlayerVolumeBar from './components/PlayerVolumeBar.svelte'
 	import AlbumArt from '../components/AlbumArt.svelte'
 
-	import type { SongType } from '../../../types/song.type'
+	// import type { SongType } from '../../../types/song.type'
 
 	import {
 		playingSongStore,
-		albumPlayingDirStore,
+		// albumPlayingDirStore,
 		currentSongDurationStore,
 		currentSongProgressStore
 	} from '../stores/main.store'
 
 	import parseDuration from '../functions/parseDuration.fn'
-	import cssVariablesService from '../services/cssVariables.service'
+	// import cssVariablesService from '../services/cssVariables.service'
 
-	let progress: number = 0
+	// let progress: number = 0
 
-	let artSize = 64
+	// let artSize = 64
 
-	let currentSong: SongType = undefined
+	// let currentSong: SongType = undefined
 
 	let songTime = {
 		currentTime: '00:00',
 		duration: '00:00',
 		timeLeft: '00:00'
+	}
+
+	$:{
+		console.log($currentSongProgressStore)
 	}
 
 	$: {
@@ -44,7 +48,7 @@
 		}
 	}
 
-	function durationChanged(currentTime) {
+/* 	function durationChanged(currentTime) {
 		let duration = $playingSongStore.Duration
 
 		// Rounds to 2 decimals.
@@ -59,7 +63,7 @@
 			duration: parseDuration(duration),
 			timeLeft: parseDuration(duration - currentTime)
 		}
-	}
+	} */
 
 	onMount(() => {})
 </script>

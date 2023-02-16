@@ -46,6 +46,10 @@ let tagReadDeferredPromises: Map<string, any> = new Map<string, any>()
 
 export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
+		if (!fs.existsSync(filePath)) {
+			return reject('File not found')
+		}
+
 		const METADATA: any = await new Promise((resolve, reject) => {
 			tagReadDeferredPromises.set(filePath, resolve)
 			exifToolReadWorker?.postMessage(filePath)

@@ -8,20 +8,17 @@ import {
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { SongType } from '../../../types/song.type'
 
-let currentAudioElementLocal: HTMLAudioElement = undefined
+// let currentAudioElementLocal: HTMLAudioElement = undefined
 
-let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
-	if (value !== undefined) {
-		currentAudioElementLocal = value
+// let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
+// 	if (value !== undefined) {
+// 		currentAudioElementLocal = value
 
-		currentAudioElementSubscription()
-	}
-})
+// 		currentAudioElementSubscription()
+// 	}
+// })
 
 export default function () {
-
-	// console.log('Hello')
-
 	let playbackStoreValue: SongType[]
 	let songPlayingLocal: SongType = undefined
 

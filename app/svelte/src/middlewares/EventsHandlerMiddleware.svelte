@@ -104,10 +104,10 @@
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
 			// Prevents resetting array if album unchanged.
-			if ($selectedAlbumDir !== rootDir || songs.length !== sortedSongs.length) {
+			// if ($selectedAlbumDir !== rootDir || songs.length === sortedSongs.length) {
 				$songListStore = sortedSongs
 				$selectedAlbumDir = rootDir
-			}
+			// }
 
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
 			$selectedSongsStore = []
