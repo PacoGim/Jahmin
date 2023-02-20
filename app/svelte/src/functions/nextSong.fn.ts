@@ -6,7 +6,7 @@ import {
 	triggerScrollToSongEvent
 } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
-import type { SongType } from '../../../types/song.type'
+import type { PartialSongType, SongType } from '../../../types/song.type'
 
 // let currentAudioElementLocal: HTMLAudioElement = undefined
 
@@ -19,22 +19,24 @@ import type { SongType } from '../../../types/song.type'
 // })
 
 export default function () {
-	let playbackStoreValue: SongType[]
-	let songPlayingLocal: SongType = undefined
+	let playbackStoreLocal: SongType[]
+	let songPlayingLocal: SongType | PartialSongType = undefined
 
-	playbackStore.subscribe(value => (playbackStoreValue = value))()
+	playbackStore.subscribe(value => (playbackStoreLocal = value))()
 	playingSongStore.subscribe(value => (songPlayingLocal = value))()
 
-	let currentSongIndex = playbackStoreValue.findIndex(song => song.ID === songPlayingLocal.ID)
+	let currentSongIndex = playbackStoreLocal.findIndex(song => song.ID === songPlayingLocal.ID)
 	let nextSongIndex = currentSongIndex + 1
 
-	let nextSong = playbackStoreValue[nextSongIndex]
+	let nextSong = playbackStoreLocal[nextSongIndex]
 
 	if (nextSong === undefined) {
-		let currentSong = playbackStoreValue[currentSongIndex]
+		let currentSong = playbackStoreLocal[currentSongIndex]
 		currentSongProgressStore.set(0)
 
-		songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }])
+		if (currentSong?.SourceFile) {
+			songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }])
+		}
 	} else {
 		songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }])
 

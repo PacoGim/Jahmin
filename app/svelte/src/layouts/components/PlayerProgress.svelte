@@ -9,7 +9,7 @@
 		isPlaying,
 		playingSongStore
 	} from '../../stores/main.store'
-	import type { SongType } from '../../../../types/song.type'
+	import type { PartialSongType, SongType } from '../../../../types/song.type'
 
 	let pauseDebounce: NodeJS.Timeout = undefined
 	let playerProgressFillElement: HTMLElement = undefined
@@ -93,6 +93,10 @@
 	}
 
 	function setProgress(songProgress: number | undefined, songDuration: number | undefined) {
+		if (songDuration === undefined) {
+			songDuration = 0
+		}
+
 		if (songDuration - songProgress <= 0.5) {
 			if (skipDurationTimeout === undefined) {
 				nextSongFn()
@@ -118,7 +122,7 @@
 		}, 100)
 	}
 
-	function setProgressFromNewSong(song: SongType) {
+	function setProgressFromNewSong(song: SongType | PartialSongType) {
 		playerProgressFillElement.style.animationDuration = `0ms`
 		playerProgressFillElement.style.animationName = 'reset-fill-progress'
 		setProgress(0, song.Duration)

@@ -1,27 +1,17 @@
 <script lang="ts">
-	import { isPlaying, currentAudioElement, playingSongStore } from '../../stores/main.store'
-	import { songToPlayUrlStore } from '../../stores/player.store'
+	import { isPlaying } from '../../stores/main.store'
+
+	import togglePlayButtonFn from '../../functions/togglePlayButton.fn'
 
 	export let customSize = 'var(--button-size)'
 	export let customColor = 'var(--art-color-dark)'
-
-	function togglePlay() {
-		if ($isPlaying) {
-			$currentAudioElement.pause()
-		} else {
-			if ($currentAudioElement !== undefined && $currentAudioElement.src !== '') {
-				$currentAudioElement.play()
-			} else {
-				$songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: true }]
-			}
-		}
-	}
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <play-pause-button
 	style="height: {customSize}; width: {customSize};"
 	class={$isPlaying ? '' : 'playing'}
-	on:click={() => togglePlay()}
+	on:click={() => togglePlayButtonFn()}
 >
 	<left-part style="background-color:{customColor};" />
 

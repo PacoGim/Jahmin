@@ -32,10 +32,6 @@
 		timeLeft: '00:00'
 	}
 
-	$:{
-		console.log($currentSongProgressStore)
-	}
-
 	$: {
 		updateSongTime($currentSongDurationStore, $currentSongProgressStore)
 	}

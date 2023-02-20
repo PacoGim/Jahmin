@@ -7312,9 +7312,6 @@ var app = (function () {
         return songsArrayCopy;
     };
 
-    let songToPlayUrlStore = writable([undefined, { playNow: false }]);
-    let currentPlayerTime = writable(undefined);
-
     function escapeStringFn (data) {
         data = data.replace('#', escape('#'));
         data = data.replace('?', escape('?'));
@@ -7409,46 +7406,9 @@ var app = (function () {
             }
         }, waveformTransitionDuration);
     }
-
-    function shuffleArrayFn (inputArray) {
-        let arrayCopy = [...inputArray].map(item => {
-            return {
-                randomValue: Math.random(),
-                data: item
-            };
-        });
-        arrayCopy.sort((a, b) => {
-            return a.randomValue - b.randomValue;
-        });
-        return arrayCopy.map(item => {
-            return item.data;
-        });
-    }
-
-    async function setNewPlaybackFn (rootDir, playbackSongs, songIdToPlay, { playNow }) {
-        let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0];
-        if (songToPlay === undefined)
-            return;
-        let isSongShuffleEnabled = false;
-        isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))();
-        if (isSongShuffleEnabled) {
-            let shuffledArray = shuffleArrayFn(playbackSongs);
-            songToPlay = shuffledArray[0];
-            playbackStore.set(shuffledArray);
-        }
-        else {
-            playbackStore.set(playbackSongs);
-        }
-        playingSongStore.set(songToPlay);
-        currentSongDurationStore.set(songToPlay.Duration);
-        currentSongProgressStore.set(0);
-        setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration);
-        albumPlayingDirStore.set(rootDir);
-        songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }]);
-        triggerScrollToSongEvent.set(songToPlay.ID);
-        getAlbumColors(rootDir).then(color => {
-            applyColorSchemeFn(color);
-        });
+    function removeWave() {
+        let wave = document.querySelector('#waveform-data wave');
+        wave.remove();
     }
 
     let currentAudioElementSubscription$1 = currentAudioElement.subscribe(value => {
@@ -7456,6 +7416,28 @@ var app = (function () {
             currentAudioElementSubscription$1();
         }
     });
+    function stopSongFn () {
+        let mainAudioElementLocal = undefined;
+        let altAudioElementLocal = undefined;
+        mainAudioElement.subscribe(value => (mainAudioElementLocal = value))();
+        altAudioElement.subscribe(value => (altAudioElementLocal = value))();
+        playbackStore.set([]);
+        playingSongStore.set({
+            Title: ''
+        });
+        currentSongDurationStore.set(0);
+        currentSongProgressStore.set(0);
+        mainAudioElementLocal.pause();
+        altAudioElementLocal.pause();
+        mainAudioElementLocal.src = '';
+        altAudioElementLocal.src = '';
+        removeWave();
+        let elementList = document.querySelectorAll(`control-bar-svlt album-art art-svlt > *`);
+        elementList.forEach(element => {
+            element.remove();
+        });
+        isPlaying.set(false);
+    }
 
     let db = undefined;
     let configLocal = undefined;
@@ -7498,7 +7480,9 @@ var app = (function () {
                 songListStoreLocal.splice(itemToDeleteIndex, 1);
                 songListStore.set(songListStoreLocal);
                 playingSongStore.subscribe(value => (playingSongLocal = value))();
-                if (oldObject.ID === playingSongLocal.ID) ;
+                if (oldObject.ID === playingSongLocal.ID) {
+                    stopSongFn();
+                }
             }
         }
     }
@@ -9278,6 +9262,50 @@ var app = (function () {
         }
     }
 
+    let songToPlayUrlStore = writable([undefined, { playNow: false }]);
+    let currentPlayerTime = writable(undefined);
+
+    function shuffleArrayFn (inputArray) {
+        let arrayCopy = [...inputArray].map(item => {
+            return {
+                randomValue: Math.random(),
+                data: item
+            };
+        });
+        arrayCopy.sort((a, b) => {
+            return a.randomValue - b.randomValue;
+        });
+        return arrayCopy.map(item => {
+            return item.data;
+        });
+    }
+
+    async function setNewPlaybackFn (rootDir, playbackSongs, songIdToPlay, { playNow }) {
+        let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0];
+        if (songToPlay === undefined)
+            return;
+        let isSongShuffleEnabled = false;
+        isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))();
+        if (isSongShuffleEnabled) {
+            let shuffledArray = shuffleArrayFn(playbackSongs);
+            songToPlay = shuffledArray[0];
+            playbackStore.set(shuffledArray);
+        }
+        else {
+            playbackStore.set(playbackSongs);
+        }
+        playingSongStore.set(songToPlay);
+        currentSongDurationStore.set(songToPlay.Duration);
+        currentSongProgressStore.set(0);
+        setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration);
+        albumPlayingDirStore.set(rootDir);
+        songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }]);
+        triggerScrollToSongEvent.set(songToPlay.ID);
+        getAlbumColors(rootDir).then(color => {
+            applyColorSchemeFn(color);
+        });
+    }
+
     /* src/middlewares/PlayerMiddleware.svelte generated by Svelte v3.55.1 */
 
     function create_fragment$1r(ctx) {
@@ -9708,8 +9736,6 @@ var app = (function () {
     }
 
     /* src/layouts/AudioPlayer.svelte generated by Svelte v3.55.1 */
-
-    const { console: console_1$4 } = globals;
     const file$1k = "src/layouts/AudioPlayer.svelte";
 
     function create_fragment$1p(ctx) {
@@ -9727,15 +9753,15 @@ var app = (function () {
     			audio1 = element("audio");
     			track1 = element("track");
     			attr_dev(track0, "kind", "captions");
-    			add_location(track0, file$1k, 251, 1, 11287);
+    			add_location(track0, file$1k, 246, 1, 11297);
     			attr_dev(audio0, "id", "main");
     			attr_dev(audio0, "class", "svelte-1afm0n4");
-    			add_location(audio0, file$1k, 250, 0, 11268);
+    			add_location(audio0, file$1k, 245, 0, 11278);
     			attr_dev(track1, "kind", "captions");
-    			add_location(track1, file$1k, 255, 1, 11341);
+    			add_location(track1, file$1k, 250, 1, 11351);
     			attr_dev(audio1, "id", "alt");
     			attr_dev(audio1, "class", "svelte-1afm0n4");
-    			add_location(audio1, file$1k, 254, 0, 11323);
+    			add_location(audio1, file$1k, 249, 0, 11333);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9848,7 +9874,15 @@ var app = (function () {
 
     	// Functions
     	function checkIfIsPlaying() {
-    		if (audioElements.main.isPlaying === true || audioElements.alt.isPlaying === true) {
+    		var _a, _b;
+
+    		if (((_a = audioElements.main.domElement) === null || _a === void 0
+    		? void 0
+    		: _a.getAttribute('src')) === '' && ((_b = audioElements.alt.domElement) === null || _b === void 0
+    		? void 0
+    		: _b.getAttribute('src')) === '') {
+    			set_store_value(isPlaying, $isPlaying = false, $isPlaying);
+    		} else if (audioElements.main.isPlaying === true || audioElements.alt.isPlaying === true) {
     			set_store_value(isPlaying, $isPlaying = true, $isPlaying);
     		} else {
     			set_store_value(isPlaying, $isPlaying = false, $isPlaying);
@@ -9856,7 +9890,7 @@ var app = (function () {
     	}
 
     	function playSong(songUrl, { playNow }) {
-    		if (songUrl && songUrl !== 'Stop Playing') {
+    		if (songUrl) {
     			set_store_value(songToPlayUrlStore, $songToPlayUrlStore = undefined, $songToPlayUrlStore);
     			let song = $playbackStore.find(song => song.SourceFile === songUrl);
 
@@ -9911,15 +9945,6 @@ var app = (function () {
     				$$invalidate(0, audioElements.main.isPlaying = false, audioElements);
     				$$invalidate(0, audioElements.alt.isPlaying = false, audioElements);
     			}
-    		} else if (songUrl === 'Stop Playing') {
-    			// stop everything!
-    			console.log('Stop everything');
-
-    			updateCurrentSongData({
-    				ID: undefined,
-    				SourceFile: '',
-    				Duration: 0
-    			});
     		}
     	}
 
@@ -10079,7 +10104,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$4.warn(`<AudioPlayer> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<AudioPlayer> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -10881,17 +10906,19 @@ var app = (function () {
     // 	}
     // })
     function nextSongFn () {
-        let playbackStoreValue;
+        let playbackStoreLocal;
         let songPlayingLocal = undefined;
-        playbackStore.subscribe(value => (playbackStoreValue = value))();
+        playbackStore.subscribe(value => (playbackStoreLocal = value))();
         playingSongStore.subscribe(value => (songPlayingLocal = value))();
-        let currentSongIndex = playbackStoreValue.findIndex(song => song.ID === songPlayingLocal.ID);
+        let currentSongIndex = playbackStoreLocal.findIndex(song => song.ID === songPlayingLocal.ID);
         let nextSongIndex = currentSongIndex + 1;
-        let nextSong = playbackStoreValue[nextSongIndex];
+        let nextSong = playbackStoreLocal[nextSongIndex];
         if (nextSong === undefined) {
-            let currentSong = playbackStoreValue[currentSongIndex];
+            let currentSong = playbackStoreLocal[currentSongIndex];
             currentSongProgressStore.set(0);
-            songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }]);
+            if (currentSong === null || currentSong === void 0 ? void 0 : currentSong.SourceFile) {
+                songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }]);
+            }
         }
         else {
             songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }]);
@@ -11121,6 +11148,27 @@ var app = (function () {
     	}
     }
 
+    function togglePlayButtonFn () {
+        let isPlayingLocal;
+        let currentAudioElementLocal;
+        let playingSongStoreLocal;
+        isPlaying.subscribe(value => (isPlayingLocal = value))();
+        currentAudioElement.subscribe(value => (currentAudioElementLocal = value))();
+        songToPlayUrlStore.subscribe(value => (value))();
+        playingSongStore.subscribe(value => (playingSongStoreLocal = value))();
+        if (isPlayingLocal) {
+            currentAudioElementLocal.pause();
+        }
+        else {
+            if (currentAudioElementLocal !== undefined && currentAudioElementLocal.src !== '') {
+                currentAudioElementLocal.play().catch();
+            }
+            else {
+                [playingSongStoreLocal.SourceFile, { playNow: true }];
+            }
+        }
+    }
+
     /* src/layouts/components/PlayButton.svelte generated by Svelte v3.55.1 */
     const file$1c = "src/layouts/components/PlayButton.svelte";
 
@@ -11141,14 +11189,14 @@ var app = (function () {
     			right_part = element("right-part");
     			set_style(left_part, "background-color", /*customColor*/ ctx[1]);
     			set_custom_element_data(left_part, "class", "svelte-4k1fw7");
-    			add_location(left_part, file$1c, 24, 1, 778);
+    			add_location(left_part, file$1c, 12, 1, 455);
     			set_style(right_part, "background-color", /*customColor*/ ctx[1]);
     			set_custom_element_data(right_part, "class", "svelte-4k1fw7");
-    			add_location(right_part, file$1c, 26, 1, 834);
+    			add_location(right_part, file$1c, 14, 1, 511);
     			set_style(play_pause_button, "height", /*customSize*/ ctx[0]);
     			set_style(play_pause_button, "width", /*customSize*/ ctx[0]);
     			set_custom_element_data(play_pause_button, "class", play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[2] ? '' : 'playing') + " svelte-4k1fw7"));
-    			add_location(play_pause_button, file$1c, 19, 0, 636);
+    			add_location(play_pause_button, file$1c, 7, 0, 305);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11160,7 +11208,7 @@ var app = (function () {
     			append_dev(play_pause_button, right_part);
 
     			if (!mounted) {
-    				dispose = listen_dev(play_pause_button, "click", /*click_handler*/ ctx[4], false, false, false);
+    				dispose = listen_dev(play_pause_button, "click", /*click_handler*/ ctx[3], false, false, false);
     				mounted = true;
     			}
     		},
@@ -11206,42 +11254,20 @@ var app = (function () {
     }
 
     function instance$1h($$self, $$props, $$invalidate) {
-    	let $playingSongStore;
-    	let $songToPlayUrlStore;
-    	let $currentAudioElement;
     	let $isPlaying;
-    	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(5, $playingSongStore = $$value));
-    	validate_store(songToPlayUrlStore, 'songToPlayUrlStore');
-    	component_subscribe($$self, songToPlayUrlStore, $$value => $$invalidate(6, $songToPlayUrlStore = $$value));
-    	validate_store(currentAudioElement, 'currentAudioElement');
-    	component_subscribe($$self, currentAudioElement, $$value => $$invalidate(7, $currentAudioElement = $$value));
     	validate_store(isPlaying, 'isPlaying');
     	component_subscribe($$self, isPlaying, $$value => $$invalidate(2, $isPlaying = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlayButton', slots, []);
     	let { customSize = 'var(--button-size)' } = $$props;
     	let { customColor = 'var(--art-color-dark)' } = $$props;
-
-    	function togglePlay() {
-    		if ($isPlaying) {
-    			$currentAudioElement.pause();
-    		} else {
-    			if ($currentAudioElement !== undefined && $currentAudioElement.src !== '') {
-    				$currentAudioElement.play();
-    			} else {
-    				set_store_value(songToPlayUrlStore, $songToPlayUrlStore = [$playingSongStore.SourceFile, { playNow: true }], $songToPlayUrlStore);
-    			}
-    		}
-    	}
-
     	const writable_props = ['customSize', 'customColor'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<PlayButton> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = () => togglePlay();
+    	const click_handler = () => togglePlayButtonFn();
 
     	$$self.$$set = $$props => {
     		if ('customSize' in $$props) $$invalidate(0, customSize = $$props.customSize);
@@ -11250,15 +11276,9 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		isPlaying,
-    		currentAudioElement,
-    		playingSongStore,
-    		songToPlayUrlStore,
+    		togglePlayButtonFn,
     		customSize,
     		customColor,
-    		togglePlay,
-    		$playingSongStore,
-    		$songToPlayUrlStore,
-    		$currentAudioElement,
     		$isPlaying
     	});
 
@@ -11271,7 +11291,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [customSize, customColor, $isPlaying, togglePlay, click_handler];
+    	return [customSize, customColor, $isPlaying, click_handler];
     }
 
     class PlayButton extends SvelteComponentDev {
@@ -11325,14 +11345,14 @@ var app = (function () {
     			t1 = space();
     			div = element("div");
     			set_custom_element_data(player_gloss, "class", "svelte-nv3uec");
-    			add_location(player_gloss, file$1b, 98, 1, 3934);
+    			add_location(player_gloss, file$1b, 101, 1, 4004);
     			set_custom_element_data(player_progress_fill, "class", "svelte-nv3uec");
-    			add_location(player_progress_fill, file$1b, 99, 1, 3952);
+    			add_location(player_progress_fill, file$1b, 102, 1, 4022);
     			attr_dev(div, "id", "waveform-data");
     			attr_dev(div, "class", "svelte-nv3uec");
-    			add_location(div, file$1b, 100, 1, 3978);
+    			add_location(div, file$1b, 103, 1, 4048);
     			set_custom_element_data(player_progress, "class", "svelte-nv3uec");
-    			add_location(player_progress, file$1b, 97, 0, 3915);
+    			add_location(player_progress, file$1b, 100, 0, 3985);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11442,6 +11462,10 @@ var app = (function () {
     	}
 
     	function setProgress(songProgress, songDuration) {
+    		if (songDuration === undefined) {
+    			songDuration = 0;
+    		}
+
     		if (songDuration - songProgress <= 0.5) {
     			if (skipDurationTimeout === undefined) {
     				nextSongFn();
@@ -12111,8 +12135,6 @@ var app = (function () {
     }
 
     /* src/layouts/ControlBar.svelte generated by Svelte v3.55.1 */
-
-    const { console: console_1$3 } = globals;
     const file$18 = "src/layouts/ControlBar.svelte";
 
     function create_fragment$1d(ctx) {
@@ -12184,15 +12206,15 @@ var app = (function () {
     			t10 = text("-");
     			t11 = text(t11_value);
     			set_custom_element_data(album_art, "class", "svelte-b3f23d");
-    			add_location(album_art, file$18, 54, 1, 1879);
+    			add_location(album_art, file$18, 51, 1, 1828);
     			set_custom_element_data(player_buttons, "class", "svelte-b3f23d");
-    			add_location(player_buttons, file$18, 58, 1, 2003);
+    			add_location(player_buttons, file$18, 55, 1, 1952);
     			set_custom_element_data(song_duration, "class", "song-time svelte-b3f23d");
-    			add_location(song_duration, file$18, 66, 1, 2118);
+    			add_location(song_duration, file$18, 63, 1, 2067);
     			set_custom_element_data(song_time_left, "class", "song-time svelte-b3f23d");
-    			add_location(song_time_left, file$18, 72, 1, 2238);
+    			add_location(song_time_left, file$18, 69, 1, 2187);
     			set_custom_element_data(control_bar_svlt, "class", "svelte-b3f23d");
-    			add_location(control_bar_svlt, file$18, 53, 0, 1859);
+    			add_location(control_bar_svlt, file$18, 50, 0, 1808);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -12322,7 +12344,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<ControlBar> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ControlBar> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -12353,12 +12375,6 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$currentSongProgressStore*/ 4) {
-    			{
-    				console.log($currentSongProgressStore);
-    			}
-    		}
-
     		if ($$self.$$.dirty & /*$currentSongDurationStore, $currentSongProgressStore*/ 12) {
     			{
     				updateSongTime($currentSongDurationStore, $currentSongProgressStore);
@@ -42132,7 +42148,7 @@ var app = (function () {
     /* src/App.svelte generated by Svelte v3.55.1 */
     const file = "src/App.svelte";
 
-    // (60:39) 
+    // (63:39) 
     function create_if_block_3(ctx) {
     	let lyricslayout;
     	let current;
@@ -42164,14 +42180,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(60:39) ",
+    		source: "(63:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (58:41) 
+    // (61:41) 
     function create_if_block_2(ctx) {
     	let playbacklayout;
     	let current;
@@ -42203,14 +42219,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(58:41) ",
+    		source: "(61:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:39) 
+    // (59:39) 
     function create_if_block_1(ctx) {
     	let configlayout;
     	let current;
@@ -42242,14 +42258,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(56:39) ",
+    		source: "(59:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (54:2) {#if $layoutToShow === 'Library'}
+    // (57:2) {#if $layoutToShow === 'Library'}
     function create_if_block(ctx) {
     	let librarylayout;
     	let current;
@@ -42281,7 +42297,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(54:2) {#if $layoutToShow === 'Library'}",
+    		source: "(57:2) {#if $layoutToShow === 'Library'}",
     		ctx
     	});
 
@@ -42416,9 +42432,9 @@ var app = (function () {
     			t12 = space();
     			create_component(storageservice.$$.fragment);
     			set_custom_element_data(current_window_svlt, "class", "svelte-sx52fo");
-    			add_location(current_window_svlt, file, 52, 1, 2260);
+    			add_location(current_window_svlt, file, 55, 1, 2293);
     			set_custom_element_data(main_app, "class", "svelte-sx52fo");
-    			add_location(main_app, file, 47, 0, 2200);
+    			add_location(main_app, file, 50, 0, 2233);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -42617,6 +42633,14 @@ var app = (function () {
 
     	onMount(() => {
     		onAppMountedService();
+
+    		setTimeout(
+    			() => {
+    				
+    			},
+    			1000
+    		); // stopSongFn()
+    		// stopSongFn()
     	});
 
     	const writable_props = [];
@@ -42677,8 +42701,6 @@ var app = (function () {
     		getDB,
     		dbSongsStore,
     		layoutToShow,
-    		reloadArts,
-    		dbVersionStore,
     		PlaybackLayout,
     		equalizerService,
     		confirmService,

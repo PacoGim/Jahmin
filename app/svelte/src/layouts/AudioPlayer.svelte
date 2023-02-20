@@ -89,7 +89,9 @@
 
 	// Functions
 	function checkIfIsPlaying() {
-		if (audioElements.main.isPlaying === true || audioElements.alt.isPlaying === true) {
+		if (audioElements.main.domElement?.getAttribute('src') === '' && audioElements.alt.domElement?.getAttribute('src') === '') {
+			$isPlaying = false
+		} else if (audioElements.main.isPlaying === true || audioElements.alt.isPlaying === true) {
 			$isPlaying = true
 		} else {
 			$isPlaying = false
@@ -97,7 +99,7 @@
 	}
 
 	function playSong(songUrl: string | undefined, { playNow }) {
-		if (songUrl && songUrl!=='Stop Playing') {
+		if (songUrl) {
 			$songToPlayUrlStore = undefined
 
 			let song = $playbackStore.find(song => song.SourceFile === songUrl)
@@ -151,16 +153,6 @@
 				audioElements.main.isPlaying = false
 				audioElements.alt.isPlaying = false
 			}
-		} else if (songUrl === 'Stop Playing') {
-			// stop everything!
-			console.log('Stop everything')
-
-
-			updateCurrentSongData({
-				ID: undefined,
-				SourceFile: '',
-				Duration: 0
-			})
 		}
 	}
 

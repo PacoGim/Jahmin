@@ -1,6 +1,6 @@
 import { writable, type Writable } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
-import type { SongType } from '../../../types/song.type'
+import type { PartialSongType, SongType } from '../../../types/song.type'
 
 export let isAppIdle: Writable<boolean> = writable(false)
 
@@ -10,7 +10,7 @@ export let selectedAlbumDir: Writable<string | undefined> = writable(undefined)
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
-export let playingSongStore: Writable<SongType | undefined> = writable(undefined)
+export let playingSongStore: Writable<PartialSongType | SongType | undefined> = writable(undefined)
 
 // Number = index of the playbackStore to play
 // Boolean = Start playing right away or not.

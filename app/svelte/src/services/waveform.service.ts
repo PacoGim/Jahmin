@@ -68,3 +68,9 @@ export async function setWaveSource(sourceFile: string, rootDir: string, duratio
 		}
 	}, waveformTransitionDuration)
 }
+
+export function removeWave() {
+	let wave = document.querySelector('#waveform-data wave')
+
+	wave.remove()
+}

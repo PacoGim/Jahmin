@@ -1,15 +1,15 @@
 import {
+	altAudioElement,
 	currentAudioElement,
+	currentSongDurationStore,
 	currentSongProgressStore,
 	isPlaying,
+	mainAudioElement,
 	playbackStore,
-	playingSongStore,
-	triggerScrollToSongEvent
+	playingSongStore
 } from '../stores/main.store'
-import { songToPlayUrlStore } from '../stores/player.store'
-import type { SongType } from '../../../types/song.type'
-import setNewPlaybackFn from './setNewPlayback.fn'
-import getDirectoryFn from './getDirectory.fn'
+
+import { removeWave } from '../services/waveform.service'
 
 let currentAudioElementLocal: HTMLAudioElement = undefined
 
@@ -22,24 +22,34 @@ let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
 })
 
 export default function () {
-	// let playbackStoreValue: SongType[]
-	// playbackStore.subscribe(value => (playbackStoreValue = value))()
+	let mainAudioElementLocal: HTMLAudioElement = undefined
+	let altAudioElementLocal: HTMLAudioElement = undefined
 
-	// let song = playbackStoreValue[0]
+	mainAudioElement.subscribe(value => (mainAudioElementLocal = value))()
+	altAudioElement.subscribe(value => (altAudioElementLocal = value))()
 
-	// setNewPlaybackFn(getDirectoryFn(song.SourceFile), playbackStoreValue, song.ID, { playNow: false })
+	playbackStore.set([])
 
-	// playingSongStore.set(undefined)
-	// currentAudioElementLocal.pause()
-	// currentAudioElementLocal.currentTime = 0
-	// currentSongProgressStore.set(0)
-	// songToPlayUrlStore.set(['Stop Playing', { playNow: false }])
+	playingSongStore.set({
+		Title: ''
+	})
 
-	// let song = playbackStoreValue[0]
+	currentSongDurationStore.set(0)
+	currentSongProgressStore.set(0)
 
-	// if (song) {
-	// 	songToPlayUrlStore.set([playbackStoreValue[0].SourceFile, { playNow: false }])
-	// } else {
-	//   console.log()
-	// }
+	mainAudioElementLocal.pause()
+	altAudioElementLocal.pause()
+
+	mainAudioElementLocal.src = ''
+	altAudioElementLocal.src = ''
+
+	removeWave()
+
+	let elementList = document.querySelectorAll(`control-bar-svlt album-art art-svlt > *`)
+
+	elementList.forEach(element => {
+		element.remove()
+	})
+
+	isPlaying.set(false)
 }
