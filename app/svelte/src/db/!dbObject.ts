@@ -1,5 +1,5 @@
 import type { ConfigType } from '../../../types/config.type'
-import type { SongType } from '../../../types/song.type'
+import type { PartialSongType, SongType } from '../../../types/song.type'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import stopSongFn from '../functions/stopSong.fn'
@@ -47,7 +47,7 @@ function insertData(newObjet: SongType) {
 function deleteData(oldObject: SongType) {
 	let selectedAlbumDirLocal = undefined
 	let songListStoreLocal: SongType[] = undefined
-	let playingSongLocal: SongType = undefined
+	let playingSongLocal: PartialSongType = undefined
 
 	selectedAlbumDir.subscribe(value => (selectedAlbumDirLocal = value))()
 
@@ -62,7 +62,7 @@ function deleteData(oldObject: SongType) {
 
 			playingSongStore.subscribe(value => (playingSongLocal = value))()
 
-			if (oldObject.ID === playingSongLocal.ID) {
+			if (oldObject.ID === playingSongLocal?.ID) {
 				stopSongFn()
 			}
 		}

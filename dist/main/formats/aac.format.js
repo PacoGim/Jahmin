@@ -70,6 +70,8 @@ function getAacTags(filePath) {
         });
         const STATS = fs.statSync(filePath);
         let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));
+        if (!isNaN(METADATA.Rating))
+            METADATA.RatingPercent = METADATA.Rating;
         resolve({
             ID: stringHash(filePath),
             Extension: METADATA.FileTypeExtension,
@@ -84,7 +86,7 @@ function getAacTags(filePath) {
             DiscNumber: METADATA.DiskNumber || null,
             Date_Day: dateParsed.day || null,
             Genre: METADATA.Genre || null,
-            Rating: METADATA.RatingPercent || null,
+            Rating: METADATA.RatingPercent || METADATA.Rating || null,
             Title: METADATA.Title || null,
             //@ts-expect-error
             Track: getTrack(METADATA.TrackNumber, METADATA.Track) || null,

@@ -164,7 +164,7 @@ function getSortMenu() {
     return submenu;
 }
 function disableSongs(songs) {
-    console.log(songs);
+    // console.log(songs)
 }
 function cutString(str, maxLength) {
     if (str.length > maxLength) {

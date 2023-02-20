@@ -17,8 +17,6 @@
 
 	$: isSongPlaying = $playingSongStore?.ID === song?.ID
 
-
-
 	$: {
 		song
 		setDynamicArtists()
@@ -147,11 +145,14 @@
 	song-list-item.playing {
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 		box-shadow: inset 0px 0px 0 2px rgba(255, 255, 255, 0.5);
-		/* border-radius: 5px; */
 	}
 
 	song-list-item.selected {
 		background-color: rgba(255, 255, 255, 0.1);
+	}
+
+	song-list-item:hover {
+		background-color: rgba(255, 255, 255, 0.05);
 	}
 
 	song-list-item.disabled {

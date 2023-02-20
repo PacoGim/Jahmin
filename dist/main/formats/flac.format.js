@@ -91,6 +91,9 @@ let mmWorker;
 let deferredPromise = new Map();
 async function getFlacTags(filePath) {
     return new Promise(async (resolve, reject) => {
+        if (!fs.existsSync(filePath)) {
+            return reject('File not found');
+        }
         const METADATA = await new Promise((resolve, reject) => {
             deferredPromise.set(filePath, resolve);
             mmWorker?.postMessage(filePath);

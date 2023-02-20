@@ -7480,7 +7480,7 @@ var app = (function () {
                 songListStoreLocal.splice(itemToDeleteIndex, 1);
                 songListStore.set(songListStoreLocal);
                 playingSongStore.subscribe(value => (playingSongLocal = value))();
-                if (oldObject.ID === playingSongLocal.ID) {
+                if (oldObject.ID === (playingSongLocal === null || playingSongLocal === void 0 ? void 0 : playingSongLocal.ID)) {
                     stopSongFn();
                 }
             }
@@ -20793,7 +20793,7 @@ var app = (function () {
     			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-1ks7s4h");
+    			: '') + " svelte-1be61gz");
 
     			add_location(song_list_item, file$U, 58, 0, 2057);
     		},
@@ -20858,7 +20858,7 @@ var app = (function () {
     			? 'playing'
     			: '') + " " + (/*$selectedSongsStore*/ ctx[6].includes(/*song*/ ctx[0].ID)
     			? 'selected'
-    			: '') + " svelte-1ks7s4h")) {
+    			: '') + " svelte-1be61gz")) {
     				set_custom_element_data(song_list_item, "class", song_list_item_class_value);
     			}
     		},

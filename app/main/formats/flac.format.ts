@@ -81,6 +81,10 @@ let deferredPromise: Map<string, any> = new Map<string, any>()
 
 export async function getFlacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
+		if (!fs.existsSync(filePath)) {
+			return reject('File not found')
+		}
+
 		const METADATA: any = await new Promise((resolve, reject) => {
 			deferredPromise.set(filePath, resolve)
 			mmWorker?.postMessage(filePath)

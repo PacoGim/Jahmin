@@ -63,6 +63,9 @@ let mmWorker;
 });
 async function getMp3Tags(filePath) {
     return new Promise(async (resolve, reject) => {
+        if (!fs.existsSync(filePath)) {
+            return reject('File not found');
+        }
         const METADATA = await new Promise((resolve, reject) => {
             deferredPromise.set(filePath, resolve);
             mmWorker?.postMessage(filePath);

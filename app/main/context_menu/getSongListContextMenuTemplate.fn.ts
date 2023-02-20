@@ -196,7 +196,7 @@ function getSortMenu() {
 }
 
 function disableSongs(songs: SongType[]) {
-	console.log(songs)
+	// console.log(songs)
 }
 
 function cutString(str: string, maxLength: number) {
