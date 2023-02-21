@@ -1,13 +1,7 @@
-import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn'
-import isAudioFileFn from '../functions/isAudioFile.fn'
-import { addToTaskQueue } from '../services/librarySongs.service'
+import verifyFolderTegrityFn from '../functions/verifyFolderTegrity.fn'
 
 export default function (ipcMain: Electron.IpcMain) {
 	ipcMain.on('verify-folder-tegrity', (evt, folderRoot: string) => {
-		let audioFiles = getAllFilesInFoldersDeepFn([folderRoot]).filter(file => isAudioFileFn(file))
-
-		audioFiles.forEach(filePath => {
-			addToTaskQueue(filePath, 'insert')
-		})
+		verifyFolderTegrityFn(folderRoot)
 	})
 }

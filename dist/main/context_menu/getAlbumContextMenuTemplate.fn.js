@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
+const verifyFolderTegrity_fn_1 = __importDefault(require("../functions/verifyFolderTegrity.fn"));
 function default_1(data) {
     let template = [];
     template.push({
@@ -16,7 +17,8 @@ function default_1(data) {
     template.push({
         label: `Reload Album Data`,
         click: () => {
-            // reloadAlbumData(data.albumId)
+            if (data.albumRootDir)
+                (0, verifyFolderTegrity_fn_1.default)(data.albumRootDir);
         }
     });
     template.push({
