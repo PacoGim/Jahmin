@@ -19,6 +19,3 @@
 * In song list when album is clicked, update the list when the clicked album is being updated.
 
 * When editing tags, the go revert changes buttons does not go away.
-* If a genre is removed the ui does not update
-
-* When tags are updated and don't match the others, update the ui accordingly.

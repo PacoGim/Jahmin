@@ -1,11 +1,5 @@
 <script lang="ts">
-	import {
-		elementMap,
-		selectedAlbumDir,
-		selectedSongsStore,
-		songListStore,
-		songSyncQueueProgress
-	} from '../../stores/main.store'
+	import { elementMap, selectedSongsStore, songListStore, songSyncQueueProgress } from '../../stores/main.store'
 
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
@@ -106,7 +100,6 @@
 
 		tagEditSuggestionFn(inputElement.parentElement, data.tag, inputValue).then((result: string) => {
 			if (result) {
-				console.log(result)
 				bindingTags[data.tag] = result
 			}
 		})
@@ -252,6 +245,16 @@
 		}
 	}
 
+	function hideToggleIcons() {
+		let tagContainerElements = document.querySelectorAll('tag-edit-svlt tag-container') as NodeListOf<HTMLElement>
+
+		tagContainerElements.forEach(tagContainerElement => {
+			let undoIconElement = tagContainerElement.querySelector('svg') as SVGElement
+			let dataTag = undoIconElement.dataset.tag
+			setUndoIconVisibility(dataTag, { isVisible: false })
+		})
+	}
+
 	onMount(() => {
 		hookUpEventListeners()
 	})
@@ -340,6 +343,7 @@
 			class="info"
 			on:click={() => {
 				window.ipc.updateSongs(songsToEdit, newTags)
+				hideToggleIcons()
 				$elementMap = undefined
 			}}
 			disabled={isEmptyObject(newTags)}
