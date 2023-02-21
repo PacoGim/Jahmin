@@ -31,6 +31,7 @@ const ipcFunctions = {
     selectDirectories: (type, songs) => electron_1.ipcRenderer.send('select-directories', type, songs),
     removeDirectory: (directory, type, songs) => electron_1.ipcRenderer.send('remove-directory', directory, type, songs),
     handleArt: (filePath, elementId, size) => electron_1.ipcRenderer.send('handle-art', filePath, elementId, size),
+    verifyFolderTegrity: (folderRoot) => electron_1.ipcRenderer.send('verify-folder-tegrity', folderRoot),
     /********************** Main to Renderer **********************/
     onGetAllSongsFromRenderer: (callback) => electron_1.ipcRenderer.on('get-all-songs-from-renderer', callback),
     handleWebStorage: (callback) => electron_1.ipcRenderer.on('web-storage', callback),

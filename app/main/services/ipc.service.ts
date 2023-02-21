@@ -11,6 +11,7 @@ export async function startIPC() {
 	await (await import('../ipc/selectDirectories.ipc')).default(ipcMain)
 	await (await import('../ipc/removeDirectory.ipc')).default(ipcMain)
 	await (await import('../ipc/handleArt.ipc')).default(ipcMain)
+	await (await import('../ipc/verifyFolderTegrity.ipc')).default(ipcMain)
 
 	/********************** Two-way **********************/
 	await (await import('../ipc/configGet.ipc')).default(ipcMain)

@@ -12,6 +12,7 @@
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 	import tagEditSuggestionFn from '../../services/tagEditSuggestion.fn'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
+	import findNextValidSongFn from '../../functions/findNextValidSong.fn'
 
 	let songsToEdit: PartialSongType[] = []
 	let groupedTags: PartialSongType = {}
@@ -255,6 +256,18 @@
 		})
 	}
 
+	function updateSongs(songsToEdit: PartialSongType[], newTags: PartialSongType) {
+		let cleanList = songsToEdit.filter(song => {
+			for (let key in newTags) {
+				if (song[key] !== newTags[key]) {
+					return true
+				}
+			}
+		})
+
+		window.ipc.updateSongs(cleanList, newTags)
+	}
+
 	onMount(() => {
 		hookUpEventListeners()
 	})
@@ -342,7 +355,7 @@
 		<button
 			class="info"
 			on:click={() => {
-				window.ipc.updateSongs(songsToEdit, newTags)
+				updateSongs(songsToEdit, newTags)
 				hideToggleIcons()
 				$elementMap = undefined
 			}}

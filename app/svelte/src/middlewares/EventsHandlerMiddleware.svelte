@@ -103,10 +103,12 @@
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
+			// window.ipc.verifyFolderTegrity(rootDir)
+
 			// Prevents resetting array if album unchanged.
 			// if ($selectedAlbumDir !== rootDir || songs.length === sortedSongs.length) {
-				$songListStore = sortedSongs
-				$selectedAlbumDir = rootDir
+			$songListStore = sortedSongs
+			$selectedAlbumDir = rootDir
 			// }
 
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.

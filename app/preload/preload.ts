@@ -38,6 +38,7 @@ const ipcFunctions = {
 	removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) =>
 		ipcRenderer.send('remove-directory', directory, type, songs),
 	handleArt: (filePath: string, elementId: string, size: number) => ipcRenderer.send('handle-art', filePath, elementId, size),
+	verifyFolderTegrity: (folderRoot: string) => ipcRenderer.send('verify-folder-tegrity', folderRoot),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),

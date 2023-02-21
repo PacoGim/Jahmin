@@ -41,6 +41,7 @@ declare global {
 			selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => void
 			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
 			handleArt: (filePath: string, elementId: string, size: number) => void
+			verifyFolderTegrity: (folderRoot: string) => void
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt

@@ -8703,7 +8703,7 @@ var app = (function () {
     function bulkInsertSongsFn (songs) {
         return new Promise((resolve, reject) => {
             getDB().songs
-                .bulkAdd(songs)
+                .bulkPut(songs)
                 .then(() => {
                 // updateVersionFn()
             })
@@ -24151,113 +24151,113 @@ var app = (function () {
     			create_component(updateicon.$$.fragment);
     			t49 = text("\n\t\t\tUpdate");
     			set_custom_element_data(songs_to_edit, "class", "svelte-vp3oog");
-    			add_location(songs_to_edit, file$O, 212, 1, 8690);
+    			add_location(songs_to_edit, file$O, 223, 1, 9048);
     			set_custom_element_data(tag_name0, "class", "svelte-vp3oog");
-    			add_location(tag_name0, file$O, 217, 2, 8867);
+    			add_location(tag_name0, file$O, 228, 2, 9225);
     			attr_dev(textarea0, "class", "svelte-vp3oog");
-    			add_location(textarea0, file$O, 218, 2, 8910);
+    			add_location(textarea0, file$O, 229, 2, 9268);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
     			set_custom_element_data(tag_container0, "class", "svelte-vp3oog");
-    			add_location(tag_container0, file$O, 216, 1, 8832);
+    			add_location(tag_container0, file$O, 227, 1, 9190);
     			set_custom_element_data(tag_name1, "class", "svelte-vp3oog");
-    			add_location(tag_name1, file$O, 222, 2, 9009);
+    			add_location(tag_name1, file$O, 233, 2, 9367);
     			attr_dev(textarea1, "class", "svelte-vp3oog");
-    			add_location(textarea1, file$O, 223, 2, 9052);
+    			add_location(textarea1, file$O, 234, 2, 9410);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
     			set_custom_element_data(tag_container1, "class", "svelte-vp3oog");
-    			add_location(tag_container1, file$O, 221, 1, 8974);
+    			add_location(tag_container1, file$O, 232, 1, 9332);
     			set_custom_element_data(tag_name2, "class", "svelte-vp3oog");
-    			add_location(tag_name2, file$O, 227, 2, 9170);
+    			add_location(tag_name2, file$O, 238, 2, 9528);
     			attr_dev(textarea2, "class", "svelte-vp3oog");
-    			add_location(textarea2, file$O, 228, 2, 9215);
+    			add_location(textarea2, file$O, 239, 2, 9573);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
     			set_custom_element_data(tag_container2, "class", "svelte-vp3oog");
-    			add_location(tag_container2, file$O, 226, 1, 9116);
+    			add_location(tag_container2, file$O, 237, 1, 9474);
     			set_custom_element_data(tag_name3, "class", "svelte-vp3oog");
-    			add_location(tag_name3, file$O, 232, 2, 9338);
+    			add_location(tag_name3, file$O, 243, 2, 9696);
     			attr_dev(textarea3, "class", "svelte-vp3oog");
-    			add_location(textarea3, file$O, 233, 2, 9382);
+    			add_location(textarea3, file$O, 244, 2, 9740);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
     			set_custom_element_data(tag_container3, "class", "svelte-vp3oog");
-    			add_location(tag_container3, file$O, 231, 1, 9279);
+    			add_location(tag_container3, file$O, 242, 1, 9637);
     			set_custom_element_data(tag_name4, "class", "svelte-vp3oog");
-    			add_location(tag_name4, file$O, 237, 2, 9487);
+    			add_location(tag_name4, file$O, 248, 2, 9845);
     			attr_dev(textarea4, "class", "svelte-vp3oog");
-    			add_location(textarea4, file$O, 238, 2, 9531);
+    			add_location(textarea4, file$O, 249, 2, 9889);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
     			set_custom_element_data(tag_container4, "class", "svelte-vp3oog");
-    			add_location(tag_container4, file$O, 236, 1, 9451);
+    			add_location(tag_container4, file$O, 247, 1, 9809);
     			set_custom_element_data(tag_name5, "class", "svelte-vp3oog");
-    			add_location(tag_name5, file$O, 242, 2, 9637);
+    			add_location(tag_name5, file$O, 253, 2, 9995);
     			attr_dev(textarea5, "class", "svelte-vp3oog");
-    			add_location(textarea5, file$O, 243, 2, 9687);
+    			add_location(textarea5, file$O, 254, 2, 10045);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
     			set_custom_element_data(tag_container5, "class", "svelte-vp3oog");
-    			add_location(tag_container5, file$O, 241, 1, 9596);
+    			add_location(tag_container5, file$O, 252, 1, 9954);
     			set_custom_element_data(tag_name6, "class", "svelte-vp3oog");
-    			add_location(tag_name6, file$O, 247, 2, 9792);
+    			add_location(tag_name6, file$O, 258, 2, 10150);
     			attr_dev(textarea6, "class", "svelte-vp3oog");
-    			add_location(textarea6, file$O, 248, 2, 9835);
+    			add_location(textarea6, file$O, 259, 2, 10193);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
     			set_custom_element_data(tag_container6, "class", "svelte-vp3oog");
-    			add_location(tag_container6, file$O, 246, 1, 9757);
+    			add_location(tag_container6, file$O, 257, 1, 10115);
     			set_custom_element_data(tag_name7, "class", "svelte-vp3oog");
-    			add_location(tag_name7, file$O, 252, 2, 9937);
+    			add_location(tag_name7, file$O, 263, 2, 10295);
     			attr_dev(textarea7, "class", "svelte-vp3oog");
-    			add_location(textarea7, file$O, 253, 2, 9983);
+    			add_location(textarea7, file$O, 264, 2, 10341);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
     			set_custom_element_data(tag_container7, "class", "svelte-vp3oog");
-    			add_location(tag_container7, file$O, 251, 1, 9899);
+    			add_location(tag_container7, file$O, 262, 1, 10257);
     			set_custom_element_data(tag_name8, "class", "svelte-vp3oog");
-    			add_location(tag_name8, file$O, 257, 2, 10087);
+    			add_location(tag_name8, file$O, 268, 2, 10445);
     			attr_dev(textarea8, "class", "svelte-vp3oog");
-    			add_location(textarea8, file$O, 258, 2, 10132);
+    			add_location(textarea8, file$O, 269, 2, 10490);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
     			set_custom_element_data(tag_container8, "class", "svelte-vp3oog");
-    			add_location(tag_container8, file$O, 256, 1, 10050);
+    			add_location(tag_container8, file$O, 267, 1, 10408);
     			set_custom_element_data(tag_name9, "class", "svelte-vp3oog");
-    			add_location(tag_name9, file$O, 262, 2, 10256);
+    			add_location(tag_name9, file$O, 273, 2, 10614);
     			attr_dev(textarea9, "class", "svelte-vp3oog");
-    			add_location(textarea9, file$O, 263, 2, 10298);
+    			add_location(textarea9, file$O, 274, 2, 10656);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
     			set_custom_element_data(tag_container9, "class", "svelte-vp3oog");
-    			add_location(tag_container9, file$O, 261, 1, 10198);
+    			add_location(tag_container9, file$O, 272, 1, 10556);
     			set_custom_element_data(tag_name10, "class", "svelte-vp3oog");
-    			add_location(tag_name10, file$O, 267, 2, 10425);
+    			add_location(tag_name10, file$O, 278, 2, 10783);
     			attr_dev(textarea10, "class", "svelte-vp3oog");
-    			add_location(textarea10, file$O, 268, 2, 10468);
+    			add_location(textarea10, file$O, 279, 2, 10826);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
     			set_custom_element_data(tag_container10, "class", "svelte-vp3oog");
-    			add_location(tag_container10, file$O, 266, 1, 10366);
+    			add_location(tag_container10, file$O, 277, 1, 10724);
     			set_custom_element_data(tag_name11, "class", "svelte-vp3oog");
-    			add_location(tag_name11, file$O, 272, 2, 10594);
+    			add_location(tag_name11, file$O, 283, 2, 10952);
     			attr_dev(textarea11, "class", "svelte-vp3oog");
-    			add_location(textarea11, file$O, 273, 2, 10635);
+    			add_location(textarea11, file$O, 284, 2, 10993);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
     			set_custom_element_data(tag_container11, "class", "svelte-vp3oog");
-    			add_location(tag_container11, file$O, 271, 1, 10537);
+    			add_location(tag_container11, file$O, 282, 1, 10895);
     			set_custom_element_data(tag_name12, "class", "svelte-vp3oog");
-    			add_location(tag_name12, file$O, 277, 2, 10738);
+    			add_location(tag_name12, file$O, 288, 2, 11096);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
     			set_custom_element_data(tag_container12, "class", "svelte-vp3oog");
-    			add_location(tag_container12, file$O, 276, 1, 10702);
+    			add_location(tag_container12, file$O, 287, 1, 11060);
     			set_custom_element_data(album_art, "class", "svelte-vp3oog");
-    			add_location(album_art, file$O, 281, 1, 10918);
+    			add_location(album_art, file$O, 292, 1, 11276);
     			attr_dev(button0, "class", "danger");
     			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[3]);
-    			add_location(button0, file$O, 286, 2, 11033);
+    			add_location(button0, file$O, 297, 2, 11391);
     			attr_dev(button1, "class", "info");
     			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[3]);
-    			add_location(button1, file$O, 290, 2, 11239);
+    			add_location(button1, file$O, 301, 2, 11597);
     			set_custom_element_data(button_container, "class", "svelte-vp3oog");
-    			add_location(button_container, file$O, 285, 1, 11012);
+    			add_location(button_container, file$O, 296, 1, 11370);
     			set_custom_element_data(tag_edit_svlt, "class", "svelte-vp3oog");
-    			add_location(tag_edit_svlt, file$O, 211, 0, 8673);
+    			add_location(tag_edit_svlt, file$O, 222, 0, 9031);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24390,20 +24390,20 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea0, "input", /*textarea0_input_handler*/ ctx[10]),
-    					listen_dev(textarea1, "input", /*textarea1_input_handler*/ ctx[11]),
-    					listen_dev(textarea2, "input", /*textarea2_input_handler*/ ctx[12]),
-    					listen_dev(textarea3, "input", /*textarea3_input_handler*/ ctx[13]),
-    					listen_dev(textarea4, "input", /*textarea4_input_handler*/ ctx[14]),
-    					listen_dev(textarea5, "input", /*textarea5_input_handler*/ ctx[15]),
-    					listen_dev(textarea6, "input", /*textarea6_input_handler*/ ctx[16]),
-    					listen_dev(textarea7, "input", /*textarea7_input_handler*/ ctx[17]),
-    					listen_dev(textarea8, "input", /*textarea8_input_handler*/ ctx[18]),
-    					listen_dev(textarea9, "input", /*textarea9_input_handler*/ ctx[19]),
-    					listen_dev(textarea10, "input", /*textarea10_input_handler*/ ctx[20]),
-    					listen_dev(textarea11, "input", /*textarea11_input_handler*/ ctx[21]),
-    					listen_dev(button0, "click", /*click_handler*/ ctx[22], false, false, false),
-    					listen_dev(button1, "click", /*click_handler_1*/ ctx[23], false, false, false)
+    					listen_dev(textarea0, "input", /*textarea0_input_handler*/ ctx[11]),
+    					listen_dev(textarea1, "input", /*textarea1_input_handler*/ ctx[12]),
+    					listen_dev(textarea2, "input", /*textarea2_input_handler*/ ctx[13]),
+    					listen_dev(textarea3, "input", /*textarea3_input_handler*/ ctx[14]),
+    					listen_dev(textarea4, "input", /*textarea4_input_handler*/ ctx[15]),
+    					listen_dev(textarea5, "input", /*textarea5_input_handler*/ ctx[16]),
+    					listen_dev(textarea6, "input", /*textarea6_input_handler*/ ctx[17]),
+    					listen_dev(textarea7, "input", /*textarea7_input_handler*/ ctx[18]),
+    					listen_dev(textarea8, "input", /*textarea8_input_handler*/ ctx[19]),
+    					listen_dev(textarea9, "input", /*textarea9_input_handler*/ ctx[20]),
+    					listen_dev(textarea10, "input", /*textarea10_input_handler*/ ctx[21]),
+    					listen_dev(textarea11, "input", /*textarea11_input_handler*/ ctx[22]),
+    					listen_dev(button0, "click", /*click_handler*/ ctx[23], false, false, false),
+    					listen_dev(button1, "click", /*click_handler_1*/ ctx[24], false, false, false)
     				];
 
     				mounted = true;
@@ -24598,11 +24598,11 @@ var app = (function () {
     	let $songSyncQueueProgress;
     	let $elementMap;
     	validate_store(selectedSongsStore, 'selectedSongsStore');
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(8, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(9, $selectedSongsStore = $$value));
     	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(9, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(10, $songListStore = $$value));
     	validate_store(songSyncQueueProgress, 'songSyncQueueProgress');
-    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(24, $songSyncQueueProgress = $$value));
+    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(25, $songSyncQueueProgress = $$value));
     	validate_store(elementMap, 'elementMap');
     	component_subscribe($$self, elementMap, $$value => $$invalidate(4, $elementMap = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -24619,7 +24619,7 @@ var app = (function () {
     		}
 
     		$$invalidate(1, songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore));
-    		$$invalidate(7, groupedTags = groupSongsByValues(songsToEdit));
+    		$$invalidate(8, groupedTags = groupSongsByValues(songsToEdit));
     		$$invalidate(0, bindingTags = Object.assign({}, groupedTags));
     		$$invalidate(2, imageSourceLocation = findAlbumArtPath());
     	}
@@ -24804,6 +24804,18 @@ var app = (function () {
     		}
     	}
 
+    	function updateSongs(songsToEdit, newTags) {
+    		let cleanList = songsToEdit.filter(song => {
+    			for (let key in newTags) {
+    				if (song[key] !== newTags[key]) {
+    					return true;
+    				}
+    			}
+    		});
+
+    		window.ipc.updateSongs(cleanList, newTags);
+    	}
+
     	onMount(() => {
     		hookUpEventListeners();
     	});
@@ -24877,7 +24889,7 @@ var app = (function () {
     	const click_handler = () => undoAllTags();
 
     	const click_handler_1 = () => {
-    		window.ipc.updateSongs(songsToEdit, newTags);
+    		updateSongs(songsToEdit, newTags);
     		hideToggleIcons();
     		set_store_value(elementMap, $elementMap = undefined, $elementMap);
     	};
@@ -24898,6 +24910,7 @@ var app = (function () {
     		isEmptyObject,
     		tagEditSuggestionFn,
     		getDirectoryFn,
+    		findNextValidSongFn,
     		songsToEdit,
     		groupedTags,
     		bindingTags,
@@ -24917,6 +24930,7 @@ var app = (function () {
     		undoAllTags,
     		findAlbumArtPath,
     		hideToggleIcons,
+    		updateSongs,
     		$selectedSongsStore,
     		$songListStore,
     		$songSyncQueueProgress,
@@ -24925,7 +24939,7 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('songsToEdit' in $$props) $$invalidate(1, songsToEdit = $$props.songsToEdit);
-    		if ('groupedTags' in $$props) $$invalidate(7, groupedTags = $$props.groupedTags);
+    		if ('groupedTags' in $$props) $$invalidate(8, groupedTags = $$props.groupedTags);
     		if ('bindingTags' in $$props) $$invalidate(0, bindingTags = $$props.bindingTags);
     		if ('imageSourceLocation' in $$props) $$invalidate(2, imageSourceLocation = $$props.imageSourceLocation);
     		if ('newTags' in $$props) $$invalidate(3, newTags = $$props.newTags);
@@ -24936,19 +24950,19 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty[0] & /*$songListStore*/ 512) {
+    		if ($$self.$$.dirty[0] & /*$songListStore*/ 1024) {
     			{
     				setupSongs('songListStoreUpdate');
     			}
     		}
 
-    		if ($$self.$$.dirty[0] & /*$selectedSongsStore*/ 256) {
+    		if ($$self.$$.dirty[0] & /*$selectedSongsStore*/ 512) {
     			{
     				setupSongs('selectedSongsStoreUpdate');
     			}
     		}
 
-    		if ($$self.$$.dirty[0] & /*groupedTags, bindingTags*/ 129) {
+    		if ($$self.$$.dirty[0] & /*groupedTags, bindingTags*/ 257) {
     			$$invalidate(3, newTags = getObjectDifference(groupedTags, bindingTags));
     		}
     	};
@@ -24961,6 +24975,7 @@ var app = (function () {
     		$elementMap,
     		setStar,
     		undoAllTags,
+    		updateSongs,
     		groupedTags,
     		$selectedSongsStore,
     		$songListStore,
@@ -37646,6 +37661,7 @@ var app = (function () {
     			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true });
     			saveGroupingConfig();
     		} else if (evtType === 'click') {
+    			// window.ipc.verifyFolderTegrity(rootDir)
     			// Prevents resetting array if album unchanged.
     			// if ($selectedAlbumDir !== rootDir || songs.length === sortedSongs.length) {
     			set_store_value(songListStore, $songListStore = sortedSongs, $songListStore);
