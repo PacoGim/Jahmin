@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ThreeDButton from '../../../components/ThreeDButton.svelte'
 	import getAllSongsFn from '../../../db/getAllSongs.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
@@ -12,26 +13,38 @@
 			{#each $config.directories.add || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
-					<button
-						class="danger"
-						on:click={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}
+					<ThreeDButton
+						--font-size="1rem"
+						--bg-color="hsl(10, 95%, 58%)"
+						--shadow-color="hsl(10, 95%, 48%)"
+						--shadow-dark-color="hsl(10, 95%, 38%)"
+						--font-weight="700"
+						--padding-x="0.5rem"
+						--padding-y="0.25rem"
+						on:buttonClick={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}
 					>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 						Remove
-					</button>
+					</ThreeDButton>
 				</section-directory>
 			{/each}
 		{/if}
 	</section-body>
-	<button
-		class="info"
-		on:click={async () => {
+	<ThreeDButton
+		--font-size="1rem"
+		--bg-color="hsl(193, 95%, 68%)"
+		--shadow-color="hsl(193, 95%, 48%)"
+		--shadow-dark-color="hsl(193, 95%, 38%)"
+		--font-weight="700"
+		--padding-x="0.5rem"
+		--padding-y="0.25rem"
+		on:buttonClick={async () => {
 			window.ipc.selectDirectories('add', await getAllSongsFn())
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		Add Directories
-	</button>
+	</ThreeDButton>
 </add-folder-config>
 
 <exclude-folder-config class="section-main">
