@@ -7,19 +7,28 @@
 		$selectedConfigOptionName = 'Library'
 		$layoutToShow = 'Config'
 	}
-</script>
 
-<no-song-svlt>
-	<p>No songs found!</p>
-	<ThreeDButton
-		on:buttonClick={handleAddFolder}
-		--font-size="1.25rem"
+	/*
+				--font-size="1.25rem"
 		--bg-color="hsl(193, 95%, 68%)"
 		--shadow-color="hsl(193, 95%, 48%)"
 		--shadow-dark-color="hsl(193, 95%, 38%)"
 		--font-weight="700"
 		--padding-x="1rem"
 		--padding-y="0.5rem"
+
+	*/
+</script>
+
+<no-song-svlt>
+	<p>No songs found!</p>
+	<ThreeDButton
+		on:buttonClick={handleAddFolder}
+		colorName='reactBlue'
+		fontSize="1.25rem"
+		fontWeight="700"
+		paddingX="1rem"
+		paddingY="0.5rem"
 	>Click here to add songs</ThreeDButton>
 </no-song-svlt>
 
@@ -46,6 +55,6 @@
 			0 2px 0 hsl(193, 95%, 45%),
 			0 3px 0 hsl(193, 95%, 45%),
 			0 4px 0 hsl(193, 95%, 45%),
-			0 4px 5px hsl(193, 95%, 35%);
+			0 4px 3px hsl(193, 95%, 35%);
 	}
 </style>

@@ -14,13 +14,8 @@
 				<section-directory>
 					<directory-path>{directory}</directory-path>
 					<ThreeDButton
-						--font-size="1rem"
-						--bg-color="hsl(10, 95%, 58%)"
-						--shadow-color="hsl(10, 95%, 48%)"
-						--shadow-dark-color="hsl(10, 95%, 38%)"
-						--font-weight="700"
-						--padding-x="0.5rem"
-						--padding-y="0.25rem"
+						colorName="dangerRed"
+						addShadow={false}
 						on:buttonClick={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}
 					>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
@@ -31,13 +26,6 @@
 		{/if}
 	</section-body>
 	<ThreeDButton
-		--font-size="1rem"
-		--bg-color="hsl(193, 95%, 68%)"
-		--shadow-color="hsl(193, 95%, 48%)"
-		--shadow-dark-color="hsl(193, 95%, 38%)"
-		--font-weight="700"
-		--padding-x="0.5rem"
-		--padding-y="0.25rem"
 		on:buttonClick={async () => {
 			window.ipc.selectDirectories('add', await getAllSongsFn())
 		}}
