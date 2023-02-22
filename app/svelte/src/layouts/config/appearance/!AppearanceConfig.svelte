@@ -2,6 +2,7 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import OptionSectionCompact from '../../../components/OptionSectionCompact.svelte'
 	import { config } from '../../../stores/main.store'
+	import AlwaysShowAlbumOverlay from './AlwaysShowAlbumOverlay.svelte'
 
 	import ColorContrastConfig from './ColorContrastConfig.svelte'
 	import DayNightThemeConfig from './DayNightThemeConfig.svelte'
@@ -36,6 +37,10 @@
 
 	<OptionSectionCompact title="Clean Art Cache">
 		<RebuildArtCacheConfig />
+	</OptionSectionCompact>
+
+	<OptionSectionCompact>
+		<AlwaysShowAlbumOverlay />
 	</OptionSectionCompact>
 </config-section>
 

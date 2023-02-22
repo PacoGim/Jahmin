@@ -14,22 +14,38 @@
 
 	const colors = {
 		reactBlue: 'hsl(193, 95%, 60%)',
-		dangerRed: 'hsl(10, 95%, 58%)'
+		dangerRed: 'hsl(10, 95%, 58%)',
+		disabled: 'hsl(0, 0%, 50%)'
 	}
 
 	let baseColor = colors[colorName]
 	let shadowColor = ''
 	let shadowDarkColor = ''
 
-	onMount(() => {
+	$: {
+		disabled
+		getColor()
+	}
+
+	function getColor() {
 		if (addShadow) {
-			let hslColorObject = toHSLObjectFn(colors[colorName])
+			let hslColorObject = disabled ? toHSLObjectFn(colors['disabled']) : toHSLObjectFn(colors[colorName])
 
 			if (hslColorObject?.lightness) {
 				shadowColor = `hsl(${hslColorObject.hue}, ${hslColorObject.saturation}%, ${hslColorObject.lightness - 20}%)`
 				shadowDarkColor = `hsl(${hslColorObject.hue}, ${hslColorObject.saturation}%, ${hslColorObject.lightness - 30}%)`
 			}
+		} else {
+			if (disabled) {
+				baseColor = colors['disabled']
+			} else {
+				baseColor = colors[colorName]
+			}
 		}
+	}
+
+	onMount(() => {
+		getColor()
 	})
 </script>
 
@@ -44,6 +60,7 @@
 	--shadow-dark-color:{shadowDarkColor};
 	--font-weight:{fontWeight};
 	"
+	{disabled}
 	data-disable-movement={addShadow ? 'false' : 'true'}
 >
 	<slot />
@@ -67,7 +84,7 @@
 			0 7px 0 var(--shadow-color), 0 8px 0 var(--shadow-color), 0 9px 0 var(--shadow-color), 0 10px 0 var(--shadow-color),
 			0 10px 5px var(--shadow-dark-color);
 
-		transition-property: box-shadow, transform;
+		transition-property: box-shadow, transform, background-color;
 		transition-timing-function: linear;
 		transition-duration: 150ms;
 	}

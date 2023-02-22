@@ -1,28 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
-
 	import type { AlbumType } from '../../../types/album.type'
-	import { selectedAlbumDir } from '../stores/main.store'
+	import { config, selectedAlbumDir } from '../stores/main.store'
 	import AlbumArt from './AlbumArt.svelte'
 
 	export let album: AlbumType
-
-	let artSize = 0
-
-	let element
-
-	onMount(() => {
-		// let lastPlayedAlbumId = localStorage.getItem('LastPlayedAlbumId')
-		// if (album.ID === lastPlayedAlbumId) {
-		// 	setTimeout(() => {
-		// 		scrollToAlbumFn(album.ID)
-		// 	}, 100)
-		// }
-	})
 </script>
 
-<album rootDir={album.RootDir} class={$selectedAlbumDir === album?.RootDir ? 'selected' : ''}>
-	<AlbumArt imageSourceLocation={album.RootDir} intersectionRoot='art-grid-svlt'  />
+<album
+	alwaysShowOverlay={$config.userOptions.alwaysShowAlbumOverlay}
+	rootDir={album.RootDir}
+	class={$selectedAlbumDir === album?.RootDir ? 'selected' : ''}
+>
+	<AlbumArt imageSourceLocation={album.RootDir} intersectionRoot="art-grid-svlt" />
 
 	<overlay-gradient />
 
@@ -61,20 +50,6 @@
 		width: var(--art-dimension);
 		max-width: var(--art-dimension);
 		max-height: var(--art-dimension);
-	}
-
-	album:hover overlay-gradient {
-		opacity: 1;
-	}
-
-	album:hover album-name {
-		transform: translateY(0px) rotateX(0deg);
-		opacity: 1;
-	}
-
-	album:hover album-artist {
-		transform: translateY(0px) rotateX(0deg);
-		opacity: 1;
 	}
 
 	overlay-gradient {
@@ -148,5 +123,18 @@
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 		/* max-width: calc(var(--art-dimension) - 1.5rem); */
+	}
+
+	album:hover overlay-gradient,
+	album[alwaysShowOverlay='true'] overlay-gradient {
+		opacity: 1;
+	}
+
+	album:hover album-name,
+	album:hover album-artist,
+	album[alwaysShowOverlay='true'] album-name,
+	album[alwaysShowOverlay='true'] album-artist {
+		transform: translateY(0px) rotateX(0deg);
+		opacity: 1;
 	}
 </style>

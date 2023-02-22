@@ -372,7 +372,7 @@
 			disabled={isEmptyObject(newTags)}
 			addShadow={false}
 		>
-			<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
+			<UpdateIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 			Update
 		</ThreeDButton>
 	</button-container>

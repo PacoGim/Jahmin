@@ -69,7 +69,8 @@ function getDefaultConfigFile(): ConfigType {
 			pauseAnimatedArtWhenAppUnfocused: false,
 			lyricsTextAlign: 'left',
 			lyricsTextSize: 16,
-			lyricsTextWeight: 0
+			lyricsTextWeight: 0,
+			alwaysShowAlbumOverlay: false
 		},
 		songListTags: [
 			{

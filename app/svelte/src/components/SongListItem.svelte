@@ -170,7 +170,8 @@
 	}
 
 	song-list-item.disabled::before {
-		content: '🚫 ';
+		content: '🚫';
+		margin-right: 5px;
 		filter: grayscale(1) brightness(1000);
 
 		font-size: 0.75rem;

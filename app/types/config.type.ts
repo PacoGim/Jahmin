@@ -26,6 +26,7 @@ export type UserOptionsType = {
 	lyricsTextAlign: 'left' | 'center' | 'right'
 	lyricsTextSize: number
 	lyricsTextWeight: number
+	alwaysShowAlbumOverlay: boolean
 }
 
 export enum ThemeOptions {

@@ -19,4 +19,8 @@
 		font-size: 1rem;
 		margin-right: 0.5rem;
 	}
+
+	section[id=''] section-title {
+		margin-right: 0;
+	}
 </style>
