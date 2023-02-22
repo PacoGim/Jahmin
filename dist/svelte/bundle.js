@@ -10739,17 +10739,17 @@ var app = (function () {
     			t3 = space();
     			nav_button3 = element("nav-button");
     			create_component(cogicon.$$.fragment);
-    			set_custom_element_data(nav_button0, "class", "svelte-uqzl80");
-    			add_location(nav_button0, file$1g, 8, 1, 332);
-    			set_custom_element_data(nav_button1, "class", "svelte-uqzl80");
-    			add_location(nav_button1, file$1g, 15, 1, 657);
-    			set_custom_element_data(nav_button2, "class", "svelte-uqzl80");
-    			add_location(nav_button2, file$1g, 22, 1, 984);
-    			add_location(separator, file$1g, 29, 1, 1304);
-    			set_custom_element_data(nav_button3, "class", "configButton svelte-uqzl80");
-    			add_location(nav_button3, file$1g, 30, 1, 1319);
-    			set_custom_element_data(navigation_svlt, "class", "dark-theme svelte-uqzl80");
-    			add_location(navigation_svlt, file$1g, 7, 0, 294);
+    			set_custom_element_data(nav_button0, "class", "svelte-pic89w");
+    			add_location(nav_button0, file$1g, 9, 1, 370);
+    			set_custom_element_data(nav_button1, "class", "svelte-pic89w");
+    			add_location(nav_button1, file$1g, 16, 1, 695);
+    			set_custom_element_data(nav_button2, "class", "svelte-pic89w");
+    			add_location(nav_button2, file$1g, 23, 1, 1022);
+    			add_location(separator, file$1g, 30, 1, 1342);
+    			set_custom_element_data(nav_button3, "class", "configButton svelte-pic89w");
+    			add_location(nav_button3, file$1g, 31, 1, 1357);
+    			set_custom_element_data(navigation_svlt, "class", "svelte-pic89w");
+    			add_location(navigation_svlt, file$1g, 8, 0, 351);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19760,8 +19760,8 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	const default_slot_template = /*#slots*/ ctx[11].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[10], null);
+    	const default_slot_template = /*#slots*/ ctx[12].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[11], null);
 
     	const block = {
     		c: function create() {
@@ -19775,8 +19775,8 @@ var app = (function () {
     			set_style(button, "--shadow-dark-color", /*shadowDarkColor*/ ctx[6]);
     			set_style(button, "--font-weight", /*fontWeight*/ ctx[3]);
     			attr_dev(button, "data-disable-movement", button_data_disable_movement_value = /*addShadow*/ ctx[4] ? 'false' : 'true');
-    			attr_dev(button, "class", "svelte-14vp1fl");
-    			add_location(button, file$Y, 27, 0, 1078);
+    			attr_dev(button, "class", "svelte-qq57lq");
+    			add_location(button, file$Y, 28, 0, 1107);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19791,21 +19791,21 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler*/ ctx[12], false, false, false);
+    				dispose = listen_dev(button, "click", /*click_handler*/ ctx[13], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
     			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 1024)) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 2048)) {
     					update_slot_base(
     						default_slot,
     						default_slot_template,
     						ctx,
-    						/*$$scope*/ ctx[10],
+    						/*$$scope*/ ctx[11],
     						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[10])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[10], dirty, null),
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[11])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[11], dirty, null),
     						null
     					);
     				}
@@ -19878,9 +19878,10 @@ var app = (function () {
     	let { addShadow: addShadow_1 } = { addShadow: true } || { addShadow: false };
     	let { addShadow = addShadow_1 } = $$props;
     	let { colorName = 'reactBlue' } = $$props;
+    	let { disabled = false } = $$props;
 
     	const colors = {
-    		reactBlue: 'hsl(193, 95%, 65%)',
+    		reactBlue: 'hsl(193, 95%, 60%)',
     		dangerRed: 'hsl(10, 95%, 58%)'
     	};
 
@@ -19901,7 +19902,15 @@ var app = (function () {
     		}
     	});
 
-    	const writable_props = ['paddingX', 'paddingY', 'fontSize', 'fontWeight', 'addShadow', 'colorName'];
+    	const writable_props = [
+    		'paddingX',
+    		'paddingY',
+    		'fontSize',
+    		'fontWeight',
+    		'addShadow',
+    		'colorName',
+    		'disabled'
+    	];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ThreeDButton> was created with unknown prop '${key}'`);
@@ -19916,7 +19925,8 @@ var app = (function () {
     		if ('fontWeight' in $$props) $$invalidate(3, fontWeight = $$props.fontWeight);
     		if ('addShadow' in $$props) $$invalidate(4, addShadow = $$props.addShadow);
     		if ('colorName' in $$props) $$invalidate(9, colorName = $$props.colorName);
-    		if ('$$scope' in $$props) $$invalidate(10, $$scope = $$props.$$scope);
+    		if ('disabled' in $$props) $$invalidate(10, disabled = $$props.disabled);
+    		if ('$$scope' in $$props) $$invalidate(11, $$scope = $$props.$$scope);
     	};
 
     	$$self.$capture_state = () => ({
@@ -19930,6 +19940,7 @@ var app = (function () {
     		fontWeight,
     		addShadow,
     		colorName,
+    		disabled,
     		colors,
     		baseColor,
     		shadowColor,
@@ -19943,6 +19954,7 @@ var app = (function () {
     		if ('fontWeight' in $$props) $$invalidate(3, fontWeight = $$props.fontWeight);
     		if ('addShadow' in $$props) $$invalidate(4, addShadow = $$props.addShadow);
     		if ('colorName' in $$props) $$invalidate(9, colorName = $$props.colorName);
+    		if ('disabled' in $$props) $$invalidate(10, disabled = $$props.disabled);
     		if ('baseColor' in $$props) $$invalidate(8, baseColor = $$props.baseColor);
     		if ('shadowColor' in $$props) $$invalidate(5, shadowColor = $$props.shadowColor);
     		if ('shadowDarkColor' in $$props) $$invalidate(6, shadowDarkColor = $$props.shadowDarkColor);
@@ -19963,6 +19975,7 @@ var app = (function () {
     		dispatcher,
     		baseColor,
     		colorName,
+    		disabled,
     		$$scope,
     		slots,
     		click_handler
@@ -19979,7 +19992,8 @@ var app = (function () {
     			fontSize: 2,
     			fontWeight: 3,
     			addShadow: 4,
-    			colorName: 9
+    			colorName: 9,
+    			disabled: 10
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -20037,6 +20051,14 @@ var app = (function () {
     	set colorName(value) {
     		throw new Error("<ThreeDButton>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
+
+    	get disabled() {
+    		throw new Error("<ThreeDButton>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set disabled(value) {
+    		throw new Error("<ThreeDButton>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
     }
 
     //TODO Change back to appearance
@@ -20046,7 +20068,7 @@ var app = (function () {
     const file$X = "src/layouts/library/NoSong.svelte";
 
     // (22:1) <ThreeDButton   on:buttonClick={handleAddFolder}   colorName='reactBlue'   fontSize="1.25rem"   fontWeight="700"   paddingX="1rem"   paddingY="0.5rem"  >
-    function create_default_slot$4(ctx) {
+    function create_default_slot$5(ctx) {
     	let t;
 
     	const block = {
@@ -20063,7 +20085,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot$4.name,
+    		id: create_default_slot$5.name,
     		type: "slot",
     		source: "(22:1) <ThreeDButton   on:buttonClick={handleAddFolder}   colorName='reactBlue'   fontSize=\\\"1.25rem\\\"   fontWeight=\\\"700\\\"   paddingX=\\\"1rem\\\"   paddingY=\\\"0.5rem\\\"  >",
     		ctx
@@ -20086,7 +20108,7 @@ var app = (function () {
     				fontWeight: "700",
     				paddingX: "1rem",
     				paddingY: "0.5rem",
-    				$$slots: { default: [create_default_slot$4] },
+    				$$slots: { default: [create_default_slot$5] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -24214,6 +24236,106 @@ var app = (function () {
     const { Object: Object_1$1 } = globals;
     const file$O = "src/layouts/library/TagEdit.svelte";
 
+    // (299:2) <ThreeDButton    on:buttonClick={() => undoAllTags()}    addShadow={false}    disabled={isEmptyObject(newTags)}    colorName="dangerRed"    fontSize=".8rem"    paddingX=".5rem"   >
+    function create_default_slot_1$3(ctx) {
+    	let undoicon;
+    	let t;
+    	let current;
+
+    	undoicon = new UndoIcon({
+    			props: {
+    				style: "height:1rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(undoicon.$$.fragment);
+    			t = text("\n\t\t\tCancel");
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(undoicon, target, anchor);
+    			insert_dev(target, t, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(undoicon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(undoicon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(undoicon, detaching);
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_1$3.name,
+    		type: "slot",
+    		source: "(299:2) <ThreeDButton    on:buttonClick={() => undoAllTags()}    addShadow={false}    disabled={isEmptyObject(newTags)}    colorName=\\\"dangerRed\\\"    fontSize=\\\".8rem\\\"    paddingX=\\\".5rem\\\"   >",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (311:2) <ThreeDButton    on:buttonClick={() => {     updateSongs(songsToEdit, newTags)     hideToggleIcons()     $elementMap = undefined    }}    fontSize=".8rem"    paddingX=".5rem"    disabled={isEmptyObject(newTags)}    addShadow={false}   >
+    function create_default_slot$4(ctx) {
+    	let updateicon;
+    	let t;
+    	let current;
+
+    	updateicon = new UpdateIcon({
+    			props: {
+    				style: "height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(updateicon.$$.fragment);
+    			t = text("\n\t\t\tUpdate");
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(updateicon, target, anchor);
+    			insert_dev(target, t, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(updateicon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(updateicon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(updateicon, detaching);
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot$4.name,
+    		type: "slot",
+    		source: "(311:2) <ThreeDButton    on:buttonClick={() => {     updateSongs(songsToEdit, newTags)     hideToggleIcons()     $elementMap = undefined    }}    fontSize=\\\".8rem\\\"    paddingX=\\\".5rem\\\"    disabled={isEmptyObject(newTags)}    addShadow={false}   >",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$T(ctx) {
     	let tag_edit_svlt;
     	let songs_to_edit;
@@ -24322,15 +24444,9 @@ var app = (function () {
     	let albumart;
     	let t46;
     	let button_container;
-    	let button0;
-    	let undoicon13;
+    	let threedbutton0;
     	let t47;
-    	let button0_disabled_value;
-    	let t48;
-    	let button1;
-    	let updateicon;
-    	let t49;
-    	let button1_disabled_value;
+    	let threedbutton1;
     	let current;
     	let mounted;
     	let dispose;
@@ -24367,19 +24483,34 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	undoicon13 = new UndoIcon({
+    	threedbutton0 = new ThreeDButton({
     			props: {
-    				style: "height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;"
+    				addShadow: false,
+    				disabled: isEmptyObject(/*newTags*/ ctx[3]),
+    				colorName: "dangerRed",
+    				fontSize: ".8rem",
+    				paddingX: ".5rem",
+    				$$slots: { default: [create_default_slot_1$3] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
 
-    	updateicon = new UpdateIcon({
+    	threedbutton0.$on("buttonClick", /*buttonClick_handler*/ ctx[23]);
+
+    	threedbutton1 = new ThreeDButton({
     			props: {
-    				style: "height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;"
+    				fontSize: ".8rem",
+    				paddingX: ".5rem",
+    				disabled: isEmptyObject(/*newTags*/ ctx[3]),
+    				addShadow: false,
+    				$$slots: { default: [create_default_slot$4] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
+
+    	threedbutton1.$on("buttonClick", /*buttonClick_handler_1*/ ctx[24]);
 
     	const block = {
     		c: function create() {
@@ -24487,121 +24618,111 @@ var app = (function () {
     			create_component(albumart.$$.fragment);
     			t46 = space();
     			button_container = element("button-container");
-    			button0 = element("button");
-    			create_component(undoicon13.$$.fragment);
-    			t47 = text("\n\t\t\tCancel");
-    			t48 = space();
-    			button1 = element("button");
-    			create_component(updateicon.$$.fragment);
-    			t49 = text("\n\t\t\tUpdate");
-    			set_custom_element_data(songs_to_edit, "class", "svelte-vp3oog");
-    			add_location(songs_to_edit, file$O, 223, 1, 9048);
-    			set_custom_element_data(tag_name0, "class", "svelte-vp3oog");
-    			add_location(tag_name0, file$O, 228, 2, 9225);
-    			attr_dev(textarea0, "class", "svelte-vp3oog");
-    			add_location(textarea0, file$O, 229, 2, 9268);
+    			create_component(threedbutton0.$$.fragment);
+    			t47 = space();
+    			create_component(threedbutton1.$$.fragment);
+    			set_custom_element_data(songs_to_edit, "class", "svelte-42ovvc");
+    			add_location(songs_to_edit, file$O, 224, 1, 9113);
+    			set_custom_element_data(tag_name0, "class", "svelte-42ovvc");
+    			add_location(tag_name0, file$O, 229, 2, 9290);
+    			attr_dev(textarea0, "class", "svelte-42ovvc");
+    			add_location(textarea0, file$O, 230, 2, 9333);
     			set_custom_element_data(tag_container0, "data-tag", "Title");
-    			set_custom_element_data(tag_container0, "class", "svelte-vp3oog");
-    			add_location(tag_container0, file$O, 227, 1, 9190);
-    			set_custom_element_data(tag_name1, "class", "svelte-vp3oog");
-    			add_location(tag_name1, file$O, 233, 2, 9367);
-    			attr_dev(textarea1, "class", "svelte-vp3oog");
-    			add_location(textarea1, file$O, 234, 2, 9410);
+    			set_custom_element_data(tag_container0, "class", "svelte-42ovvc");
+    			add_location(tag_container0, file$O, 228, 1, 9255);
+    			set_custom_element_data(tag_name1, "class", "svelte-42ovvc");
+    			add_location(tag_name1, file$O, 234, 2, 9432);
+    			attr_dev(textarea1, "class", "svelte-42ovvc");
+    			add_location(textarea1, file$O, 235, 2, 9475);
     			set_custom_element_data(tag_container1, "data-tag", "Album");
-    			set_custom_element_data(tag_container1, "class", "svelte-vp3oog");
-    			add_location(tag_container1, file$O, 232, 1, 9332);
-    			set_custom_element_data(tag_name2, "class", "svelte-vp3oog");
-    			add_location(tag_name2, file$O, 238, 2, 9528);
-    			attr_dev(textarea2, "class", "svelte-vp3oog");
-    			add_location(textarea2, file$O, 239, 2, 9573);
+    			set_custom_element_data(tag_container1, "class", "svelte-42ovvc");
+    			add_location(tag_container1, file$O, 233, 1, 9397);
+    			set_custom_element_data(tag_name2, "class", "svelte-42ovvc");
+    			add_location(tag_name2, file$O, 239, 2, 9593);
+    			attr_dev(textarea2, "class", "svelte-42ovvc");
+    			add_location(textarea2, file$O, 240, 2, 9638);
     			set_custom_element_data(tag_container2, "data-tag", "Track");
     			set_custom_element_data(tag_container2, "data-type", "number");
-    			set_custom_element_data(tag_container2, "class", "svelte-vp3oog");
-    			add_location(tag_container2, file$O, 237, 1, 9474);
-    			set_custom_element_data(tag_name3, "class", "svelte-vp3oog");
-    			add_location(tag_name3, file$O, 243, 2, 9696);
-    			attr_dev(textarea3, "class", "svelte-vp3oog");
-    			add_location(textarea3, file$O, 244, 2, 9740);
+    			set_custom_element_data(tag_container2, "class", "svelte-42ovvc");
+    			add_location(tag_container2, file$O, 238, 1, 9539);
+    			set_custom_element_data(tag_name3, "class", "svelte-42ovvc");
+    			add_location(tag_name3, file$O, 244, 2, 9761);
+    			attr_dev(textarea3, "class", "svelte-42ovvc");
+    			add_location(textarea3, file$O, 245, 2, 9805);
     			set_custom_element_data(tag_container3, "data-tag", "DiscNumber");
     			set_custom_element_data(tag_container3, "data-type", "number");
-    			set_custom_element_data(tag_container3, "class", "svelte-vp3oog");
-    			add_location(tag_container3, file$O, 242, 1, 9637);
-    			set_custom_element_data(tag_name4, "class", "svelte-vp3oog");
-    			add_location(tag_name4, file$O, 248, 2, 9845);
-    			attr_dev(textarea4, "class", "svelte-vp3oog");
-    			add_location(textarea4, file$O, 249, 2, 9889);
+    			set_custom_element_data(tag_container3, "class", "svelte-42ovvc");
+    			add_location(tag_container3, file$O, 243, 1, 9702);
+    			set_custom_element_data(tag_name4, "class", "svelte-42ovvc");
+    			add_location(tag_name4, file$O, 249, 2, 9910);
+    			attr_dev(textarea4, "class", "svelte-42ovvc");
+    			add_location(textarea4, file$O, 250, 2, 9954);
     			set_custom_element_data(tag_container4, "data-tag", "Artist");
-    			set_custom_element_data(tag_container4, "class", "svelte-vp3oog");
-    			add_location(tag_container4, file$O, 247, 1, 9809);
-    			set_custom_element_data(tag_name5, "class", "svelte-vp3oog");
-    			add_location(tag_name5, file$O, 253, 2, 9995);
-    			attr_dev(textarea5, "class", "svelte-vp3oog");
-    			add_location(textarea5, file$O, 254, 2, 10045);
+    			set_custom_element_data(tag_container4, "class", "svelte-42ovvc");
+    			add_location(tag_container4, file$O, 248, 1, 9874);
+    			set_custom_element_data(tag_name5, "class", "svelte-42ovvc");
+    			add_location(tag_name5, file$O, 254, 2, 10060);
+    			attr_dev(textarea5, "class", "svelte-42ovvc");
+    			add_location(textarea5, file$O, 255, 2, 10110);
     			set_custom_element_data(tag_container5, "data-tag", "AlbumArtist");
-    			set_custom_element_data(tag_container5, "class", "svelte-vp3oog");
-    			add_location(tag_container5, file$O, 252, 1, 9954);
-    			set_custom_element_data(tag_name6, "class", "svelte-vp3oog");
-    			add_location(tag_name6, file$O, 258, 2, 10150);
-    			attr_dev(textarea6, "class", "svelte-vp3oog");
-    			add_location(textarea6, file$O, 259, 2, 10193);
+    			set_custom_element_data(tag_container5, "class", "svelte-42ovvc");
+    			add_location(tag_container5, file$O, 253, 1, 10019);
+    			set_custom_element_data(tag_name6, "class", "svelte-42ovvc");
+    			add_location(tag_name6, file$O, 259, 2, 10215);
+    			attr_dev(textarea6, "class", "svelte-42ovvc");
+    			add_location(textarea6, file$O, 260, 2, 10258);
     			set_custom_element_data(tag_container6, "data-tag", "Genre");
-    			set_custom_element_data(tag_container6, "class", "svelte-vp3oog");
-    			add_location(tag_container6, file$O, 257, 1, 10115);
-    			set_custom_element_data(tag_name7, "class", "svelte-vp3oog");
-    			add_location(tag_name7, file$O, 263, 2, 10295);
-    			attr_dev(textarea7, "class", "svelte-vp3oog");
-    			add_location(textarea7, file$O, 264, 2, 10341);
+    			set_custom_element_data(tag_container6, "class", "svelte-42ovvc");
+    			add_location(tag_container6, file$O, 258, 1, 10180);
+    			set_custom_element_data(tag_name7, "class", "svelte-42ovvc");
+    			add_location(tag_name7, file$O, 264, 2, 10360);
+    			attr_dev(textarea7, "class", "svelte-42ovvc");
+    			add_location(textarea7, file$O, 265, 2, 10406);
     			set_custom_element_data(tag_container7, "data-tag", "Composer");
-    			set_custom_element_data(tag_container7, "class", "svelte-vp3oog");
-    			add_location(tag_container7, file$O, 262, 1, 10257);
-    			set_custom_element_data(tag_name8, "class", "svelte-vp3oog");
-    			add_location(tag_name8, file$O, 268, 2, 10445);
-    			attr_dev(textarea8, "class", "svelte-vp3oog");
-    			add_location(textarea8, file$O, 269, 2, 10490);
+    			set_custom_element_data(tag_container7, "class", "svelte-42ovvc");
+    			add_location(tag_container7, file$O, 263, 1, 10322);
+    			set_custom_element_data(tag_name8, "class", "svelte-42ovvc");
+    			add_location(tag_name8, file$O, 269, 2, 10510);
+    			attr_dev(textarea8, "class", "svelte-42ovvc");
+    			add_location(textarea8, file$O, 270, 2, 10555);
     			set_custom_element_data(tag_container8, "data-tag", "Comment");
-    			set_custom_element_data(tag_container8, "class", "svelte-vp3oog");
-    			add_location(tag_container8, file$O, 267, 1, 10408);
-    			set_custom_element_data(tag_name9, "class", "svelte-vp3oog");
-    			add_location(tag_name9, file$O, 273, 2, 10614);
-    			attr_dev(textarea9, "class", "svelte-vp3oog");
-    			add_location(textarea9, file$O, 274, 2, 10656);
+    			set_custom_element_data(tag_container8, "class", "svelte-42ovvc");
+    			add_location(tag_container8, file$O, 268, 1, 10473);
+    			set_custom_element_data(tag_name9, "class", "svelte-42ovvc");
+    			add_location(tag_name9, file$O, 274, 2, 10679);
+    			attr_dev(textarea9, "class", "svelte-42ovvc");
+    			add_location(textarea9, file$O, 275, 2, 10721);
     			set_custom_element_data(tag_container9, "data-tag", "Date_Year");
     			set_custom_element_data(tag_container9, "data-type", "number");
-    			set_custom_element_data(tag_container9, "class", "svelte-vp3oog");
-    			add_location(tag_container9, file$O, 272, 1, 10556);
-    			set_custom_element_data(tag_name10, "class", "svelte-vp3oog");
-    			add_location(tag_name10, file$O, 278, 2, 10783);
-    			attr_dev(textarea10, "class", "svelte-vp3oog");
-    			add_location(textarea10, file$O, 279, 2, 10826);
+    			set_custom_element_data(tag_container9, "class", "svelte-42ovvc");
+    			add_location(tag_container9, file$O, 273, 1, 10621);
+    			set_custom_element_data(tag_name10, "class", "svelte-42ovvc");
+    			add_location(tag_name10, file$O, 279, 2, 10848);
+    			attr_dev(textarea10, "class", "svelte-42ovvc");
+    			add_location(textarea10, file$O, 280, 2, 10891);
     			set_custom_element_data(tag_container10, "data-tag", "Date_Month");
     			set_custom_element_data(tag_container10, "data-type", "number");
-    			set_custom_element_data(tag_container10, "class", "svelte-vp3oog");
-    			add_location(tag_container10, file$O, 277, 1, 10724);
-    			set_custom_element_data(tag_name11, "class", "svelte-vp3oog");
-    			add_location(tag_name11, file$O, 283, 2, 10952);
-    			attr_dev(textarea11, "class", "svelte-vp3oog");
-    			add_location(textarea11, file$O, 284, 2, 10993);
+    			set_custom_element_data(tag_container10, "class", "svelte-42ovvc");
+    			add_location(tag_container10, file$O, 278, 1, 10789);
+    			set_custom_element_data(tag_name11, "class", "svelte-42ovvc");
+    			add_location(tag_name11, file$O, 284, 2, 11017);
+    			attr_dev(textarea11, "class", "svelte-42ovvc");
+    			add_location(textarea11, file$O, 285, 2, 11058);
     			set_custom_element_data(tag_container11, "data-tag", "Date_Day");
     			set_custom_element_data(tag_container11, "data-type", "number");
-    			set_custom_element_data(tag_container11, "class", "svelte-vp3oog");
-    			add_location(tag_container11, file$O, 282, 1, 10895);
-    			set_custom_element_data(tag_name12, "class", "svelte-vp3oog");
-    			add_location(tag_name12, file$O, 288, 2, 11096);
+    			set_custom_element_data(tag_container11, "class", "svelte-42ovvc");
+    			add_location(tag_container11, file$O, 283, 1, 10960);
+    			set_custom_element_data(tag_name12, "class", "svelte-42ovvc");
+    			add_location(tag_name12, file$O, 289, 2, 11161);
     			set_custom_element_data(tag_container12, "data-tag", "Rating");
-    			set_custom_element_data(tag_container12, "class", "svelte-vp3oog");
-    			add_location(tag_container12, file$O, 287, 1, 11060);
-    			set_custom_element_data(album_art, "class", "svelte-vp3oog");
-    			add_location(album_art, file$O, 292, 1, 11276);
-    			attr_dev(button0, "class", "danger");
-    			button0.disabled = button0_disabled_value = isEmptyObject(/*newTags*/ ctx[3]);
-    			add_location(button0, file$O, 297, 2, 11391);
-    			attr_dev(button1, "class", "info");
-    			button1.disabled = button1_disabled_value = isEmptyObject(/*newTags*/ ctx[3]);
-    			add_location(button1, file$O, 301, 2, 11597);
-    			set_custom_element_data(button_container, "class", "svelte-vp3oog");
-    			add_location(button_container, file$O, 296, 1, 11370);
-    			set_custom_element_data(tag_edit_svlt, "class", "svelte-vp3oog");
-    			add_location(tag_edit_svlt, file$O, 222, 0, 9031);
+    			set_custom_element_data(tag_container12, "class", "svelte-42ovvc");
+    			add_location(tag_container12, file$O, 288, 1, 11125);
+    			set_custom_element_data(album_art, "class", "svelte-42ovvc");
+    			add_location(album_art, file$O, 293, 1, 11341);
+    			set_custom_element_data(button_container, "class", "svelte-42ovvc");
+    			add_location(button_container, file$O, 297, 1, 11435);
+    			set_custom_element_data(tag_edit_svlt, "class", "svelte-42ovvc");
+    			add_location(tag_edit_svlt, file$O, 223, 0, 9096);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24723,13 +24844,9 @@ var app = (function () {
     			mount_component(albumart, album_art, null);
     			append_dev(tag_edit_svlt, t46);
     			append_dev(tag_edit_svlt, button_container);
-    			append_dev(button_container, button0);
-    			mount_component(undoicon13, button0, null);
-    			append_dev(button0, t47);
-    			append_dev(button_container, t48);
-    			append_dev(button_container, button1);
-    			mount_component(updateicon, button1, null);
-    			append_dev(button1, t49);
+    			mount_component(threedbutton0, button_container, null);
+    			append_dev(button_container, t47);
+    			mount_component(threedbutton1, button_container, null);
     			current = true;
 
     			if (!mounted) {
@@ -24745,9 +24862,7 @@ var app = (function () {
     					listen_dev(textarea8, "input", /*textarea8_input_handler*/ ctx[19]),
     					listen_dev(textarea9, "input", /*textarea9_input_handler*/ ctx[20]),
     					listen_dev(textarea10, "input", /*textarea10_input_handler*/ ctx[21]),
-    					listen_dev(textarea11, "input", /*textarea11_input_handler*/ ctx[22]),
-    					listen_dev(button0, "click", /*click_handler*/ ctx[23], false, false, false),
-    					listen_dev(button1, "click", /*click_handler_1*/ ctx[24], false, false, false)
+    					listen_dev(textarea11, "input", /*textarea11_input_handler*/ ctx[22])
     				];
 
     				mounted = true;
@@ -24812,14 +24927,22 @@ var app = (function () {
     			const albumart_changes = {};
     			if (dirty[0] & /*imageSourceLocation*/ 4) albumart_changes.imageSourceLocation = /*imageSourceLocation*/ ctx[2];
     			albumart.$set(albumart_changes);
+    			const threedbutton0_changes = {};
+    			if (dirty[0] & /*newTags*/ 8) threedbutton0_changes.disabled = isEmptyObject(/*newTags*/ ctx[3]);
 
-    			if (!current || dirty[0] & /*newTags*/ 8 && button0_disabled_value !== (button0_disabled_value = isEmptyObject(/*newTags*/ ctx[3]))) {
-    				prop_dev(button0, "disabled", button0_disabled_value);
+    			if (dirty[1] & /*$$scope*/ 8) {
+    				threedbutton0_changes.$$scope = { dirty, ctx };
     			}
 
-    			if (!current || dirty[0] & /*newTags*/ 8 && button1_disabled_value !== (button1_disabled_value = isEmptyObject(/*newTags*/ ctx[3]))) {
-    				prop_dev(button1, "disabled", button1_disabled_value);
+    			threedbutton0.$set(threedbutton0_changes);
+    			const threedbutton1_changes = {};
+    			if (dirty[0] & /*newTags*/ 8) threedbutton1_changes.disabled = isEmptyObject(/*newTags*/ ctx[3]);
+
+    			if (dirty[1] & /*$$scope*/ 8) {
+    				threedbutton1_changes.$$scope = { dirty, ctx };
     			}
+
+    			threedbutton1.$set(threedbutton1_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -24838,8 +24961,8 @@ var app = (function () {
     			transition_in(undoicon12.$$.fragment, local);
     			transition_in(star.$$.fragment, local);
     			transition_in(albumart.$$.fragment, local);
-    			transition_in(undoicon13.$$.fragment, local);
-    			transition_in(updateicon.$$.fragment, local);
+    			transition_in(threedbutton0.$$.fragment, local);
+    			transition_in(threedbutton1.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
@@ -24858,8 +24981,8 @@ var app = (function () {
     			transition_out(undoicon12.$$.fragment, local);
     			transition_out(star.$$.fragment, local);
     			transition_out(albumart.$$.fragment, local);
-    			transition_out(undoicon13.$$.fragment, local);
-    			transition_out(updateicon.$$.fragment, local);
+    			transition_out(threedbutton0.$$.fragment, local);
+    			transition_out(threedbutton1.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -24879,8 +25002,8 @@ var app = (function () {
     			destroy_component(undoicon12);
     			destroy_component(star);
     			destroy_component(albumart);
-    			destroy_component(undoicon13);
-    			destroy_component(updateicon);
+    			destroy_component(threedbutton0);
+    			destroy_component(threedbutton1);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -25230,9 +25353,9 @@ var app = (function () {
     		$$invalidate(0, bindingTags);
     	}
 
-    	const click_handler = () => undoAllTags();
+    	const buttonClick_handler = () => undoAllTags();
 
-    	const click_handler_1 = () => {
+    	const buttonClick_handler_1 = () => {
     		updateSongs(songsToEdit, newTags);
     		hideToggleIcons();
     		set_store_value(elementMap, $elementMap = undefined, $elementMap);
@@ -25255,6 +25378,7 @@ var app = (function () {
     		tagEditSuggestionFn,
     		getDirectoryFn,
     		findNextValidSongFn,
+    		ThreeDButton,
     		songsToEdit,
     		groupedTags,
     		bindingTags,
@@ -25335,8 +25459,8 @@ var app = (function () {
     		textarea9_input_handler,
     		textarea10_input_handler,
     		textarea11_input_handler,
-    		click_handler,
-    		click_handler_1
+    		buttonClick_handler,
+    		buttonClick_handler_1
     	];
     }
 

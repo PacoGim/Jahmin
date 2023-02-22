@@ -10,9 +10,10 @@
 	export let fontWeight = '600'
 	export let { addShadow } = { addShadow: true } || { addShadow: false }
 	export let colorName: 'reactBlue' | 'dangerRed' = 'reactBlue'
+	export let disabled = false
 
 	const colors = {
-		reactBlue: 'hsl(193, 95%, 65%)',
+		reactBlue: 'hsl(193, 95%, 60%)',
 		dangerRed: 'hsl(10, 95%, 58%)'
 	}
 
@@ -61,18 +62,9 @@
 
 		font-variation-settings: inherit;
 
-		box-shadow:
-			inset 0 0 10px 2px rgba(0, 0, 0, 0.1),
-			0 1px 0 var(--shadow-color),
-			0 2px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 4px 0 var(--shadow-color),
-			0 5px 0 var(--shadow-color),
-			0 6px 0 var(--shadow-color),
-			0 7px 0 var(--shadow-color),
-			0 8px 0 var(--shadow-color),
-			0 9px 0 var(--shadow-color),
-			0 10px 0 var(--shadow-color),
+		box-shadow: inset 0 0 10px 2px rgba(0, 0, 0, 0.1), 0 1px 0 var(--shadow-color), 0 2px 0 var(--shadow-color),
+			0 3px 0 var(--shadow-color), 0 4px 0 var(--shadow-color), 0 5px 0 var(--shadow-color), 0 6px 0 var(--shadow-color),
+			0 7px 0 var(--shadow-color), 0 8px 0 var(--shadow-color), 0 9px 0 var(--shadow-color), 0 10px 0 var(--shadow-color),
 			0 10px 5px var(--shadow-dark-color);
 
 		transition-property: box-shadow, transform;
@@ -83,36 +75,18 @@
 	button[data-disable-movement='false']:hover {
 		transform: translateY(3px);
 
-		box-shadow:
-			inset 0 0 10px 2px rgba(0, 0, 0, 0.1),
-			0 1px 0 var(--shadow-color),
-			0 2px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 4px 0 var(--shadow-color),
-			0 5px 0 var(--shadow-color),
-			0 7px 0 var(--shadow-color),
-			0 7px 0 var(--shadow-color),
-			0 7px 0 var(--shadow-color),
-			0 7px 0 var(--shadow-color),
-			0 7px 0 var(--shadow-color),
+		box-shadow: inset 0 0 10px 2px rgba(0, 0, 0, 0.1), 0 1px 0 var(--shadow-color), 0 2px 0 var(--shadow-color),
+			0 3px 0 var(--shadow-color), 0 4px 0 var(--shadow-color), 0 5px 0 var(--shadow-color), 0 7px 0 var(--shadow-color),
+			0 7px 0 var(--shadow-color), 0 7px 0 var(--shadow-color), 0 7px 0 var(--shadow-color), 0 7px 0 var(--shadow-color),
 			0 7px 5px var(--shadow-dark-color);
 	}
 
 	button[data-disable-movement='false']:active {
 		transform: translateY(7px);
 
-		box-shadow:
-			inset 0 0 10px 2px rgba(0, 0, 0, 0.1),
-			0 1px 0 var(--shadow-color),
-			0 2px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
-			0 3px 0 var(--shadow-color),
+		box-shadow: inset 0 0 10px 2px rgba(0, 0, 0, 0.1), 0 1px 0 var(--shadow-color), 0 2px 0 var(--shadow-color),
+			0 3px 0 var(--shadow-color), 0 3px 0 var(--shadow-color), 0 3px 0 var(--shadow-color), 0 3px 0 var(--shadow-color),
+			0 3px 0 var(--shadow-color), 0 3px 0 var(--shadow-color), 0 3px 0 var(--shadow-color), 0 3px 0 var(--shadow-color),
 			0 3px 5px var(--shadow-dark-color);
 	}
 </style>

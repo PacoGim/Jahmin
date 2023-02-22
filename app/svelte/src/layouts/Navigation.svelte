@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import CogIcon from '../icons/CogIcon.svelte'
 
@@ -8,7 +9,7 @@
 	import { layoutToShow } from '../stores/main.store'
 </script>
 
-<navigation-svlt class="dark-theme">
+<navigation-svlt>
 	<nav-button on:click={() => ($layoutToShow = 'Library')}>
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'
@@ -47,7 +48,7 @@
 		display: grid;
 		grid-template-rows: repeat(3, max-content) auto max-content;
 
-		border-right: 2px solid rgba(255,255,255,0.05);
+		border-right: 2px solid rgba(255, 255, 255, 0.05);
 
 		width: max-content;
 

@@ -13,6 +13,7 @@
 	import tagEditSuggestionFn from '../../services/tagEditSuggestion.fn'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import findNextValidSongFn from '../../functions/findNextValidSong.fn'
+	import ThreeDButton from '../../components/ThreeDButton.svelte'
 
 	let songsToEdit: PartialSongType[] = []
 	let groupedTags: PartialSongType = {}
@@ -348,22 +349,32 @@
 	</album-art>
 
 	<button-container>
-		<button class="danger" on:click={() => undoAllTags()} disabled={isEmptyObject(newTags)}>
-			<UndoIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;" />
+		<ThreeDButton
+			on:buttonClick={() => undoAllTags()}
+			addShadow={false}
+			disabled={isEmptyObject(newTags)}
+			colorName="dangerRed"
+			fontSize=".8rem"
+			paddingX=".5rem"
+		>
+			<UndoIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;" />
 			Cancel
-		</button>
-		<button
-			class="info"
-			on:click={() => {
+		</ThreeDButton>
+
+		<ThreeDButton
+			on:buttonClick={() => {
 				updateSongs(songsToEdit, newTags)
 				hideToggleIcons()
 				$elementMap = undefined
 			}}
+			fontSize=".8rem"
+			paddingX=".5rem"
 			disabled={isEmptyObject(newTags)}
+			addShadow={false}
 		>
 			<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 			Update
-		</button>
+		</ThreeDButton>
 	</button-container>
 </tag-edit-svlt>
 
@@ -543,7 +554,7 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
-		align-items: end;
+		/* align-items: end; */
 		margin: 0.5rem 0;
 	}
 
