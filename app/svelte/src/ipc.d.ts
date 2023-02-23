@@ -54,6 +54,8 @@ declare global {
 			onShowLyrics: (callback: any) => void
 			onWebStorageBulkDelete: (callback: any) => void
 			onSelectedDirectories: (callback: any) => void
+			onAlbumAddToPlayback: (callback: any) => void
+			onAlbumPlayAfter: (callback: any) => void
 		}
 	}
 }

@@ -13,18 +13,18 @@ export default function (id: number) {
 
 			getDB()
 				.songs.put(song)
-				.then(() => /*updateVersionFn()*/{})
+				.then(() => /*updateVersionFn()*/ {})
 
-			// Updates the song list to reflect the new play count changes.
-			let songListStoreLocal: SongType[] = undefined
+			// <	// Updates the song list to reflect the new play count changes.
+			// 	let songListStoreLocal: SongType[] = undefined
 
-			songListStore.subscribe(value => (songListStoreLocal = value))()
+			// 	songListStore.subscribe(value => (songListStoreLocal = value))()
 
-			let songFound = songListStoreLocal.find(storeSong => storeSong.ID === song.ID)
+			// 	let songFound = songListStoreLocal.find(storeSong => storeSong.ID === song.ID)
 
-			if (songFound) {
-				songFound.PlayCount = song.PlayCount
-				songListStore.set(songListStoreLocal)
-			}
+			// 	if (songFound) {
+			// 		songFound.PlayCount = song.PlayCount
+			// 		songListStore.set(songListStoreLocal)
+			// 	}>
 		})
 }

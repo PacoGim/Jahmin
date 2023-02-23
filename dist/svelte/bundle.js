@@ -9145,21 +9145,27 @@ var app = (function () {
     }
 
     function instance$1u($$self, $$props, $$invalidate) {
+    	let $playbackStore;
+    	let $playingSongStore;
     	let $config;
     	let $onNewLyrics;
     	let $layoutToShow;
     	let $artCompressQueueLength;
     	let $songSyncQueueProgress;
+    	validate_store(playbackStore, 'playbackStore');
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(0, $playbackStore = $$value));
+    	validate_store(playingSongStore, 'playingSongStore');
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(1, $playingSongStore = $$value));
     	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
+    	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
     	validate_store(onNewLyrics, 'onNewLyrics');
-    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(1, $onNewLyrics = $$value));
+    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(3, $onNewLyrics = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(2, $layoutToShow = $$value));
+    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(4, $layoutToShow = $$value));
     	validate_store(artCompressQueueLength, 'artCompressQueueLength');
-    	component_subscribe($$self, artCompressQueueLength, $$value => $$invalidate(3, $artCompressQueueLength = $$value));
+    	component_subscribe($$self, artCompressQueueLength, $$value => $$invalidate(5, $artCompressQueueLength = $$value));
     	validate_store(songSyncQueueProgress, 'songSyncQueueProgress');
-    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(4, $songSyncQueueProgress = $$value));
+    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(6, $songSyncQueueProgress = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('IpcMiddleware', slots, []);
 
@@ -9206,6 +9212,21 @@ var app = (function () {
     		set_store_value(config, $config.directories = { add: data.add, exclude: data.exclude }, $config);
     	});
 
+    	window.ipc.onAlbumAddToPlayback(async (_, rootDir) => {
+    		let songs = await getAlbumSongsFn(rootDir);
+    		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
+    		$playbackStore.push(...sortedSongs);
+    	});
+
+    	window.ipc.onAlbumPlayAfter(async (_, rootDir) => {
+    		let songs = await getAlbumSongsFn(rootDir);
+    		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
+    		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0;
+    		$playbackStore.splice(currentPlayingSongIndex, 0, ...sortedSongs);
+    	}); // $playbackStore = $playbackStore
+    	// $playbackStore = newArray
+    	// console.log(newArray)
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -9215,13 +9236,19 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		addTaskToQueue,
     		bulkDeleteSongsFn,
+    		getAlbumSongsFn,
     		getAllSongsFn,
+    		sortSongsArrayFn,
     		handleArtService,
     		onNewLyrics,
     		artCompressQueueLength,
     		config,
     		layoutToShow,
+    		playbackStore,
+    		playingSongStore,
     		songSyncQueueProgress,
+    		$playbackStore,
+    		$playingSongStore,
     		$config,
     		$onNewLyrics,
     		$layoutToShow,
@@ -9667,14 +9694,14 @@ var app = (function () {
             getDB()
                 .songs.put(song)
                 .then(() => /*updateVersionFn()*/ { });
-            // Updates the song list to reflect the new play count changes.
-            let songListStoreLocal = undefined;
-            songListStore.subscribe(value => (songListStoreLocal = value))();
-            let songFound = songListStoreLocal.find(storeSong => storeSong.ID === song.ID);
-            if (songFound) {
-                songFound.PlayCount = song.PlayCount;
-                songListStore.set(songListStoreLocal);
-            }
+            // <	// Updates the song list to reflect the new play count changes.
+            // 	let songListStoreLocal: SongType[] = undefined
+            // 	songListStore.subscribe(value => (songListStoreLocal = value))()
+            // 	let songFound = songListStoreLocal.find(storeSong => storeSong.ID === song.ID)
+            // 	if (songFound) {
+            // 		songFound.PlayCount = song.PlayCount
+            // 		songListStore.set(songListStoreLocal)
+            // 	}>
         });
     }
 
@@ -21189,7 +21216,7 @@ var app = (function () {
     			? 'selected'
     			: '') + " svelte-1r34qoo");
 
-    			add_location(song_list_item, file$V, 58, 0, 2057);
+    			add_location(song_list_item, file$V, 58, 0, 2040);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21385,7 +21412,6 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		onMount,
-    		activeSongStore,
     		config,
     		playingSongStore,
     		selectedSongsStore,
@@ -21816,9 +21842,9 @@ var app = (function () {
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
     			set_custom_element_data(song_list, "class", "svelte-y11uul");
-    			add_location(song_list, file$T, 83, 1, 2922);
+    			add_location(song_list, file$T, 83, 1, 2906);
     			set_custom_element_data(song_list_svlt, "class", "svelte-y11uul");
-    			add_location(song_list_svlt, file$T, 82, 0, 2812);
+    			add_location(song_list_svlt, file$T, 82, 0, 2796);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -21988,7 +22014,6 @@ var app = (function () {
     		cssVariablesService,
     		songListClickEventHandlerService,
     		config,
-    		dbVersionStore,
     		selectedAlbumDir,
     		songListStore,
     		triggerScrollToSongEvent,

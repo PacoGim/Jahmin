@@ -16,6 +16,18 @@ function default_1(data) {
         }
     });
     template.push({
+        label: 'Add to playback',
+        click: () => {
+            (0, sendWebContents_fn_1.default)('album-add-to-playback', data.albumRootDir);
+        }
+    });
+    template.push({
+        label: 'Play after',
+        click: () => {
+            (0, sendWebContents_fn_1.default)('album-play-after', data.albumRootDir);
+        }
+    });
+    template.push({
         label: `Reload Album Data`,
         click: () => {
             if (data.albumRootDir)

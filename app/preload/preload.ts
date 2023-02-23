@@ -49,7 +49,9 @@ const ipcFunctions = {
 	onArtQueueChange: (callback: any) => ipcRenderer.on('art-queue-length', callback),
 	onShowLyrics: (callback: any) => ipcRenderer.on('show-lyrics', callback),
 	onWebStorageBulkDelete: (callback: any) => ipcRenderer.on('web-storage-bulk-delete', callback),
-	onSelectedDirectories: (callback: any) => ipcRenderer.on('selected-directories', callback)
+	onSelectedDirectories: (callback: any) => ipcRenderer.on('selected-directories', callback),
+	onAlbumAddToPlayback: (callback: any) => ipcRenderer.on('album-add-to-playback', callback),
+	onAlbumPlayAfter: (callback: any) => ipcRenderer.on('album-play-after', callback)
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)

@@ -42,7 +42,9 @@ const ipcFunctions = {
     onArtQueueChange: (callback) => electron_1.ipcRenderer.on('art-queue-length', callback),
     onShowLyrics: (callback) => electron_1.ipcRenderer.on('show-lyrics', callback),
     onWebStorageBulkDelete: (callback) => electron_1.ipcRenderer.on('web-storage-bulk-delete', callback),
-    onSelectedDirectories: (callback) => electron_1.ipcRenderer.on('selected-directories', callback)
+    onSelectedDirectories: (callback) => electron_1.ipcRenderer.on('selected-directories', callback),
+    onAlbumAddToPlayback: (callback) => electron_1.ipcRenderer.on('album-add-to-playback', callback),
+    onAlbumPlayAfter: (callback) => electron_1.ipcRenderer.on('album-play-after', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
 function fileExists(filePath) {

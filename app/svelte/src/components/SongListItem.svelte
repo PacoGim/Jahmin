@@ -3,7 +3,7 @@
 
 	import type { SongType } from '../../../types/song.type'
 
-	import { activeSongStore, config, playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
+	import { config, playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
 
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'

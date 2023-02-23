@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { addTaskToQueue } from '../db/!db'
 	import bulkDeleteSongsFn from '../db/bulkDeleteSongs.fn'
+	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
 	import getAllSongsFn from '../db/getAllSongs.fn'
+	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import handleArtService from '../services/handleArt.service'
 	import { onNewLyrics } from '../stores/crosscall.store'
-	import { artCompressQueueLength, config, layoutToShow, songSyncQueueProgress } from '../stores/main.store'
+	import {
+		artCompressQueueLength,
+		config,
+		layoutToShow,
+		playbackStore,
+		playingSongStore,
+		songSyncQueueProgress
+	} from '../stores/main.store'
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {
@@ -54,5 +63,29 @@
 			add: data.add,
 			exclude: data.exclude
 		}
+	})
+
+	window.ipc.onAlbumAddToPlayback(async (_, rootDir) => {
+		let songs = await getAlbumSongsFn(rootDir)
+
+		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+		$playbackStore.push(...sortedSongs)
+	})
+
+	window.ipc.onAlbumPlayAfter(async (_, rootDir) => {
+		let songs = await getAlbumSongsFn(rootDir)
+
+		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
+
+		$playbackStore.splice(currentPlayingSongIndex, 0, ...sortedSongs)
+
+		// $playbackStore = $playbackStore
+
+		// $playbackStore = newArray
+
+		// console.log(newArray)
 	})
 </script>

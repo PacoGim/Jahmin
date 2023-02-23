@@ -3,7 +3,7 @@
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 
-	import { config, dbVersionStore, selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../stores/main.store'
+	import { config, selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../stores/main.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
 	let songsToShow = []
