@@ -21,12 +21,15 @@
 		isPlaybackRepeatEnabledStore,
 		currentSongDurationStore,
 		currentSongProgressStore,
-		isSongShuffleEnabledStore
+		isSongShuffleEnabledStore,
+		config
 	} from '../stores/main.store'
 
 	import { currentPlayerTime, songToPlayUrlStore } from '../stores/player.store'
 	import type { SongType } from '../../../types/song.type'
 	import encodeURLFn from '../functions/encodeURL.fn'
+	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
+	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -77,6 +80,12 @@
 			checkIfIsPlaying()
 		}
 	}
+
+	// $: {
+	// 	getAlbumColorsFn(getDirectoryFn($playingSongStore?.SourceFile), $config.userOptions.contrastRatio).then(color => {
+	// 		applyColorSchemeFn(color)
+	// 	})
+	// }
 
 	function listenPlaybackChangers() {
 		if (isMounted === false) return
@@ -157,12 +166,18 @@
 	}
 
 	function updateCurrentSongData(song: SongType) {
+		let songRootFolder = getDirectoryFn(song.SourceFile)
+
 		$playingSongStore = song
 
-		setWaveSource(song.SourceFile, $albumPlayingDirStore, song.Duration)
+		getAlbumColorsFn(songRootFolder, $config.userOptions.contrastRatio).then(color => {
+			applyColorSchemeFn(color)
+		})
+
+		setWaveSource(song.SourceFile, songRootFolder, song.Duration)
 
 		localStorage.setItem('LastPlayedSongId', String(song.ID))
-		localStorage.setItem('LastPlayedDir', String(getDirectoryFn(song.SourceFile)))
+		localStorage.setItem('LastPlayedDir', String(songRootFolder))
 	}
 
 	function setCurrentAudioElement(audioElement: HTMLAudioElement) {

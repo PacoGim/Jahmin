@@ -67,6 +67,20 @@ export default function (data: dataType) {
 		})
 	}
 
+	template.push({
+		label: 'Add to playback',
+		click: () => {
+			sendWebContentsFn('song-add-to-playback', { clickedSong: data.clickedSongData, selectedSongs: data.selectedSongsData })
+		}
+	})
+
+	template.push({
+		label: 'Play after',
+		click: () => {
+			sendWebContentsFn('song-play-after', { clickedSong: data.clickedSongData, selectedSongs: data.selectedSongsData })
+		}
+	})
+
 	return template
 }
 

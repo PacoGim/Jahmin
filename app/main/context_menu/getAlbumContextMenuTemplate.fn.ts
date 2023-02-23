@@ -6,8 +6,6 @@ import verifyFolderTegrityFn from '../functions/verifyFolderTegrity.fn'
 export default function (data: any) {
 	let template: MenuItemConstructorOptions[] = []
 
-	console.log(data)
-
 	template.push({
 		label: `Show Folder`,
 		click: () => {

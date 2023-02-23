@@ -49,7 +49,7 @@ export default async function (
 
 	triggerScrollToSongEvent.set(songToPlay.ID)
 
-	getAlbumColorsFn(rootDir).then(color => {
-		applyColorSchemeFn(color)
-	})
+	// getAlbumColorsFn(rootDir).then(color => {
+	// 	applyColorSchemeFn(color)
+	// })
 }

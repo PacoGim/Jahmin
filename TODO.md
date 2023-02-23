@@ -5,7 +5,6 @@
 * Remove album from library.
 * Quick Play.
 * Select multiple albums.
-* Verify album tegrity when user plays it.
 
 * Disable Autochoose songs when clicking on lyrics.
 * Add autoswitch functionality.
@@ -14,5 +13,5 @@
 * Add a playing symbol next to the playing song in lyrics list.
 
 * Remember playback list
-* Backdrop filter bug when resizing?
-* Get album color based on playing album?
+
+* Song Duration is quickly set to 0 when clicking either Loop Button or the shuffle button

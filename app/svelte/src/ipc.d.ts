@@ -56,6 +56,8 @@ declare global {
 			onSelectedDirectories: (callback: any) => void
 			onAlbumAddToPlayback: (callback: any) => void
 			onAlbumPlayAfter: (callback: any) => void
+			onSongAddToPlayback: (callback: any) => void
+			onSongPlayAfter: (callback: any) => void
 		}
 	}
 }

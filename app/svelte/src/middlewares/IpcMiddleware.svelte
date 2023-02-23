@@ -86,4 +86,32 @@
 
 		$playbackStore = arrayCopy
 	})
+
+	window.ipc.onSongAddToPlayback(async (_, data) => {
+		let selectedSongs = data.selectedSongs
+		let clickedSong = data.clickedSong
+
+		if (selectedSongs.findIndex(song => song.ID === clickedSong.ID) === -1) {
+			selectedSongs.push(clickedSong)
+		}
+
+		let sortedSongs = sortSongsArrayFn(selectedSongs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+		$playbackStore.push(...sortedSongs)
+	})
+
+	window.ipc.onSongPlayAfter(async (_, data) => {
+		// console.log(data)
+		/* 		let songs = await getAlbumSongsFn(rootDir)
+
+		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
+
+		let arrayCopy = [...$playbackStore]
+
+		arrayCopy.splice(currentPlayingSongIndex, 0, ...sortedSongs)
+
+		$playbackStore = arrayCopy */
+	})
 </script>

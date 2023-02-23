@@ -8,7 +8,6 @@ const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebConten
 const verifyFolderTegrity_fn_1 = __importDefault(require("../functions/verifyFolderTegrity.fn"));
 function default_1(data) {
     let template = [];
-    console.log(data);
     template.push({
         label: `Show Folder`,
         click: () => {

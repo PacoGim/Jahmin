@@ -99,8 +99,6 @@
 			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width
 		})
 
-		console.log(`${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`)
-
 		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`)
 	}
 
@@ -153,7 +151,7 @@
 			<td class="filler" />
 		</tr>
 
-		{#each $playbackStore as song, index (song.ID)}
+		{#each $playbackStore as song, index (index)}
 			<tr class={selectedSongsId.includes(song.ID) ? 'selected' : ''} data-song-id={song.ID} data-index={index}>
 				{#each tempTags as tag, index (index)}
 					{#if tag === 'Track' && $playingSongStore.ID === song.ID}

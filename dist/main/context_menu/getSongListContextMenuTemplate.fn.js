@@ -53,6 +53,18 @@ function default_1(data) {
             click: () => editLyrics(clickedSongData)
         });
     }
+    template.push({
+        label: 'Add to playback',
+        click: () => {
+            (0, sendWebContents_fn_1.default)('song-add-to-playback', { clickedSong: data.clickedSongData, selectedSongs: data.selectedSongsData });
+        }
+    });
+    template.push({
+        label: 'Play after',
+        click: () => {
+            (0, sendWebContents_fn_1.default)('song-play-after', { clickedSong: data.clickedSongData, selectedSongs: data.selectedSongsData });
+        }
+    });
     return template;
 }
 exports.default = default_1;
