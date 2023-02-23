@@ -80,12 +80,10 @@
 
 		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
 
-		$playbackStore.splice(currentPlayingSongIndex, 0, ...sortedSongs)
+		let arrayCopy = [...$playbackStore]
 
-		// $playbackStore = $playbackStore
+		arrayCopy.splice(currentPlayingSongIndex, 0, ...sortedSongs)
 
-		// $playbackStore = newArray
-
-		// console.log(newArray)
+		$playbackStore = arrayCopy
 	})
 </script>
