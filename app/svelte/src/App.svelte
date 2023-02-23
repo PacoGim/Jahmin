@@ -37,12 +37,6 @@
 	import StorageService from './svelte_services/StorageService.svelte'
 	import LyricsLayout from './layouts/lyrics/!LyricsLayout.svelte'
 
-	$:{
-		console.log('----------')
-		console.log($playbackStore)
-		console.log($songListStore)
-	}
-
 	liveQuery(async () => {
 		return await getDB().songs.toArray()
 	}).subscribe(songs => {
@@ -51,10 +45,6 @@
 
 	onMount(() => {
 		onAppMountedService()
-
-		setTimeout(() => {
-			// stopSongFn()
-		}, 1000)
 	})
 </script>
 

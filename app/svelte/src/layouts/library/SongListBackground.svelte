@@ -1,11 +1,13 @@
 <script lang="ts">
 	import AlbumArt from '../../components/AlbumArt.svelte'
 
-	import { selectedAlbumDir } from '../../stores/main.store'
+	import { selectedAlbumDir, windowResize } from '../../stores/main.store'
 </script>
 
 <song-list-background-svlt>
-	<backdrop />
+	{#key $windowResize}
+		<backdrop />
+	{/key}
 
 	<AlbumArt imageSourceLocation={$selectedAlbumDir} />
 </song-list-background-svlt>
@@ -35,6 +37,7 @@
 	}
 
 	:global(song-list-background-svlt art-svlt) {
+		/* filter: blur(50px); */
 		width: 100% !important;
 	}
 </style>

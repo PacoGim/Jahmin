@@ -44,6 +44,8 @@ export let appTitle: Writable<string> = writable('Jahmin')
 
 export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable(undefined)
 
+export let windowResize: Writable<number> = writable(undefined)
+
 /********************** ConfigLayout **********************/
 export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
 

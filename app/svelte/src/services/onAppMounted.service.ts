@@ -1,6 +1,6 @@
 import iziToast from 'izitoast'
 import applyColorSchemeFn from '../functions/applyColorScheme.fn'
-import { isAppIdle, keyModifier, keyPressed } from '../stores/main.store'
+import { isAppIdle, keyModifier, keyPressed, windowResize } from '../stores/main.store'
 import { handleContextMenuEvent } from './contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
@@ -26,6 +26,10 @@ export default function () {
 	setTimeout(() => {
 		cssVariablesService.set('theme-transition-duration', '500ms')
 	}, 2000)
+
+	window.addEventListener('resize', evt => {
+		windowResize.set(new Date().getTime())
+	})
 
 	window.addEventListener('keydown', evt => {
 		keyPressed.set(evt.key)
