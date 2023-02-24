@@ -18644,15 +18644,15 @@ var app = (function () {
     			create_component(repeatoneicon.$$.fragment);
     			set_custom_element_data(option_icon0, "class", "shuffle svelte-13cka6b");
     			set_custom_element_data(option_icon0, "data-is-active", /*$isSongShuffleEnabledStore*/ ctx[0]);
-    			add_location(option_icon0, file$11, 31, 1, 1484);
+    			add_location(option_icon0, file$11, 32, 1, 1504);
     			set_custom_element_data(option_icon1, "data-is-active", /*$isPlaybackRepeatEnabledStore*/ ctx[1]);
     			set_custom_element_data(option_icon1, "class", "svelte-13cka6b");
-    			add_location(option_icon1, file$11, 35, 1, 1697);
+    			add_location(option_icon1, file$11, 36, 1, 1717);
     			set_custom_element_data(option_icon2, "data-is-active", /*$isSongRepeatEnabledStore*/ ctx[2]);
     			set_custom_element_data(option_icon2, "class", "svelte-13cka6b");
-    			add_location(option_icon2, file$11, 42, 1, 1987);
+    			add_location(option_icon2, file$11, 43, 1, 2007);
     			set_custom_element_data(playback_options, "class", "svelte-13cka6b");
-    			add_location(playback_options, file$11, 30, 0, 1464);
+    			add_location(playback_options, file$11, 31, 0, 1484);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -18750,19 +18750,19 @@ var app = (function () {
     }
 
     function instance$16($$self, $$props, $$invalidate) {
-    	let $isSongShuffleEnabledStore;
     	let $config;
     	let $playbackStore;
+    	let $isSongShuffleEnabledStore;
     	let $playingSongStore;
     	let $songListStore;
     	let $isPlaybackRepeatEnabledStore;
     	let $isSongRepeatEnabledStore;
-    	validate_store(isSongShuffleEnabledStore, 'isSongShuffleEnabledStore');
-    	component_subscribe($$self, isSongShuffleEnabledStore, $$value => $$invalidate(0, $isSongShuffleEnabledStore = $$value));
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(5, $config = $$value));
     	validate_store(playbackStore, 'playbackStore');
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(6, $playbackStore = $$value));
+    	validate_store(isSongShuffleEnabledStore, 'isSongShuffleEnabledStore');
+    	component_subscribe($$self, isSongShuffleEnabledStore, $$value => $$invalidate(0, $isSongShuffleEnabledStore = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
     	component_subscribe($$self, playingSongStore, $$value => $$invalidate(7, $playingSongStore = $$value));
     	validate_store(songListStore, 'songListStore');
@@ -18776,18 +18776,16 @@ var app = (function () {
 
     	function shuffleSongs(evt) {
     		if (evt.type === 'click') {
-    			let shuffledArray = shuffleArrayFn($songListStore);
-    			let removedSong = shuffledArray.splice(shuffledArray.findIndex(song => song.ID === $playingSongStore.ID), 1);
-    			shuffledArray.unshift(removedSong[0]);
-    			set_store_value(playbackStore, $playbackStore = shuffledArray, $playbackStore);
-
-    			// Sets value to false first to trigger an update.
-    			set_store_value(isSongShuffleEnabledStore, $isSongShuffleEnabledStore = false, $isSongShuffleEnabledStore);
-
-    			set_store_value(isSongShuffleEnabledStore, $isSongShuffleEnabledStore = true, $isSongShuffleEnabledStore);
-    		} else if (evt.type === 'contextmenu') {
-    			set_store_value(playbackStore, $playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder), $playbackStore);
-    			set_store_value(isSongShuffleEnabledStore, $isSongShuffleEnabledStore = false, $isSongShuffleEnabledStore);
+    			if ($isSongShuffleEnabledStore === false) {
+    				set_store_value(isSongShuffleEnabledStore, $isSongShuffleEnabledStore = true, $isSongShuffleEnabledStore);
+    				let shuffledArray = shuffleArrayFn($songListStore);
+    				let removedSong = shuffledArray.splice(shuffledArray.findIndex(song => song.ID === $playingSongStore.ID), 1);
+    				shuffledArray.unshift(removedSong[0]);
+    				set_store_value(playbackStore, $playbackStore = shuffledArray, $playbackStore);
+    			} else {
+    				set_store_value(isSongShuffleEnabledStore, $isSongShuffleEnabledStore = false, $isSongShuffleEnabledStore);
+    				set_store_value(playbackStore, $playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder), $playbackStore);
+    			}
     		}
     	}
 
@@ -18823,9 +18821,9 @@ var app = (function () {
     		playingSongStore,
     		songListStore,
     		shuffleSongs,
-    		$isSongShuffleEnabledStore,
     		$config,
     		$playbackStore,
+    		$isSongShuffleEnabledStore,
     		$playingSongStore,
     		$songListStore,
     		$isPlaybackRepeatEnabledStore,

@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import shuffleArrayFn from '../../functions/shuffleArray.fn'
@@ -17,23 +18,22 @@
 
 	function shuffleSongs(evt: Event) {
 		if (evt.type === 'click') {
-			let shuffledArray = shuffleArrayFn($songListStore)
+			if ($isSongShuffleEnabledStore === false) {
+				$isSongShuffleEnabledStore = true
+				let shuffledArray = shuffleArrayFn($songListStore)
 
-			let removedSong = shuffledArray.splice(
-				shuffledArray.findIndex(song => song.ID === $playingSongStore.ID),
-				1
-			)
+				let removedSong = shuffledArray.splice(
+					shuffledArray.findIndex(song => song.ID === $playingSongStore.ID),
+					1
+				)
 
-			shuffledArray.unshift(removedSong[0])
+				shuffledArray.unshift(removedSong[0])
 
-			$playbackStore = shuffledArray
-
-			// Sets value to false first to trigger an update.
-			$isSongShuffleEnabledStore = false
-			$isSongShuffleEnabledStore = true
-		} else if (evt.type === 'contextmenu') {
-			$playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
-			$isSongShuffleEnabledStore = false
+				$playbackStore = shuffledArray
+			} else {
+				$isSongShuffleEnabledStore = false
+				$playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
+			}
 		}
 	}
 
