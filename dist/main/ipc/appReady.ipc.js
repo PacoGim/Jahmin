@@ -7,9 +7,8 @@ const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebConten
 let isAppReady = false;
 function default_1(ipcMain) {
     ipcMain.on('app-ready', () => {
-        if (isAppReady === true) {
+        if (isAppReady === true)
             return;
-        }
         isAppReady = true;
         (0, sendWebContents_fn_1.default)('get-all-songs-from-renderer', undefined);
     });

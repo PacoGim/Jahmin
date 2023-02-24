@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 
@@ -8,7 +9,10 @@
 	import LibraryConfig from './library/!LibraryConfig.svelte'
 	import SongListTagsConfig from './song_list_tags/!SongListTagsConfig.svelte'
 
-	const options = [
+	const options: {
+		name: 'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'
+		component: any
+	}[] = [
 		{
 			name: 'Appearance',
 			component: AppearanceConfig

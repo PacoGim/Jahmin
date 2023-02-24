@@ -1,10 +1,22 @@
 <script lang="ts">
+	import OptionSectionCompact from '../../../components/OptionSectionCompact.svelte'
 	import ThreeDButton from '../../../components/ThreeDButton.svelte'
 	import getAllSongsFn from '../../../db/getAllSongs.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
-	import { config } from '../../../stores/main.store'
+	import { config, layoutToShow } from '../../../stores/main.store'
 </script>
+
+<OptionSectionCompact title="Is the library missing songs?">
+	<ThreeDButton
+		on:buttonClick={() => {
+			getAllSongsFn().then(songs => {
+				window.ipc.sendAllSongsToMain(songs)
+				$layoutToShow = 'Library'
+			})
+		}}>Reload the library</ThreeDButton
+	>
+</OptionSectionCompact>
 
 <add-folder-config class="section-main">
 	<section-title> Add Folder to Library </section-title>

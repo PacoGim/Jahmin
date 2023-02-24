@@ -4,9 +4,7 @@ let isAppReady = false
 
 export default function (ipcMain: Electron.IpcMain) {
 	ipcMain.on('app-ready', () => {
-		if (isAppReady === true) {
-			return
-		}
+		if (isAppReady === true) return
 
 		isAppReady = true
 

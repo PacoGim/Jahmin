@@ -115,6 +115,8 @@
 	opacity: 1;
 }
 .iziToast > .iziToast-body {
+	display: flex;
+	align-items: center;
 	position: relative;
 	padding: 0 0 0 10px;
 	height: auto;
@@ -128,7 +130,7 @@
 	clear: both;
 }
 .iziToast > .iziToast-body .iziToast-texts {
-	margin: 10px 0 0;
+	/* margin: 10px 0 0; */
 	padding-right: 2px;
 	display: inline-block;
 	float: left;

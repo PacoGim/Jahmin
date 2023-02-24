@@ -30,6 +30,8 @@
 	import encodeURLFn from '../functions/encodeURL.fn'
 	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
 	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
+	import { addTaskToQueue } from '../db/!db'
+  import nextSongFn from '../functions/nextSong.fn'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -318,7 +320,20 @@
 	function fileNotFoundCheck(song: SongType) {
 		window.ipc.fileExists(song.SourceFile).then(result => {
 			if (result === false) {
-				notifyService.error(`File "${song.SourceFile}" not found!`)
+				notifyService.error(`File "${song.SourceFile}" not found!`, {
+					timeout: 10000,
+					closeOnClick:true,
+					buttons: [
+						[
+							'<button style="color:#fff;border:solid 2px #fff;">Delete from library</button>',
+							function () {
+								addTaskToQueue(song.ID, 'delete')
+								nextSongFn()
+							},
+							false
+						]
+					]
+				})
 			}
 		})
 	}

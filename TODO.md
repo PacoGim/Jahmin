@@ -13,5 +13,3 @@
 * Add a playing symbol next to the playing song in lyrics list.
 
 * Remember playback list
-
-* Song Duration is quickly set to 0 when clicking either Loop Button or the shuffle button
