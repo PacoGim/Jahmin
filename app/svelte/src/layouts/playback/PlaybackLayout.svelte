@@ -9,7 +9,7 @@
 	import { config, playbackStore, playingSongStore } from '../../stores/main.store'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
-  import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
+	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
 
 	$: if ($playbackStore.length > 0) {
 		createSortableList()
@@ -20,6 +20,8 @@
 	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Artist']
 
 	let handleWindowResizeRunning = false
+
+	let heightPercent = 0
 
 	function createSortableList() {
 		let el = document.querySelector('playback-layout table')
@@ -128,9 +130,17 @@
 		$playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.sortOrder)
 	}
 
+	function calculateScroll(evt) {
+		let maxHeight = Math.abs(evt.target.scrollHeight - evt.target.clientHeight)
+		let currentHeight = evt.target.scrollTop
+		heightPercent = Math.round((100 / maxHeight) * currentHeight)
+	}
+
 	onMount(() => {
 		createSortableList()
-		calculateTableFillerWidth()
+		setTimeout(() => {
+			calculateTableFillerWidth()
+		}, 1000)
 
 		window.addEventListener('resize', handleWindowResize)
 	})
@@ -140,9 +150,9 @@
 	})
 </script>
 
-<selected-songs-preview />
+<scroll-bar> <scroll-bar-progress style="width:{heightPercent}%;" /></scroll-bar>
 
-<playback-layout on:dblclick={evt => playSongFoo(evt)}>
+<playback-layout on:scroll={calculateScroll} on:dblclick={evt => playSongFoo(evt)}>
 	<table>
 		<tr class="table-header static" on:click={onTableHeaderClick}>
 			{#each tempTags as tag, index (index)}
@@ -173,13 +183,35 @@
 </playback-layout>
 
 <style>
+	scroll-bar {
+		border-radius: 3px;
+		background-color: hsl(0, 0%, 50%, 0.5);
+		display: block;
+		height: 10px;
+		width: calc(100% - 1rem);
+		position: relative;
+		margin: 0.5rem;
+		margin-bottom: 0;
+	}
+
+	scroll-bar-progress {
+		border-radius: inherit;
+		position: absolute;
+		background-color: var(--color-reactBlue);
+		height: inherit;
+	}
+
 	playback-layout {
 		display: flex;
-		height: 100%;
+		height: calc(100% - 10px - 0.5rem);
+		/* height: 100%; */
 		overflow-x: hidden;
 		min-width: 100%;
 		width: max-content;
 		justify-content: center;
+	}
+	playback-layout::-webkit-scrollbar {
+		display: none;
 	}
 
 	playback-layout table {

@@ -3,7 +3,16 @@
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 
-	import { config, selectedAlbumDir, songListStore, triggerScrollToSongEvent } from '../../stores/main.store'
+	import {
+		config,
+		elementMap,
+		keyModifier,
+		keyPressed,
+		selectedAlbumDir,
+		selectedSongsStore,
+		songListStore,
+		triggerScrollToSongEvent
+	} from '../../stores/main.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
 	let songsToShow = []
@@ -32,6 +41,20 @@
 		if ($triggerScrollToSongEvent !== 0) {
 			setScrollAmountFromSong($triggerScrollToSongEvent)
 			$triggerScrollToSongEvent = 0
+		}
+	}
+
+	$: {
+		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('song-list-svlt')) {
+			selectAllSongs()
+		}
+	}
+
+	function selectAllSongs() {
+		const songListElement = $elementMap.get('song-list')
+
+		if (songListElement) {
+			$selectedSongsStore = [...$songListStore.map(song => song.ID)]
 		}
 	}
 

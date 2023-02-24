@@ -53,21 +53,21 @@
 		}
 	}
 
-	function handleKeyboardEvents(evt: KeyboardEvent) {
-		let keyModifier = {
-			ctrl: evt.ctrlKey || evt.metaKey,
-			shift: evt.shiftKey,
-			alt: evt.altKey
-		}
+	// function handleKeyboardEvents(evt: KeyboardEvent) {
+	// 	let keyModifier = {
+	// 		ctrl: evt.ctrlKey || evt.metaKey,
+	// 		shift: evt.shiftKey,
+	// 		alt: evt.altKey
+	// 	}
 
-		if (evt.key === 'a' && keyModifier.ctrl === true) {
-			const songListElement = $elementMap.get('song-list')
+	// 	if (evt.key === 'a' && keyModifier.ctrl === true) {
+	// 		const songListElement = $elementMap.get('song-list')
 
-			if (songListElement) {
-				$selectedSongsStore = [...$songListStore.map(song => song.ID)]
-			}
-		}
-	}
+	// 		if (songListElement) {
+	// 			$selectedSongsStore = [...$songListStore.map(song => song.ID)]
+	// 		}
+	// 	}
+	// }
 
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
 	function setAlbumBackInView() {
@@ -141,6 +141,6 @@
 		;['click', 'dblclick', 'contextmenu'].forEach(evtType =>
 			document.addEventListener(evtType, (evt: MouseEvent) => handleClickEvents(evt))
 		)
-		;['keydown'].forEach(evtType => document.addEventListener(evtType, (evt: KeyboardEvent) => handleKeyboardEvents(evt)))
+		// ;['keydown'].forEach(evtType => document.addEventListener(evtType, (evt: KeyboardEvent) => handleKeyboardEvents(evt)))
 	})
 </script>

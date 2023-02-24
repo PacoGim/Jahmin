@@ -3,7 +3,7 @@
 
 	import Album from '../../components/Album.svelte'
 
-	import { config, dbSongsStore } from '../../stores/main.store'
+	import { config, dbSongsStore, elementMap, keyModifier, keyPressed } from '../../stores/main.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -17,6 +17,12 @@
 	$: {
 		if ($dbSongsStore && $config.group.groupByValues && $config.group.groupBy) {
 			updateArtGridAlbums()
+		}
+	}
+
+	$: {
+		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('art-grid-svlt')) {
+			selecteAllAlbums()
 		}
 	}
 
@@ -36,6 +42,16 @@
 			albums = groupedAlbums.sort((a, b) => {
 				return a.RootDir.localeCompare(b.RootDir)
 			})
+		})
+	}
+
+	function selecteAllAlbums() {
+		let allAlbums = document.querySelectorAll('art-grid-svlt album')
+
+		allAlbums.forEach(album=>{
+
+			console.log(album.getAttribute('rootDir'))
+
 		})
 	}
 

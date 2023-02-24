@@ -29,8 +29,15 @@
 </album>
 
 <style>
-	album.selected {
+	:global(body[theme='Day']) album.selected {
+		box-shadow: 0 0 10px 5px #000000, 0 0 0 5px rgba(0, 0, 0, 0.5);
+	}
+
+	:global(body[theme='Night']) album.selected {
 		box-shadow: 0 0 10px 5px #ffffff, 0 0 0 5px rgba(255, 255, 255, 0.5);
+	}
+
+	album.selected {
 		z-index: 1;
 	}
 

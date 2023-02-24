@@ -13,3 +13,5 @@
 * Add a playing symbol next to the playing song in lyrics list.
 
 * Remember playback list
+
+* Add multiple album selection

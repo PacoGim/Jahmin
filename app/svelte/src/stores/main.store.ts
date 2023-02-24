@@ -7,6 +7,7 @@ export let isAppIdle: Writable<boolean> = writable(false)
 // List to show within Song List component.
 export let songListStore: Writable<SongType[]> = writable([])
 export let selectedAlbumDir: Writable<string | undefined> = writable(undefined)
+export let selectedAlbumsDir: Writable<string[] | undefined> = writable(undefined)
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
@@ -47,7 +48,7 @@ export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable
 export let windowResize: Writable<number> = writable(undefined)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Playback')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
