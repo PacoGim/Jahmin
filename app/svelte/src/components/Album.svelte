@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AlbumType } from '../../../types/album.type'
-	import { config, selectedAlbumDir } from '../stores/main.store'
+	import { config, selectedAlbumDir, selectedAlbumsDir } from '../stores/main.store'
 	import AlbumArt from './AlbumArt.svelte'
 
 	export let album: AlbumType
@@ -9,7 +9,7 @@
 <album
 	alwaysShowOverlay={$config.userOptions.alwaysShowAlbumOverlay}
 	rootDir={album.RootDir}
-	class={$selectedAlbumDir === album?.RootDir ? 'selected' : ''}
+	class={$selectedAlbumsDir?.includes(album?.RootDir) ? 'selected' : ''}
 >
 	<AlbumArt imageSourceLocation={album.RootDir} intersectionRoot="art-grid-svlt" />
 

@@ -7217,6 +7217,7 @@ var app = (function () {
     // List to show within Song List component.
     let songListStore = writable([]);
     let selectedAlbumDir = writable(undefined);
+    let selectedAlbumsDir = writable(undefined);
     let albumPlayingDirStore = writable(undefined);
     let currentSongDurationStore = writable(0);
     let currentSongProgressStore = writable(0);
@@ -7241,10 +7242,10 @@ var app = (function () {
     /********************** Keyboard Events **********************/
     let keyPressed = writable(undefined);
     let keyModifier = writable(undefined);
-    let elementMap = writable(undefined);
+    let elementMap = writable(new Map());
     let windowResize = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Playback');
+    let layoutToShow = writable('Library');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -19202,7 +19203,7 @@ var app = (function () {
     		c: function create() {
     			album_artist = element("album-artist");
     			set_custom_element_data(album_artist, "class", "svelte-1uxrzxj");
-    			add_location(album_artist, file$$, 22, 3, 730);
+    			add_location(album_artist, file$$, 22, 3, 757);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -19235,7 +19236,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			t = text(t_value);
     			set_custom_element_data(album_artist, "class", "svelte-1uxrzxj");
-    			add_location(album_artist, file$$, 20, 3, 652);
+    			add_location(album_artist, file$$, 20, 3, 679);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -19271,7 +19272,7 @@ var app = (function () {
     			album_artist = element("album-artist");
     			t = text(t_value);
     			set_custom_element_data(album_artist, "class", "svelte-1uxrzxj");
-    			add_location(album_artist, file$$, 18, 3, 536);
+    			add_location(album_artist, file$$, 18, 3, 563);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, album_artist, anchor);
@@ -19342,19 +19343,19 @@ var app = (function () {
     			t3 = space();
     			if_block.c();
     			set_custom_element_data(overlay_gradient, "class", "svelte-1uxrzxj");
-    			add_location(overlay_gradient, file$$, 12, 1, 401);
+    			add_location(overlay_gradient, file$$, 12, 1, 428);
     			set_custom_element_data(album_name, "class", "svelte-1uxrzxj");
-    			add_location(album_name, file$$, 15, 2, 442);
+    			add_location(album_name, file$$, 15, 2, 469);
     			set_custom_element_data(album_details, "class", "svelte-1uxrzxj");
-    			add_location(album_details, file$$, 14, 1, 424);
+    			add_location(album_details, file$$, 14, 1, 451);
     			attr_dev(album_1, "alwaysshowoverlay", album_1_alwaysshowoverlay_value = /*$config*/ ctx[1].userOptions.alwaysShowAlbumOverlay);
     			attr_dev(album_1, "rootdir", album_1_rootdir_value = /*album*/ ctx[0].RootDir);
 
-    			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty(/*$selectedAlbumDir*/ ctx[2] === /*album*/ ctx[0]?.RootDir
+    			attr_dev(album_1, "class", album_1_class_value = "" + (null_to_empty((/*$selectedAlbumsDir*/ ctx[2]?.includes(/*album*/ ctx[0]?.RootDir))
     			? 'selected'
     			: '') + " svelte-1uxrzxj"));
 
-    			add_location(album_1, file$$, 5, 0, 154);
+    			add_location(album_1, file$$, 5, 0, 173);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19398,7 +19399,7 @@ var app = (function () {
     				attr_dev(album_1, "rootdir", album_1_rootdir_value);
     			}
 
-    			if (!current || dirty & /*$selectedAlbumDir, album*/ 5 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty(/*$selectedAlbumDir*/ ctx[2] === /*album*/ ctx[0]?.RootDir
+    			if (!current || dirty & /*$selectedAlbumsDir, album*/ 5 && album_1_class_value !== (album_1_class_value = "" + (null_to_empty((/*$selectedAlbumsDir*/ ctx[2]?.includes(/*album*/ ctx[0]?.RootDir))
     			? 'selected'
     			: '') + " svelte-1uxrzxj"))) {
     				attr_dev(album_1, "class", album_1_class_value);
@@ -19433,11 +19434,11 @@ var app = (function () {
 
     function instance$14($$self, $$props, $$invalidate) {
     	let $config;
-    	let $selectedAlbumDir;
+    	let $selectedAlbumsDir;
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(1, $config = $$value));
-    	validate_store(selectedAlbumDir, 'selectedAlbumDir');
-    	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(2, $selectedAlbumDir = $$value));
+    	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(2, $selectedAlbumsDir = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Album', slots, []);
     	let { album } = $$props;
@@ -19461,10 +19462,11 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		config,
     		selectedAlbumDir,
+    		selectedAlbumsDir,
     		AlbumArt,
     		album,
     		$config,
-    		$selectedAlbumDir
+    		$selectedAlbumsDir
     	});
 
     	$$self.$inject_state = $$props => {
@@ -19475,7 +19477,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [album, $config, $selectedAlbumDir];
+    	return [album, $config, $selectedAlbumsDir];
     }
 
     class Album extends SvelteComponentDev {
@@ -19568,24 +19570,22 @@ var app = (function () {
     }
 
     /* src/layouts/library/ArtGrid.svelte generated by Svelte v3.55.1 */
-
-    const { console: console_1$1 } = globals;
     const file$_ = "src/layouts/library/ArtGrid.svelte";
 
     function get_each_context$d(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
+    	child_ctx[9] = list[i];
     	return child_ctx;
     }
 
-    // (56:1) {#each albums || [] as album (album.ID)}
+    // (58:1) {#each albums || [] as album (album.ID)}
     function create_each_block$d(key_1, ctx) {
     	let first;
     	let album;
     	let current;
 
     	album = new Album({
-    			props: { album: /*album*/ ctx[8] },
+    			props: { album: /*album*/ ctx[9] },
     			$$inline: true
     		});
 
@@ -19605,7 +19605,7 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
     			const album_changes = {};
-    			if (dirty & /*albums*/ 1) album_changes.album = /*album*/ ctx[8];
+    			if (dirty & /*albums*/ 1) album_changes.album = /*album*/ ctx[9];
     			album.$set(album_changes);
     		},
     		i: function intro(local) {
@@ -19627,7 +19627,7 @@ var app = (function () {
     		block,
     		id: create_each_block$d.name,
     		type: "each",
-    		source: "(56:1) {#each albums || [] as album (album.ID)}",
+    		source: "(58:1) {#each albums || [] as album (album.ID)}",
     		ctx
     	});
 
@@ -19641,7 +19641,7 @@ var app = (function () {
     	let current;
     	let each_value = /*albums*/ ctx[0] || [];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*album*/ ctx[8].ID;
+    	const get_key = ctx => /*album*/ ctx[9].ID;
     	validate_each_keys(ctx, each_value, get_each_context$d, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -19659,7 +19659,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(art_grid_svlt, "class", "svelte-1brq1yb");
-    			add_location(art_grid_svlt, file$_, 54, 0, 2099);
+    			add_location(art_grid_svlt, file$_, 56, 0, 2249);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19719,20 +19719,15 @@ var app = (function () {
     	return block;
     }
 
-    function selecteAllAlbums() {
-    	let allAlbums = document.querySelectorAll('art-grid-svlt album');
-
-    	allAlbums.forEach(album => {
-    		console.log(album.getAttribute('rootDir'));
-    	});
-    }
-
     function instance$13($$self, $$props, $$invalidate) {
+    	let $selectedAlbumsDir;
     	let $config;
     	let $dbSongsStore;
     	let $elementMap;
     	let $keyPressed;
     	let $keyModifier;
+    	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(6, $selectedAlbumsDir = $$value));
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(1, $config = $$value));
     	validate_store(dbSongsStore, 'dbSongsStore');
@@ -19746,7 +19741,6 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ArtGrid', slots, []);
     	let albums;
-    	let groupByValuesConfigObserver;
 
     	function updateArtGridAlbums() {
     		let songsFiltered = [];
@@ -19765,6 +19759,18 @@ var app = (function () {
     		});
     	}
 
+    	function selecteAllAlbums() {
+    		let albumElements = document.querySelectorAll('art-grid-svlt album');
+    		let albumElementsRootDir = [];
+
+    		albumElements.forEach(albumElement => {
+    			let albumRootDir = albumElement.getAttribute('rootDir');
+    			albumElementsRootDir.push(albumRootDir);
+    		});
+
+    		set_store_value(selectedAlbumsDir, $selectedAlbumsDir = [...albumElementsRootDir], $selectedAlbumsDir);
+    	}
+
     	onMount(() => {
     		
     	}); // Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
@@ -19780,7 +19786,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<ArtGrid> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ArtGrid> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -19792,12 +19798,13 @@ var app = (function () {
     		elementMap,
     		keyModifier,
     		keyPressed,
+    		selectedAlbumsDir,
     		groupSongsByAlbumFn,
     		cssVariablesService,
     		albums,
-    		groupByValuesConfigObserver,
     		updateArtGridAlbums,
     		selecteAllAlbums,
+    		$selectedAlbumsDir,
     		$config,
     		$dbSongsStore,
     		$elementMap,
@@ -19807,7 +19814,6 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('albums' in $$props) $$invalidate(0, albums = $$props.albums);
-    		if ('groupByValuesConfigObserver' in $$props) groupByValuesConfigObserver = $$props.groupByValuesConfigObserver;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -38655,6 +38661,18 @@ var app = (function () {
         }
     }
 
+    function toggleArrayElementFn (array, value) {
+        let index = array.indexOf(value);
+        let arrayCopy = [...array];
+        if (index === -1) {
+            arrayCopy.push(value);
+        }
+        else {
+            arrayCopy.splice(index, 1);
+        }
+        return arrayCopy;
+    }
+
     /* src/middlewares/EventsHandlerMiddleware.svelte generated by Svelte v3.55.1 */
 
     function create_fragment$h(ctx) {
@@ -38686,6 +38704,8 @@ var app = (function () {
     	let $songListStore;
     	let $selectedAlbumDir;
     	let $selectedSongsStore;
+    	let $selectedAlbumsDir;
+    	let $keyModifier;
     	let $albumPlayingDirStore;
     	let $triggerScrollToSongEvent;
     	let $triggerGroupingChangeEvent;
@@ -38701,20 +38721,24 @@ var app = (function () {
     	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(2, $selectedAlbumDir = $$value));
     	validate_store(selectedSongsStore, 'selectedSongsStore');
     	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(3, $selectedSongsStore = $$value));
+    	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(4, $selectedAlbumsDir = $$value));
+    	validate_store(keyModifier, 'keyModifier');
+    	component_subscribe($$self, keyModifier, $$value => $$invalidate(5, $keyModifier = $$value));
     	validate_store(albumPlayingDirStore, 'albumPlayingDirStore');
-    	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(4, $albumPlayingDirStore = $$value));
+    	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(6, $albumPlayingDirStore = $$value));
     	validate_store(triggerScrollToSongEvent, 'triggerScrollToSongEvent');
-    	component_subscribe($$self, triggerScrollToSongEvent, $$value => $$invalidate(5, $triggerScrollToSongEvent = $$value));
+    	component_subscribe($$self, triggerScrollToSongEvent, $$value => $$invalidate(7, $triggerScrollToSongEvent = $$value));
     	validate_store(triggerGroupingChangeEvent, 'triggerGroupingChangeEvent');
-    	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(6, $triggerGroupingChangeEvent = $$value));
+    	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(8, $triggerGroupingChangeEvent = $$value));
     	validate_store(playbackStore, 'playbackStore');
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(7, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(9, $playbackStore = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(8, $playingSongStore = $$value));
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(10, $playingSongStore = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(9, $layoutToShow = $$value));
+    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(11, $layoutToShow = $$value));
     	validate_store(elementMap, 'elementMap');
-    	component_subscribe($$self, elementMap, $$value => $$invalidate(10, $elementMap = $$value));
+    	component_subscribe($$self, elementMap, $$value => $$invalidate(12, $elementMap = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EventsHandlerMiddleware', slots, []);
 
@@ -38727,6 +38751,7 @@ var app = (function () {
     			}
     		});
 
+    		const mainElementClicked = $elementMap.entries().next().value;
     		$elementMap.get('img');
     		const albumElement = $elementMap.get('album');
     		const songListItemElement = $elementMap.get('song-list-item'); //! true
@@ -38734,12 +38759,17 @@ var app = (function () {
     		const controlBarElement = $elementMap.get('control-bar-svlt');
     		const tagEditElement = $elementMap.get('tag-edit-svlt'); //! false
     		const artElement = $elementMap.get('art-svlt');
+    		$elementMap.get('art-grid-svlt');
     		if (albumElement) handleAlbumEvent(albumElement, evt.type);
     		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type);
     		if (artElement && controlBarElement) setAlbumBackInView();
 
     		if (songListElement === undefined && tagEditElement === undefined) {
     			set_store_value(selectedSongsStore, $selectedSongsStore = [], $selectedSongsStore);
+    		}
+
+    		if (mainElementClicked[0] === 'art-grid-svlt') {
+    			set_store_value(selectedAlbumsDir, $selectedAlbumsDir = [], $selectedAlbumsDir);
     		}
     	}
 
@@ -38760,6 +38790,7 @@ var app = (function () {
     	function setAlbumBackInView() {
     		set_store_value(layoutToShow, $layoutToShow = 'Library', $layoutToShow);
     		let playingSong = $playingSongStore;
+    		set_store_value(selectedAlbumsDir, $selectedAlbumsDir = [$albumPlayingDirStore], $selectedAlbumsDir);
     		set_store_value(selectedAlbumDir, $selectedAlbumDir = $albumPlayingDirStore, $selectedAlbumDir);
     		set_store_value(songListStore, $songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder), $songListStore);
     		let groupByValuesLocalStorage = parseJsonFn(localStorage.getItem('GroupByValues'));
@@ -38792,6 +38823,12 @@ var app = (function () {
     			// Prevents resetting array if album unchanged.
     			// if ($selectedAlbumDir !== rootDir || songs.length === sortedSongs.length) {
     			set_store_value(songListStore, $songListStore = sortedSongs, $songListStore);
+
+    			if ($keyModifier === 'ctrlKey') {
+    				set_store_value(selectedAlbumsDir, $selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir), $selectedAlbumsDir);
+    			} else {
+    				set_store_value(selectedAlbumsDir, $selectedAlbumsDir = [rootDir], $selectedAlbumsDir);
+    			}
 
     			set_store_value(selectedAlbumDir, $selectedAlbumDir = rootDir, $selectedAlbumDir);
 
@@ -38840,6 +38877,8 @@ var app = (function () {
     		scrollToAlbumFn,
     		setNewPlaybackFn,
     		sortSongsArrayFn,
+    		toggleArrayElementFn,
+    		main,
     		albumPlayingDirStore,
     		activeSongStore,
     		config,
@@ -38852,6 +38891,8 @@ var app = (function () {
     		songListStore,
     		triggerGroupingChangeEvent,
     		triggerScrollToSongEvent,
+    		selectedAlbumsDir,
+    		keyModifier,
     		handleClickEvents,
     		setAlbumBackInView,
     		handleAlbumEvent,
@@ -38861,6 +38902,8 @@ var app = (function () {
     		$songListStore,
     		$selectedAlbumDir,
     		$selectedSongsStore,
+    		$selectedAlbumsDir,
+    		$keyModifier,
     		$albumPlayingDirStore,
     		$triggerScrollToSongEvent,
     		$triggerGroupingChangeEvent,
@@ -38927,7 +38970,7 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-usbsq1");
+    			attr_dev(td, "class", "svelte-19h670p");
     			add_location(td, file$e, 127, 4, 4967);
     			this.first = td;
     		},
@@ -38964,7 +39007,7 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-usbsq1");
+    			attr_dev(td, "class", "svelte-19h670p");
     			add_location(td, file$e, 143, 6, 5486);
     		},
     		m: function mount(target, anchor) {
@@ -39017,9 +39060,9 @@ var app = (function () {
     			create_component(playbutton.$$.fragment);
     			t0 = space();
     			t1 = text(t1_value);
-    			set_custom_element_data(play_button, "class", "svelte-usbsq1");
+    			set_custom_element_data(play_button, "class", "svelte-19h670p");
     			add_location(play_button, file$e, 137, 7, 5324);
-    			attr_dev(td, "class", "svelte-usbsq1");
+    			attr_dev(td, "class", "svelte-19h670p");
     			add_location(td, file$e, 136, 6, 5312);
     		},
     		m: function mount(target, anchor) {
@@ -39183,12 +39226,12 @@ var app = (function () {
     			t0 = space();
     			td = element("td");
     			t1 = space();
-    			attr_dev(td, "class", "filler svelte-usbsq1");
+    			attr_dev(td, "class", "filler svelte-19h670p");
     			add_location(td, file$e, 147, 4, 5535);
 
     			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[3].includes(/*song*/ ctx[17].ID)
     			? 'selected'
-    			: '') + " svelte-usbsq1"));
+    			: '') + " svelte-19h670p"));
 
     			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[17].ID);
     			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[19]);
@@ -39221,7 +39264,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[3].includes(/*song*/ ctx[17].ID)
     			? 'selected'
-    			: '') + " svelte-usbsq1"))) {
+    			: '') + " svelte-19h670p"))) {
     				attr_dev(tr, "class", tr_class_value);
     			}
 
@@ -39330,17 +39373,17 @@ var app = (function () {
     			}
 
     			set_style(scroll_bar_progress, "width", /*heightPercent*/ ctx[1] + "%");
-    			set_custom_element_data(scroll_bar_progress, "class", "svelte-usbsq1");
+    			set_custom_element_data(scroll_bar_progress, "class", "svelte-19h670p");
     			add_location(scroll_bar_progress, file$e, 121, 13, 4693);
-    			set_custom_element_data(scroll_bar, "class", "svelte-usbsq1");
+    			set_custom_element_data(scroll_bar, "class", "svelte-19h670p");
     			add_location(scroll_bar, file$e, 121, 0, 4680);
-    			attr_dev(td, "class", "filler svelte-usbsq1");
+    			attr_dev(td, "class", "filler svelte-19h670p");
     			add_location(td, file$e, 129, 3, 5011);
-    			attr_dev(tr, "class", "table-header static svelte-usbsq1");
+    			attr_dev(tr, "class", "table-header static svelte-19h670p");
     			add_location(tr, file$e, 125, 2, 4858);
-    			attr_dev(table, "class", "svelte-usbsq1");
+    			attr_dev(table, "class", "svelte-19h670p");
     			add_location(table, file$e, 124, 1, 4848);
-    			set_custom_element_data(playback_layout, "class", "svelte-usbsq1");
+    			set_custom_element_data(playback_layout, "class", "svelte-19h670p");
     			add_location(playback_layout, file$e, 123, 0, 4763);
     		},
     		l: function claim(nodes) {

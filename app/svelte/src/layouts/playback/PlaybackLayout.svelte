@@ -185,12 +185,15 @@
 <style>
 	scroll-bar {
 		border-radius: 3px;
-		background-color: hsl(0, 0%, 50%, 0.5);
+		background-color: hsl(0, 0%, 50%, 0.1);
+		box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+
 		display: block;
-		height: 10px;
+		height: 5px;
 		width: calc(100% - 1rem);
 		position: relative;
-		margin: 0.5rem;
+		margin-left: 0.5rem;
+		margin-top: 0.5rem;
 		margin-bottom: 0;
 	}
 
@@ -205,6 +208,7 @@
 		display: flex;
 		height: calc(100% - 10px - 0.5rem);
 		/* height: 100%; */
+		padding-top: 0.5rem;
 		overflow-x: hidden;
 		min-width: 100%;
 		width: max-content;

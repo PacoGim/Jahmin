@@ -3,7 +3,7 @@
 
 	import Album from '../../components/Album.svelte'
 
-	import { config, dbSongsStore, elementMap, keyModifier, keyPressed } from '../../stores/main.store'
+	import { config, dbSongsStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -26,8 +26,6 @@
 		}
 	}
 
-	let groupByValuesConfigObserver
-
 	function updateArtGridAlbums() {
 		let songsFiltered = []
 
@@ -46,13 +44,15 @@
 	}
 
 	function selecteAllAlbums() {
-		let allAlbums = document.querySelectorAll('art-grid-svlt album')
+		let albumElements = document.querySelectorAll('art-grid-svlt album')
+		let albumElementsRootDir = []
 
-		allAlbums.forEach(album=>{
-
-			console.log(album.getAttribute('rootDir'))
-
+		albumElements.forEach(albumElement => {
+			let albumRootDir = albumElement.getAttribute('rootDir')
+			albumElementsRootDir.push(albumRootDir)
 		})
+
+		$selectedAlbumsDir = [...albumElementsRootDir]
 	}
 
 	onMount(() => {

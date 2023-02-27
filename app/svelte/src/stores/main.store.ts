@@ -43,12 +43,12 @@ export let keyModifier: Writable<'altKey' | 'ctrlKey' | 'shiftKey' | undefined> 
 
 export let appTitle: Writable<string> = writable('Jahmin')
 
-export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable(undefined)
+export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable(new Map<string, HTMLElement>())
 
 export let windowResize: Writable<number> = writable(undefined)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Playback')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)

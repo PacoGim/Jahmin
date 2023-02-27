@@ -9,6 +9,8 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
+  import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
+	import main from '../main'
 
 	import {
 		albumPlayingDirStore,
@@ -22,7 +24,9 @@
 		selectedSongsStore,
 		songListStore,
 		triggerGroupingChangeEvent,
-		triggerScrollToSongEvent
+		triggerScrollToSongEvent,
+		selectedAlbumsDir,
+		keyModifier
 	} from '../stores/main.store'
 
 	function handleClickEvents(evt: MouseEvent) {
@@ -34,6 +38,8 @@
 			}
 		})
 
+		const mainElementClicked = $elementMap.entries().next().value
+
 		const imgElement = $elementMap.get('img')
 		const albumElement = $elementMap.get('album')
 		const songListItemElement = $elementMap.get('song-list-item') //! true
@@ -41,6 +47,7 @@
 		const controlBarElement = $elementMap.get('control-bar-svlt')
 		const tagEditElement = $elementMap.get('tag-edit-svlt') //! false
 		const artElement = $elementMap.get('art-svlt')
+		const artGridElement = $elementMap.get('art-grid-svlt')
 
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
 
@@ -50,6 +57,10 @@
 
 		if (songListElement === undefined && tagEditElement === undefined) {
 			$selectedSongsStore = []
+		}
+
+		if (mainElementClicked[0] === 'art-grid-svlt') {
+			$selectedAlbumsDir = []
 		}
 	}
 
@@ -74,6 +85,7 @@
 		$layoutToShow = 'Library'
 		let playingSong = $playingSongStore
 
+		$selectedAlbumsDir = [$albumPlayingDirStore]
 		$selectedAlbumDir = $albumPlayingDirStore
 
 		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
@@ -108,6 +120,13 @@
 			// Prevents resetting array if album unchanged.
 			// if ($selectedAlbumDir !== rootDir || songs.length === sortedSongs.length) {
 			$songListStore = sortedSongs
+
+			if ($keyModifier === 'ctrlKey') {
+				$selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)
+			} else {
+				$selectedAlbumsDir = [rootDir]
+			}
+
 			$selectedAlbumDir = rootDir
 			// }
 
