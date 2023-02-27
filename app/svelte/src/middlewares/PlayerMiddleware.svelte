@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { all } from 'deepmerge'
 	import { onMount } from 'svelte'
-	import Album from '../components/Album.svelte'
 	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
 	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
-	import groupSongsByAlbumFn from '../functions/groupSongsByAlbum.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
@@ -22,6 +19,18 @@
 		$songListStore = allSongs
 	}
 
+	$: {
+		if ($selectedAlbumsDir !== undefined) {
+			localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir))
+		}
+	}
+
+	$: {
+		if ($songListStore !== undefined && $songListStore.length > 0) {
+			localStorage.setItem('SongList', JSON.stringify($songListStore))
+		}
+	}
+
 	function fillSongList(albumRootDirList: string[] = []) {
 		allSongs = []
 		albumRootDirList.forEach(albumRootDir => {
@@ -36,6 +45,8 @@
 	function loadPreviousState() {
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 		let lastPlayedDir = localStorage.getItem('LastPlayedDir')
+		let lastPlayedDirs = JSON.parse(localStorage.getItem('SelectedAlbumsDir'))
+		let songList = JSON.parse(localStorage.getItem('SongList'))
 
 		getAlbumSongsFn(lastPlayedDir).then(songs => {
 			if (songs.length === 0) {

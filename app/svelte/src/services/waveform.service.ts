@@ -29,16 +29,13 @@ function getNewWaveSurfer(color: string) {
 	return waveSurfer
 }
 
-let lastSongSourceFile = ''
-
 export async function setWaveSource(sourceFile: string, rootDir: string, duration: number) {
-	if (sourceFile === lastSongSourceFile) {
-		return
-	} else {
-		lastSongSourceFile = sourceFile
-	}
+	let waveFormElement = waveSurfer?.container
+
+	if (waveFormElement?.getAttribute('src') === sourceFile) return
 
 	let peaks = await window.ipc.getPeaks(sourceFile)
+
 	let color = await getAlbumColorsFn(rootDir)
 
 	cssVariablesService.set('waveform-opacity', '0')
@@ -54,6 +51,8 @@ export async function setWaveSource(sourceFile: string, rootDir: string, duratio
 		waveSurfer = getNewWaveSurfer(`hsl(${color.hue},${color.saturation}%,${color.lightnessDark}%)`)
 
 		waveSurfer.load(escapeStringFn(sourceFile), peaks, undefined, duration)
+
+		waveFormElement?.setAttribute('src', sourceFile)
 
 		if (peaks) {
 			cssVariablesService.set('waveform-opacity', '1')

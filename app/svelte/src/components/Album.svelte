@@ -30,7 +30,7 @@
 
 <style>
 	:global(body[theme='Day']) album.selected {
-		box-shadow: 0 0 10px 5px #000000, 0 0 0 5px rgba(0, 0, 0, 0.5);
+		box-shadow: 0 0 10px 5px hsl(38, 100%, 78%), 0 0 0 5px hsla(38, 100%, 81%, 0.5);
 	}
 
 	:global(body[theme='Night']) album.selected {

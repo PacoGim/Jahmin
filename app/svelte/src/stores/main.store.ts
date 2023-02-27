@@ -1,11 +1,12 @@
 import { writable, type Writable } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
 import type { PartialSongType, SongType } from '../../../types/song.type'
+import parseJsonFn from '../functions/parseJson.fn'
 
 export let isAppIdle: Writable<boolean> = writable(false)
 
 // List to show within Song List component.
-export let songListStore: Writable<SongType[]> = writable([])
+export let songListStore: Writable<SongType[]> = writable(undefined)
 export let selectedAlbumDir: Writable<string | undefined> = writable(undefined)
 export let selectedAlbumsDir: Writable<string[] | undefined> = writable(undefined)
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)

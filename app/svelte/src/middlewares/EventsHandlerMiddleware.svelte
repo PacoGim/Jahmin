@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
+	import getDirectoryFn from '../functions/getDirectory.fn'
 
 	import isArrayEqualFn from '../functions/isArrayEqual.fn'
 	import parseJsonFn from '../functions/parseJson.fn'
@@ -10,7 +11,6 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
-	import main from '../main'
 
 	import {
 		albumPlayingDirStore,
@@ -60,7 +60,7 @@
 		}
 
 		if (mainElementClicked[0] === 'art-grid-svlt') {
-			$selectedAlbumsDir = []
+			$selectedAlbumsDir = [getDirectoryFn($playingSongStore?.SourceFile)]
 		}
 	}
 
