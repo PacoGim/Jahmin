@@ -9,7 +9,7 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-  import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
+	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
 	import main from '../main'
 
 	import {
@@ -105,6 +105,10 @@
 	}
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
+		// console.log($selectedAlbumsDir)
+
+		// Get all song from albums
+
 		const rootDir = element.getAttribute('rootDir')
 
 		let songs = await getAlbumSongsFn(rootDir)
@@ -115,11 +119,7 @@
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
-			// window.ipc.verifyFolderTegrity(rootDir)
-
-			// Prevents resetting array if album unchanged.
-			// if ($selectedAlbumDir !== rootDir || songs.length === sortedSongs.length) {
-			$songListStore = sortedSongs
+			// $songListStore = sortedSongs
 
 			if ($keyModifier === 'ctrlKey') {
 				$selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)
@@ -128,7 +128,6 @@
 			}
 
 			$selectedAlbumDir = rootDir
-			// }
 
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
 			$selectedSongsStore = []

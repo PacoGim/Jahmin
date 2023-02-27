@@ -91,10 +91,11 @@
 		font-size: 0.9rem;
 		width: 36px;
 		height: 20px;
-		background-color: #fff;
+		background-color: #f8f8ff;
 		border-radius: 25px;
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-		color: var(--art-color-dark);
+		color: #333333;
+		/* color: var(--art-color-dark); */
 	}
 
 	span.Title {

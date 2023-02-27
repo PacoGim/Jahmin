@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AlbumType } from '../../../types/album.type'
-	import { config, selectedAlbumDir, selectedAlbumsDir } from '../stores/main.store'
+	import { config, selectedAlbumsDir } from '../stores/main.store'
 	import AlbumArt from './AlbumArt.svelte'
 
 	export let album: AlbumType

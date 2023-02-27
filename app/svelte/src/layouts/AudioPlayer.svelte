@@ -16,7 +16,6 @@
 		playbackStore,
 		playingSongStore,
 		isPlaying,
-		albumPlayingDirStore,
 		isSongRepeatEnabledStore,
 		isPlaybackRepeatEnabledStore,
 		currentSongDurationStore,

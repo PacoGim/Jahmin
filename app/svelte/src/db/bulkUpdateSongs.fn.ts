@@ -1,19 +1,8 @@
-import deepmerge from 'deepmerge'
-import type { ConfigType, PartialConfigType } from '../../../types/config.type'
-import type { PartialSongType, SongType } from '../../../types/song.type'
-import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-import { config, selectedAlbumDir, songListStore } from '../stores/main.store'
+import type { PartialSongType } from '../../../types/song.type'
 import { getDB } from './!dbObject'
-import getAlbumSongsFn from './getAlbumSongs.fn'
-import updateVersionFn from './updateVersion.fn'
 
 export default function (songs: { id: string | number; newTags: PartialSongType }[]) {
 	return new Promise((resolve, reject) => {
-		// updateVariables(songs)
-
-		// console.log(JSON.stringify(songs))
-
-
 		// Will contain songs grouped by the same new tags to update.
 		let updateGroups = []
 
@@ -58,50 +47,4 @@ export default function (songs: { id: string | number; newTags: PartialSongType 
 				resolve(undefined)
 			})
 	})
-}
-
-function updateVariables(songs: { id: string | number; newTags: PartialSongType }[]) {
-	// console.log(123)
-
-	// let songListStoreLocal: SongType[] = undefined
-	// let configStoreLocal = undefined
-
-	// songListStore.subscribe(value => (songListStoreLocal = value))()
-
-	// songListStoreLocal.forEach(songListSong => {
-		// let findSong = songs.find(song => song.id===songListSong.ID)
-		// console.log(songListSong)
-		// console.log(songs)
-
-		// console.log(findSong)
-	// })
-
-	// console.log(songs)
-	// config.subscribe(value => (configStoreLocal = value))()
-
-	// songs.forEach(song => {
-	// 	let arraySongIndex = songListStoreLocal.findIndex(a => a.ID === song.id)
-
-	// 	if (arraySongIndex !== -1) {
-	// 		songListStoreLocal[arraySongIndex] = deepmerge(songListStoreLocal[arraySongIndex], song.newTags)
-	// 	}
-	// })
-
-	// songListStoreLocal = songListStoreLocal.filter(
-	// 	song => song[configStoreLocal.group.groupBy[0]] === configStoreLocal.group.groupByValues[0]
-	// )
-
-	// if (songListStoreLocal.length === 0) {
-	// location.reload()
-	// selectedAlbumDir.subscribe(value => {
-	// 	getAlbumSongsFn(value).then(songs => {
-	// 		let sortedSongs = sortSongsArrayFn(songs, configStoreLocal.userOptions.sortBy, configStoreLocal.userOptions.sortOrder)
-
-	// 		songListStore.set(sortedSongs)
-
-	// 	})
-	// })()
-	// } else {
-	// songListStore.set(songListStoreLocal)
-	// }
 }
