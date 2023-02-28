@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const verifyFolderTegrity_fn_1 = __importDefault(require("../functions/verifyFolderTegrity.fn"));
+const addSeparator_fn_1 = __importDefault(require("./functions/addSeparator.fn"));
 function default_1(data) {
     let template = [];
     template.push({
@@ -14,18 +15,30 @@ function default_1(data) {
             electron_1.shell.openPath(data.albumRootDir || '');
         }
     });
+    (0, addSeparator_fn_1.default)(template);
     template.push({
-        label: 'Add to playback',
+        label: 'Play Now',
         click: () => {
-            (0, sendWebContents_fn_1.default)('album-add-to-playback', data.albumRootDir);
+            (0, sendWebContents_fn_1.default)('album-play-now', {
+                songList: data.songList,
+                clickedAlbum: data.albumRootDir,
+                selectedAlbumsDir: data.selectedAlbumsDir
+            });
         }
     });
     template.push({
-        label: 'Play after',
+        label: 'Add to Playback',
         click: () => {
-            (0, sendWebContents_fn_1.default)('album-play-after', data.albumRootDir);
+            (0, sendWebContents_fn_1.default)('album-add-to-playback', data.songList);
         }
     });
+    template.push({
+        label: 'Play After',
+        click: () => {
+            (0, sendWebContents_fn_1.default)('album-play-after', data.songList);
+        }
+    });
+    (0, addSeparator_fn_1.default)(template);
     template.push({
         label: `Reload Album Data`,
         click: () => {

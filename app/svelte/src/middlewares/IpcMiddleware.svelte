@@ -1,8 +1,11 @@
 <script lang="ts">
+	import type { SongType } from '../../../types/song.type'
 	import { addTaskToQueue } from '../db/!db'
 	import bulkDeleteSongsFn from '../db/bulkDeleteSongs.fn'
 	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
 	import getAllSongsFn from '../db/getAllSongs.fn'
+	import getDirectoryFn from '../functions/getDirectory.fn'
+	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import handleArtService from '../services/handleArt.service'
 	import { onNewLyrics } from '../stores/crosscall.store'
@@ -12,6 +15,7 @@
 		layoutToShow,
 		playbackStore,
 		playingSongStore,
+		selectedAlbumsDir,
 		songSyncQueueProgress
 	} from '../stores/main.store'
 
@@ -62,6 +66,18 @@
 		$config.directories = {
 			add: data.add,
 			exclude: data.exclude
+		}
+	})
+
+	window.ipc.onAlbumPlayNow(async (_, data: { songList: SongType[]; clickedAlbum: string; selectedAlbumsDir: string[] }) => {
+		if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
+			let songs = await getAlbumSongsFn(data.clickedAlbum)
+
+			let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+			setNewPlaybackFn(data.clickedAlbum, sortedSongs, undefined, { playNow: true })
+			$selectedAlbumsDir = [data.clickedAlbum]
+		} else {
+			setNewPlaybackFn(getDirectoryFn(data.songList[0].SourceFile), data.songList, data.songList[0].ID, { playNow: true })
 		}
 	})
 

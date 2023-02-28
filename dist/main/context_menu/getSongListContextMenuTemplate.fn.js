@@ -7,6 +7,7 @@ const electron_1 = require("electron");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const config_service_1 = require("../services/config.service");
 const lyrics_service_1 = require("../services/lyrics.service");
+const addSeparator_fn_1 = __importDefault(require("./functions/addSeparator.fn"));
 function default_1(data) {
     let template = [];
     let { selectedSongsData, clickedSongData } = data;
@@ -24,7 +25,7 @@ function default_1(data) {
                 handleEnableDisableSongs({ enable: false }, selectedSongsData, clickedSongData);
             }
         });
-        addSeparator(template);
+        (0, addSeparator_fn_1.default)(template);
     }
     template.push({
         label: 'Reveal in Folder',
@@ -40,14 +41,14 @@ function default_1(data) {
         type: 'submenu',
         submenu: getSongAmountMenu()
     });
-    addSeparator(template);
+    (0, addSeparator_fn_1.default)(template);
     template.push({
         label: 'Sort by',
         type: 'submenu',
         submenu: getSortMenu()
     });
     if (clickedSongData !== undefined) {
-        addSeparator(template);
+        (0, addSeparator_fn_1.default)(template);
         template.push({
             label: 'Edit Lyrics',
             click: () => editLyrics(clickedSongData)
@@ -185,9 +186,4 @@ function cutString(str, maxLength) {
     else {
         return str;
     }
-}
-function addSeparator(template) {
-    template.push({
-        type: 'separator'
-    });
 }

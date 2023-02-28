@@ -7528,8 +7528,14 @@ var app = (function () {
         if (pathsName.includes('ALBUM')) {
             let albumElement = e.composedPath().find((path) => path.tagName === 'ALBUM');
             let albumRootDir = albumElement.getAttribute('rootDir');
+            let songListStoreLocal = undefined;
+            let selectedAlbumsDirLocal = undefined;
+            songListStore.subscribe(value => (songListStoreLocal = value))();
+            selectedAlbumsDir.subscribe(value => (selectedAlbumsDirLocal = value))();
             window.ipc.showContextMenu('AlbumContextMenu', {
-                albumRootDir
+                albumRootDir,
+                selectedAlbumsDir: selectedAlbumsDirLocal,
+                songList: songListStoreLocal
             });
         }
         if (pathsName.includes('SONG-LIST')) {
@@ -8845,6 +8851,50 @@ var app = (function () {
         });
     }
 
+    let songToPlayUrlStore = writable([undefined, { playNow: false }]);
+    let currentPlayerTime = writable(undefined);
+
+    function shuffleArrayFn (inputArray) {
+        let arrayCopy = [...inputArray].map(item => {
+            return {
+                randomValue: Math.random(),
+                data: item
+            };
+        });
+        arrayCopy.sort((a, b) => {
+            return a.randomValue - b.randomValue;
+        });
+        return arrayCopy.map(item => {
+            return item.data;
+        });
+    }
+
+    async function setNewPlaybackFn (rootDir, playbackSongs, songIdToPlay, { playNow }) {
+        let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0];
+        if (songToPlay === undefined)
+            return;
+        let isSongShuffleEnabled = false;
+        isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))();
+        if (isSongShuffleEnabled) {
+            let shuffledArray = shuffleArrayFn(playbackSongs);
+            songToPlay = shuffledArray[0];
+            playbackStore.set(shuffledArray);
+        }
+        else {
+            playbackStore.set(playbackSongs);
+        }
+        playingSongStore.set(songToPlay);
+        currentSongDurationStore.set(songToPlay.Duration);
+        currentSongProgressStore.set(0);
+        setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration);
+        albumPlayingDirStore.set(rootDir);
+        songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }]);
+        triggerScrollToSongEvent.set(songToPlay.ID);
+        // getAlbumColorsFn(rootDir).then(color => {
+        // 	applyColorSchemeFn(color)
+        // })
+    }
+
     function generateId() {
         return BigInt(`${String(Math.random()).substring(2)}${Date.now()}`).toString(36);
     }
@@ -9025,6 +9075,7 @@ var app = (function () {
     	let $playbackStore;
     	let $playingSongStore;
     	let $config;
+    	let $selectedAlbumsDir;
     	let $onNewLyrics;
     	let $layoutToShow;
     	let $artCompressQueueLength;
@@ -9035,14 +9086,16 @@ var app = (function () {
     	component_subscribe($$self, playingSongStore, $$value => $$invalidate(1, $playingSongStore = $$value));
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
+    	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(3, $selectedAlbumsDir = $$value));
     	validate_store(onNewLyrics, 'onNewLyrics');
-    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(3, $onNewLyrics = $$value));
+    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(4, $onNewLyrics = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(4, $layoutToShow = $$value));
+    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(5, $layoutToShow = $$value));
     	validate_store(artCompressQueueLength, 'artCompressQueueLength');
-    	component_subscribe($$self, artCompressQueueLength, $$value => $$invalidate(5, $artCompressQueueLength = $$value));
+    	component_subscribe($$self, artCompressQueueLength, $$value => $$invalidate(6, $artCompressQueueLength = $$value));
     	validate_store(songSyncQueueProgress, 'songSyncQueueProgress');
-    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(6, $songSyncQueueProgress = $$value));
+    	component_subscribe($$self, songSyncQueueProgress, $$value => $$invalidate(7, $songSyncQueueProgress = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('IpcMiddleware', slots, []);
 
@@ -9087,6 +9140,17 @@ var app = (function () {
 
     	window.ipc.onSelectedDirectories((_, data) => {
     		set_store_value(config, $config.directories = { add: data.add, exclude: data.exclude }, $config);
+    	});
+
+    	window.ipc.onAlbumPlayNow(async (_, data) => {
+    		if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
+    			let songs = await getAlbumSongsFn(data.clickedAlbum);
+    			let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
+    			setNewPlaybackFn(data.clickedAlbum, sortedSongs, undefined, { playNow: true });
+    			set_store_value(selectedAlbumsDir, $selectedAlbumsDir = [data.clickedAlbum], $selectedAlbumsDir);
+    		} else {
+    			setNewPlaybackFn(getDirectoryFn(data.songList[0].SourceFile), data.songList, data.songList[0].ID, { playNow: true });
+    		}
     	});
 
     	window.ipc.onAlbumAddToPlayback(async (_, rootDir) => {
@@ -9142,6 +9206,8 @@ var app = (function () {
     		bulkDeleteSongsFn,
     		getAlbumSongsFn,
     		getAllSongsFn,
+    		getDirectoryFn,
+    		setNewPlaybackFn,
     		sortSongsArrayFn,
     		handleArtService,
     		onNewLyrics,
@@ -9150,10 +9216,12 @@ var app = (function () {
     		layoutToShow,
     		playbackStore,
     		playingSongStore,
+    		selectedAlbumsDir,
     		songSyncQueueProgress,
     		$playbackStore,
     		$playingSongStore,
     		$config,
+    		$selectedAlbumsDir,
     		$onNewLyrics,
     		$layoutToShow,
     		$artCompressQueueLength,
@@ -9191,50 +9259,6 @@ var app = (function () {
                 albumElement.scrollIntoView({ block: 'center', behavior: 'auto' });
             }
         }
-    }
-
-    let songToPlayUrlStore = writable([undefined, { playNow: false }]);
-    let currentPlayerTime = writable(undefined);
-
-    function shuffleArrayFn (inputArray) {
-        let arrayCopy = [...inputArray].map(item => {
-            return {
-                randomValue: Math.random(),
-                data: item
-            };
-        });
-        arrayCopy.sort((a, b) => {
-            return a.randomValue - b.randomValue;
-        });
-        return arrayCopy.map(item => {
-            return item.data;
-        });
-    }
-
-    async function setNewPlaybackFn (rootDir, playbackSongs, songIdToPlay, { playNow }) {
-        let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0];
-        if (songToPlay === undefined)
-            return;
-        let isSongShuffleEnabled = false;
-        isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))();
-        if (isSongShuffleEnabled) {
-            let shuffledArray = shuffleArrayFn(playbackSongs);
-            songToPlay = shuffledArray[0];
-            playbackStore.set(shuffledArray);
-        }
-        else {
-            playbackStore.set(playbackSongs);
-        }
-        playingSongStore.set(songToPlay);
-        currentSongDurationStore.set(songToPlay.Duration);
-        currentSongProgressStore.set(0);
-        setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration);
-        albumPlayingDirStore.set(rootDir);
-        songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }]);
-        triggerScrollToSongEvent.set(songToPlay.ID);
-        // getAlbumColorsFn(rootDir).then(color => {
-        // 	applyColorSchemeFn(color)
-        // })
     }
 
     /* src/middlewares/PlayerMiddleware.svelte generated by Svelte v3.55.1 */

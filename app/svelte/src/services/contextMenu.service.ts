@@ -1,5 +1,5 @@
 import bulkGetSongsFn from '../db/bulkGetSongs.fn'
-import { activeSongStore, selectedAlbumDir, selectedSongsStore } from '../stores/main.store'
+import { activeSongStore, selectedAlbumDir, selectedAlbumsDir, selectedSongsStore, songListStore } from '../stores/main.store'
 
 export async function handleContextMenuEvent(e: MouseEvent) {
 	e.preventDefault()
@@ -11,8 +11,16 @@ export async function handleContextMenuEvent(e: MouseEvent) {
 
 		let albumRootDir = albumElement.getAttribute('rootDir')
 
+		let songListStoreLocal = undefined
+		let selectedAlbumsDirLocal = undefined
+
+		songListStore.subscribe(value => (songListStoreLocal = value))()
+		selectedAlbumsDir.subscribe(value => (selectedAlbumsDirLocal = value))()
+
 		window.ipc.showContextMenu('AlbumContextMenu', {
-			albumRootDir
+			albumRootDir,
+			selectedAlbumsDir: selectedAlbumsDirLocal,
+			songList: songListStoreLocal
 		})
 	}
 

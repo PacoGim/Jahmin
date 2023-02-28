@@ -4,6 +4,8 @@ import { getConfig } from '../services/config.service'
 import { SongType } from '../../types/song.type'
 import { saveLyrics } from '../services/lyrics.service'
 
+import addSeparatorFn from './functions/addSeparator.fn'
+
 type dataType = {
 	selectedSongsData: SongType[]
 	clickedSongData: SongType | undefined
@@ -31,7 +33,7 @@ export default function (data: dataType) {
 			}
 		})
 
-		addSeparator(template)
+		addSeparatorFn(template)
 	}
 
 	template.push({
@@ -50,7 +52,7 @@ export default function (data: dataType) {
 		submenu: getSongAmountMenu()
 	})
 
-	addSeparator(template)
+	addSeparatorFn(template)
 
 	template.push({
 		label: 'Sort by',
@@ -59,7 +61,7 @@ export default function (data: dataType) {
 	})
 
 	if (clickedSongData !== undefined) {
-		addSeparator(template)
+		addSeparatorFn(template)
 
 		template.push({
 			label: 'Edit Lyrics',
@@ -221,8 +223,4 @@ function cutString(str: string, maxLength: number) {
 	}
 }
 
-function addSeparator(template: MenuItemConstructorOptions[]) {
-	template.push({
-		type: 'separator'
-	})
-}
+

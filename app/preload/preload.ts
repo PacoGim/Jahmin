@@ -52,6 +52,7 @@ const ipcFunctions = {
 	onSelectedDirectories: (callback: any) => ipcRenderer.on('selected-directories', callback),
 	onAlbumAddToPlayback: (callback: any) => ipcRenderer.on('album-add-to-playback', callback),
 	onAlbumPlayAfter: (callback: any) => ipcRenderer.on('album-play-after', callback),
+	onAlbumPlayNow: (callback: any) => ipcRenderer.on('album-play-now', callback),
 	onSongAddToPlayback: (callback: any) => ipcRenderer.on('song-add-to-playback', callback),
 	onSongPlayAfter: (callback: any) => ipcRenderer.on('song-play-after', callback)
 }
