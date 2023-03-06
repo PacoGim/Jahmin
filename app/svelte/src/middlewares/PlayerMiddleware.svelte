@@ -10,7 +10,13 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 
-	import { playbackStore, selectedAlbumDir, selectedAlbumsDir, songListStore } from '../stores/main.store'
+	import {
+		playbackStore,
+		selectedAlbumDir,
+		selectedAlbumsDir,
+		songListStore,
+		triggerScrollToSongEvent
+	} from '../stores/main.store'
 	import { config } from '../stores/main.store'
 
 	let allSongs = []
@@ -46,17 +52,17 @@
 
 	function loadPreviousState() {
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
-		// let lastPlayedDir = localStorage.getItem('LastPlayedDir')
-		// let lastPlayedDirs = JSON.parse(localStorage.getItem('SelectedAlbumsDir'))
 		let songList: SongType[] = JSON.parse(localStorage.getItem('SongList'))
 
 		let lastPlayedSong = songList.find(song => song.ID === lastPlayedSongId)
+		let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile)
 
-		setNewPlaybackFn(getDirectoryFn(lastPlayedSong.SourceFile), songList, lastPlayedSongId, {
+		$songListStore = songList
+		$playbackStore = songList
+
+		setNewPlaybackFn(lastPlayedSongDirectory, songList, lastPlayedSongId, {
 			playNow: false
 		})
-
-		$playbackStore = songList
 
 		songList.forEach(song => {
 			let songDirectory = getDirectoryFn(song.SourceFile)
@@ -67,7 +73,11 @@
 			}
 		})
 
-		$songListStore = songList
+		scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
+
+		// setTimeout(() => {
+		// 	$triggerScrollToSongEvent = lastPlayedSong.ID
+		// }, 150)
 
 		/* 		getAlbumSongsFn(lastPlayedDir).then(songs => {
 			if (songs.length === 0) {
@@ -87,7 +97,6 @@
 			setNewPlaybackFn(lastPlayedDir, fooSongs, lastPlayedSongId, { playNow: false })
 			// setNewPlaybackFn(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
 
-			scrollToAlbumFn(lastPlayedDir, 'smooth-scroll')
 		}) */
 	}
 

@@ -136,6 +136,16 @@
 		heightPercent = Math.round((100 / maxHeight) * currentHeight)
 	}
 
+	function limitCharacters(value: any, maxCharacters: number = 20) {
+		value = String(value)
+
+		if (value.length + 3 > maxCharacters) {
+			return value.substring(0, maxCharacters) + '...'
+		} else {
+			return value
+		}
+	}
+
 	onMount(() => {
 		createSortableList()
 		setTimeout(() => {
@@ -169,10 +179,10 @@
 							<play-button>
 								<PlayButton customColor="var(--color-fg-1)" customSize="0.75rem" />
 							</play-button>
-							{song[tag]}
+							{limitCharacters(song[tag], 40)}
 						</td>
 					{:else}
-						<td>{song[tag]}</td>
+						<td>{limitCharacters(song[tag], 40)}</td>
 					{/if}
 				{/each}
 
@@ -251,6 +261,8 @@
 	table tr td {
 		padding: 0.5rem;
 		text-align: center;
+
+		/* max-width: 100px; */
 	}
 
 	table tr td play-button {

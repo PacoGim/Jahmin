@@ -7258,7 +7258,7 @@ var app = (function () {
     let elementMap = writable(new Map());
     let windowResize = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Library');
+    let layoutToShow = writable('Playback');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -9321,16 +9321,16 @@ var app = (function () {
     }
 
     function instance$1t($$self, $$props, $$invalidate) {
-    	let $songListStore;
     	let $selectedAlbumsDir;
     	let $playbackStore;
+    	let $songListStore;
     	let $config;
-    	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(1, $songListStore = $$value));
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
-    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(2, $selectedAlbumsDir = $$value));
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(1, $selectedAlbumsDir = $$value));
     	validate_store(playbackStore, 'playbackStore');
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(3, $playbackStore = $$value));
+    	validate_store(songListStore, 'songListStore');
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(2, $songListStore = $$value));
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(4, $config = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -9350,14 +9350,12 @@ var app = (function () {
 
     	function loadPreviousState() {
     		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'));
-
-    		// let lastPlayedDir = localStorage.getItem('LastPlayedDir')
-    		// let lastPlayedDirs = JSON.parse(localStorage.getItem('SelectedAlbumsDir'))
     		let songList = JSON.parse(localStorage.getItem('SongList'));
-
     		let lastPlayedSong = songList.find(song => song.ID === lastPlayedSongId);
-    		setNewPlaybackFn(getDirectoryFn(lastPlayedSong.SourceFile), songList, lastPlayedSongId, { playNow: false });
+    		let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile);
+    		set_store_value(songListStore, $songListStore = songList, $songListStore);
     		set_store_value(playbackStore, $playbackStore = songList, $playbackStore);
+    		setNewPlaybackFn(lastPlayedSongDirectory, songList, lastPlayedSongId, { playNow: false });
 
     		songList.forEach(song => {
     			let songDirectory = getDirectoryFn(song.SourceFile);
@@ -9368,8 +9366,12 @@ var app = (function () {
     			}
     		});
 
-    		set_store_value(songListStore, $songListStore = songList, $songListStore);
-    	} /* 		getAlbumSongsFn(lastPlayedDir).then(songs => {
+    		scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll');
+    	} // setTimeout(() => {
+    	// 	$triggerScrollToSongEvent = lastPlayedSong.ID
+
+    	// }, 150)
+    	/* 		getAlbumSongsFn(lastPlayedDir).then(songs => {
         if (songs.length === 0) {
             $selectedAlbumDir = undefined
             getAlbumColorsFn(undefined).then(color => {
@@ -9387,9 +9389,7 @@ var app = (function () {
         setNewPlaybackFn(lastPlayedDir, fooSongs, lastPlayedSongId, { playNow: false })
         // setNewPlaybackFn(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
 
-        scrollToAlbumFn(lastPlayedDir, 'smooth-scroll')
     }) */
-
     	onMount(() => {
     		loadPreviousState();
     	});
@@ -9413,13 +9413,14 @@ var app = (function () {
     		selectedAlbumDir,
     		selectedAlbumsDir,
     		songListStore,
+    		triggerScrollToSongEvent,
     		config,
     		allSongs,
     		fillSongList,
     		loadPreviousState,
-    		$songListStore,
     		$selectedAlbumsDir,
     		$playbackStore,
+    		$songListStore,
     		$config
     	});
 
@@ -9432,7 +9433,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 4) {
+    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 2) {
     			fillSongList($selectedAlbumsDir);
     		}
 
@@ -9442,7 +9443,7 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 4) {
+    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 2) {
     			{
     				if ($selectedAlbumsDir !== undefined) {
     					localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir));
@@ -9450,7 +9451,7 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$songListStore*/ 2) {
+    		if ($$self.$$.dirty & /*$songListStore*/ 4) {
     			{
     				if ($songListStore !== undefined && $songListStore.length > 0) {
     					localStorage.setItem('SongList', JSON.stringify($songListStore));
@@ -9459,7 +9460,7 @@ var app = (function () {
     		}
     	};
 
-    	return [allSongs, $songListStore, $selectedAlbumsDir];
+    	return [allSongs, $selectedAlbumsDir, $songListStore];
     }
 
     class PlayerMiddleware extends SvelteComponentDev {
@@ -39107,7 +39108,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (127:3) {#each tempTags as tag, index (index)}
+    // (136:3) {#each tempTags as tag, index (index)}
     function create_each_block_2(key_1, ctx) {
     	let td;
     	let t_value = renameTagName(/*tag*/ ctx[20]) + "";
@@ -39119,8 +39120,8 @@ var app = (function () {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-19h670p");
-    			add_location(td, file$e, 127, 4, 4967);
+    			attr_dev(td, "class", "svelte-108dzys");
+    			add_location(td, file$e, 136, 4, 5197);
     			this.first = td;
     		},
     		m: function mount(target, anchor) {
@@ -39139,32 +39140,32 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(127:3) {#each tempTags as tag, index (index)}",
+    		source: "(136:3) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (143:5) {:else}
+    // (152:5) {:else}
     function create_else_block(ctx) {
     	let td;
-    	let t_value = /*song*/ ctx[17][/*tag*/ ctx[20]] + "";
+    	let t_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			attr_dev(td, "class", "svelte-19h670p");
-    			add_location(td, file$e, 143, 6, 5486);
+    			attr_dev(td, "class", "svelte-108dzys");
+    			add_location(td, file$e, 152, 6, 5737);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
     			append_dev(td, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = /*song*/ ctx[17][/*tag*/ ctx[20]] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "")) set_data_dev(t, t_value);
     		},
     		i: noop,
     		o: noop,
@@ -39177,20 +39178,20 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(143:5) {:else}",
+    		source: "(152:5) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (136:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
+    // (145:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
     function create_if_block$3(ctx) {
     	let td;
     	let play_button;
     	let playbutton;
     	let t0;
-    	let t1_value = /*song*/ ctx[17][/*tag*/ ctx[20]] + "";
+    	let t1_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "";
     	let t1;
     	let current;
 
@@ -39209,10 +39210,10 @@ var app = (function () {
     			create_component(playbutton.$$.fragment);
     			t0 = space();
     			t1 = text(t1_value);
-    			set_custom_element_data(play_button, "class", "svelte-19h670p");
-    			add_location(play_button, file$e, 137, 7, 5324);
-    			attr_dev(td, "class", "svelte-19h670p");
-    			add_location(td, file$e, 136, 6, 5312);
+    			set_custom_element_data(play_button, "class", "svelte-108dzys");
+    			add_location(play_button, file$e, 146, 7, 5554);
+    			attr_dev(td, "class", "svelte-108dzys");
+    			add_location(td, file$e, 145, 6, 5542);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -39223,7 +39224,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if ((!current || dirty & /*$playbackStore*/ 1) && t1_value !== (t1_value = /*song*/ ctx[17][/*tag*/ ctx[20]] + "")) set_data_dev(t1, t1_value);
+    			if ((!current || dirty & /*$playbackStore*/ 1) && t1_value !== (t1_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "")) set_data_dev(t1, t1_value);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -39244,14 +39245,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(136:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
+    		source: "(145:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (135:4) {#each tempTags as tag, index (index)}
+    // (144:4) {#each tempTags as tag, index (index)}
     function create_each_block_1(key_1, ctx) {
     	let first;
     	let current_block_type_index;
@@ -39332,14 +39333,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(135:4) {#each tempTags as tag, index (index)}",
+    		source: "(144:4) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (133:2) {#each $playbackStore as song, index (index)}
+    // (142:2) {#each $playbackStore as song, index (index)}
     function create_each_block$1(key_1, ctx) {
     	let tr;
     	let each_blocks = [];
@@ -39375,16 +39376,16 @@ var app = (function () {
     			t0 = space();
     			td = element("td");
     			t1 = space();
-    			attr_dev(td, "class", "filler svelte-19h670p");
-    			add_location(td, file$e, 147, 4, 5535);
+    			attr_dev(td, "class", "filler svelte-108dzys");
+    			add_location(td, file$e, 156, 4, 5807);
 
     			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[3].includes(/*song*/ ctx[17].ID)
     			? 'selected'
-    			: '') + " svelte-19h670p"));
+    			: '') + " svelte-108dzys"));
 
     			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[17].ID);
     			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[19]);
-    			add_location(tr, file$e, 133, 3, 5093);
+    			add_location(tr, file$e, 142, 3, 5323);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -39402,7 +39403,7 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*$playbackStore, tempTags, $playingSongStore*/ 21) {
+    			if (dirty & /*limitCharacters, $playbackStore, tempTags, $playingSongStore*/ 21) {
     				each_value_1 = /*tempTags*/ ctx[4];
     				validate_each_argument(each_value_1);
     				group_outros();
@@ -39413,7 +39414,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[3].includes(/*song*/ ctx[17].ID)
     			? 'selected'
-    			: '') + " svelte-19h670p"))) {
+    			: '') + " svelte-108dzys"))) {
     				attr_dev(tr, "class", tr_class_value);
     			}
 
@@ -39454,7 +39455,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(133:2) {#each $playbackStore as song, index (index)}",
+    		source: "(142:2) {#each $playbackStore as song, index (index)}",
     		ctx
     	});
 
@@ -39522,18 +39523,18 @@ var app = (function () {
     			}
 
     			set_style(scroll_bar_progress, "width", /*heightPercent*/ ctx[1] + "%");
-    			set_custom_element_data(scroll_bar_progress, "class", "svelte-19h670p");
-    			add_location(scroll_bar_progress, file$e, 121, 13, 4693);
-    			set_custom_element_data(scroll_bar, "class", "svelte-19h670p");
-    			add_location(scroll_bar, file$e, 121, 0, 4680);
-    			attr_dev(td, "class", "filler svelte-19h670p");
-    			add_location(td, file$e, 129, 3, 5011);
-    			attr_dev(tr, "class", "table-header static svelte-19h670p");
-    			add_location(tr, file$e, 125, 2, 4858);
-    			attr_dev(table, "class", "svelte-19h670p");
-    			add_location(table, file$e, 124, 1, 4848);
-    			set_custom_element_data(playback_layout, "class", "svelte-19h670p");
-    			add_location(playback_layout, file$e, 123, 0, 4763);
+    			set_custom_element_data(scroll_bar_progress, "class", "svelte-108dzys");
+    			add_location(scroll_bar_progress, file$e, 130, 13, 4923);
+    			set_custom_element_data(scroll_bar, "class", "svelte-108dzys");
+    			add_location(scroll_bar, file$e, 130, 0, 4910);
+    			attr_dev(td, "class", "filler svelte-108dzys");
+    			add_location(td, file$e, 138, 3, 5241);
+    			attr_dev(tr, "class", "table-header static svelte-108dzys");
+    			add_location(tr, file$e, 134, 2, 5088);
+    			attr_dev(table, "class", "svelte-108dzys");
+    			add_location(table, file$e, 133, 1, 5078);
+    			set_custom_element_data(playback_layout, "class", "svelte-108dzys");
+    			add_location(playback_layout, file$e, 132, 0, 4993);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -39582,7 +39583,7 @@ var app = (function () {
     				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_2, each0_lookup, tr, destroy_block, create_each_block_2, t1, get_each_context_2);
     			}
 
-    			if (dirty & /*selectedSongsId, $playbackStore, tempTags, $playingSongStore*/ 29) {
+    			if (dirty & /*selectedSongsId, $playbackStore, tempTags, limitCharacters, $playingSongStore*/ 29) {
     				each_value = /*$playbackStore*/ ctx[0];
     				validate_each_argument(each_value);
     				group_outros();
@@ -39644,6 +39645,16 @@ var app = (function () {
     		Artist: 'Artist',
     		Album: 'Album'
     	})[tagName];
+    }
+
+    function limitCharacters(value, maxCharacters = 20) {
+    	value = String(value);
+
+    	if (value.length + 3 > maxCharacters) {
+    		return value.substring(0, maxCharacters) + '...';
+    	} else {
+    		return value;
+    	}
     }
 
     function instance$g($$self, $$props, $$invalidate) {
@@ -39822,6 +39833,7 @@ var app = (function () {
     		handleWindowResize,
     		onTableHeaderClick,
     		calculateScroll,
+    		limitCharacters,
     		$config,
     		$playbackStore,
     		$playingSongStore
