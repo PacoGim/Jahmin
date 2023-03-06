@@ -1,6 +1,7 @@
 import iziToast from 'izitoast'
 import applyColorSchemeFn from '../functions/applyColorScheme.fn'
-import { isAppIdle, keyModifier, keyPressed, windowResize } from '../stores/main.store'
+import getDirectoryFn from '../functions/getDirectory.fn'
+import { isAppIdle, keyModifier, keyPressed, playbackStore, selectedAlbumsDir, windowResize } from '../stores/main.store'
 import { handleContextMenuEvent } from './contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
@@ -91,6 +92,23 @@ export default function () {
 			art.style.display = 'block'
 			staticArt.style.display = 'none'
 		})
+	})
+
+	playbackStore.subscribe(value => {
+		let selectedAlbumsDirLocal: string[] = undefined
+
+		selectedAlbumsDir.subscribe(value => (selectedAlbumsDirLocal = value || []))()
+
+		localStorage.setItem('SongList', JSON.stringify(value))
+
+/* 		value.forEach(song => {
+			let songDirectory = getDirectoryFn(song.SourceFile)
+
+			if (!selectedAlbumsDirLocal.includes(songDirectory)) {
+				selectedAlbumsDirLocal.push(songDirectory)
+				selectedAlbumsDir.set(selectedAlbumsDirLocal)
+			}
+		}) */
 	})
 }
 

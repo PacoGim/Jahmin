@@ -70,24 +70,45 @@
 	})
 
 	window.ipc.onAlbumPlayNow(async (_, data: { songList: SongType[]; clickedAlbum: string; selectedAlbumsDir: string[] }) => {
+		// If the album clicked is not included in the list of selected albums, only add the clicked album to the list.
 		if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
 			let songs = await getAlbumSongsFn(data.clickedAlbum)
 
 			let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
 			setNewPlaybackFn(data.clickedAlbum, sortedSongs, undefined, { playNow: true })
+
 			$selectedAlbumsDir = [data.clickedAlbum]
 		} else {
 			setNewPlaybackFn(getDirectoryFn(data.songList[0].SourceFile), data.songList, data.songList[0].ID, { playNow: true })
 		}
 	})
 
-	window.ipc.onAlbumAddToPlayback(async (_, rootDir) => {
-		let songs = await getAlbumSongsFn(rootDir)
+	window.ipc.onAlbumAddToPlayback(
+		async (_, data: { songList: SongType[]; clickedAlbum: string; selectedAlbumsDir: string[]; keyModifier }) => {
+			let songListToAdd = undefined
 
-		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+			// If the album clicked is not included in the list of selected albums, only add the clicked album to the list.
+			if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
+				let songs = await getAlbumSongsFn(data.clickedAlbum)
 
-		$playbackStore.push(...sortedSongs)
-	})
+				let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+				songListToAdd = sortedSongs
+			} else {
+				songListToAdd = data.songList
+			}
+
+			songListToAdd.forEach(song => {
+				let foundSong = $playbackStore.find(item => item.ID === song.ID)
+
+				if (!foundSong || data.keyModifier === 'altKey') {
+					$playbackStore.push(song)
+					$playbackStore = $playbackStore
+				}
+			})
+		}
+	)
 
 	window.ipc.onAlbumPlayAfter(async (_, rootDir) => {
 		let songs = await getAlbumSongsFn(rootDir)

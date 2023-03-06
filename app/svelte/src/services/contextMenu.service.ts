@@ -1,5 +1,12 @@
 import bulkGetSongsFn from '../db/bulkGetSongs.fn'
-import { activeSongStore, selectedAlbumDir, selectedAlbumsDir, selectedSongsStore, songListStore } from '../stores/main.store'
+import {
+	activeSongStore,
+	keyModifier,
+	selectedAlbumDir,
+	selectedAlbumsDir,
+	selectedSongsStore,
+	songListStore
+} from '../stores/main.store'
 
 export async function handleContextMenuEvent(e: MouseEvent) {
 	e.preventDefault()
@@ -13,15 +20,20 @@ export async function handleContextMenuEvent(e: MouseEvent) {
 
 		let songListStoreLocal = undefined
 		let selectedAlbumsDirLocal = undefined
+		let keyModifierLocal = undefined
 
 		songListStore.subscribe(value => (songListStoreLocal = value))()
 		selectedAlbumsDir.subscribe(value => (selectedAlbumsDirLocal = value))()
+		keyModifier.subscribe(value => (keyModifierLocal = value))()
 
 		window.ipc.showContextMenu('AlbumContextMenu', {
 			albumRootDir,
 			selectedAlbumsDir: selectedAlbumsDirLocal,
-			songList: songListStoreLocal
+			songList: songListStoreLocal,
+			keyModifier: keyModifierLocal
 		})
+
+		keyModifier.set(undefined)
 	}
 
 	if (pathsName.includes('SONG-LIST')) {

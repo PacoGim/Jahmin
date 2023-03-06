@@ -1,7 +1,20 @@
 <script lang="ts">
 	import AlbumArt from '../../components/AlbumArt.svelte'
+	import getDirectoryFn from '../../functions/getDirectory.fn'
 
-	import { selectedAlbumsDir, windowResize } from '../../stores/main.store'
+	import { playingSongStore, selectedAlbumsDir, windowResize } from '../../stores/main.store'
+
+	let imageSourceLocation = ''
+
+	$: findImage($selectedAlbumsDir, $playingSongStore)
+
+	function findImage(selectedAlbumsDir, playingSongStore) {
+		if (selectedAlbumsDir.length > 1) {
+			imageSourceLocation = getDirectoryFn(playingSongStore.SourceFile)
+		} else {
+			imageSourceLocation = selectedAlbumsDir?.[selectedAlbumsDir?.length - 1]
+		}
+	}
 </script>
 
 <song-list-background-svlt>
@@ -9,7 +22,7 @@
 		<backdrop />
 	{/key}
 
-	<AlbumArt imageSourceLocation={$selectedAlbumsDir?.[$selectedAlbumsDir?.length - 1]} />
+	<AlbumArt {imageSourceLocation} />
 </song-list-background-svlt>
 
 <style>

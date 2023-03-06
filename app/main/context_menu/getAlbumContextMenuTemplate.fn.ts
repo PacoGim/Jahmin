@@ -28,16 +28,26 @@ export default function (data: any) {
 	})
 
 	template.push({
-		label: 'Add to Playback',
+		label: data.keyModifier === 'altKey' ? 'Add to Playback (Force add)' : 'Add to Playback',
 		click: () => {
-			sendWebContentsFn('album-add-to-playback', data.songList)
+			sendWebContentsFn('album-add-to-playback', {
+				songList: data.songList,
+				clickedAlbum: data.albumRootDir,
+				selectedAlbumsDir: data.selectedAlbumsDir,
+				keyModifier: data.keyModifier
+			})
 		}
 	})
 
 	template.push({
-		label: 'Play After',
+		label: data.keyModifier === 'altKey' ? 'Play After (Force add)' : 'Play After',
 		click: () => {
-			sendWebContentsFn('album-play-after', data.songList)
+			sendWebContentsFn('album-play-after', {
+				songList: data.songList,
+				clickedAlbum: data.albumRootDir,
+				selectedAlbumsDir: data.selectedAlbumsDir,
+				keyModifier: data.keyModifier
+			})
 		}
 	})
 

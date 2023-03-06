@@ -8,7 +8,7 @@ export let isAppIdle: Writable<boolean> = writable(false)
 // List to show within Song List component.
 export let songListStore: Writable<SongType[]> = writable(undefined)
 export let selectedAlbumDir: Writable<string | undefined> = writable(undefined)
-export let selectedAlbumsDir: Writable<string[] | undefined> = writable(undefined)
+export let selectedAlbumsDir: Writable<string[] | undefined> = writable([])
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)

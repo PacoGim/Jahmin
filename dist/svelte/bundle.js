@@ -7165,6 +7165,10 @@ var app = (function () {
         cssVariablesService.set('art-lightness-light', color.lightnessLight + '%');
     }
 
+    function getDirectoryFn (inputString) {
+        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
+    }
+
     const subscriber_queue = [];
     /**
      * Create a `Writable` store that allows both updating and reading by subscription.
@@ -7226,7 +7230,7 @@ var app = (function () {
     // List to show within Song List component.
     let songListStore = writable(undefined);
     let selectedAlbumDir = writable(undefined);
-    let selectedAlbumsDir = writable(undefined);
+    let selectedAlbumsDir = writable([]);
     let albumPlayingDirStore = writable(undefined);
     let currentSongDurationStore = writable(0);
     let currentSongProgressStore = writable(0);
@@ -7276,10 +7280,6 @@ var app = (function () {
     layoutToShow.subscribe(layoutName => {
         document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin';
     });
-
-    function getDirectoryFn (inputString) {
-        return (inputString === null || inputString === void 0 ? void 0 : inputString.split('/').slice(0, -1).join('/')) || '';
-    }
 
     var sortSongsArrayFn = (songs, tag, order, group = undefined) => {
         let songsArrayCopy = [...songs];
@@ -7530,13 +7530,17 @@ var app = (function () {
             let albumRootDir = albumElement.getAttribute('rootDir');
             let songListStoreLocal = undefined;
             let selectedAlbumsDirLocal = undefined;
+            let keyModifierLocal = undefined;
             songListStore.subscribe(value => (songListStoreLocal = value))();
             selectedAlbumsDir.subscribe(value => (selectedAlbumsDirLocal = value))();
+            keyModifier.subscribe(value => (keyModifierLocal = value))();
             window.ipc.showContextMenu('AlbumContextMenu', {
                 albumRootDir,
                 selectedAlbumsDir: selectedAlbumsDirLocal,
-                songList: songListStoreLocal
+                songList: songListStoreLocal,
+                keyModifier: keyModifierLocal
             });
+            keyModifier.set(undefined);
         }
         if (pathsName.includes('SONG-LIST')) {
             let clickedSongItem = e
@@ -7680,6 +7684,18 @@ var app = (function () {
                 art.style.display = 'block';
                 staticArt.style.display = 'none';
             });
+        });
+        playbackStore.subscribe(value => {
+            selectedAlbumsDir.subscribe(value => (value || []))();
+            localStorage.setItem('SongList', JSON.stringify(value));
+            /* 		value.forEach(song => {
+                        let songDirectory = getDirectoryFn(song.SourceFile)
+            
+                        if (!selectedAlbumsDirLocal.includes(songDirectory)) {
+                            selectedAlbumsDirLocal.push(songDirectory)
+                            selectedAlbumsDir.set(selectedAlbumsDirLocal)
+                        }
+                    }) */
         });
     }
     function getAppIdleDebounce() {
@@ -9143,6 +9159,7 @@ var app = (function () {
     	});
 
     	window.ipc.onAlbumPlayNow(async (_, data) => {
+    		// If the album clicked is not included in the list of selected albums, only add the clicked album to the list.
     		if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
     			let songs = await getAlbumSongsFn(data.clickedAlbum);
     			let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
@@ -9153,10 +9170,26 @@ var app = (function () {
     		}
     	});
 
-    	window.ipc.onAlbumAddToPlayback(async (_, rootDir) => {
-    		let songs = await getAlbumSongsFn(rootDir);
-    		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
-    		$playbackStore.push(...sortedSongs);
+    	window.ipc.onAlbumAddToPlayback(async (_, data) => {
+    		let songListToAdd = undefined;
+
+    		// If the album clicked is not included in the list of selected albums, only add the clicked album to the list.
+    		if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
+    			let songs = await getAlbumSongsFn(data.clickedAlbum);
+    			let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
+    			songListToAdd = sortedSongs;
+    		} else {
+    			songListToAdd = data.songList;
+    		}
+
+    		songListToAdd.forEach(song => {
+    			let foundSong = $playbackStore.find(item => item.ID === song.ID);
+
+    			if (!foundSong || data.keyModifier === 'altKey') {
+    				$playbackStore.push(song);
+    				playbackStore.set($playbackStore);
+    			}
+    		});
     	});
 
     	window.ipc.onAlbumPlayAfter(async (_, rootDir) => {
@@ -9288,18 +9321,18 @@ var app = (function () {
     }
 
     function instance$1t($$self, $$props, $$invalidate) {
-    	let $config;
-    	let $selectedAlbumDir;
-    	let $selectedAlbumsDir;
     	let $songListStore;
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(3, $config = $$value));
-    	validate_store(selectedAlbumDir, 'selectedAlbumDir');
-    	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(4, $selectedAlbumDir = $$value));
-    	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
-    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(1, $selectedAlbumsDir = $$value));
+    	let $selectedAlbumsDir;
+    	let $playbackStore;
+    	let $config;
     	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(2, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(1, $songListStore = $$value));
+    	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(2, $selectedAlbumsDir = $$value));
+    	validate_store(playbackStore, 'playbackStore');
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(3, $playbackStore = $$value));
+    	validate_store(config, 'config');
+    	component_subscribe($$self, config, $$value => $$invalidate(4, $config = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlayerMiddleware', slots, []);
     	let allSongs = [];
@@ -9317,33 +9350,45 @@ var app = (function () {
 
     	function loadPreviousState() {
     		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'));
-    		let lastPlayedDir = localStorage.getItem('LastPlayedDir');
-    		JSON.parse(localStorage.getItem('SelectedAlbumsDir'));
-    		JSON.parse(localStorage.getItem('SongList'));
 
-    		getAlbumSongsFn(lastPlayedDir).then(songs => {
-    			if (songs.length === 0) {
-    				set_store_value(selectedAlbumDir, $selectedAlbumDir = undefined, $selectedAlbumDir);
+    		// let lastPlayedDir = localStorage.getItem('LastPlayedDir')
+    		// let lastPlayedDirs = JSON.parse(localStorage.getItem('SelectedAlbumsDir'))
+    		let songList = JSON.parse(localStorage.getItem('SongList'));
 
-    				getAlbumColors(undefined).then(color => {
-    					applyColorSchemeFn(color);
-    				});
+    		let lastPlayedSong = songList.find(song => song.ID === lastPlayedSongId);
+    		setNewPlaybackFn(getDirectoryFn(lastPlayedSong.SourceFile), songList, lastPlayedSongId, { playNow: false });
+    		set_store_value(playbackStore, $playbackStore = songList, $playbackStore);
 
-    				return;
-    			} else {
-    				set_store_value(selectedAlbumsDir, $selectedAlbumsDir = [lastPlayedDir], $selectedAlbumsDir);
-    				set_store_value(selectedAlbumDir, $selectedAlbumDir = lastPlayedDir, $selectedAlbumDir);
+    		songList.forEach(song => {
+    			let songDirectory = getDirectoryFn(song.SourceFile);
+
+    			if (!$selectedAlbumsDir.includes(songDirectory)) {
+    				$selectedAlbumsDir.push(songDirectory);
+    				selectedAlbumsDir.set($selectedAlbumsDir);
     			}
-
-    			// $songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-    			let fooSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
-
-    			setNewPlaybackFn(lastPlayedDir, fooSongs, lastPlayedSongId, { playNow: false });
-
-    			// setNewPlaybackFn(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
-    			scrollToAlbumFn(lastPlayedDir, 'smooth-scroll');
     		});
-    	}
+
+    		set_store_value(songListStore, $songListStore = songList, $songListStore);
+    	} /* 		getAlbumSongsFn(lastPlayedDir).then(songs => {
+        if (songs.length === 0) {
+            $selectedAlbumDir = undefined
+            getAlbumColorsFn(undefined).then(color => {
+                applyColorSchemeFn(color)
+            })
+            return
+        } else {
+            $selectedAlbumsDir = [lastPlayedDir]
+            $selectedAlbumDir = lastPlayedDir
+        }
+
+        // $songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+        let fooSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+        setNewPlaybackFn(lastPlayedDir, fooSongs, lastPlayedSongId, { playNow: false })
+        // setNewPlaybackFn(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
+
+        scrollToAlbumFn(lastPlayedDir, 'smooth-scroll')
+    }) */
 
     	onMount(() => {
     		loadPreviousState();
@@ -9360,9 +9405,11 @@ var app = (function () {
     		getAlbumSongsFn,
     		applyColorSchemeFn,
     		getAlbumColorsFn: getAlbumColors,
+    		getDirectoryFn,
     		scrollToAlbumFn,
     		setNewPlaybackFn,
     		sortSongsArrayFn,
+    		playbackStore,
     		selectedAlbumDir,
     		selectedAlbumsDir,
     		songListStore,
@@ -9370,10 +9417,10 @@ var app = (function () {
     		allSongs,
     		fillSongList,
     		loadPreviousState,
-    		$config,
-    		$selectedAlbumDir,
+    		$songListStore,
     		$selectedAlbumsDir,
-    		$songListStore
+    		$playbackStore,
+    		$config
     	});
 
     	$$self.$inject_state = $$props => {
@@ -9385,7 +9432,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 2) {
+    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 4) {
     			fillSongList($selectedAlbumsDir);
     		}
 
@@ -9395,7 +9442,7 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 2) {
+    		if ($$self.$$.dirty & /*$selectedAlbumsDir*/ 4) {
     			{
     				if ($selectedAlbumsDir !== undefined) {
     					localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir));
@@ -9403,7 +9450,7 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$songListStore*/ 4) {
+    		if ($$self.$$.dirty & /*$songListStore*/ 2) {
     			{
     				if ($songListStore !== undefined && $songListStore.length > 0) {
     					localStorage.setItem('SongList', JSON.stringify($songListStore));
@@ -9412,7 +9459,7 @@ var app = (function () {
     		}
     	};
 
-    	return [allSongs, $selectedAlbumsDir, $songListStore];
+    	return [allSongs, $songListStore, $selectedAlbumsDir];
     }
 
     class PlayerMiddleware extends SvelteComponentDev {
@@ -22179,9 +22226,10 @@ var app = (function () {
     }
 
     /* src/layouts/library/SongListBackground.svelte generated by Svelte v3.55.1 */
+
     const file$S = "src/layouts/library/SongListBackground.svelte";
 
-    // (6:1) {#key $windowResize}
+    // (17:1) {#key $windowResize}
     function create_key_block(ctx) {
     	let backdrop;
 
@@ -22189,7 +22237,7 @@ var app = (function () {
     		c: function create() {
     			backdrop = element("backdrop");
     			attr_dev(backdrop, "class", "svelte-1ok3km0");
-    			add_location(backdrop, file$S, 6, 2, 213);
+    			add_location(backdrop, file$S, 17, 2, 795);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, backdrop, anchor);
@@ -22204,7 +22252,7 @@ var app = (function () {
     		block,
     		id: create_key_block.name,
     		type: "key",
-    		source: "(6:1) {#key $windowResize}",
+    		source: "(17:1) {#key $windowResize}",
     		ctx
     	});
 
@@ -22213,7 +22261,7 @@ var app = (function () {
 
     function create_fragment$X(ctx) {
     	let song_list_background_svlt;
-    	let previous_key = /*$windowResize*/ ctx[0];
+    	let previous_key = /*$windowResize*/ ctx[1];
     	let t;
     	let albumart;
     	let current;
@@ -22221,7 +22269,7 @@ var app = (function () {
 
     	albumart = new AlbumArt({
     			props: {
-    				imageSourceLocation: /*$selectedAlbumsDir*/ ctx[1]?.[/*$selectedAlbumsDir*/ ctx[1]?.length - 1]
+    				imageSourceLocation: /*imageSourceLocation*/ ctx[0]
     			},
     			$$inline: true
     		});
@@ -22233,7 +22281,7 @@ var app = (function () {
     			t = space();
     			create_component(albumart.$$.fragment);
     			set_custom_element_data(song_list_background_svlt, "class", "svelte-1ok3km0");
-    			add_location(song_list_background_svlt, file$S, 4, 0, 161);
+    			add_location(song_list_background_svlt, file$S, 15, 0, 743);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -22246,7 +22294,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*$windowResize*/ 1 && safe_not_equal(previous_key, previous_key = /*$windowResize*/ ctx[0])) {
+    			if (dirty & /*$windowResize*/ 2 && safe_not_equal(previous_key, previous_key = /*$windowResize*/ ctx[1])) {
     				key_block.d(1);
     				key_block = create_key_block(ctx);
     				key_block.c();
@@ -22256,7 +22304,7 @@ var app = (function () {
     			}
 
     			const albumart_changes = {};
-    			if (dirty & /*$selectedAlbumsDir*/ 2) albumart_changes.imageSourceLocation = /*$selectedAlbumsDir*/ ctx[1]?.[/*$selectedAlbumsDir*/ ctx[1]?.length - 1];
+    			if (dirty & /*imageSourceLocation*/ 1) albumart_changes.imageSourceLocation = /*imageSourceLocation*/ ctx[0];
     			albumart.$set(albumart_changes);
     		},
     		i: function intro(local) {
@@ -22287,14 +22335,31 @@ var app = (function () {
     }
 
     function instance$X($$self, $$props, $$invalidate) {
-    	let $windowResize;
+    	let $playingSongStore;
     	let $selectedAlbumsDir;
-    	validate_store(windowResize, 'windowResize');
-    	component_subscribe($$self, windowResize, $$value => $$invalidate(0, $windowResize = $$value));
+    	let $windowResize;
+    	validate_store(playingSongStore, 'playingSongStore');
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(2, $playingSongStore = $$value));
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
-    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(1, $selectedAlbumsDir = $$value));
+    	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(3, $selectedAlbumsDir = $$value));
+    	validate_store(windowResize, 'windowResize');
+    	component_subscribe($$self, windowResize, $$value => $$invalidate(1, $windowResize = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SongListBackground', slots, []);
+    	let imageSourceLocation = '';
+
+    	function findImage(selectedAlbumsDir, playingSongStore) {
+    		if (selectedAlbumsDir.length > 1) {
+    			$$invalidate(0, imageSourceLocation = getDirectoryFn(playingSongStore.SourceFile));
+    		} else {
+    			$$invalidate(0, imageSourceLocation = selectedAlbumsDir === null || selectedAlbumsDir === void 0
+    			? void 0
+    			: selectedAlbumsDir[(selectedAlbumsDir === null || selectedAlbumsDir === void 0
+    				? void 0
+    				: selectedAlbumsDir.length) - 1]);
+    		}
+    	}
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -22303,13 +22368,32 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		AlbumArt,
+    		getDirectoryFn,
+    		playingSongStore,
     		selectedAlbumsDir,
     		windowResize,
-    		$windowResize,
-    		$selectedAlbumsDir
+    		imageSourceLocation,
+    		findImage,
+    		$playingSongStore,
+    		$selectedAlbumsDir,
+    		$windowResize
     	});
 
-    	return [$windowResize, $selectedAlbumsDir];
+    	$$self.$inject_state = $$props => {
+    		if ('imageSourceLocation' in $$props) $$invalidate(0, imageSourceLocation = $$props.imageSourceLocation);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$selectedAlbumsDir, $playingSongStore*/ 12) {
+    			findImage($selectedAlbumsDir, $playingSongStore);
+    		}
+    	};
+
+    	return [imageSourceLocation, $windowResize, $playingSongStore, $selectedAlbumsDir];
     }
 
     class SongListBackground extends SvelteComponentDev {

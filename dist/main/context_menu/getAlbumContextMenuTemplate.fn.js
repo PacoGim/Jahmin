@@ -27,15 +27,25 @@ function default_1(data) {
         }
     });
     template.push({
-        label: 'Add to Playback',
+        label: data.keyModifier === 'altKey' ? 'Add to Playback (Force add)' : 'Add to Playback',
         click: () => {
-            (0, sendWebContents_fn_1.default)('album-add-to-playback', data.songList);
+            (0, sendWebContents_fn_1.default)('album-add-to-playback', {
+                songList: data.songList,
+                clickedAlbum: data.albumRootDir,
+                selectedAlbumsDir: data.selectedAlbumsDir,
+                keyModifier: data.keyModifier
+            });
         }
     });
     template.push({
-        label: 'Play After',
+        label: data.keyModifier === 'altKey' ? 'Play After (Force add)' : 'Play After',
         click: () => {
-            (0, sendWebContents_fn_1.default)('album-play-after', data.songList);
+            (0, sendWebContents_fn_1.default)('album-play-after', {
+                songList: data.songList,
+                clickedAlbum: data.albumRootDir,
+                selectedAlbumsDir: data.selectedAlbumsDir,
+                keyModifier: data.keyModifier
+            });
         }
     });
     (0, addSeparator_fn_1.default)(template);
