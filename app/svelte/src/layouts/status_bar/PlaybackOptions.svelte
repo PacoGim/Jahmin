@@ -6,8 +6,8 @@
 	import RepeatIcon from '../../icons/RepeatIcon.svelte'
 	import RepeatOneIcon from '../../icons/RepeatOneIcon.svelte'
 	import ShuffleIcon from '../../icons/ShuffleIcon.svelte'
+  import { config } from '../../stores/config.store'
 	import {
-		config,
 		isPlaybackRepeatEnabledStore,
 		isSongRepeatEnabledStore,
 		isSongShuffleEnabledStore,

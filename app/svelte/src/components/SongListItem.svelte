@@ -3,11 +3,12 @@
 
 	import type { SongType } from '../../../types/song.type'
 
-	import { config, playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
+	import {  playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
 
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'
 	import PlayButton from '../layouts/components/PlayButton.svelte'
+  import { songListTagConfig } from '../stores/config.store'
 
 	export let song: SongType
 	export let index: number
@@ -25,7 +26,7 @@
 	$: {
 		song
 		// TODO Potential problem here.
-		$config.songListTags
+		$songListTagConfig
 		isSongPlaying
 		buildGridStyle()
 	}
@@ -41,7 +42,7 @@
 	})
 
 	function buildGridStyle() {
-		let tempGridStyle = tagToGridStyleFn($config.songListTags)
+		let tempGridStyle = tagToGridStyleFn($songListTagConfig)
 
 		if (song.isEnabled === false) {
 			tempGridStyle = 'max-content ' + tempGridStyle
@@ -88,15 +89,15 @@
 	{#if isSongPlaying === true}
 		<PlayButton customSize="0.75rem" customColor="#fff" />
 	{/if}
-	{#each $config.songListTags as tag, index (index)}
-		{#if tag.value === 'Title' && $config.songListTags.find(configTag => configTag.value === 'DynamicArtists')}
+	{#each $songListTagConfig as tag, index (index)}
+		{#if tag.value === 'Title' && $songListTagConfig.find(configTag => configTag.value === 'DynamicArtists')}
 			<SongTag
 				tagName={tag.value}
 				tagValue={`${song[tag.value]} ${song.DynamicArtists}` || ''}
 				align={tag?.align?.toLowerCase()}
 				on:starChange={setStar}
 			/>
-		{:else if tag.value === 'DynamicArtists' || !$config.songListTags.find(configTag => configTag.value === 'Title')}
+		{:else if tag.value === 'DynamicArtists' || !$songListTagConfig.find(configTag => configTag.value === 'Title')}
 			<!-- Empty -->
 		{:else}
 			<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />

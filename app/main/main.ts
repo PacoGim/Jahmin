@@ -14,12 +14,14 @@ import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.f
 
 let browserWindow: BrowserWindow
 
-chokidarWatch([path.join(__dirname, '../svelte'), path.join(__dirname, '../index.html'), path.join(__dirname, '../assets')]).on(
-	'change',
-	() => {
-		getMainWindow().reload()
-	}
-)
+chokidarWatch([
+	path.join(__dirname, '../svelte'),
+	path.join(__dirname, '../index.html'),
+	path.join(__dirname, '../assets'),
+	path.join(__dirname, './i18n')
+]).on('change', () => {
+	getMainWindow().reload()
+})
 
 function createWindow() {
 	const config = getConfig()

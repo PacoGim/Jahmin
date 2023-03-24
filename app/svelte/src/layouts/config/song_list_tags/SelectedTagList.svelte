@@ -3,9 +3,9 @@
 
 	import SortableService from '../../../services/sortable.service'
 	import { onMount } from 'svelte'
-	import { config } from '../../../stores/main.store'
+	import { config, songListTagConfig } from '../../../stores/config.store'
 
-	$: if ($config.songListTags.length > 0) createSortableList()
+	$: if ($songListTagConfig.length > 0) createSortableList()
 
 	function createSortableList() {
 		let el = document.querySelector('selected-tags-list ul')

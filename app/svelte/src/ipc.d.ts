@@ -30,6 +30,8 @@ declare global {
 			) => Promise<{ isError: boolean; message: string; data: { title: string; artist: string } }>
 			getArtCacheSize: () => Promise<string>
 			fileExists: (filePath: string) => Promise<boolean>
+			getOs: () => Promise<string>
+			getLangFile: () => Promise<Object>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void
@@ -42,6 +44,7 @@ declare global {
 			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
 			handleArt: (filePath: string, elementId: string, size: number) => void
 			verifyFolderTegrity: (folderRoot: string) => void
+			reloadApp: () => void,
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt
@@ -59,6 +62,7 @@ declare global {
 			onAlbumPlayNow: (callback: any) => void
 			onSongAddToPlayback: (callback: any) => void
 			onSongPlayAfter: (callback: any) => void
+			onChangeSongAmount: (callback: any) => void
 		}
 	}
 }

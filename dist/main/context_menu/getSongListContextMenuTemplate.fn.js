@@ -108,7 +108,7 @@ function getSongAmountMenu() {
             type: 'radio',
             label: String(i),
             click: () => {
-                (0, sendWebContents_fn_1.default)('show-song-amount', i);
+                (0, sendWebContents_fn_1.default)('change-song-amount', i);
             },
             checked: i === songAmountConfig,
             enabled: i !== songAmountConfig

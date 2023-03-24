@@ -6,13 +6,14 @@
 	import { equalizerNameStore, isEqualizerDirty, isEqualizerOn } from '../../../stores/equalizer.store'
 
 	import OptionSection from '../../../components/OptionSection.svelte'
+	import traduceFn from '../../../functions/traduce.fn'
 </script>
 
-<OptionSection title="Equalizer Profiles">
+<OptionSection title="{traduceFn('Equalizer')} {traduceFn('Profiles')}">
 	<EqualizerProfiles />
 </OptionSection>
 
-<OptionSection title="Equalizer - {$equalizerNameStore} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
+<OptionSection title="{traduceFn('Equalizer')} - {$equalizerNameStore} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
 	<EqualizerControls />
 	<EqualizerButtons />
 </OptionSection>

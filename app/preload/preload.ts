@@ -24,6 +24,8 @@ const ipcFunctions = {
 	deleteLyrics,
 	getArtCacheSize,
 	fileExists,
+	getOs,
+	getLangFile,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -39,6 +41,7 @@ const ipcFunctions = {
 		ipcRenderer.send('remove-directory', directory, type, songs),
 	handleArt: (filePath: string, elementId: string, size: number) => ipcRenderer.send('handle-art', filePath, elementId, size),
 	verifyFolderTegrity: (folderRoot: string) => ipcRenderer.send('verify-folder-tegrity', folderRoot),
+	reloadApp: () => ipcRenderer.send('reload-app'),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),
@@ -54,10 +57,29 @@ const ipcFunctions = {
 	onAlbumPlayAfter: (callback: any) => ipcRenderer.on('album-play-after', callback),
 	onAlbumPlayNow: (callback: any) => ipcRenderer.on('album-play-now', callback),
 	onSongAddToPlayback: (callback: any) => ipcRenderer.on('song-add-to-playback', callback),
-	onSongPlayAfter: (callback: any) => ipcRenderer.on('song-play-after', callback)
+	onSongPlayAfter: (callback: any) => ipcRenderer.on('song-play-after', callback),
+	onChangeSongAmount: (callback: any) => ipcRenderer.on('change-song-amount', callback)
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
+
+function getLangFile() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('get-lang-file')
+			.then(response => resolve(JSON.parse(response)))
+			.catch(err => reject(err))
+	})
+}
+
+function getOs() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('get-os')
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
 
 function fileExists(filePath: string) {
 	return new Promise((resolve, reject) => {

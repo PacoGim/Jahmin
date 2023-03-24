@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { handleContextMenuEvent } from '../../services/contextMenu.service'
 	import { groupSongs } from '../../services/groupSongs.service'
+	import { config } from '../../stores/config.store'
 
-	import { config, dbSongsStore, dbVersionStore, selectedGroups, triggerGroupingChangeEvent } from '../../stores/main.store'
+	import { dbSongsStore, dbVersionStore, selectedGroups, triggerGroupingChangeEvent } from '../../stores/main.store'
 
 	let isFirstGroupSongs = true
 

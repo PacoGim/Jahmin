@@ -11,11 +11,10 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
+	import { config } from '../stores/config.store'
 
 	import {
 		albumPlayingDirStore,
-		activeSongStore,
-		config,
 		elementMap,
 		layoutToShow,
 		playbackStore,

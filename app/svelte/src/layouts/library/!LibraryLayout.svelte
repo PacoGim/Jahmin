@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import { groupSongs } from '../../services/groupSongs.service'
-	import { config, dbSongsStore } from '../../stores/main.store'
+	import { dbSongsStore } from '../../stores/main.store'
+	import { config, fontSizeConfig } from '../../stores/config.store'
 
 	import ArtGrid from './ArtGrid.svelte'
 	import NoSong from './NoSong.svelte'
@@ -11,8 +12,8 @@
 	import TagEdit from './TagEdit.svelte'
 	import TagGroup from './TagGroup.svelte'
 
-	$: if ($config.userOptions.fontSize !== undefined) {
-		cssVariablesService.set('font-size', `${$config.userOptions.fontSize}px`)
+	$: if ($fontSizeConfig !== undefined) {
+		cssVariablesService.set('font-size', `${$fontSizeConfig}px`)
 	}
 
 	onMount(() => {
@@ -34,7 +35,6 @@
 
 <style>
 	library-layout {
-
 		overflow-y: hidden;
 
 		display: grid;

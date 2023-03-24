@@ -1,4 +1,4 @@
-import tippy, { roundArrow, type Instance, type Props } from 'tippy.js'
+import tippy, { type Instance, type Props } from 'tippy.js'
 import DomPurify from 'dompurify'
 
 let tippyInstances = new Map<string, Instance<Props>[]>()

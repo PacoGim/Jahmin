@@ -75,7 +75,7 @@ function getAacTags(filePath) {
         resolve({
             ID: stringHash(filePath),
             Extension: METADATA.FileTypeExtension,
-            SourceFile: METADATA.SourceFile || null,
+            SourceFile: filePath,
             Album: METADATA.Album || null,
             AlbumArtist: METADATA.AlbumArtist || null,
             Artist: METADATA.Artist || null,

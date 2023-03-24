@@ -13,6 +13,7 @@ type DirectoriesType = {
 }
 
 export type UserOptionsType = {
+	language:string
 	theme: ThemeOptions
 	equalizerName?: string
 	songAmount: number

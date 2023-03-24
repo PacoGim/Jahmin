@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import MoonFillIcon from '../../../icons/MoonFillIcon.svelte'
 
@@ -7,8 +8,9 @@
 	import SystemFillIcon from '../../../icons/SystemFillIcon.svelte'
 	import SystemIcon from '../../../icons/SystemIcon.svelte'
 	import type { ThemeOptions } from '../../../../../types/config.type'
-	import { config } from '../../../stores/main.store'
+	import { config } from '../../../stores/config.store'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
+	import traduceFn from '../../../functions/traduce.fn'
 
 	let iconsStyle = 'height: 4rem;margin-bottom: 1rem;fill: var(--color-fg-1);transition: all 300ms ease-in-out;'
 
@@ -32,7 +34,7 @@
 			<SystemIcon style="opacity:{$config.userOptions.theme !== 'SystemBased' ? '1' : '0'};{iconsStyle}" />
 		</section-icon>
 
-		<theme-name>System Based</theme-name>
+		<theme-name>{traduceFn('System Based')}</theme-name>
 	</theme-section>
 	<theme-section
 		data-theme="Day"
@@ -44,7 +46,7 @@
 			<SunIcon style="opacity:{$config.userOptions.theme !== 'Day' ? '1' : '0'};{iconsStyle}" />
 		</section-icon>
 
-		<theme-name>Day</theme-name>
+		<theme-name>{traduceFn('Day')}</theme-name>
 	</theme-section>
 	<theme-section
 		data-theme="Night"
@@ -57,7 +59,7 @@
 			<MoonIcon style="opacity:{$config.userOptions.theme !== 'Night' ? '1' : '0'};{iconsStyle}" />
 		</section-icon>
 
-		<theme-name>Night</theme-name>
+		<theme-name>{traduceFn('Night')}</theme-name>
 	</theme-section>
 </day-night-theme-config>
 
@@ -91,6 +93,7 @@
 	}
 
 	theme-section theme-name {
+		text-align: center;
 		transition: font-variation-settings 300ms ease-in-out;
 	}
 

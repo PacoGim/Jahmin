@@ -12,7 +12,12 @@ const ipc_service_1 = require("./services/ipc.service");
 const path_1 = __importDefault(require("path"));
 const calculateWindowBoundaries_fn_1 = __importDefault(require("./functions/calculateWindowBoundaries.fn"));
 let browserWindow;
-(0, chokidar_1.watch)([path_1.default.join(__dirname, '../svelte'), path_1.default.join(__dirname, '../index.html'), path_1.default.join(__dirname, '../assets')]).on('change', () => {
+(0, chokidar_1.watch)([
+    path_1.default.join(__dirname, '../svelte'),
+    path_1.default.join(__dirname, '../index.html'),
+    path_1.default.join(__dirname, '../assets'),
+    path_1.default.join(__dirname, './i18n')
+]).on('change', () => {
     getMainWindow().reload();
 });
 function createWindow() {

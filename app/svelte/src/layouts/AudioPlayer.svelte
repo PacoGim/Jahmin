@@ -20,8 +20,7 @@
 		isPlaybackRepeatEnabledStore,
 		currentSongDurationStore,
 		currentSongProgressStore,
-		isSongShuffleEnabledStore,
-		config
+		isSongShuffleEnabledStore
 	} from '../stores/main.store'
 
 	import { currentPlayerTime, songToPlayUrlStore } from '../stores/player.store'
@@ -31,6 +30,7 @@
 	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 	import { addTaskToQueue } from '../db/!db'
   import nextSongFn from '../functions/nextSong.fn'
+  import { config } from '../stores/config.store'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.

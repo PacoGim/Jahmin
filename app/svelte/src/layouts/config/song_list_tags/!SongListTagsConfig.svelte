@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import OptionSection from '../../../components/OptionSection.svelte'
-	import { config } from '../../../stores/main.store'
+	import { config } from '../../../stores/config.store'
 	import type { SelectedTagType } from '../../../../../types/selectedTag.type'
 	import AddSongListTag from './AddSongListTag.svelte'
 	import SelectedTagList from './SelectedTagList.svelte'
 	import SongListPreview from './SongListPreview.svelte'
 
 	let isMounted = false
+
+
 
 	// TODO Check this more in depth
 	$: saveSelectedTagsToConfig($config.songListTags)

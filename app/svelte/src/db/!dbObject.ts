@@ -1,16 +1,17 @@
+import { get } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 import getDirectoryFn from '../functions/getDirectory.fn'
 import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 import stopSongFn from '../functions/stopSong.fn'
-import { config, playingSongStore, selectedAlbumDir, songListStore } from '../stores/main.store'
+import { config } from '../stores/config.store'
+import { playingSongStore, selectedAlbumDir, songListStore } from '../stores/main.store'
 import type { JahminDb } from './!db'
-import updateVersionFn from './updateVersion.fn'
 
 let db: any = undefined
-let configLocal: ConfigType = undefined
+// let configLocal: ConfigType = undefined
 
-config.subscribe(value => (configLocal = value))
+// config.subscribe(value => (configLocal = value))
 
 export function setDB(newDb: any) {
 	db = newDb
@@ -39,7 +40,7 @@ function insertData(newObjet: SongType) {
 		songListStoreLocal.push(newObjet)
 
 		songListStore.set(
-			sortSongsArrayFn(songListStoreLocal, configLocal.userOptions.sortBy, configLocal.userOptions.sortOrder, configLocal.group)
+			sortSongsArrayFn(songListStoreLocal, get(config).userOptions.sortBy, get(config).userOptions.sortOrder, get(config).group)
 		)
 	}
 }
@@ -83,7 +84,7 @@ function updateData(newObjet: SongType) {
 		songListStoreLocal[songIndex] = newObjet
 
 		songListStore.set(
-			sortSongsArrayFn(songListStoreLocal, configLocal.userOptions.sortBy, configLocal.userOptions.sortOrder, configLocal.group)
+			sortSongsArrayFn(songListStoreLocal, get(config).userOptions.sortBy, get(config).userOptions.sortOrder, get(config).group)
 		)
 	}
 }

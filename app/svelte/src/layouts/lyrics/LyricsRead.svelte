@@ -6,7 +6,7 @@
 	import TextAlignLeftcon from '../../icons/TextAlignLeftcon.svelte'
 	import TextAlignRightIcon from '../../icons/TextAlignRightIcon.svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
-	import { config } from '../../stores/main.store'
+	import { config } from '../../stores/config.store'
 
 	export let lyrics
 

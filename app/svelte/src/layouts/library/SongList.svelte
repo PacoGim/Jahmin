@@ -2,9 +2,9 @@
 	import SongListItem from '../../components/SongListItem.svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
+  import { songAmountConfig } from '../../stores/config.store'
 
 	import {
-		config,
 		elementMap,
 		keyModifier,
 		keyPressed,
@@ -28,13 +28,13 @@
 	// Main Song List refresh trigger
 	$: {
 		$songListStore
-		$config.userOptions.songAmount
+		$songAmountConfig
 		previousScrollAmount = undefined
 		trimSongArray()
 	}
 
 	$: {
-		changeSongListHeight($config.userOptions.songAmount)
+		changeSongListHeight($songAmountConfig)
 	}
 
 	$: {
@@ -61,7 +61,7 @@
 	// Trims the current song array to show a limited amount of songs.
 	function trimSongArray() {
 		if (scrollAmount !== previousScrollAmount) {
-			songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $config.userOptions.songAmount)
+			songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
 
 			if (songsToShow.length > 0) {
 				previousScrollAmount = scrollAmount
@@ -112,7 +112,7 @@
 	function setScrollAmountFromSong(songId) {
 		let songIndex = $songListStore.findIndex(song => song.ID === songId)
 
-		let differenceAmount = Math.floor($config.userOptions.songAmount / 2)
+		let differenceAmount = Math.floor($songAmountConfig / 2)
 
 		if (songIndex !== -1) {
 			if (songIndex < differenceAmount) {

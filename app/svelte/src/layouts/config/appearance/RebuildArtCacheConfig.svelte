@@ -1,6 +1,8 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { layoutToShow, reloadArts } from '../../../stores/main.store'
+	import traduceFn from '../../../functions/traduce.fn'
 
 	let artCacheSize = ''
 
@@ -20,7 +22,7 @@
 </script>
 
 <font-size-config on:click={() => rebuildArtCache()}>
-	<config-edit-button>Clean{artCacheSize}</config-edit-button>
+	<config-edit-button>{traduceFn('Clean')}{artCacheSize}</config-edit-button>
 </font-size-config>
 
 <style>

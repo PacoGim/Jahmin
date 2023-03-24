@@ -1,4 +1,10 @@
-<input-steps-info>Hold <shift-button>⇧ Shift</shift-button> to be more accurate</input-steps-info>
+<script>
+	import traduceFn from '../functions/traduce.fn'
+</script>
+
+<input-steps-info
+	>{traduceFn('Hold')} <shift-button>⇧ {traduceFn('Shift')}</shift-button> {traduceFn('to be more accurate')}</input-steps-info
+>
 
 <style>
 	input-steps-info {

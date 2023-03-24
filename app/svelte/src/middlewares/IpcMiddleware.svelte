@@ -8,10 +8,10 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import handleArtService from '../services/handleArt.service'
+	import { config, songAmountConfig } from '../stores/config.store'
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
 		artCompressQueueLength,
-		config,
 		layoutToShow,
 		playbackStore,
 		playingSongStore,
@@ -154,5 +154,16 @@
 		arrayCopy.splice(currentPlayingSongIndex, 0, ...sortedSongs)
 
 		$playbackStore = arrayCopy
+	})
+
+	window.ipc.onChangeSongAmount((_, data) => {
+		$config.userOptions.songAmount = data
+
+		window.ipc.saveConfig({
+			userOptions:{
+				songAmount:data
+			}
+		})
+
 	})
 </script>

@@ -3,8 +3,8 @@
 	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
 	import ToggleOffIcon from '../../../icons/ToggleOffIcon.svelte'
 	import ToggleOnIcon from '../../../icons/ToggleOnIcon.svelte'
-	// import { songListTagsConfig } from '../../../store/config.store'
-	import { config, songListTagsValuesStore } from '../../../stores/main.store'
+	import { songListTagsValuesStore } from '../../../stores/main.store'
+	import { config, songListTagConfig } from '../../../stores/config.store'
 	import type { PartialSongType } from '../../../../../types/song.type'
 
 	let gridStyle = ''
@@ -33,7 +33,15 @@
 	}
 
 	$: {
-		gridStyle = tagToGridStyleFn($config.songListTags)
+		gridStyle = tagToGridStyleFn($songListTagConfig)
+	}
+
+	$: {
+		$songListTagsValuesStore = $config.songListTags.map(tag => tag.value)
+	}
+
+	$:{
+		console.log($songListTagsValuesStore)
 	}
 
 	function toggleDynamicArtists() {
@@ -93,8 +101,11 @@
 
 <style>
 	song-list-preview {
+		width: 100%;
 		display: block;
 		padding: 0 1rem;
+
+		background-color: var(--color-reactBlue);
 	}
 
 	grid-tags {

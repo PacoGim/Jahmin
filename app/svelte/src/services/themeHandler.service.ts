@@ -1,6 +1,4 @@
-// import { themeConfig } from '../stores/main.store'
-
-import { config } from '../stores/main.store'
+import { themeConfig } from '../stores/config.store'
 
 export function runThemeHandler() {
 	// Enables SystemBased theme when the app first runs.
@@ -12,11 +10,11 @@ export function runThemeHandler() {
 		.addEventListener('change', (evt: MediaQueryListEvent) => enableSystemBasedTheme(evt.matches))
 
 	// Listens to changes in theme from AppearanceOption.
-	config.subscribe(config => {
-		if (config.userOptions.theme === 'Day') {
+	themeConfig.subscribe(newTheme => {
+		if (newTheme === 'Day') {
 			// Sets theme to day
 			setHTMLThemeAtb(true)
-		} else if (config.userOptions.theme === 'SystemBased') {
+		} else if (newTheme === 'SystemBased') {
 			// Sets theme to system default
 			setHTMLThemeAtb(window.matchMedia('(prefers-color-scheme: light)').matches)
 		} else {
@@ -28,8 +26,8 @@ export function runThemeHandler() {
 
 // Sets SystemBased theme ONLY if enabled in the config file or selected as Option.
 function enableSystemBasedTheme(isDayTheme: boolean) {
-	config.subscribe(config => {
-		if (config.userOptions.theme === 'SystemBased') {
+	themeConfig.subscribe(newTheme => {
+		if (newTheme === 'SystemBased') {
 			setHTMLThemeAtb(isDayTheme)
 		}
 	})()

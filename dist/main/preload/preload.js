@@ -20,6 +20,8 @@ const ipcFunctions = {
     deleteLyrics,
     getArtCacheSize,
     fileExists,
+    getOs,
+    getLangFile,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -32,6 +34,7 @@ const ipcFunctions = {
     removeDirectory: (directory, type, songs) => electron_1.ipcRenderer.send('remove-directory', directory, type, songs),
     handleArt: (filePath, elementId, size) => electron_1.ipcRenderer.send('handle-art', filePath, elementId, size),
     verifyFolderTegrity: (folderRoot) => electron_1.ipcRenderer.send('verify-folder-tegrity', folderRoot),
+    reloadApp: () => electron_1.ipcRenderer.send('reload-app'),
     /********************** Main to Renderer **********************/
     onGetAllSongsFromRenderer: (callback) => electron_1.ipcRenderer.on('get-all-songs-from-renderer', callback),
     handleWebStorage: (callback) => electron_1.ipcRenderer.on('web-storage', callback),
@@ -47,9 +50,26 @@ const ipcFunctions = {
     onAlbumPlayAfter: (callback) => electron_1.ipcRenderer.on('album-play-after', callback),
     onAlbumPlayNow: (callback) => electron_1.ipcRenderer.on('album-play-now', callback),
     onSongAddToPlayback: (callback) => electron_1.ipcRenderer.on('song-add-to-playback', callback),
-    onSongPlayAfter: (callback) => electron_1.ipcRenderer.on('song-play-after', callback)
+    onSongPlayAfter: (callback) => electron_1.ipcRenderer.on('song-play-after', callback),
+    onChangeSongAmount: (callback) => electron_1.ipcRenderer.on('change-song-amount', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
+function getLangFile() {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('get-lang-file')
+            .then(response => resolve(JSON.parse(response)))
+            .catch(err => reject(err));
+    });
+}
+function getOs() {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('get-os')
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
 function fileExists(filePath) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer

@@ -2,13 +2,14 @@ import type { AlbumType } from '../../../types/album.type'
 import type { SongType } from '../../../types/song.type'
 import { hash } from './hashString.fn'
 
+import getDirectoryFn from './getDirectory.fn'
+
 export default function (songs: SongType[]): Promise<AlbumType[]> {
 	return new Promise((resolve, reject) => {
 		let albums = []
 		songs.forEach(song => {
-			const rootDir = song.SourceFile.split('/').slice(0, -1).join('/')
+			const rootDir = getDirectoryFn(song.SourceFile)
 			const albumId = hash(rootDir)
-
 			let album = albums.find(album => album.ID === albumId)
 
 			if (album === undefined) {

@@ -1,7 +1,19 @@
 import iziToast from 'izitoast'
+import { get } from 'svelte/store'
 import applyColorSchemeFn from '../functions/applyColorScheme.fn'
-import getDirectoryFn from '../functions/getDirectory.fn'
-import { isAppIdle, keyModifier, keyPressed, playbackStore, selectedAlbumsDir, windowResize } from '../stores/main.store'
+import parseJsonFn from '../functions/parseJson.fn'
+import {
+	currentAudioElement,
+	externalSongProgressChange,
+	isAppIdle,
+	keyModifier,
+	keyPressed,
+	layoutToShow,
+	playbackStore,
+	selectedAlbumsDir,
+	windowResize
+} from '../stores/main.store'
+import { selectedConfigOptionName } from '../stores/session.store'
 import { handleContextMenuEvent } from './contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
@@ -9,6 +21,8 @@ import { runThemeHandler } from './themeHandler.service'
 let appIdleDebounce = getAppIdleDebounce()
 
 export default function () {
+	afterLanguageChangeReload()
+
 	iziToast.settings({ position: 'topRight' })
 
 	runThemeHandler()
@@ -101,7 +115,7 @@ export default function () {
 
 		localStorage.setItem('SongList', JSON.stringify(value))
 
-/* 		value.forEach(song => {
+		/* 		value.forEach(song => {
 			let songDirectory = getDirectoryFn(song.SourceFile)
 
 			if (!selectedAlbumsDirLocal.includes(songDirectory)) {
@@ -110,6 +124,32 @@ export default function () {
 			}
 		}) */
 	})
+}
+
+function afterLanguageChangeReload() {
+	let afterReload: any = parseJsonFn(localStorage.getItem('afterReload'))
+
+	if (afterReload !== undefined) {
+		selectedConfigOptionName.set('Appearance')
+		layoutToShow.set('Config')
+
+		currentAudioElement.subscribe(audioPlayer => {
+			audioPlayer.addEventListener('loadeddata', () => {
+				let audioElement = get(currentAudioElement)
+
+				externalSongProgressChange.set(afterReload.duration)
+				audioElement.currentTime = afterReload.duration
+
+				if (afterReload.wasPlaying === true) {
+					let volume = localStorage.getItem('volume')
+					audioElement.volume = Number(volume)
+					audioPlayer.play()
+				}
+
+				localStorage.setItem('afterReload', undefined)
+			})
+		})()
+	}
 }
 
 function getAppIdleDebounce() {

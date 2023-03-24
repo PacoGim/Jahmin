@@ -1,10 +1,12 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import songListTagsVar from '../../../global/songListTags.var'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
 	import MoveIcon from '../../../icons/MoveIcon.svelte'
+	import { config } from '../../../stores/config.store'
 	// import { songListTagsConfig } from '../../../store/config.store'
-	import { config, songListTagsValuesStore } from '../../../stores/main.store'
+	import { songListTagsValuesStore } from '../../../stores/main.store'
 
 	export let tag
 	export let index
@@ -148,9 +150,9 @@
 	}
 
 	li tag-expand[data-is-expanded='true'] label {
-		background-color: var(--color-hl-gold);
+		background-color: var(--color-reactBlue);
 		color: var(--color-bg-1);
-		border-color: var(--color-hl-gold);
+		border-color: var(--color-reactBlue);
 		transform: translateX(0rem);
 	}
 
@@ -208,9 +210,9 @@
 	}
 
 	li tag-aligns .tag-align input:checked ~ label {
-		background-color: var(--color-hl-gold);
+		background-color: var(--color-reactBlue);
 		color: var(--color-bg-1);
-		border-color: var(--color-hl-gold);
+		border-color: var(--color-reactBlue);
 	}
 
 	li tag-aligns .tag-align input {

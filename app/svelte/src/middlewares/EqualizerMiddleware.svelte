@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { config } from '../stores/config.store'
+
 	// import { equalizerNameConfig } from '../store/config.store'
 	import {
 		context,
@@ -8,7 +10,6 @@
 		sourceAltAudio,
 		equalizer
 	} from '../stores/equalizer.store'
-	import { config } from '../stores/main.store'
 
 	let equalizerGainValues = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
 	let isFirstSelectedEqIdChange = true

@@ -2,13 +2,12 @@
 	import { onMount } from 'svelte'
 	import type { SongType } from '../../../types/song.type'
 	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
-	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
-	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
+  import { config } from '../stores/config.store'
 
 	import {
 		playbackStore,
@@ -17,7 +16,6 @@
 		songListStore,
 		triggerScrollToSongEvent
 	} from '../stores/main.store'
-	import { config } from '../stores/main.store'
 
 	let allSongs = []
 

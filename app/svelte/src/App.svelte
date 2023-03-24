@@ -27,7 +27,7 @@
 
 	import { getDB } from './db/!dbObject'
 
-	import { dbSongsStore, layoutToShow, playbackStore, songListStore } from './stores/main.store'
+	import {  dbSongsStore, layoutToShow } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 	import { equalizerService, confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import EqualizerService from './svelte_services/EqualizerService.svelte'

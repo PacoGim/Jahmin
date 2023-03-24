@@ -1,7 +1,8 @@
 <script lang="ts">
 	import UpdateIcon from '../../../icons/UpdateIcon.svelte'
+	import { config } from '../../../stores/config.store'
 	// import { fontSizeConfig } from '../../../stores/config.store'
-	import { config, layoutToShow } from '../../../stores/main.store'
+	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
 
 	function setFontSize() {

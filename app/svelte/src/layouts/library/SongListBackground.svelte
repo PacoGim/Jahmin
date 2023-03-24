@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AlbumArt from '../../components/AlbumArt.svelte'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
+	import { songAmountConfig } from '../../stores/config.store'
 
 	import { playingSongStore, selectedAlbumsDir, windowResize } from '../../stores/main.store'
 
@@ -22,7 +23,9 @@
 		<backdrop />
 	{/key}
 
-	<AlbumArt {imageSourceLocation} />
+	{#key $songAmountConfig}
+		<AlbumArt {imageSourceLocation} />
+	{/key}
 </song-list-background-svlt>
 
 <style>

@@ -2,24 +2,26 @@
 	import OptionSectionCompact from '../../../components/OptionSectionCompact.svelte'
 	import ThreeDButton from '../../../components/ThreeDButton.svelte'
 	import getAllSongsFn from '../../../db/getAllSongs.fn'
+	import traduceFn from '../../../functions/traduce.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
-	import { config, layoutToShow } from '../../../stores/main.store'
+	import { config } from '../../../stores/config.store'
+	import { layoutToShow } from '../../../stores/main.store'
 </script>
 
-<OptionSectionCompact title="Is the library missing songs?">
+<OptionSectionCompact title="{traduceFn('Is the library missing songs?')}">
 	<ThreeDButton
 		on:buttonClick={() => {
 			getAllSongsFn().then(songs => {
 				window.ipc.sendAllSongsToMain(songs)
 				$layoutToShow = 'Library'
 			})
-		}}>Reload the library</ThreeDButton
+		}}>{traduceFn('Reload the library')}</ThreeDButton
 	>
 </OptionSectionCompact>
 
 <add-folder-config class="section-main">
-	<section-title> Add Folder to Library </section-title>
+	<section-title>{traduceFn('Add Folder to Library')}</section-title>
 	<section-body>
 		{#if $config.directories}
 			{#each $config.directories.add || [] as directory, index (index)}
@@ -31,7 +33,7 @@
 						on:buttonClick={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}
 					>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-						Remove
+						{traduceFn('Remove')}
 					</ThreeDButton>
 				</section-directory>
 			{/each}
@@ -43,12 +45,12 @@
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Add Directories
+		{traduceFn('Add Directories')}
 	</ThreeDButton>
 </add-folder-config>
 
 <exclude-folder-config class="section-main">
-	<section-title>Exclude Folder from Library</section-title>
+	<section-title>{traduceFn('Exclude Folder from Library')}</section-title>
 	<section-body>
 		{#if $config.directories}
 			{#each $config.directories.exclude || [] as directory, index (index)}
@@ -59,7 +61,7 @@
 						on:click={async () => window.ipc.removeDirectory(directory, 'remove-exclude', await getAllSongsFn())}
 					>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-						Remove
+						{traduceFn('Remove')}
 					</button>
 				</section-directory>
 			{/each}
@@ -72,7 +74,7 @@
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Exclude Directories
+		{traduceFn('Exclude Directories')}
 	</button>
 </exclude-folder-config>
 

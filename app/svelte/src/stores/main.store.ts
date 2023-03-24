@@ -1,8 +1,8 @@
 import { writable, type Writable } from 'svelte/store'
-import type { ConfigType } from '../../../types/config.type'
 import type { PartialSongType, SongType } from '../../../types/song.type'
-import parseJsonFn from '../functions/parseJson.fn'
 
+export let os: Writable<string> = writable(undefined)
+export let langFile: Writable<Object> = writable(undefined)
 export let isAppIdle: Writable<boolean> = writable(false)
 
 // List to show within Song List component.
@@ -12,6 +12,7 @@ export let selectedAlbumsDir: Writable<string[] | undefined> = writable([])
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
+export let externalSongProgressChange: Writable<number> = writable(undefined)
 export let playingSongStore: Writable<PartialSongType | SongType | undefined> = writable(undefined)
 
 // Number = index of the playbackStore to play
@@ -31,9 +32,6 @@ export let playbackStore: Writable<SongType[]> = writable([])
 export let activeSongStore: Writable<number | undefined> = writable(undefined)
 export let selectedSongsStore: Writable<number[]> = writable([])
 
-/********************** Config **********************/
-export let config: Writable<ConfigType | undefined> = writable(undefined)
-
 /********************** Database **********************/
 export let dbSongsStore: Writable<SongType[]> = writable([])
 export let dbVersionStore: Writable<number | undefined> = writable(Date.now())
@@ -49,7 +47,7 @@ export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable
 export let windowResize: Writable<number> = writable(undefined)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Playback')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Config')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)

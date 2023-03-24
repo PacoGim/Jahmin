@@ -3,7 +3,8 @@
 
 	import Album from '../../components/Album.svelte'
 
-	import { config, dbSongsStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
+	import { dbSongsStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
+	import { artSizeConfig, gridGapConfig, config } from '../../stores/config.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -11,8 +12,8 @@
 	let albums
 
 	// If the album art size has been set in the store.
-	$: if ($config.userOptions.artSize !== undefined) cssVariablesService.set('art-dimension', `${$config.userOptions.artSize}px`)
-	$: if ($config.userOptions.gridGap !== undefined) cssVariablesService.set('grid-gap', `${$config.userOptions.gridGap}px`)
+	$: if ($artSizeConfig !== undefined) cssVariablesService.set('art-dimension', `${$artSizeConfig}px`)
+	$: if ($gridGapConfig !== undefined) cssVariablesService.set('grid-gap', `${$gridGapConfig}px`)
 
 	$: {
 		if ($dbSongsStore && $config.group.groupByValues && $config.group.groupBy) {

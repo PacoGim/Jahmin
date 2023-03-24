@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { config, layoutToShow } from '../../../stores/main.store'
+	import { config } from '../../../stores/config.store'
+	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
 
 	function setGridGap() {

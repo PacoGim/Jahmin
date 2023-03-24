@@ -6,10 +6,11 @@
 
 	import Sortable from 'sortablejs'
 
-	import { config, playbackStore, playingSongStore } from '../../stores/main.store'
+	import { playbackStore, playingSongStore } from '../../stores/main.store'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
 	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
+	import { config } from '../../stores/config.store'
 
 	$: if ($playbackStore.length > 0) {
 		createSortableList()

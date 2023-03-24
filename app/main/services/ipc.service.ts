@@ -12,6 +12,7 @@ export async function startIPC() {
 	await (await import('../ipc/removeDirectory.ipc')).default(ipcMain)
 	await (await import('../ipc/handleArt.ipc')).default(ipcMain)
 	await (await import('../ipc/verifyFolderTegrity.ipc')).default(ipcMain)
+	await (await import('../ipc/reloadApp.ipc')).default(ipcMain)
 
 	/********************** Two-way **********************/
 	await (await import('../ipc/configGet.ipc')).default(ipcMain)
@@ -31,4 +32,6 @@ export async function startIPC() {
 	await (await import('../ipc/lyricsGet.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsListGet.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsDelete.ipc')).default(ipcMain)
+	await (await import('../ipc/getOs.ipc')).default(ipcMain)
+	await (await import('../ipc/getLangFile.ipc')).default(ipcMain)
 }

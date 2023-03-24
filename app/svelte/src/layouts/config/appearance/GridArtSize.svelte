@@ -1,8 +1,9 @@
 <script lang="ts">
 	import isElementInViewportFn from '../../../functions/isElementInViewport.fn'
 	import UpdateIcon from '../../../icons/UpdateIcon.svelte'
+	import { config } from '../../../stores/config.store'
 	// import { artSizeConfig } from '../../../stores/config.store'
-	import { config, layoutToShow } from '../../../stores/main.store'
+	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
 
 	function setGridSize() {

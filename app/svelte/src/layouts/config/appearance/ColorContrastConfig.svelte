@@ -2,9 +2,11 @@
 	import InputShiftInfo from '../../../components/InputShiftInfo.svelte'
 	import applyColorSchemeFn from '../../../functions/applyColorScheme.fn'
 	import getAlbumColors from '../../../functions/getAlbumColors.fn'
+	import traduceFn from '../../../functions/traduce.fn'
 	import notifyService from '../../../services/notify.service'
+	import { config } from '../../../stores/config.store'
 	// import { contrastRatioConfig } from '../../../stores/config.store'
-	import { albumPlayingDirStore, config, keyPressed } from '../../../stores/main.store'
+	import { albumPlayingDirStore, keyPressed } from '../../../stores/main.store'
 
 	let colorContrastRangeValue = $config.userOptions.contrastRatio
 
@@ -22,20 +24,22 @@
 
 	function saveContrastRatio() {
 		$config.userOptions.contrastRatio = colorContrastRangeValue
- 		window.ipc.saveConfig({
-			userOptions: {
-				contrastRatio: colorContrastRangeValue
-			}
-		}).then(() => {
-			notifyService.success('Contrast Ratio saved!')
-		})
+		window.ipc
+			.saveConfig({
+				userOptions: {
+					contrastRatio: colorContrastRangeValue
+				}
+			})
+			.then(() => {
+				notifyService.success('Contrast Ratio saved!')
+			})
 	}
 </script>
 
 <color-contrast-config>
 	<current-contrast-value
 		>{colorContrastRangeValue}
-		{colorContrastRangeValue === 4.5 ? ' Suggested' : ''}</current-contrast-value
+		{colorContrastRangeValue === 4.5 ? ` ${traduceFn('Suggested')}` : ''}</current-contrast-value
 	>
 	<input
 		type="range"
@@ -48,7 +52,7 @@
 
 	<InputShiftInfo />
 
-	<current-contrast-sample>Sample</current-contrast-sample>
+	<current-contrast-sample>{traduceFn('Sample')}</current-contrast-sample>
 </color-contrast-config>
 
 <style>

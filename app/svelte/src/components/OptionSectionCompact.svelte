@@ -1,4 +1,6 @@
 <script lang="ts">
+	import traduceFn from '../functions/traduce.fn'
+
 	export let title = ''
 </script>
 

@@ -6,6 +6,7 @@
 		currentAudioElement,
 		currentSongDurationStore,
 		currentSongProgressStore,
+		externalSongProgressChange,
 		isPlaying,
 		playingSongStore
 	} from '../../stores/main.store'
@@ -33,6 +34,13 @@
 	$: {
 		if ($playingSongStore !== undefined) {
 			setProgressFromNewSong($playingSongStore)
+		}
+	}
+
+	$: {
+		if ($externalSongProgressChange !== undefined) {
+			setProgress($externalSongProgressChange, $playingSongStore.Duration)
+			$externalSongProgressChange = undefined
 		}
 	}
 

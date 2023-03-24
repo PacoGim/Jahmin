@@ -1,7 +1,8 @@
 <script lang="ts">
 	import songListTagsVar from '../../../global/songListTags.var'
-	import { config, songListTagsValuesStore } from '../../../stores/main.store'
+	import { songListTagsValuesStore } from '../../../stores/main.store'
 	import type { SelectedTagNameType } from '../../../../../types/selectedTag.type'
+	import { config } from '../../../stores/config.store'
 
 	let optionBind: SelectedTagNameType = 'ChooseTag'
 
@@ -41,8 +42,9 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		color: #fff;
 
-		background-color: var(--color-bg-2);
+		background-color: var(--color-reactBlue);
 
 		border-radius: 50px;
 	}

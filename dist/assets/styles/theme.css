@@ -41,6 +41,7 @@ body[theme='Night'] {
 }
 
 .tippy-box[data-theme~='dynamic'] {
+	font-size: var(--font-size);
 	background-color: var(--art-color-dark);
 	color: var(--art-color-light);
 }
