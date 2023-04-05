@@ -1,10 +1,9 @@
-import { ConfigType, ThemeOptions } from '../../types/config.type'
+import { ConfigType, PartialConfigType, ThemeOptions } from '../../types/config.type'
 
 import * as fs from 'fs'
 import * as path from 'path'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
 import verifyConfigFileFn from '../functions/verifyConfigFile.fn'
-
 const deepmerge = require('deepmerge')
 
 function getConfigPathFile() {
@@ -33,7 +32,7 @@ export function getConfig(): ConfigType {
 	}
 }
 
-export function saveConfig(newConfig: any) {
+export function saveConfig(newConfig: PartialConfigType | any) {
 	let config = getConfig()
 
 	config = deepmerge(config, newConfig, { arrayMerge: (destinationArray: any[], sourceArray: any[]) => sourceArray })
@@ -71,7 +70,8 @@ function getDefaultConfigFile(): ConfigType {
 			lyricsTextAlign: 'left',
 			lyricsTextSize: 16,
 			lyricsTextWeight: 0,
-			alwaysShowAlbumOverlay: false
+			alwaysShowAlbumOverlay: false,
+			isFullscreen: false
 		},
 		songListTags: [
 			{

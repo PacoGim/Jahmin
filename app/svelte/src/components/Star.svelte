@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
 
@@ -16,7 +17,7 @@
 	function convertRating(fnSongRating: number) {
 		// Converts 0-100 Rating to 0-10
 		if (fnSongRating && fnSongRating !== 0) {
-			starRating = fnSongRating / 10
+			starRating = Math.round(fnSongRating / 10)
 		} else {
 			starRating = 0
 		}

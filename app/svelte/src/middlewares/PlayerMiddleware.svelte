@@ -7,7 +7,7 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-  import { config } from '../stores/config.store'
+	import { config } from '../stores/config.store'
 
 	import {
 		playbackStore,
@@ -52,6 +52,10 @@
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 		let songList: SongType[] = JSON.parse(localStorage.getItem('SongList'))
 
+		if (songList.length === 0) {
+			return
+		}
+
 		let lastPlayedSong = songList.find(song => song.ID === lastPlayedSongId)
 		let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile)
 
@@ -72,30 +76,6 @@
 		})
 
 		scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
-
-		// setTimeout(() => {
-		// 	$triggerScrollToSongEvent = lastPlayedSong.ID
-		// }, 150)
-
-		/* 		getAlbumSongsFn(lastPlayedDir).then(songs => {
-			if (songs.length === 0) {
-				$selectedAlbumDir = undefined
-				getAlbumColorsFn(undefined).then(color => {
-					applyColorSchemeFn(color)
-				})
-				return
-			} else {
-				$selectedAlbumsDir = [lastPlayedDir]
-				$selectedAlbumDir = lastPlayedDir
-			}
-
-			// $songListStore = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-			let fooSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-
-			setNewPlaybackFn(lastPlayedDir, fooSongs, lastPlayedSongId, { playNow: false })
-			// setNewPlaybackFn(lastPlayedDir, $songListStore, lastPlayedSongId, { playNow: false })
-
-		}) */
 	}
 
 	onMount(() => {

@@ -83,7 +83,7 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 		tags.Genre = nativeTags?.TCON || null
 		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || null
 		tags.Title = nativeTags?.TIT2 || null
-		tags.Track = Number(nativeTags?.TRCK) || null
+		tags.Track = Number(nativeTags?.TRCK) || Number(nativeTags?.track) || null
 
 		tags.BitRate = METADATA.format.bitrate / 1000 || null
 		tags.Duration = truncToDecimalPointFn(METADATA.format.duration, 3) || null

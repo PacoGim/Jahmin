@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron'
 
 import { watch as chokidarWatch } from 'chokidar'
 
-import { getConfig } from './services/config.service'
+import { getConfig, saveConfig } from './services/config.service'
 
 import getWindowOptionsFn from './functions/getWindowOptions.fn'
 
@@ -35,11 +35,29 @@ function createWindow() {
 	browserWindow
 		.on('move', () => calculateWindowBoundariesFn(browserWindow))
 		.on('resize', () => calculateWindowBoundariesFn(browserWindow))
+		.on('maximize', () => {
+			saveConfig({
+				userOptions: {
+					isFullscreen: true
+				}
+			})
+		})
+		.on('unmaximize', () => {
+			saveConfig({
+				userOptions: {
+					isFullscreen: false
+				}
+			})
+		})
 }
 
 app.whenReady().then(() => {
 	createWindow()
 	startIPC()
+
+	if (getConfig().userOptions.isFullscreen === true) {
+		getMainWindow().maximize()
+	}
 
 	app.on('activate', () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow()

@@ -12,6 +12,7 @@ function windowResize(event) {
     if (window === null)
         return;
     clearTimeout(saveConfigDebounce);
+    console.log(window.isFullScreen());
     saveConfigDebounce = setTimeout(() => {
         (0, config_service_1.saveConfig)({
             bounds: {

@@ -27,11 +27,28 @@ function createWindow() {
     browserWindow.loadFile(path_1.default.join(__dirname, '../index.html'));
     browserWindow
         .on('move', () => (0, calculateWindowBoundaries_fn_1.default)(browserWindow))
-        .on('resize', () => (0, calculateWindowBoundaries_fn_1.default)(browserWindow));
+        .on('resize', () => (0, calculateWindowBoundaries_fn_1.default)(browserWindow))
+        .on('maximize', () => {
+        (0, config_service_1.saveConfig)({
+            userOptions: {
+                isFullscreen: true
+            }
+        });
+    })
+        .on('unmaximize', () => {
+        (0, config_service_1.saveConfig)({
+            userOptions: {
+                isFullscreen: false
+            }
+        });
+    });
 }
 electron_1.app.whenReady().then(() => {
     createWindow();
     (0, ipc_service_1.startIPC)();
+    if ((0, config_service_1.getConfig)().userOptions.isFullscreen === true) {
+        getMainWindow().maximize();
+    }
     electron_1.app.on('activate', () => {
         if (electron_1.BrowserWindow.getAllWindows().length === 0)
             createWindow();

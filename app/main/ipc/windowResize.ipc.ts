@@ -14,6 +14,8 @@ function windowResize(event: IpcMainEvent) {
 
 	clearTimeout(saveConfigDebounce)
 
+	console.log(window.isFullScreen())
+
 	saveConfigDebounce = setTimeout(() => {
 		saveConfig({
 			bounds: {

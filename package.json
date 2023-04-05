@@ -25,12 +25,15 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./dist/icons/logo"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "electron_build"
+            "name": "electron_build",
+            "setupIcon":"./dist/icons/logo.ico"
           }
         },
         {

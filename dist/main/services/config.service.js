@@ -93,7 +93,8 @@ function getDefaultConfigFile() {
             lyricsTextAlign: 'left',
             lyricsTextSize: 16,
             lyricsTextWeight: 0,
-            alwaysShowAlbumOverlay: false
+            alwaysShowAlbumOverlay: false,
+            isFullscreen: false
         },
         songListTags: [
             {

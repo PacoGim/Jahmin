@@ -13,7 +13,7 @@ type DirectoriesType = {
 }
 
 export type UserOptionsType = {
-	language:string
+	language: string
 	theme: ThemeOptions
 	equalizerName?: string
 	songAmount: number
@@ -28,6 +28,7 @@ export type UserOptionsType = {
 	lyricsTextSize: number
 	lyricsTextWeight: number
 	alwaysShowAlbumOverlay: boolean
+	isFullscreen: boolean
 }
 
 export enum ThemeOptions {
@@ -48,6 +49,4 @@ export type BoundsType = {
 	width: number
 }
 
-export type PartialConfigType<T> = {
-	[P in keyof T]?: PartialConfigType<T[P]>;
-}
+export type PartialConfigType = Partial<ConfigType>

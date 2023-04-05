@@ -6,7 +6,7 @@ import fixWindowBoundariesFn from './fixWindowBoundaries.fn'
 const deepmerge = require('deepmerge')
 
 export default function (config: ConfigType) {
-	let options = {
+	let options: Electron.BrowserWindowConstructorOptions = {
 		title: 'Jahmin',
 		x: 0,
 		y: 0,

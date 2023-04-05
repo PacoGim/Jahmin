@@ -1,5 +1,6 @@
 export type Mp3TagType = {
 	TRCK: string
+	track: string
 	TPE2: string
 	TALB: string
 	TPE1: string
