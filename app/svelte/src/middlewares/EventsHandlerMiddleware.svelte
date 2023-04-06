@@ -106,6 +106,8 @@
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		// console.log($selectedAlbumsDir)
 
+		let tempSelectedAlbums = [...$selectedAlbumsDir] || []
+
 		// Get all song from albums
 
 		const rootDir = element.getAttribute('rootDir')
@@ -130,6 +132,15 @@
 
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
 			$selectedSongsStore = []
+
+			if (
+				$selectedAlbumsDir.sort((a, b) => a.localeCompare(b)).toString() !==
+				tempSelectedAlbums.sort((a, b) => a.localeCompare(b)).toString()
+			) {
+				setTimeout(() => {
+					$triggerScrollToSongEvent = sortedSongs[0].ID
+				}, 10)
+			}
 		}
 	}
 

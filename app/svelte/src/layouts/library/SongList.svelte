@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -124,7 +125,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <song-list-svlt on:mousewheel={e => scrollContainer(e)} on:click={e => songListClickEventHandlerService(e)}>
 	<song-list>
 		{#each songsToShow as song, index (song.ID)}

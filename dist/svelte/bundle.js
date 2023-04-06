@@ -7265,7 +7265,7 @@ var app = (function () {
     let elementMap = writable(new Map());
     let windowResize = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Config');
+    let layoutToShow = writable('Library');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -7749,7 +7749,7 @@ var app = (function () {
     }
     function afterLanguageChangeReload() {
         let afterReload = parseJsonFn(localStorage.getItem('afterReload'));
-        if (afterReload !== undefined) {
+        if (afterReload !== undefined && afterReload !== null) {
             selectedConfigOptionName.set('Appearance');
             layoutToShow.set('Config');
             currentAudioElement.subscribe(audioPlayer => {
@@ -9403,9 +9403,9 @@ var app = (function () {
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
     	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(1, $selectedAlbumsDir = $$value));
     	validate_store(playbackStore, 'playbackStore');
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(3, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(2, $playbackStore = $$value));
     	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(2, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(3, $songListStore = $$value));
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(4, $config = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -9427,7 +9427,7 @@ var app = (function () {
     		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'));
     		let songList = JSON.parse(localStorage.getItem('SongList'));
 
-    		if (songList.length === 0) {
+    		if (songList === null || songList.length === 0) {
     			return;
     		}
 
@@ -9468,6 +9468,7 @@ var app = (function () {
     		sortSongsArrayFn,
     		config,
     		playbackStore,
+    		playingSongStore,
     		selectedAlbumDir,
     		selectedAlbumsDir,
     		songListStore,
@@ -9507,17 +9508,9 @@ var app = (function () {
     				}
     			}
     		}
-
-    		if ($$self.$$.dirty & /*$songListStore*/ 4) {
-    			{
-    				if ($songListStore !== undefined && $songListStore.length > 0) {
-    					localStorage.setItem('SongList', JSON.stringify($songListStore));
-    				}
-    			}
-    		}
     	};
 
-    	return [allSongs, $selectedAlbumsDir, $songListStore];
+    	return [allSongs, $selectedAlbumsDir];
     }
 
     class PlayerMiddleware extends SvelteComponentDev {
@@ -39287,11 +39280,11 @@ var app = (function () {
     	let $config;
     	let $songListStore;
     	let $selectedAlbumDir;
-    	let $selectedSongsStore;
+    	let $triggerScrollToSongEvent;
     	let $selectedAlbumsDir;
+    	let $selectedSongsStore;
     	let $keyModifier;
     	let $albumPlayingDirStore;
-    	let $triggerScrollToSongEvent;
     	let $triggerGroupingChangeEvent;
     	let $playbackStore;
     	let $playingSongStore;
@@ -39303,16 +39296,16 @@ var app = (function () {
     	component_subscribe($$self, songListStore, $$value => $$invalidate(1, $songListStore = $$value));
     	validate_store(selectedAlbumDir, 'selectedAlbumDir');
     	component_subscribe($$self, selectedAlbumDir, $$value => $$invalidate(2, $selectedAlbumDir = $$value));
-    	validate_store(selectedSongsStore, 'selectedSongsStore');
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(3, $selectedSongsStore = $$value));
+    	validate_store(triggerScrollToSongEvent, 'triggerScrollToSongEvent');
+    	component_subscribe($$self, triggerScrollToSongEvent, $$value => $$invalidate(3, $triggerScrollToSongEvent = $$value));
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
     	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(4, $selectedAlbumsDir = $$value));
+    	validate_store(selectedSongsStore, 'selectedSongsStore');
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(5, $selectedSongsStore = $$value));
     	validate_store(keyModifier, 'keyModifier');
-    	component_subscribe($$self, keyModifier, $$value => $$invalidate(5, $keyModifier = $$value));
+    	component_subscribe($$self, keyModifier, $$value => $$invalidate(6, $keyModifier = $$value));
     	validate_store(albumPlayingDirStore, 'albumPlayingDirStore');
-    	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(6, $albumPlayingDirStore = $$value));
-    	validate_store(triggerScrollToSongEvent, 'triggerScrollToSongEvent');
-    	component_subscribe($$self, triggerScrollToSongEvent, $$value => $$invalidate(7, $triggerScrollToSongEvent = $$value));
+    	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(7, $albumPlayingDirStore = $$value));
     	validate_store(triggerGroupingChangeEvent, 'triggerGroupingChangeEvent');
     	component_subscribe($$self, triggerGroupingChangeEvent, $$value => $$invalidate(8, $triggerGroupingChangeEvent = $$value));
     	validate_store(playbackStore, 'playbackStore');
@@ -39404,6 +39397,8 @@ var app = (function () {
 
     	async function handleAlbumEvent(element, evtType) {
     		// console.log($selectedAlbumsDir)
+    		let tempSelectedAlbums = [...$selectedAlbumsDir] || [];
+
     		// Get all song from albums
     		const rootDir = element.getAttribute('rootDir');
 
@@ -39425,6 +39420,15 @@ var app = (function () {
 
     			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
     			set_store_value(selectedSongsStore, $selectedSongsStore = [], $selectedSongsStore);
+
+    			if ($selectedAlbumsDir.sort((a, b) => a.localeCompare(b)).toString() !== tempSelectedAlbums.sort((a, b) => a.localeCompare(b)).toString()) {
+    				setTimeout(
+    					() => {
+    						set_store_value(triggerScrollToSongEvent, $triggerScrollToSongEvent = sortedSongs[0].ID, $triggerScrollToSongEvent);
+    					},
+    					10
+    				);
+    			}
     		}
     	}
 
@@ -39490,11 +39494,11 @@ var app = (function () {
     		$config,
     		$songListStore,
     		$selectedAlbumDir,
-    		$selectedSongsStore,
+    		$triggerScrollToSongEvent,
     		$selectedAlbumsDir,
+    		$selectedSongsStore,
     		$keyModifier,
     		$albumPlayingDirStore,
-    		$triggerScrollToSongEvent,
     		$triggerGroupingChangeEvent,
     		$playbackStore,
     		$playingSongStore,

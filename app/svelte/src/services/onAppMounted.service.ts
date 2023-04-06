@@ -129,7 +129,7 @@ export default function () {
 function afterLanguageChangeReload() {
 	let afterReload: any = parseJsonFn(localStorage.getItem('afterReload'))
 
-	if (afterReload !== undefined) {
+	if (afterReload !== undefined && afterReload !== null) {
 		selectedConfigOptionName.set('Appearance')
 		layoutToShow.set('Config')
 

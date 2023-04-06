@@ -11,6 +11,7 @@
 
 	import {
 		playbackStore,
+		playingSongStore,
 		selectedAlbumDir,
 		selectedAlbumsDir,
 		songListStore,
@@ -31,11 +32,6 @@
 		}
 	}
 
-	$: {
-		if ($songListStore !== undefined && $songListStore.length > 0) {
-			localStorage.setItem('SongList', JSON.stringify($songListStore))
-		}
-	}
 
 	function fillSongList(albumRootDirList: string[] = []) {
 		allSongs = []
@@ -52,11 +48,12 @@
 		let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
 		let songList: SongType[] = JSON.parse(localStorage.getItem('SongList'))
 
-		if (songList.length === 0) {
+		if (songList === null || songList.length === 0) {
 			return
 		}
 
 		let lastPlayedSong = songList.find(song => song.ID === lastPlayedSongId)
+
 		let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile)
 
 		$songListStore = songList
