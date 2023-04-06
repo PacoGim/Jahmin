@@ -6,9 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const worker_threads_1 = require("worker_threads");
 const child_process_1 = require("child_process");
 const path_1 = require("path");
+const fs_1 = __importDefault(require("fs"));
 const getOs_fn_1 = __importDefault(require("../functions/getOs.fn"));
 let os /* Operating system */ = (0, getOs_fn_1.default)();
-let ffmpegPath = (0, path_1.join)(__dirname, `../../binaries/${os}/ffmpeg`);
+let ffmpegPath = (0, path_1.join)(__dirname, `../../binaries/${os}`);
+let ffmpegBinary = fs_1.default.readdirSync(ffmpegPath);
+ffmpegPath = (0, path_1.join)(ffmpegPath, ffmpegBinary[0]);
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', message => {
     let { id, filePath, tempFileName, command } = message;
     let status = -1;

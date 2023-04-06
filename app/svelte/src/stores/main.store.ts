@@ -47,7 +47,7 @@ export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable
 export let windowResize: Writable<number> = writable(undefined)
 
 /********************** ConfigLayout **********************/
-export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
+export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Config')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)

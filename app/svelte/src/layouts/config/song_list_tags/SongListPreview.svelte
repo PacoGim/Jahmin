@@ -40,10 +40,6 @@
 		$songListTagsValuesStore = $config.songListTags.map(tag => tag.value)
 	}
 
-	$:{
-		console.log($songListTagsValuesStore)
-	}
-
 	function toggleDynamicArtists() {
 		let dynamicArtistsTagIndex = $config.songListTags.findIndex(tag => tag.value === 'DynamicArtists')
 		let titleTagIndex = $config.songListTags.findIndex(tag => tag.value === 'Title')
@@ -102,22 +98,26 @@
 <style>
 	song-list-preview {
 		width: 100%;
-		display: block;
+		display: flex;
 		padding: 0 1rem;
-
-		background-color: var(--color-reactBlue);
+		color: #fff;
+		flex-direction: column;
+		align-items: center;
 	}
 
 	grid-tags {
 		align-items: center;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
+		width: 100%;
+
 	}
 
 	enable-dynamic-artists {
 		display: flex;
 		justify-content: center;
-
+		width: fit-content;
+		background-color: var(--color-reactBlue);
 		margin-top: 1rem;
 	}
 
