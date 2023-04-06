@@ -97,5 +97,6 @@
 	main-app > current-window-svlt {
 		grid-area: current-window-svlt;
 		height: calc(100vh - 64px - 32px);
+		overflow-y: auto;
 	}
 </style>

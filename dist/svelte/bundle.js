@@ -38178,7 +38178,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (69:52) 
+    // (70:52) 
     function create_if_block_2$2(ctx) {
     	let songtag;
     	let current;
@@ -38225,14 +38225,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$2.name,
     		type: "if",
-    		source: "(69:52) ",
+    		source: "(70:52) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (63:3) {#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}
+    // (64:3) {#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}
     function create_if_block_1$3(ctx) {
     	let songtag;
     	let current;
@@ -38278,14 +38278,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(63:3) {#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}",
+    		source: "(64:3) {#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (62:2) {#each $config.songListTags as selectedTag, index (index)}
+    // (63:2) {#each $config.songListTags as selectedTag, index (index)}
     function create_each_block$3(key_1, ctx) {
     	let first;
     	let show_if;
@@ -38297,8 +38297,8 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (dirty & /*$config, $songListTagsValuesStore*/ 5) show_if = null;
-    		if (show_if == null) show_if = !!(/*selectedTag*/ ctx[6].value === 'Title' && /*$songListTagsValuesStore*/ ctx[2].includes('DynamicArtists'));
+    		if (dirty & /*$config, $songListTagsValuesStore*/ 3) show_if = null;
+    		if (show_if == null) show_if = !!(/*selectedTag*/ ctx[6].value === 'Title' && /*$songListTagsValuesStore*/ ctx[1].includes('DynamicArtists'));
     		if (show_if) return 0;
     		if (/*selectedTag*/ ctx[6].value !== 'DynamicArtists') return 1;
     		return -1;
@@ -38388,14 +38388,14 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(62:2) {#each $config.songListTags as selectedTag, index (index)}",
+    		source: "(63:2) {#each $config.songListTags as selectedTag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (82:3) {:else}
+    // (83:3) {:else}
     function create_else_block$1(ctx) {
     	let span;
     	let t;
@@ -38415,7 +38415,7 @@ var app = (function () {
     			t = text("Dynamic Artists ");
     			create_component(toggleofficon.$$.fragment);
     			attr_dev(span, "class", "svelte-k20jh3");
-    			add_location(span, file$h, 82, 4, 2846);
+    			add_location(span, file$h, 83, 4, 2877);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -38442,14 +38442,14 @@ var app = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(82:3) {:else}",
+    		source: "(83:3) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (80:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}
+    // (81:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}
     function create_if_block$4(ctx) {
     	let span;
     	let t;
@@ -38469,7 +38469,7 @@ var app = (function () {
     			t = text("Dynamic Artists ");
     			create_component(toggleonicon.$$.fragment);
     			attr_dev(span, "class", "svelte-k20jh3");
-    			add_location(span, file$h, 80, 4, 2727);
+    			add_location(span, file$h, 81, 4, 2758);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -38496,7 +38496,7 @@ var app = (function () {
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(80:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}",
+    		source: "(81:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}",
     		ctx
     	});
 
@@ -38532,8 +38532,8 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (dirty & /*$songListTagsValuesStore*/ 4) show_if = null;
-    		if (show_if == null) show_if = !!/*$songListTagsValuesStore*/ ctx[2].includes('DynamicArtists');
+    		if (dirty & /*$songListTagsValuesStore*/ 2) show_if = null;
+    		if (show_if == null) show_if = !!/*$songListTagsValuesStore*/ ctx[1].includes('DynamicArtists');
     		if (show_if) return 0;
     		return 1;
     	}
@@ -38554,14 +38554,14 @@ var app = (function () {
     			enable_dynamic_artists = element("enable-dynamic-artists");
     			button = element("button");
     			if_block.c();
-    			set_style(grid_tags, "grid-template-columns", /*gridStyle*/ ctx[1]);
+    			set_style(grid_tags, "grid-template-columns", /*gridStyle*/ ctx[2]);
     			set_custom_element_data(grid_tags, "class", "svelte-k20jh3");
-    			add_location(grid_tags, file$h, 60, 1, 1952);
-    			add_location(button, file$h, 78, 2, 2619);
+    			add_location(grid_tags, file$h, 61, 1, 1983);
+    			add_location(button, file$h, 79, 2, 2650);
     			set_custom_element_data(enable_dynamic_artists, "class", "svelte-k20jh3");
-    			add_location(enable_dynamic_artists, file$h, 77, 1, 2591);
+    			add_location(enable_dynamic_artists, file$h, 78, 1, 2622);
     			set_custom_element_data(song_list_preview, "class", "svelte-k20jh3");
-    			add_location(song_list_preview, file$h, 59, 0, 1930);
+    			add_location(song_list_preview, file$h, 60, 0, 1961);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -38586,7 +38586,7 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*$config, sampleSong, $songListTagsValuesStore*/ 13) {
+    			if (dirty & /*$config, sampleSong, $songListTagsValuesStore*/ 11) {
     				each_value = /*$config*/ ctx[0].songListTags;
     				validate_each_argument(each_value);
     				group_outros();
@@ -38595,8 +38595,8 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (!current || dirty & /*gridStyle*/ 2) {
-    				set_style(grid_tags, "grid-template-columns", /*gridStyle*/ ctx[1]);
+    			if (!current || dirty & /*gridStyle*/ 4) {
+    				set_style(grid_tags, "grid-template-columns", /*gridStyle*/ ctx[2]);
     			}
 
     			let previous_block_index = current_block_type_index;
@@ -38670,7 +38670,7 @@ var app = (function () {
     	validate_store(config, 'config');
     	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
     	validate_store(songListTagsValuesStore, 'songListTagsValuesStore');
-    	component_subscribe($$self, songListTagsValuesStore, $$value => $$invalidate(2, $songListTagsValuesStore = $$value));
+    	component_subscribe($$self, songListTagsValuesStore, $$value => $$invalidate(1, $songListTagsValuesStore = $$value));
     	validate_store(songListTagConfig, 'songListTagConfig');
     	component_subscribe($$self, songListTagConfig, $$value => $$invalidate(5, $songListTagConfig = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -38748,7 +38748,7 @@ var app = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('gridStyle' in $$props) $$invalidate(1, gridStyle = $$props.gridStyle);
+    		if ('gridStyle' in $$props) $$invalidate(2, gridStyle = $$props.gridStyle);
     		if ('sampleSong' in $$props) $$invalidate(3, sampleSong = $$props.sampleSong);
     	};
 
@@ -38757,23 +38757,23 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$songListTagConfig*/ 32) {
-    			{
-    				$$invalidate(1, gridStyle = tagToGridStyleFn($songListTagConfig));
-    			}
-    		}
-
     		if ($$self.$$.dirty & /*$config*/ 1) {
     			{
     				set_store_value(songListTagsValuesStore, $songListTagsValuesStore = $config.songListTags.map(tag => tag.value), $songListTagsValuesStore);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*$songListTagsValuesStore, $songListTagConfig*/ 34) {
+    			{
+    				$$invalidate(2, gridStyle = tagToGridStyleFn($songListTagConfig));
     			}
     		}
     	};
 
     	return [
     		$config,
-    		gridStyle,
     		$songListTagsValuesStore,
+    		gridStyle,
     		sampleSong,
     		toggleDynamicArtists,
     		$songListTagConfig
@@ -44253,9 +44253,9 @@ var app = (function () {
     			create_component(rangeinputservice.$$.fragment);
     			t12 = space();
     			create_component(storageservice.$$.fragment);
-    			set_custom_element_data(current_window_svlt, "class", "svelte-sx52fo");
+    			set_custom_element_data(current_window_svlt, "class", "svelte-1d8lkhi");
     			add_location(current_window_svlt, file, 52, 1, 2284);
-    			set_custom_element_data(main_app, "class", "svelte-sx52fo");
+    			set_custom_element_data(main_app, "class", "svelte-1d8lkhi");
     			add_location(main_app, file, 47, 0, 2219);
     		},
     		l: function claim(nodes) {

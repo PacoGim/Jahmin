@@ -33,6 +33,7 @@
 	}
 
 	$: {
+		$songListTagsValuesStore
 		gridStyle = tagToGridStyleFn($songListTagConfig)
 	}
 
