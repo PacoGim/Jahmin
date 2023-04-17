@@ -81,7 +81,7 @@
 		width: 16px;
 		height: 16px;
 		outline: none;
-		background-color: var(--color-hl-blue);
+		background-color: var(--color-reactBlue);
 		box-shadow: 0px 0px 0px 5px hsl(0, 0%, 90%), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 
 		transition: background-color 300ms linear;

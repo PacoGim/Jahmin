@@ -17,3 +17,4 @@
 * Add multiple album selection
 
 * Fix covers not working when song others than opus
+* A lot of padding in toast

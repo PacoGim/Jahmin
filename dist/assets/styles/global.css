@@ -41,7 +41,7 @@ button {
 	font-family: inherit;
 
 	color: #fff;
-	background-color: var(--color-hl-gold);
+	background-color: var(--color-reactBlue);
 
 	display: flex;
 	align-items: center;
