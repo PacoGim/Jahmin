@@ -22,6 +22,7 @@ const ipcFunctions = {
     fileExists,
     getOs,
     getLangFile,
+    getCommunityEqualizerProfiles,
     /********************** Renderer to Main (one-way) **********************/
     sendAppReady: () => electron_1.ipcRenderer.send('app-ready'),
     sendAllSongsToMain: (songs) => electron_1.ipcRenderer.send('send-all-songs-to-main', songs),
@@ -54,6 +55,14 @@ const ipcFunctions = {
     onChangeSongAmount: (callback) => electron_1.ipcRenderer.on('change-song-amount', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
+function getCommunityEqualizerProfiles() {
+    return new Promise((resolve, reject) => {
+        electron_1.ipcRenderer
+            .invoke('get-community-equalizer-profiles')
+            .then(response => resolve(response))
+            .catch(err => reject(err));
+    });
+}
 function getLangFile() {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer

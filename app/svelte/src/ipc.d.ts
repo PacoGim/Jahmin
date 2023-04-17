@@ -32,6 +32,7 @@ declare global {
 			fileExists: (filePath: string) => Promise<boolean>
 			getOs: () => Promise<string>
 			getLangFile: () => Promise<Object>
+			getCommunityEqualizerProfiles: () => Promise<EqualizerProfileType[]>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void
@@ -44,7 +45,7 @@ declare global {
 			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
 			handleArt: (filePath: string, elementId: string, size: number) => void
 			verifyFolderTegrity: (folderRoot: string) => void
-			reloadApp: () => void,
+			reloadApp: () => void
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt

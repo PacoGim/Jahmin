@@ -34,4 +34,5 @@ export async function startIPC() {
 	await (await import('../ipc/lyricsDelete.ipc')).default(ipcMain)
 	await (await import('../ipc/getOs.ipc')).default(ipcMain)
 	await (await import('../ipc/getLangFile.ipc')).default(ipcMain)
+	await (await import('../ipc/getCommunityEqualizerProfiles.ipc')).default(ipcMain)
 }
