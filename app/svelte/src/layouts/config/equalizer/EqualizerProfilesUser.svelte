@@ -11,6 +11,8 @@
 	import { equalizer, equalizerProfiles, selectedEqName } from '../../../stores/equalizer.store'
 	import { confirmService, equalizerService, promptService } from '../../../stores/service.store'
 
+	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
+
 	function renameEq(eqName: string) {
 		if (eqName === 'Default') {
 			return notifyService.error("Default profile can't be renamed.")
@@ -128,7 +130,9 @@
 <equalizer-profiles>
 	{#each $equalizerProfiles as eq (eq.name)}
 		<equalizer-field id="eq-{eq.name}">
-			<equalizer-name on:click={() => $equalizerService.changeProfile(eq.name)}
+			<equalizer-name
+				on:click={() => equalizerServiceNew.saveEqHashConfigFn(eq.hash)}
+				on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eq.values)}
 				>{$selectedEqName === eq.name ? '‣ ' : ''} {eq.name}</equalizer-name
 			>
 			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.name)}>

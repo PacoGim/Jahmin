@@ -4,7 +4,8 @@ import fs from 'fs'
 import EqualizerFile from './equalizerFile.service'
 import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
 import { ReturnMessageType } from '../../types/returnMessage.type'
-import fileExistsWithCaseSync from '../functions/fileExistsWithCaseSync.fn'
+import fileExistsWithCaseSyncFn from '../functions/fileExistsWithCaseSync.fn'
+import getStringHashFn from '../functions/getStringHash.fn'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
 
 const eqFolderPath = path.join(getAppDataPathFn(), 'eq')
@@ -49,7 +50,7 @@ export function renameEqualizer(eqName: string, newName: string): ReturnMessageT
 
 		foundEq.name = newName
 
-		if (fileExistsWithCaseSync(newNamePath)) {
+		if (fileExistsWithCaseSyncFn(newNamePath)) {
 			return {
 				code: 'EXISTS',
 				message: 'Profile name already exists.'
@@ -99,6 +100,8 @@ export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessage
 	if (newProfile.name === '') {
 		newProfile.name = 'Noname'
 	}
+
+	newProfile.hash = getStringHashFn(newProfile.name + JSON.stringify(newProfile.values))
 
 	if (!fs.existsSync(path.join(eqFolderPath, `${newProfile.name}.json`))) {
 		try {
@@ -169,5 +172,6 @@ let defaultEqualizer: EqualizerFileObjectType = {
 		'4096': 0,
 		'8192': 0,
 		'16384': 0
-	}
+	},
+	hash: '3qu'
 }

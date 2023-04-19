@@ -8,6 +8,7 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const equalizerFile_service_1 = __importDefault(require("./equalizerFile.service"));
 const fileExistsWithCaseSync_fn_1 = __importDefault(require("../functions/fileExistsWithCaseSync.fn"));
+const getStringHash_fn_1 = __importDefault(require("../functions/getStringHash.fn"));
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
 const eqFolderPath = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'eq');
 function getEqFolderPath() {
@@ -88,6 +89,7 @@ function addEqualizer(newProfile) {
     if (newProfile.name === '') {
         newProfile.name = 'Noname';
     }
+    newProfile.hash = (0, getStringHash_fn_1.default)(newProfile.name + JSON.stringify(newProfile.values));
     if (!fs_1.default.existsSync(path_1.default.join(eqFolderPath, `${newProfile.name}.json`))) {
         try {
             fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${newProfile.name}.json`), equalizerFile_service_1.default.stringify(newProfile));
@@ -157,5 +159,6 @@ let defaultEqualizer = {
         '4096': 0,
         '8192': 0,
         '16384': 0
-    }
+    },
+    hash: '3qu'
 };

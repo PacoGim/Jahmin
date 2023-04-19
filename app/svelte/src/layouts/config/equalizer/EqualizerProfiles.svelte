@@ -1,6 +1,6 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
-	import EqualizerProfilesOnline from './EqualizerProfilesOnline.svelte'
+	import EqualizerProfilesOnline from './EqualizerProfilesCommunity.svelte'
 	import EqualizerProfilesUser from './EqualizerProfilesUser.svelte'
 </script>
 
@@ -11,7 +11,7 @@
 	</user-profiles>
 
 	<online-profiles>
-		<h2>Online Profiles</h2>
+		<h2>Community Profiles</h2>
 		<EqualizerProfilesOnline />
 	</online-profiles>
 </equalizer-profiles-config>

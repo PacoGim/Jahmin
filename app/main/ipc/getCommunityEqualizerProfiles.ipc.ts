@@ -1,3 +1,6 @@
+import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
+import getStringHashFn from '../functions/getStringHash.fn'
+
 let promiseResolve: any = undefined
 
 export default function (ipcMain: Electron.IpcMain) {
@@ -19,7 +22,7 @@ function getEqualizersFromProfiles(profilesList: { name: string; url: string }[]
 	let profile = profilesList.shift()
 
 	if (profile) {
-		let newProfile = {
+		let newProfile: EqualizerFileObjectType = {
 			name: profile.name,
 			values: undefined
 		}
@@ -30,6 +33,8 @@ function getEqualizersFromProfiles(profilesList: { name: string; url: string }[]
 				.then(res => res.json())
 				.then(data => {
 					newProfile.values = data.values
+
+					newProfile.hash = getStringHashFn(newProfile.name + JSON.stringify(newProfile.values))
 
 					equalizerProfilesList.push(newProfile)
 					getEqualizersFromProfiles(profilesList, equalizerProfilesList)

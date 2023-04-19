@@ -71,7 +71,8 @@ function getDefaultConfigFile(): ConfigType {
 			lyricsTextSize: 16,
 			lyricsTextWeight: 0,
 			alwaysShowAlbumOverlay: false,
-			isFullscreen: false
+			isFullscreen: false,
+			equalizerHash: '3qu'
 		},
 		songListTags: [
 			{

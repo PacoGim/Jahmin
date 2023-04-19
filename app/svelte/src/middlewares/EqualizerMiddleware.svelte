@@ -93,7 +93,7 @@
 			window.ipc.getEqualizers().then(equalizers => {
 				$equalizerProfiles = equalizers
 
-				let equalizerFound = equalizers.find(x => x.name === $config.userOptions.equalizerName)
+				let equalizerFound = equalizers.find(x => x.name === $config.userOptions.equalizerHash)
 
 				if (equalizerFound) {
 					$equalizerProfiles = $equalizerProfiles.sort((a, b) => a.name.localeCompare(b.name))

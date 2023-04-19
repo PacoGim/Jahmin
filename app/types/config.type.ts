@@ -15,7 +15,7 @@ type DirectoriesType = {
 export type UserOptionsType = {
 	language: string
 	theme: ThemeOptions
-	equalizerName?: string
+	equalizerHash?: string
 	songAmount: number
 	gridGap: number
 	artSize: number
