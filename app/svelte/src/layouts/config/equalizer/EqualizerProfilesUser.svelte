@@ -8,7 +8,7 @@
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
 	import notifyService from '../../../services/notify.service'
-	import { equalizer, equalizerProfiles, selectedEqName } from '../../../stores/equalizer.store'
+	import { currentEqHash, equalizer, equalizerProfiles, selectedEqName } from '../../../stores/equalizer.store'
 	import { confirmService, equalizerService, promptService } from '../../../stores/service.store'
 
 	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
@@ -128,18 +128,19 @@
 </script>
 
 <equalizer-profiles>
-	{#each $equalizerProfiles as eq (eq.name)}
-		<equalizer-field id="eq-{eq.name}">
+	{#each $equalizerProfiles as eqProfile (eqProfile.name)}
+		<equalizer-field id="eq-{eqProfile.name}">
 			<equalizer-name
-				on:click={() => equalizerServiceNew.saveEqHashConfigFn(eq.hash)}
-				on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eq.values)}
-				>{$selectedEqName === eq.name ? '‣ ' : ''} {eq.name}</equalizer-name
+				class={$currentEqHash === eqProfile.hash ? 'current' : ''}
+				on:click={() => equalizerServiceNew.saveEqHashConfigFn(eqProfile.hash)}
+				on:click={() => ($currentEqHash = eqProfile.hash)}
+				on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}>{eqProfile.name}</equalizer-name
 			>
-			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eq.name)}>
+			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eqProfile.name)}>
 				<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				Rename
 			</equalizer-rename>
-			<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eq.name)}>
+			<equalizer-delete class="eqProfileButton" on:click={() => deleteEq(eqProfile.name)}>
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				Delete
 			</equalizer-delete>
@@ -184,15 +185,34 @@
 	equalizer-profiles equalizer-field:hover {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
-	equalizer-profiles equalizer-field equalizer-name {
-		padding: 0.25rem 0.5rem;
+
+	equalizer-name {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
 	}
 
-	equalizer-profiles equalizer-field equalizer-rename:hover {
+	equalizer-name::before {
+		content: '';
+		height: 0.33rem;
+		width: 0.33rem;
+		border-radius: 100vmax;
+		display: inline-block;
+		background-color: currentColor;
+		margin-right: 0.25rem;
+		opacity: 0;
+
+		transition: opacity 250ms ease-in-out;
+	}
+
+	equalizer-name.current::before {
+		opacity: 1;
+	}
+	equalizer-rename:hover {
 		background-color: var(--color-reactBlue);
 	}
 
-	equalizer-profiles equalizer-field equalizer-delete:hover {
+	equalizer-delete:hover {
 		background-color: var(--color-hl-2);
 	}
 

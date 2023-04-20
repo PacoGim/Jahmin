@@ -169,10 +169,10 @@
 	confirm-content confirm-footer button.confirm {
 		margin-left: 1rem;
 
-		background-color: var(--color-hl-gold);
+		background-color: var(--color-reactBlue);
 	}
 
 	confirm-content confirm-footer button.cancel {
-		background-color: var(--color-hl-2);
+		background-color: var(--color-dangerRed);
 	}
 </style>

@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import CheckIcon from '../icons/CheckIcon.svelte'
 	import DeleteIcon from '../icons/DeleteIcon.svelte'
@@ -215,7 +216,7 @@
 	}
 
 	prompt-content prompt-footer button.cancel {
-		background-color: var(--color-hl-2);
+		background-color: var(--color-dangerRed);
 	}
 
 	input {
