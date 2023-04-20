@@ -1,7 +1,6 @@
-import { get, writable, type Writable } from 'svelte/store'
+import { writable, type Writable } from 'svelte/store'
 import type { EqualizerType } from '../../../types/equalizer.type'
 import type { EqualizerProfileType } from '../../../types/equalizerProfile.type'
-import { config } from './config.store'
 
 export let context: Writable<AudioContext | undefined> = writable(undefined)
 export let sourceAltAudio: Writable<MediaElementAudioSourceNode | undefined> = writable(undefined)

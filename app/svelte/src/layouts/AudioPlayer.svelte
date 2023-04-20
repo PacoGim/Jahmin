@@ -29,8 +29,9 @@
 	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
 	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 	import { addTaskToQueue } from '../db/!db'
-  import nextSongFn from '../functions/nextSong.fn'
-  import { config } from '../stores/config.store'
+	import nextSongFn from '../functions/nextSong.fn'
+	import { config } from '../stores/config.store'
+	import equalizerService from '../services/equalizer/!equalizer.service'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -71,6 +72,8 @@
 
 			// Source for the alt audio element.
 			$sourceAltAudio = $context.createMediaElementSource($altAudioElement)
+
+			equalizerService.initEqualizerFn()
 		}
 	}
 
@@ -321,7 +324,7 @@
 			if (result === false) {
 				notifyService.error(`File "${song.SourceFile}" not found!`, {
 					timeout: 10000,
-					closeOnClick:true,
+					closeOnClick: true,
 					buttons: [
 						[
 							'<button style="color:#fff;border:solid 2px #fff;">Delete from library</button>',

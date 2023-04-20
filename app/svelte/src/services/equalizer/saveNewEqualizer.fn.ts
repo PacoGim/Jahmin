@@ -20,10 +20,15 @@ export default function (eqValues: EqualizerProfileValuesType, eqName: string, e
 			equalizerProfilesLocal.unshift(newEqualizerProfile)
 
 			equalizerProfiles.set(equalizerProfilesLocal)
-
-			// $equalizerProfiles = $equalizerProfiles
-			// $selectedEqName = newEqualizerProfile.name
-			currentEqHash.set(newEqualizerProfile.hash)
 		}
 	})
+
+	/*
+
+		Set default eq when all eq delete or current one
+		Redo dirty eq code
+
+
+
+	*/
 }

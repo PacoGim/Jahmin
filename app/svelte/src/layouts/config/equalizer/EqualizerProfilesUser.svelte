@@ -8,7 +8,13 @@
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
 	import notifyService from '../../../services/notify.service'
-	import { currentEqHash, equalizer, equalizerProfiles, selectedEqName } from '../../../stores/equalizer.store'
+	import {
+		currentEqHash,
+		equalizer,
+		equalizerNameStore,
+		equalizerProfiles,
+		selectedEqName
+	} from '../../../stores/equalizer.store'
 	import { confirmService, equalizerService, promptService } from '../../../stores/service.store'
 
 	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
@@ -134,7 +140,8 @@
 				class={$currentEqHash === eqProfile.hash ? 'current' : ''}
 				on:click={() => equalizerServiceNew.saveEqHashConfigFn(eqProfile.hash)}
 				on:click={() => ($currentEqHash = eqProfile.hash)}
-				on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}>{eqProfile.name}</equalizer-name
+				on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}
+				on:click={() => ($equalizerNameStore = eqProfile.name)}>{eqProfile.name}</equalizer-name
 			>
 			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eqProfile.name)}>
 				<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />

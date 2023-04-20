@@ -15,7 +15,6 @@
 	/********************** Middlewares **********************/
 	import IpcMiddleware from './middlewares/IpcMiddleware.svelte'
 	import PlayerMiddleware from './middlewares/PlayerMiddleware.svelte'
-	import EqualizerMiddleware from './middlewares/EqualizerMiddleware.svelte'
 
 	import AudioPlayer from './layouts/AudioPlayer.svelte'
 	import Navigation from './layouts/Navigation.svelte'
@@ -50,7 +49,6 @@
 
 <IpcMiddleware />
 <PlayerMiddleware />
-<EqualizerMiddleware />
 <EventsHandlerMiddleware />
 
 <AudioPlayer />

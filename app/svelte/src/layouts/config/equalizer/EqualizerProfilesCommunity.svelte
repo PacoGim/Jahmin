@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte'
 
 	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
-	import { currentEqHash, equalizerProfiles } from '../../../stores/equalizer.store'
+	import { currentEqHash, equalizerNameStore, equalizerProfiles } from '../../../stores/equalizer.store'
 
 	let communityProfiles = []
 
@@ -12,10 +12,6 @@
 			communityProfiles = results
 		})
 	})
-
-	$: {
-		console.log($equalizerProfiles)
-	}
 </script>
 
 <equalizer-profiles-community>
@@ -26,6 +22,7 @@
 					class={$currentEqHash === eqProfile.hash ? 'current' : ''}
 					on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}
 					on:click={() => ($currentEqHash = eqProfile.hash)}
+					on:click={() => ($equalizerNameStore = eqProfile.name)}
 				>
 					{eqProfile.name}
 				</equalizer-name>
