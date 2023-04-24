@@ -4,6 +4,8 @@
 
 	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
 	import { currentEqHash, currentEqProfile, equalizerNameStore, equalizerProfiles } from '../../../stores/equalizer.store'
+	import DownloadIcon from '../../../icons/DownloadIcon.svelte'
+	import DownloadedIcon from '../../../icons/DownloadedIcon.svelte'
 
 	let communityProfiles = []
 
@@ -27,11 +29,14 @@
 				>
 					{eqProfile.name}
 				</equalizer-name>
-				<button
-					disabled={$equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
-					on:click={() => equalizerServiceNew.saveNewEqualizerFn(eqProfile.values, eqProfile.name, eqProfile.hash)}
-					>Download</button
-				>
+
+				{#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
+					<button disabled><DownloadedIcon style="height: 1rem;fill: #3d3d3d;margin-right: .4rem;" /> Download</button>
+				{:else}
+					<button on:click={() => equalizerServiceNew.saveNewEqualizerFn(eqProfile.values, eqProfile.name, eqProfile.hash)}
+						><DownloadIcon style="height: 1rem;fill: #fff;margin-right: .4rem;" /> Download</button
+					>
+				{/if}
 			</equalizer-field>
 		{/each}
 	{:else}
@@ -96,6 +101,11 @@
 	}
 
 	button:disabled {
-		filter: grayscale(1);
+		cursor: not-allowed;
+
+		background-color: transparent;
+		color: #3d3d3d;
+		box-shadow: inset 0px 0px 0 1px #3d3d3d;
+		border-radius: 3px;
 	}
 </style>

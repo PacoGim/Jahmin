@@ -84,18 +84,18 @@
 		}
 	}
 
-	function checkIfEqualizerChanged() {
-		let isChanged = false
-		let equalizerSelected = $equalizerProfiles.find(x => x.name === $selectedEqName)
+	// function checkIfEqualizerChanged() {
+	// 	let isChanged = false
+	// 	let equalizerSelected = $equalizerProfiles.find(x => x.name === $selectedEqName)
 
-		if (equalizerSelected === undefined) return
+	// 	if (equalizerSelected === undefined) return
 
-		for (let Hz in $equalizer) {
-			if ($equalizer[Hz].gain.value !== equalizerSelected.values[Hz]) {
-				isChanged = true
-			}
-		}
+	// 	for (let Hz in $equalizer) {
+	// 		if ($equalizer[Hz].gain.value !== equalizerSelected.values[Hz]) {
+	// 			isChanged = true
+	// 		}
+	// 	}
 
-		$isEqualizerDirty = isChanged
-	}
+	// 	$isEqualizerDirty = isChanged
+	// }
 </script>

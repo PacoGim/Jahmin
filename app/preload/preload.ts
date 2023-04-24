@@ -197,10 +197,10 @@ function deleteEqualizer(eqName: string): Promise<ReturnMessageType> {
 	})
 }
 
-function updateEqualizerValues(eqName: string, newValues: any): Promise<boolean> {
+function updateEqualizerValues(eqHash: string, newValues: any): Promise<boolean> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
-			.invoke('update-equalizer-values', eqName, newValues)
+			.invoke('update-equalizer-values', eqHash, newValues)
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})

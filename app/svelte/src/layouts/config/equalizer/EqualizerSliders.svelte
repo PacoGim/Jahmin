@@ -97,7 +97,7 @@
 		cursor: not-allowed;
 	}
 	audio-filter-range eq-input-container input[type='range']:disabled::-webkit-slider-thumb {
-		background-color: var(--color-hl-2);
+		background-color: var(--color-dangerRed);
 	}
 
 	audio-filter-range filter-frequency {

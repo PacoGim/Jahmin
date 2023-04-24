@@ -9,6 +9,7 @@
 
 	import notify from '../../../services/notify.service'
 	import {
+		currentEqProfile,
 		equalizer,
 		equalizerProfiles,
 		isEqualizerDirty,
@@ -80,7 +81,10 @@
 		<SaveIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		Save as...
 	</button>
-	<button on:click={() => $equalizerServiceOld.updateEqualizer()} disabled={!$isEqualizerDirty}>
+	<button
+		on:click={() => equalizerService.updateEqualizerFn()}
+		disabled={!$isEqualizerDirty || $currentEqProfile.type === 'Community'}
+	>
 		<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		Update
 	</button>
@@ -110,5 +114,9 @@
 
 	equalizer-buttons-config button.resetEqButton {
 		margin-right: 4rem;
+	}
+
+	button.not-active{
+		background-color: var(--color-dangerRed);
 	}
 </style>

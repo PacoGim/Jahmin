@@ -65,11 +65,11 @@ svg {
 }
 
 button.info {
-	background-color: var(--color-hl-gold);
+	background-color: var(--color-reactBlue);
 }
 
 button.danger {
-	background-color: var(--color-hl-2);
+	background-color: var(--color-dangerRed);
 }
 
 button:focus {

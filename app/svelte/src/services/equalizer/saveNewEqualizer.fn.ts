@@ -1,6 +1,6 @@
 import { get } from 'svelte/store'
 import type { EqualizerProfileType, EqualizerProfileValuesType } from '../../../../types/equalizerProfile.type'
-import { currentEqHash } from '../../stores/equalizer.store'
+import { currentEqProfile } from '../../stores/equalizer.store'
 import { equalizerProfiles } from '../../stores/equalizer.store'
 import notifyService from '../notify.service'
 
@@ -17,18 +17,15 @@ export default function (eqValues: EqualizerProfileValuesType, eqName: string, e
 		} else if (result.code === 'OK') {
 			let equalizerProfilesLocal = get(equalizerProfiles)
 
+			newEqualizerProfile.type = 'Local'
+
 			equalizerProfilesLocal.unshift(newEqualizerProfile)
 
 			equalizerProfiles.set(equalizerProfilesLocal)
+
+			if (get(currentEqProfile).hash === newEqualizerProfile.hash) {
+				currentEqProfile.set(newEqualizerProfile)
+			}
 		}
 	})
-
-	/*
-
-		Set default eq when all eq delete or current one
-		Redo dirty eq code
-
-
-
-	*/
 }

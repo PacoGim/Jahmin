@@ -71,14 +71,15 @@ function renameEqualizer(eqName, newName) {
     }
 }
 exports.renameEqualizer = renameEqualizer;
-function updateEqualizerValues(eqName, newValues) {
+function updateEqualizerValues(eqHash, newValues) {
     let equalizers = getEqualizers();
-    let foundEq = equalizers.find(x => x.name === eqName);
+    let foundEq = equalizers.find(x => x.hash === eqHash);
     if (foundEq) {
         foundEq.values = newValues;
+        foundEq.hash = (0, getStringHash_fn_1.default)(foundEq.name + JSON.stringify(foundEq.values));
         try {
             fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${foundEq.name}.json`), equalizerFile_service_1.default.stringify(foundEq));
-            return true;
+            return foundEq;
         }
         catch (error) {
             return false;

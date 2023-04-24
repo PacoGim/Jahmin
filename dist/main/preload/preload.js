@@ -173,10 +173,10 @@ function deleteEqualizer(eqName) {
             .catch(err => reject(err));
     });
 }
-function updateEqualizerValues(eqName, newValues) {
+function updateEqualizerValues(eqHash, newValues) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer
-            .invoke('update-equalizer-values', eqName, newValues)
+            .invoke('update-equalizer-values', eqHash, newValues)
             .then(result => resolve(result))
             .catch(err => reject(err));
     });

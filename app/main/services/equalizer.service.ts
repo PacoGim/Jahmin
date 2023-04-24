@@ -81,18 +81,19 @@ export function renameEqualizer(eqName: string, newName: string): ReturnMessageT
 	}
 }
 
-export function updateEqualizerValues(eqName: string, newValues: string) {
+export function updateEqualizerValues(eqHash: string, newValues: string) {
 	let equalizers = getEqualizers()
 
-	let foundEq = equalizers.find(x => x.name === eqName)
+	let foundEq = equalizers.find(x => x.hash === eqHash)
 
 	if (foundEq) {
 		foundEq.values = newValues
+		foundEq.hash = getStringHashFn(foundEq.name + JSON.stringify(foundEq.values))
 
 		try {
 			fs.writeFileSync(path.join(eqFolderPath, `${foundEq.name}.json`), EqualizerFile.stringify(foundEq))
 
-			return true
+			return foundEq
 		} catch (error) {
 			return false
 		}

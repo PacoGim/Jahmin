@@ -170,27 +170,44 @@
 		margin: 0 auto;
 		margin-top: 1rem;
 	}
+
 	equalizer-profiles equalizer-field {
-		cursor: pointer;
 		display: grid;
 		grid-template-columns: auto max-content max-content;
-		transition: background-color 150ms ease-in-out;
+
+		margin-bottom: 0.25rem;
+		align-items: center;
 	}
 
 	equalizer-profiles equalizer-field * {
 		transition: background-color 150ms ease-in-out;
 	}
 
-	equalizer-profiles equalizer-field *.eqProfileButton {
+	.eqProfileButton {
 		display: flex;
 		padding: 0.25rem 0.5rem;
 		height: inherit;
-		margin-right: 1rem;
 
 		font-size: 0.85rem;
 		font-variation-settings: 'wght' 450;
+
+		display: flex;
+		align-items: center;
+		font-variation-settings: 'wght' 700;
+		letter-spacing: 0.4px;
+		font-size: 0.75rem;
+		cursor: pointer;
+		color: #fff;
+		background-color: var(--color-deepBlue);
+		border-radius: 3px;
+		padding: 0.2rem 0.4rem;
+
+		transition: background-color 250ms ease-in-out;
 	}
 
+	.eqProfileButton:first-of-type {
+		margin-right: 0.5rem;
+	}
 	equalizer-profiles equalizer-field:hover {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
@@ -222,7 +239,7 @@
 	}
 
 	equalizer-delete:hover {
-		background-color: var(--color-hl-2);
+		background-color: var(--color-dangerRed);
 	}
 
 	button.addProfile {
