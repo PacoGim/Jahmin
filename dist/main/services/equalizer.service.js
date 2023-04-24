@@ -30,6 +30,7 @@ function getEqualizers() {
         let equalizerObject = equalizerFile_service_1.default.parse(fs_1.default.readFileSync(path_1.default.join(eqFolderPath, filePath), { encoding: 'utf8' }));
         if (equalizerObject === null)
             return;
+        equalizerObject.type = 'Local';
         equalizers.push(equalizerObject);
     });
     return equalizers;

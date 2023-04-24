@@ -15,9 +15,10 @@
 		isEqualizerOn,
 		selectedEqName
 	} from '../../../stores/equalizer.store'
-	import { equalizerService, promptService } from '../../../stores/service.store'
+	import { equalizerService as equalizerServiceOld, promptService } from '../../../stores/service.store'
 	import type { EqualizerProfileType } from '../../../../../types/equalizerProfile.type'
 	import type { PromptStateType } from '../../../../../types/promptState.type'
+	import equalizerService from '../../../services/equalizer/!equalizer.service'
 
 	function saveEqualizerAs(newName: string = '') {
 		let promptState: PromptStateType = {
@@ -58,7 +59,7 @@
 </script>
 
 <equalizer-buttons-config>
-	<button class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}" on:click={() => $equalizerService.toggleEq()}>
+	<button class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}" on:click={() => $equalizerServiceOld.toggleEq()}>
 		{#if $isEqualizerOn === true}
 			<ToggleOnIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		{:else}
@@ -69,7 +70,7 @@
 	</button>
 	<button
 		class="resetEqButton"
-		on:click={() => $equalizerService.resetEqualizer()}
+		on:click={() => equalizerService.resetEqualizerFn()}
 		disabled={$isEqualizerDirty === false || $isEqualizerOn === false}
 	>
 		<RefreshIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
@@ -79,7 +80,7 @@
 		<SaveIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		Save as...
 	</button>
-	<button on:click={() => $equalizerService.updateEqualizer()} disabled={!$isEqualizerDirty}>
+	<button on:click={() => $equalizerServiceOld.updateEqualizer()} disabled={!$isEqualizerDirty}>
 		<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		Update
 	</button>

@@ -13,11 +13,12 @@
 		equalizer,
 		equalizerNameStore,
 		equalizerProfiles,
-		selectedEqName
+		selectedEqName,
+		currentEqProfile
 	} from '../../../stores/equalizer.store'
-	import { confirmService, equalizerService, promptService } from '../../../stores/service.store'
+	import { confirmService, promptService } from '../../../stores/service.store'
 
-	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
+	import equalizerService from '../../../services/equalizer/!equalizer.service'
 
 	function renameEq(eqName: string) {
 		if (eqName === 'Default') {
@@ -138,9 +139,10 @@
 		<equalizer-field id="eq-{eqProfile.name}">
 			<equalizer-name
 				class={$currentEqHash === eqProfile.hash ? 'current' : ''}
-				on:click={() => equalizerServiceNew.saveEqHashConfigFn(eqProfile.hash)}
+				on:click={() => equalizerService.saveEqHashConfigFn(eqProfile.hash)}
 				on:click={() => ($currentEqHash = eqProfile.hash)}
-				on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}
+				on:click={() => ($currentEqProfile = eqProfile)}
+				on:click={() => equalizerService.loadEqualizerValuesFn(eqProfile.values)}
 				on:click={() => ($equalizerNameStore = eqProfile.name)}>{eqProfile.name}</equalizer-name
 			>
 			<equalizer-rename class="eqProfileButton" on:click={() => renameEq(eqProfile.name)}>

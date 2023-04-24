@@ -1,6 +1,6 @@
 import { get } from 'svelte/store'
 import getAudioFiltersFn from './loadLocalEqualizerProfiles.fn'
-import { context, equalizer, sourceAltAudio, sourceMainAudio } from '../../stores/equalizer.store'
+import { context, currentEqProfile, equalizer, sourceAltAudio, sourceMainAudio } from '../../stores/equalizer.store'
 import loadEqualizerValuesFn from './loadEqualizerValues.fn'
 
 const equalizerGainValues = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
@@ -44,6 +44,7 @@ export default function () {
 
 		equalizer.set(equalizerLocal)
 
+		currentEqProfile.set(eqProfile)
     loadEqualizerValuesFn(eqProfile.values)
 	})
 }

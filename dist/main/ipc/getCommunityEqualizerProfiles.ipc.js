@@ -32,6 +32,7 @@ function getEqualizersFromProfiles(profilesList, equalizerProfilesList) {
                 .then(data => {
                 newProfile.values = data.values;
                 newProfile.hash = (0, getStringHash_fn_1.default)(newProfile.name + JSON.stringify(newProfile.values));
+                newProfile.type = 'Community';
                 equalizerProfilesList.push(newProfile);
                 getEqualizersFromProfiles(profilesList, equalizerProfilesList);
             });

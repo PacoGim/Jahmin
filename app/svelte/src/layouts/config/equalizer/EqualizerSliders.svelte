@@ -1,21 +1,22 @@
 <script lang="ts">
 	import { equalizer, equalizerNameStore, isEqualizerOn, selectedEqName } from '../../../stores/equalizer.store'
-	import { equalizerService } from '../../../stores/service.store'
+	import { equalizerService as equalizerServiceOld } from '../../../stores/service.store'
 
 	import objectToArrayFn from '../../../functions/objectToArray.fn'
+	import equalizerService from '../../../services/equalizer/!equalizer.service'
 
 	$: $equalizerNameStore = getProfileNameFromId($selectedEqName)
 
 	function getProfileNameFromId(eqId: String) {
-		if ($equalizerService !== undefined) {
-			return $equalizerService.getEqualizerName(eqId)
+		if ($equalizerServiceOld !== undefined) {
+			return $equalizerServiceOld.getEqualizerName(eqId)
 		} else {
 			return ''
 		}
 	}
 </script>
 
-<equalizer-controls-config>
+<equalizer-sliders-config>
 	{#each objectToArrayFn($equalizer) as equalizerProfile, index (index)}
 		<audio-filter-range>
 			<filter-frequency>{equalizerProfile.frequency.value} Hz</filter-frequency>
@@ -26,17 +27,17 @@
 					max="8"
 					step="1"
 					value={equalizerProfile.gain.value}
-					on:input={evt => $equalizerService.gainChange(evt, equalizerProfile.frequency.value)}
+					on:input={evt => equalizerService.gainChangeFn(evt.currentTarget, equalizerProfile.frequency.value)}
 					disabled={!$isEqualizerOn}
 				/>
 			</eq-input-container>
 			<filter-gain>{equalizerProfile.gain.value} dB</filter-gain>
 		</audio-filter-range>
 	{/each}
-</equalizer-controls-config>
+</equalizer-sliders-config>
 
 <style>
-	equalizer-controls-config {
+	equalizer-sliders-config {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
@@ -67,6 +68,7 @@
 		transform: rotate(-90deg);
 
 		-webkit-appearance: none;
+		appearance: none;
 
 		outline: none;
 

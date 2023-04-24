@@ -33,8 +33,8 @@ function getEqualizersFromProfiles(profilesList: { name: string; url: string }[]
 				.then(res => res.json())
 				.then(data => {
 					newProfile.values = data.values
-
 					newProfile.hash = getStringHashFn(newProfile.name + JSON.stringify(newProfile.values))
+					newProfile.type = 'Community'
 
 					equalizerProfilesList.push(newProfile)
 					getEqualizersFromProfiles(profilesList, equalizerProfilesList)

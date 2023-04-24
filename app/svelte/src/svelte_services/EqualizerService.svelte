@@ -6,8 +6,8 @@
 	import type { EqualizerProfileType } from '../../../types/equalizerProfile.type'
 
 	$: {
-		$equalizer
-		checkIfEqualizerChanged()
+		// $equalizer
+		// checkIfEqualizerChanged()
 	}
 
 	export function changeProfile(id: string) {

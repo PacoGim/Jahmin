@@ -4,4 +4,5 @@ export type EqualizerFileObjectType = {
 		[key: string]: number
 	}|undefined
 	hash?: string
+	type?:'Local'|'Community'
 }

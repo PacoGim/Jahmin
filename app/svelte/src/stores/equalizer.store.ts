@@ -17,3 +17,4 @@ export let isEqualizerOn: Writable<boolean> = writable(true)
 export let isEqualizerDirty: Writable<boolean> = writable(false)
 
 export let currentEqHash: Writable<string> = writable()
+export let currentEqProfile: Writable<EqualizerProfileType> = writable()

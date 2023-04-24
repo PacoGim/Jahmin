@@ -1,6 +1,6 @@
 <script lang="ts">
 	import EqualizerButtons from './EqualizerButtons.svelte'
-	import EqualizerControls from './EqualizerControls.svelte'
+	import EqualizerControls from './EqualizerSliders.svelte'
 	import EqualizerProfiles from './EqualizerProfiles.svelte'
 
 	import { equalizerNameStore, isEqualizerDirty, isEqualizerOn } from '../../../stores/equalizer.store'

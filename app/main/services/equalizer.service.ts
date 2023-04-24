@@ -30,9 +30,12 @@ export function getEqualizers() {
 	}
 
 	equalizerFilePaths.forEach(filePath => {
-		let equalizerObject = EqualizerFile.parse(fs.readFileSync(path.join(eqFolderPath, filePath), { encoding: 'utf8' }))
+		let equalizerObject: EqualizerFileObjectType = EqualizerFile.parse(
+			fs.readFileSync(path.join(eqFolderPath, filePath), { encoding: 'utf8' })
+		)
 
 		if (equalizerObject === null) return
+		equalizerObject.type = 'Local'
 
 		equalizers.push(equalizerObject)
 	})
