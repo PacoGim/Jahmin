@@ -16,7 +16,7 @@
 		isEqualizerOn,
 		selectedEqName
 	} from '../../../stores/equalizer.store'
-	import { equalizerService as equalizerServiceOld, promptService } from '../../../stores/service.store'
+	import { promptService } from '../../../stores/service.store'
 	import type { EqualizerProfileType } from '../../../../../types/equalizerProfile.type'
 	import type { PromptStateType } from '../../../../../types/promptState.type'
 	import equalizerService from '../../../services/equalizer/!equalizer.service'
@@ -60,7 +60,10 @@
 </script>
 
 <equalizer-buttons-config>
-	<button class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}" on:click={() => $equalizerServiceOld.toggleEq()}>
+	<button
+		class="toggleEqButton {$isEqualizerOn ? 'active' : 'not-active'}"
+		on:click={() => equalizerService.toggleEqualizerFn()}
+	>
 		{#if $isEqualizerOn === true}
 			<ToggleOnIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		{:else}
@@ -116,7 +119,7 @@
 		margin-right: 4rem;
 	}
 
-	button.not-active{
+	button.not-active {
 		background-color: var(--color-dangerRed);
 	}
 </style>

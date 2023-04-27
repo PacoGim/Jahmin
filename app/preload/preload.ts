@@ -188,10 +188,10 @@ function addNewEqualizerProfile(newProfile: EqualizerProfileType) {
 	})
 }
 
-function deleteEqualizer(eqName: string): Promise<ReturnMessageType> {
+function deleteEqualizer(eqHash: string): Promise<ReturnMessageType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
-			.invoke('delete-equalizer', eqName)
+			.invoke('delete-equalizer', eqHash)
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})
@@ -206,10 +206,10 @@ function updateEqualizerValues(eqHash: string, newValues: any): Promise<boolean>
 	})
 }
 
-function renameEqualizer(eqName: string, newName: string): Promise<ReturnMessageType> {
+function renameEqualizer(eqHash: string, newName: string): Promise<ReturnMessageType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
-			.invoke('rename-equalizer', eqName, newName)
+			.invoke('rename-equalizer', eqHash, newName)
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})

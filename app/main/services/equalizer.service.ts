@@ -43,9 +43,9 @@ export function getEqualizers() {
 	return equalizers
 }
 
-export function renameEqualizer(eqName: string, newName: string): ReturnMessageType {
+export function renameEqualizer(eqHash: string, newName: string): ReturnMessageType {
 	let equalizers = getEqualizers()
-	let foundEq = equalizers.find(x => x.name === eqName)
+	let foundEq = equalizers.find(x => x.hash === eqHash)
 
 	if (foundEq) {
 		let newNamePath = path.join(eqFolderPath, `${newName}.json`)
@@ -112,7 +112,8 @@ export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessage
 			fs.writeFileSync(path.join(eqFolderPath, `${newProfile.name}.json`), EqualizerFile.stringify(newProfile))
 
 			return {
-				code: 'OK'
+				code: 'OK',
+				data: { hash: newProfile.hash }
 			}
 		} catch (error: any) {
 			return {
@@ -128,10 +129,10 @@ export function addEqualizer(newProfile: EqualizerFileObjectType): ReturnMessage
 	}
 }
 
-export function deleteEqualizer(eqName: string): ReturnMessageType {
+export function deleteEqualizer(eqHash: string): ReturnMessageType {
 	let equalizers = getEqualizers()
 
-	let foundEq = equalizers.find(x => x.name === eqName)
+	let foundEq = equalizers.find(x => x.hash === eqHash)
 
 	if (foundEq) {
 		let eqPath = path.join(eqFolderPath, `${foundEq.name}.json`)

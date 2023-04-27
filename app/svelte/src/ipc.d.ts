@@ -16,9 +16,9 @@ declare global {
 			getEqualizers
 			saveConfig: (config: PartialConfigType<ConfigType>) => Promise<ConfigType>
 			addNewEqualizerProfile: (newProfile: EqualizerProfileType) => Promise<ReturnMessageType>
-			renameEqualizer: (eqName: string, newName: string) => Promise<ReturnMessageType>
+			renameEqualizer: (eqHash: string, newName: string) => Promise<ReturnMessageType>
 			updateEqualizerValues: (eqName: string, newValues: any) => Promise<EqualizerProfileType>
-			deleteEqualizer: (eqName: string) => Promise<ReturnMessageType>
+			deleteEqualizer: (eqHash: string) => Promise<ReturnMessageType>
 			stopSongUpdate: () => Promise<>
 			rebuildArtCache: () => Promise<>
 			saveLyrics: (lyrics: string, songTile: string, songArtist: string) => Promise<string>

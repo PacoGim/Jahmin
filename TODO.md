@@ -19,5 +19,5 @@
 * Fix covers not working when song others than opus
 * A lot of padding in toast
 
-* Set default eq when all eq delete or current one
 * Verifiy matching eq hash before saving
+* Add a hi db warning in community profiles

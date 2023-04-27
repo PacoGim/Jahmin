@@ -1,19 +1,8 @@
 <script lang="ts">
-	import { equalizer, equalizerNameStore, isEqualizerOn, selectedEqName } from '../../../stores/equalizer.store'
-	import { equalizerService as equalizerServiceOld } from '../../../stores/service.store'
+	import { equalizer, isEqualizerOn } from '../../../stores/equalizer.store'
 
 	import objectToArrayFn from '../../../functions/objectToArray.fn'
 	import equalizerService from '../../../services/equalizer/!equalizer.service'
-
-	$: $equalizerNameStore = getProfileNameFromId($selectedEqName)
-
-	function getProfileNameFromId(eqId: String) {
-		if ($equalizerServiceOld !== undefined) {
-			return $equalizerServiceOld.getEqualizerName(eqId)
-		} else {
-			return ''
-		}
-	}
 </script>
 
 <equalizer-sliders-config>

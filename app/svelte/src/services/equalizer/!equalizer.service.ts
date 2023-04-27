@@ -6,6 +6,11 @@ import getAudioFiltersFn from './loadLocalEqualizerProfiles.fn'
 import gainChangeFn from './gainChange.fn'
 import resetEqualizerFn from './resetEqualizer.fn'
 import updateEqualizerFn from './updateEqualizer.fn'
+import deleteEqualizerFn from './deleteEqualizer.fn'
+import renameEqualizerFn from './renameEqualizer.fn'
+import addEqualizerFn from './addEqualizer.fn'
+import toggleEqualizerFn from './toggleEqualizer.fn'
+
 
 export default {
 	loadEqualizerValuesFn,
@@ -15,5 +20,9 @@ export default {
 	getAudioFiltersFn,
 	gainChangeFn,
 	resetEqualizerFn,
-	updateEqualizerFn
+	updateEqualizerFn,
+	deleteEqualizerFn,
+	renameEqualizerFn,
+	addEqualizerFn,
+	toggleEqualizerFn
 }

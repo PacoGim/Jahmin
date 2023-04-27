@@ -99,7 +99,7 @@
 	top: 0;
 	border: 0;
 	padding: 0;
-	opacity: 0.6;
+	/* opacity: 0.6; */
 	width: 42px;
 	height: 100%;
 	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAJPAAACTwBcGfW0QAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAD3SURBVFiF1ZdtDoMgDEBfdi4PwAX8vLFn0qT7wxantojKupmQmCi8R4tSACpgjC2ICCUbEBa8ingjsU1AXRBeR8aLN64FiknswN8CYefBBDQ3whuFESy7WyQMeC0ipEI0A+0FeBvHUFN8xPaUhAH/iKoWsnXHGegy4J0yxialOfaHJAz4bhRzQzgDvdGnz4GbAonZbCQMuBm1K/kcFu8Mp1N2cFFpsxsMuJqqbIGExGl4loARajU1twskJLLhIsID7+tvUoDnIjTg5T9DPH9EBrz8rxjPzciAl9+O8SxI8CzJ8CxKFfh3ynK8Dyb8wNHM/XDqejx/AtNyPO87tNybAAAAAElFTkSuQmCC)
@@ -245,7 +245,7 @@
 	margin: 0;
 }
 .iziToast > .iziToast-body .iziToast-message {
-	margin: 0 0 10px;
+	/* margin: 0 0 10px; */
 	color: rgba(0, 0, 0, 0.6);
 }
 .iziToast.iziToast-animateInside .iziToast-buttons-child,

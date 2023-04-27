@@ -26,10 +26,9 @@
 
 	import { getDB } from './db/!dbObject'
 
-	import {  dbSongsStore, layoutToShow } from './stores/main.store'
+	import { dbSongsStore, layoutToShow } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
-	import { equalizerService, confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
-	import EqualizerService from './svelte_services/EqualizerService.svelte'
+	import { confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import PromptService from './svelte_services/PromptService.svelte'
 	import ConfirmService from './svelte_services/ConfirmService.svelte'
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
@@ -71,7 +70,6 @@
 	</current-window-svlt>
 </main-app>
 
-<EqualizerService bind:this={$equalizerService} />
 <PromptService bind:this={$promptService} />
 <ConfirmService bind:this={$confirmService} />
 <RangeInputService bind:this={$rangeInputService} />
@@ -96,5 +94,6 @@
 		grid-area: current-window-svlt;
 		height: calc(100vh - 64px - 32px);
 		overflow-y: auto;
+		overflow-x: hidden;
 	}
 </style>

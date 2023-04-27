@@ -36,9 +36,9 @@ function getEqualizers() {
     return equalizers;
 }
 exports.getEqualizers = getEqualizers;
-function renameEqualizer(eqName, newName) {
+function renameEqualizer(eqHash, newName) {
     let equalizers = getEqualizers();
-    let foundEq = equalizers.find(x => x.name === eqName);
+    let foundEq = equalizers.find(x => x.hash === eqHash);
     if (foundEq) {
         let newNamePath = path_1.default.join(eqFolderPath, `${newName}.json`);
         let oldNamePath = path_1.default.join(eqFolderPath, `${foundEq.name}.json`);
@@ -96,7 +96,8 @@ function addEqualizer(newProfile) {
         try {
             fs_1.default.writeFileSync(path_1.default.join(eqFolderPath, `${newProfile.name}.json`), equalizerFile_service_1.default.stringify(newProfile));
             return {
-                code: 'OK'
+                code: 'OK',
+                data: { hash: newProfile.hash }
             };
         }
         catch (error) {
@@ -114,9 +115,9 @@ function addEqualizer(newProfile) {
     }
 }
 exports.addEqualizer = addEqualizer;
-function deleteEqualizer(eqName) {
+function deleteEqualizer(eqHash) {
     let equalizers = getEqualizers();
-    let foundEq = equalizers.find(x => x.name === eqName);
+    let foundEq = equalizers.find(x => x.hash === eqHash);
     if (foundEq) {
         let eqPath = path_1.default.join(eqFolderPath, `${foundEq.name}.json`);
         if (fs_1.default.existsSync(eqPath)) {

@@ -165,10 +165,10 @@ function addNewEqualizerProfile(newProfile) {
             .catch(err => reject(err));
     });
 }
-function deleteEqualizer(eqName) {
+function deleteEqualizer(eqHash) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer
-            .invoke('delete-equalizer', eqName)
+            .invoke('delete-equalizer', eqHash)
             .then(result => resolve(result))
             .catch(err => reject(err));
     });
@@ -181,10 +181,10 @@ function updateEqualizerValues(eqHash, newValues) {
             .catch(err => reject(err));
     });
 }
-function renameEqualizer(eqName, newName) {
+function renameEqualizer(eqHash, newName) {
     return new Promise((resolve, reject) => {
         electron_1.ipcRenderer
-            .invoke('rename-equalizer', eqName, newName)
+            .invoke('rename-equalizer', eqHash, newName)
             .then(result => resolve(result))
             .catch(err => reject(err));
     });

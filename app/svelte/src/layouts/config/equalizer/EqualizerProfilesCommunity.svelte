@@ -6,8 +6,34 @@
 	import { currentEqHash, currentEqProfile, equalizerNameStore, equalizerProfiles } from '../../../stores/equalizer.store'
 	import DownloadIcon from '../../../icons/DownloadIcon.svelte'
 	import DownloadedIcon from '../../../icons/DownloadedIcon.svelte'
+	import WarningIcon from '../../../icons/WarningIcon.svelte'
+	import tippyService from '../../../services/tippy.service'
+	import generateId from '../../../functions/generateId.fn'
 
 	let communityProfiles = []
+
+	function getWarning(eqValues) {
+		let isDangerous = false
+
+		for (let frequency in eqValues) {
+			if (eqValues[frequency] > 4) {
+				isDangerous = true
+				setTimeout(() => {
+					tippyService(
+						'equalizer-profiles-community-loud-warning',
+						'equalizer-profiles-community equalizer-field equalizer-name span.warning',
+						{
+							content: 'Warning: Contains loud values',
+							theme: 'warning'
+						}
+					)
+				}, 100)
+				break
+			}
+		}
+
+		return isDangerous
+	}
 
 	onMount(() => {
 		window.ipc.getCommunityEqualizerProfiles().then(results => {
@@ -27,6 +53,12 @@
 					on:click={() => ($currentEqProfile = eqProfile)}
 					on:click={() => ($equalizerNameStore = eqProfile.name)}
 				>
+					{#if getWarning(eqProfile.values)}
+						<span class="warning">
+							<WarningIcon style="fill: var(--color-dangerRed); height: 1.25rem; margin-right: .2rem;" />
+						</span>
+					{/if}
+
 					{eqProfile.name}
 				</equalizer-name>
 

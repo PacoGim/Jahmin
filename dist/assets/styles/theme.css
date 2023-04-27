@@ -46,6 +46,16 @@ body[theme='Night'] {
 	color: var(--art-color-light);
 }
 
-.tippy-box > .tippy-arrow:before {
+.tippy-box[data-theme~='dynamic'] > .tippy-arrow:before {
 	border-top-color: var(--art-color-dark) !important; /* set your color here and use the !important property */
+}
+
+.tippy-box[data-theme~='warning'] {
+	font-size: 0.9rem;
+	background-color: var(--color-dangerRed);
+	color: #fff;
+}
+
+.tippy-box[data-theme~='warning'] > .tippy-arrow:before {
+	border-top-color: var(--color-dangerRed) !important; /* set your color here and use the !important property */
 }
