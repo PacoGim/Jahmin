@@ -1,3 +1,4 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import CheckIcon from '../icons/CheckIcon.svelte'
 
@@ -146,8 +147,8 @@
 		height: 2rem;
 		width: 2rem;
 
-		color: #fff;
-		background-color: #0a0a0a;
+		color: var(--color-fg-1);
+		background-color: var(--color-bg-3);
 	}
 
 	confirm-content confirm-title {
@@ -169,7 +170,7 @@
 	confirm-content confirm-footer button.confirm {
 		margin-left: 1rem;
 
-		background-color: var(--color-reactBlue);
+		background-color: var(--color-accent-1);
 	}
 
 	confirm-content confirm-footer button.cancel {

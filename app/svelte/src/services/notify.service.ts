@@ -4,7 +4,7 @@ function success(message: string, customConfig: IziToastSettings = {}) {
 	return iziToast.success({
 		message,
 		messageColor: '#fff',
-		backgroundColor: 'var(--color-reactBlue)',
+		backgroundColor: 'var(--color-accent-1)',
 		icon: '',
 		...customConfig
 	})

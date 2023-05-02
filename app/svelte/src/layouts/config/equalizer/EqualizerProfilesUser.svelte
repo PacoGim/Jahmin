@@ -4,7 +4,7 @@
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 	import EditIcon from '../../../icons/EditIcon.svelte'
 
-	import { currentEqHash, equalizerNameStore, equalizerProfiles, currentEqProfile } from '../../../stores/equalizer.store'
+	import { currentEqHash, equalizerProfiles, currentEqProfile } from '../../../stores/equalizer.store'
 
 	import equalizerService from '../../../services/equalizer/!equalizer.service'
 </script>
@@ -17,8 +17,7 @@
 				on:click={() => equalizerService.saveEqHashConfigFn(eqProfile.hash)}
 				on:click={() => ($currentEqHash = eqProfile.hash)}
 				on:click={() => ($currentEqProfile = eqProfile)}
-				on:click={() => equalizerService.loadEqualizerValuesFn(eqProfile.values)}
-				on:click={() => ($equalizerNameStore = eqProfile.name)}>{eqProfile.name}</equalizer-name
+				on:click={() => equalizerService.loadEqualizerValuesFn(eqProfile.values)}>{eqProfile.name}</equalizer-name
 			>
 			<equalizer-rename
 				class="eqProfileButton"
@@ -37,19 +36,21 @@
 		</equalizer-field>
 	{/each}
 </equalizer-profiles>
+
 <button class="addProfile" on:click={() => equalizerService.addEqualizerFn()}
 	><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
 >
 
 <style>
 	equalizer-profiles {
-		max-height: 10rem;
-		min-height: 10rem;
 		display: block;
 		overflow-y: auto;
 		margin-top: 1rem;
-		padding: .5rem;
+		padding: 0.5rem;
 		border-radius: 5px;
+
+		max-height: 12rem;
+		min-height: 12rem;
 
 		background-color: var(--color-bg-3);
 	}
@@ -100,7 +101,7 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		padding: .5rem;
+		padding: 0.5rem;
 	}
 
 	equalizer-name::before {

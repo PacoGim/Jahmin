@@ -9615,7 +9615,7 @@ var app = (function () {
     }
 
     function success(message, customConfig = {}) {
-        return iziToast.success(Object.assign({ message, messageColor: '#fff', backgroundColor: 'var(--color-reactBlue)', icon: '' }, customConfig));
+        return iziToast.success(Object.assign({ message, messageColor: '#fff', backgroundColor: 'var(--color-accent-1)', icon: '' }, customConfig));
     }
     function error(message, customConfig = {}) {
         return iziToast.error(Object.assign({ message, messageColor: '#fff', backgroundColor: 'var(--color-dangerRed)', icon: '' }, customConfig));
@@ -9631,7 +9631,6 @@ var app = (function () {
     let equalizer = writable({});
     let selectedEqName = writable(undefined);
     let equalizerProfiles = writable([]);
-    let equalizerNameStore = writable('');
     let isEqualizerOn = writable(true);
     let isEqualizerDirty = writable(false);
     let currentEqHash = writable();
@@ -10114,23 +10113,23 @@ var app = (function () {
     			button1 = element("button");
     			create_component(checkicon.$$.fragment);
     			t8 = text("\n\t\t\t\tConfirm");
-    			set_custom_element_data(confirm_close, "class", "svelte-1c7w2jd");
-    			add_location(confirm_close, file$1q, 42, 2, 1237);
-    			set_custom_element_data(confirm_title, "class", "svelte-1c7w2jd");
-    			add_location(confirm_title, file$1q, 43, 2, 1304);
-    			set_custom_element_data(confirm_body, "class", "svelte-1c7w2jd");
-    			add_location(confirm_body, file$1q, 44, 2, 1358);
-    			attr_dev(button0, "class", "cancel svelte-1c7w2jd");
-    			add_location(button0, file$1q, 48, 3, 1445);
-    			attr_dev(button1, "class", "confirm svelte-1c7w2jd");
-    			add_location(button1, file$1q, 52, 3, 1610);
-    			set_custom_element_data(confirm_footer, "class", "svelte-1c7w2jd");
-    			add_location(confirm_footer, file$1q, 47, 2, 1425);
-    			set_custom_element_data(confirm_content, "class", "svelte-1c7w2jd");
-    			add_location(confirm_content, file$1q, 41, 1, 1217);
+    			set_custom_element_data(confirm_close, "class", "svelte-18tmbv");
+    			add_location(confirm_close, file$1q, 43, 2, 1294);
+    			set_custom_element_data(confirm_title, "class", "svelte-18tmbv");
+    			add_location(confirm_title, file$1q, 44, 2, 1361);
+    			set_custom_element_data(confirm_body, "class", "svelte-18tmbv");
+    			add_location(confirm_body, file$1q, 45, 2, 1415);
+    			attr_dev(button0, "class", "cancel svelte-18tmbv");
+    			add_location(button0, file$1q, 49, 3, 1502);
+    			attr_dev(button1, "class", "confirm svelte-18tmbv");
+    			add_location(button1, file$1q, 53, 3, 1667);
+    			set_custom_element_data(confirm_footer, "class", "svelte-18tmbv");
+    			add_location(confirm_footer, file$1q, 48, 2, 1482);
+    			set_custom_element_data(confirm_content, "class", "svelte-18tmbv");
+    			add_location(confirm_content, file$1q, 42, 1, 1274);
     			set_custom_element_data(confirm_svlt, "show", /*isConfirmVisible*/ ctx[1]);
-    			set_custom_element_data(confirm_svlt, "class", "svelte-1c7w2jd");
-    			add_location(confirm_svlt, file$1q, 40, 0, 1133);
+    			set_custom_element_data(confirm_svlt, "class", "svelte-18tmbv");
+    			add_location(confirm_svlt, file$1q, 41, 0, 1190);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -31408,7 +31407,7 @@ var app = (function () {
     			t4 = text(t4_value);
     			t5 = text(" dB");
     			t6 = space();
-    			set_custom_element_data(filter_frequency, "class", "svelte-2bg7p0");
+    			set_custom_element_data(filter_frequency, "class", "svelte-4xioco");
     			add_location(filter_frequency, file$t, 8, 3, 376);
     			attr_dev(input, "type", "range");
     			attr_dev(input, "min", "-8");
@@ -31416,13 +31415,13 @@ var app = (function () {
     			attr_dev(input, "step", "1");
     			input.value = input_value_value = /*equalizerProfile*/ ctx[3].gain.value;
     			input.disabled = input_disabled_value = !/*$isEqualizerOn*/ ctx[1];
-    			attr_dev(input, "class", "svelte-2bg7p0");
+    			attr_dev(input, "class", "svelte-4xioco");
     			add_location(input, file$t, 10, 4, 479);
-    			set_custom_element_data(eq_input_container, "class", "svelte-2bg7p0");
+    			set_custom_element_data(eq_input_container, "class", "svelte-4xioco");
     			add_location(eq_input_container, file$t, 9, 3, 454);
-    			set_custom_element_data(filter_gain, "class", "svelte-2bg7p0");
+    			set_custom_element_data(filter_gain, "class", "svelte-4xioco");
     			add_location(filter_gain, file$t, 20, 3, 759);
-    			set_custom_element_data(audio_filter_range, "class", "svelte-2bg7p0");
+    			set_custom_element_data(audio_filter_range, "class", "svelte-4xioco");
     			add_location(audio_filter_range, file$t, 7, 2, 352);
     			this.first = audio_filter_range;
     		},
@@ -31500,7 +31499,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(equalizer_sliders_config, "class", "svelte-2bg7p0");
+    			set_custom_element_data(equalizer_sliders_config, "class", "svelte-4xioco");
     			add_location(equalizer_sliders_config, file$t, 5, 0, 251);
     		},
     		l: function claim(nodes) {
@@ -31908,12 +31907,12 @@ var app = (function () {
 
     function get_each_context$9(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[12] = list[i];
-    	child_ctx[14] = i;
+    	child_ctx[10] = list[i];
+    	child_ctx[12] = i;
     	return child_ctx;
     }
 
-    // (64:1) {:else}
+    // (63:1) {:else}
     function create_else_block_1(ctx) {
     	let span;
 
@@ -31921,7 +31920,7 @@ var app = (function () {
     		c: function create() {
     			span = element("span");
     			span.textContent = "Fetching community profiles...";
-    			add_location(span, file$p, 64, 2, 2594);
+    			add_location(span, file$p, 63, 2, 2513);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -31938,7 +31937,7 @@ var app = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(64:1) {:else}",
+    		source: "(63:1) {:else}",
     		ctx
     	});
 
@@ -31953,7 +31952,7 @@ var app = (function () {
     	let current;
     	let each_value = /*communityProfiles*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[14];
+    	const get_key = ctx => /*index*/ ctx[12];
     	validate_each_keys(ctx, each_value, get_each_context$9, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -31981,7 +31980,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*communityProfiles, $equalizerProfiles, equalizerServiceNew, $currentEqHash, $currentEqProfile, $equalizerNameStore, getWarning*/ 63) {
+    			if (dirty & /*communityProfiles, $equalizerProfiles, equalizerServiceNew, $currentEqHash, $currentEqProfile, getWarning*/ 31) {
     				each_value = /*communityProfiles*/ ctx[0];
     				validate_each_argument(each_value);
     				group_outros();
@@ -32026,7 +32025,7 @@ var app = (function () {
     	return block;
     }
 
-    // (45:5) {#if getWarning(eqProfile.values)}
+    // (44:5) {#if getWarning(eqProfile.values)}
     function create_if_block_2$3(ctx) {
     	let span;
     	let warningicon;
@@ -32044,7 +32043,7 @@ var app = (function () {
     			span = element("span");
     			create_component(warningicon.$$.fragment);
     			attr_dev(span, "class", "warning");
-    			add_location(span, file$p, 45, 6, 1899);
+    			add_location(span, file$p, 44, 6, 1818);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -32070,14 +32069,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(45:5) {#if getWarning(eqProfile.values)}",
+    		source: "(44:5) {#if getWarning(eqProfile.values)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (57:4) {:else}
+    // (56:4) {:else}
     function create_else_block$3(ctx) {
     	let button;
     	let downloadicon;
@@ -32093,8 +32092,8 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function click_handler_4() {
-    		return /*click_handler_4*/ ctx[11](/*eqProfile*/ ctx[12]);
+    	function click_handler_3() {
+    		return /*click_handler_3*/ ctx[9](/*eqProfile*/ ctx[10]);
     	}
 
     	const block = {
@@ -32102,8 +32101,8 @@ var app = (function () {
     			button = element("button");
     			create_component(downloadicon.$$.fragment);
     			t = text(" Download");
-    			attr_dev(button, "class", "svelte-1szp9sc");
-    			add_location(button, file$p, 57, 5, 2326);
+    			attr_dev(button, "class", "svelte-80b4i0");
+    			add_location(button, file$p, 56, 5, 2245);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -32112,7 +32111,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", click_handler_4, false, false, false, false);
+    				dispose = listen_dev(button, "click", click_handler_3, false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -32140,14 +32139,14 @@ var app = (function () {
     		block,
     		id: create_else_block$3.name,
     		type: "else",
-    		source: "(57:4) {:else}",
+    		source: "(56:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (54:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
+    // (53:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
     function create_if_block_1$6(ctx) {
     	let button;
     	let downloadedicon;
@@ -32167,8 +32166,8 @@ var app = (function () {
     			create_component(downloadedicon.$$.fragment);
     			t = text(" Download");
     			button.disabled = true;
-    			attr_dev(button, "class", "svelte-1szp9sc");
-    			add_location(button, file$p, 54, 5, 2183);
+    			attr_dev(button, "class", "svelte-80b4i0");
+    			add_location(button, file$p, 53, 5, 2102);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -32196,7 +32195,7 @@ var app = (function () {
     		block,
     		id: create_if_block_1$6.name,
     		type: "if",
-    		source: "(54:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}",
+    		source: "(53:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}",
     		ctx
     	});
 
@@ -32207,9 +32206,9 @@ var app = (function () {
     function create_each_block$9(key_1, ctx) {
     	let equalizer_field;
     	let equalizer_name;
-    	let show_if_1 = /*getWarning*/ ctx[5](/*eqProfile*/ ctx[12].values);
+    	let show_if_1 = /*getWarning*/ ctx[4](/*eqProfile*/ ctx[10].values);
     	let t0;
-    	let t1_value = /*eqProfile*/ ctx[12].name + "";
+    	let t1_value = /*eqProfile*/ ctx[10].name + "";
     	let t1;
     	let equalizer_name_class_value;
     	let t2;
@@ -32223,33 +32222,29 @@ var app = (function () {
     	let dispose;
 
     	function func(...args) {
-    		return /*func*/ ctx[6](/*eqProfile*/ ctx[12], ...args);
+    		return /*func*/ ctx[5](/*eqProfile*/ ctx[10], ...args);
     	}
 
     	let if_block0 = show_if_1 && create_if_block_2$3(ctx);
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[7](/*eqProfile*/ ctx[12]);
+    		return /*click_handler*/ ctx[6](/*eqProfile*/ ctx[10]);
     	}
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[8](/*eqProfile*/ ctx[12]);
+    		return /*click_handler_1*/ ctx[7](/*eqProfile*/ ctx[10]);
     	}
 
     	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[9](/*eqProfile*/ ctx[12]);
-    	}
-
-    	function click_handler_3() {
-    		return /*click_handler_3*/ ctx[10](/*eqProfile*/ ctx[12]);
+    		return /*click_handler_2*/ ctx[8](/*eqProfile*/ ctx[10]);
     	}
 
     	const if_block_creators = [create_if_block_1$6, create_else_block$3];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (dirty & /*$equalizerProfiles, communityProfiles*/ 17) show_if = null;
-    		if (show_if == null) show_if = !!(/*$equalizerProfiles*/ ctx[4].findIndex(func) !== -1);
+    		if (dirty & /*$equalizerProfiles, communityProfiles*/ 9) show_if = null;
+    		if (show_if == null) show_if = !!(/*$equalizerProfiles*/ ctx[3].findIndex(func) !== -1);
     		if (show_if) return 0;
     		return 1;
     	}
@@ -32270,14 +32265,14 @@ var app = (function () {
     			if_block1.c();
     			t3 = space();
 
-    			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[12].hash
+    			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
     			? 'current'
-    			: '') + " svelte-1szp9sc"));
+    			: '') + " svelte-80b4i0"));
 
-    			add_location(equalizer_name, file$p, 37, 4, 1514);
-    			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = /*eqProfile*/ ctx[12].hash);
-    			set_custom_element_data(equalizer_field, "class", "svelte-1szp9sc");
-    			add_location(equalizer_field, file$p, 36, 3, 1472);
+    			add_location(equalizer_name, file$p, 37, 4, 1494);
+    			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = /*eqProfile*/ ctx[10].hash);
+    			set_custom_element_data(equalizer_field, "class", "svelte-80b4i0");
+    			add_location(equalizer_field, file$p, 36, 3, 1452);
     			this.first = equalizer_field;
     		},
     		m: function mount(target, anchor) {
@@ -32295,8 +32290,7 @@ var app = (function () {
     				dispose = [
     					listen_dev(equalizer_name, "click", click_handler, false, false, false, false),
     					listen_dev(equalizer_name, "click", click_handler_1, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_2, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_3, false, false, false, false)
+    					listen_dev(equalizer_name, "click", click_handler_2, false, false, false, false)
     				];
 
     				mounted = true;
@@ -32304,7 +32298,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*communityProfiles*/ 1) show_if_1 = /*getWarning*/ ctx[5](/*eqProfile*/ ctx[12].values);
+    			if (dirty & /*communityProfiles*/ 1) show_if_1 = /*getWarning*/ ctx[4](/*eqProfile*/ ctx[10].values);
 
     			if (show_if_1) {
     				if (if_block0) {
@@ -32327,11 +32321,11 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if ((!current || dirty & /*communityProfiles*/ 1) && t1_value !== (t1_value = /*eqProfile*/ ctx[12].name + "")) set_data_dev(t1, t1_value);
+    			if ((!current || dirty & /*communityProfiles*/ 1) && t1_value !== (t1_value = /*eqProfile*/ ctx[10].name + "")) set_data_dev(t1, t1_value);
 
-    			if (!current || dirty & /*$currentEqHash, communityProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[12].hash
+    			if (!current || dirty & /*$currentEqHash, communityProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
     			? 'current'
-    			: '') + " svelte-1szp9sc"))) {
+    			: '') + " svelte-80b4i0"))) {
     				set_custom_element_data(equalizer_name, "class", equalizer_name_class_value);
     			}
 
@@ -32361,7 +32355,7 @@ var app = (function () {
     				if_block1.m(equalizer_field, t3);
     			}
 
-    			if (!current || dirty & /*communityProfiles*/ 1 && equalizer_field_id_value !== (equalizer_field_id_value = /*eqProfile*/ ctx[12].hash)) {
+    			if (!current || dirty & /*communityProfiles*/ 1 && equalizer_field_id_value !== (equalizer_field_id_value = /*eqProfile*/ ctx[10].hash)) {
     				set_custom_element_data(equalizer_field, "id", equalizer_field_id_value);
     			}
     		},
@@ -32416,8 +32410,8 @@ var app = (function () {
     		c: function create() {
     			equalizer_profiles_community = element("equalizer-profiles-community");
     			if_block.c();
-    			set_custom_element_data(equalizer_profiles_community, "class", "svelte-1szp9sc");
-    			add_location(equalizer_profiles_community, file$p, 33, 0, 1346);
+    			set_custom_element_data(equalizer_profiles_community, "class", "svelte-80b4i0");
+    			add_location(equalizer_profiles_community, file$p, 33, 0, 1326);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -32483,16 +32477,13 @@ var app = (function () {
     function instance$t($$self, $$props, $$invalidate) {
     	let $currentEqHash;
     	let $currentEqProfile;
-    	let $equalizerNameStore;
     	let $equalizerProfiles;
     	validate_store(currentEqHash, 'currentEqHash');
     	component_subscribe($$self, currentEqHash, $$value => $$invalidate(1, $currentEqHash = $$value));
     	validate_store(currentEqProfile, 'currentEqProfile');
     	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(2, $currentEqProfile = $$value));
-    	validate_store(equalizerNameStore, 'equalizerNameStore');
-    	component_subscribe($$self, equalizerNameStore, $$value => $$invalidate(3, $equalizerNameStore = $$value));
     	validate_store(equalizerProfiles, 'equalizerProfiles');
-    	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(4, $equalizerProfiles = $$value));
+    	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(3, $equalizerProfiles = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EqualizerProfilesCommunity', slots, []);
     	let communityProfiles = [];
@@ -32537,15 +32528,13 @@ var app = (function () {
     	const click_handler = eqProfile => equalizerService.loadEqualizerValuesFn(eqProfile.values);
     	const click_handler_1 = eqProfile => set_store_value(currentEqHash, $currentEqHash = eqProfile.hash, $currentEqHash);
     	const click_handler_2 = eqProfile => set_store_value(currentEqProfile, $currentEqProfile = eqProfile, $currentEqProfile);
-    	const click_handler_3 = eqProfile => set_store_value(equalizerNameStore, $equalizerNameStore = eqProfile.name, $equalizerNameStore);
-    	const click_handler_4 = eqProfile => equalizerService.saveNewEqualizerFn(eqProfile.values, eqProfile.name, eqProfile.hash);
+    	const click_handler_3 = eqProfile => equalizerService.saveNewEqualizerFn(eqProfile.values, eqProfile.name, eqProfile.hash);
 
     	$$self.$capture_state = () => ({
     		onMount,
     		equalizerServiceNew: equalizerService,
     		currentEqHash,
     		currentEqProfile,
-    		equalizerNameStore,
     		equalizerProfiles,
     		DownloadIcon,
     		DownloadedIcon,
@@ -32556,7 +32545,6 @@ var app = (function () {
     		getWarning,
     		$currentEqHash,
     		$currentEqProfile,
-    		$equalizerNameStore,
     		$equalizerProfiles
     	});
 
@@ -32572,15 +32560,13 @@ var app = (function () {
     		communityProfiles,
     		$currentEqHash,
     		$currentEqProfile,
-    		$equalizerNameStore,
     		$equalizerProfiles,
     		getWarning,
     		func,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
-    		click_handler_3,
-    		click_handler_4
+    		click_handler_3
     	];
     }
 
@@ -32811,7 +32797,7 @@ var app = (function () {
 
     function get_each_context$8(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[12] = list[i];
+    	child_ctx[10] = list[i];
     	return child_ctx;
     }
 
@@ -32819,7 +32805,7 @@ var app = (function () {
     function create_each_block$8(key_1, ctx) {
     	let equalizer_field;
     	let equalizer_name;
-    	let t0_value = /*eqProfile*/ ctx[12].name + "";
+    	let t0_value = /*eqProfile*/ ctx[10].name + "";
     	let t0;
     	let equalizer_name_class_value;
     	let t1;
@@ -32837,23 +32823,19 @@ var app = (function () {
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[4](/*eqProfile*/ ctx[12]);
+    		return /*click_handler*/ ctx[3](/*eqProfile*/ ctx[10]);
     	}
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[5](/*eqProfile*/ ctx[12]);
+    		return /*click_handler_1*/ ctx[4](/*eqProfile*/ ctx[10]);
     	}
 
     	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[6](/*eqProfile*/ ctx[12]);
+    		return /*click_handler_2*/ ctx[5](/*eqProfile*/ ctx[10]);
     	}
 
     	function click_handler_3() {
-    		return /*click_handler_3*/ ctx[7](/*eqProfile*/ ctx[12]);
-    	}
-
-    	function click_handler_4() {
-    		return /*click_handler_4*/ ctx[8](/*eqProfile*/ ctx[12]);
+    		return /*click_handler_3*/ ctx[6](/*eqProfile*/ ctx[10]);
     	}
 
     	editicon = new EditIcon({
@@ -32863,8 +32845,8 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function click_handler_5() {
-    		return /*click_handler_5*/ ctx[9](/*eqProfile*/ ctx[12]);
+    	function click_handler_4() {
+    		return /*click_handler_4*/ ctx[7](/*eqProfile*/ ctx[10]);
     	}
 
     	deleteicon = new DeleteIcon({
@@ -32874,8 +32856,8 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function click_handler_6() {
-    		return /*click_handler_6*/ ctx[10](/*eqProfile*/ ctx[12]);
+    	function click_handler_5() {
+    		return /*click_handler_5*/ ctx[8](/*eqProfile*/ ctx[10]);
     	}
 
     	const block = {
@@ -32895,18 +32877,18 @@ var app = (function () {
     			t4 = text("\n\t\t\t\tDelete");
     			t5 = space();
 
-    			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[12].hash
+    			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
     			? 'current'
-    			: '') + " svelte-1acy6xn"));
+    			: '') + " svelte-nogy8h"));
 
-    			add_location(equalizer_name, file$m, 11, 3, 581);
-    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-1acy6xn");
-    			add_location(equalizer_rename, file$m, 19, 3, 1020);
-    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-1acy6xn");
-    			add_location(equalizer_delete, file$m, 26, 3, 1276);
-    			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[12].hash);
-    			set_custom_element_data(equalizer_field, "class", "svelte-1acy6xn");
-    			add_location(equalizer_field, file$m, 10, 2, 535);
+    			add_location(equalizer_name, file$m, 11, 3, 561);
+    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-nogy8h");
+    			add_location(equalizer_rename, file$m, 18, 3, 940);
+    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-nogy8h");
+    			add_location(equalizer_delete, file$m, 25, 3, 1196);
+    			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[10].hash);
+    			set_custom_element_data(equalizer_field, "class", "svelte-nogy8h");
+    			add_location(equalizer_field, file$m, 10, 2, 515);
     			this.first = equalizer_field;
     		},
     		m: function mount(target, anchor) {
@@ -32930,9 +32912,8 @@ var app = (function () {
     					listen_dev(equalizer_name, "click", click_handler_1, false, false, false, false),
     					listen_dev(equalizer_name, "click", click_handler_2, false, false, false, false),
     					listen_dev(equalizer_name, "click", click_handler_3, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_4, false, false, false, false),
-    					listen_dev(equalizer_rename, "click", click_handler_5, false, false, false, false),
-    					listen_dev(equalizer_delete, "click", click_handler_6, false, false, false, false)
+    					listen_dev(equalizer_rename, "click", click_handler_4, false, false, false, false),
+    					listen_dev(equalizer_delete, "click", click_handler_5, false, false, false, false)
     				];
 
     				mounted = true;
@@ -32940,15 +32921,15 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if ((!current || dirty & /*$equalizerProfiles*/ 1) && t0_value !== (t0_value = /*eqProfile*/ ctx[12].name + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty & /*$equalizerProfiles*/ 1) && t0_value !== (t0_value = /*eqProfile*/ ctx[10].name + "")) set_data_dev(t0, t0_value);
 
-    			if (!current || dirty & /*$currentEqHash, $equalizerProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[12].hash
+    			if (!current || dirty & /*$currentEqHash, $equalizerProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
     			? 'current'
-    			: '') + " svelte-1acy6xn"))) {
+    			: '') + " svelte-nogy8h"))) {
     				set_custom_element_data(equalizer_name, "class", equalizer_name_class_value);
     			}
 
-    			if (!current || dirty & /*$equalizerProfiles*/ 1 && equalizer_field_id_value !== (equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[12].hash)) {
+    			if (!current || dirty & /*$equalizerProfiles*/ 1 && equalizer_field_id_value !== (equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[10].hash)) {
     				set_custom_element_data(equalizer_field, "id", equalizer_field_id_value);
     			}
     		},
@@ -32996,7 +32977,7 @@ var app = (function () {
     	let dispose;
     	let each_value = /*$equalizerProfiles*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*eqProfile*/ ctx[12].hash;
+    	const get_key = ctx => /*eqProfile*/ ctx[10].hash;
     	validate_each_keys(ctx, each_value, get_each_context$8, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -33024,10 +33005,10 @@ var app = (function () {
     			button = element("button");
     			create_component(addicon.$$.fragment);
     			t1 = text(" Add new profile");
-    			set_custom_element_data(equalizer_profiles, "class", "svelte-1acy6xn");
-    			add_location(equalizer_profiles, file$m, 8, 0, 454);
-    			attr_dev(button, "class", "addProfile svelte-1acy6xn");
-    			add_location(button, file$m, 36, 0, 1583);
+    			set_custom_element_data(equalizer_profiles, "class", "svelte-nogy8h");
+    			add_location(equalizer_profiles, file$m, 8, 0, 434);
+    			attr_dev(button, "class", "addProfile svelte-nogy8h");
+    			add_location(button, file$m, 36, 0, 1504);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -33048,12 +33029,12 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler_7*/ ctx[11], false, false, false, false);
+    				dispose = listen_dev(button, "click", /*click_handler_6*/ ctx[9], false, false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*$equalizerProfiles, equalizerService, $currentEqHash, $currentEqProfile, $equalizerNameStore*/ 15) {
+    			if (dirty & /*$equalizerProfiles, equalizerService, $currentEqHash, $currentEqProfile*/ 7) {
     				each_value = /*$equalizerProfiles*/ ctx[0];
     				validate_each_argument(each_value);
     				group_outros();
@@ -33110,15 +33091,12 @@ var app = (function () {
     	let $equalizerProfiles;
     	let $currentEqHash;
     	let $currentEqProfile;
-    	let $equalizerNameStore;
     	validate_store(equalizerProfiles, 'equalizerProfiles');
     	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(0, $equalizerProfiles = $$value));
     	validate_store(currentEqHash, 'currentEqHash');
     	component_subscribe($$self, currentEqHash, $$value => $$invalidate(1, $currentEqHash = $$value));
     	validate_store(currentEqProfile, 'currentEqProfile');
     	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(2, $currentEqProfile = $$value));
-    	validate_store(equalizerNameStore, 'equalizerNameStore');
-    	component_subscribe($$self, equalizerNameStore, $$value => $$invalidate(3, $equalizerNameStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EqualizerProfilesUser', slots, []);
     	const writable_props = [];
@@ -33131,39 +33109,34 @@ var app = (function () {
     	const click_handler_1 = eqProfile => set_store_value(currentEqHash, $currentEqHash = eqProfile.hash, $currentEqHash);
     	const click_handler_2 = eqProfile => set_store_value(currentEqProfile, $currentEqProfile = eqProfile, $currentEqProfile);
     	const click_handler_3 = eqProfile => equalizerService.loadEqualizerValuesFn(eqProfile.values);
-    	const click_handler_4 = eqProfile => set_store_value(equalizerNameStore, $equalizerNameStore = eqProfile.name, $equalizerNameStore);
-    	const click_handler_5 = eqProfile => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name);
-    	const click_handler_6 = eqProfile => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name);
-    	const click_handler_7 = () => equalizerService.addEqualizerFn();
+    	const click_handler_4 = eqProfile => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name);
+    	const click_handler_5 = eqProfile => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name);
+    	const click_handler_6 = () => equalizerService.addEqualizerFn();
 
     	$$self.$capture_state = () => ({
     		AddIcon,
     		DeleteIcon,
     		EditIcon,
     		currentEqHash,
-    		equalizerNameStore,
     		equalizerProfiles,
     		currentEqProfile,
     		equalizerService,
     		$equalizerProfiles,
     		$currentEqHash,
-    		$currentEqProfile,
-    		$equalizerNameStore
+    		$currentEqProfile
     	});
 
     	return [
     		$equalizerProfiles,
     		$currentEqHash,
     		$currentEqProfile,
-    		$equalizerNameStore,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
     		click_handler_3,
     		click_handler_4,
     		click_handler_5,
-    		click_handler_6,
-    		click_handler_7
+    		click_handler_6
     	];
     }
 
@@ -33213,15 +33186,15 @@ var app = (function () {
     			span1.textContent = "Community Profiles";
     			t4 = space();
     			create_component(equalizerprofilesonline.$$.fragment);
-    			attr_dev(span0, "class", "svelte-139ma1j");
+    			attr_dev(span0, "class", "svelte-5mloir");
     			add_location(span0, file$l, 7, 2, 303);
-    			set_custom_element_data(user_profiles, "class", "profiles-container svelte-139ma1j");
+    			set_custom_element_data(user_profiles, "class", "profiles-container svelte-5mloir");
     			add_location(user_profiles, file$l, 6, 1, 258);
-    			attr_dev(span1, "class", "svelte-139ma1j");
+    			attr_dev(span1, "class", "svelte-5mloir");
     			add_location(span1, file$l, 12, 2, 428);
-    			set_custom_element_data(community_profiles, "class", "profiles-container svelte-139ma1j");
+    			set_custom_element_data(community_profiles, "class", "profiles-container svelte-5mloir");
     			add_location(community_profiles, file$l, 11, 1, 378);
-    			set_custom_element_data(equalizer_profiles_config, "class", "svelte-139ma1j");
+    			set_custom_element_data(equalizer_profiles_config, "class", "svelte-5mloir");
     			add_location(equalizer_profiles_config, file$l, 5, 0, 229);
     		},
     		l: function claim(nodes) {
@@ -33342,7 +33315,7 @@ var app = (function () {
     	return block;
     }
 
-    // (13:0) <OptionSection title="{traduceFn('Equalizer')} - {$equalizerNameStore} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
+    // (13:0) <OptionSection title="{traduceFn('Equalizer')} - {$currentEqProfile?.name} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
     function create_default_slot$2(ctx) {
     	let equalizercontrols;
     	let t;
@@ -33385,7 +33358,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$2.name,
     		type: "slot",
-    		source: "(13:0) <OptionSection title=\\\"{traduceFn('Equalizer')} - {$equalizerNameStore} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}\\\">",
+    		source: "(13:0) <OptionSection title=\\\"{traduceFn('Equalizer')} - {$currentEqProfile?.name} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}\\\">",
     		ctx
     	});
 
@@ -33409,7 +33382,7 @@ var app = (function () {
 
     	optionsection1 = new OptionSection({
     			props: {
-    				title: "" + (traduceFn('Equalizer') + " - " + /*$equalizerNameStore*/ ctx[0] + " " + (/*$isEqualizerDirty*/ ctx[1] && /*$isEqualizerOn*/ ctx[2]
+    				title: "" + (traduceFn('Equalizer') + " - " + /*$currentEqProfile*/ ctx[0]?.name + " " + (/*$isEqualizerDirty*/ ctx[1] && /*$isEqualizerOn*/ ctx[2]
     				? '•'
     				: '')),
     				$$slots: { default: [create_default_slot$2] },
@@ -33443,7 +33416,7 @@ var app = (function () {
     			optionsection0.$set(optionsection0_changes);
     			const optionsection1_changes = {};
 
-    			if (dirty & /*$equalizerNameStore, $isEqualizerDirty, $isEqualizerOn*/ 7) optionsection1_changes.title = "" + (traduceFn('Equalizer') + " - " + /*$equalizerNameStore*/ ctx[0] + " " + (/*$isEqualizerDirty*/ ctx[1] && /*$isEqualizerOn*/ ctx[2]
+    			if (dirty & /*$currentEqProfile, $isEqualizerDirty, $isEqualizerOn*/ 7) optionsection1_changes.title = "" + (traduceFn('Equalizer') + " - " + /*$currentEqProfile*/ ctx[0]?.name + " " + (/*$isEqualizerDirty*/ ctx[1] && /*$isEqualizerOn*/ ctx[2]
     			? '•'
     			: ''));
 
@@ -33483,11 +33456,11 @@ var app = (function () {
     }
 
     function instance$o($$self, $$props, $$invalidate) {
-    	let $equalizerNameStore;
+    	let $currentEqProfile;
     	let $isEqualizerDirty;
     	let $isEqualizerOn;
-    	validate_store(equalizerNameStore, 'equalizerNameStore');
-    	component_subscribe($$self, equalizerNameStore, $$value => $$invalidate(0, $equalizerNameStore = $$value));
+    	validate_store(currentEqProfile, 'currentEqProfile');
+    	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(0, $currentEqProfile = $$value));
     	validate_store(isEqualizerDirty, 'isEqualizerDirty');
     	component_subscribe($$self, isEqualizerDirty, $$value => $$invalidate(1, $isEqualizerDirty = $$value));
     	validate_store(isEqualizerOn, 'isEqualizerOn');
@@ -33504,17 +33477,17 @@ var app = (function () {
     		EqualizerButtons,
     		EqualizerControls: EqualizerSliders,
     		EqualizerProfiles,
-    		equalizerNameStore,
+    		currentEqProfile,
     		isEqualizerDirty,
     		isEqualizerOn,
     		OptionSection,
     		traduceFn,
-    		$equalizerNameStore,
+    		$currentEqProfile,
     		$isEqualizerDirty,
     		$isEqualizerOn
     	});
 
-    	return [$equalizerNameStore, $isEqualizerDirty, $isEqualizerOn];
+    	return [$currentEqProfile, $isEqualizerDirty, $isEqualizerOn];
     }
 
     class EqualizerConfig extends SvelteComponentDev {

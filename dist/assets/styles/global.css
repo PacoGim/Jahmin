@@ -64,7 +64,7 @@ svg {
 }
 
 button.info {
-	background-color: var(--color-reactBlue);
+	background-color: var(--color-accent-1);
 }
 
 button.danger {

@@ -20,6 +20,9 @@
 	equalizer-profiles-config {
 		display: grid;
 		grid-template-columns: 5fr 3fr;
+
+		/* max-height: 10rem; */
+		/* min-height: 10rem; */
 	}
 
 	.profiles-container {

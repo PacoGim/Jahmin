@@ -1,6 +1,12 @@
 import { EqualizerFileObjectType } from '../../types/equalizerFileObject.type'
 import getStringHashFn from '../functions/getStringHash.fn'
 
+import { JSDOM } from 'jsdom'
+import DOMPurify from 'dompurify'
+
+const window = new JSDOM('').window
+const purify = DOMPurify(window)
+
 let promiseResolve: any = undefined
 
 export default function (ipcMain: Electron.IpcMain) {
@@ -44,10 +50,43 @@ function getEqualizersFromProfiles(profilesList: string[], equalizerProfilesList
 }
 
 function equalizerProfileSanitize(equalizerProfile: EqualizerFileObjectType): EqualizerFileObjectType {
+	let cleanProfile: any = {
+		name: '',
+		values: {
+			32: 0,
+			64: 0,
+			128: 0,
+			256: 0,
+			512: 0,
+			1024: 0,
+			2048: 0,
+			4096: 0,
+			8192: 0,
+			16384: 0
+		}
+	}
 
+	let frequencies = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
 
+	cleanProfile.name = purify.sanitize(equalizerProfile.name)
 
-	return equalizerProfile
+	for (let frequency of frequencies) {
+		let profileFrequencyValue = equalizerProfile.values?.[frequency]
+
+		if (!isNaN(Number(profileFrequencyValue)) && profileFrequencyValue) {
+			if (profileFrequencyValue > 8) {
+				cleanProfile.values[frequency] = 8
+			} else if (profileFrequencyValue < -8) {
+				cleanProfile.values[frequency] = -8
+			} else {
+				cleanProfile.values[frequency] = profileFrequencyValue
+			}
+		} else {
+			cleanProfile.values[frequency] = 0
+		}
+	}
+
+	return cleanProfile
 }
 
 function fetchProfileList(): Promise<string[]> {

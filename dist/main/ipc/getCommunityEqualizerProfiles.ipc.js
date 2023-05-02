@@ -4,6 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const getStringHash_fn_1 = __importDefault(require("../functions/getStringHash.fn"));
+const jsdom_1 = require("jsdom");
+const dompurify_1 = __importDefault(require("dompurify"));
+const window = new jsdom_1.JSDOM('').window;
+const purify = (0, dompurify_1.default)(window);
 let promiseResolve = undefined;
 function default_1(ipcMain) {
     ipcMain.handle('get-community-equalizer-profiles', async () => {
@@ -41,7 +45,41 @@ function getEqualizersFromProfiles(profilesList, equalizerProfilesList) {
     }
 }
 function equalizerProfileSanitize(equalizerProfile) {
-    return equalizerProfile;
+    let cleanProfile = {
+        name: '',
+        values: {
+            32: 0,
+            64: 0,
+            128: 0,
+            256: 0,
+            512: 0,
+            1024: 0,
+            2048: 0,
+            4096: 0,
+            8192: 0,
+            16384: 0
+        }
+    };
+    let frequencies = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384];
+    cleanProfile.name = purify.sanitize(equalizerProfile.name);
+    for (let frequency of frequencies) {
+        let profileFrequencyValue = equalizerProfile.values?.[frequency];
+        if (!isNaN(Number(profileFrequencyValue)) && profileFrequencyValue) {
+            if (profileFrequencyValue > 8) {
+                cleanProfile.values[frequency] = 8;
+            }
+            else if (profileFrequencyValue < -8) {
+                cleanProfile.values[frequency] = -8;
+            }
+            else {
+                cleanProfile.values[frequency] = profileFrequencyValue;
+            }
+        }
+        else {
+            cleanProfile.values[frequency] = 0;
+        }
+    }
+    return cleanProfile;
 }
 function fetchProfileList() {
     return new Promise((resolve, reject) => {

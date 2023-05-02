@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte'
 
 	import equalizerServiceNew from '../../../services/equalizer/!equalizer.service'
-	import { currentEqHash, currentEqProfile, equalizerNameStore, equalizerProfiles } from '../../../stores/equalizer.store'
+	import { currentEqHash, currentEqProfile, equalizerProfiles } from '../../../stores/equalizer.store'
 	import DownloadIcon from '../../../icons/DownloadIcon.svelte'
 	import DownloadedIcon from '../../../icons/DownloadedIcon.svelte'
 	import WarningIcon from '../../../icons/WarningIcon.svelte'
@@ -51,7 +51,6 @@
 					on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}
 					on:click={() => ($currentEqHash = eqProfile.hash)}
 					on:click={() => ($currentEqProfile = eqProfile)}
-					on:click={() => ($equalizerNameStore = eqProfile.name)}
 				>
 					{#if getWarning(eqProfile.values)}
 						<span class="warning">
@@ -82,8 +81,11 @@
 		display: block;
 		overflow-y: auto;
 		margin-top: 1rem;
-		padding: .5rem;
+		padding: 0.5rem;
 		border-radius: 5px;
+
+		max-height: 14.75rem;
+		min-height: 14.75rem;
 
 		background-color: var(--color-bg-3);
 	}
@@ -94,10 +96,6 @@
 
 		margin-bottom: 0.25rem;
 		align-items: center;
-	}
-
-	equalizer-field:hover {
-		/* background-color: ; */
 	}
 
 	equalizer-name {

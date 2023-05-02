@@ -33,12 +33,24 @@
 		margin: 0 auto;
 		margin-bottom: 1rem;
 		width: max-content;
+		font-variation-settings: 'wght' 700;
+		font-size: 0.9rem;
 	}
+
 	audio-filter-range {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		margin: 0 1rem;
+	}
+	audio-filter-range filter-gain,
+	audio-filter-range filter-frequency {
+		transition: transform 200ms cubic-bezier(1, -1, 1, 2);
+	}
+
+	audio-filter-range:hover filter-gain,
+	audio-filter-range:hover filter-frequency {
+		transform: scale(1.25);
 	}
 
 	eq-input-container {
@@ -87,15 +99,5 @@
 	}
 	audio-filter-range eq-input-container input[type='range']:disabled::-webkit-slider-thumb {
 		background-color: var(--color-dangerRed);
-	}
-
-	audio-filter-range filter-frequency {
-		font-size: 0.9rem;
-		font-variation-settings: 'wght' 500;
-	}
-
-	audio-filter-range filter-gain {
-		font-size: 0.9rem;
-		font-variation-settings: 'wght' 500;
 	}
 </style>

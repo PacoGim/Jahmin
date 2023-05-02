@@ -21,3 +21,6 @@
 
 * Verifiy matching eq hash before saving
 * Playcount dynamic colors doesn't work in first launch
+
+* Can't delete profile right after downloading it
+* Notify user after downloading profile

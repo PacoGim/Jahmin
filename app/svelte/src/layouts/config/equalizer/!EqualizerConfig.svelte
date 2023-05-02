@@ -3,7 +3,7 @@
 	import EqualizerControls from './EqualizerSliders.svelte'
 	import EqualizerProfiles from './EqualizerProfiles.svelte'
 
-	import { equalizerNameStore, isEqualizerDirty, isEqualizerOn } from '../../../stores/equalizer.store'
+	import { currentEqProfile, isEqualizerDirty, isEqualizerOn } from '../../../stores/equalizer.store'
 
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import traduceFn from '../../../functions/traduce.fn'
@@ -13,7 +13,7 @@
 	<EqualizerProfiles />
 </OptionSection>
 
-<OptionSection title="{traduceFn('Equalizer')} - {$equalizerNameStore} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
+<OptionSection title="{traduceFn('Equalizer')} - {$currentEqProfile?.name} {$isEqualizerDirty && $isEqualizerOn ? '•' : ''}">
 	<EqualizerControls />
 	<EqualizerButtons />
 </OptionSection>
