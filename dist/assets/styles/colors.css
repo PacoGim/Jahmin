@@ -2,7 +2,6 @@ body {
 	--color-gold: hsl(46, 55%, 52%);
 	--color-blue: hsl(211, 100%, 55%);
 	--color-reactBlue: hsl(193, 95%, 68%);
-	--color-dangerRed: #f91f4b;
+	--color-dangerRed: #fc4b4b;
 	--color-deepBlue: #00007a;
-	/* --color-dangerRed: hsl(10, 95%, 58%); */
 }

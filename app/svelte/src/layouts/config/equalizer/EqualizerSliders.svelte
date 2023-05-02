@@ -61,7 +61,7 @@
 
 		outline: none;
 
-		background-color: hsl(0, 0%, 90%);
+		background-color: var(--color-fg-1);
 
 		box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25); /* x | y | blur | spread | color */
 	}
@@ -72,8 +72,8 @@
 		width: 16px;
 		height: 16px;
 		outline: none;
-		background-color: var(--color-reactBlue);
-		box-shadow: 0px 0px 0px 5px hsl(0, 0%, 90%), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+		background-color: var(--color-accent-1);
+		box-shadow: 0px 0px 0px 5px var(--color-fg-1), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
 
 		transition: background-color 300ms linear;
 	}

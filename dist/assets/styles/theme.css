@@ -1,10 +1,18 @@
 body {
+	--color-fg-1: var(--theme-fg-1);
+	--color-fg-2: var(--theme-fg-2);
+	--color-fg-3: var(--theme-fg-3);
+
 	--color-bg-1: var(--theme-bg-1);
 	--color-bg-2: var(--theme-bg-2);
-	--color-fg-1: var(--theme-fg-1);
+	--color-bg-3: var(--theme-bg-3);
+
+	--color-accent-1: #6674d1;
+	--color-accent-2: #1f8be4;
+	--color-accent-3: #fc5987;
+
 	--color-fg-1-low: var(--theme-fg-1-low);
 	--filter-hl: var(--theme-filter-hl);
-
 	--color-art-fg: var(--theme-color-art-fg);
 	--color-art-bg: var(--theme-color-art-bg);
 
@@ -12,10 +20,15 @@ body {
 }
 
 body[theme='Day'] {
-	--theme-fg-1: #5c6165;
+	--theme-fg-1: #2f2f4c;
+	--theme-fg-2: #6b6884;
+	--theme-fg-3: #9d9cae;
+
+	--theme-bg-1: #fcfbfe;
+	--theme-bg-2: #f6f8fa;
+	--theme-bg-3: #efeef5;
+
 	--theme-fg-1-low: hsl(210, 12%, 16%, 0.1);
-	--theme-bg-1: #f8f9fa;
-	--theme-bg-2: hsl(0, 0%, 97%);
 
 	--theme-filter-hl: brightness(0) saturate(100%) invert(15%) sepia(24%) saturate(284%) hue-rotate(169deg) brightness(91%)
 		contrast(96%);
@@ -27,10 +40,17 @@ body[theme='Day'] {
 }
 
 body[theme='Night'] {
-	--theme-fg-1: hsl(210, 17%, 82%);
+	--theme-fg-1: #fefdff;
+	--theme-fg-2: #9a99b9;
+	--theme-fg-3: #696a8e;
+
+	--theme-bg-1: #353452;
+	--theme-bg-2: #2f2e4e;
+	--theme-bg-3: #282747;
+
+	--theme-accent: #6674d1;
+
 	--theme-fg-1-low: hsla(210, 17%, 82%, 0.1);
-	--theme-bg-1: hsl(215, 18%, 13%);
-	--theme-bg-2: hsl(215, 21%, 11%);
 	--theme-filter-hl: brightness(0) saturate(100%) invert(90%) sepia(14%) saturate(137%) hue-rotate(169deg) brightness(92%)
 		contrast(90%);
 

@@ -22,28 +22,26 @@ function getEqualizersFromProfiles(profilesList, equalizerProfilesList) {
     let profile = profilesList.shift();
     if (profile) {
         let newProfile = {
-            name: profile.name,
+            name: '',
             values: undefined
         };
-        // Verifies if the file is a json file
-        if (profile.url.split('/').pop()?.split('.').pop() === 'json') {
-            fetch(profile.url)
-                .then(res => res.json())
-                .then(data => {
-                newProfile.values = data.values;
-                newProfile.hash = (0, getStringHash_fn_1.default)(newProfile.name + JSON.stringify(newProfile.values));
-                newProfile.type = 'Community';
-                equalizerProfilesList.push(newProfile);
-                getEqualizersFromProfiles(profilesList, equalizerProfilesList);
-            });
-        }
-        else {
+        fetch(profile)
+            .then(res => res.json())
+            .then(data => {
+            newProfile.name = data.name;
+            newProfile.values = data.values;
+            newProfile.hash = (0, getStringHash_fn_1.default)(newProfile.name + JSON.stringify(newProfile.values));
+            newProfile.type = 'Community';
+            equalizerProfilesList.push(equalizerProfileSanitize(newProfile));
             getEqualizersFromProfiles(profilesList, equalizerProfilesList);
-        }
+        });
     }
     else {
         promiseResolve(equalizerProfilesList);
     }
+}
+function equalizerProfileSanitize(equalizerProfile) {
+    return equalizerProfile;
 }
 function fetchProfileList() {
     return new Promise((resolve, reject) => {

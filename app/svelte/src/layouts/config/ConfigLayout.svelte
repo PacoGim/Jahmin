@@ -68,27 +68,66 @@
 	config-layout-svlt {
 		display: flex;
 		flex-direction: row;
+		height: inherit;
 	}
 
 	config-layout-svlt > options-list {
 		display: flex;
 		flex-direction: column;
+		width: 200px;
+
+		font-size: 1.05rem;
+		font-variation-settings: 'wght' 650;
+
+		text-shadow: none;
+
+		border-right: 2px solid var(--color-bg-3);
+
+		background-color: var(--color-bg-2);
 	}
 
 	config-layout-svlt > options-list > option-svlt {
 		cursor: pointer;
 		padding: 0.33rem 0.66rem;
+		padding-left: 2rem;
 		margin: 0.25rem;
 		position: relative;
 		box-shadow: inset 0 0px 0 0 transparent;
 
-		transition-property: box-shadow background-color;
+		position: relative;
+
+		color: var(--color-fg-2);
+
+		transition-property: color;
 		transition-duration: 300ms;
 		transition-timing-function: ease-in-out;
 	}
+
+	config-layout-svlt > options-list > option-svlt:hover {
+		color: var(--color-fg-1);
+	}
+	config-layout-svlt > options-list > option-svlt::before {
+		content: '▶';
+		position: absolute;
+
+		transform: scale(0);
+		left: 5px;
+		color: var(--color-fg-1);
+		opacity: 0;
+
+		transition-property: transform opacity;
+		transition-duration: 300ms;
+		transition-timing-function: cubic-bezier(0.4, -0.4, 0.4, 1.4);
+	}
+
+	config-layout-svlt > options-list > option-svlt[data-selected='true']::before {
+		content: '▶';
+		transform: scale(0.75);
+		opacity: 1;
+	}
+
 	config-layout-svlt > options-list > option-svlt[data-selected='true'] {
-		box-shadow: inset 0 -2px 0 0 var(--color-fg-1);
-		background-color: var(--color-fg-1-low);
+		color: var(--color-fg-1);
 	}
 
 	current-component-svlt {

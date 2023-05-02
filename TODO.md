@@ -20,4 +20,4 @@
 * A lot of padding in toast
 
 * Verifiy matching eq hash before saving
-* Add a hi db warning in community profiles
+* Playcount dynamic colors doesn't work in first launch

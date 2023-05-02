@@ -11,16 +11,27 @@
 
 <style>
 	section {
-		margin-bottom: 2rem;
+		margin-bottom: 1rem;
 		color: var(--color-fg-1);
+
+		background-color: var(--color-bg-3);
+		padding: 1rem;
+
+		border-radius: 10px 30px;
 	}
 	section-title {
+		display: flex;
+
 		font-size: 1.2rem;
-		display: block;
-		border-bottom: 2px var(--color-fg-1) solid;
-		padding-bottom: 0.5rem;
-		padding-left: 0.5rem;
-		margin-bottom: 2rem;
-		font-variation-settings: 'wght' calc(var(--default-weight));
+
+		background-color: var(--color-bg-2);
+		margin-bottom: 1rem;
+		font-variation-settings: 'wght' 700;
+
+		border-radius: 10px 20px;
+
+		letter-spacing: 0.25px;
+
+		padding: 1rem;
 	}
 </style>

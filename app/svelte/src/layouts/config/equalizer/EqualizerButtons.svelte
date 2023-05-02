@@ -108,7 +108,6 @@
 		display: flex;
 		align-items: center;
 		margin: 0 0.25rem;
-		/* transition: background-color 300ms linear; */
 	}
 
 	equalizer-buttons-config button.toggleEqButton {

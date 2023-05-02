@@ -5,7 +5,7 @@ let promiseResolve: any = undefined
 
 export default function (ipcMain: Electron.IpcMain) {
 	ipcMain.handle('get-community-equalizer-profiles', async () => {
-		let profilesList: { name: string; url: string }[] = await fetchProfileList()
+		let profilesList: string[] = await fetchProfileList()
 
 		let equalizerProfilesList: any[] = []
 
@@ -18,36 +18,39 @@ export default function (ipcMain: Electron.IpcMain) {
 	})
 }
 
-function getEqualizersFromProfiles(profilesList: { name: string; url: string }[], equalizerProfilesList: any[]) {
+function getEqualizersFromProfiles(profilesList: string[], equalizerProfilesList: any[]) {
 	let profile = profilesList.shift()
 
 	if (profile) {
 		let newProfile: EqualizerFileObjectType = {
-			name: profile.name,
+			name: '',
 			values: undefined
 		}
 
-		// Verifies if the file is a json file
-		if (profile.url.split('/').pop()?.split('.').pop() === 'json') {
-			fetch(profile.url)
-				.then(res => res.json())
-				.then(data => {
-					newProfile.values = data.values
-					newProfile.hash = getStringHashFn(newProfile.name + JSON.stringify(newProfile.values))
-					newProfile.type = 'Community'
+		fetch(profile)
+			.then(res => res.json())
+			.then(data => {
+				newProfile.name = data.name
+				newProfile.values = data.values
+				newProfile.hash = getStringHashFn(newProfile.name + JSON.stringify(newProfile.values))
+				newProfile.type = 'Community'
 
-					equalizerProfilesList.push(newProfile)
-					getEqualizersFromProfiles(profilesList, equalizerProfilesList)
-				})
-		} else {
-			getEqualizersFromProfiles(profilesList, equalizerProfilesList)
-		}
+				equalizerProfilesList.push(equalizerProfileSanitize(newProfile))
+				getEqualizersFromProfiles(profilesList, equalizerProfilesList)
+			})
 	} else {
 		promiseResolve(equalizerProfilesList)
 	}
 }
 
-function fetchProfileList(): Promise<{ name: string; url: string }[]> {
+function equalizerProfileSanitize(equalizerProfile: EqualizerFileObjectType): EqualizerFileObjectType {
+
+
+
+	return equalizerProfile
+}
+
+function fetchProfileList(): Promise<string[]> {
 	return new Promise((resolve, reject) => {
 		fetch('https://raw.githubusercontent.com/PacoGim/Jahmin-Equalizers/main/index.json')
 			.then(res => res.json())

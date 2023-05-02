@@ -63,7 +63,8 @@
 				</equalizer-name>
 
 				{#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
-					<button disabled><DownloadedIcon style="height: 1rem;fill: #3d3d3d;margin-right: .4rem;" /> Download</button>
+					<button disabled><DownloadedIcon style="height: 1rem;fill: var(--color-fg-2);margin-right: .4rem;" /> Download</button
+					>
 				{:else}
 					<button on:click={() => equalizerServiceNew.saveNewEqualizerFn(eqProfile.values, eqProfile.name, eqProfile.hash)}
 						><DownloadIcon style="height: 1rem;fill: #fff;margin-right: .4rem;" /> Download</button
@@ -78,8 +79,13 @@
 
 <style>
 	equalizer-profiles-community {
-		margin-top: 1rem;
 		display: block;
+		overflow-y: auto;
+		margin-top: 1rem;
+		padding: .5rem;
+		border-radius: 5px;
+
+		background-color: var(--color-bg-3);
 	}
 
 	equalizer-field {
@@ -90,10 +96,15 @@
 		align-items: center;
 	}
 
+	equalizer-field:hover {
+		/* background-color: ; */
+	}
+
 	equalizer-name {
 		display: flex;
 		align-items: center;
 		cursor: pointer;
+		padding: 0.5rem;
 	}
 
 	equalizer-name::before {
@@ -121,7 +132,7 @@
 		font-size: 0.75rem;
 		cursor: pointer;
 		color: #fff;
-		background-color: #00007a;
+		background-color: var(--color-accent-1);
 		border-radius: 3px;
 		padding: 0.2rem 0.4rem;
 
@@ -129,15 +140,15 @@
 	}
 
 	button:hover {
-		background-color: #029aff;
+		background-color: var(--color-accent-2);
 	}
 
 	button:disabled {
 		cursor: not-allowed;
 
 		background-color: transparent;
-		color: #3d3d3d;
-		box-shadow: inset 0px 0px 0 1px #3d3d3d;
+		color: var(--color-fg-2);
+		box-shadow: inset 0px 0px 0 1px var(--color-fg-2);
 		border-radius: 3px;
 	}
 </style>

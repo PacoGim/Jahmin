@@ -43,20 +43,22 @@
 
 <style>
 	equalizer-profiles {
-		/* width: var(--clamp-width); */
 		max-height: 10rem;
 		min-height: 10rem;
 		display: block;
 		overflow-y: auto;
-		margin: 0 auto;
 		margin-top: 1rem;
+		padding: .5rem;
+		border-radius: 5px;
+
+		background-color: var(--color-bg-3);
 	}
 
 	equalizer-profiles equalizer-field {
 		display: grid;
 		grid-template-columns: auto max-content max-content;
 
-		margin-bottom: 0.25rem;
+		border-radius: 5px;
 		align-items: center;
 	}
 
@@ -79,24 +81,26 @@
 		font-size: 0.75rem;
 		cursor: pointer;
 		color: #fff;
-		background-color: var(--color-deepBlue);
+		background-color: var(--color-accent-1);
 		border-radius: 3px;
 		padding: 0.2rem 0.4rem;
 
 		transition: background-color 250ms ease-in-out;
 	}
 
-	.eqProfileButton:first-of-type {
+	equalizer-rename:first-of-type {
 		margin-right: 0.5rem;
 	}
+
 	equalizer-profiles equalizer-field:hover {
-		background-color: rgba(255, 255, 255, 0.1);
+		background-color: var(--color-bg-1);
 	}
 
 	equalizer-name {
 		display: flex;
 		align-items: center;
 		cursor: pointer;
+		padding: .5rem;
 	}
 
 	equalizer-name::before {
@@ -116,7 +120,7 @@
 		opacity: 1;
 	}
 	equalizer-rename:hover {
-		background-color: var(--color-reactBlue);
+		background-color: var(--color-accent-2);
 	}
 
 	equalizer-delete:hover {

@@ -5,15 +5,15 @@
 </script>
 
 <equalizer-profiles-config>
-	<user-profiles>
-		<h2>Your Profiles</h2>
+	<user-profiles class="profiles-container">
+		<span>Your Profiles</span>
 		<EqualizerProfilesUser />
 	</user-profiles>
 
-	<online-profiles>
-		<h2>Community Profiles</h2>
+	<community-profiles class="profiles-container">
+		<span>Community Profiles</span>
 		<EqualizerProfilesOnline />
-	</online-profiles>
+	</community-profiles>
 </equalizer-profiles-config>
 
 <style>
@@ -21,4 +21,27 @@
 		display: grid;
 		grid-template-columns: 5fr 3fr;
 	}
+
+	.profiles-container {
+		padding: 1rem;
+		background-color: var(--color-bg-2);
+		border-radius: 10px 20px;
+	}
+
+	.profiles-container span {
+		text-align: center;
+		display: block;
+		font-size: 1.15rem;
+		font-variation-settings: 'wght' 650;
+		letter-spacing: 0.2px;
+	}
+	user-profiles {
+		margin-right: 0.5rem;
+	}
+
+	community-profiles {
+		margin-left: 0.5rem;
+	}
+
+	/* :global() */
 </style>
