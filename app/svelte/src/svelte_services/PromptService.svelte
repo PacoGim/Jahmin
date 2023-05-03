@@ -190,8 +190,8 @@
 		height: 2rem;
 		width: 2rem;
 
-		color: #fff;
-		background-color: #0a0a0a;
+		color: var(--color-fg-1);
+		background-color: var(--color-bg-3);
 	}
 
 	prompt-content prompt-title {
@@ -241,6 +241,6 @@
 
 	input:active,
 	input:focus {
-		border-bottom: 2px var(--color-hl-gold) solid;
+		border-bottom: 2px var(--color-accent-1) solid;
 	}
 </style>

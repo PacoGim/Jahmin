@@ -8,7 +8,9 @@
 	import DownloadedIcon from '../../../icons/DownloadedIcon.svelte'
 	import WarningIcon from '../../../icons/WarningIcon.svelte'
 	import tippyService from '../../../services/tippy.service'
-	import generateId from '../../../functions/generateId.fn'
+	import notifyService from '../../../services/notify.service'
+	import FetchingIcon from '../../../icons/FetchingIcon.svelte'
+	import traduceFn from '../../../functions/traduce.fn'
 
 	let communityProfiles = []
 
@@ -23,7 +25,7 @@
 						'equalizer-profiles-community-loud-warning',
 						'equalizer-profiles-community equalizer-field equalizer-name span.warning',
 						{
-							content: 'Warning: Contains loud values',
+							content: `${traduceFn('Ear Warning!: Could be too loud!')}`,
 							theme: 'warning'
 						}
 					)
@@ -35,15 +37,32 @@
 		return isDangerous
 	}
 
-	onMount(() => {
+	function saveCommunityEqualizer(values, name, hash) {
+		equalizerServiceNew
+			.saveNewEqualizerFn(values, name, hash)
+			.then(() => {
+				notifyService.success(traduceFn('Equalizer ${name} downloaded successfully', { name: traduceFn(name) }))
+			})
+			.catch()
+	}
+
+	function fetchCommunityProfiles() {
 		window.ipc.getCommunityEqualizerProfiles().then(results => {
-			communityProfiles = results
+			if (results.length === 0) {
+				communityProfiles = null
+			} else {
+				communityProfiles = results
+			}
 		})
+	}
+
+	onMount(() => {
+		fetchCommunityProfiles()
 	})
 </script>
 
 <equalizer-profiles-community>
-	{#if communityProfiles.length > 0}
+	{#if communityProfiles && communityProfiles.length > 0}
 		{#each communityProfiles as eqProfile, index (index)}
 			<equalizer-field id={eqProfile.hash}>
 				<equalizer-name
@@ -57,22 +76,32 @@
 							<WarningIcon style="fill: var(--color-dangerRed); height: 1.25rem; margin-right: .2rem;" />
 						</span>
 					{/if}
-
-					{eqProfile.name}
+					{traduceFn(eqProfile.name)}
 				</equalizer-name>
 
 				{#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
-					<button disabled><DownloadedIcon style="height: 1rem;fill: var(--color-fg-2);margin-right: .4rem;" /> Download</button
+					<button disabled
+						><DownloadedIcon style="height: 1rem;fill: var(--color-fg-2);margin-right: .4rem;" />
+						{traduceFn('Download')}</button
 					>
 				{:else}
-					<button on:click={() => equalizerServiceNew.saveNewEqualizerFn(eqProfile.values, eqProfile.name, eqProfile.hash)}
-						><DownloadIcon style="height: 1rem;fill: #fff;margin-right: .4rem;" /> Download</button
+					<button on:click={() => saveCommunityEqualizer(eqProfile.values, eqProfile.name, eqProfile.hash)}
+						><DownloadIcon style="height: 1rem;fill: #fff;margin-right: .4rem;" /> {traduceFn('Download')}</button
 					>
 				{/if}
 			</equalizer-field>
 		{/each}
+	{:else if communityProfiles === null}
+		<community-profile-fetch-error>
+			<span>{traduceFn('Could not get community profiles =(')}</span>
+			<span>{traduceFn('Click on refetch to try again')}</span>
+			<button on:click={() => fetchCommunityProfiles()}>{traduceFn('Refetch')}</button>
+		</community-profile-fetch-error>
 	{:else}
-		<span>Fetching community profiles...</span>
+		<loading-community-profiles>
+			<span>{traduceFn('Fetching community profiles')}</span>
+			<FetchingIcon style="height: 1rem;fill: currentColor;margin-left: .25rem;" />
+		</loading-community-profiles>
 	{/if}
 </equalizer-profiles-community>
 
@@ -83,7 +112,9 @@
 		margin-top: 1rem;
 		padding: 0.5rem;
 		border-radius: 5px;
+		text-align: center;
 
+		height: 14.75rem;
 		max-height: 14.75rem;
 		min-height: 14.75rem;
 
@@ -148,5 +179,35 @@
 		color: var(--color-fg-2);
 		box-shadow: inset 0px 0px 0 1px var(--color-fg-2);
 		border-radius: 3px;
+	}
+
+	community-profile-fetch-error {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	community-profile-fetch-error span {
+		margin-bottom: 0.75rem;
+	}
+
+	community-profile-fetch-error span:nth-child(1) {
+		font-size: 1.1rem;
+		font-variation-settings: 'wght' 700;
+	}
+
+	community-profile-fetch-error span:nth-child(2) {
+		font-variation-settings: 'wght' 600;
+	}
+
+	loading-community-profiles {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
+
+		font-variation-settings: 'wght' 600;
 	}
 </style>

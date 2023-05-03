@@ -1,17 +1,18 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
+	import traduceFn from '../../../functions/traduce.fn'
 	import EqualizerProfilesOnline from './EqualizerProfilesCommunity.svelte'
 	import EqualizerProfilesUser from './EqualizerProfilesUser.svelte'
 </script>
 
 <equalizer-profiles-config>
 	<user-profiles class="profiles-container">
-		<span>Your Profiles</span>
+		<span>{traduceFn('Your Profiles')}</span>
 		<EqualizerProfilesUser />
 	</user-profiles>
 
 	<community-profiles class="profiles-container">
-		<span>Community Profiles</span>
+		<span>{traduceFn('Community Profiles')}</span>
 		<EqualizerProfilesOnline />
 	</community-profiles>
 </equalizer-profiles-config>

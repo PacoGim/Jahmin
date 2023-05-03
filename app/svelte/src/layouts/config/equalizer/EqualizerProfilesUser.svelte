@@ -7,6 +7,7 @@
 	import { currentEqHash, equalizerProfiles, currentEqProfile } from '../../../stores/equalizer.store'
 
 	import equalizerService from '../../../services/equalizer/!equalizer.service'
+	import traduceFn from '../../../functions/traduce.fn'
 </script>
 
 <equalizer-profiles>
@@ -17,28 +18,28 @@
 				on:click={() => equalizerService.saveEqHashConfigFn(eqProfile.hash)}
 				on:click={() => ($currentEqHash = eqProfile.hash)}
 				on:click={() => ($currentEqProfile = eqProfile)}
-				on:click={() => equalizerService.loadEqualizerValuesFn(eqProfile.values)}>{eqProfile.name}</equalizer-name
+				on:click={() => equalizerService.loadEqualizerValuesFn(eqProfile.values)}>{traduceFn(eqProfile.name)}</equalizer-name
 			>
 			<equalizer-rename
 				class="eqProfileButton"
 				on:click={() => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name)}
 			>
 				<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-				Rename
+				{traduceFn('Rename')}
 			</equalizer-rename>
 			<equalizer-delete
 				class="eqProfileButton"
 				on:click={() => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name)}
 			>
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-				Delete
+				{traduceFn('Delete')}
 			</equalizer-delete>
 		</equalizer-field>
 	{/each}
 </equalizer-profiles>
 
 <button class="addProfile" on:click={() => equalizerService.addEqualizerFn()}
-	><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> Add new profile</button
+	><AddIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" /> {traduceFn('Add new profile')}</button
 >
 
 <style>

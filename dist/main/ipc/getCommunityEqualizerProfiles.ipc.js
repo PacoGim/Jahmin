@@ -12,6 +12,9 @@ let promiseResolve = undefined;
 function default_1(ipcMain) {
     ipcMain.handle('get-community-equalizer-profiles', async () => {
         let profilesList = await fetchProfileList();
+        if (profilesList === null) {
+            return '';
+        }
         let equalizerProfilesList = [];
         return new Promise((resolve, reject) => {
             getEqualizersFromProfiles(profilesList, equalizerProfilesList);
@@ -62,6 +65,7 @@ function equalizerProfileSanitize(equalizerProfile) {
     };
     let frequencies = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384];
     cleanProfile.name = purify.sanitize(equalizerProfile.name);
+    cleanProfile.hash = purify.sanitize(equalizerProfile.hash);
     for (let frequency of frequencies) {
         let profileFrequencyValue = equalizerProfile.values?.[frequency];
         if (!isNaN(Number(profileFrequencyValue)) && profileFrequencyValue) {
@@ -89,7 +93,8 @@ function fetchProfileList() {
             resolve(data);
         })
             .catch(err => {
-            reject(err);
+            console.log(err);
+            resolve(null);
         });
     });
 }

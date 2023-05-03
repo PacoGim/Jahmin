@@ -4,6 +4,7 @@ import validateFileNameFn from '../../functions/validateFileName.fn'
 import { promptService } from '../../stores/service.store'
 import notifyService from '../notify.service'
 import { equalizerProfiles } from '../../stores/equalizer.store'
+import traduceFn from '../../functions/traduce.fn'
 
 export default function renameEq(eqHash: string, eqName: string) {
 	if (eqHash === '3qu') {
@@ -11,10 +12,10 @@ export default function renameEq(eqHash: string, eqName: string) {
 	}
 
 	let promptState: PromptStateType = {
-		title: 'Rename Equalizer Preset',
-		placeholder: 'Equalizer new name',
-		confirmButtonText: 'Rename',
-		cancelButtonText: 'Cancel',
+		title: traduceFn('Rename Equalizer Preset'),
+		placeholder: traduceFn('Equalizer new name'),
+		confirmButtonText: traduceFn('Rename'),
+		cancelButtonText: traduceFn('Cancel'),
 		validateFn: validateFileNameFn,
 		data: { eqName, inputValue: eqName }
 	}
@@ -36,13 +37,17 @@ export default function renameEq(eqHash: string, eqName: string) {
 						equalizerProfiles.set(equalizerProfilesLocal)
 					}
 
-					notifyService.success(`Equalizer renamed to "${newName}"`)
+					notifyService.success(traduceFn('Equalizer renamed to "${newName}"', { newName }))
 				} else if (result.code === 'EXISTS') {
-					notifyService.error(`Name ${newName} already exists.`)
+					notifyService.error(traduceFn('Name ${newName} already exists', { newName }))
 
 					return renameEq(eqHash, eqName)
 				} else if (result.code === 'NOT_FOUND') {
-					notifyService.error(`Equalizer ${newName} not found. We suggest you delete the profile manually and restart the app.`)
+					notifyService.error(
+						traduceFn('Equalizer ${newName} not found. We suggest you delete the profile manually and restart the app.', {
+							newName
+						})
+					)
 				}
 			})
 		})

@@ -3,6 +3,7 @@ import { confirmService } from '../../stores/service.store'
 import ConfirmService from '../../svelte_services/ConfirmService.svelte'
 import notifyService from '../notify.service'
 import { currentEqHash, equalizerProfiles } from '../../stores/equalizer.store'
+import traduceFn from '../../functions/traduce.fn'
 
 export default function (eqHash: string, eqName: string) {
 	if (eqHash === '3qu') {
@@ -10,7 +11,7 @@ export default function (eqHash: string, eqName: string) {
 	}
 
 	let confirmState = {
-		textToConfirm: `Delete equalizer "${eqName}"?`,
+		textToConfirm: traduceFn('Delete equalizer "${eqName}"?', { eqName: traduceFn(eqName) }),
 		title: 'Delete Equalizer',
 		data: {
 			name: eqName

@@ -2,7 +2,7 @@ import { get } from 'svelte/store'
 import { config } from '../stores/config.store'
 import { langFile } from '../stores/main.store'
 
-export default function (stringToTraduce: string) {
+export default function (stringToTraduce: string, values: object = undefined) {
 	if (!stringToTraduce) return stringToTraduce
 
 	let language = get(config)?.userOptions?.language
@@ -13,6 +13,12 @@ export default function (stringToTraduce: string) {
 
 	if (!traduced) {
 		console.log(`Missing "${stringToTraduce}" traduction in ${language}`)
+	} else {
+		if (values !== undefined) {
+			for (let key in values) {
+				traduced = traduced.replace(`\$\{${key}\}`, values[key])
+			}
+		}
 	}
 
 	return traduced || stringToTraduce

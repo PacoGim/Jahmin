@@ -129,7 +129,23 @@ svg.player-button {
 }
 
 bold {
-	font-variation-settings: 'wght' calc(var(--default-weight) + 300);
+	font-variation-settings: 'wght' 700;
+}
+
+bold-1 {
+	font-variation-settings: 'wght' 750;
+}
+
+bold-2 {
+	font-variation-settings: 'wght' 800;
+}
+
+bold-3 {
+	font-variation-settings: 'wght' 850;
+}
+
+bold-4 {
+	font-variation-settings: 'wght' 900;
 }
 
 input[type='range'] {

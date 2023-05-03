@@ -20,6 +20,7 @@
 	import type { EqualizerProfileType } from '../../../../../types/equalizerProfile.type'
 	import type { PromptStateType } from '../../../../../types/promptState.type'
 	import equalizerService from '../../../services/equalizer/!equalizer.service'
+  import traduceFn from '../../../functions/traduce.fn'
 
 	function saveEqualizerAs(newName: string = '') {
 		let promptState: PromptStateType = {
@@ -70,7 +71,7 @@
 			<ToggleOffIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		{/if}
 
-		Toggle EQ
+		{traduceFn('Toggle EQ')}
 	</button>
 	<button
 		class="resetEqButton"
@@ -78,18 +79,18 @@
 		disabled={$isEqualizerDirty === false || $isEqualizerOn === false}
 	>
 		<RefreshIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Reset
+		{traduceFn('Reset')}
 	</button>
 	<button on:click={() => saveEqualizerAs()} disabled={$isEqualizerOn === false}>
 		<SaveIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Save as...
+		{traduceFn('Save as...')}
 	</button>
 	<button
 		on:click={() => equalizerService.updateEqualizerFn()}
 		disabled={!$isEqualizerDirty || $currentEqProfile.type === 'Community'}
 	>
 		<UpdateIcon style="height:1.25rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-		Update
+		{traduceFn('Update')}
 	</button>
 </equalizer-buttons-config>
 

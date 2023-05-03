@@ -11,12 +11,16 @@ let promiseResolve: any = undefined
 
 export default function (ipcMain: Electron.IpcMain) {
 	ipcMain.handle('get-community-equalizer-profiles', async () => {
-		let profilesList: string[] = await fetchProfileList()
+		let profilesList: string[] | null = await fetchProfileList()
+
+		if (profilesList === null) {
+			return ''
+		}
 
 		let equalizerProfilesList: any[] = []
 
 		return new Promise((resolve, reject) => {
-			getEqualizersFromProfiles(profilesList, equalizerProfilesList)
+			getEqualizersFromProfiles(profilesList!, equalizerProfilesList)
 			promiseResolve = resolve
 		}).then(res => {
 			return res
@@ -69,6 +73,7 @@ function equalizerProfileSanitize(equalizerProfile: EqualizerFileObjectType): Eq
 	let frequencies = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
 
 	cleanProfile.name = purify.sanitize(equalizerProfile.name)
+	cleanProfile.hash = purify.sanitize(equalizerProfile.hash!)
 
 	for (let frequency of frequencies) {
 		let profileFrequencyValue = equalizerProfile.values?.[frequency]
@@ -89,7 +94,7 @@ function equalizerProfileSanitize(equalizerProfile: EqualizerFileObjectType): Eq
 	return cleanProfile
 }
 
-function fetchProfileList(): Promise<string[]> {
+function fetchProfileList(): Promise<string[] | null> {
 	return new Promise((resolve, reject) => {
 		fetch('https://raw.githubusercontent.com/PacoGim/Jahmin-Equalizers/main/index.json')
 			.then(res => res.json())
@@ -97,7 +102,8 @@ function fetchProfileList(): Promise<string[]> {
 				resolve(data)
 			})
 			.catch(err => {
-				reject(err)
+				console.log(err)
+				resolve(null)
 			})
 	})
 }
