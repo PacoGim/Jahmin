@@ -12,7 +12,7 @@
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import traduceFn from '../../../functions/traduce.fn'
 
-	let iconsStyle = 'height: 4rem;margin-bottom: 1rem;fill: var(--color-fg-1);transition: all 300ms ease-in-out;'
+	let iconsStyle = 'height: 4rem;margin-bottom: 1rem;fill: var(--color-fg-1);transition: fill var(--theme-transition-duration) linear;'
 
 	function saveThemeToConfig(themeName: string) {
 		updateConfigFn({
@@ -25,6 +25,7 @@
 
 <day-night-theme-config>
 	<theme-section
+		class="smooth-colors"
 		data-theme="SystemBased"
 		data-selected={$config.userOptions.theme === 'SystemBased' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('SystemBased')}
@@ -37,6 +38,7 @@
 		<theme-name>{traduceFn('System Based')}</theme-name>
 	</theme-section>
 	<theme-section
+		class="smooth-colors"
 		data-theme="Day"
 		data-selected={$config.userOptions.theme === 'Day' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('Day')}
@@ -49,6 +51,7 @@
 		<theme-name>{traduceFn('Day')}</theme-name>
 	</theme-section>
 	<theme-section
+		class="smooth-colors"
 		data-theme="Night"
 		data-selected={$config.userOptions.theme === 'Night' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('Night')}
@@ -81,11 +84,9 @@
 		width: 128px;
 		height: 128px;
 		cursor: pointer;
-		border: var(--color-fg-1-low) solid 2px;
+		border: var(--color-fg-3) solid 2px;
 		border-radius: 4px;
 		padding: 0.5rem;
-
-		transition: border-color 300ms ease-in-out;
 	}
 
 	theme-section[data-selected='true'] {

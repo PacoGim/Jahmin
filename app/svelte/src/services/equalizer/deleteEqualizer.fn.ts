@@ -1,18 +1,17 @@
 import { get } from 'svelte/store'
 import { confirmService } from '../../stores/service.store'
-import ConfirmService from '../../svelte_services/ConfirmService.svelte'
 import notifyService from '../notify.service'
 import { currentEqHash, equalizerProfiles } from '../../stores/equalizer.store'
 import traduceFn from '../../functions/traduce.fn'
 
 export default function (eqHash: string, eqName: string) {
 	if (eqHash === '3qu') {
-		return notifyService.error("Default profile can't be deleted")
+		return notifyService.error(traduceFn("The Default profile can't be deleted"))
 	}
 
 	let confirmState = {
 		textToConfirm: traduceFn('Delete equalizer "${eqName}"?', { eqName: traduceFn(eqName) }),
-		title: 'Delete Equalizer',
+		title: traduceFn('Delete Equalizer'),
 		data: {
 			name: eqName
 		}
@@ -39,7 +38,7 @@ export default function (eqHash: string, eqName: string) {
 						defaultEqElement.click()
 					}
 
-					notifyService.success('Equalizer successfully deleted.')
+					notifyService.success(traduceFn('Equalizer successfully deleted'))
 				}
 			})
 		})

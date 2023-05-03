@@ -1,7 +1,6 @@
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
-	import UpdateIcon from '../../../icons/UpdateIcon.svelte'
 	import { config } from '../../../stores/config.store'
-	// import { fontSizeConfig } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
 
@@ -40,4 +39,6 @@
 	}
 </script>
 
-<font-size-config on:click={() => setFontSize()}> <config-edit-button>···</config-edit-button> </font-size-config>
+<font-size-config on:click={() => setFontSize()}>
+	<config-edit-button class="smooth-colors">···</config-edit-button>
+</font-size-config>

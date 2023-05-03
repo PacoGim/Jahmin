@@ -6,6 +6,7 @@
 
 	import { keyPressed } from '../stores/main.store'
 	import type { ConfirmStateType } from '../../../types/confirmState.type'
+	import traduceFn from '../functions/traduce.fn'
 
 	let isConfirmVisible = false
 	let confirmState: ConfirmStateType = {
@@ -61,11 +62,11 @@
 		<confirm-footer>
 			<button class="cancel" on:click={() => closeConfirm()}>
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-				Cancel
+				{traduceFn('Cancel')}
 			</button>
 			<button class="confirm" on:click={() => confirmConfirm()}>
 				<CheckIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
-				Confirm
+				{traduceFn('Confirm')}
 			</button>
 		</confirm-footer>
 	</confirm-content>

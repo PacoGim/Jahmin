@@ -9,7 +9,7 @@
 	import { layoutToShow } from '../stores/main.store'
 </script>
 
-<navigation-svlt>
+<navigation-svlt class="smooth-colors">
 	<nav-button on:click={() => ($layoutToShow = 'Library')}>
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'
@@ -51,10 +51,6 @@
 		border-right: 2px solid rgba(255, 255, 255, 0.05);
 
 		width: max-content;
-
-		transition-property: background-color, border-right;
-		transition-duration: var(--theme-transition-duration);
-		transition-timing-function: linear;
 	}
 
 	nav-button {

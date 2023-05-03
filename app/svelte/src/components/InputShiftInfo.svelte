@@ -3,7 +3,7 @@
 </script>
 
 <input-steps-info
-	>{traduceFn('Hold')} <shift-button>⇧ {traduceFn('Shift')}</shift-button> {traduceFn('to be more accurate')}</input-steps-info
+	>{traduceFn('Hold')} <shift-button class="smooth-colors">⇧ {traduceFn('Shift')}</shift-button> {traduceFn('to be more accurate')}</input-steps-info
 >
 
 <style>

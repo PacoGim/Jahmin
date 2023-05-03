@@ -8,7 +8,7 @@ import traduceFn from '../../functions/traduce.fn'
 
 export default function renameEq(eqHash: string, eqName: string) {
 	if (eqHash === '3qu') {
-		return notifyService.error("Default profile can't be deleted")
+		return notifyService.error(traduceFn("The Default profile can't be renamed"))
 	}
 
 	let promptState: PromptStateType = {

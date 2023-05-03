@@ -4,8 +4,8 @@
 	export let title = ''
 </script>
 
-<section id={title}>
-	<section-title>{title}</section-title>
+<section id={title} class="smooth-colors">
+	<section-title class="smooth-colors">{title}</section-title>
 	<slot />
 </section>
 
@@ -19,6 +19,7 @@
 
 		border-radius: 10px 30px;
 	}
+
 	section-title {
 		display: flex;
 

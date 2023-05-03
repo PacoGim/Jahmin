@@ -65,5 +65,5 @@
 </script>
 
 <grid-art-size-config on:click={() => setGridSize()}>
-	<config-edit-button>···</config-edit-button>
+	<config-edit-button class="smooth-colors">···</config-edit-button>
 </grid-art-size-config>

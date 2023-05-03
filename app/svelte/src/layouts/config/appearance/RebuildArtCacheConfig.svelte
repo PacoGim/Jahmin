@@ -22,7 +22,7 @@
 </script>
 
 <font-size-config on:click={() => rebuildArtCache()}>
-	<config-edit-button>{traduceFn('Clean')}{artCacheSize}</config-edit-button>
+	<config-edit-button class="smooth-colors">{traduceFn('Clean')}{artCacheSize}</config-edit-button>
 </font-size-config>
 
 <style>

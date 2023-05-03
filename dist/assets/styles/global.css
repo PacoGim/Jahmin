@@ -6,6 +6,18 @@
 	line-height: 17px;
 }
 
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+*.smooth-colors {
+	transition-property: color, background-color, border-color, fill;
+	transition-duration: var(--theme-transition-duration);
+	transition-timing-function: linear;
+}
+
 html {
 	height: 100%;
 	overflow: hidden;
@@ -46,8 +58,6 @@ button {
 	align-items: center;
 	font-size: 0.85rem;
 	font-variation-settings: 'wght' 600;
-
-	transition: background-color 300ms linear;
 }
 
 button.not-active {
@@ -82,8 +92,6 @@ p-center {
 
 .layout {
 	height: inherit;
-
-	transition: background-color var(--theme-transition-duration) linear;
 }
 
 *::-webkit-scrollbar {
@@ -224,11 +232,6 @@ config-edit-button {
 	border: 2px solid var(--color-fg-1);
 	border-radius: 4px;
 	cursor: pointer;
-
-	transition-property: color, background-color;
-	transition-timing-function: ease-in-out;
-
-	transition-duration: 300ms;
 }
 
 config-edit-button:hover {

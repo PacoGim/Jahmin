@@ -1,11 +1,9 @@
 <script lang="ts">
-	import traduceFn from '../functions/traduce.fn'
-
 	export let title = ''
 </script>
 
-<section id={title}>
-	<section-title>{title}</section-title>
+<section id={title} class="smooth-colors">
+	<section-title class="smooth-colors">{title}</section-title>
 	<slot />
 </section>
 
