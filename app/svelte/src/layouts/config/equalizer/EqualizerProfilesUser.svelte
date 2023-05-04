@@ -10,7 +10,7 @@
 	import traduceFn from '../../../functions/traduce.fn'
 </script>
 
-<equalizer-profiles>
+<equalizer-profiles class="smooth-colors">
 	{#each $equalizerProfiles as eqProfile (eqProfile.hash)}
 		<equalizer-field id="eq-{eqProfile.hash}">
 			<equalizer-name

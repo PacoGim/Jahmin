@@ -51,9 +51,10 @@
 </script>
 
 <config-layout-svlt>
-	<options-list  class="smooth-colors">
+	<options-list class="smooth-colors">
 		{#each options as option, index (index)}
 			<option-svlt
+				class="smooth-colors"
 				data-selected={selectedOption === option.name}
 				on:click={() => loadComponent(option.name)}>{option.name}</option-svlt
 			>
@@ -112,9 +113,9 @@
 		color: var(--color-fg-1);
 		opacity: 0;
 
-		transition-property: transform opacity;
-		transition-duration: 300ms;
-		transition-timing-function: cubic-bezier(0.4, -0.4, 0.4, 1.4);
+		transition-property: transform, opacity, color;
+		transition-duration: 300ms, 300ms, var(--theme-transition-duration);
+		transition-timing-function: cubic-bezier(0.4, -0.4, 0.4, 1.4), cubic-bezier(0.4, -0.4, 0.4, 1.4), linear;
 	}
 
 	config-layout-svlt > options-list > option-svlt[data-selected='true']::before {

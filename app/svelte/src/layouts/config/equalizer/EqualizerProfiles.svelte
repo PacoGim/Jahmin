@@ -6,13 +6,13 @@
 </script>
 
 <equalizer-profiles-config>
-	<user-profiles class="profiles-container">
-		<span>{traduceFn('Your Profiles')}</span>
+	<user-profiles class="profiles-container smooth-colors">
+		<span class="smooth-colors">{traduceFn('Your Profiles')}</span>
 		<EqualizerProfilesUser />
 	</user-profiles>
 
-	<community-profiles class="profiles-container">
-		<span>{traduceFn('Community Profiles')}</span>
+	<community-profiles class="profiles-container smooth-colors">
+		<span class="smooth-colors">{traduceFn('Community Profiles')}</span>
 		<EqualizerProfilesOnline />
 	</community-profiles>
 </equalizer-profiles-config>

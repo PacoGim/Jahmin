@@ -61,7 +61,7 @@
 	})
 </script>
 
-<equalizer-profiles-community>
+<equalizer-profiles-community class="smooth-colors">
 	{#if communityProfiles && communityProfiles.length > 0}
 		{#each communityProfiles as eqProfile, index (index)}
 			<equalizer-field id={eqProfile.hash}>

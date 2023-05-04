@@ -53,7 +53,7 @@ export default function () {
 	// To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Long after the app has finished loading).
 	setTimeout(() => {
 		cssVariablesService.set('theme-transition-duration', '1000ms')
-		flickTheme()
+		// flickTheme()
 	}, 2000)
 
 	window.addEventListener('resize', evt => {
