@@ -22,18 +22,17 @@ let appIdleDebounce = getAppIdleDebounce()
 
 function flickTheme(flickToDay = true) {
 	if (flickToDay === true) {
-		document.querySelector('body').setAttribute('theme', 'Day')
-	} else {
 		document.querySelector('body').setAttribute('theme', 'Night')
+	} else {
+		document.querySelector('body').setAttribute('theme', 'Day')
 	}
 
 	setTimeout(() => {
 		flickTheme(!flickToDay)
-	}, 2000)
+	}, 3000)
 }
 
 export default function () {
-	flickTheme()
 
 	afterLanguageChangeReload()
 
@@ -53,7 +52,8 @@ export default function () {
 
 	// To prevent slow transition of colors when app loads, the transition duration is set to 0ms by default then set to 500ms after 2000ms (Long after the app has finished loading).
 	setTimeout(() => {
-		cssVariablesService.set('theme-transition-duration', '2500ms')
+		cssVariablesService.set('theme-transition-duration', '1000ms')
+		flickTheme()
 	}, 2000)
 
 	window.addEventListener('resize', evt => {

@@ -9,6 +9,7 @@ export let gridGapConfig: Writable<number> = writable(0)
 export let artSizeConfig: Writable<number> = writable(0)
 export let fontSizeConfig: Writable<number> = writable(0)
 export let songListTagConfig: Writable<any[]> = writable([])
+export let alwaysShowAlbumOverlayConfig: Writable<boolean> = writable(false)
 
 config.subscribe(value => {
 	if (get(songAmountConfig) !== value?.userOptions?.songAmount) {
@@ -33,5 +34,9 @@ config.subscribe(value => {
 
 	if (get(songListTagConfig) !== value?.songListTags) {
 		songListTagConfig.set(value?.songListTags)
+	}
+
+	if (get(alwaysShowAlbumOverlayConfig) !== value?.userOptions.alwaysShowAlbumOverlay) {
+		alwaysShowAlbumOverlayConfig.set(value?.userOptions.alwaysShowAlbumOverlay)
 	}
 })

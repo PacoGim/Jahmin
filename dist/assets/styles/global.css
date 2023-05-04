@@ -12,7 +12,7 @@
 	box-sizing: border-box;
 }
 
-*.smooth-colors {
+.smooth-colors {
 	transition-property: color, background-color, border-color, fill;
 	transition-duration: var(--theme-transition-duration);
 	transition-timing-function: linear;
@@ -33,7 +33,7 @@ body {
 
 	text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
 
-	transition-property: color, background-color;
+	transition-property: background-color;
 	transition-duration: var(--theme-transition-duration);
 	transition-timing-function: linear;
 }

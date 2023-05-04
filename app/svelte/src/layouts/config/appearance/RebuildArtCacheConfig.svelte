@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { layoutToShow, reloadArts } from '../../../stores/main.store'
@@ -21,7 +20,7 @@
 	})
 </script>
 
-<font-size-config on:click={() => rebuildArtCache()}>
+<font-size-config on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabindex="-1" role="button">
 	<config-edit-button class="smooth-colors">{traduceFn('Clean')}{artCacheSize}</config-edit-button>
 </font-size-config>
 

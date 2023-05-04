@@ -3,7 +3,7 @@
 </script>
 
 <section id={title} class="smooth-colors">
-	<section-title class="smooth-colors">{title}</section-title>
+	<section-title>{title}</section-title>
 	<slot />
 </section>
 

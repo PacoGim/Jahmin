@@ -1,4 +1,5 @@
 <script lang="ts">
+	import TranslateIcon from '../../../icons/TranslateIcon.svelte'
 	import { config } from '../../../stores/config.store'
 	import { currentSongProgressStore, isPlaying } from '../../../stores/main.store'
 
@@ -25,76 +26,26 @@
 	}
 </script>
 
-<div class="select">
-	<select bind:value={currentLanguage} on:change={languageChanged}>
-		<option value="english">🇬🇧 English</option>
-		<option value="french">🇫🇷 Français</option>
-	</select>
-	<span class="focus" />
-</div>
+<TranslateIcon style="fill:var(--color-fg-1); height: 1.2rem; margin-right: .5rem; transition: fill var(--theme-transition-duration) linear;" />
+<select bind:value={currentLanguage} on:change={languageChanged}>
+	<option value="english">🇬🇧 English</option>
+	<option value="french">🇫🇷 Français</option>
+</select>
 
 <style>
-	div.select {
-		margin-left: 1rem;
-		--select-border: var(--color-fg-2);
-		--select-focus: var(--color-accent-1);
-		--select-arrow: var(--select-border);
-
-		display: grid;
-
-		width: 100%;
-		min-width: 15ch;
-		max-width: 30ch;
-		border: 1px solid var(--select-border);
-		border-radius: 0.25em;
-		padding: 0.25em 0.5em;
-		font-size: 1rem;
-		cursor: pointer;
-		line-height: 1.1;
-		background-color: transparent;
-		background-image: linear-gradient(to top, #f9f9f9, #fff 33%);
-
-		grid-template-areas: 'select';
-		align-items: center;
-		position: relative;
-	}
-
 	select {
-		appearance: none;
-		background-color: transparent;
-		border: none;
-		padding: 0 1em 0 0;
-		margin: 0;
-		width: 100%;
-		color: inherit;
-		font-family: inherit;
+		padding: 0.25rem 0.5rem;
 		font-size: inherit;
-		cursor: inherit;
-		line-height: inherit;
-		outline: none;
-	}
 
-	div.select::after {
-		content: '';
-		width: 0.8em;
-		height: 0.5em;
-		background-color: var(--select-arrow);
-		clip-path: polygon(100% 0%, 0 0%, 50% 100%);
-		justify-self: end;
-	}
+		border-radius: 4px;
+		background-color: var(--color-bg-1);
+		color: var(--color-fg-1);
+		border-color: var(--color-fg-1);
 
-	select,
-	.select:after {
-		grid-area: select;
-	}
+		cursor: pointer;
 
-	select:focus + .focus {
-		position: absolute;
-		top: -1px;
-		left: -1px;
-		right: -1px;
-		bottom: -1px;
-		border: 2px solid var(--select-focus);
-		border-radius: inherit;
+		transition-property: color, background-color, border-color;
+		transition-duration: var(--theme-transition-duration);
+		transition-timing-function: linear;
 	}
 </style>

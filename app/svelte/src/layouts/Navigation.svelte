@@ -9,7 +9,7 @@
 	import { layoutToShow } from '../stores/main.store'
 </script>
 
-<navigation-svlt class="smooth-colors">
+<navigation-svlt>
 	<nav-button on:click={() => ($layoutToShow = 'Library')}>
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'

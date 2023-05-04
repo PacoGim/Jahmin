@@ -51,10 +51,11 @@
 </script>
 
 <config-layout-svlt>
-	<options-list>
+	<options-list  class="smooth-colors">
 		{#each options as option, index (index)}
-			<option-svlt data-selected={selectedOption === option.name} on:click={() => loadComponent(option.name)}
-				>{option.name}</option-svlt
+			<option-svlt
+				data-selected={selectedOption === option.name}
+				on:click={() => loadComponent(option.name)}>{option.name}</option-svlt
 			>
 		{/each}
 	</options-list>
@@ -97,10 +98,6 @@
 		position: relative;
 
 		color: var(--color-fg-2);
-
-		transition-property: color;
-		transition-duration: 300ms;
-		transition-timing-function: ease-in-out;
 	}
 
 	config-layout-svlt > options-list > option-svlt:hover {

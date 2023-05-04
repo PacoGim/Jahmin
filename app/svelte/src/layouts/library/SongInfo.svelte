@@ -1,12 +1,12 @@
 <script lang="ts">
+	import type { SongType } from '../../../../types/song.type'
 	import { playingSongStore } from '../../stores/main.store'
-	import type { SongType } from '../../types/song.type'
 
 	let playingSong: SongType = undefined
 
 	$: {
 		if ($playingSongStore) {
-			playingSong = $playingSongStore
+			playingSong = $playingSongStore as SongType
 		}
 	}
 </script>

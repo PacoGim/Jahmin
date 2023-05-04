@@ -23,3 +23,5 @@
 * Playcount dynamic colors doesn't work in first launch
 
 * After renaming EQ, recalculate the hash, and also, prevent renaming if hashes matches, and also... check the community eq
+
+on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabindex="-1" role="button"

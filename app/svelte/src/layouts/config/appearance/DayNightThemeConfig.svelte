@@ -11,8 +11,8 @@
 	import { config } from '../../../stores/config.store'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import traduceFn from '../../../functions/traduce.fn'
-
-	let iconsStyle = 'height: 4rem;margin-bottom: 1rem;fill: var(--color-fg-1);transition: fill var(--theme-transition-duration) linear;'
+	// transition: fill var(--theme-transition-duration) linear;
+	let iconsStyle = 'height: 4rem;margin-bottom: 1rem;fill: var(--color-fg-1);'
 
 	function saveThemeToConfig(themeName: string) {
 		updateConfigFn({
@@ -31,8 +31,18 @@
 		on:click={() => saveThemeToConfig('SystemBased')}
 	>
 		<section-icon>
-			<SystemFillIcon style="opacity:{$config.userOptions.theme === 'SystemBased' ? '1' : '0'};{iconsStyle}" />
-			<SystemIcon style="opacity:{$config.userOptions.theme !== 'SystemBased' ? '1' : '0'};{iconsStyle}" />
+			<SystemFillIcon
+				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme ===
+				'SystemBased'
+					? '1'
+					: '0'};{iconsStyle}"
+			/>
+			<SystemIcon
+				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !==
+				'SystemBased'
+					? '1'
+					: '0'};{iconsStyle}"
+			/>
 		</section-icon>
 
 		<theme-name>{traduceFn('System Based')}</theme-name>
@@ -43,9 +53,9 @@
 		data-selected={$config.userOptions.theme === 'Day' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('Day')}
 	>
-		<section-icon>
-			<SunFillIcon style="opacity:{$config.userOptions.theme === 'Day' ? '1' : '0'};{iconsStyle}" />
-			<SunIcon style="opacity:{$config.userOptions.theme !== 'Day' ? '1' : '0'};{iconsStyle}" />
+		<section-icon class="smooth-colors">
+			<SunFillIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Day' ? '1' : '0'};{iconsStyle}" />
+			<SunIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !== 'Day' ? '1' : '0'};{iconsStyle}" />
 		</section-icon>
 
 		<theme-name>{traduceFn('Day')}</theme-name>
@@ -56,10 +66,10 @@
 		data-selected={$config.userOptions.theme === 'Night' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('Night')}
 	>
-		<section-icon>
-			<MoonFillIcon style="opacity:{$config.userOptions.theme === 'Night' ? '1' : '0'};{iconsStyle}" />
+		<section-icon class="smooth-colors">
+			<MoonFillIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Night' ? '1' : '0'};{iconsStyle}" />
 
-			<MoonIcon style="opacity:{$config.userOptions.theme !== 'Night' ? '1' : '0'};{iconsStyle}" />
+			<MoonIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !== 'Night' ? '1' : '0'};{iconsStyle}" />
 		</section-icon>
 
 		<theme-name>{traduceFn('Night')}</theme-name>
