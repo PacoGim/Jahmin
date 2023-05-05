@@ -53,6 +53,7 @@
 <style>
 	selected-tags-list {
 		display: block;
+		margin: 0 auto;
 		width: var(--clamp-width);
 	}
 </style>

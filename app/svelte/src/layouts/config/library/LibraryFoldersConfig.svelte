@@ -9,14 +9,14 @@
 	import { layoutToShow } from '../../../stores/main.store'
 </script>
 
-<OptionSectionCompact title="{traduceFn('Is the library missing songs?')}">
-	<ThreeDButton
-		on:buttonClick={() => {
+<OptionSectionCompact title={traduceFn('Is the library missing songs?')}>
+	<button
+		on:click={() => {
 			getAllSongsFn().then(songs => {
 				window.ipc.sendAllSongsToMain(songs)
 				$layoutToShow = 'Library'
 			})
-		}}>{traduceFn('Reload the library')}</ThreeDButton
+		}}>{traduceFn('Reload the library')}</button
 	>
 </OptionSectionCompact>
 
@@ -27,26 +27,22 @@
 			{#each $config.directories.add || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
-					<ThreeDButton
-						colorName="dangerRed"
-						addShadow={false}
-						on:buttonClick={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}
-					>
+					<button on:click={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 						{traduceFn('Remove')}
-					</ThreeDButton>
+					</button>
 				</section-directory>
 			{/each}
 		{/if}
 	</section-body>
-	<ThreeDButton
-		on:buttonClick={async () => {
+	<button
+		on:click={async () => {
 			window.ipc.selectDirectories('add', await getAllSongsFn())
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 		{traduceFn('Add Directories')}
-	</ThreeDButton>
+	</button>
 </add-folder-config>
 
 <exclude-folder-config class="section-main">

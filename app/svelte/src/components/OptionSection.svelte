@@ -1,6 +1,4 @@
 <script lang="ts">
-	import traduceFn from '../functions/traduce.fn'
-
 	export let title = ''
 </script>
 
@@ -18,6 +16,8 @@
 		padding: 1rem;
 
 		border-radius: 10px 30px;
+
+		width: 100%;
 	}
 
 	section-title {

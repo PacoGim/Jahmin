@@ -5,8 +5,6 @@
 
 	import MoveIcon from '../../../icons/MoveIcon.svelte'
 	import { config } from '../../../stores/config.store'
-	// import { songListTagsConfig } from '../../../store/config.store'
-	import { songListTagsValuesStore } from '../../../stores/main.store'
 
 	export let tag
 	export let index
@@ -40,14 +38,13 @@
 	}
 </script>
 
+<!-- Center end start -->
 {#if tag.value !== 'DynamicArtists'}
 	<li data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value}>
 		<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
 		<select bind:value={$config.songListTags[index].value}>
 			{#each songListTagsVar as tag, index (index)}
-				{#if !$songListTagsValuesStore.includes(tag.value)}
-					<option value={tag.value} checked={false}>{tag.name}</option>
-				{/if}
+				<option value={tag.value}>{tag.name}</option>
 			{/each}
 		</select>
 		<tag-empty-space />
@@ -58,7 +55,7 @@
 
 		<tag-aligns data-is-active={$config.songListTags[index].isExpanded}>
 			<tag-align-left class="tag-align">
-				<input id="{index}-{tag.value}-l" type="radio" bind:group={$config.songListTags[index].align} value="left" />
+				<input id="{index}-{tag.value}-l" type="radio" bind:group={$config.songListTags[index].align} value="start" />
 				<label for="{index}-{tag.value}-l">L</label>
 			</tag-align-left>
 
@@ -68,7 +65,7 @@
 			</tag-align-center>
 
 			<tag-align-right class="tag-align">
-				<input id="{index}-{tag.value}-r" type="radio" bind:group={$config.songListTags[index].align} value="right" />
+				<input id="{index}-{tag.value}-r" type="radio" bind:group={$config.songListTags[index].align} value="end" />
 				<label for="{index}-{tag.value}-r">R</label>
 			</tag-align-right>
 		</tag-aligns>
@@ -150,9 +147,9 @@
 	}
 
 	li tag-expand[data-is-expanded='true'] label {
-		background-color: var(--color-reactBlue);
+		background-color: var(--color-accent-1);
 		color: var(--color-bg-1);
-		border-color: var(--color-reactBlue);
+		border-color: var(--color-accent-1);
 		transform: translateX(0rem);
 	}
 
@@ -210,9 +207,9 @@
 	}
 
 	li tag-aligns .tag-align input:checked ~ label {
-		background-color: var(--color-reactBlue);
+		background-color: var(--color-accent-1);
 		color: var(--color-bg-1);
-		border-color: var(--color-reactBlue);
+		border-color: var(--color-accent-1);
 	}
 
 	li tag-aligns .tag-align input {

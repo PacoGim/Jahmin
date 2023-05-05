@@ -1,4 +1,5 @@
 <script lang="ts">
+  import traduceFn from '../../functions/traduce.fn'
 	import { layoutToShow } from '../../stores/main.store'
 	import { selectedConfigOptionName } from '../../stores/session.store'
 
@@ -9,8 +10,9 @@
 </script>
 
 <no-song-svlt>
-	<p>No songs found!</p>
-	<button on:click={handleAddFolder}>Click here to add songs</button>
+	<p>{traduceFn("I can't find any songs!")}</p>
+	<img src="./assets/img/files_not_found.webp" alt="" />
+	<button on:click={handleAddFolder}>{traduceFn('Click here to add songs')}</button>
 </no-song-svlt>
 
 <style>
@@ -28,5 +30,38 @@
 
 		line-height: normal;
 		margin-bottom: 1rem;
+
+		padding: 0.5rem 1rem;
+
+		border-radius: 10px;
+
+		text-align: center;
+
+		border: 4px var(--color-fg-1) solid;
+
+		position: relative;
+	}
+
+	no-song-svlt p::after {
+		content: '';
+		position: absolute;
+		border-style: solid;
+		border-width: 15px 15px 0;
+		border-color: var(--color-fg-1) transparent;
+		display: block;
+		width: 0;
+		z-index: 1;
+		bottom: -15px;
+		left: 50%;
+	}
+
+	img {
+		display: block;
+		height: 10rem;
+	}
+
+	button {
+		padding: .5rem .75rem;
+		font-size: 1rem;
 	}
 </style>

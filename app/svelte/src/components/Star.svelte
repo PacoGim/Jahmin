@@ -7,6 +7,7 @@
 	export let songRating = 0
 	export let hook
 	export let klass: '' | 'tag-edit-star' = ''
+	export let align: string = 'center'
 
 	let starRating = 0
 	let starRatingTemp = 0 // Keeps track of the user selected rating.
@@ -49,7 +50,7 @@
 	}
 </script>
 
-<stars on:click={dispatch('starChange', { rating: starRating * 10 })} class={klass}>
+<stars on:click={dispatch('starChange', { rating: starRating * 10 })} class={klass} style="justify-self: {align}">
 	<img
 		on:click={() => {
 			starRating = 0

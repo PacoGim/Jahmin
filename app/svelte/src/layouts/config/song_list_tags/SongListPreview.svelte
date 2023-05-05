@@ -112,13 +112,16 @@
 		grid-template-columns: 1fr 1fr;
 		width: 100%;
 
+		padding: 1rem;
+
+		background-color: var(--color-fg-1);
+		color: var(--color-bg-1);
 	}
 
 	enable-dynamic-artists {
 		display: flex;
 		justify-content: center;
 		width: fit-content;
-		background-color: var(--color-reactBlue);
 		margin-top: 1rem;
 	}
 

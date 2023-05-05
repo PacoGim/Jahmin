@@ -8,6 +8,7 @@
 	import EqualizerConfig from './equalizer/!EqualizerConfig.svelte'
 	import LibraryConfig from './library/!LibraryConfig.svelte'
 	import SongListTagsConfig from './song_list_tags/!SongListTagsConfig.svelte'
+	import traduceFn from '../../functions/traduce.fn'
 
 	const options: {
 		name: 'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'
@@ -56,7 +57,7 @@
 			<option-svlt
 				class="smooth-colors"
 				data-selected={selectedOption === option.name}
-				on:click={() => loadComponent(option.name)}>{option.name}</option-svlt
+				on:click={() => loadComponent(option.name)}>{traduceFn(option.name)}</option-svlt
 			>
 		{/each}
 	</options-list>
@@ -95,6 +96,8 @@
 		margin: 0.25rem;
 		position: relative;
 		box-shadow: inset 0 0px 0 0 transparent;
+
+		text-align: center;
 
 		position: relative;
 

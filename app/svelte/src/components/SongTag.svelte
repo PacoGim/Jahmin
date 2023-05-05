@@ -14,6 +14,8 @@
 
 	let originalTagValue: any
 
+
+
 	let dispatch = createEventDispatcher()
 
 	/* 	$: {
@@ -74,9 +76,9 @@
 </script>
 
 {#if tagName !== 'Rating'}
-	<span class={tagName} data-tippy-content={originalTagValue} style="text-align: {align}">{parseTag(tagName, tagValue)}</span>
+	<span class={tagName} data-tippy-content={originalTagValue} style="justify-self: {align}">{parseTag(tagName, tagValue)}</span>
 {:else}
-	<Star on:starChange={evt => dispatch('starChange', evt.detail)} songRating={tagValue} hook="song-list-item" />
+	<Star on:starChange={evt => dispatch('starChange', evt.detail)} {align} songRating={tagValue} hook="song-list-item" />
 {/if}
 
 <style>

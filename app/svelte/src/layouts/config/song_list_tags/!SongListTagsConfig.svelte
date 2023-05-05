@@ -9,8 +9,6 @@
 
 	let isMounted = false
 
-
-
 	// TODO Check this more in depth
 	$: saveSelectedTagsToConfig($config.songListTags)
 
@@ -28,11 +26,11 @@
 </script>
 
 <song-list-tag-config>
-	<OptionSection title="Song List Tags" />
+	<OptionSection title="Song List Tags">
+		<AddSongListTag />
 
-	<AddSongListTag />
-
-	<SelectedTagList />
+		<SelectedTagList />
+	</OptionSection>
 
 	<SongListPreview />
 </song-list-tag-config>

@@ -42,9 +42,14 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		justify-content: center;
+
+		margin: 0 auto;
 		color: #fff;
 
-		background-color: var(--color-reactBlue);
+		width: fit-content;
+
+		background-color: var(--color-accent-1);
 
 		border-radius: 50px;
 	}
