@@ -7316,7 +7316,7 @@ var app = (function () {
         document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin';
     });
 
-    let selectedConfigOptionName = writable('Library');
+    let selectedConfigOptionName = writable('Equalizer');
 
     function getDirectoryFn (inputString) {
         let osLocal = undefined;
@@ -31749,7 +31749,7 @@ var app = (function () {
     			t1 = space();
     			create_component(fetchingicon.$$.fragment);
     			add_location(span, file$s, 89, 3, 3556);
-    			set_custom_element_data(loading_community_profiles, "class", "svelte-1f3qoqy");
+    			set_custom_element_data(loading_community_profiles, "class", "svelte-670t9i");
     			add_location(loading_community_profiles, file$s, 88, 2, 3524);
     		},
     		m: function mount(target, anchor) {
@@ -31808,13 +31808,13 @@ var app = (function () {
     			t3 = space();
     			button = element("button");
     			button.textContent = `${traduceFn('Refetch')}`;
-    			attr_dev(span0, "class", "svelte-1f3qoqy");
+    			attr_dev(span0, "class", "svelte-670t9i");
     			add_location(span0, file$s, 83, 3, 3268);
-    			attr_dev(span1, "class", "svelte-1f3qoqy");
+    			attr_dev(span1, "class", "svelte-670t9i");
     			add_location(span1, file$s, 84, 3, 3335);
-    			attr_dev(button, "class", "svelte-1f3qoqy");
+    			attr_dev(button, "class", "svelte-670t9i");
     			add_location(button, file$s, 85, 3, 3396);
-    			set_custom_element_data(community_profile_fetch_error, "class", "svelte-1f3qoqy");
+    			set_custom_element_data(community_profile_fetch_error, "class", "svelte-670t9i");
     			add_location(community_profile_fetch_error, file$s, 82, 2, 3233);
     		},
     		m: function mount(target, anchor) {
@@ -32011,7 +32011,7 @@ var app = (function () {
     			create_component(downloadicon.$$.fragment);
     			t0 = space();
     			t1 = text(t1_value);
-    			attr_dev(button, "class", "svelte-1f3qoqy");
+    			attr_dev(button, "class", "svelte-670t9i");
     			add_location(button, file$s, 75, 5, 2936);
     		},
     		m: function mount(target, anchor) {
@@ -32080,7 +32080,7 @@ var app = (function () {
     			t0 = space();
     			t1 = text(t1_value);
     			button.disabled = true;
-    			attr_dev(button, "class", "svelte-1f3qoqy");
+    			attr_dev(button, "class", "svelte-670t9i");
     			add_location(button, file$s, 70, 5, 2765);
     		},
     		m: function mount(target, anchor) {
@@ -32182,11 +32182,11 @@ var app = (function () {
 
     			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[13].hash
     			? 'current'
-    			: '') + " svelte-1f3qoqy"));
+    			: '') + " svelte-670t9i"));
 
     			add_location(equalizer_name, file$s, 55, 4, 2147);
     			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = /*eqProfile*/ ctx[13].hash);
-    			set_custom_element_data(equalizer_field, "class", "svelte-1f3qoqy");
+    			set_custom_element_data(equalizer_field, "class", "svelte-670t9i");
     			add_location(equalizer_field, file$s, 54, 3, 2105);
     			this.first = equalizer_field;
     		},
@@ -32240,7 +32240,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$currentEqHash, communityProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[13].hash
     			? 'current'
-    			: '') + " svelte-1f3qoqy"))) {
+    			: '') + " svelte-670t9i"))) {
     				set_custom_element_data(equalizer_name, "class", equalizer_name_class_value);
     			}
 
@@ -32326,7 +32326,7 @@ var app = (function () {
     		c: function create() {
     			equalizer_profiles_community = element("equalizer-profiles-community");
     			if_block.c();
-    			set_custom_element_data(equalizer_profiles_community, "class", "smooth-colors svelte-1f3qoqy");
+    			set_custom_element_data(equalizer_profiles_community, "class", "smooth-colors svelte-670t9i");
     			add_location(equalizer_profiles_community, file$s, 51, 0, 1936);
     		},
     		l: function claim(nodes) {
@@ -32927,15 +32927,15 @@ var app = (function () {
 
     			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
     			? 'current'
-    			: '') + " svelte-nogy8h"));
+    			: '') + " svelte-9swy31"));
 
     			add_location(equalizer_name, file$o, 12, 3, 638);
-    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-nogy8h");
+    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-9swy31");
     			add_location(equalizer_rename, file$o, 19, 3, 1028);
-    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-nogy8h");
+    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-9swy31");
     			add_location(equalizer_delete, file$o, 26, 3, 1299);
     			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[10].hash);
-    			set_custom_element_data(equalizer_field, "class", "svelte-nogy8h");
+    			set_custom_element_data(equalizer_field, "class", "svelte-9swy31");
     			add_location(equalizer_field, file$o, 11, 2, 592);
     			this.first = equalizer_field;
     		},
@@ -32975,7 +32975,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$currentEqHash, $equalizerProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
     			? 'current'
-    			: '') + " svelte-nogy8h"))) {
+    			: '') + " svelte-9swy31"))) {
     				set_custom_element_data(equalizer_name, "class", equalizer_name_class_value);
     			}
 
@@ -33058,9 +33058,9 @@ var app = (function () {
     			create_component(addicon.$$.fragment);
     			t1 = space();
     			t2 = text(t2_value);
-    			set_custom_element_data(equalizer_profiles, "class", "smooth-colors svelte-nogy8h");
+    			set_custom_element_data(equalizer_profiles, "class", "smooth-colors svelte-9swy31");
     			add_location(equalizer_profiles, file$o, 9, 0, 489);
-    			attr_dev(button, "class", "addProfile svelte-nogy8h");
+    			attr_dev(button, "class", "addProfile svelte-9swy31");
     			add_location(button, file$o, 37, 0, 1622);
     		},
     		l: function claim(nodes) {
@@ -33738,10 +33738,10 @@ var app = (function () {
     			t2 = space();
     			t3 = text(t3_value);
     			t4 = space();
-    			set_custom_element_data(directory_path, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(directory_path, "class", "svelte-hdj1gr");
     			add_location(directory_path, file$m, 27, 5, 1060);
     			add_location(button, file$m, 28, 5, 1110);
-    			set_custom_element_data(section_directory, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(section_directory, "class", "svelte-hdj1gr");
     			add_location(section_directory, file$m, 26, 4, 1035);
     			this.first = section_directory;
     		},
@@ -33916,11 +33916,11 @@ var app = (function () {
     			t2 = space();
     			t3 = text(t3_value);
     			t4 = space();
-    			set_custom_element_data(directory_path, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(directory_path, "class", "svelte-hdj1gr");
     			add_location(directory_path, file$m, 52, 5, 1919);
     			attr_dev(button, "class", "danger");
     			add_location(button, file$m, 53, 5, 1969);
-    			set_custom_element_data(section_directory, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(section_directory, "class", "svelte-hdj1gr");
     			add_location(section_directory, file$m, 51, 4, 1894);
     			this.first = section_directory;
     		},
@@ -34055,20 +34055,20 @@ var app = (function () {
     			create_component(addicon1.$$.fragment);
     			t10 = space();
     			t11 = text(t11_value);
-    			set_custom_element_data(section_title0, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(section_title0, "class", "svelte-hdj1gr");
     			add_location(section_title0, file$m, 22, 1, 850);
-    			set_custom_element_data(section_body0, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(section_body0, "class", "svelte-hdj1gr");
     			add_location(section_body0, file$m, 23, 1, 919);
     			add_location(button0, file$m, 36, 1, 1406);
-    			set_custom_element_data(add_folder_config, "class", "section-main svelte-1kfhqfj");
+    			set_custom_element_data(add_folder_config, "class", "section-main svelte-hdj1gr");
     			add_location(add_folder_config, file$m, 21, 0, 808);
-    			set_custom_element_data(section_title1, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(section_title1, "class", "svelte-hdj1gr");
     			add_location(section_title1, file$m, 47, 1, 1699);
-    			set_custom_element_data(section_body1, "class", "svelte-1kfhqfj");
+    			set_custom_element_data(section_body1, "class", "svelte-hdj1gr");
     			add_location(section_body1, file$m, 48, 1, 1774);
     			attr_dev(button1, "class", "info");
     			add_location(button1, file$m, 64, 1, 2302);
-    			set_custom_element_data(exclude_folder_config, "class", "section-main svelte-1kfhqfj");
+    			set_custom_element_data(exclude_folder_config, "class", "section-main svelte-hdj1gr");
     			add_location(exclude_folder_config, file$m, 46, 0, 1653);
     		},
     		l: function claim(nodes) {

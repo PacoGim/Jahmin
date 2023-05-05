@@ -125,8 +125,17 @@
 		display: grid;
 		grid-template-columns: auto max-content;
 
-		margin-bottom: 0.25rem;
+		/* margin-bottom: 0.25rem; */
+		padding-right: 0.5rem;
 		align-items: center;
+
+		border-radius: 3px;
+
+		transition: background-color 250ms ease-in-out;
+	}
+
+	equalizer-field:hover {
+		background-color: var(--color-bg-1);
 	}
 
 	equalizer-name {

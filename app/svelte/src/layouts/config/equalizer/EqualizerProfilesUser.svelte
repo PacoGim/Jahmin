@@ -60,12 +60,13 @@
 		display: grid;
 		grid-template-columns: auto max-content max-content;
 
+		padding-right: 0.5rem;
 		border-radius: 5px;
 		align-items: center;
 	}
 
 	equalizer-profiles equalizer-field * {
-		transition: background-color 150ms ease-in-out;
+		/* transition: background-color 150ms ease-in-out; */
 	}
 
 	.eqProfileButton {
@@ -86,12 +87,14 @@
 		background-color: var(--color-accent-1);
 		border-radius: 3px;
 		padding: 0.2rem 0.4rem;
-
-		transition: background-color 250ms ease-in-out;
 	}
 
 	equalizer-rename:first-of-type {
 		margin-right: 0.5rem;
+	}
+
+	equalizer-profiles equalizer-field {
+		transition: background-color 250ms ease-in-out;
 	}
 
 	equalizer-profiles equalizer-field:hover {

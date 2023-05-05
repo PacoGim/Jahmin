@@ -82,6 +82,8 @@
 		justify-content: center;
 		margin-bottom: 1rem;
 		padding: 1rem;
+
+		background-color: var(--color-bg-2);
 	}
 
 	exclude-folder-config {
@@ -98,13 +100,33 @@
 	section-body {
 		display: block;
 		margin-bottom: 1rem;
+
+		max-height: 14rem;
+		min-height: 14rem;
+
+		min-width: 75%;
+		max-width: 75%;
+
+		overflow-y: auto;
+
+		padding: 0.5rem;
+
+		background-color: var(--color-bg-3);
 	}
 
 	section-directory {
 		display: grid;
 		grid-template-columns: auto max-content;
 		align-items: center;
-		padding: 0.5rem;
+		padding: 0.5rem 1rem;
+
+		transition-property: color, background-color;
+		transition-duration: 300ms;
+		transition-timing-function: linear;
+	}
+
+	section-directory:hover {
+		background-color: var(--color-bg-1);
 	}
 
 	section-directory directory-path {
