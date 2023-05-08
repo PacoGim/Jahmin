@@ -29,11 +29,14 @@ export default function renameEq(eqHash: string, eqName: string) {
 				get(promptService).closePrompt()
 
 				if (result.code === 'OK') {
+					let newHash = result.data.hash
+
 					let equalizerProfilesLocal = get(equalizerProfiles)
-					let equalizerFound = equalizerProfilesLocal.find(x => x.name === eqName)
+					let equalizerFound = equalizerProfilesLocal.find(x => x.hash === eqHash)
 
 					if (equalizerFound) {
 						equalizerFound.name = newName
+						equalizerFound.hash = newHash
 						equalizerProfiles.set(equalizerProfilesLocal)
 					}
 

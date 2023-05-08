@@ -43,6 +43,7 @@ function renameEqualizer(eqHash, newName) {
         let newNamePath = path_1.default.join(eqFolderPath, `${newName}.json`);
         let oldNamePath = path_1.default.join(eqFolderPath, `${foundEq.name}.json`);
         foundEq.name = newName;
+        foundEq.hash = (0, getStringHash_fn_1.default)(foundEq.name + JSON.stringify(foundEq.values));
         if ((0, fileExistsWithCaseSync_fn_1.default)(newNamePath)) {
             return {
                 code: 'EXISTS',
@@ -53,7 +54,8 @@ function renameEqualizer(eqHash, newName) {
             fs_1.default.writeFileSync(newNamePath, equalizerFile_service_1.default.stringify(foundEq));
             fs_1.default.unlinkSync(oldNamePath);
             return {
-                code: 'OK'
+                code: 'OK',
+                data: { hash: foundEq.hash }
             };
         }
         catch (error) {

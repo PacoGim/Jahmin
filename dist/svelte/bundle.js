@@ -7293,7 +7293,7 @@ var app = (function () {
     let elementMap = writable(new Map());
     let windowResize = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Config');
+    let layoutToShow = writable('Playback');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
@@ -7693,8 +7693,16 @@ var app = (function () {
         document.body.setAttribute('theme', isDayTheme ? 'Day' : 'Night');
     }
 
+    function setElementSizeToCssVariablesFn () {
+        var _a, _b;
+        let navigationElement = (_b = (_a = document.querySelector('navigation-svlt')) === null || _a === void 0 ? void 0 : _a.getClientRects()[0]) === null || _b === void 0 ? void 0 : _b.width;
+        if (navigationElement)
+            cssVariablesService.set('navigation-element-width', `${navigationElement}px`);
+    }
+
     let appIdleDebounce = getAppIdleDebounce();
     function onAppMountedService () {
+        setElementSizeToCssVariablesFn();
         afterLanguageChangeReload();
         iziToast.settings({ position: 'topRight' });
         runThemeHandler();
@@ -7712,6 +7720,7 @@ var app = (function () {
             // flickTheme()
         }, 2000);
         window.addEventListener('resize', evt => {
+            setElementSizeToCssVariablesFn();
             windowResize.set(new Date().getTime());
         });
         window.addEventListener('keydown', evt => {
@@ -10087,10 +10096,12 @@ var app = (function () {
             window.ipc.renameEqualizer(eqHash, newName).then(result => {
                 get_store_value(promptService).closePrompt();
                 if (result.code === 'OK') {
+                    let newHash = result.data.hash;
                     let equalizerProfilesLocal = get_store_value(equalizerProfiles);
-                    let equalizerFound = equalizerProfilesLocal.find(x => x.name === eqName);
+                    let equalizerFound = equalizerProfilesLocal.find(x => x.hash === eqHash);
                     if (equalizerFound) {
                         equalizerFound.name = newName;
+                        equalizerFound.hash = newHash;
                         equalizerProfiles.set(equalizerProfilesLocal);
                     }
                     notifyService.success(traduceFn('Equalizer renamed to "${newName}"', { newName }));
@@ -19232,7 +19243,7 @@ var app = (function () {
     const file$18 = "src/layouts/status_bar/!StatusBar.svelte";
 
     // (32:2) {#if currentSong?.Title !== ''}
-    function create_if_block$f(ctx) {
+    function create_if_block$e(ctx) {
     	let bold0;
     	let t0_value = numberZeroPad(/*currentSong*/ ctx[0].Track) + "";
     	let t0;
@@ -19285,7 +19296,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$f.name,
+    		id: create_if_block$e.name,
     		type: "if",
     		source: "(32:2) {#if currentSong?.Title !== ''}",
     		ctx
@@ -19305,7 +19316,7 @@ var app = (function () {
     	let playbackoptions;
     	let current;
     	queues = new Queues({ $$inline: true });
-    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$f(ctx);
+    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$e(ctx);
     	albuminfo = new AlbumInfo({ $$inline: true });
     	playbackoptions = new PlaybackOptions({ $$inline: true });
 
@@ -19345,7 +19356,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$f(ctx);
+    					if_block = create_if_block$e(ctx);
     					if_block.c();
     					if_block.m(song_info, null);
     				}
@@ -19570,7 +19581,7 @@ var app = (function () {
     const file$17 = "src/components/Album.svelte";
 
     // (23:2) {:else}
-    function create_else_block$8(ctx) {
+    function create_else_block$7(ctx) {
     	let album_artist;
 
     	const block = {
@@ -19590,7 +19601,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$8.name,
+    		id: create_else_block$7.name,
     		type: "else",
     		source: "(23:2) {:else}",
     		ctx
@@ -19636,7 +19647,7 @@ var app = (function () {
     }
 
     // (19:2) {#if album['AlbumArtist'] !== undefined}
-    function create_if_block$e(ctx) {
+    function create_if_block$d(ctx) {
     	let album_artist;
     	let t_value = (/*album*/ ctx[0]['AlbumArtist'] || '') + "";
     	let t;
@@ -19662,7 +19673,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$e.name,
+    		id: create_if_block$d.name,
     		type: "if",
     		source: "(19:2) {#if album['AlbumArtist'] !== undefined}",
     		ctx
@@ -19696,9 +19707,9 @@ var app = (function () {
     		});
 
     	function select_block_type(ctx, dirty) {
-    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$e;
+    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$d;
     		if (/*album*/ ctx[0]['DynamicAlbumArtist'] !== undefined) return create_if_block_1$7;
-    		return create_else_block$8;
+    		return create_else_block$7;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -20665,7 +20676,7 @@ var app = (function () {
     const file$13 = "src/components/SongTag.svelte";
 
     // (62:0) {:else}
-    function create_else_block$7(ctx) {
+    function create_else_block$6(ctx) {
     	let star;
     	let current;
 
@@ -20710,7 +20721,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$7.name,
+    		id: create_else_block$6.name,
     		type: "else",
     		source: "(62:0) {:else}",
     		ctx
@@ -20720,7 +20731,7 @@ var app = (function () {
     }
 
     // (60:0) {#if tagName !== 'Rating'}
-    function create_if_block$d(ctx) {
+    function create_if_block$c(ctx) {
     	let span;
     	let t_value = /*parseTag*/ ctx[5](/*tagName*/ ctx[1], /*tagValue*/ ctx[2]) + "";
     	let t;
@@ -20763,7 +20774,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$d.name,
+    		id: create_if_block$c.name,
     		type: "if",
     		source: "(60:0) {#if tagName !== 'Rating'}",
     		ctx
@@ -20777,7 +20788,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$d, create_else_block$7];
+    	const if_block_creators = [create_if_block$c, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -21077,7 +21088,7 @@ var app = (function () {
     }
 
     // (82:2) {:else}
-    function create_else_block$6(ctx) {
+    function create_else_block$5(ctx) {
     	let songtag;
     	let current;
 
@@ -21123,7 +21134,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$6.name,
+    		id: create_else_block$5.name,
     		type: "else",
     		source: "(82:2) {:else}",
     		ctx
@@ -21155,7 +21166,7 @@ var app = (function () {
     }
 
     // (73:2) {#if tag.value === 'Title' && $songListTagConfig.find(configTag => configTag.value === 'DynamicArtists')}
-    function create_if_block$c(ctx) {
+    function create_if_block$b(ctx) {
     	let songtag;
     	let current;
 
@@ -21201,7 +21212,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$c.name,
+    		id: create_if_block$b.name,
     		type: "if",
     		source: "(73:2) {#if tag.value === 'Title' && $songListTagConfig.find(configTag => configTag.value === 'DynamicArtists')}",
     		ctx
@@ -21219,7 +21230,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$c, create_if_block_1$6, create_else_block$6];
+    	const if_block_creators = [create_if_block$b, create_if_block_1$6, create_else_block$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -26212,7 +26223,7 @@ var app = (function () {
     }
 
     // (55:3) {#if $selectedGroups[index]}
-    function create_if_block$b(ctx) {
+    function create_if_block$a(ctx) {
     	let group_value;
     	let t0;
     	let t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]].length + "";
@@ -26322,7 +26333,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$b.name,
+    		id: create_if_block$a.name,
     		type: "if",
     		source: "(55:3) {#if $selectedGroups[index]}",
     		ctx
@@ -26408,7 +26419,7 @@ var app = (function () {
     	let group_svlt_data_index_value;
     	let mounted;
     	let dispose;
-    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]] && create_if_block$b(ctx);
+    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]] && create_if_block$a(ctx);
 
     	const block = {
     		key: key_1,
@@ -26458,7 +26469,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$b(ctx);
+    					if_block = create_if_block$a(ctx);
     					if_block.c();
     					if_block.m(group_svlt, t2);
     				}
@@ -26693,7 +26704,7 @@ var app = (function () {
     const file$V = "src/layouts/library/!LibraryLayout.svelte";
 
     // (23:1) {:else}
-    function create_else_block$5(ctx) {
+    function create_else_block$4(ctx) {
     	let nosong;
     	let current;
     	nosong = new NoSong({ $$inline: true });
@@ -26722,7 +26733,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$5.name,
+    		id: create_else_block$4.name,
     		type: "else",
     		source: "(23:1) {:else}",
     		ctx
@@ -26732,7 +26743,7 @@ var app = (function () {
     }
 
     // (21:1) {#if $dbSongsStore.length > 0}
-    function create_if_block$a(ctx) {
+    function create_if_block$9(ctx) {
     	let artgrid;
     	let current;
     	artgrid = new ArtGrid({ $$inline: true });
@@ -26761,7 +26772,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$a.name,
+    		id: create_if_block$9.name,
     		type: "if",
     		source: "(21:1) {#if $dbSongsStore.length > 0}",
     		ctx
@@ -26783,7 +26794,7 @@ var app = (function () {
     	let t3;
     	let songlistbackground;
     	let current;
-    	const if_block_creators = [create_if_block$a, create_else_block$5];
+    	const if_block_creators = [create_if_block$9, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -30613,7 +30624,7 @@ var app = (function () {
     const file$y = "src/layouts/config/equalizer/EqualizerButtons.svelte";
 
     // (54:2) {:else}
-    function create_else_block$4(ctx) {
+    function create_else_block$3(ctx) {
     	let toggleofficon;
     	let current;
 
@@ -30648,7 +30659,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$4.name,
+    		id: create_else_block$3.name,
     		type: "else",
     		source: "(54:2) {:else}",
     		ctx
@@ -30658,7 +30669,7 @@ var app = (function () {
     }
 
     // (52:2) {#if $isEqualizerOn === true}
-    function create_if_block$9(ctx) {
+    function create_if_block$8(ctx) {
     	let toggleonicon;
     	let current;
 
@@ -30693,7 +30704,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$9.name,
+    		id: create_if_block$8.name,
     		type: "if",
     		source: "(52:2) {#if $isEqualizerOn === true}",
     		ctx
@@ -30735,7 +30746,7 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	const if_block_creators = [create_if_block$9, create_else_block$4];
+    	const if_block_creators = [create_if_block$8, create_else_block$3];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -31852,7 +31863,7 @@ var app = (function () {
     }
 
     // (53:1) {#if communityProfiles && communityProfiles.length > 0}
-    function create_if_block$8(ctx) {
+    function create_if_block$7(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -31923,7 +31934,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$8.name,
+    		id: create_if_block$7.name,
     		type: "if",
     		source: "(53:1) {#if communityProfiles && communityProfiles.length > 0}",
     		ctx
@@ -31984,7 +31995,7 @@ var app = (function () {
     }
 
     // (75:4) {:else}
-    function create_else_block$3(ctx) {
+    function create_else_block$2(ctx) {
     	let button;
     	let downloadicon;
     	let t0;
@@ -32048,7 +32059,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$3.name,
+    		id: create_else_block$2.name,
     		type: "else",
     		source: "(75:4) {:else}",
     		ctx
@@ -32154,7 +32165,7 @@ var app = (function () {
     		return /*click_handler_2*/ ctx[10](/*eqProfile*/ ctx[13]);
     	}
 
-    	const if_block_creators = [create_if_block_1$5, create_else_block$3];
+    	const if_block_creators = [create_if_block_1$5, create_else_block$2];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -32310,7 +32321,7 @@ var app = (function () {
     	let current_block_type_index;
     	let if_block;
     	let current;
-    	const if_block_creators = [create_if_block$8, create_if_block_3$1, create_else_block_1];
+    	const if_block_creators = [create_if_block$7, create_if_block_3$1, create_else_block_1];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -33795,7 +33806,7 @@ var app = (function () {
     }
 
     // (50:2) {#if $config.directories}
-    function create_if_block$7(ctx) {
+    function create_if_block$6(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -33866,7 +33877,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$7.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(50:2) {#if $config.directories}",
     		ctx
@@ -34019,7 +34030,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	let if_block1 = /*$config*/ ctx[1].directories && create_if_block$7(ctx);
+    	let if_block1 = /*$config*/ ctx[1].directories && create_if_block$6(ctx);
 
     	addicon1 = new AddIcon({
     			props: {
@@ -34149,7 +34160,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block$7(ctx);
+    					if_block1 = create_if_block$6(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(section_body1, null);
@@ -34444,7 +34455,7 @@ var app = (function () {
     }
 
     // (26:4) {#if !$songListTagsValuesStore.includes(tag.value)}
-    function create_if_block$6(ctx) {
+    function create_if_block$5(ctx) {
     	let option;
     	let t_value = /*tag*/ ctx[7].name + "";
     	let t;
@@ -34469,7 +34480,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$6.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(26:4) {#if !$songListTagsValuesStore.includes(tag.value)}",
     		ctx
@@ -34483,7 +34494,7 @@ var app = (function () {
     	let first;
     	let show_if = !/*$songListTagsValuesStore*/ ctx[1].includes(/*tag*/ ctx[7].value);
     	let if_block_anchor;
-    	let if_block = show_if && create_if_block$6(ctx);
+    	let if_block = show_if && create_if_block$5(ctx);
 
     	const block = {
     		key: key_1,
@@ -34507,7 +34518,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$6(ctx);
+    					if_block = create_if_block$5(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -34857,7 +34868,7 @@ var app = (function () {
     }
 
     // (77:0) {:else}
-    function create_else_block$2(ctx) {
+    function create_else_block$1(ctx) {
     	let li;
     	let li_data_align_value;
     	let li_data_is_expanded_value;
@@ -34902,7 +34913,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$2.name,
+    		id: create_else_block$1.name,
     		type: "else",
     		source: "(77:0) {:else}",
     		ctx
@@ -34912,7 +34923,7 @@ var app = (function () {
     }
 
     // (34:0) {#if tag.value !== 'DynamicArtists'}
-    function create_if_block$5(ctx) {
+    function create_if_block$4(ctx) {
     	let li;
     	let tag_name;
     	let t0_value = /*getTagNameFromValue*/ ctx[3](/*tag*/ ctx[0].value) + "";
@@ -35288,7 +35299,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$5.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(34:0) {#if tag.value !== 'DynamicArtists'}",
     		ctx
@@ -35343,7 +35354,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$5, create_else_block$2];
+    	const if_block_creators = [create_if_block$4, create_else_block$1];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -39745,7 +39756,7 @@ var app = (function () {
     }
 
     // (83:3) {:else}
-    function create_else_block$1(ctx) {
+    function create_else_block(ctx) {
     	let span;
     	let t;
     	let toggleofficon;
@@ -39789,7 +39800,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$1.name,
+    		id: create_else_block.name,
     		type: "else",
     		source: "(83:3) {:else}",
     		ctx
@@ -39799,7 +39810,7 @@ var app = (function () {
     }
 
     // (81:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}
-    function create_if_block$4(ctx) {
+    function create_if_block$3(ctx) {
     	let span;
     	let t;
     	let toggleonicon;
@@ -39843,7 +39854,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$3.name,
     		type: "if",
     		source: "(81:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}",
     		ctx
@@ -39877,7 +39888,7 @@ var app = (function () {
     		each_1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
-    	const if_block_creators = [create_if_block$4, create_else_block$1];
+    	const if_block_creators = [create_if_block$3, create_else_block];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -40935,243 +40946,45 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[17] = list[i];
-    	child_ctx[19] = i;
+    	child_ctx[3] = list[i];
+    	child_ctx[5] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
-    	child_ctx[19] = i;
+    	child_ctx[6] = list[i];
+    	child_ctx[5] = i;
     	return child_ctx;
     }
 
-    function get_each_context_2(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
-    	child_ctx[19] = i;
-    	return child_ctx;
-    }
-
-    // (137:3) {#each tempTags as tag, index (index)}
-    function create_each_block_2(key_1, ctx) {
-    	let td;
-    	let t_value = renameTagName(/*tag*/ ctx[20]) + "";
-    	let t;
-
-    	const block = {
-    		key: key_1,
-    		first: null,
-    		c: function create() {
-    			td = element("td");
-    			t = text(t_value);
-    			attr_dev(td, "class", "svelte-108dzys");
-    			add_location(td, file$e, 137, 4, 5241);
-    			this.first = td;
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, td, anchor);
-    			append_dev(td, t);
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(td);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block_2.name,
-    		type: "each",
-    		source: "(137:3) {#each tempTags as tag, index (index)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (153:5) {:else}
-    function create_else_block(ctx) {
-    	let td;
-    	let t_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "";
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			td = element("td");
-    			t = text(t_value);
-    			attr_dev(td, "class", "svelte-108dzys");
-    			add_location(td, file$e, 153, 6, 5781);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, td, anchor);
-    			append_dev(td, t);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "")) set_data_dev(t, t_value);
-    		},
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(td);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(153:5) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (146:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}
-    function create_if_block$3(ctx) {
-    	let td;
-    	let play_button;
-    	let playbutton;
-    	let t0;
-    	let t1_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "";
-    	let t1;
-    	let current;
-
-    	playbutton = new PlayButton({
-    			props: {
-    				customColor: "var(--color-fg-1)",
-    				customSize: "0.75rem"
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			td = element("td");
-    			play_button = element("play-button");
-    			create_component(playbutton.$$.fragment);
-    			t0 = space();
-    			t1 = text(t1_value);
-    			set_custom_element_data(play_button, "class", "svelte-108dzys");
-    			add_location(play_button, file$e, 147, 7, 5598);
-    			attr_dev(td, "class", "svelte-108dzys");
-    			add_location(td, file$e, 146, 6, 5586);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, td, anchor);
-    			append_dev(td, play_button);
-    			mount_component(playbutton, play_button, null);
-    			append_dev(td, t0);
-    			append_dev(td, t1);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			if ((!current || dirty & /*$playbackStore*/ 1) && t1_value !== (t1_value = limitCharacters(/*song*/ ctx[17][/*tag*/ ctx[20]], 40) + "")) set_data_dev(t1, t1_value);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(playbutton.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(playbutton.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(td);
-    			destroy_component(playbutton);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$3.name,
-    		type: "if",
-    		source: "(146:5) {#if tag === 'Track' && $playingSongStore.ID === song.ID}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (145:4) {#each tempTags as tag, index (index)}
+    // (46:4) {#each tempTags as tag, index (index)}
     function create_each_block_1(key_1, ctx) {
-    	let first;
-    	let current_block_type_index;
-    	let if_block;
-    	let if_block_anchor;
-    	let current;
-    	const if_block_creators = [create_if_block$3, create_else_block];
-    	const if_blocks = [];
-
-    	function select_block_type(ctx, dirty) {
-    		if (/*tag*/ ctx[20] === 'Track' && /*$playingSongStore*/ ctx[2].ID === /*song*/ ctx[17].ID) return 0;
-    		return 1;
-    	}
-
-    	current_block_type_index = select_block_type(ctx);
-    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    	let song_data;
+    	let t_value = limitCharacters(/*song*/ ctx[3][/*tag*/ ctx[6]], 75) + "";
+    	let t;
 
     	const block = {
     		key: key_1,
     		first: null,
     		c: function create() {
-    			first = empty();
-    			if_block.c();
-    			if_block_anchor = empty();
-    			this.first = first;
+    			song_data = element("song-data");
+    			t = text(t_value);
+    			set_custom_element_data(song_data, "data-tag", /*tag*/ ctx[6]);
+    			set_custom_element_data(song_data, "class", "svelte-2e4ske");
+    			add_location(song_data, file$e, 46, 5, 1464);
+    			this.first = song_data;
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, first, anchor);
-    			if_blocks[current_block_type_index].m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
+    			insert_dev(target, song_data, anchor);
+    			append_dev(song_data, t);
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			let previous_block_index = current_block_type_index;
-    			current_block_type_index = select_block_type(ctx);
-
-    			if (current_block_type_index === previous_block_index) {
-    				if_blocks[current_block_type_index].p(ctx, dirty);
-    			} else {
-    				group_outros();
-
-    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
-    					if_blocks[previous_block_index] = null;
-    				});
-
-    				check_outros();
-    				if_block = if_blocks[current_block_type_index];
-
-    				if (!if_block) {
-    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    					if_block.c();
-    				} else {
-    					if_block.p(ctx, dirty);
-    				}
-
-    				transition_in(if_block, 1);
-    				if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
+    			if (dirty & /*$playbackStore*/ 1 && t_value !== (t_value = limitCharacters(/*song*/ ctx[3][/*tag*/ ctx[6]], 75) + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(first);
-    			if_blocks[current_block_type_index].d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
+    			if (detaching) detach_dev(song_data);
     		}
     	};
 
@@ -41179,28 +40992,24 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(145:4) {#each tempTags as tag, index (index)}",
+    		source: "(46:4) {#each tempTags as tag, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (143:2) {#each $playbackStore as song, index (index)}
+    // (44:2) {#each $playbackStore as song, index (index)}
     function create_each_block$1(key_1, ctx) {
-    	let tr;
+    	let song_row;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let t0;
-    	let td;
+    	let blank_data;
     	let t1;
-    	let tr_class_value;
-    	let tr_data_song_id_value;
-    	let tr_data_index_value;
-    	let current;
-    	let each_value_1 = /*tempTags*/ ctx[4];
+    	let each_value_1 = /*tempTags*/ ctx[1];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*index*/ ctx[19];
+    	const get_key = ctx => /*index*/ ctx[5];
     	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -41213,85 +41022,46 @@ var app = (function () {
     		key: key_1,
     		first: null,
     		c: function create() {
-    			tr = element("tr");
+    			song_row = element("song-row");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
     			t0 = space();
-    			td = element("td");
+    			blank_data = element("blank-data");
     			t1 = space();
-    			attr_dev(td, "class", "filler svelte-108dzys");
-    			add_location(td, file$e, 157, 4, 5851);
-
-    			attr_dev(tr, "class", tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[3].includes(/*song*/ ctx[17].ID)
-    			? 'selected'
-    			: '') + " svelte-108dzys"));
-
-    			attr_dev(tr, "data-song-id", tr_data_song_id_value = /*song*/ ctx[17].ID);
-    			attr_dev(tr, "data-index", tr_data_index_value = /*index*/ ctx[19]);
-    			add_location(tr, file$e, 143, 3, 5367);
-    			this.first = tr;
+    			set_custom_element_data(blank_data, "class", "svelte-2e4ske");
+    			add_location(blank_data, file$e, 50, 4, 1564);
+    			set_custom_element_data(song_row, "class", "svelte-2e4ske");
+    			add_location(song_row, file$e, 44, 3, 1405);
+    			this.first = song_row;
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, tr, anchor);
+    			insert_dev(target, song_row, anchor);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				if (each_blocks[i]) {
-    					each_blocks[i].m(tr, null);
+    					each_blocks[i].m(song_row, null);
     				}
     			}
 
-    			append_dev(tr, t0);
-    			append_dev(tr, td);
-    			append_dev(tr, t1);
-    			current = true;
+    			append_dev(song_row, t0);
+    			append_dev(song_row, blank_data);
+    			append_dev(song_row, t1);
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*limitCharacters, $playbackStore, tempTags, $playingSongStore*/ 21) {
-    				each_value_1 = /*tempTags*/ ctx[4];
+    			if (dirty & /*tempTags, limitCharacters, $playbackStore*/ 3) {
+    				each_value_1 = /*tempTags*/ ctx[1];
     				validate_each_argument(each_value_1);
-    				group_outros();
     				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value_1, each_1_lookup, tr, outro_and_destroy_block, create_each_block_1, t0, get_each_context_1);
-    				check_outros();
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value_1, each_1_lookup, song_row, destroy_block, create_each_block_1, t0, get_each_context_1);
     			}
-
-    			if (!current || dirty & /*$playbackStore*/ 1 && tr_class_value !== (tr_class_value = "" + (null_to_empty(/*selectedSongsId*/ ctx[3].includes(/*song*/ ctx[17].ID)
-    			? 'selected'
-    			: '') + " svelte-108dzys"))) {
-    				attr_dev(tr, "class", tr_class_value);
-    			}
-
-    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_song_id_value !== (tr_data_song_id_value = /*song*/ ctx[17].ID)) {
-    				attr_dev(tr, "data-song-id", tr_data_song_id_value);
-    			}
-
-    			if (!current || dirty & /*$playbackStore*/ 1 && tr_data_index_value !== (tr_data_index_value = /*index*/ ctx[19])) {
-    				attr_dev(tr, "data-index", tr_data_index_value);
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			for (let i = 0; i < each_value_1.length; i += 1) {
-    				transition_in(each_blocks[i]);
-    			}
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				transition_out(each_blocks[i]);
-    			}
-
-    			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tr);
+    			if (detaching) detach_dev(song_row);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d();
@@ -41303,7 +41073,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(143:2) {#each $playbackStore as song, index (index)}",
+    		source: "(44:2) {#each $playbackStore as song, index (index)}",
     		ctx
     	});
 
@@ -41311,170 +41081,63 @@ var app = (function () {
     }
 
     function create_fragment$f(ctx) {
-    	let scroll_bar;
-    	let scroll_bar_progress;
-    	let t0;
     	let playback_layout;
-    	let table;
-    	let tr;
-    	let each_blocks_1 = [];
-    	let each0_lookup = new Map();
-    	let t1;
-    	let td;
-    	let t2;
+    	let song_list_grid;
     	let each_blocks = [];
-    	let each1_lookup = new Map();
-    	let current;
-    	let mounted;
-    	let dispose;
-    	let each_value_2 = /*tempTags*/ ctx[4];
-    	validate_each_argument(each_value_2);
-    	const get_key = ctx => /*index*/ ctx[19];
-    	validate_each_keys(ctx, each_value_2, get_each_context_2, get_key);
-
-    	for (let i = 0; i < each_value_2.length; i += 1) {
-    		let child_ctx = get_each_context_2(ctx, each_value_2, i);
-    		let key = get_key(child_ctx);
-    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_2(key, child_ctx));
-    	}
-
+    	let each_1_lookup = new Map();
     	let each_value = /*$playbackStore*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*index*/ ctx[19];
-    	validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
+    	const get_key = ctx => /*index*/ ctx[5];
+    	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$1(ctx, each_value, i);
-    		let key = get_key_1(child_ctx);
-    		each1_lookup.set(key, each_blocks[i] = create_each_block$1(key, child_ctx));
+    		let key = get_key(child_ctx);
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block$1(key, child_ctx));
     	}
 
     	const block = {
     		c: function create() {
-    			scroll_bar = element("scroll-bar");
-    			scroll_bar_progress = element("scroll-bar-progress");
-    			t0 = space();
     			playback_layout = element("playback-layout");
-    			table = element("table");
-    			tr = element("tr");
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].c();
-    			}
-
-    			t1 = space();
-    			td = element("td");
-    			t2 = space();
+    			song_list_grid = element("song-list-grid");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			set_style(scroll_bar_progress, "width", /*heightPercent*/ ctx[1] + "%");
-    			set_custom_element_data(scroll_bar_progress, "class", "svelte-108dzys");
-    			add_location(scroll_bar_progress, file$e, 131, 13, 4967);
-    			set_custom_element_data(scroll_bar, "class", "svelte-108dzys");
-    			add_location(scroll_bar, file$e, 131, 0, 4954);
-    			attr_dev(td, "class", "filler svelte-108dzys");
-    			add_location(td, file$e, 139, 3, 5285);
-    			attr_dev(tr, "class", "table-header static svelte-108dzys");
-    			add_location(tr, file$e, 135, 2, 5132);
-    			attr_dev(table, "class", "svelte-108dzys");
-    			add_location(table, file$e, 134, 1, 5122);
-    			set_custom_element_data(playback_layout, "class", "svelte-108dzys");
-    			add_location(playback_layout, file$e, 133, 0, 5037);
+    			set_custom_element_data(song_list_grid, "class", "svelte-2e4ske");
+    			add_location(song_list_grid, file$e, 42, 1, 1337);
+    			add_location(playback_layout, file$e, 41, 0, 1318);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, scroll_bar, anchor);
-    			append_dev(scroll_bar, scroll_bar_progress);
-    			insert_dev(target, t0, anchor);
     			insert_dev(target, playback_layout, anchor);
-    			append_dev(playback_layout, table);
-    			append_dev(table, tr);
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				if (each_blocks_1[i]) {
-    					each_blocks_1[i].m(tr, null);
-    				}
-    			}
-
-    			append_dev(tr, t1);
-    			append_dev(tr, td);
-    			append_dev(table, t2);
+    			append_dev(playback_layout, song_list_grid);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				if (each_blocks[i]) {
-    					each_blocks[i].m(table, null);
+    					each_blocks[i].m(song_list_grid, null);
     				}
-    			}
-
-    			current = true;
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(tr, "click", /*onTableHeaderClick*/ ctx[6], false, false, false, false),
-    					listen_dev(playback_layout, "scroll", /*calculateScroll*/ ctx[7], false, false, false, false),
-    					listen_dev(playback_layout, "dblclick", /*dblclick_handler*/ ctx[8], false, false, false, false)
-    				];
-
-    				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*heightPercent*/ 2) {
-    				set_style(scroll_bar_progress, "width", /*heightPercent*/ ctx[1] + "%");
-    			}
-
-    			if (dirty & /*renameTagName, tempTags*/ 16) {
-    				each_value_2 = /*tempTags*/ ctx[4];
-    				validate_each_argument(each_value_2);
-    				validate_each_keys(ctx, each_value_2, get_each_context_2, get_key);
-    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_2, each0_lookup, tr, destroy_block, create_each_block_2, t1, get_each_context_2);
-    			}
-
-    			if (dirty & /*selectedSongsId, $playbackStore, tempTags, limitCharacters, $playingSongStore*/ 29) {
+    			if (dirty & /*tempTags, limitCharacters, $playbackStore*/ 3) {
     				each_value = /*$playbackStore*/ ctx[0];
     				validate_each_argument(each_value);
-    				group_outros();
-    				validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, table, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
-    				check_outros();
+    				validate_each_keys(ctx, each_value, get_each_context$1, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, song_list_grid, destroy_block, create_each_block$1, null, get_each_context$1);
     			}
     		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			for (let i = 0; i < each_value.length; i += 1) {
-    				transition_in(each_blocks[i]);
-    			}
-
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				transition_out(each_blocks[i]);
-    			}
-
-    			current = false;
-    		},
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(scroll_bar);
-    			if (detaching) detach_dev(t0);
     			if (detaching) detach_dev(playback_layout);
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].d();
-    			}
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d();
     			}
-
-    			mounted = false;
-    			run_all(dispose);
     		}
     	};
 
@@ -41487,6 +41150,10 @@ var app = (function () {
     	});
 
     	return block;
+    }
+
+    function createSortableList() {
+    	
     }
 
     function renameTagName(tagName) {
@@ -41510,144 +41177,15 @@ var app = (function () {
     }
 
     function instance$f($$self, $$props, $$invalidate) {
-    	let $config;
     	let $playbackStore;
-    	let $playingSongStore;
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(10, $config = $$value));
     	validate_store(playbackStore, 'playbackStore');
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(0, $playbackStore = $$value));
-    	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(2, $playingSongStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlaybackLayout', slots, []);
     	let selectedSongsId = [];
-    	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Artist'];
-    	let handleWindowResizeRunning = false;
-    	let heightPercent = 0;
-
-    	function createSortableList() {
-    		let el = document.querySelector('playback-layout table');
-    		if (el === undefined || el === null) return;
-
-    		SortableService.create(el, {
-    			multiDrag: true,
-    			animation: 150,
-    			selectedClass: 'selected',
-    			filter: '.static',
-    			onEnd: onDragEnd,
-    			onSelect: onSelectDeselect,
-    			onDeselect: onSelectDeselect,
-    			onMove(e) {
-    				return e.related.className.indexOf('static') === -1;
-    			}
-    		});
-    	}
-
-    	function onSelectDeselect(evt) {
-    		if (evt.originalEvent.shiftKey === false && evt.originalEvent.ctrlKey === false && evt.originalEvent.metaKey === false) {
-    			deselectAll().then(() => {
-    				Sortable.utils.select(evt.item);
-    			});
-    		}
-    	}
-
-    	function deselectAll() {
-    		return new Promise(resolve => {
-    				document.querySelectorAll('table tr.selected').forEach((el, index, list) => {
-    					Sortable.utils.deselect(el);
-
-    					if (index === list.length - 1) {
-    						resolve(null);
-    					}
-    				});
-    			});
-    	}
-
-    	function onDragEnd(evt) {
-    		let tableElement = document.querySelector('playback-layout table');
-    		if (tableElement === undefined || tableElement === null) return;
-    		let newOrder = [];
-
-    		tableElement.querySelectorAll('tr[data-song-id]').forEach(trElement => {
-    			newOrder.push($playbackStore.find(song => song.ID === Number(trElement.dataset.songId)));
-    		});
-
-    		set_store_value(playbackStore, $playbackStore = newOrder, $playbackStore);
-    	}
-
-    	function playSongFoo(evt) {
-    		var _a, _b;
-    		let clickedElement = getClosestElementFn(evt.target, 'tr');
-    		if (clickedElement === undefined || clickedElement === null) return;
-
-    		let songId = (_a = clickedElement === null || clickedElement === void 0
-    		? void 0
-    		: clickedElement.dataset) === null || _a === void 0
-    		? void 0
-    		: _a.songId;
-
-    		if (songId === undefined || songId === null) return;
-
-    		let songSourceFile = (_b = $playbackStore.find(song => song.ID === Number(songId))) === null || _b === void 0
-    		? void 0
-    		: _b.SourceFile;
-
-    		if (songSourceFile === undefined || songSourceFile === null) return;
-    		songToPlayUrlStore.set([songSourceFile, { playNow: true }]);
-    	}
-
-    	function calculateTableFillerWidth() {
-    		let windowWidth = window.innerWidth;
-    		let navbarWidth = document.querySelector('navigation-svlt').getBoundingClientRect().width;
-    		let tableHeaderWidth = 0;
-
-    		document.querySelectorAll('playback-layout table tr.table-header td:not(.filler)').forEach(element => {
-    			tableHeaderWidth = tableHeaderWidth + element.getBoundingClientRect().width;
-    		});
-
-    		cssVariablesService.set('table-filler-width', `${Math.abs(navbarWidth + tableHeaderWidth - windowWidth)}px`);
-    	}
-
-    	function handleWindowResize() {
-    		if (handleWindowResizeRunning === true) return;
-    		handleWindowResizeRunning = true;
-
-    		setTimeout(
-    			() => {
-    				calculateTableFillerWidth();
-    				handleWindowResizeRunning = false;
-    			},
-    			125
-    		);
-    	}
-
-    	function onTableHeaderClick(evt) {
-    		let tdElement = evt.composedPath().filter(element => element.tagName === 'TD')[0];
-    		set_store_value(playbackStore, $playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.sortOrder), $playbackStore);
-    	}
-
-    	function calculateScroll(evt) {
-    		let maxHeight = Math.abs(evt.target.scrollHeight - evt.target.clientHeight);
-    		let currentHeight = evt.target.scrollTop;
-    		$$invalidate(1, heightPercent = Math.round(100 / maxHeight * currentHeight));
-    	}
+    	let tempTags = ['Track', 'Title', 'SampleRate', 'Album'];
 
     	onMount(() => {
-    		createSortableList();
-
-    		setTimeout(
-    			() => {
-    				calculateTableFillerWidth();
-    			},
-    			1000
-    		);
-
-    		window.addEventListener('resize', handleWindowResize);
-    	});
-
-    	onDestroy(() => {
-    		window.removeEventListener('resize', handleWindowResize);
     	});
 
     	const writable_props = [];
@@ -41656,15 +41194,11 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<PlaybackLayout> was created with unknown prop '${key}'`);
     	});
 
-    	const dblclick_handler = evt => playSongFoo(evt);
-
     	$$self.$capture_state = () => ({
     		onDestroy,
     		onMount,
     		getClosestElementFn,
     		cssVariablesService,
-    		SortableService,
-    		Sortable,
     		playbackStore,
     		playingSongStore,
     		songToPlayUrlStore,
@@ -41673,29 +41207,15 @@ var app = (function () {
     		config,
     		selectedSongsId,
     		tempTags,
-    		handleWindowResizeRunning,
-    		heightPercent,
     		createSortableList,
-    		onSelectDeselect,
-    		deselectAll,
-    		onDragEnd,
-    		playSongFoo,
-    		calculateTableFillerWidth,
     		renameTagName,
-    		handleWindowResize,
-    		onTableHeaderClick,
-    		calculateScroll,
     		limitCharacters,
-    		$config,
-    		$playbackStore,
-    		$playingSongStore
+    		$playbackStore
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('selectedSongsId' in $$props) $$invalidate(3, selectedSongsId = $$props.selectedSongsId);
-    		if ('tempTags' in $$props) $$invalidate(4, tempTags = $$props.tempTags);
-    		if ('handleWindowResizeRunning' in $$props) handleWindowResizeRunning = $$props.handleWindowResizeRunning;
-    		if ('heightPercent' in $$props) $$invalidate(1, heightPercent = $$props.heightPercent);
+    		if ('selectedSongsId' in $$props) selectedSongsId = $$props.selectedSongsId;
+    		if ('tempTags' in $$props) $$invalidate(1, tempTags = $$props.tempTags);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -41704,23 +41224,15 @@ var app = (function () {
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$playbackStore*/ 1) {
-    			if ($playbackStore.length > 0) {
-    				createSortableList();
-    			}
+    			if ($playbackStore.length > 0) ;
     		}
     	};
 
-    	return [
-    		$playbackStore,
-    		heightPercent,
-    		$playingSongStore,
-    		selectedSongsId,
-    		tempTags,
-    		playSongFoo,
-    		onTableHeaderClick,
-    		calculateScroll,
-    		dblclick_handler
-    	];
+    	{
+    		cssVariablesService.set('temp-tags-qt', tempTags.length);
+    	}
+
+    	return [$playbackStore, tempTags];
     }
 
     class PlaybackLayout extends SvelteComponentDev {

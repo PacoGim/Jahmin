@@ -52,6 +52,7 @@ export function renameEqualizer(eqHash: string, newName: string): ReturnMessageT
 		let oldNamePath = path.join(eqFolderPath, `${foundEq.name}.json`)
 
 		foundEq.name = newName
+		foundEq.hash = getStringHashFn(foundEq.name + JSON.stringify(foundEq.values))
 
 		if (fileExistsWithCaseSyncFn(newNamePath)) {
 			return {
@@ -65,7 +66,8 @@ export function renameEqualizer(eqHash: string, newName: string): ReturnMessageT
 			fs.unlinkSync(oldNamePath)
 
 			return {
-				code: 'OK'
+				code: 'OK',
+				data: { hash: foundEq.hash }
 			}
 		} catch (error: any) {
 			return {

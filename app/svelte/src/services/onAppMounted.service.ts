@@ -17,6 +17,7 @@ import { selectedConfigOptionName } from '../stores/session.store'
 import { handleContextMenuEvent } from './contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
+import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVariables.fn'
 
 let appIdleDebounce = getAppIdleDebounce()
 
@@ -33,6 +34,7 @@ function flickTheme(flickToDay = true) {
 }
 
 export default function () {
+	setElementSizeToCssVariablesFn()
 
 	afterLanguageChangeReload()
 
@@ -57,6 +59,7 @@ export default function () {
 	}, 2000)
 
 	window.addEventListener('resize', evt => {
+		setElementSizeToCssVariablesFn()
 		windowResize.set(new Date().getTime())
 	})
 
