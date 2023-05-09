@@ -1,10 +1,9 @@
 import type { SongType } from '../../../types/song.type'
-import { config } from '../stores/main.store'
 
-export default (songs: SongType[], tag, order, group = undefined) => {
+export default (songs: SongType[], tag, order: 'asc' | 'desc' = 'desc', group = undefined) => {
 	let songsArrayCopy = [...songs]
 
-	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount'].includes(tag)) {
+	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount','SampleRate'].includes(tag)) {
 		if (order === 'asc') {
 			songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0))
 		} else {
@@ -12,7 +11,7 @@ export default (songs: SongType[], tag, order, group = undefined) => {
 		}
 	}
 
-	if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title'].includes(tag)) {
+	if (['Artist', 'Comment', 'Composer', 'Extension', 'Genre', 'Title','Album'].includes(tag)) {
 		if (order === 'asc') {
 			songsArrayCopy.sort((a, b) => String(a[tag]).localeCompare(String(b[tag]), undefined, { numeric: true }))
 		} else {

@@ -11,7 +11,7 @@
 
 	function findImage(selectedAlbumsDir, playingSongStore) {
 		if (selectedAlbumsDir.length > 1) {
-			imageSourceLocation = getDirectoryFn(playingSongStore.SourceFile)
+			imageSourceLocation = getDirectoryFn(playingSongStore?.SourceFile)
 		} else {
 			imageSourceLocation = selectedAlbumsDir?.[selectedAlbumsDir?.length - 1]
 		}

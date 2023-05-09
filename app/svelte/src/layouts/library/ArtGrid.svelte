@@ -37,6 +37,7 @@
 		})
 
 		groupSongsByAlbumFn(songsFiltered).then(groupedAlbums => {
+
 			// TODO add user controlled album sorting.
 			albums = groupedAlbums.sort((a, b) => {
 				return a.RootDir.localeCompare(b.RootDir)
