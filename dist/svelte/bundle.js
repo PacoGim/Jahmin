@@ -7700,6 +7700,87 @@ var app = (function () {
             cssVariablesService.set('navigation-element-width', `${navigationElement}px`);
     }
 
+    let songToPlayUrlStore = writable([undefined, { playNow: false }]);
+    let currentPlayerTime = writable(undefined);
+
+    // let currentAudioElementLocal: HTMLAudioElement = undefined
+    // let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
+    // 	if (value !== undefined) {
+    // 		currentAudioElementLocal = value
+    // 		currentAudioElementSubscription()
+    // 	}
+    // })
+    function nextSongFn () {
+        let playbackStoreLocal;
+        let songPlayingLocal = undefined;
+        playbackStore.subscribe(value => (playbackStoreLocal = value))();
+        playingSongStore.subscribe(value => (songPlayingLocal = value))();
+        let currentSongIndex = playbackStoreLocal.findIndex(song => song.ID === songPlayingLocal.ID);
+        let nextSongIndex = currentSongIndex + 1;
+        let nextSong = playbackStoreLocal[nextSongIndex];
+        if (nextSong === undefined) {
+            let currentSong = playbackStoreLocal[currentSongIndex];
+            currentSongProgressStore.set(0);
+            if (currentSong === null || currentSong === void 0 ? void 0 : currentSong.SourceFile) {
+                songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }]);
+            }
+        }
+        else {
+            songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }]);
+            triggerScrollToSongEvent.set(nextSong.ID);
+        }
+    }
+
+    let currentAudioElementLocal = undefined;
+    let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
+        if (value !== undefined) {
+            currentAudioElementLocal = value;
+            currentAudioElementSubscription();
+        }
+    });
+    function previousSongFn () {
+        let playbackStoreValue = get_store_value(playbackStore);
+        let songPlayingLocal = get_store_value(playingSongStore);
+        let currentSongIndex = playbackStoreValue.findIndex(song => song.ID === songPlayingLocal.ID);
+        let previousSongIndex = currentSongIndex - 1;
+        let previousSong = playbackStoreValue[previousSongIndex];
+        if (previousSong === undefined && currentAudioElementLocal !== undefined) {
+            currentAudioElementLocal.currentTime = 0;
+            externalSongProgressChange.set(0);
+        }
+        if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
+            songToPlayUrlStore.set([previousSong.SourceFile, { playNow: true }]);
+        }
+        else {
+            if (currentAudioElementLocal !== undefined) {
+                currentAudioElementLocal.currentTime = 0;
+                externalSongProgressChange.set(0);
+            }
+        }
+        if (previousSong !== undefined) {
+            triggerScrollToSongEvent.set(previousSong.ID);
+        }
+    }
+
+    function nextMedia() {
+        nextSongFn();
+    }
+    function previousMedia() {
+        previousSongFn();
+    }
+    var mediaKeyControlsService = {
+        nextMedia,
+        previousMedia
+    };
+
+    function registerMediaKeysFn () {
+        console.log('Keys registered');
+        navigator.mediaSession.setActionHandler('nexttrack', () => mediaKeyControlsService.nextMedia());
+        navigator.mediaSession.setActionHandler('previoustrack', () => mediaKeyControlsService.previousMedia());
+        // navigator.mediaSession.setActionHandler('play', () => {})
+        // navigator.mediaSession.setActionHandler('pause', () => {})
+    }
+
     let appIdleDebounce = getAppIdleDebounce();
     function onAppMountedService () {
         setElementSizeToCssVariablesFn();
@@ -7774,6 +7855,7 @@ var app = (function () {
                 staticArt.style.display = 'none';
             });
         });
+        registerMediaKeysFn();
         playbackStore.subscribe(value => {
             selectedAlbumsDir.subscribe(value => (value || []))();
             localStorage.setItem('SongList', JSON.stringify(value));
@@ -8976,9 +9058,6 @@ var app = (function () {
         });
     }
 
-    let songToPlayUrlStore = writable([undefined, { playNow: false }]);
-    let currentPlayerTime = writable(undefined);
-
     function shuffleArrayFn (inputArray) {
         let arrayCopy = [...inputArray].map(item => {
             return {
@@ -9342,6 +9421,14 @@ var app = (function () {
     		window.ipc.saveConfig({ userOptions: { songAmount: data } });
     	});
 
+    	window.ipc.onMediaKeyPressed((_, mediaKeyPressed) => {
+    		if (mediaKeyPressed === 'MediaNextTrack') {
+    			mediaKeyControlsService.nextMedia();
+    		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
+    			mediaKeyControlsService.previousMedia();
+    		} else ; // mediaKeyControlsService.nextMedia()
+    	});
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -9357,6 +9444,7 @@ var app = (function () {
     		setNewPlaybackFn,
     		sortSongsArrayFn,
     		handleArtService,
+    		mediaKeyControlsService,
     		config,
     		songAmountConfig,
     		onNewLyrics,
@@ -9656,34 +9744,6 @@ var app = (function () {
         //url = encodeURI(url)
         //url = url.replace('#', '%23')
         return url;
-    }
-
-    // let currentAudioElementLocal: HTMLAudioElement = undefined
-    // let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
-    // 	if (value !== undefined) {
-    // 		currentAudioElementLocal = value
-    // 		currentAudioElementSubscription()
-    // 	}
-    // })
-    function nextSongFn () {
-        let playbackStoreLocal;
-        let songPlayingLocal = undefined;
-        playbackStore.subscribe(value => (playbackStoreLocal = value))();
-        playingSongStore.subscribe(value => (songPlayingLocal = value))();
-        let currentSongIndex = playbackStoreLocal.findIndex(song => song.ID === songPlayingLocal.ID);
-        let nextSongIndex = currentSongIndex + 1;
-        let nextSong = playbackStoreLocal[nextSongIndex];
-        if (nextSong === undefined) {
-            let currentSong = playbackStoreLocal[currentSongIndex];
-            currentSongProgressStore.set(0);
-            if (currentSong === null || currentSong === void 0 ? void 0 : currentSong.SourceFile) {
-                songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }]);
-            }
-        }
-        else {
-            songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }]);
-            triggerScrollToSongEvent.set(nextSong.ID);
-        }
     }
 
     // Takes equalizers values and applies them to the audio players equalizers
@@ -10200,15 +10260,15 @@ var app = (function () {
     			audio1 = element("audio");
     			track1 = element("track");
     			attr_dev(track0, "kind", "captions");
-    			add_location(track0, file$1u, 275, 1, 12481);
+    			add_location(track0, file$1u, 316, 1, 13604);
     			attr_dev(audio0, "id", "main");
     			attr_dev(audio0, "class", "svelte-1afm0n4");
-    			add_location(audio0, file$1u, 274, 0, 12462);
+    			add_location(audio0, file$1u, 315, 0, 13585);
     			attr_dev(track1, "kind", "captions");
-    			add_location(track1, file$1u, 279, 1, 12535);
+    			add_location(track1, file$1u, 320, 1, 13658);
     			attr_dev(audio1, "id", "alt");
     			attr_dev(audio1, "class", "svelte-1afm0n4");
-    			add_location(audio1, file$1u, 278, 0, 12517);
+    			add_location(audio1, file$1u, 319, 0, 13640);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10411,8 +10471,48 @@ var app = (function () {
     		setWaveSource(song.SourceFile, songRootFolder, song.Duration);
     		localStorage.setItem('LastPlayedSongId', String(song.ID));
     		localStorage.setItem('LastPlayedDir', String(songRootFolder));
-    	}
+    	} // if ('mediaSession' in navigator) {
+    	// 	console.log('New metadata')
 
+    	// 	navigator.mediaSession.metadata = new MediaMetadata({
+    	// 		title: song.Title,
+    	// 		artist: song.Artist,
+    	// 		album: song.Album,
+    	// 		artwork: [
+    	// 			{
+    	// 				src: 'https://dummyimage.com/96x96',
+    	// 				sizes: '96x96',
+    	// 				type: 'image/png'
+    	// 			},
+    	// 			{
+    	// 				src: 'https://dummyimage.com/128x128',
+    	// 				sizes: '128x128',
+    	// 				type: 'image/png'
+    	// 			},
+    	// 			{
+    	// 				src: 'https://dummyimage.com/192x192',
+    	// 				sizes: '192x192',
+    	// 				type: 'image/png'
+    	// 			},
+    	// 			{
+    	// 				src: 'https://dummyimage.com/256x256',
+    	// 				sizes: '256x256',
+    	// 				type: 'image/png'
+    	// 			},
+    	// 			{
+    	// 				src: 'https://dummyimage.com/384x384',
+    	// 				sizes: '384x384',
+    	// 				type: 'image/png'
+    	// 			},
+    	// 			{
+    	// 				src: 'https://dummyimage.com/512x512',
+    	// 				sizes: '512x512',
+    	// 				type: 'image/png'
+    	// 			}
+    	// 		]
+    	// 	})
+    	// 	console.log(navigator.mediaSession.metadata)
+    	// }
     	function setCurrentAudioElement(audioElement) {
     		set_store_value(currentAudioElement, $currentAudioElement = audioElement, $currentAudioElement);
     		$currentAudioElement.addEventListener('timeupdate', handleTimeUpdate);
@@ -11469,37 +11569,6 @@ var app = (function () {
     			id: create_fragment$1s.name
     		});
     	}
-    }
-
-    let currentAudioElementLocal = undefined;
-    let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
-        if (value !== undefined) {
-            currentAudioElementLocal = value;
-            currentAudioElementSubscription();
-        }
-    });
-    function previousSongFn () {
-        let playbackStoreValue;
-        let songPlayingLocal = undefined;
-        playbackStore.subscribe(value => (playbackStoreValue = value))();
-        playingSongStore.subscribe(value => (songPlayingLocal = value))();
-        let currentSongIndex = playbackStoreValue.findIndex(song => song.ID === songPlayingLocal.ID);
-        let previousSongIndex = currentSongIndex - 1;
-        let previousSong = playbackStoreValue[previousSongIndex];
-        if (previousSong === undefined && currentAudioElementLocal !== undefined) {
-            currentAudioElementLocal.currentTime = 0;
-        }
-        if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
-            songToPlayUrlStore.set([previousSong.SourceFile, { playNow: true }]);
-        }
-        else {
-            if (currentAudioElementLocal !== undefined) {
-                currentAudioElementLocal.currentTime = 0;
-            }
-        }
-        if (previousSong !== undefined) {
-            triggerScrollToSongEvent.set(previousSong.ID);
-        }
     }
 
     /* src/layouts/components/PreviousButton.svelte generated by Svelte v3.58.0 */

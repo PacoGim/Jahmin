@@ -18,6 +18,7 @@ import { handleContextMenuEvent } from './contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
 import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVariables.fn'
+import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 
 let appIdleDebounce = getAppIdleDebounce()
 
@@ -124,6 +125,8 @@ export default function () {
 			staticArt.style.display = 'none'
 		})
 	})
+
+	registerMediaKeysFn()
 
 	playbackStore.subscribe(value => {
 		let selectedAlbumsDirLocal: string[] = undefined

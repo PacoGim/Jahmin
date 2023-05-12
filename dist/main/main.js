@@ -11,6 +11,7 @@ const getWindowOptions_fn_1 = __importDefault(require("./functions/getWindowOpti
 const ipc_service_1 = require("./services/ipc.service");
 const path_1 = __importDefault(require("path"));
 const calculateWindowBoundaries_fn_1 = __importDefault(require("./functions/calculateWindowBoundaries.fn"));
+const sendWebContents_fn_1 = __importDefault(require("./functions/sendWebContents.fn"));
 let browserWindow;
 (0, chokidar_1.watch)([
     path_1.default.join(__dirname, '../svelte'),
@@ -19,6 +20,26 @@ let browserWindow;
     path_1.default.join(__dirname, './i18n')
 ]).on('change', () => {
     getMainWindow().reload();
+});
+electron_1.app.whenReady().then(() => {
+    createWindow();
+    (0, ipc_service_1.startIPC)();
+    if ((0, config_service_1.getConfig)().userOptions.isFullscreen === true) {
+        getMainWindow().maximize();
+    }
+    electron_1.app.on('activate', () => {
+        if (electron_1.BrowserWindow.getAllWindows().length === 0)
+            createWindow();
+    });
+    electron_1.app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin')
+            electron_1.app.quit();
+    });
+    registerGlobalShortcuts();
+});
+electron_1.app.on('will-quit', () => {
+    // Unregister all shortcuts.
+    electron_1.globalShortcut.unregisterAll();
 });
 function createWindow() {
     const config = (0, config_service_1.getConfig)();
@@ -43,21 +64,17 @@ function createWindow() {
         });
     });
 }
-electron_1.app.whenReady().then(() => {
-    createWindow();
-    (0, ipc_service_1.startIPC)();
-    if ((0, config_service_1.getConfig)().userOptions.isFullscreen === true) {
-        getMainWindow().maximize();
-    }
-    electron_1.app.on('activate', () => {
-        if (electron_1.BrowserWindow.getAllWindows().length === 0)
-            createWindow();
+function registerGlobalShortcuts() {
+    electron_1.globalShortcut.register('MediaNextTrack', () => {
+        (0, sendWebContents_fn_1.default)('media-key-pressed', 'MediaNextTrack');
     });
-    electron_1.app.on('window-all-closed', () => {
-        if (process.platform !== 'darwin')
-            electron_1.app.quit();
+    electron_1.globalShortcut.register('MediaPreviousTrack', () => {
+        (0, sendWebContents_fn_1.default)('media-key-pressed', 'MediaPreviousTrack');
     });
-});
+    electron_1.globalShortcut.register('MediaPlayPause', () => {
+        (0, sendWebContents_fn_1.default)('media-key-pressed', 'MediaPlayPause');
+    });
+}
 function getMainWindow() {
     return browserWindow;
 }

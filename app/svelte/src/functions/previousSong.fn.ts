@@ -1,6 +1,7 @@
-import { playbackStore, currentAudioElement, playingSongStore, triggerScrollToSongEvent } from '../stores/main.store'
+import { playbackStore, currentAudioElement, playingSongStore, triggerScrollToSongEvent, externalSongProgressChange } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
-import type { SongType } from '../../../types/song.type'
+import type { PartialSongType, SongType } from '../../../types/song.type'
+import { get } from 'svelte/store'
 
 let currentAudioElementLocal: HTMLAudioElement = undefined
 
@@ -13,11 +14,8 @@ let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
 })
 
 export default function () {
-	let playbackStoreValue: SongType[]
-	let songPlayingLocal: SongType = undefined
-
-	playbackStore.subscribe(value => (playbackStoreValue = value))()
-	playingSongStore.subscribe(value => (songPlayingLocal = value))()
+	let playbackStoreValue: SongType[] = get(playbackStore)
+	let songPlayingLocal: PartialSongType = get(playingSongStore)
 
 	let currentSongIndex = playbackStoreValue.findIndex(song => song.ID === songPlayingLocal.ID)
 	let previousSongIndex = currentSongIndex - 1
@@ -26,6 +24,7 @@ export default function () {
 
 	if (previousSong === undefined && currentAudioElementLocal !== undefined) {
 		currentAudioElementLocal.currentTime = 0
+		externalSongProgressChange.set(0)
 	}
 
 	if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
@@ -33,6 +32,7 @@ export default function () {
 	} else {
 		if (currentAudioElementLocal !== undefined) {
 			currentAudioElementLocal.currentTime = 0
+			externalSongProgressChange.set(0)
 		}
 	}
 

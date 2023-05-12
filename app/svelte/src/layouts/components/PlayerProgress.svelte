@@ -10,6 +10,7 @@
 		isPlaying,
 		playingSongStore
 	} from '../../stores/main.store'
+
 	import type { PartialSongType, SongType } from '../../../../types/song.type'
 
 	let pauseDebounce: NodeJS.Timeout = undefined

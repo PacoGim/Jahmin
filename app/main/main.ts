@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, globalShortcut } from 'electron'
 
 import { watch as chokidarWatch } from 'chokidar'
 
@@ -11,6 +11,8 @@ import { startIPC } from './services/ipc.service'
 import path from 'path'
 
 import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.fn'
+import sendWebContentsFn from './functions/sendWebContents.fn'
+
 
 let browserWindow: BrowserWindow
 
@@ -21,6 +23,30 @@ chokidarWatch([
 	path.join(__dirname, './i18n')
 ]).on('change', () => {
 	getMainWindow().reload()
+})
+
+app.whenReady().then(() => {
+	createWindow()
+	startIPC()
+
+	if (getConfig().userOptions.isFullscreen === true) {
+		getMainWindow().maximize()
+	}
+
+	app.on('activate', () => {
+		if (BrowserWindow.getAllWindows().length === 0) createWindow()
+	})
+
+	app.on('window-all-closed', () => {
+		if (process.platform !== 'darwin') app.quit()
+	})
+
+	registerGlobalShortcuts()
+})
+
+app.on('will-quit', () => {
+	// Unregister all shortcuts.
+	globalShortcut.unregisterAll()
 })
 
 function createWindow() {
@@ -51,22 +77,19 @@ function createWindow() {
 		})
 }
 
-app.whenReady().then(() => {
-	createWindow()
-	startIPC()
-
-	if (getConfig().userOptions.isFullscreen === true) {
-		getMainWindow().maximize()
-	}
-
-	app.on('activate', () => {
-		if (BrowserWindow.getAllWindows().length === 0) createWindow()
+function registerGlobalShortcuts() {
+	globalShortcut.register('MediaNextTrack', () => {
+		sendWebContentsFn('media-key-pressed', 'MediaNextTrack')
 	})
 
-	app.on('window-all-closed', () => {
-		if (process.platform !== 'darwin') app.quit()
+	globalShortcut.register('MediaPreviousTrack', () => {
+		sendWebContentsFn('media-key-pressed', 'MediaPreviousTrack')
 	})
-})
+
+	globalShortcut.register('MediaPlayPause', () => {
+		sendWebContentsFn('media-key-pressed', 'MediaPlayPause')
+	})
+}
 
 export function getMainWindow() {
 	return browserWindow

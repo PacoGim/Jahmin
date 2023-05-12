@@ -8,6 +8,7 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import handleArtService from '../services/handleArt.service'
+	import mediaKeyControlsService from '../services/mediaKeyControls.service'
 	import { config, songAmountConfig } from '../stores/config.store'
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
@@ -160,10 +161,19 @@
 		$config.userOptions.songAmount = data
 
 		window.ipc.saveConfig({
-			userOptions:{
-				songAmount:data
+			userOptions: {
+				songAmount: data
 			}
 		})
+	})
 
+	window.ipc.onMediaKeyPressed((_, mediaKeyPressed) => {
+		if (mediaKeyPressed === 'MediaNextTrack') {
+			mediaKeyControlsService.nextMedia()
+		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
+			mediaKeyControlsService.previousMedia()
+		} else if (mediaKeyPressed === 'MediaPlayPause') {
+			// mediaKeyControlsService.nextMedia()
+		}
 	})
 </script>
