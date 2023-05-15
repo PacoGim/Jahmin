@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { isPlaying } from '../../stores/main.store'
 
-	import togglePlayButtonFn from '../../functions/togglePlayButton.fn'
+	import togglePlayPauseFn from '../../functions/togglePlayPause'
 
 	export let customSize = 'var(--button-size)'
 	export let customColor = 'var(--art-color-dark)'
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <play-pause-button
 	style="height: {customSize}; width: {customSize};"
 	class={$isPlaying ? '' : 'playing'}
-	on:click={() => togglePlayButtonFn()}
+	on:click={() => togglePlayPauseFn()}
+	on:keypress={() => togglePlayPauseFn()}
+	tabindex="-1"
+	role="button"
 >
 	<left-part style="background-color:{customColor};" />
 

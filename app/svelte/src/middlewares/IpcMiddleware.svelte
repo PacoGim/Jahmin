@@ -173,7 +173,7 @@
 		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
 			mediaKeyControlsService.previousMedia()
 		} else if (mediaKeyPressed === 'MediaPlayPause') {
-			// mediaKeyControlsService.nextMedia()
+			mediaKeyControlsService.togglePlayPauseMedia()
 		}
 	})
 </script>

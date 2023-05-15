@@ -104,6 +104,7 @@
 		color: #fff;
 		flex-direction: column;
 		align-items: center;
+		margin-bottom: 1rem;
 	}
 
 	grid-tags {

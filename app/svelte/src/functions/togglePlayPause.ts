@@ -1,16 +1,12 @@
+import { get } from 'svelte/store'
 import { currentAudioElement, isPlaying, playingSongStore } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 
 export default function () {
-	let isPlayingLocal
-	let currentAudioElementLocal
-	let songToPlayUrlStoreLocal
-	let playingSongStoreLocal
-
-	isPlaying.subscribe(value => (isPlayingLocal = value))()
-	currentAudioElement.subscribe(value => (currentAudioElementLocal = value))()
-	songToPlayUrlStore.subscribe(value => (songToPlayUrlStoreLocal = value))()
-	playingSongStore.subscribe(value => (playingSongStoreLocal = value))()
+	let isPlayingLocal = get(isPlaying)
+	let currentAudioElementLocal = get(currentAudioElement)
+	let songToPlayUrlStoreLocal = get(songToPlayUrlStore)
+	let playingSongStoreLocal = get(playingSongStore)
 
 	if (isPlayingLocal) {
 		currentAudioElementLocal.pause()
