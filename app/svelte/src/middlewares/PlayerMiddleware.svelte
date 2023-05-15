@@ -17,6 +17,7 @@
 		songListStore,
 		triggerScrollToSongEvent
 	} from '../stores/main.store'
+  import setMediaSessionDataFn from '../functions/setMediaSessionData.fn'
 
 	let allSongs = []
 
