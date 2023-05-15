@@ -5,10 +5,11 @@
 
 	export let customSize = 'var(--button-size)'
 	export let customColor = 'var(--art-color-dark)'
+	export let customMargins = '0'
 </script>
 
 <play-pause-button
-	style="height: {customSize}; width: {customSize};"
+	style="height: {customSize}; width: {customSize};margin:{customMargins};"
 	class={$isPlaying ? '' : 'playing'}
 	on:click={() => togglePlayPauseFn()}
 	on:keypress={() => togglePlayPauseFn()}
