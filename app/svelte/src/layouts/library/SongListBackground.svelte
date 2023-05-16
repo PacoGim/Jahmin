@@ -36,7 +36,7 @@
 		height: 100%;
 		width: 100%;
 		background-color: rgba(0, 0, 0, 0.33);
-		backdrop-filter: blur(50px);
+		backdrop-filter: blur(200px);
 		z-index: 1;
 	}
 	song-list-background-svlt {

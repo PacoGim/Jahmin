@@ -10,6 +10,7 @@ body {
 	--color-accent-1: #6674d1;
 	--color-accent-2: #1f8be4;
 	--color-accent-3: #fc5987;
+	--color-accent-4: #083096;
 
 	--color-fg-1-low: var(--theme-fg-1-low);
 	--filter-hl: var(--theme-filter-hl);

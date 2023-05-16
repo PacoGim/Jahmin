@@ -5,7 +5,7 @@
 	import LyricsControls from './LyricsControls.svelte'
 	import LyricsReadEdit from './LyricsReadEdit.svelte'
 
-	let lyricsMode: 'Read' | 'Write' = 'Read'
+	let lyricsMode: 'Read' | 'Edit' = 'Edit'
 </script>
 
 <lyrics-layout class="layout">
