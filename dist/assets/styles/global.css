@@ -4,6 +4,7 @@
 	margin: 0;
 	user-select: none;
 	line-height: 17px;
+	outline: 0;
 }
 
 *,

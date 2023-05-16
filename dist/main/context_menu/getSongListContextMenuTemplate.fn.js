@@ -50,7 +50,7 @@ function default_1(data) {
     if (clickedSongData !== undefined) {
         (0, addSeparator_fn_1.default)(template);
         template.push({
-            label: 'Edit Lyrics',
+            label: 'Show/Edit Lyrics',
             click: () => editLyrics(clickedSongData)
         });
     }

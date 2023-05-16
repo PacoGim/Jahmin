@@ -64,7 +64,7 @@ export default function (data: dataType) {
 		addSeparatorFn(template)
 
 		template.push({
-			label: 'Edit Lyrics',
+			label: 'Show/Edit Lyrics',
 			click: () => editLyrics(clickedSongData!)
 		})
 	}
