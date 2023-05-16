@@ -7876,7 +7876,6 @@ var app = (function () {
                 staticArt.style.display = 'none';
             });
         });
-        registerMediaKeysFn();
         playbackStore.subscribe(value => {
             selectedAlbumsDir.subscribe(value => (value || []))();
             localStorage.setItem('SongList', JSON.stringify(value));
@@ -9442,6 +9441,7 @@ var app = (function () {
     		window.ipc.saveConfig({ userOptions: { songAmount: data } });
     	});
 
+    	// Global shortcuts
     	window.ipc.onMediaKeyPressed((_, mediaKeyPressed) => {
     		if (mediaKeyPressed === 'MediaNextTrack') {
     			mediaKeyControlsService.nextMedia();
@@ -9449,6 +9449,12 @@ var app = (function () {
     			mediaKeyControlsService.previousMedia();
     		} else if (mediaKeyPressed === 'MediaPlayPause') {
     			mediaKeyControlsService.togglePlayPauseMedia();
+    		}
+    	});
+
+    	window.ipc.onGlobalShortcutsRegistered((_, globalShortcutsRegistered) => {
+    		if (globalShortcutsRegistered === false) {
+    			registerMediaKeysFn();
     		}
     	});
 
@@ -9464,6 +9470,7 @@ var app = (function () {
     		getAlbumSongsFn,
     		getAllSongsFn,
     		getDirectoryFn,
+    		registerMediaKeysFn,
     		setNewPlaybackFn,
     		sortSongsArrayFn,
     		handleArtService,

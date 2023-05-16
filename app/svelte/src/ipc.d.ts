@@ -65,6 +65,7 @@ declare global {
 			onSongPlayAfter: (callback: any) => void
 			onChangeSongAmount: (callback: any) => void
 			onMediaKeyPressed: (callback: any) => void
+			onGlobalShortcutsRegistered: (callback: any) => void
 		}
 	}
 }

@@ -11,7 +11,6 @@ const getWindowOptions_fn_1 = __importDefault(require("./functions/getWindowOpti
 const ipc_service_1 = require("./services/ipc.service");
 const path_1 = __importDefault(require("path"));
 const calculateWindowBoundaries_fn_1 = __importDefault(require("./functions/calculateWindowBoundaries.fn"));
-const sendWebContents_fn_1 = __importDefault(require("./functions/sendWebContents.fn"));
 let browserWindow;
 (0, chokidar_1.watch)([
     path_1.default.join(__dirname, '../svelte'),
@@ -35,7 +34,6 @@ electron_1.app.whenReady().then(() => {
         if (process.platform !== 'darwin')
             electron_1.app.quit();
     });
-    registerGlobalShortcuts();
 });
 electron_1.app.on('will-quit', () => {
     // Unregister all shortcuts.
@@ -62,17 +60,6 @@ function createWindow() {
                 isFullscreen: false
             }
         });
-    });
-}
-function registerGlobalShortcuts() {
-    electron_1.globalShortcut.register('MediaNextTrack', () => {
-        (0, sendWebContents_fn_1.default)('media-key-pressed', 'MediaNextTrack');
-    });
-    electron_1.globalShortcut.register('MediaPreviousTrack', () => {
-        (0, sendWebContents_fn_1.default)('media-key-pressed', 'MediaPreviousTrack');
-    });
-    electron_1.globalShortcut.register('MediaPlayPause', () => {
-        (0, sendWebContents_fn_1.default)('media-key-pressed', 'MediaPlayPause');
     });
 }
 function getMainWindow() {

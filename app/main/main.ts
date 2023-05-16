@@ -13,7 +13,6 @@ import path from 'path'
 import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.fn'
 import sendWebContentsFn from './functions/sendWebContents.fn'
 
-
 let browserWindow: BrowserWindow
 
 chokidarWatch([
@@ -40,8 +39,6 @@ app.whenReady().then(() => {
 	app.on('window-all-closed', () => {
 		if (process.platform !== 'darwin') app.quit()
 	})
-
-	registerGlobalShortcuts()
 })
 
 app.on('will-quit', () => {
@@ -75,20 +72,6 @@ function createWindow() {
 				}
 			})
 		})
-}
-
-function registerGlobalShortcuts() {
-	globalShortcut.register('MediaNextTrack', () => {
-		sendWebContentsFn('media-key-pressed', 'MediaNextTrack')
-	})
-
-	globalShortcut.register('MediaPreviousTrack', () => {
-		sendWebContentsFn('media-key-pressed', 'MediaPreviousTrack')
-	})
-
-	globalShortcut.register('MediaPlayPause', () => {
-		sendWebContentsFn('media-key-pressed', 'MediaPlayPause')
-	})
 }
 
 export function getMainWindow() {

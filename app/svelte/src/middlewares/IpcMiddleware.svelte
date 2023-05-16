@@ -5,6 +5,7 @@
 	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
 	import getAllSongsFn from '../db/getAllSongs.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
+	import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import handleArtService from '../services/handleArt.service'
@@ -167,6 +168,7 @@
 		})
 	})
 
+	// Global shortcuts
 	window.ipc.onMediaKeyPressed((_, mediaKeyPressed) => {
 		if (mediaKeyPressed === 'MediaNextTrack') {
 			mediaKeyControlsService.nextMedia()
@@ -174,6 +176,12 @@
 			mediaKeyControlsService.previousMedia()
 		} else if (mediaKeyPressed === 'MediaPlayPause') {
 			mediaKeyControlsService.togglePlayPauseMedia()
+		}
+	})
+
+	window.ipc.onGlobalShortcutsRegistered((_, globalShortcutsRegistered) => {
+		if (globalShortcutsRegistered === false) {
+			registerMediaKeysFn()
 		}
 	})
 </script>

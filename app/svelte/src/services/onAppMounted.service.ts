@@ -126,8 +126,6 @@ export default function () {
 		})
 	})
 
-	registerMediaKeysFn()
-
 	playbackStore.subscribe(value => {
 		let selectedAlbumsDirLocal: string[] = undefined
 
