@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import shuffleArrayFn from '../../functions/shuffleArray.fn'
@@ -6,7 +5,7 @@
 	import RepeatIcon from '../../icons/RepeatIcon.svelte'
 	import RepeatOneIcon from '../../icons/RepeatOneIcon.svelte'
 	import ShuffleIcon from '../../icons/ShuffleIcon.svelte'
-  import { config } from '../../stores/config.store'
+	import { config } from '../../stores/config.store'
 	import {
 		isPlaybackRepeatEnabledStore,
 		isSongRepeatEnabledStore,
@@ -54,6 +53,9 @@
 	<option-icon
 		data-is-active={$isPlaybackRepeatEnabledStore}
 		on:click={() => ($isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore)}
+		on:keypress={() => ($isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore)}
+		tabindex="-1"
+		role="button"
 	>
 		<RepeatIcon style="height: 1.25rem;fill:var(--art-color-{$isPlaybackRepeatEnabledStore === true ? 'light' : 'dark'})" />
 	</option-icon>
@@ -61,6 +63,9 @@
 	<option-icon
 		data-is-active={$isSongRepeatEnabledStore}
 		on:click={() => ($isSongRepeatEnabledStore = !$isSongRepeatEnabledStore)}
+		on:keypress={() => ($isSongRepeatEnabledStore = !$isSongRepeatEnabledStore)}
+		tabindex="-1"
+		role="button"
 	>
 		<RepeatOneIcon style="height: 1.25rem;fill:var(--art-color-{$isSongRepeatEnabledStore === true ? 'light' : 'dark'})" />
 	</option-icon>

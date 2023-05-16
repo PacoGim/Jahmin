@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import CogIcon from '../icons/CogIcon.svelte'
 
@@ -10,21 +9,36 @@
 </script>
 
 <navigation-svlt>
-	<nav-button on:click={() => ($layoutToShow = 'Library')}>
+	<nav-button
+		on:click={() => ($layoutToShow = 'Library')}
+		on:keypress={() => ($layoutToShow = 'Library')}
+		tabindex="-1"
+		role="button"
+	>
 		<PlayListIcon
 			style="{$layoutToShow === 'Library'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
 				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
 	</nav-button>
-	<nav-button on:click={() => ($layoutToShow = 'Playback')}>
+	<nav-button
+		on:click={() => ($layoutToShow = 'Playback')}
+		on:keypress={() => ($layoutToShow = 'Playback')}
+		tabindex="-1"
+		role="button"
+	>
 		<PlaybackIcon
 			style="{$layoutToShow === 'Playback'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
 				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
 	</nav-button>
-	<nav-button on:click={() => ($layoutToShow = 'Lyrics')}>
+	<nav-button
+		on:click={() => ($layoutToShow = 'Lyrics')}
+		on:keypress={() => ($layoutToShow = 'Lyrics')}
+		tabindex="-1"
+		role="button"
+	>
 		<SpeakIcon
 			style="{$layoutToShow === 'Lyrics'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
@@ -32,7 +46,13 @@
 		/>
 	</nav-button>
 	<separator />
-	<nav-button class="configButton" on:click={() => ($layoutToShow = 'Config')}>
+	<nav-button
+		class="configButton"
+		on:click={() => ($layoutToShow = 'Config')}
+		on:keypress={() => ($layoutToShow = 'Config')}
+		tabindex="-1"
+		role="button"
+	>
 		<CogIcon
 			style="{$layoutToShow === 'Config'
 				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`

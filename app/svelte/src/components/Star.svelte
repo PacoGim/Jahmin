@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
 
@@ -50,12 +49,24 @@
 	}
 </script>
 
-<stars on:click={dispatch('starChange', { rating: starRating * 10 })} class={klass} style="justify-self: {align}">
+<stars
+	on:click={dispatch('starChange', { rating: starRating * 10 })}
+	on:keypress={dispatch('starChange', { rating: starRating * 10 })}
+	tabindex="-1"
+	role="button"
+	class={klass}
+	style="justify-self: {align}"
+>
 	<img
 		on:click={() => {
 			starRating = 0
 			starRatingTemp = 0
 		}}
+		on:keypress={() => {
+			starRating = 0
+			starRatingTemp = 0
+		}}
+		tabindex="-1"
 		class="delete-star {klass} starFilter"
 		src={`assets/img/star/star-delete.svg`}
 		alt=""
@@ -70,6 +81,8 @@
 		class="star starFilter {klass}"
 		on:mouseleave={() => (starRating = starRatingTemp)}
 		on:click={() => (starRatingTemp = starRating)}
+		on:keypress={() => (starRatingTemp = starRating)}
+		tabindex="-1"
 		on:mousemove={e => setStarRating(e)}
 		src={`assets/img/star/star-${starRating}.svg`}
 		alt=""

@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
@@ -8,6 +7,13 @@
 
 	import equalizerService from '../../../services/equalizer/!equalizer.service'
 	import traduceFn from '../../../functions/traduce.fn'
+
+	function onEqualizerNameClickEvent(eqProfile) {
+		equalizerService.saveEqHashConfigFn(eqProfile.hash)
+		$currentEqHash = eqProfile.hash
+		$currentEqProfile = eqProfile
+		equalizerService.loadEqualizerValuesFn(eqProfile.values)
+	}
 </script>
 
 <equalizer-profiles class="smooth-colors">
@@ -15,14 +21,17 @@
 		<equalizer-field id="eq-{eqProfile.hash}">
 			<equalizer-name
 				class={$currentEqHash === eqProfile.hash ? 'current' : ''}
-				on:click={() => equalizerService.saveEqHashConfigFn(eqProfile.hash)}
-				on:click={() => ($currentEqHash = eqProfile.hash)}
-				on:click={() => ($currentEqProfile = eqProfile)}
-				on:click={() => equalizerService.loadEqualizerValuesFn(eqProfile.values)}>{traduceFn(eqProfile.name)}</equalizer-name
+				on:click={() => onEqualizerNameClickEvent(eqProfile)}
+				on:keypress={() => onEqualizerNameClickEvent(eqProfile)}
+				tabindex="-1"
+				role="button">{traduceFn(eqProfile.name)}</equalizer-name
 			>
 			<equalizer-rename
 				class="eqProfileButton"
 				on:click={() => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name)}
+				on:keypress={() => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name)}
+				tabindex="-1"
+				role="button"
 			>
 				<EditIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{traduceFn('Rename')}
@@ -30,6 +39,9 @@
 			<equalizer-delete
 				class="eqProfileButton"
 				on:click={() => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name)}
+				on:keypress={() => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name)}
+				tabindex="-1"
+				role="button"
 			>
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{traduceFn('Delete')}
@@ -63,10 +75,6 @@
 		padding-right: 0.5rem;
 		border-radius: 5px;
 		align-items: center;
-	}
-
-	equalizer-profiles equalizer-field * {
-		/* transition: background-color 150ms ease-in-out; */
 	}
 
 	.eqProfileButton {

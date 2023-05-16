@@ -27,6 +27,7 @@
 		selectedAlbumsDir,
 		keyModifier
 	} from '../stores/main.store'
+	import updateConfigFn from '../functions/updateConfig.fn'
 
 	function handleClickEvents(evt: MouseEvent) {
 		$elementMap = new Map<string, HTMLElement>()
@@ -157,12 +158,15 @@
 	function saveGroupingConfig() {
 		localStorage.setItem('GroupByValues', JSON.stringify($config.group.groupByValues))
 		// Saves the grouping
-		window.ipc.saveConfig({
-			group: {
-				groupBy: $config.group.groupBy,
-				groupByValues: $config.group.groupByValues
-			}
-		})
+		updateConfigFn(
+			{
+				group: {
+					groupBy: $config.group.groupBy,
+					groupByValues: $config.group.groupByValues
+				}
+			},
+			{ doUpdateLocalConfig: false }
+		)
 	}
 
 	onMount(() => {

@@ -60,22 +60,32 @@
 <tag-group-svlt>
 	{#each $config.group.groupBy || [] as group, index (index)}
 		<group-svlt data-index={index}>
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<group-name on:click={e => handleContextMenuEvent(e)} data-name={group} data-index={index}>{group}</group-name>
+			<group-name
+				on:click={e => handleContextMenuEvent(e)}
+				on:keypress={e => handleContextMenuEvent(e)}
+				tabindex="-1"
+				role="button"
+				data-name={group}
+				data-index={index}>{group}</group-name
+			>
 
 			{#if $selectedGroups[index]}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<group-value
 					class={$config.group.groupByValues[index] === 'undefined' ? 'selected' : null}
 					on:click={() => setNewGroupValue(index, 'undefined')}
+					on:keypress={() => setNewGroupValue(index, 'undefined')}
+					tabindex="-1"
+					role="button"
 				>
 					All ({$selectedGroups[index].length})
 				</group-value>
 				{#each $selectedGroups[index] as groupValue}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<group-value
 						class={$config.group.groupByValues[index] === groupValue ? 'selected' : null}
-						on:click={() => setNewGroupValue(index, groupValue)}
+						on:click={setNewGroupValue(index, groupValue)}
+						on:keypress={setNewGroupValue(index, groupValue)}
+						tabindex="-1"
+						role="button"
 					>
 						{groupValue}
 					</group-value>

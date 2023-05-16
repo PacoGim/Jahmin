@@ -1,5 +1,5 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import { config } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
@@ -30,8 +30,7 @@
 	}
 
 	function saveFontSize(newFontSize) {
-		$config.userOptions.fontSize = newFontSize
-		window.ipc.saveConfig({
+		updateConfigFn({
 			userOptions: {
 				fontSize: newFontSize
 			}
@@ -39,6 +38,6 @@
 	}
 </script>
 
-<font-size-config on:click={() => setFontSize()}>
+<font-size-config on:click={() => setFontSize()} on:keypress={() => setFontSize()} tabindex="-1" role="button">
 	<config-edit-button class="smooth-colors">···</config-edit-button>
 </font-size-config>

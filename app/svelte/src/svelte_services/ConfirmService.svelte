@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import CheckIcon from '../icons/CheckIcon.svelte'
 
@@ -52,9 +51,15 @@
 	}
 </script>
 
-<confirm-svlt show={isConfirmVisible} on:click={e => handleOutsidePromptClick(e)}>
+<confirm-svlt
+	show={isConfirmVisible}
+	on:click={e => handleOutsidePromptClick(e)}
+	on:keypress={e => handleOutsidePromptClick(e)}
+	tabindex="-1"
+	role="button"
+>
 	<confirm-content>
-		<confirm-close on:click={() => closeConfirm()}>x</confirm-close>
+		<confirm-close on:click={() => closeConfirm()} on:keypress={() => closeConfirm()} tabindex="-1">x</confirm-close>
 		<confirm-title>{confirmState.title}</confirm-title>
 		<confirm-body>
 			{confirmState.textToConfirm}

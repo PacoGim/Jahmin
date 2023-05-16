@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import traduceFn from '../../../functions/traduce.fn'
 	import EqualizerProfilesOnline from './EqualizerProfilesCommunity.svelte'

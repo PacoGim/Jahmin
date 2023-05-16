@@ -1,4 +1,5 @@
 <script lang="ts">
+  import updateConfigFn from '../../../functions/updateConfig.fn'
 	import { config } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
@@ -16,25 +17,24 @@
 			confirmButtonText: 'Confirm',
 			cancelButtonText: 'Close',
 			onChange: value => {
-				updateArtSize(value)
+				updateGridGapSize(value)
 			},
 			onConfirm: newGridGap => {
-				saveArtSize(newGridGap)
+				saveGridGapSize(newGridGap)
 			},
 			onCancel: previousGridGap => {
-				saveArtSize(previousGridGap)
+				saveGridGapSize(previousGridGap)
 				$layoutToShow = 'Config'
 			}
 		})
 	}
 
-	function updateArtSize(newGridGap: number) {
+	function updateGridGapSize(newGridGap: number) {
 		$config.userOptions.gridGap = newGridGap
 	}
 
-	function saveArtSize(newGridGap: number) {
-		$config.userOptions.gridGap = newGridGap
-		window.ipc.saveConfig({
+	function saveGridGapSize(newGridGap: number) {
+		updateConfigFn({
 			userOptions: {
 				gridGap: newGridGap
 			}

@@ -9119,6 +9119,153 @@ var app = (function () {
         // })
     }
 
+    var isMergeableObject = function isMergeableObject(value) {
+    	return isNonNullObject(value)
+    		&& !isSpecial(value)
+    };
+
+    function isNonNullObject(value) {
+    	return !!value && typeof value === 'object'
+    }
+
+    function isSpecial(value) {
+    	var stringValue = Object.prototype.toString.call(value);
+
+    	return stringValue === '[object RegExp]'
+    		|| stringValue === '[object Date]'
+    		|| isReactElement(value)
+    }
+
+    // see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+    var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
+    var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
+
+    function isReactElement(value) {
+    	return value.$$typeof === REACT_ELEMENT_TYPE
+    }
+
+    function emptyTarget(val) {
+    	return Array.isArray(val) ? [] : {}
+    }
+
+    function cloneUnlessOtherwiseSpecified(value, options) {
+    	return (options.clone !== false && options.isMergeableObject(value))
+    		? deepmerge(emptyTarget(value), value, options)
+    		: value
+    }
+
+    function defaultArrayMerge(target, source, options) {
+    	return target.concat(source).map(function(element) {
+    		return cloneUnlessOtherwiseSpecified(element, options)
+    	})
+    }
+
+    function getMergeFunction(key, options) {
+    	if (!options.customMerge) {
+    		return deepmerge
+    	}
+    	var customMerge = options.customMerge(key);
+    	return typeof customMerge === 'function' ? customMerge : deepmerge
+    }
+
+    function getEnumerableOwnPropertySymbols(target) {
+    	return Object.getOwnPropertySymbols
+    		? Object.getOwnPropertySymbols(target).filter(function(symbol) {
+    			return Object.propertyIsEnumerable.call(target, symbol)
+    		})
+    		: []
+    }
+
+    function getKeys(target) {
+    	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+    }
+
+    function propertyIsOnObject(object, property) {
+    	try {
+    		return property in object
+    	} catch(_) {
+    		return false
+    	}
+    }
+
+    // Protects from prototype poisoning and unexpected merging up the prototype chain.
+    function propertyIsUnsafe(target, key) {
+    	return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+    		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+    			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+    }
+
+    function mergeObject(target, source, options) {
+    	var destination = {};
+    	if (options.isMergeableObject(target)) {
+    		getKeys(target).forEach(function(key) {
+    			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+    		});
+    	}
+    	getKeys(source).forEach(function(key) {
+    		if (propertyIsUnsafe(target, key)) {
+    			return
+    		}
+
+    		if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
+    			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
+    		} else {
+    			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
+    		}
+    	});
+    	return destination
+    }
+
+    function deepmerge(target, source, options) {
+    	options = options || {};
+    	options.arrayMerge = options.arrayMerge || defaultArrayMerge;
+    	options.isMergeableObject = options.isMergeableObject || isMergeableObject;
+    	// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
+    	// implementations can use it. The caller may not replace it.
+    	options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
+
+    	var sourceIsArray = Array.isArray(source);
+    	var targetIsArray = Array.isArray(target);
+    	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
+
+    	if (!sourceAndTargetTypesMatch) {
+    		return cloneUnlessOtherwiseSpecified(source, options)
+    	} else if (sourceIsArray) {
+    		return options.arrayMerge(target, source, options)
+    	} else {
+    		return mergeObject(target, source, options)
+    	}
+    }
+
+    deepmerge.all = function deepmergeAll(array, options) {
+    	if (!Array.isArray(array)) {
+    		throw new Error('first argument should be an array')
+    	}
+
+    	return array.reduce(function(prev, next) {
+    		return deepmerge(prev, next, options)
+    	}, {})
+    };
+
+    var deepmerge_1 = deepmerge;
+
+    var cjs = deepmerge_1;
+
+    var deepmerge$1 = /*@__PURE__*/getDefaultExportFromCjs(cjs);
+
+    function updateConfigFn (newConfig, { doUpdateLocalConfig } = { doUpdateLocalConfig: true }) {
+        return new Promise((resolve, reject) => {
+            if (doUpdateLocalConfig === true) {
+                let mergedConfig;
+                mergedConfig = deepmerge$1(get_store_value(config), newConfig);
+                config.set(mergedConfig);
+            }
+            window.ipc.saveConfig(newConfig).then(() => {
+                resolve('ok');
+            });
+        });
+    }
+
     function generateId() {
         return BigInt(`${String(Math.random()).substring(2)}${Date.now()}`).toString(36);
     }
@@ -9296,20 +9443,20 @@ var app = (function () {
     }
 
     function instance$1B($$self, $$props, $$invalidate) {
-    	let $config;
     	let $playbackStore;
     	let $playingSongStore;
+    	let $config;
     	let $selectedAlbumsDir;
     	let $onNewLyrics;
     	let $layoutToShow;
     	let $artCompressQueueLength;
     	let $songSyncQueueProgress;
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
     	validate_store(playbackStore, 'playbackStore');
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(1, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(0, $playbackStore = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(2, $playingSongStore = $$value));
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(1, $playingSongStore = $$value));
+    	validate_store(config, 'config');
+    	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
     	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(3, $selectedAlbumsDir = $$value));
     	validate_store(onNewLyrics, 'onNewLyrics');
@@ -9437,8 +9584,7 @@ var app = (function () {
     	});
 
     	window.ipc.onChangeSongAmount((_, data) => {
-    		set_store_value(config, $config.userOptions.songAmount = data, $config);
-    		window.ipc.saveConfig({ userOptions: { songAmount: data } });
+    		updateConfigFn({ userOptions: { songAmount: data } });
     	});
 
     	// Global shortcuts
@@ -9473,6 +9619,7 @@ var app = (function () {
     		registerMediaKeysFn,
     		setNewPlaybackFn,
     		sortSongsArrayFn,
+    		updateConfigFn,
     		handleArtService,
     		mediaKeyControlsService,
     		config,
@@ -9484,9 +9631,9 @@ var app = (function () {
     		playingSongStore,
     		selectedAlbumsDir,
     		songSyncQueueProgress,
-    		$config,
     		$playbackStore,
     		$playingSongStore,
+    		$config,
     		$selectedAlbumsDir,
     		$onNewLyrics,
     		$layoutToShow,
@@ -11343,17 +11490,25 @@ var app = (function () {
     			t3 = space();
     			nav_button3 = element("nav-button");
     			create_component(cogicon.$$.fragment);
+    			set_custom_element_data(nav_button0, "tabindex", "-1");
+    			set_custom_element_data(nav_button0, "role", "button");
     			set_custom_element_data(nav_button0, "class", "svelte-om8wjl");
-    			add_location(nav_button0, file$1q, 9, 1, 370);
+    			add_location(nav_button0, file$1q, 8, 1, 313);
+    			set_custom_element_data(nav_button1, "tabindex", "-1");
+    			set_custom_element_data(nav_button1, "role", "button");
     			set_custom_element_data(nav_button1, "class", "svelte-om8wjl");
-    			add_location(nav_button1, file$1q, 16, 1, 695);
+    			add_location(nav_button1, file$1q, 20, 1, 724);
+    			set_custom_element_data(nav_button2, "tabindex", "-1");
+    			set_custom_element_data(nav_button2, "role", "button");
     			set_custom_element_data(nav_button2, "class", "svelte-om8wjl");
-    			add_location(nav_button2, file$1q, 23, 1, 1022);
-    			add_location(separator, file$1q, 30, 1, 1342);
+    			add_location(nav_button2, file$1q, 32, 1, 1138);
+    			add_location(separator, file$1q, 44, 1, 1543);
     			set_custom_element_data(nav_button3, "class", "configButton svelte-om8wjl");
-    			add_location(nav_button3, file$1q, 31, 1, 1357);
+    			set_custom_element_data(nav_button3, "tabindex", "-1");
+    			set_custom_element_data(nav_button3, "role", "button");
+    			add_location(nav_button3, file$1q, 45, 1, 1558);
     			set_custom_element_data(navigation_svlt, "class", "svelte-om8wjl");
-    			add_location(navigation_svlt, file$1q, 8, 0, 351);
+    			add_location(navigation_svlt, file$1q, 7, 0, 294);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11378,9 +11533,13 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(nav_button0, "click", /*click_handler*/ ctx[1], false, false, false, false),
-    					listen_dev(nav_button1, "click", /*click_handler_1*/ ctx[2], false, false, false, false),
-    					listen_dev(nav_button2, "click", /*click_handler_2*/ ctx[3], false, false, false, false),
-    					listen_dev(nav_button3, "click", /*click_handler_3*/ ctx[4], false, false, false, false)
+    					listen_dev(nav_button0, "keypress", /*keypress_handler*/ ctx[2], false, false, false, false),
+    					listen_dev(nav_button1, "click", /*click_handler_1*/ ctx[3], false, false, false, false),
+    					listen_dev(nav_button1, "keypress", /*keypress_handler_1*/ ctx[4], false, false, false, false),
+    					listen_dev(nav_button2, "click", /*click_handler_2*/ ctx[5], false, false, false, false),
+    					listen_dev(nav_button2, "keypress", /*keypress_handler_2*/ ctx[6], false, false, false, false),
+    					listen_dev(nav_button3, "click", /*click_handler_3*/ ctx[7], false, false, false, false),
+    					listen_dev(nav_button3, "keypress", /*keypress_handler_3*/ ctx[8], false, false, false, false)
     				];
 
     				mounted = true;
@@ -11466,9 +11625,13 @@ var app = (function () {
     	});
 
     	const click_handler = () => set_store_value(layoutToShow, $layoutToShow = 'Library', $layoutToShow);
+    	const keypress_handler = () => set_store_value(layoutToShow, $layoutToShow = 'Library', $layoutToShow);
     	const click_handler_1 = () => set_store_value(layoutToShow, $layoutToShow = 'Playback', $layoutToShow);
+    	const keypress_handler_1 = () => set_store_value(layoutToShow, $layoutToShow = 'Playback', $layoutToShow);
     	const click_handler_2 = () => set_store_value(layoutToShow, $layoutToShow = 'Lyrics', $layoutToShow);
+    	const keypress_handler_2 = () => set_store_value(layoutToShow, $layoutToShow = 'Lyrics', $layoutToShow);
     	const click_handler_3 = () => set_store_value(layoutToShow, $layoutToShow = 'Config', $layoutToShow);
+    	const keypress_handler_3 = () => set_store_value(layoutToShow, $layoutToShow = 'Config', $layoutToShow);
 
     	$$self.$capture_state = () => ({
     		CogIcon,
@@ -11482,9 +11645,13 @@ var app = (function () {
     	return [
     		$layoutToShow,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
+    		keypress_handler_1,
     		click_handler_2,
-    		click_handler_3
+    		keypress_handler_2,
+    		click_handler_3,
+    		keypress_handler_3
     	];
     }
 
@@ -19140,15 +19307,19 @@ var app = (function () {
     			create_component(repeatoneicon.$$.fragment);
     			set_custom_element_data(option_icon0, "class", "shuffle svelte-13cka6b");
     			set_custom_element_data(option_icon0, "data-is-active", /*$isSongShuffleEnabledStore*/ ctx[0]);
-    			add_location(option_icon0, file$1a, 33, 1, 1548);
+    			add_location(option_icon0, file$1a, 32, 1, 1491);
     			set_custom_element_data(option_icon1, "data-is-active", /*$isPlaybackRepeatEnabledStore*/ ctx[1]);
+    			set_custom_element_data(option_icon1, "tabindex", "-1");
+    			set_custom_element_data(option_icon1, "role", "button");
     			set_custom_element_data(option_icon1, "class", "svelte-13cka6b");
-    			add_location(option_icon1, file$1a, 37, 1, 1761);
+    			add_location(option_icon1, file$1a, 36, 1, 1704);
     			set_custom_element_data(option_icon2, "data-is-active", /*$isSongRepeatEnabledStore*/ ctx[2]);
+    			set_custom_element_data(option_icon2, "tabindex", "-1");
+    			set_custom_element_data(option_icon2, "role", "button");
     			set_custom_element_data(option_icon2, "class", "svelte-13cka6b");
-    			add_location(option_icon2, file$1a, 44, 1, 2051);
+    			add_location(option_icon2, file$1a, 46, 1, 2113);
     			set_custom_element_data(playback_options, "class", "svelte-13cka6b");
-    			add_location(playback_options, file$1a, 32, 0, 1528);
+    			add_location(playback_options, file$1a, 31, 0, 1471);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -19168,7 +19339,9 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(option_icon1, "click", /*click_handler*/ ctx[3], false, false, false, false),
-    					listen_dev(option_icon2, "click", /*click_handler_1*/ ctx[4], false, false, false, false)
+    					listen_dev(option_icon1, "keypress", /*keypress_handler*/ ctx[4], false, false, false, false),
+    					listen_dev(option_icon2, "click", /*click_handler_1*/ ctx[5], false, false, false, false),
+    					listen_dev(option_icon2, "keypress", /*keypress_handler_1*/ ctx[6], false, false, false, false)
     				];
 
     				mounted = true;
@@ -19254,15 +19427,15 @@ var app = (function () {
     	let $isPlaybackRepeatEnabledStore;
     	let $isSongRepeatEnabledStore;
     	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(5, $config = $$value));
+    	component_subscribe($$self, config, $$value => $$invalidate(7, $config = $$value));
     	validate_store(playbackStore, 'playbackStore');
-    	component_subscribe($$self, playbackStore, $$value => $$invalidate(6, $playbackStore = $$value));
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(8, $playbackStore = $$value));
     	validate_store(isSongShuffleEnabledStore, 'isSongShuffleEnabledStore');
     	component_subscribe($$self, isSongShuffleEnabledStore, $$value => $$invalidate(0, $isSongShuffleEnabledStore = $$value));
     	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(7, $playingSongStore = $$value));
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(9, $playingSongStore = $$value));
     	validate_store(songListStore, 'songListStore');
-    	component_subscribe($$self, songListStore, $$value => $$invalidate(8, $songListStore = $$value));
+    	component_subscribe($$self, songListStore, $$value => $$invalidate(10, $songListStore = $$value));
     	validate_store(isPlaybackRepeatEnabledStore, 'isPlaybackRepeatEnabledStore');
     	component_subscribe($$self, isPlaybackRepeatEnabledStore, $$value => $$invalidate(1, $isPlaybackRepeatEnabledStore = $$value));
     	validate_store(isSongRepeatEnabledStore, 'isSongRepeatEnabledStore');
@@ -19300,7 +19473,9 @@ var app = (function () {
     	});
 
     	const click_handler = () => set_store_value(isPlaybackRepeatEnabledStore, $isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore, $isPlaybackRepeatEnabledStore);
+    	const keypress_handler = () => set_store_value(isPlaybackRepeatEnabledStore, $isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore, $isPlaybackRepeatEnabledStore);
     	const click_handler_1 = () => set_store_value(isSongRepeatEnabledStore, $isSongRepeatEnabledStore = !$isSongRepeatEnabledStore, $isSongRepeatEnabledStore);
+    	const keypress_handler_1 = () => set_store_value(isSongRepeatEnabledStore, $isSongRepeatEnabledStore = !$isSongRepeatEnabledStore, $isSongRepeatEnabledStore);
 
     	$$self.$capture_state = () => ({
     		onMount,
@@ -19331,7 +19506,9 @@ var app = (function () {
     		$isPlaybackRepeatEnabledStore,
     		$isSongRepeatEnabledStore,
     		click_handler,
-    		click_handler_1
+    		keypress_handler,
+    		click_handler_1,
+    		keypress_handler_1
     	];
     }
 
@@ -20520,17 +20697,21 @@ var app = (function () {
     			img0 = element("img");
     			t = space();
     			img1 = element("img");
+    			attr_dev(img0, "tabindex", "-1");
     			attr_dev(img0, "class", img0_class_value = "delete-star " + /*klass*/ ctx[0] + " starFilter" + " svelte-umysnq");
     			if (!src_url_equal(img0.src, img0_src_value = `assets/img/star/star-delete.svg`)) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$15, 44, 1, 1400);
+    			add_location(img0, file$15, 50, 1, 1444);
     			attr_dev(img1, "class", img1_class_value = "star starFilter " + /*klass*/ ctx[0] + " svelte-umysnq");
+    			attr_dev(img1, "tabindex", "-1");
     			if (!src_url_equal(img1.src, img1_src_value = `assets/img/star/star-${/*starRating*/ ctx[2]}.svg`)) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$15, 59, 1, 1907);
+    			add_location(img1, file$15, 70, 1, 2035);
+    			attr_dev(stars, "tabindex", "-1");
+    			attr_dev(stars, "role", "button");
     			attr_dev(stars, "class", stars_class_value = "" + (null_to_empty(/*klass*/ ctx[0]) + " svelte-umysnq"));
     			set_style(stars, "justify-self", /*align*/ ctx[1]);
-    			add_location(stars, file$15, 43, 0, 1284);
+    			add_location(stars, file$15, 42, 0, 1227);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20544,12 +20725,25 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(img0, "click", /*click_handler*/ ctx[8], false, false, false, false),
-    					listen_dev(img1, "mouseleave", /*mouseleave_handler*/ ctx[9], false, false, false, false),
-    					listen_dev(img1, "click", /*click_handler_1*/ ctx[10], false, false, false, false),
-    					listen_dev(img1, "mousemove", /*mousemove_handler*/ ctx[11], false, false, false, false),
+    					listen_dev(img0, "keypress", /*keypress_handler*/ ctx[9], false, false, false, false),
+    					listen_dev(img1, "mouseleave", /*mouseleave_handler*/ ctx[10], false, false, false, false),
+    					listen_dev(img1, "click", /*click_handler_1*/ ctx[11], false, false, false, false),
+    					listen_dev(img1, "keypress", /*keypress_handler_1*/ ctx[12], false, false, false, false),
+    					listen_dev(img1, "mousemove", /*mousemove_handler*/ ctx[13], false, false, false, false),
     					listen_dev(
     						stars,
     						"click",
+    						function () {
+    							if (is_function(/*dispatch*/ ctx[4]('starChange', { rating: /*starRating*/ ctx[2] * 10 }))) /*dispatch*/ ctx[4]('starChange', { rating: /*starRating*/ ctx[2] * 10 }).apply(this, arguments);
+    						},
+    						false,
+    						false,
+    						false,
+    						false
+    					),
+    					listen_dev(
+    						stars,
+    						"keypress",
     						function () {
     							if (is_function(/*dispatch*/ ctx[4]('starChange', { rating: /*starRating*/ ctx[2] * 10 }))) /*dispatch*/ ctx[4]('starChange', { rating: /*starRating*/ ctx[2] * 10 }).apply(this, arguments);
     						},
@@ -20669,8 +20863,14 @@ var app = (function () {
     		$$invalidate(3, starRatingTemp = 0);
     	};
 
+    	const keypress_handler = () => {
+    		$$invalidate(2, starRating = 0);
+    		$$invalidate(3, starRatingTemp = 0);
+    	};
+
     	const mouseleave_handler = () => $$invalidate(2, starRating = starRatingTemp);
     	const click_handler_1 = () => $$invalidate(3, starRatingTemp = starRating);
+    	const keypress_handler_1 = () => $$invalidate(3, starRatingTemp = starRating);
     	const mousemove_handler = e => setStarRating(e);
 
     	$$self.$$set = $$props => {
@@ -20724,8 +20924,10 @@ var app = (function () {
     		songRating,
     		hook,
     		click_handler,
+    		keypress_handler,
     		mouseleave_handler,
     		click_handler_1,
+    		keypress_handler_1,
     		mousemove_handler
     	];
     }
@@ -21990,12 +22192,12 @@ var app = (function () {
 
     function get_each_context$c(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[21] = list[i];
-    	child_ctx[23] = i;
+    	child_ctx[22] = list[i];
+    	child_ctx[24] = i;
     	return child_ctx;
     }
 
-    // (97:2) {#each songsToShow as song, index (song.ID)}
+    // (102:2) {#each songsToShow as song, index (song.ID)}
     function create_each_block$c(key_1, ctx) {
     	let first;
     	let songlistitem;
@@ -22003,8 +22205,8 @@ var app = (function () {
 
     	songlistitem = new SongListItem({
     			props: {
-    				song: /*song*/ ctx[21],
-    				index: /*index*/ ctx[23]
+    				song: /*song*/ ctx[22],
+    				index: /*index*/ ctx[24]
     			},
     			$$inline: true
     		});
@@ -22025,8 +22227,8 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
     			const songlistitem_changes = {};
-    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.song = /*song*/ ctx[21];
-    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.index = /*index*/ ctx[23];
+    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.song = /*song*/ ctx[22];
+    			if (dirty & /*songsToShow*/ 1) songlistitem_changes.index = /*index*/ ctx[24];
     			songlistitem.$set(songlistitem_changes);
     		},
     		i: function intro(local) {
@@ -22048,7 +22250,7 @@ var app = (function () {
     		block,
     		id: create_each_block$c.name,
     		type: "each",
-    		source: "(97:2) {#each songsToShow as song, index (song.ID)}",
+    		source: "(102:2) {#each songsToShow as song, index (song.ID)}",
     		ctx
     	});
 
@@ -22067,7 +22269,7 @@ var app = (function () {
     	let dispose;
     	let each_value = /*songsToShow*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*song*/ ctx[21].ID;
+    	const get_key = ctx => /*song*/ ctx[22].ID;
     	validate_each_keys(ctx, each_value, get_each_context$c, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -22091,9 +22293,11 @@ var app = (function () {
     			t = space();
     			create_component(songlistscrollbar.$$.fragment);
     			set_custom_element_data(song_list, "class", "svelte-y11uul");
-    			add_location(song_list, file$11, 95, 1, 3295);
+    			add_location(song_list, file$11, 100, 1, 3327);
+    			set_custom_element_data(song_list_svlt, "tabindex", "-1");
+    			set_custom_element_data(song_list_svlt, "role", "button");
     			set_custom_element_data(song_list_svlt, "class", "svelte-y11uul");
-    			add_location(song_list_svlt, file$11, 94, 0, 3185);
+    			add_location(song_list_svlt, file$11, 93, 0, 3128);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -22115,7 +22319,8 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(song_list_svlt, "mousewheel", /*mousewheel_handler*/ ctx[10], false, false, false, false),
-    					listen_dev(song_list_svlt, "click", /*click_handler*/ ctx[11], false, false, false, false)
+    					listen_dev(song_list_svlt, "click", /*click_handler*/ ctx[11], false, false, false, false),
+    					listen_dev(song_list_svlt, "keypress", /*keypress_handler*/ ctx[12], false, false, false, false)
     				];
 
     				mounted = true;
@@ -22187,7 +22392,7 @@ var app = (function () {
     	validate_store(songListStore, 'songListStore');
     	component_subscribe($$self, songListStore, $$value => $$invalidate(4, $songListStore = $$value));
     	validate_store(selectedSongsStore, 'selectedSongsStore');
-    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(14, $selectedSongsStore = $$value));
+    	component_subscribe($$self, selectedSongsStore, $$value => $$invalidate(15, $selectedSongsStore = $$value));
     	validate_store(elementMap, 'elementMap');
     	component_subscribe($$self, elementMap, $$value => $$invalidate(5, $elementMap = $$value));
     	validate_store(keyPressed, 'keyPressed');
@@ -22279,6 +22484,7 @@ var app = (function () {
 
     	const mousewheel_handler = e => scrollContainer(e);
     	const click_handler = e => songListClickEventHandlerService(e);
+    	const keypress_handler = e => songListClickEventHandlerService(e);
 
     	$$self.$capture_state = () => ({
     		SongListItem,
@@ -22376,7 +22582,8 @@ var app = (function () {
     		$triggerScrollToSongEvent,
     		$selectedAlbumDir,
     		mousewheel_handler,
-    		click_handler
+    		click_handler,
+    		keypress_handler
     	];
     }
 
@@ -26323,22 +26530,22 @@ var app = (function () {
 
     function get_each_context$b(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[10] = list[i];
-    	child_ctx[12] = i;
+    	child_ctx[11] = list[i];
+    	child_ctx[13] = i;
     	return child_ctx;
     }
 
     function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[13] = list[i];
+    	child_ctx[14] = list[i];
     	return child_ctx;
     }
 
-    // (55:3) {#if $selectedGroups[index]}
+    // (61:3) {#if $selectedGroups[index]}
     function create_if_block$b(ctx) {
     	let group_value;
     	let t0;
-    	let t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]].length + "";
+    	let t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]].length + "";
     	let t1;
     	let t2;
     	let group_value_class_value;
@@ -26348,10 +26555,14 @@ var app = (function () {
     	let dispose;
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[6](/*index*/ ctx[12]);
+    		return /*click_handler_1*/ ctx[7](/*index*/ ctx[13]);
     	}
 
-    	let each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]];
+    	function keypress_handler_1() {
+    		return /*keypress_handler_1*/ ctx[8](/*index*/ ctx[13]);
+    	}
+
+    	let each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -26373,11 +26584,13 @@ var app = (function () {
 
     			each_1_anchor = empty();
 
-    			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
+    			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[13]] === 'undefined'
     			? 'selected'
     			: null) + " svelte-1357yc5"));
 
-    			add_location(group_value, file$X, 56, 4, 1869);
+    			set_custom_element_data(group_value, "tabindex", "-1");
+    			set_custom_element_data(group_value, "role", "button");
+    			add_location(group_value, file$X, 61, 4, 1849);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -26395,22 +26608,26 @@ var app = (function () {
     			insert_dev(target, each_1_anchor, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(group_value, "click", click_handler_1, false, false, false, false);
+    				dispose = [
+    					listen_dev(group_value, "click", click_handler_1, false, false, false, false),
+    					listen_dev(group_value, "keypress", keypress_handler_1, false, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*$selectedGroups, $config*/ 3 && t1_value !== (t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]].length + "")) set_data_dev(t1, t1_value);
+    			if (dirty & /*$selectedGroups, $config*/ 3 && t1_value !== (t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]].length + "")) set_data_dev(t1, t1_value);
 
-    			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === 'undefined'
+    			if (dirty & /*$config*/ 1 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[13]] === 'undefined'
     			? 'selected'
     			: null) + " svelte-1357yc5"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
     			}
 
     			if (dirty & /*$config, $selectedGroups, setNewGroupValue*/ 7) {
-    				each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]];
+    				each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -26439,7 +26656,7 @@ var app = (function () {
     			destroy_each(each_blocks, detaching);
     			if (detaching) detach_dev(each_1_anchor);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -26447,26 +26664,22 @@ var app = (function () {
     		block,
     		id: create_if_block$b.name,
     		type: "if",
-    		source: "(55:3) {#if $selectedGroups[index]}",
+    		source: "(61:3) {#if $selectedGroups[index]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (63:4) {#each $selectedGroups[index] as groupValue}
+    // (71:4) {#each $selectedGroups[index] as groupValue}
     function create_each_block_1$2(ctx) {
     	let group_value;
-    	let t0_value = /*groupValue*/ ctx[13] + "";
+    	let t0_value = /*groupValue*/ ctx[14] + "";
     	let t0;
     	let t1;
     	let group_value_class_value;
     	let mounted;
     	let dispose;
-
-    	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[7](/*index*/ ctx[12], /*groupValue*/ ctx[13]);
-    	}
 
     	const block = {
     		c: function create() {
@@ -26474,11 +26687,13 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
 
-    			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
+    			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[13]] === /*groupValue*/ ctx[14]
     			? 'selected'
     			: null) + " svelte-1357yc5"));
 
-    			add_location(group_value, file$X, 64, 5, 2209);
+    			set_custom_element_data(group_value, "tabindex", "-1");
+    			set_custom_element_data(group_value, "role", "button");
+    			add_location(group_value, file$X, 71, 5, 2227);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -26486,15 +26701,39 @@ var app = (function () {
     			append_dev(group_value, t1);
 
     			if (!mounted) {
-    				dispose = listen_dev(group_value, "click", click_handler_2, false, false, false, false);
+    				dispose = [
+    					listen_dev(
+    						group_value,
+    						"click",
+    						function () {
+    							if (is_function(/*setNewGroupValue*/ ctx[2](/*index*/ ctx[13], /*groupValue*/ ctx[14]))) /*setNewGroupValue*/ ctx[2](/*index*/ ctx[13], /*groupValue*/ ctx[14]).apply(this, arguments);
+    						},
+    						false,
+    						false,
+    						false,
+    						false
+    					),
+    					listen_dev(
+    						group_value,
+    						"keypress",
+    						function () {
+    							if (is_function(/*setNewGroupValue*/ ctx[2](/*index*/ ctx[13], /*groupValue*/ ctx[14]))) /*setNewGroupValue*/ ctx[2](/*index*/ ctx[13], /*groupValue*/ ctx[14]).apply(this, arguments);
+    						},
+    						false,
+    						false,
+    						false,
+    						false
+    					)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*$selectedGroups, $config*/ 3 && t0_value !== (t0_value = /*groupValue*/ ctx[13] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*$selectedGroups, $config*/ 3 && t0_value !== (t0_value = /*groupValue*/ ctx[14] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[12]] === /*groupValue*/ ctx[13]
+    			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[13]] === /*groupValue*/ ctx[14]
     			? 'selected'
     			: null) + " svelte-1357yc5"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
@@ -26503,7 +26742,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(group_value);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -26511,7 +26750,7 @@ var app = (function () {
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(63:4) {#each $selectedGroups[index] as groupValue}",
+    		source: "(71:4) {#each $selectedGroups[index] as groupValue}",
     		ctx
     	});
 
@@ -26522,7 +26761,7 @@ var app = (function () {
     function create_each_block$b(key_1, ctx) {
     	let group_svlt;
     	let group_name;
-    	let t0_value = /*group*/ ctx[10] + "";
+    	let t0_value = /*group*/ ctx[11] + "";
     	let t0;
     	let group_name_data_name_value;
     	let group_name_data_index_value;
@@ -26531,7 +26770,7 @@ var app = (function () {
     	let group_svlt_data_index_value;
     	let mounted;
     	let dispose;
-    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[12]] && create_if_block$b(ctx);
+    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]] && create_if_block$b(ctx);
 
     	const block = {
     		key: key_1,
@@ -26543,11 +26782,13 @@ var app = (function () {
     			t1 = space();
     			if (if_block) if_block.c();
     			t2 = space();
-    			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[10]);
-    			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[12]);
+    			set_custom_element_data(group_name, "tabindex", "-1");
+    			set_custom_element_data(group_name, "role", "button");
+    			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[11]);
+    			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[13]);
     			set_custom_element_data(group_name, "class", "svelte-1357yc5");
-    			add_location(group_name, file$X, 52, 3, 1659);
-    			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[12]);
+    			add_location(group_name, file$X, 51, 3, 1599);
+    			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[13]);
     			set_custom_element_data(group_svlt, "class", "svelte-1357yc5");
     			add_location(group_svlt, file$X, 50, 2, 1564);
     			this.first = group_svlt;
@@ -26561,23 +26802,27 @@ var app = (function () {
     			append_dev(group_svlt, t2);
 
     			if (!mounted) {
-    				dispose = listen_dev(group_name, "click", /*click_handler*/ ctx[5], false, false, false, false);
+    				dispose = [
+    					listen_dev(group_name, "click", /*click_handler*/ ctx[5], false, false, false, false),
+    					listen_dev(group_name, "keypress", /*keypress_handler*/ ctx[6], false, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*$config*/ 1 && t0_value !== (t0_value = /*group*/ ctx[10] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*$config*/ 1 && t0_value !== (t0_value = /*group*/ ctx[11] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*$config*/ 1 && group_name_data_name_value !== (group_name_data_name_value = /*group*/ ctx[10])) {
+    			if (dirty & /*$config*/ 1 && group_name_data_name_value !== (group_name_data_name_value = /*group*/ ctx[11])) {
     				set_custom_element_data(group_name, "data-name", group_name_data_name_value);
     			}
 
-    			if (dirty & /*$config*/ 1 && group_name_data_index_value !== (group_name_data_index_value = /*index*/ ctx[12])) {
+    			if (dirty & /*$config*/ 1 && group_name_data_index_value !== (group_name_data_index_value = /*index*/ ctx[13])) {
     				set_custom_element_data(group_name, "data-index", group_name_data_index_value);
     			}
 
-    			if (/*$selectedGroups*/ ctx[1][/*index*/ ctx[12]]) {
+    			if (/*$selectedGroups*/ ctx[1][/*index*/ ctx[13]]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -26590,7 +26835,7 @@ var app = (function () {
     				if_block = null;
     			}
 
-    			if (dirty & /*$config*/ 1 && group_svlt_data_index_value !== (group_svlt_data_index_value = /*index*/ ctx[12])) {
+    			if (dirty & /*$config*/ 1 && group_svlt_data_index_value !== (group_svlt_data_index_value = /*index*/ ctx[13])) {
     				set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value);
     			}
     		},
@@ -26598,7 +26843,7 @@ var app = (function () {
     			if (detaching) detach_dev(group_svlt);
     			if (if_block) if_block.d();
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -26619,7 +26864,7 @@ var app = (function () {
     	let each_1_lookup = new Map();
     	let each_value = /*$config*/ ctx[0].group.groupBy || [];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[12];
+    	const get_key = ctx => /*index*/ ctx[13];
     	validate_each_keys(ctx, each_value, get_each_context$b, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -26728,8 +26973,9 @@ var app = (function () {
     	});
 
     	const click_handler = e => handleContextMenuEvent(e);
+    	const keypress_handler = e => handleContextMenuEvent(e);
     	const click_handler_1 = index => setNewGroupValue(index, 'undefined');
-    	const click_handler_2 = (index, groupValue) => setNewGroupValue(index, groupValue);
+    	const keypress_handler_1 = index => setNewGroupValue(index, 'undefined');
 
     	$$self.$capture_state = () => ({
     		handleContextMenuEvent,
@@ -26793,8 +27039,9 @@ var app = (function () {
     		$triggerGroupingChangeEvent,
     		$dbSongsStore,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
-    		click_handler_2
+    		keypress_handler_1
     	];
     }
 
@@ -27357,147 +27604,6 @@ var app = (function () {
     	}
     }
 
-    var isMergeableObject = function isMergeableObject(value) {
-    	return isNonNullObject(value)
-    		&& !isSpecial(value)
-    };
-
-    function isNonNullObject(value) {
-    	return !!value && typeof value === 'object'
-    }
-
-    function isSpecial(value) {
-    	var stringValue = Object.prototype.toString.call(value);
-
-    	return stringValue === '[object RegExp]'
-    		|| stringValue === '[object Date]'
-    		|| isReactElement(value)
-    }
-
-    // see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
-    var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
-    var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
-
-    function isReactElement(value) {
-    	return value.$$typeof === REACT_ELEMENT_TYPE
-    }
-
-    function emptyTarget(val) {
-    	return Array.isArray(val) ? [] : {}
-    }
-
-    function cloneUnlessOtherwiseSpecified(value, options) {
-    	return (options.clone !== false && options.isMergeableObject(value))
-    		? deepmerge(emptyTarget(value), value, options)
-    		: value
-    }
-
-    function defaultArrayMerge(target, source, options) {
-    	return target.concat(source).map(function(element) {
-    		return cloneUnlessOtherwiseSpecified(element, options)
-    	})
-    }
-
-    function getMergeFunction(key, options) {
-    	if (!options.customMerge) {
-    		return deepmerge
-    	}
-    	var customMerge = options.customMerge(key);
-    	return typeof customMerge === 'function' ? customMerge : deepmerge
-    }
-
-    function getEnumerableOwnPropertySymbols(target) {
-    	return Object.getOwnPropertySymbols
-    		? Object.getOwnPropertySymbols(target).filter(function(symbol) {
-    			return Object.propertyIsEnumerable.call(target, symbol)
-    		})
-    		: []
-    }
-
-    function getKeys(target) {
-    	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
-    }
-
-    function propertyIsOnObject(object, property) {
-    	try {
-    		return property in object
-    	} catch(_) {
-    		return false
-    	}
-    }
-
-    // Protects from prototype poisoning and unexpected merging up the prototype chain.
-    function propertyIsUnsafe(target, key) {
-    	return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-    		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-    			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
-    }
-
-    function mergeObject(target, source, options) {
-    	var destination = {};
-    	if (options.isMergeableObject(target)) {
-    		getKeys(target).forEach(function(key) {
-    			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
-    		});
-    	}
-    	getKeys(source).forEach(function(key) {
-    		if (propertyIsUnsafe(target, key)) {
-    			return
-    		}
-
-    		if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
-    			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
-    		} else {
-    			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
-    		}
-    	});
-    	return destination
-    }
-
-    function deepmerge(target, source, options) {
-    	options = options || {};
-    	options.arrayMerge = options.arrayMerge || defaultArrayMerge;
-    	options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-    	// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
-    	// implementations can use it. The caller may not replace it.
-    	options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
-
-    	var sourceIsArray = Array.isArray(source);
-    	var targetIsArray = Array.isArray(target);
-    	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
-
-    	if (!sourceAndTargetTypesMatch) {
-    		return cloneUnlessOtherwiseSpecified(source, options)
-    	} else if (sourceIsArray) {
-    		return options.arrayMerge(target, source, options)
-    	} else {
-    		return mergeObject(target, source, options)
-    	}
-    }
-
-    deepmerge.all = function deepmergeAll(array, options) {
-    	if (!Array.isArray(array)) {
-    		throw new Error('first argument should be an array')
-    	}
-
-    	return array.reduce(function(prev, next) {
-    		return deepmerge(prev, next, options)
-    	}, {})
-    };
-
-    var deepmerge_1 = deepmerge;
-
-    var cjs = deepmerge_1;
-
-    var deepmerge$1 = /*@__PURE__*/getDefaultExportFromCjs(cjs);
-
-    function updateConfigFn (newConfig) {
-        let mergedConfig;
-        mergedConfig = deepmerge$1(get_store_value(config), newConfig);
-        window.ipc.saveConfig(newConfig);
-        config.set(mergedConfig);
-    }
-
     /* src/layouts/config/appearance/AlwaysShowAlbumOverlay.svelte generated by Svelte v3.58.0 */
     const file$T = "src/layouts/config/appearance/AlwaysShowAlbumOverlay.svelte";
 
@@ -27787,16 +27893,16 @@ var app = (function () {
     			current_contrast_sample = element("current-contrast-sample");
     			current_contrast_sample.textContent = `${traduceFn('Sample')}`;
     			set_custom_element_data(current_contrast_value, "class", "svelte-1kl3fww");
-    			add_location(current_contrast_value, file$R, 34, 1, 1199);
+    			add_location(current_contrast_value, file$R, 32, 1, 1174);
     			attr_dev(input, "type", "range");
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "21");
     			attr_dev(input, "step", input_step_value = /*$keyPressed*/ ctx[1] === 'Shift' ? 0.1 : 0.5);
     			attr_dev(input, "class", "svelte-1kl3fww");
-    			add_location(input, file$R, 38, 1, 1352);
+    			add_location(input, file$R, 36, 1, 1327);
     			set_custom_element_data(current_contrast_sample, "class", "svelte-1kl3fww");
-    			add_location(current_contrast_sample, file$R, 49, 1, 1546);
-    			add_location(color_contrast_config, file$R, 33, 0, 1174);
+    			add_location(current_contrast_sample, file$R, 47, 1, 1521);
+    			add_location(color_contrast_config, file$R, 31, 0, 1149);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -27870,13 +27976,13 @@ var app = (function () {
     }
 
     function instance$V($$self, $$props, $$invalidate) {
-    	let $config;
     	let $albumPlayingDirStore;
+    	let $config;
     	let $keyPressed;
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(6, $config = $$value));
     	validate_store(albumPlayingDirStore, 'albumPlayingDirStore');
     	component_subscribe($$self, albumPlayingDirStore, $$value => $$invalidate(3, $albumPlayingDirStore = $$value));
+    	validate_store(config, 'config');
+    	component_subscribe($$self, config, $$value => $$invalidate(6, $config = $$value));
     	validate_store(keyPressed, 'keyPressed');
     	component_subscribe($$self, keyPressed, $$value => $$invalidate(1, $keyPressed = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -27890,9 +27996,7 @@ var app = (function () {
     	}
 
     	function saveContrastRatio() {
-    		set_store_value(config, $config.userOptions.contrastRatio = colorContrastRangeValue, $config);
-
-    		window.ipc.saveConfig({
+    		updateConfigFn({
     			userOptions: { contrastRatio: colorContrastRangeValue }
     		}).then(() => {
     			notifyService.success('Contrast Ratio saved!');
@@ -27917,6 +28021,7 @@ var app = (function () {
     		applyColorSchemeFn,
     		getAlbumColors,
     		traduceFn,
+    		updateConfigFn,
     		notifyService,
     		config,
     		albumPlayingDirStore,
@@ -27924,8 +28029,8 @@ var app = (function () {
     		colorContrastRangeValue,
     		updateColor,
     		saveContrastRatio,
-    		$config,
     		$albumPlayingDirStore,
+    		$config,
     		$keyPressed
     	});
 
@@ -28712,9 +28817,9 @@ var app = (function () {
     			theme_name2 = element("theme-name");
     			theme_name2.textContent = `${traduceFn('Night')}`;
     			set_custom_element_data(section_icon0, "class", "svelte-ejcqf9");
-    			add_location(section_icon0, file$K, 28, 2, 1121);
+    			add_location(section_icon0, file$K, 30, 2, 1151);
     			set_custom_element_data(theme_name0, "class", "svelte-ejcqf9");
-    			add_location(theme_name0, file$K, 43, 2, 1539);
+    			add_location(theme_name0, file$K, 45, 2, 1569);
     			set_custom_element_data(theme_section0, "class", "smooth-colors svelte-ejcqf9");
     			set_custom_element_data(theme_section0, "data-theme", "SystemBased");
 
@@ -28722,11 +28827,13 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			add_location(theme_section0, file$K, 22, 1, 917);
+    			set_custom_element_data(theme_section0, "tabindex", "-1");
+    			set_custom_element_data(theme_section0, "role", "button");
+    			add_location(theme_section0, file$K, 21, 1, 860);
     			set_custom_element_data(section_icon1, "class", "smooth-colors svelte-ejcqf9");
-    			add_location(section_icon1, file$K, 51, 2, 1791);
+    			add_location(section_icon1, file$K, 56, 2, 1900);
     			set_custom_element_data(theme_name1, "class", "svelte-ejcqf9");
-    			add_location(theme_name1, file$K, 56, 2, 2167);
+    			add_location(theme_name1, file$K, 69, 2, 2310);
     			set_custom_element_data(theme_section1, "class", "smooth-colors svelte-ejcqf9");
     			set_custom_element_data(theme_section1, "data-theme", "Day");
 
@@ -28734,11 +28841,13 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			add_location(theme_section1, file$K, 45, 1, 1611);
+    			set_custom_element_data(theme_section1, "tabindex", "-1");
+    			set_custom_element_data(theme_section1, "role", "button");
+    			add_location(theme_section1, file$K, 47, 1, 1641);
     			set_custom_element_data(section_icon2, "class", "smooth-colors svelte-ejcqf9");
-    			add_location(section_icon2, file$K, 64, 2, 2416);
+    			add_location(section_icon2, file$K, 80, 2, 2640);
     			set_custom_element_data(theme_name2, "class", "svelte-ejcqf9");
-    			add_location(theme_name2, file$K, 70, 2, 2799);
+    			add_location(theme_name2, file$K, 94, 2, 3057);
     			set_custom_element_data(theme_section2, "class", "smooth-colors svelte-ejcqf9");
     			set_custom_element_data(theme_section2, "data-theme", "Night");
 
@@ -28746,9 +28855,11 @@ var app = (function () {
     			? 'true'
     			: 'false');
 
-    			add_location(theme_section2, file$K, 58, 1, 2230);
+    			set_custom_element_data(theme_section2, "tabindex", "-1");
+    			set_custom_element_data(theme_section2, "role", "button");
+    			add_location(theme_section2, file$K, 71, 1, 2373);
     			set_custom_element_data(day_night_theme_config, "class", "svelte-ejcqf9");
-    			add_location(day_night_theme_config, file$K, 21, 0, 891);
+    			add_location(day_night_theme_config, file$K, 20, 0, 834);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -28783,8 +28894,11 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(theme_section0, "click", /*click_handler*/ ctx[3], false, false, false, false),
-    					listen_dev(theme_section1, "click", /*click_handler_1*/ ctx[4], false, false, false, false),
-    					listen_dev(theme_section2, "click", /*click_handler_2*/ ctx[5], false, false, false, false)
+    					listen_dev(theme_section0, "keypress", /*keypress_handler*/ ctx[4], false, false, false, false),
+    					listen_dev(theme_section1, "click", /*click_handler_1*/ ctx[5], false, false, false, false),
+    					listen_dev(theme_section1, "keypress", /*keypress_handler_1*/ ctx[6], false, false, false, false),
+    					listen_dev(theme_section2, "click", /*click_handler_2*/ ctx[7], false, false, false, false),
+    					listen_dev(theme_section2, "keypress", /*keypress_handler_2*/ ctx[8], false, false, false, false)
     				];
 
     				mounted = true;
@@ -28916,8 +29030,11 @@ var app = (function () {
     	});
 
     	const click_handler = () => saveThemeToConfig('SystemBased');
+    	const keypress_handler = () => saveThemeToConfig('SystemBased');
     	const click_handler_1 = () => saveThemeToConfig('Day');
+    	const keypress_handler_1 = () => saveThemeToConfig('Day');
     	const click_handler_2 = () => saveThemeToConfig('Night');
+    	const keypress_handler_2 = () => saveThemeToConfig('Night');
 
     	$$self.$capture_state = () => ({
     		MoonFillIcon,
@@ -28947,8 +29064,11 @@ var app = (function () {
     		iconsStyle,
     		saveThemeToConfig,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
-    		click_handler_2
+    		keypress_handler_1,
+    		click_handler_2,
+    		keypress_handler_2
     	];
     }
 
@@ -28981,8 +29101,10 @@ var app = (function () {
     			config_edit_button = element("config-edit-button");
     			config_edit_button.textContent = "···";
     			set_custom_element_data(config_edit_button, "class", "smooth-colors");
-    			add_location(config_edit_button, file$J, 38, 1, 1150);
-    			add_location(font_size_config, file$J, 37, 0, 1099);
+    			add_location(config_edit_button, file$J, 37, 1, 1165);
+    			set_custom_element_data(font_size_config, "tabindex", "-1");
+    			set_custom_element_data(font_size_config, "role", "button");
+    			add_location(font_size_config, file$J, 36, 0, 1052);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -28992,7 +29114,11 @@ var app = (function () {
     			append_dev(font_size_config, config_edit_button);
 
     			if (!mounted) {
-    				dispose = listen_dev(font_size_config, "click", /*click_handler*/ ctx[1], false, false, false, false);
+    				dispose = [
+    					listen_dev(font_size_config, "click", /*click_handler*/ ctx[1], false, false, false, false),
+    					listen_dev(font_size_config, "keypress", /*keypress_handler*/ ctx[2], false, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
@@ -29002,7 +29128,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(font_size_config);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -29018,15 +29144,15 @@ var app = (function () {
     }
 
     function instance$N($$self, $$props, $$invalidate) {
-    	let $config;
     	let $layoutToShow;
+    	let $config;
     	let $rangeInputService;
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
     	component_subscribe($$self, layoutToShow, $$value => $$invalidate(3, $layoutToShow = $$value));
+    	validate_store(config, 'config');
+    	component_subscribe($$self, config, $$value => $$invalidate(4, $config = $$value));
     	validate_store(rangeInputService, 'rangeInputService');
-    	component_subscribe($$self, rangeInputService, $$value => $$invalidate(4, $rangeInputService = $$value));
+    	component_subscribe($$self, rangeInputService, $$value => $$invalidate(5, $rangeInputService = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('FontSizeConfig', slots, []);
 
@@ -29056,8 +29182,7 @@ var app = (function () {
     	}
 
     	function saveFontSize(newFontSize) {
-    		set_store_value(config, $config.userOptions.fontSize = newFontSize, $config);
-    		window.ipc.saveConfig({ userOptions: { fontSize: newFontSize } });
+    		updateConfigFn({ userOptions: { fontSize: newFontSize } });
     	}
 
     	const writable_props = [];
@@ -29067,19 +29192,21 @@ var app = (function () {
     	});
 
     	const click_handler = () => setFontSize();
+    	const keypress_handler = () => setFontSize();
 
     	$$self.$capture_state = () => ({
+    		updateConfigFn,
     		config,
     		layoutToShow,
     		rangeInputService,
     		setFontSize,
     		saveFontSize,
-    		$config,
     		$layoutToShow,
+    		$config,
     		$rangeInputService
     	});
 
-    	return [setFontSize, click_handler];
+    	return [setFontSize, click_handler, keypress_handler];
     }
 
     class FontSizeConfig extends SvelteComponentDev {
@@ -29119,8 +29246,10 @@ var app = (function () {
     			config_edit_button = element("config-edit-button");
     			config_edit_button.textContent = "···";
     			set_custom_element_data(config_edit_button, "class", "smooth-colors");
-    			add_location(config_edit_button, file$I, 61, 1, 2168);
-    			add_location(grid_art_size_config, file$I, 60, 0, 2113);
+    			add_location(config_edit_button, file$I, 59, 1, 2224);
+    			set_custom_element_data(grid_art_size_config, "tabindex", "-1");
+    			set_custom_element_data(grid_art_size_config, "role", "button");
+    			add_location(grid_art_size_config, file$I, 58, 0, 2107);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -29130,7 +29259,11 @@ var app = (function () {
     			append_dev(grid_art_size_config, config_edit_button);
 
     			if (!mounted) {
-    				dispose = listen_dev(grid_art_size_config, "click", /*click_handler*/ ctx[1], false, false, false, false);
+    				dispose = [
+    					listen_dev(grid_art_size_config, "click", /*click_handler*/ ctx[1], false, false, false, false),
+    					listen_dev(grid_art_size_config, "keypress", /*keypress_handler*/ ctx[2], false, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
@@ -29140,7 +29273,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(grid_art_size_config);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -29160,11 +29293,11 @@ var app = (function () {
     	let $layoutToShow;
     	let $rangeInputService;
     	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(2, $config = $$value));
+    	component_subscribe($$self, config, $$value => $$invalidate(3, $config = $$value));
     	validate_store(layoutToShow, 'layoutToShow');
-    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(3, $layoutToShow = $$value));
+    	component_subscribe($$self, layoutToShow, $$value => $$invalidate(4, $layoutToShow = $$value));
     	validate_store(rangeInputService, 'rangeInputService');
-    	component_subscribe($$self, rangeInputService, $$value => $$invalidate(4, $rangeInputService = $$value));
+    	component_subscribe($$self, rangeInputService, $$value => $$invalidate(5, $rangeInputService = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('GridArtSize', slots, []);
 
@@ -29203,9 +29336,7 @@ var app = (function () {
     	}
 
     	function saveArtSize(newArtSize) {
-    		set_store_value(config, $config.userOptions.artSize = newArtSize, $config);
-
-    		window.ipc.saveConfig({ userOptions: { artSize: newArtSize } }).then(() => {
+    		updateConfigFn({ userOptions: { artSize: newArtSize } }).then(() => {
     			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach(artElement => {
     				let parentAlbumElementRootDir = artElement.closest('album').getAttribute('rootDir');
 
@@ -29230,9 +29361,11 @@ var app = (function () {
     	});
 
     	const click_handler = () => setGridSize();
+    	const keypress_handler = () => setGridSize();
 
     	$$self.$capture_state = () => ({
     		isElementInViewportFn,
+    		updateConfigFn,
     		UpdateIcon,
     		config,
     		layoutToShow,
@@ -29245,7 +29378,7 @@ var app = (function () {
     		$rangeInputService
     	});
 
-    	return [setGridSize, click_handler];
+    	return [setGridSize, click_handler, keypress_handler];
     }
 
     class GridArtSize extends SvelteComponentDev {
@@ -29277,10 +29410,10 @@ var app = (function () {
     			config_edit_button = element("config-edit-button");
     			config_edit_button.textContent = "···";
     			set_custom_element_data(config_edit_button, "class", "smooth-colors");
-    			add_location(config_edit_button, file$H, 40, 1, 1207);
+    			add_location(config_edit_button, file$H, 40, 1, 1239);
     			set_custom_element_data(grid_art_size_config, "tabindex", "-1");
     			set_custom_element_data(grid_art_size_config, "role", "button");
-    			add_location(grid_art_size_config, file$H, 39, 0, 1092);
+    			add_location(grid_art_size_config, file$H, 39, 0, 1124);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -29345,25 +29478,24 @@ var app = (function () {
     			confirmButtonText: 'Confirm',
     			cancelButtonText: 'Close',
     			onChange: value => {
-    				updateArtSize(value);
+    				updateGridGapSize(value);
     			},
     			onConfirm: newGridGap => {
-    				saveArtSize(newGridGap);
+    				saveGridGapSize(newGridGap);
     			},
     			onCancel: previousGridGap => {
-    				saveArtSize(previousGridGap);
+    				saveGridGapSize(previousGridGap);
     				set_store_value(layoutToShow, $layoutToShow = 'Config', $layoutToShow);
     			}
     		});
     	}
 
-    	function updateArtSize(newGridGap) {
+    	function updateGridGapSize(newGridGap) {
     		set_store_value(config, $config.userOptions.gridGap = newGridGap, $config);
     	}
 
-    	function saveArtSize(newGridGap) {
-    		set_store_value(config, $config.userOptions.gridGap = newGridGap, $config);
-    		window.ipc.saveConfig({ userOptions: { gridGap: newGridGap } });
+    	function saveGridGapSize(newGridGap) {
+    		updateConfigFn({ userOptions: { gridGap: newGridGap } });
     	}
 
     	const writable_props = [];
@@ -29376,12 +29508,13 @@ var app = (function () {
     	const keypress_handler = () => setGridGap();
 
     	$$self.$capture_state = () => ({
+    		updateConfigFn,
     		config,
     		layoutToShow,
     		rangeInputService,
     		setGridGap,
-    		updateArtSize,
-    		saveArtSize,
+    		updateGridGapSize,
+    		saveGridGapSize,
     		$config,
     		$layoutToShow,
     		$rangeInputService
@@ -29533,13 +29666,13 @@ var app = (function () {
     			option1.textContent = "🇫🇷 Français";
     			option0.__value = "english";
     			option0.value = option0.__value;
-    			add_location(option0, file$F, 23, 1, 861);
+    			add_location(option0, file$F, 24, 1, 902);
     			option1.__value = "french";
     			option1.value = option1.__value;
-    			add_location(option1, file$F, 24, 1, 908);
+    			add_location(option1, file$F, 25, 1, 949);
     			attr_dev(select, "class", "svelte-attqus");
     			if (/*currentLanguage*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[2].call(select));
-    			add_location(select, file$F, 22, 0, 794);
+    			add_location(select, file$F, 23, 0, 835);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -29611,7 +29744,7 @@ var app = (function () {
     	let currentLanguage = $config.userOptions.language;
 
     	function languageChanged() {
-    		window.ipc.saveConfig({
+    		updateConfigFn({
     			userOptions: { language: currentLanguage }
     		}).then(() => {
     			localStorage.setItem('afterReload', JSON.stringify({
@@ -29635,6 +29768,7 @@ var app = (function () {
     	}
 
     	$$self.$capture_state = () => ({
+    		updateConfigFn,
     		TranslateIcon,
     		config,
     		currentSongProgressStore,
@@ -31849,7 +31983,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (88:1) {:else}
+    // (93:1) {:else}
     function create_else_block_1(ctx) {
     	let loading_community_profiles;
     	let span;
@@ -31871,9 +32005,9 @@ var app = (function () {
     			span.textContent = `${traduceFn('Fetching community profiles')}`;
     			t1 = space();
     			create_component(fetchingicon.$$.fragment);
-    			add_location(span, file$t, 89, 3, 3556);
+    			add_location(span, file$t, 94, 3, 3653);
     			set_custom_element_data(loading_community_profiles, "class", "svelte-670t9i");
-    			add_location(loading_community_profiles, file$t, 88, 2, 3524);
+    			add_location(loading_community_profiles, file$t, 93, 2, 3621);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, loading_community_profiles, anchor);
@@ -31902,14 +32036,14 @@ var app = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(88:1) {:else}",
+    		source: "(93:1) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (82:38) 
+    // (87:38) 
     function create_if_block_3$1(ctx) {
     	let community_profile_fetch_error;
     	let span0;
@@ -31932,13 +32066,13 @@ var app = (function () {
     			button = element("button");
     			button.textContent = `${traduceFn('Refetch')}`;
     			attr_dev(span0, "class", "svelte-670t9i");
-    			add_location(span0, file$t, 83, 3, 3268);
+    			add_location(span0, file$t, 88, 3, 3365);
     			attr_dev(span1, "class", "svelte-670t9i");
-    			add_location(span1, file$t, 84, 3, 3335);
+    			add_location(span1, file$t, 89, 3, 3432);
     			attr_dev(button, "class", "svelte-670t9i");
-    			add_location(button, file$t, 85, 3, 3396);
+    			add_location(button, file$t, 90, 3, 3493);
     			set_custom_element_data(community_profile_fetch_error, "class", "svelte-670t9i");
-    			add_location(community_profile_fetch_error, file$t, 82, 2, 3233);
+    			add_location(community_profile_fetch_error, file$t, 87, 2, 3330);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, community_profile_fetch_error, anchor);
@@ -31949,7 +32083,7 @@ var app = (function () {
     			append_dev(community_profile_fetch_error, button);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler_4*/ ctx[12], false, false, false, false);
+    				dispose = listen_dev(button, "click", /*click_handler_2*/ ctx[11], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -31967,14 +32101,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3$1.name,
     		type: "if",
-    		source: "(82:38) ",
+    		source: "(87:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (53:1) {#if communityProfiles && communityProfiles.length > 0}
+    // (57:1) {#if communityProfiles && communityProfiles.length > 0}
     function create_if_block$8(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -32010,7 +32144,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*communityProfiles, traduceFn, $equalizerProfiles, saveCommunityEqualizer, $currentEqHash, equalizerServiceNew, $currentEqProfile, getWarning*/ 63) {
+    			if (dirty & /*communityProfiles, traduceFn, $equalizerProfiles, saveCommunityEqualizer, $currentEqHash, onEqualizerNameClickEvent, getWarning*/ 95) {
     				each_value = /*communityProfiles*/ ctx[0];
     				validate_each_argument(each_value);
     				group_outros();
@@ -32048,14 +32182,14 @@ var app = (function () {
     		block,
     		id: create_if_block$8.name,
     		type: "if",
-    		source: "(53:1) {#if communityProfiles && communityProfiles.length > 0}",
+    		source: "(57:1) {#if communityProfiles && communityProfiles.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (62:5) {#if getWarning(eqProfile.values)}
+    // (67:5) {#if getWarning(eqProfile.values)}
     function create_if_block_2$3(ctx) {
     	let span;
     	let warningicon;
@@ -32073,7 +32207,7 @@ var app = (function () {
     			span = element("span");
     			create_component(warningicon.$$.fragment);
     			attr_dev(span, "class", "warning");
-    			add_location(span, file$t, 62, 6, 2471);
+    			add_location(span, file$t, 67, 6, 2568);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -32099,14 +32233,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(62:5) {#if getWarning(eqProfile.values)}",
+    		source: "(67:5) {#if getWarning(eqProfile.values)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (75:4) {:else}
+    // (80:4) {:else}
     function create_else_block$2(ctx) {
     	let button;
     	let downloadicon;
@@ -32124,8 +32258,8 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function click_handler_3() {
-    		return /*click_handler_3*/ ctx[11](/*eqProfile*/ ctx[13]);
+    	function click_handler_1() {
+    		return /*click_handler_1*/ ctx[10](/*eqProfile*/ ctx[13]);
     	}
 
     	const block = {
@@ -32135,7 +32269,7 @@ var app = (function () {
     			t0 = space();
     			t1 = text(t1_value);
     			attr_dev(button, "class", "svelte-670t9i");
-    			add_location(button, file$t, 75, 5, 2936);
+    			add_location(button, file$t, 80, 5, 3033);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -32145,7 +32279,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", click_handler_3, false, false, false, false);
+    				dispose = listen_dev(button, "click", click_handler_1, false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -32173,14 +32307,14 @@ var app = (function () {
     		block,
     		id: create_else_block$2.name,
     		type: "else",
-    		source: "(75:4) {:else}",
+    		source: "(80:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (70:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
+    // (75:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}
     function create_if_block_1$5(ctx) {
     	let button;
     	let downloadedicon;
@@ -32204,7 +32338,7 @@ var app = (function () {
     			t1 = text(t1_value);
     			button.disabled = true;
     			attr_dev(button, "class", "svelte-670t9i");
-    			add_location(button, file$t, 70, 5, 2765);
+    			add_location(button, file$t, 75, 5, 2862);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -32233,18 +32367,18 @@ var app = (function () {
     		block,
     		id: create_if_block_1$5.name,
     		type: "if",
-    		source: "(70:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}",
+    		source: "(75:4) {#if $equalizerProfiles.findIndex(value => value.hash === eqProfile.hash) !== -1}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (54:2) {#each communityProfiles as eqProfile, index (index)}
+    // (58:2) {#each communityProfiles as eqProfile, index (index)}
     function create_each_block$9(key_1, ctx) {
     	let equalizer_field;
     	let equalizer_name;
-    	let show_if_1 = /*getWarning*/ ctx[4](/*eqProfile*/ ctx[13].values);
+    	let show_if_1 = /*getWarning*/ ctx[3](/*eqProfile*/ ctx[13].values);
     	let t0;
     	let t1_value = traduceFn(/*eqProfile*/ ctx[13].name) + "";
     	let t1;
@@ -32269,20 +32403,16 @@ var app = (function () {
     		return /*click_handler*/ ctx[8](/*eqProfile*/ ctx[13]);
     	}
 
-    	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[9](/*eqProfile*/ ctx[13]);
-    	}
-
-    	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[10](/*eqProfile*/ ctx[13]);
+    	function keypress_handler() {
+    		return /*keypress_handler*/ ctx[9](/*eqProfile*/ ctx[13]);
     	}
 
     	const if_block_creators = [create_if_block_1$5, create_else_block$2];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (dirty & /*$equalizerProfiles, communityProfiles*/ 9) show_if = null;
-    		if (show_if == null) show_if = !!(/*$equalizerProfiles*/ ctx[3].findIndex(func) !== -1);
+    		if (dirty & /*$equalizerProfiles, communityProfiles*/ 5) show_if = null;
+    		if (show_if == null) show_if = !!(/*$equalizerProfiles*/ ctx[2].findIndex(func) !== -1);
     		if (show_if) return 0;
     		return 1;
     	}
@@ -32307,10 +32437,12 @@ var app = (function () {
     			? 'current'
     			: '') + " svelte-670t9i"));
 
-    			add_location(equalizer_name, file$t, 55, 4, 2147);
+    			set_custom_element_data(equalizer_name, "tabindex", "-1");
+    			set_custom_element_data(equalizer_name, "role", "button");
+    			add_location(equalizer_name, file$t, 59, 4, 2277);
     			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = /*eqProfile*/ ctx[13].hash);
     			set_custom_element_data(equalizer_field, "class", "svelte-670t9i");
-    			add_location(equalizer_field, file$t, 54, 3, 2105);
+    			add_location(equalizer_field, file$t, 58, 3, 2235);
     			this.first = equalizer_field;
     		},
     		m: function mount(target, anchor) {
@@ -32327,8 +32459,7 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(equalizer_name, "click", click_handler, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_1, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_2, false, false, false, false)
+    					listen_dev(equalizer_name, "keypress", keypress_handler, false, false, false, false)
     				];
 
     				mounted = true;
@@ -32336,7 +32467,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*communityProfiles*/ 1) show_if_1 = /*getWarning*/ ctx[4](/*eqProfile*/ ctx[13].values);
+    			if (dirty & /*communityProfiles*/ 1) show_if_1 = /*getWarning*/ ctx[3](/*eqProfile*/ ctx[13].values);
 
     			if (show_if_1) {
     				if (if_block0) {
@@ -32421,7 +32552,7 @@ var app = (function () {
     		block,
     		id: create_each_block$9.name,
     		type: "each",
-    		source: "(54:2) {#each communityProfiles as eqProfile, index (index)}",
+    		source: "(58:2) {#each communityProfiles as eqProfile, index (index)}",
     		ctx
     	});
 
@@ -32450,7 +32581,7 @@ var app = (function () {
     			equalizer_profiles_community = element("equalizer-profiles-community");
     			if_block.c();
     			set_custom_element_data(equalizer_profiles_community, "class", "smooth-colors svelte-670t9i");
-    			add_location(equalizer_profiles_community, file$t, 51, 0, 1936);
+    			add_location(equalizer_profiles_community, file$t, 55, 0, 2066);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -32514,15 +32645,15 @@ var app = (function () {
     }
 
     function instance$x($$self, $$props, $$invalidate) {
-    	let $currentEqHash;
     	let $currentEqProfile;
+    	let $currentEqHash;
     	let $equalizerProfiles;
+    	validate_store(currentEqProfile, 'currentEqProfile');
+    	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(12, $currentEqProfile = $$value));
     	validate_store(currentEqHash, 'currentEqHash');
     	component_subscribe($$self, currentEqHash, $$value => $$invalidate(1, $currentEqHash = $$value));
-    	validate_store(currentEqProfile, 'currentEqProfile');
-    	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(2, $currentEqProfile = $$value));
     	validate_store(equalizerProfiles, 'equalizerProfiles');
-    	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(3, $equalizerProfiles = $$value));
+    	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(2, $equalizerProfiles = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EqualizerProfilesCommunity', slots, []);
     	let communityProfiles = [];
@@ -32567,6 +32698,12 @@ var app = (function () {
     		});
     	}
 
+    	function onEqualizerNameClickEvent(eqProfile) {
+    		equalizerService.loadEqualizerValuesFn(eqProfile.values);
+    		set_store_value(currentEqHash, $currentEqHash = eqProfile.hash, $currentEqHash);
+    		set_store_value(currentEqProfile, $currentEqProfile = eqProfile, $currentEqProfile);
+    	}
+
     	onMount(() => {
     		fetchCommunityProfiles();
     	});
@@ -32578,11 +32715,10 @@ var app = (function () {
     	});
 
     	const func = (eqProfile, value) => value.hash === eqProfile.hash;
-    	const click_handler = eqProfile => equalizerService.loadEqualizerValuesFn(eqProfile.values);
-    	const click_handler_1 = eqProfile => set_store_value(currentEqHash, $currentEqHash = eqProfile.hash, $currentEqHash);
-    	const click_handler_2 = eqProfile => set_store_value(currentEqProfile, $currentEqProfile = eqProfile, $currentEqProfile);
-    	const click_handler_3 = eqProfile => saveCommunityEqualizer(eqProfile.values, eqProfile.name, eqProfile.hash);
-    	const click_handler_4 = () => fetchCommunityProfiles();
+    	const click_handler = eqProfile => onEqualizerNameClickEvent(eqProfile);
+    	const keypress_handler = eqProfile => onEqualizerNameClickEvent(eqProfile);
+    	const click_handler_1 = eqProfile => saveCommunityEqualizer(eqProfile.values, eqProfile.name, eqProfile.hash);
+    	const click_handler_2 = () => fetchCommunityProfiles();
 
     	$$self.$capture_state = () => ({
     		onMount,
@@ -32601,8 +32737,9 @@ var app = (function () {
     		getWarning,
     		saveCommunityEqualizer,
     		fetchCommunityProfiles,
-    		$currentEqHash,
+    		onEqualizerNameClickEvent,
     		$currentEqProfile,
+    		$currentEqHash,
     		$equalizerProfiles
     	});
 
@@ -32617,17 +32754,16 @@ var app = (function () {
     	return [
     		communityProfiles,
     		$currentEqHash,
-    		$currentEqProfile,
     		$equalizerProfiles,
     		getWarning,
     		saveCommunityEqualizer,
     		fetchCommunityProfiles,
+    		onEqualizerNameClickEvent,
     		func,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
-    		click_handler_2,
-    		click_handler_3,
-    		click_handler_4
+    		click_handler_2
     	];
     }
 
@@ -32962,15 +33098,15 @@ var app = (function () {
 
     function get_each_context$8(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[10] = list[i];
+    	child_ctx[11] = list[i];
     	return child_ctx;
     }
 
-    // (11:1) {#each $equalizerProfiles as eqProfile (eqProfile.hash)}
+    // (16:1) {#each $equalizerProfiles as eqProfile (eqProfile.hash)}
     function create_each_block$8(key_1, ctx) {
     	let equalizer_field;
     	let equalizer_name;
-    	let t0_value = traduceFn(/*eqProfile*/ ctx[10].name) + "";
+    	let t0_value = traduceFn(/*eqProfile*/ ctx[11].name) + "";
     	let t0;
     	let equalizer_name_class_value;
     	let t1;
@@ -32992,19 +33128,11 @@ var app = (function () {
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[3](/*eqProfile*/ ctx[10]);
+    		return /*click_handler*/ ctx[3](/*eqProfile*/ ctx[11]);
     	}
 
-    	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[4](/*eqProfile*/ ctx[10]);
-    	}
-
-    	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[5](/*eqProfile*/ ctx[10]);
-    	}
-
-    	function click_handler_3() {
-    		return /*click_handler_3*/ ctx[6](/*eqProfile*/ ctx[10]);
+    	function keypress_handler() {
+    		return /*keypress_handler*/ ctx[4](/*eqProfile*/ ctx[11]);
     	}
 
     	editicon = new EditIcon({
@@ -33014,8 +33142,12 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function click_handler_4() {
-    		return /*click_handler_4*/ ctx[7](/*eqProfile*/ ctx[10]);
+    	function click_handler_1() {
+    		return /*click_handler_1*/ ctx[5](/*eqProfile*/ ctx[11]);
+    	}
+
+    	function keypress_handler_1() {
+    		return /*keypress_handler_1*/ ctx[6](/*eqProfile*/ ctx[11]);
     	}
 
     	deleteicon = new DeleteIcon({
@@ -33025,8 +33157,12 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function click_handler_5() {
-    		return /*click_handler_5*/ ctx[8](/*eqProfile*/ ctx[10]);
+    	function click_handler_2() {
+    		return /*click_handler_2*/ ctx[7](/*eqProfile*/ ctx[11]);
+    	}
+
+    	function keypress_handler_2() {
+    		return /*keypress_handler_2*/ ctx[8](/*eqProfile*/ ctx[11]);
     	}
 
     	const block = {
@@ -33048,18 +33184,24 @@ var app = (function () {
     			t6 = text(t6_value);
     			t7 = space();
 
-    			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
+    			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[0] === /*eqProfile*/ ctx[11].hash
     			? 'current'
-    			: '') + " svelte-9swy31"));
+    			: '') + " svelte-7b4bgi"));
 
-    			add_location(equalizer_name, file$p, 12, 3, 638);
-    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-9swy31");
-    			add_location(equalizer_rename, file$p, 19, 3, 1028);
-    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-9swy31");
-    			add_location(equalizer_delete, file$p, 26, 3, 1299);
-    			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[10].hash);
-    			set_custom_element_data(equalizer_field, "class", "svelte-9swy31");
-    			add_location(equalizer_field, file$p, 11, 2, 592);
+    			set_custom_element_data(equalizer_name, "tabindex", "-1");
+    			set_custom_element_data(equalizer_name, "role", "button");
+    			add_location(equalizer_name, file$p, 17, 3, 822);
+    			set_custom_element_data(equalizer_rename, "class", "eqProfileButton svelte-7b4bgi");
+    			set_custom_element_data(equalizer_rename, "tabindex", "-1");
+    			set_custom_element_data(equalizer_rename, "role", "button");
+    			add_location(equalizer_rename, file$p, 24, 3, 1108);
+    			set_custom_element_data(equalizer_delete, "class", "eqProfileButton svelte-7b4bgi");
+    			set_custom_element_data(equalizer_delete, "tabindex", "-1");
+    			set_custom_element_data(equalizer_delete, "role", "button");
+    			add_location(equalizer_delete, file$p, 34, 3, 1506);
+    			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[11].hash);
+    			set_custom_element_data(equalizer_field, "class", "svelte-7b4bgi");
+    			add_location(equalizer_field, file$p, 16, 2, 776);
     			this.first = equalizer_field;
     		},
     		m: function mount(target, anchor) {
@@ -33082,11 +33224,11 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(equalizer_name, "click", click_handler, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_1, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_2, false, false, false, false),
-    					listen_dev(equalizer_name, "click", click_handler_3, false, false, false, false),
-    					listen_dev(equalizer_rename, "click", click_handler_4, false, false, false, false),
-    					listen_dev(equalizer_delete, "click", click_handler_5, false, false, false, false)
+    					listen_dev(equalizer_name, "keypress", keypress_handler, false, false, false, false),
+    					listen_dev(equalizer_rename, "click", click_handler_1, false, false, false, false),
+    					listen_dev(equalizer_rename, "keypress", keypress_handler_1, false, false, false, false),
+    					listen_dev(equalizer_delete, "click", click_handler_2, false, false, false, false),
+    					listen_dev(equalizer_delete, "keypress", keypress_handler_2, false, false, false, false)
     				];
 
     				mounted = true;
@@ -33094,15 +33236,15 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if ((!current || dirty & /*$equalizerProfiles*/ 1) && t0_value !== (t0_value = traduceFn(/*eqProfile*/ ctx[10].name) + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty & /*$equalizerProfiles*/ 2) && t0_value !== (t0_value = traduceFn(/*eqProfile*/ ctx[11].name) + "")) set_data_dev(t0, t0_value);
 
-    			if (!current || dirty & /*$currentEqHash, $equalizerProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[10].hash
+    			if (!current || dirty & /*$currentEqHash, $equalizerProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[0] === /*eqProfile*/ ctx[11].hash
     			? 'current'
-    			: '') + " svelte-9swy31"))) {
+    			: '') + " svelte-7b4bgi"))) {
     				set_custom_element_data(equalizer_name, "class", equalizer_name_class_value);
     			}
 
-    			if (!current || dirty & /*$equalizerProfiles*/ 1 && equalizer_field_id_value !== (equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[10].hash)) {
+    			if (!current || dirty & /*$equalizerProfiles*/ 2 && equalizer_field_id_value !== (equalizer_field_id_value = "eq-" + /*eqProfile*/ ctx[11].hash)) {
     				set_custom_element_data(equalizer_field, "id", equalizer_field_id_value);
     			}
     		},
@@ -33130,7 +33272,7 @@ var app = (function () {
     		block,
     		id: create_each_block$8.name,
     		type: "each",
-    		source: "(11:1) {#each $equalizerProfiles as eqProfile (eqProfile.hash)}",
+    		source: "(16:1) {#each $equalizerProfiles as eqProfile (eqProfile.hash)}",
     		ctx
     	});
 
@@ -33150,9 +33292,9 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let each_value = /*$equalizerProfiles*/ ctx[0];
+    	let each_value = /*$equalizerProfiles*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*eqProfile*/ ctx[10].hash;
+    	const get_key = ctx => /*eqProfile*/ ctx[11].hash;
     	validate_each_keys(ctx, each_value, get_each_context$8, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -33181,10 +33323,10 @@ var app = (function () {
     			create_component(addicon.$$.fragment);
     			t1 = space();
     			t2 = text(t2_value);
-    			set_custom_element_data(equalizer_profiles, "class", "smooth-colors svelte-9swy31");
-    			add_location(equalizer_profiles, file$p, 9, 0, 489);
-    			attr_dev(button, "class", "addProfile svelte-9swy31");
-    			add_location(button, file$p, 37, 0, 1622);
+    			set_custom_element_data(equalizer_profiles, "class", "smooth-colors svelte-7b4bgi");
+    			add_location(equalizer_profiles, file$p, 14, 0, 673);
+    			attr_dev(button, "class", "addProfile svelte-7b4bgi");
+    			add_location(button, file$p, 48, 0, 1956);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -33206,13 +33348,13 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*click_handler_6*/ ctx[9], false, false, false, false);
+    				dispose = listen_dev(button, "click", /*click_handler_3*/ ctx[9], false, false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*$equalizerProfiles, equalizerService, traduceFn, $currentEqHash, $currentEqProfile*/ 7) {
-    				each_value = /*$equalizerProfiles*/ ctx[0];
+    			if (dirty & /*$equalizerProfiles, equalizerService, traduceFn, $currentEqHash, onEqualizerNameClickEvent*/ 7) {
+    				each_value = /*$equalizerProfiles*/ ctx[1];
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context$8, get_key);
@@ -33265,30 +33407,38 @@ var app = (function () {
     }
 
     function instance$t($$self, $$props, $$invalidate) {
-    	let $equalizerProfiles;
-    	let $currentEqHash;
     	let $currentEqProfile;
-    	validate_store(equalizerProfiles, 'equalizerProfiles');
-    	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(0, $equalizerProfiles = $$value));
-    	validate_store(currentEqHash, 'currentEqHash');
-    	component_subscribe($$self, currentEqHash, $$value => $$invalidate(1, $currentEqHash = $$value));
+    	let $currentEqHash;
+    	let $equalizerProfiles;
     	validate_store(currentEqProfile, 'currentEqProfile');
-    	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(2, $currentEqProfile = $$value));
+    	component_subscribe($$self, currentEqProfile, $$value => $$invalidate(10, $currentEqProfile = $$value));
+    	validate_store(currentEqHash, 'currentEqHash');
+    	component_subscribe($$self, currentEqHash, $$value => $$invalidate(0, $currentEqHash = $$value));
+    	validate_store(equalizerProfiles, 'equalizerProfiles');
+    	component_subscribe($$self, equalizerProfiles, $$value => $$invalidate(1, $equalizerProfiles = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('EqualizerProfilesUser', slots, []);
+
+    	function onEqualizerNameClickEvent(eqProfile) {
+    		equalizerService.saveEqHashConfigFn(eqProfile.hash);
+    		set_store_value(currentEqHash, $currentEqHash = eqProfile.hash, $currentEqHash);
+    		set_store_value(currentEqProfile, $currentEqProfile = eqProfile, $currentEqProfile);
+    		equalizerService.loadEqualizerValuesFn(eqProfile.values);
+    	}
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<EqualizerProfilesUser> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = eqProfile => equalizerService.saveEqHashConfigFn(eqProfile.hash);
-    	const click_handler_1 = eqProfile => set_store_value(currentEqHash, $currentEqHash = eqProfile.hash, $currentEqHash);
-    	const click_handler_2 = eqProfile => set_store_value(currentEqProfile, $currentEqProfile = eqProfile, $currentEqProfile);
-    	const click_handler_3 = eqProfile => equalizerService.loadEqualizerValuesFn(eqProfile.values);
-    	const click_handler_4 = eqProfile => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name);
-    	const click_handler_5 = eqProfile => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name);
-    	const click_handler_6 = () => equalizerService.addEqualizerFn();
+    	const click_handler = eqProfile => onEqualizerNameClickEvent(eqProfile);
+    	const keypress_handler = eqProfile => onEqualizerNameClickEvent(eqProfile);
+    	const click_handler_1 = eqProfile => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name);
+    	const keypress_handler_1 = eqProfile => equalizerService.renameEqualizerFn(eqProfile.hash, eqProfile.name);
+    	const click_handler_2 = eqProfile => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name);
+    	const keypress_handler_2 = eqProfile => equalizerService.deleteEqualizerFn(eqProfile.hash, eqProfile.name);
+    	const click_handler_3 = () => equalizerService.addEqualizerFn();
 
     	$$self.$capture_state = () => ({
     		AddIcon,
@@ -33299,22 +33449,23 @@ var app = (function () {
     		currentEqProfile,
     		equalizerService,
     		traduceFn,
-    		$equalizerProfiles,
+    		onEqualizerNameClickEvent,
+    		$currentEqProfile,
     		$currentEqHash,
-    		$currentEqProfile
+    		$equalizerProfiles
     	});
 
     	return [
-    		$equalizerProfiles,
     		$currentEqHash,
-    		$currentEqProfile,
+    		$equalizerProfiles,
+    		onEqualizerNameClickEvent,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
+    		keypress_handler_1,
     		click_handler_2,
-    		click_handler_3,
-    		click_handler_4,
-    		click_handler_5,
-    		click_handler_6
+    		keypress_handler_2,
+    		click_handler_3
     	];
     }
 
@@ -33365,15 +33516,15 @@ var app = (function () {
     			t4 = space();
     			create_component(equalizerprofilesonline.$$.fragment);
     			attr_dev(span0, "class", "smooth-colors svelte-5mloir");
-    			add_location(span0, file$o, 8, 2, 372);
+    			add_location(span0, file$o, 7, 2, 315);
     			set_custom_element_data(user_profiles, "class", "profiles-container smooth-colors svelte-5mloir");
-    			add_location(user_profiles, file$o, 7, 1, 313);
+    			add_location(user_profiles, file$o, 6, 1, 256);
     			attr_dev(span1, "class", "smooth-colors svelte-5mloir");
-    			add_location(span1, file$o, 13, 2, 548);
+    			add_location(span1, file$o, 12, 2, 491);
     			set_custom_element_data(community_profiles, "class", "profiles-container smooth-colors svelte-5mloir");
-    			add_location(community_profiles, file$o, 12, 1, 484);
+    			add_location(community_profiles, file$o, 11, 1, 427);
     			set_custom_element_data(equalizer_profiles_config, "class", "svelte-5mloir");
-    			add_location(equalizer_profiles_config, file$o, 6, 0, 284);
+    			add_location(equalizer_profiles_config, file$o, 5, 0, 227);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -34979,7 +35130,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (77:0) {:else}
+    // (81:0) {:else}
     function create_else_block$1(ctx) {
     	let li;
     	let li_data_align_value;
@@ -34994,7 +35145,7 @@ var app = (function () {
     			attr_dev(li, "data-align", li_data_align_value = /*tag*/ ctx[0].align);
     			attr_dev(li, "data-is-expanded", li_data_is_expanded_value = /*tag*/ ctx[0].isExpanded);
     			attr_dev(li, "data-value", li_data_value_value = /*tag*/ ctx[0].value);
-    			add_location(li, file$k, 77, 1, 3076);
+    			add_location(li, file$k, 81, 1, 3115);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, li, anchor);
@@ -35027,14 +35178,14 @@ var app = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(77:0) {:else}",
+    		source: "(81:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:0) {#if tag.value !== 'DynamicArtists'}
+    // (33:0) {#if tag.value !== 'DynamicArtists'}
     function create_if_block$5(ctx) {
     	let li;
     	let tag_name;
@@ -35167,68 +35318,70 @@ var app = (function () {
     			delete_icon = element("delete-icon");
     			create_component(deleteicon.$$.fragment);
     			set_custom_element_data(tag_name, "class", "svelte-1tpja4j");
-    			add_location(tag_name, file$k, 35, 2, 1506);
+    			add_location(tag_name, file$k, 34, 2, 1449);
     			attr_dev(select, "class", "svelte-1tpja4j");
     			if (/*$config*/ ctx[2].songListTags[/*index*/ ctx[1]].value === void 0) add_render_callback(() => /*select_change_handler*/ ctx[5].call(select));
-    			add_location(select, file$k, 36, 2, 1562);
+    			add_location(select, file$k, 35, 2, 1505);
     			set_custom_element_data(tag_empty_space, "class", "svelte-1tpja4j");
-    			add_location(tag_empty_space, file$k, 41, 2, 1742);
+    			add_location(tag_empty_space, file$k, 40, 2, 1685);
     			attr_dev(input0, "id", input0_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-expand"));
     			attr_dev(input0, "type", "checkbox");
     			attr_dev(input0, "class", "svelte-1tpja4j");
-    			add_location(input0, file$k, 43, 3, 1838);
+    			add_location(input0, file$k, 42, 3, 1781);
     			attr_dev(label0, "for", label0_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-expand"));
     			attr_dev(label0, "class", "svelte-1tpja4j");
-    			add_location(label0, file$k, 44, 3, 1953);
+    			add_location(label0, file$k, 43, 3, 1896);
     			set_custom_element_data(tag_expand, "data-is-expanded", tag_expand_data_is_expanded_value = /*$config*/ ctx[2].songListTags[/*index*/ ctx[1]].isExpanded);
     			set_custom_element_data(tag_expand, "class", "svelte-1tpja4j");
-    			add_location(tag_expand, file$k, 42, 2, 1764);
+    			add_location(tag_expand, file$k, 41, 2, 1707);
     			attr_dev(input1, "id", input1_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-l"));
     			attr_dev(input1, "type", "radio");
     			input1.__value = "start";
     			input1.value = input1.__value;
     			attr_dev(input1, "class", "svelte-1tpja4j");
-    			add_location(input1, file$k, 49, 4, 2140);
+    			add_location(input1, file$k, 48, 4, 2083);
     			attr_dev(label1, "for", label1_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-l"));
     			attr_dev(label1, "class", "svelte-1tpja4j");
-    			add_location(label1, file$k, 50, 4, 2255);
+    			add_location(label1, file$k, 49, 4, 2198);
     			set_custom_element_data(tag_align_left, "class", "tag-align svelte-1tpja4j");
-    			add_location(tag_align_left, file$k, 48, 3, 2101);
+    			add_location(tag_align_left, file$k, 47, 3, 2044);
     			attr_dev(input2, "id", input2_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-c"));
     			attr_dev(input2, "type", "radio");
     			input2.__value = "center";
     			input2.value = input2.__value;
     			attr_dev(input2, "class", "svelte-1tpja4j");
-    			add_location(input2, file$k, 54, 4, 2366);
+    			add_location(input2, file$k, 53, 4, 2309);
     			attr_dev(label2, "for", label2_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-c"));
     			attr_dev(label2, "class", "svelte-1tpja4j");
-    			add_location(label2, file$k, 55, 4, 2482);
+    			add_location(label2, file$k, 54, 4, 2425);
     			set_custom_element_data(tag_align_center, "class", "tag-align svelte-1tpja4j");
-    			add_location(tag_align_center, file$k, 53, 3, 2325);
+    			add_location(tag_align_center, file$k, 52, 3, 2268);
     			attr_dev(input3, "id", input3_id_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-r"));
     			attr_dev(input3, "type", "radio");
     			input3.__value = "end";
     			input3.value = input3.__value;
     			attr_dev(input3, "class", "svelte-1tpja4j");
-    			add_location(input3, file$k, 59, 4, 2594);
+    			add_location(input3, file$k, 58, 4, 2537);
     			attr_dev(label3, "for", label3_for_value = "" + (/*index*/ ctx[1] + "-" + /*tag*/ ctx[0].value + "-r"));
     			attr_dev(label3, "class", "svelte-1tpja4j");
-    			add_location(label3, file$k, 60, 4, 2707);
+    			add_location(label3, file$k, 59, 4, 2650);
     			set_custom_element_data(tag_align_right, "class", "tag-align svelte-1tpja4j");
-    			add_location(tag_align_right, file$k, 58, 3, 2554);
+    			add_location(tag_align_right, file$k, 57, 3, 2497);
     			set_custom_element_data(tag_aligns, "data-is-active", tag_aligns_data_is_active_value = /*$config*/ ctx[2].songListTags[/*index*/ ctx[1]].isExpanded);
     			set_custom_element_data(tag_aligns, "class", "svelte-1tpja4j");
-    			add_location(tag_aligns, file$k, 47, 2, 2029);
+    			add_location(tag_aligns, file$k, 46, 2, 1972);
     			set_custom_element_data(move_icon, "class", "svelte-1tpja4j");
-    			add_location(move_icon, file$k, 64, 2, 2793);
+    			add_location(move_icon, file$k, 63, 2, 2736);
+    			set_custom_element_data(delete_icon, "tabindex", "-1");
+    			set_custom_element_data(delete_icon, "role", "button");
     			set_custom_element_data(delete_icon, "class", "svelte-1tpja4j");
-    			add_location(delete_icon, file$k, 68, 2, 2901);
+    			add_location(delete_icon, file$k, 67, 2, 2844);
     			attr_dev(li, "data-index", /*index*/ ctx[1]);
     			attr_dev(li, "data-align", li_data_align_value = /*tag*/ ctx[0].align);
     			attr_dev(li, "data-is-expanded", li_data_is_expanded_value = /*tag*/ ctx[0].isExpanded);
     			attr_dev(li, "data-value", li_data_value_value = /*tag*/ ctx[0].value);
     			attr_dev(li, "class", "svelte-1tpja4j");
-    			add_location(li, file$k, 34, 1, 1400);
+    			add_location(li, file$k, 33, 1, 1343);
     			binding_group.p(input1, input2, input3);
     		},
     		m: function mount(target, anchor) {
@@ -35291,7 +35444,8 @@ var app = (function () {
     					listen_dev(input1, "change", /*input1_change_handler*/ ctx[7]),
     					listen_dev(input2, "change", /*input2_change_handler*/ ctx[9]),
     					listen_dev(input3, "change", /*input3_change_handler*/ ctx[10]),
-    					listen_dev(delete_icon, "click", /*click_handler*/ ctx[11], false, false, false, false)
+    					listen_dev(delete_icon, "click", /*click_handler*/ ctx[11], false, false, false, false),
+    					listen_dev(delete_icon, "keypress", /*keypress_handler*/ ctx[12], false, false, false, false)
     				];
 
     				mounted = true;
@@ -35413,14 +35567,14 @@ var app = (function () {
     		block,
     		id: create_if_block$5.name,
     		type: "if",
-    		source: "(34:0) {#if tag.value !== 'DynamicArtists'}",
+    		source: "(33:0) {#if tag.value !== 'DynamicArtists'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (38:3) {#each songListTagsVar as tag, index (index)}
+    // (37:3) {#each songListTagsVar as tag, index (index)}
     function create_each_block$5(key_1, ctx) {
     	let option;
     	let t_value = /*tag*/ ctx[0].name + "";
@@ -35435,7 +35589,7 @@ var app = (function () {
     			option.__value = /*tag*/ ctx[0].value;
     			option.value = option.__value;
     			attr_dev(option, "class", "svelte-1tpja4j");
-    			add_location(option, file$k, 38, 4, 1671);
+    			add_location(option, file$k, 37, 4, 1614);
     			this.first = option;
     		},
     		m: function mount(target, anchor) {
@@ -35454,7 +35608,7 @@ var app = (function () {
     		block,
     		id: create_each_block$5.name,
     		type: "each",
-    		source: "(38:3) {#each songListTagsVar as tag, index (index)}",
+    		source: "(37:3) {#each songListTagsVar as tag, index (index)}",
     		ctx
     	});
 
@@ -35632,6 +35786,10 @@ var app = (function () {
     		removeTagFromTagList(index);
     	};
 
+    	const keypress_handler = () => {
+    		removeTagFromTagList(index);
+    	};
+
     	$$self.$$set = $$props => {
     		if ('tag' in $$props) $$invalidate(0, tag = $$props.tag);
     		if ('index' in $$props) $$invalidate(1, index = $$props.index);
@@ -35670,7 +35828,8 @@ var app = (function () {
     		$$binding_groups,
     		input2_change_handler,
     		input3_change_handler,
-    		click_handler
+    		click_handler,
+    		keypress_handler
     	];
     }
 
@@ -40271,7 +40430,7 @@ var app = (function () {
     /* src/layouts/config/song_list_tags/!SongListTagsConfig.svelte generated by Svelte v3.58.0 */
     const file$h = "src/layouts/config/song_list_tags/!SongListTagsConfig.svelte";
 
-    // (23:1) <OptionSection title="Song List Tags">
+    // (24:1) <OptionSection title="Song List Tags">
     function create_default_slot(ctx) {
     	let addsonglisttag;
     	let t;
@@ -40314,7 +40473,7 @@ var app = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(23:1) <OptionSection title=\\\"Song List Tags\\\">",
+    		source: "(24:1) <OptionSection title=\\\"Song List Tags\\\">",
     		ctx
     	});
 
@@ -40346,7 +40505,7 @@ var app = (function () {
     			t = space();
     			create_component(songlistpreview.$$.fragment);
     			set_custom_element_data(song_list_tag_config, "class", "svelte-j59to5");
-    			add_location(song_list_tag_config, file$h, 21, 0, 680);
+    			add_location(song_list_tag_config, file$h, 22, 0, 770);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -40406,7 +40565,7 @@ var app = (function () {
 
     	function saveSelectedTagsToConfig(newSelectedTags) {
     		if (isMounted === true) {
-    			window.ipc.saveConfig({ songListTags: newSelectedTags });
+    			updateConfigFn({ songListTags: newSelectedTags }, { doUpdateLocalConfig: false });
     		}
     	}
 
@@ -40427,6 +40586,7 @@ var app = (function () {
     		AddSongListTag,
     		SelectedTagList,
     		SongListPreview,
+    		updateConfigFn,
     		isMounted,
     		saveSelectedTagsToConfig,
     		$config
@@ -40469,22 +40629,26 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[6] = list[i];
-    	child_ctx[8] = i;
+    	child_ctx[7] = list[i];
+    	child_ctx[9] = i;
     	return child_ctx;
     }
 
-    // (44:2) {#each options as option, index (index)}
+    // (43:2) {#each options as option, index (index)}
     function create_each_block$2(key_1, ctx) {
     	let option_svlt;
-    	let t_value = traduceFn(/*option*/ ctx[6].name) + "";
+    	let t_value = traduceFn(/*option*/ ctx[7].name) + "";
     	let t;
     	let option_svlt_data_selected_value;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[4](/*option*/ ctx[6]);
+    		return /*click_handler*/ ctx[4](/*option*/ ctx[7]);
+    	}
+
+    	function keypress_handler() {
+    		return /*keypress_handler*/ ctx[5](/*option*/ ctx[7]);
     	}
 
     	const block = {
@@ -40494,8 +40658,10 @@ var app = (function () {
     			option_svlt = element("option-svlt");
     			t = text(t_value);
     			set_custom_element_data(option_svlt, "class", "smooth-colors svelte-ybdvzc");
-    			set_custom_element_data(option_svlt, "data-selected", option_svlt_data_selected_value = /*selectedOption*/ ctx[0] === /*option*/ ctx[6].name);
-    			add_location(option_svlt, file$g, 44, 3, 1371);
+    			set_custom_element_data(option_svlt, "data-selected", option_svlt_data_selected_value = /*selectedOption*/ ctx[0] === /*option*/ ctx[7].name);
+    			set_custom_element_data(option_svlt, "tabindex", "-1");
+    			set_custom_element_data(option_svlt, "role", "button");
+    			add_location(option_svlt, file$g, 43, 3, 1314);
     			this.first = option_svlt;
     		},
     		m: function mount(target, anchor) {
@@ -40503,21 +40669,25 @@ var app = (function () {
     			append_dev(option_svlt, t);
 
     			if (!mounted) {
-    				dispose = listen_dev(option_svlt, "click", click_handler, false, false, false, false);
+    				dispose = [
+    					listen_dev(option_svlt, "click", click_handler, false, false, false, false),
+    					listen_dev(option_svlt, "keypress", keypress_handler, false, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*selectedOption*/ 1 && option_svlt_data_selected_value !== (option_svlt_data_selected_value = /*selectedOption*/ ctx[0] === /*option*/ ctx[6].name)) {
+    			if (dirty & /*selectedOption*/ 1 && option_svlt_data_selected_value !== (option_svlt_data_selected_value = /*selectedOption*/ ctx[0] === /*option*/ ctx[7].name)) {
     				set_custom_element_data(option_svlt, "data-selected", option_svlt_data_selected_value);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(option_svlt);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -40525,7 +40695,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(44:2) {#each options as option, index (index)}",
+    		source: "(43:2) {#each options as option, index (index)}",
     		ctx
     	});
 
@@ -40543,7 +40713,7 @@ var app = (function () {
     	let current;
     	let each_value = /*options*/ ctx[2];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[8];
+    	const get_key = ctx => /*index*/ ctx[9];
     	validate_each_keys(ctx, each_value, get_each_context$2, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -40575,11 +40745,11 @@ var app = (function () {
     			current_component_svlt = element("current-component-svlt");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			set_custom_element_data(options_list, "class", "smooth-colors svelte-ybdvzc");
-    			add_location(options_list, file$g, 42, 1, 1288);
+    			add_location(options_list, file$g, 41, 1, 1231);
     			set_custom_element_data(current_component_svlt, "class", "svelte-ybdvzc");
-    			add_location(current_component_svlt, file$g, 52, 1, 1581);
+    			add_location(current_component_svlt, file$g, 54, 1, 1611);
     			set_custom_element_data(config_layout_svlt, "class", "svelte-ybdvzc");
-    			add_location(config_layout_svlt, file$g, 41, 0, 1266);
+    			add_location(config_layout_svlt, file$g, 40, 0, 1209);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -40663,7 +40833,7 @@ var app = (function () {
     function instance$i($$self, $$props, $$invalidate) {
     	let $selectedConfigOptionName;
     	validate_store(selectedConfigOptionName, 'selectedConfigOptionName');
-    	component_subscribe($$self, selectedConfigOptionName, $$value => $$invalidate(5, $selectedConfigOptionName = $$value));
+    	component_subscribe($$self, selectedConfigOptionName, $$value => $$invalidate(6, $selectedConfigOptionName = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ConfigLayout', slots, []);
 
@@ -40710,6 +40880,7 @@ var app = (function () {
     	});
 
     	const click_handler = option => loadComponent(option.name);
+    	const keypress_handler = option => loadComponent(option.name);
 
     	$$self.$capture_state = () => ({
     		onMount,
@@ -40735,7 +40906,14 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [selectedOption, currentComponent, options, loadComponent, click_handler];
+    	return [
+    		selectedOption,
+    		currentComponent,
+    		options,
+    		loadComponent,
+    		click_handler,
+    		keypress_handler
+    	];
     }
 
     class ConfigLayout extends SvelteComponentDev {
@@ -40971,12 +41149,15 @@ var app = (function () {
     		localStorage.setItem('GroupByValues', JSON.stringify($config.group.groupByValues));
 
     		// Saves the grouping
-    		window.ipc.saveConfig({
-    			group: {
-    				groupBy: $config.group.groupBy,
-    				groupByValues: $config.group.groupByValues
-    			}
-    		});
+    		updateConfigFn(
+    			{
+    				group: {
+    					groupBy: $config.group.groupBy,
+    					groupByValues: $config.group.groupByValues
+    				}
+    			},
+    			{ doUpdateLocalConfig: false }
+    		);
     	}
 
     	onMount(() => {
@@ -41012,6 +41193,7 @@ var app = (function () {
     		triggerScrollToSongEvent,
     		selectedAlbumsDir,
     		keyModifier,
+    		updateConfigFn,
     		handleClickEvents,
     		setAlbumBackInView,
     		handleAlbumEvent,
@@ -42016,28 +42198,33 @@ var app = (function () {
     			create_component(checkicon.$$.fragment);
     			t8 = space();
     			t9 = text(t9_value);
+    			set_custom_element_data(prompt_close, "tabindex", "-1");
+    			set_custom_element_data(prompt_close, "role", "button");
     			set_custom_element_data(prompt_close, "class", "svelte-1k0n8b8");
-    			add_location(prompt_close, file$c, 75, 2, 2185);
+    			add_location(prompt_close, file$c, 74, 2, 2203);
     			set_custom_element_data(prompt_title, "class", "svelte-1k0n8b8");
-    			add_location(prompt_title, file$c, 76, 2, 2249);
+    			add_location(prompt_title, file$c, 75, 2, 2329);
     			attr_dev(input, "slot", "body");
     			attr_dev(input, "type", "text");
     			attr_dev(input, "placeholder", input_placeholder_value = /*promptState*/ ctx[2].placeholder);
     			attr_dev(input, "class", "svelte-1k0n8b8");
-    			add_location(input, file$c, 78, 3, 2317);
+    			add_location(input, file$c, 77, 3, 2397);
     			set_custom_element_data(prompt_body, "class", "svelte-1k0n8b8");
-    			add_location(prompt_body, file$c, 77, 2, 2300);
+    			add_location(prompt_body, file$c, 76, 2, 2380);
     			attr_dev(button0, "class", "cancel svelte-1k0n8b8");
-    			add_location(button0, file$c, 87, 3, 2520);
+    			attr_dev(button0, "tabindex", "-1");
+    			add_location(button0, file$c, 86, 3, 2600);
     			attr_dev(button1, "class", "confirm svelte-1k0n8b8");
-    			add_location(button1, file$c, 91, 3, 2708);
+    			add_location(button1, file$c, 90, 3, 2802);
     			set_custom_element_data(prompt_footer, "class", "svelte-1k0n8b8");
-    			add_location(prompt_footer, file$c, 86, 2, 2501);
+    			add_location(prompt_footer, file$c, 85, 2, 2581);
     			set_custom_element_data(prompt_content, "class", "svelte-1k0n8b8");
-    			add_location(prompt_content, file$c, 74, 1, 2166);
+    			add_location(prompt_content, file$c, 73, 1, 2184);
     			set_custom_element_data(prompt_svlt, "show", /*isPromptVisible*/ ctx[1]);
+    			set_custom_element_data(prompt_svlt, "tabindex", "-1");
+    			set_custom_element_data(prompt_svlt, "role", "button");
     			set_custom_element_data(prompt_svlt, "class", "svelte-1k0n8b8");
-    			add_location(prompt_svlt, file$c, 73, 0, 2084);
+    			add_location(prompt_svlt, file$c, 72, 0, 2027);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -42069,11 +42256,13 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(prompt_close, "click", /*click_handler*/ ctx[10], false, false, false, false),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[11]),
-    					listen_dev(input, "keypress", /*keypress_handler*/ ctx[12], false, false, false, false),
-    					listen_dev(button0, "click", /*click_handler_1*/ ctx[13], false, false, false, false),
-    					listen_dev(button1, "click", /*click_handler_2*/ ctx[14], false, false, false, false),
-    					listen_dev(prompt_svlt, "click", /*click_handler_3*/ ctx[15], false, false, false, false)
+    					listen_dev(prompt_close, "keypress", /*keypress_handler*/ ctx[11], false, false, false, false),
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[12]),
+    					listen_dev(input, "keypress", /*keypress_handler_1*/ ctx[13], false, false, false, false),
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[14], false, false, false, false),
+    					listen_dev(button1, "click", /*click_handler_2*/ ctx[15], false, false, false, false),
+    					listen_dev(prompt_svlt, "click", /*click_handler_3*/ ctx[16], false, false, false, false),
+    					listen_dev(prompt_svlt, "keypress", /*keypress_handler_2*/ ctx[17], false, false, false, false)
     				];
 
     				mounted = true;
@@ -42207,16 +42396,18 @@ var app = (function () {
     	});
 
     	const click_handler = () => closePrompt();
+    	const keypress_handler = () => closePrompt();
 
     	function input_input_handler() {
     		inputValue = this.value;
     		$$invalidate(3, inputValue);
     	}
 
-    	const keypress_handler = evt => handleInputKeypress(evt);
+    	const keypress_handler_1 = evt => handleInputKeypress(evt);
     	const click_handler_1 = () => closePrompt();
     	const click_handler_2 = () => confirmPrompt();
     	const click_handler_3 = e => handleOutsidePromptClick(e);
+    	const keypress_handler_2 = e => handleOutsidePromptClick(e);
 
     	$$self.$capture_state = () => ({
     		CheckIcon,
@@ -42285,11 +42476,13 @@ var app = (function () {
     		promptElement,
     		$keyPressed,
     		click_handler,
-    		input_input_handler,
     		keypress_handler,
+    		input_input_handler,
+    		keypress_handler_1,
     		click_handler_1,
     		click_handler_2,
-    		click_handler_3
+    		click_handler_3,
+    		keypress_handler_2
     	];
     }
 
@@ -42392,23 +42585,26 @@ var app = (function () {
     			create_component(checkicon.$$.fragment);
     			t9 = space();
     			t10 = text(t10_value);
+    			set_custom_element_data(confirm_close, "tabindex", "-1");
     			set_custom_element_data(confirm_close, "class", "svelte-18tmbv");
-    			add_location(confirm_close, file$b, 44, 2, 1343);
+    			add_location(confirm_close, file$b, 49, 2, 1367);
     			set_custom_element_data(confirm_title, "class", "svelte-18tmbv");
-    			add_location(confirm_title, file$b, 45, 2, 1410);
+    			add_location(confirm_title, file$b, 50, 2, 1483);
     			set_custom_element_data(confirm_body, "class", "svelte-18tmbv");
-    			add_location(confirm_body, file$b, 46, 2, 1464);
+    			add_location(confirm_body, file$b, 51, 2, 1537);
     			attr_dev(button0, "class", "cancel svelte-18tmbv");
-    			add_location(button0, file$b, 50, 3, 1551);
+    			add_location(button0, file$b, 55, 3, 1624);
     			attr_dev(button1, "class", "confirm svelte-18tmbv");
-    			add_location(button1, file$b, 54, 3, 1731);
+    			add_location(button1, file$b, 59, 3, 1804);
     			set_custom_element_data(confirm_footer, "class", "svelte-18tmbv");
-    			add_location(confirm_footer, file$b, 49, 2, 1531);
+    			add_location(confirm_footer, file$b, 54, 2, 1604);
     			set_custom_element_data(confirm_content, "class", "svelte-18tmbv");
-    			add_location(confirm_content, file$b, 43, 1, 1323);
+    			add_location(confirm_content, file$b, 48, 1, 1347);
     			set_custom_element_data(confirm_svlt, "show", /*isConfirmVisible*/ ctx[1]);
+    			set_custom_element_data(confirm_svlt, "tabindex", "-1");
+    			set_custom_element_data(confirm_svlt, "role", "button");
     			set_custom_element_data(confirm_svlt, "class", "svelte-18tmbv");
-    			add_location(confirm_svlt, file$b, 42, 0, 1239);
+    			add_location(confirm_svlt, file$b, 41, 0, 1182);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -42439,9 +42635,11 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(confirm_close, "click", /*click_handler*/ ctx[7], false, false, false, false),
-    					listen_dev(button0, "click", /*click_handler_1*/ ctx[8], false, false, false, false),
-    					listen_dev(button1, "click", /*click_handler_2*/ ctx[9], false, false, false, false),
-    					listen_dev(confirm_svlt, "click", /*click_handler_3*/ ctx[10], false, false, false, false)
+    					listen_dev(confirm_close, "keypress", /*keypress_handler*/ ctx[8], false, false, false, false),
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[9], false, false, false, false),
+    					listen_dev(button1, "click", /*click_handler_2*/ ctx[10], false, false, false, false),
+    					listen_dev(confirm_svlt, "click", /*click_handler_3*/ ctx[11], false, false, false, false),
+    					listen_dev(confirm_svlt, "keypress", /*keypress_handler_1*/ ctx[12], false, false, false, false)
     				];
 
     				mounted = true;
@@ -42532,9 +42730,11 @@ var app = (function () {
     	});
 
     	const click_handler = () => closeConfirm();
+    	const keypress_handler = () => closeConfirm();
     	const click_handler_1 = () => closeConfirm();
     	const click_handler_2 = () => confirmConfirm();
     	const click_handler_3 = e => handleOutsidePromptClick(e);
+    	const keypress_handler_1 = e => handleOutsidePromptClick(e);
 
     	$$self.$capture_state = () => ({
     		CheckIcon,
@@ -42580,9 +42780,11 @@ var app = (function () {
     		showConfirm,
     		$keyPressed,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
     		click_handler_2,
-    		click_handler_3
+    		click_handler_3,
+    		keypress_handler_1
     	];
     }
 
@@ -44591,7 +44793,7 @@ var app = (function () {
     /* src/layouts/lyrics/!LyricsLayout.svelte generated by Svelte v3.58.0 */
     const file$1 = "src/layouts/lyrics/!LyricsLayout.svelte";
 
-    // (128:40) 
+    // (146:40) 
     function create_if_block_2$1(ctx) {
     	let lyricsnotfound;
     	let current;
@@ -44624,14 +44826,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(128:40) ",
+    		source: "(146:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (126:36) 
+    // (144:36) 
     function create_if_block_1$1(ctx) {
     	let lyricsread;
     	let current;
@@ -44672,14 +44874,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(126:36) ",
+    		source: "(144:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (124:2) {#if selectedView === 'edit'}
+    // (142:2) {#if selectedView === 'edit'}
     function create_if_block$1(ctx) {
     	let lyricsedit;
     	let current;
@@ -44722,7 +44924,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(124:2) {#if selectedView === 'edit'}",
+    		source: "(142:2) {#if selectedView === 'edit'}",
     		ctx
     	});
 
@@ -44850,16 +45052,24 @@ var app = (function () {
     			set_custom_element_data(song_information, "class", "svelte-1cy3nul");
     			add_location(song_information, file$1, 101, 2, 3309);
     			set_custom_element_data(event_wrapper0, "disabled", event_wrapper0_disabled_value = /*selectedView*/ ctx[1] === 'read');
+    			set_custom_element_data(event_wrapper0, "tabindex", "-1");
+    			set_custom_element_data(event_wrapper0, "role", "button");
     			set_custom_element_data(event_wrapper0, "class", "svelte-1cy3nul");
     			add_location(event_wrapper0, file$1, 107, 3, 3533);
     			set_custom_element_data(event_wrapper1, "disabled", event_wrapper1_disabled_value = /*selectedView*/ ctx[1] === 'edit');
+    			set_custom_element_data(event_wrapper1, "tabindex", "-1");
+    			set_custom_element_data(event_wrapper1, "role", "button");
     			set_custom_element_data(event_wrapper1, "class", "svelte-1cy3nul");
-    			add_location(event_wrapper1, file$1, 110, 3, 3710);
+    			add_location(event_wrapper1, file$1, 116, 3, 3806);
     			set_custom_element_data(event_wrapper2, "disabled", event_wrapper2_disabled_value = /*selectedView*/ ctx[1] !== 'edit' || /*isLyricsDirty*/ ctx[4] === false);
+    			set_custom_element_data(event_wrapper2, "tabindex", "-1");
+    			set_custom_element_data(event_wrapper2, "role", "button");
     			set_custom_element_data(event_wrapper2, "class", "svelte-1cy3nul");
-    			add_location(event_wrapper2, file$1, 113, 3, 3890);
+    			add_location(event_wrapper2, file$1, 125, 3, 4082);
+    			set_custom_element_data(event_wrapper3, "tabindex", "-1");
+    			set_custom_element_data(event_wrapper3, "role", "button");
     			set_custom_element_data(event_wrapper3, "class", "svelte-1cy3nul");
-    			add_location(event_wrapper3, file$1, 116, 3, 4084);
+    			add_location(event_wrapper3, file$1, 134, 3, 4361);
     			set_custom_element_data(lyrics_controls, "class", "svelte-1cy3nul");
     			add_location(lyrics_controls, file$1, 106, 2, 3512);
 
@@ -44870,7 +45080,7 @@ var app = (function () {
     			set_custom_element_data(lyrics_layout_header, "class", "svelte-1cy3nul");
     			add_location(lyrics_layout_header, file$1, 100, 1, 3226);
     			set_custom_element_data(lyrics_layout_body, "class", "svelte-1cy3nul");
-    			add_location(lyrics_layout_body, file$1, 122, 1, 4265);
+    			add_location(lyrics_layout_body, file$1, 140, 1, 4605);
     			set_custom_element_data(lyrics_layout, "class", "layout svelte-1cy3nul");
     			add_location(lyrics_layout, file$1, 98, 0, 3107);
     		},
@@ -44912,9 +45122,13 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(event_wrapper0, "click", /*click_handler*/ ctx[13], false, false, false, false),
-    					listen_dev(event_wrapper1, "click", /*click_handler_1*/ ctx[14], false, false, false, false),
-    					listen_dev(event_wrapper2, "click", /*click_handler_2*/ ctx[15], false, false, false, false),
-    					listen_dev(event_wrapper3, "click", /*click_handler_3*/ ctx[16], false, false, false, false)
+    					listen_dev(event_wrapper0, "keypress", /*keypress_handler*/ ctx[14], false, false, false, false),
+    					listen_dev(event_wrapper1, "click", /*click_handler_1*/ ctx[15], false, false, false, false),
+    					listen_dev(event_wrapper1, "keypress", /*keypress_handler_1*/ ctx[16], false, false, false, false),
+    					listen_dev(event_wrapper2, "click", /*click_handler_2*/ ctx[17], false, false, false, false),
+    					listen_dev(event_wrapper2, "keypress", /*keypress_handler_2*/ ctx[18], false, false, false, false),
+    					listen_dev(event_wrapper3, "click", /*click_handler_3*/ ctx[19], false, false, false, false),
+    					listen_dev(event_wrapper3, "keypress", /*keypress_handler_3*/ ctx[20], false, false, false, false)
     				];
 
     				mounted = true;
@@ -45130,9 +45344,13 @@ var app = (function () {
     	});
 
     	const click_handler = () => $$invalidate(1, selectedView = 'read');
+    	const keypress_handler = () => $$invalidate(1, selectedView = 'read');
     	const click_handler_1 = () => $$invalidate(1, selectedView = 'edit');
+    	const keypress_handler_1 = () => $$invalidate(1, selectedView = 'edit');
     	const click_handler_2 = () => saveLyrics();
+    	const keypress_handler_2 = () => saveLyrics();
     	const click_handler_3 = () => deleteLyrics();
+    	const keypress_handler_3 = () => deleteLyrics();
 
     	$$self.$capture_state = () => ({
     		LyricsRead,
@@ -45219,9 +45437,13 @@ var app = (function () {
     		$keyModifier,
     		$keyPressed,
     		click_handler,
+    		keypress_handler,
     		click_handler_1,
+    		keypress_handler_1,
     		click_handler_2,
-    		click_handler_3
+    		keypress_handler_2,
+    		click_handler_3,
+    		keypress_handler_3
     	];
     }
 

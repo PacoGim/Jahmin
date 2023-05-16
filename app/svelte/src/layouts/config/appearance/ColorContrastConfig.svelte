@@ -3,6 +3,7 @@
 	import applyColorSchemeFn from '../../../functions/applyColorScheme.fn'
 	import getAlbumColors from '../../../functions/getAlbumColors.fn'
 	import traduceFn from '../../../functions/traduce.fn'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import notifyService from '../../../services/notify.service'
 	import { config } from '../../../stores/config.store'
 	// import { contrastRatioConfig } from '../../../stores/config.store'
@@ -23,16 +24,13 @@
 	}
 
 	function saveContrastRatio() {
-		$config.userOptions.contrastRatio = colorContrastRangeValue
-		window.ipc
-			.saveConfig({
-				userOptions: {
-					contrastRatio: colorContrastRangeValue
-				}
-			})
-			.then(() => {
-				notifyService.success('Contrast Ratio saved!')
-			})
+		updateConfigFn({
+			userOptions: {
+				contrastRatio: colorContrastRangeValue
+			}
+		}).then(() => {
+			notifyService.success('Contrast Ratio saved!')
+		})
 	}
 </script>
 

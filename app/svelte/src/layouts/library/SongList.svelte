@@ -1,9 +1,8 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
-  import { songAmountConfig } from '../../stores/config.store'
+	import { songAmountConfig } from '../../stores/config.store'
 
 	import {
 		elementMap,
@@ -125,7 +124,13 @@
 	}
 </script>
 
-<song-list-svlt on:mousewheel={e => scrollContainer(e)} on:click={e => songListClickEventHandlerService(e)}>
+<song-list-svlt
+	on:mousewheel={e => scrollContainer(e)}
+	on:click={e => songListClickEventHandlerService(e)}
+	on:keypress={e => songListClickEventHandlerService(e)}
+	tabindex="-1"
+	role="button"
+>
 	<song-list>
 		{#each songsToShow as song, index (song.ID)}
 			<SongListItem {song} {index} />

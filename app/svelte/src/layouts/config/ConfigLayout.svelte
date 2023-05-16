@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 
@@ -57,7 +56,10 @@
 			<option-svlt
 				class="smooth-colors"
 				data-selected={selectedOption === option.name}
-				on:click={() => loadComponent(option.name)}>{traduceFn(option.name)}</option-svlt
+				on:click={() => loadComponent(option.name)}
+				on:keypress={() => loadComponent(option.name)}
+				tabindex="-1"
+				role="button">{traduceFn(option.name)}</option-svlt
 			>
 		{/each}
 	</options-list>

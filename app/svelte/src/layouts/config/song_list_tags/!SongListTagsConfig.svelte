@@ -6,6 +6,7 @@
 	import AddSongListTag from './AddSongListTag.svelte'
 	import SelectedTagList from './SelectedTagList.svelte'
 	import SongListPreview from './SongListPreview.svelte'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 
 	let isMounted = false
 
@@ -14,9 +15,12 @@
 
 	function saveSelectedTagsToConfig(newSelectedTags: SelectedTagType[]) {
 		if (isMounted === true) {
-			window.ipc.saveConfig({
-				songListTags: newSelectedTags
-			})
+			updateConfigFn(
+				{
+					songListTags: newSelectedTags
+				},
+				{ doUpdateLocalConfig: false }
+			)
 		}
 	}
 

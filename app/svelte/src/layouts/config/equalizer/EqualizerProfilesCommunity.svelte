@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import { onMount } from 'svelte'
 
@@ -56,6 +55,12 @@
 		})
 	}
 
+	function onEqualizerNameClickEvent(eqProfile) {
+		equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)
+		$currentEqHash = eqProfile.hash
+		$currentEqProfile = eqProfile
+	}
+
 	onMount(() => {
 		fetchCommunityProfiles()
 	})
@@ -67,9 +72,10 @@
 			<equalizer-field id={eqProfile.hash}>
 				<equalizer-name
 					class={$currentEqHash === eqProfile.hash ? 'current' : ''}
-					on:click={() => equalizerServiceNew.loadEqualizerValuesFn(eqProfile.values)}
-					on:click={() => ($currentEqHash = eqProfile.hash)}
-					on:click={() => ($currentEqProfile = eqProfile)}
+					on:click={() => onEqualizerNameClickEvent(eqProfile)}
+					on:keypress={() => onEqualizerNameClickEvent(eqProfile)}
+					tabindex="-1"
+					role="button"
 				>
 					{#if getWarning(eqProfile.values)}
 						<span class="warning">

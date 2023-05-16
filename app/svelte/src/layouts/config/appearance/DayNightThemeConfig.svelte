@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import MoonFillIcon from '../../../icons/MoonFillIcon.svelte'
 
@@ -29,6 +28,9 @@
 		data-theme="SystemBased"
 		data-selected={$config.userOptions.theme === 'SystemBased' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('SystemBased')}
+		on:keypress={() => saveThemeToConfig('SystemBased')}
+		tabindex="-1"
+		role="button"
 	>
 		<section-icon>
 			<SystemFillIcon
@@ -52,10 +54,21 @@
 		data-theme="Day"
 		data-selected={$config.userOptions.theme === 'Day' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('Day')}
+		on:keypress={() => saveThemeToConfig('Day')}
+		tabindex="-1"
+		role="button"
 	>
 		<section-icon class="smooth-colors">
-			<SunFillIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Day' ? '1' : '0'};{iconsStyle}" />
-			<SunIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !== 'Day' ? '1' : '0'};{iconsStyle}" />
+			<SunFillIcon
+				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Day'
+					? '1'
+					: '0'};{iconsStyle}"
+			/>
+			<SunIcon
+				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !== 'Day'
+					? '1'
+					: '0'};{iconsStyle}"
+			/>
 		</section-icon>
 
 		<theme-name>{traduceFn('Day')}</theme-name>
@@ -65,11 +78,22 @@
 		data-theme="Night"
 		data-selected={$config.userOptions.theme === 'Night' ? 'true' : 'false'}
 		on:click={() => saveThemeToConfig('Night')}
+		on:keypress={() => saveThemeToConfig('Night')}
+		tabindex="-1"
+		role="button"
 	>
 		<section-icon class="smooth-colors">
-			<MoonFillIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Night' ? '1' : '0'};{iconsStyle}" />
+			<MoonFillIcon
+				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Night'
+					? '1'
+					: '0'};{iconsStyle}"
+			/>
 
-			<MoonIcon style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !== 'Night' ? '1' : '0'};{iconsStyle}" />
+			<MoonIcon
+				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme !== 'Night'
+					? '1'
+					: '0'};{iconsStyle}"
+			/>
 		</section-icon>
 
 		<theme-name>{traduceFn('Night')}</theme-name>

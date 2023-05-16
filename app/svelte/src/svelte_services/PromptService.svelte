@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import CheckIcon from '../icons/CheckIcon.svelte'
 	import DeleteIcon from '../icons/DeleteIcon.svelte'
@@ -88,9 +87,9 @@
 	}
 </script>
 
-<prompt-svlt show={isPromptVisible} on:click={e => handleOutsidePromptClick(e)}>
+<prompt-svlt show={isPromptVisible} on:click={e => handleOutsidePromptClick(e)} on:keypress={e => handleOutsidePromptClick(e)} tabindex="-1" role="button">
 	<prompt-content>
-		<prompt-close on:click={() => closePrompt()}>x</prompt-close>
+		<prompt-close on:click={() => closePrompt()} on:keypress={() => closePrompt()} tabindex="-1" role="button">x</prompt-close>
 		<prompt-title>{promptState.title}</prompt-title>
 		<prompt-body>
 			<input
@@ -102,7 +101,7 @@
 			/>
 		</prompt-body>
 		<prompt-footer>
-			<button class="cancel" on:click={() => closePrompt()}>
+			<button class="cancel" on:click={() => closePrompt()} tabindex="-1">
 				<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 				{promptState.cancelButtonText}
 			</button>

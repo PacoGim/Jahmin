@@ -8,6 +8,7 @@
 	import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
+	import updateConfigFn from '../functions/updateConfig.fn'
 	import handleArtService from '../services/handleArt.service'
 	import mediaKeyControlsService from '../services/mediaKeyControls.service'
 	import { config, songAmountConfig } from '../stores/config.store'
@@ -159,9 +160,7 @@
 	})
 
 	window.ipc.onChangeSongAmount((_, data) => {
-		$config.userOptions.songAmount = data
-
-		window.ipc.saveConfig({
+		updateConfigFn({
 			userOptions: {
 				songAmount: data
 			}

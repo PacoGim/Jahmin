@@ -125,16 +125,34 @@
 		</song-information>
 
 		<lyrics-controls>
-			<event-wrapper disabled={selectedView === 'read'} on:click={() => (selectedView = 'read')}>
+			<event-wrapper
+				disabled={selectedView === 'read'}
+				on:click={() => (selectedView = 'read')}
+				on:keypress={() => (selectedView = 'read')}
+				tabindex="-1"
+				role="button"
+			>
 				<EyeIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
-			<event-wrapper disabled={selectedView === 'edit'} on:click={() => (selectedView = 'edit')}>
+			<event-wrapper
+				disabled={selectedView === 'edit'}
+				on:click={() => (selectedView = 'edit')}
+				on:keypress={() => (selectedView = 'edit')}
+				tabindex="-1"
+				role="button"
+			>
 				<UpdateIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
-			<event-wrapper disabled={selectedView !== 'edit' || isLyricsDirty === false} on:click={() => saveLyrics()}>
+			<event-wrapper
+				disabled={selectedView !== 'edit' || isLyricsDirty === false}
+				on:click={() => saveLyrics()}
+				on:keypress={() => saveLyrics()}
+				tabindex="-1"
+				role="button"
+			>
 				<SaveIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
-			<event-wrapper on:click={() => deleteLyrics()}>
+			<event-wrapper on:click={() => deleteLyrics()} on:keypress={() => deleteLyrics()} tabindex="-1" role="button">
 				<DeleteIcon style="height: 1.5rem;fill:var(--color-bg-1)" />
 			</event-wrapper>
 		</lyrics-controls>

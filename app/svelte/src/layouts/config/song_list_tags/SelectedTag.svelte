@@ -1,4 +1,3 @@
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts">
 	import songListTagsVar from '../../../global/songListTags.var'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
@@ -78,6 +77,11 @@
 			on:click={() => {
 				removeTagFromTagList(index)
 			}}
+			on:keypress={() => {
+				removeTagFromTagList(index)
+			}}
+			tabindex="-1"
+			role="button"
 		>
 			<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);" />
 		</delete-icon>

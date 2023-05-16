@@ -1,5 +1,6 @@
 <script lang="ts">
 	import isElementInViewportFn from '../../../functions/isElementInViewport.fn'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import UpdateIcon from '../../../icons/UpdateIcon.svelte'
 	import { config } from '../../../stores/config.store'
 	// import { artSizeConfig } from '../../../stores/config.store'
@@ -41,29 +42,26 @@
 	}
 
 	function saveArtSize(newArtSize: number) {
-		$config.userOptions.artSize = newArtSize
-		window.ipc
-			.saveConfig({
-				userOptions: {
-					artSize: newArtSize
+		updateConfigFn({
+			userOptions: {
+				artSize: newArtSize
+			}
+		}).then(() => {
+			document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
+				let parentAlbumElementRootDir = artElement.closest('album').getAttribute('rootDir')
+
+				if (isElementInViewportFn(artElement)) {
+					window.ipc.handleArt(parentAlbumElementRootDir, artElement.getAttribute('id'), newArtSize)
+				} else {
+					setTimeout(() => {
+						window.ipc.handleArt(parentAlbumElementRootDir, artElement.getAttribute('id'), newArtSize)
+					}, 1000)
 				}
 			})
-			.then(() => {
-				document.querySelectorAll('art-grid-svlt > album > art-svlt').forEach((artElement: HTMLImageElement) => {
-					let parentAlbumElementRootDir = artElement.closest('album').getAttribute('rootDir')
-
-					if (isElementInViewportFn(artElement)) {
-						window.ipc.handleArt(parentAlbumElementRootDir, artElement.getAttribute('id'), newArtSize)
-					} else {
-						setTimeout(() => {
-							window.ipc.handleArt(parentAlbumElementRootDir, artElement.getAttribute('id'), newArtSize)
-						}, 1000)
-					}
-				})
-			})
+		})
 	}
 </script>
 
-<grid-art-size-config on:click={() => setGridSize()}>
+<grid-art-size-config on:click={() => setGridSize()} on:keypress={() => setGridSize()} tabindex="-1" role="button">
 	<config-edit-button class="smooth-colors">···</config-edit-button>
 </grid-art-size-config>

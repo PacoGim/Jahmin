@@ -1,4 +1,5 @@
 <script lang="ts">
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import TranslateIcon from '../../../icons/TranslateIcon.svelte'
 	import { config } from '../../../stores/config.store'
 	import { currentSongProgressStore, isPlaying } from '../../../stores/main.store'
@@ -6,27 +7,27 @@
 	let currentLanguage = $config.userOptions.language
 
 	function languageChanged() {
-		window.ipc
-			.saveConfig({
-				userOptions: {
-					language: currentLanguage
-				}
-			})
-			.then(() => {
-				localStorage.setItem(
-					'afterReload',
-					JSON.stringify({
-						duration: $currentSongProgressStore,
-						wasPlaying: $isPlaying
-					})
-				)
+		updateConfigFn({
+			userOptions: {
+				language: currentLanguage
+			}
+		}).then(() => {
+			localStorage.setItem(
+				'afterReload',
+				JSON.stringify({
+					duration: $currentSongProgressStore,
+					wasPlaying: $isPlaying
+				})
+			)
 
-				window.ipc.reloadApp()
-			})
+			window.ipc.reloadApp()
+		})
 	}
 </script>
 
-<TranslateIcon style="fill:var(--color-fg-1); height: 1.2rem; margin-right: .5rem; transition: fill var(--theme-transition-duration) linear;" />
+<TranslateIcon
+	style="fill:var(--color-fg-1); height: 1.2rem; margin-right: .5rem; transition: fill var(--theme-transition-duration) linear;"
+/>
 <select bind:value={currentLanguage} on:change={languageChanged}>
 	<option value="english">🇬🇧 English</option>
 	<option value="french">🇫🇷 Français</option>
