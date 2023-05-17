@@ -19,18 +19,12 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
+		height: fit-content;
+		align-self: center;
 	}
 
 	lyrics-controls button {
 		transition: opacity 300ms ease-in-out;
 		margin: 0 0.5rem;
-	}
-
-	lyrics-controls button.hide {
-		/* opacity: 1; */
-	}
-
-	lyrics-controls button.show {
-		/* opacity: 0.5; */
 	}
 </style>

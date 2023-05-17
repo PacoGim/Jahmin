@@ -11,5 +11,11 @@
 <style>
   lyrics-create{
     grid-area: lyrics-create;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: space-evenly;
+    padding: .5rem;
   }
 </style>

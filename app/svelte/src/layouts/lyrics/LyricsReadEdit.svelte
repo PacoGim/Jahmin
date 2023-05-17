@@ -1,11 +1,9 @@
 <script lang="ts">
-	import LyricsReadEditControls from './LyricsReadEditControls.svelte'
-
 	export let lyricsMode
 
-	let textWeight = 500
-	let textSize = 16
-	let textAlignment = 'left'
+	export let fontWeight
+	export let fontSize
+	export let textAlignment
 
 	let lyric = `Totsuzen ni mō Upside Down
 Sekai wa kawari dasu
@@ -67,31 +65,14 @@ Jibun ga dare ka wakaranaku naru
 
 Imi mo naku mata hashiri tsuzukete
 Owari no mienai tabi o tsuzukeru)`
-
-	function onTextWeightChange({ detail }) {
-		textWeight = detail
-	}
-
-	function onTextSizeChange({ detail }) {
-		textSize = detail
-	}
-
-	function onTextAlignmentChange({ detail }) {
-		textAlignment = ['left', 'center', 'right'][detail]
-	}
 </script>
 
 <lyrics-read-edit class={lyricsMode === 'Read' ? 'read' : 'edit'}>
 	<lyrics-mode-name> Edit Mode </lyrics-mode-name>
 
 	<lyrics-text-area>
-		<LyricsReadEditControls
-			on:textWeightChange={onTextWeightChange}
-			on:textSizeChange={onTextSizeChange}
-			on:textAlignmentChange={onTextAlignmentChange}
-		/>
 		<textarea
-			style="text-align:{textAlignment};font-size: {textSize}px;line-height: {textSize}px;font-variation-settings:'wght' {textWeight};"
+			style="text-align:{['left', 'center', 'right'][textAlignment]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
 			value={lyric}
 			disabled={lyricsMode === 'Read' ? true : false}
 		/>
@@ -129,17 +110,19 @@ Owari no mienai tabi o tsuzukeru)`
 		background-color: var(--color-accent-4);
 		color: #fff;
 
-		transition-property: opacity;
+		transition-property: opacity transform;
 		transition-duration: 300ms;
 		transition-timing-function: linear;
 	}
 
 	lyrics-read-edit.read lyrics-mode-name {
 		opacity: 0;
+		transform: translateY(100%);
 	}
 
 	lyrics-read-edit.edit lyrics-mode-name {
 		opacity: 1;
+		transform: translateY(0%);
 	}
 
 	lyrics-text-area {
@@ -162,8 +145,8 @@ Owari no mienai tabi o tsuzukeru)`
 
 		padding: 1rem;
 
-		transition-property: all;
-		transition-duration: 300ms;
+		transition-property: border-color, font-size, line-height, font-variation-settings;
+		transition-duration: 300ms, 100ms, 100ms, 100ms;
 		transition-timing-function: linear;
 	}
 

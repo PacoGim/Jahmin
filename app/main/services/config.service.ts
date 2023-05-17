@@ -67,12 +67,14 @@ function getDefaultConfigFile(): ConfigType {
 			sortBy: 'Track',
 			sortOrder: 'asc',
 			pauseAnimatedArtWhenAppUnfocused: false,
-			lyricsTextAlign: 'left',
-			lyricsTextSize: 16,
-			lyricsTextWeight: 0,
 			alwaysShowAlbumOverlay: false,
 			isFullscreen: false,
-			equalizerHash: '3qu'
+			equalizerHash: '3qu',
+			lyricsStyle: {
+				fontSize: 16,
+				fontWeight: 500,
+				textAlignement: 0
+			}
 		},
 		songListTags: [
 			{

@@ -24,11 +24,9 @@ export type UserOptionsType = {
 	sortBy: string
 	sortOrder: 'asc' | 'desc'
 	pauseAnimatedArtWhenAppUnfocused: boolean
-	lyricsTextAlign: 'left' | 'center' | 'right'
-	lyricsTextSize: number
-	lyricsTextWeight: number
 	alwaysShowAlbumOverlay: boolean
 	isFullscreen: boolean
+	lyricsStyle: LyricsStyle
 }
 
 export enum ThemeOptions {
@@ -47,6 +45,12 @@ export type BoundsType = {
 	y: number
 	height: number
 	width: number
+}
+
+type LyricsStyle = {
+	fontWeight: number
+	fontSize: number
+	textAlignement: number
 }
 
 export type PartialConfigType = Partial<ConfigType>
