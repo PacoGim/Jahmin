@@ -3,43 +3,65 @@ import fs from 'fs'
 import sanitize from 'sanitize-filename'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
 
+import type { PromiseResolveType } from '../../types/promiseResolve.type'
+
 let lyricsFolderPath = path.join(getAppDataPathFn(), 'lyrics')
 
-function saveLyrics(lyrics: string | null, songTile: string | null | undefined, songArtist: string | null | undefined) {
-	return new Promise((resolve, reject) => {
+function saveLyrics(
+	lyrics: string,
+	songTile: string | null | undefined,
+	songArtist: string | null | undefined
+): Promise<PromiseResolveType> {
+	return new Promise(resolve => {
 		if (songTile === null || songTile === undefined || songArtist === null || songArtist === undefined) {
-			return reject('Song Title or Song Artist not defined.')
+			return resolve({
+				code: -1,
+				message: 'Song Title or Song Artist not defined.'
+			})
 		}
 
-		let lyricsPath = sanitize(`${songTile})_(${songArtist}.txt`)
+		let lyricsPath = getCleanFileName(`${songTile}.${songArtist}` + '.txt')
+
 		let lyricsFullPath = path.join(lyricsFolderPath, lyricsPath)
 
 		if (!fs.existsSync(lyricsFolderPath)) {
 			fs.mkdirSync(lyricsFolderPath, { recursive: true })
 		}
 
-		if (lyrics === null) {
-			if (!fs.existsSync(lyricsFullPath)) {
-				fs.writeFile(lyricsFullPath, '', err => {
-					if (err) {
-						reject(err)
-					} else {
-						resolve(`${songTile} lyrics saved!`)
-					}
+		fs.writeFile(lyricsFullPath, lyrics, err => {
+			if (err) {
+				resolve({
+					code: -1,
+					message: 'Could not write file'
 				})
 			} else {
-				resolve(`${songTile} lyrics saved!`)
+				resolve({
+					code: 0,
+					message: 'Lyrics saved!',
+					data: {
+						songTile,
+						songArtist
+					}
+				})
 			}
-		} else {
-			fs.writeFile(lyricsFullPath, lyrics, err => {
-				if (err) {
-					reject(err)
-				} else {
-					resolve(`${songTile} lyrics saved!`)
-				}
-			})
-		}
+		})
 	})
+}
+
+function getCleanFileName(str: string) {
+	return removeIllegalCharacters(sanitize(`${removeSpacesAndUppercaseFirst(str)}`))
+}
+
+function removeIllegalCharacters(str: string) {
+	let illegalChars = /[<>:"\/\\|?*\x00-\x1F]/g
+	return str.replace(illegalChars, '')
+}
+
+function removeSpacesAndUppercaseFirst(str: string) {
+	return str
+		.split(' ')
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.join('')
 }
 
 function getLyrics(songTile: string, songArtist: string) {

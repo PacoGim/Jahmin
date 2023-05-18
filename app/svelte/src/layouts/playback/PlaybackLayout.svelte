@@ -10,6 +10,7 @@
 	import type { SongType } from '../../../../types/song.type'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
+  import limitCharactersFn from '../../functions/limitCharacters.fn'
 
 	$: if ($playbackStore.length > 0) {
 	}
@@ -30,16 +31,6 @@
 			}[tagName] || tagName
 
 		return traduceFn(renamed)
-	}
-
-	function limitCharacters(value: any, maxCharacters: number = 20) {
-		value = String(value)
-
-		if (value.length + 3 > maxCharacters) {
-			return value.substring(0, maxCharacters) + '...'
-		} else {
-			return value
-		}
 	}
 
 	function sortSongList(tag: string) {
@@ -107,7 +98,7 @@
 							<PlayButton customSize="0.75rem" customMargins="0 0.5rem 0 0" customColor="currentColor"/>
 						{/if}
 
-						{limitCharacters(song[tag], 75)}
+						{limitCharactersFn(song[tag], 75)}
 					</song-data>
 				{/each}
 				<blank-data />

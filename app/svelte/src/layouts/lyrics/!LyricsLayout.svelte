@@ -6,12 +6,23 @@
 	import LyricsReadEditControls from './LyricsReadEditControls.svelte'
 	import { config } from '../../stores/config.store'
 	import updateConfigFn from '../../functions/updateConfig.fn'
+	import { onMount } from 'svelte'
+	import notifyService from '../../services/notify.service'
+	import iziToast from 'izitoast'
+	import traduceFn from '../../functions/traduce.fn'
+	import { playingSongStore } from '../../stores/main.store'
 
-	let lyricsMode: 'Read' | 'Edit' = 'Edit'
+	let lyricsMode: 'Read' | 'Edit' = 'Read'
 
 	let fontWeight = $config.userOptions.lyricsStyle.fontWeight
 	let fontSize = $config.userOptions.lyricsStyle.fontSize
 	let textAlignment = $config.userOptions.lyricsStyle.textAlignement
+
+	let triggerLyricSave = undefined
+
+	$: {
+		console.log(triggerLyricSave)
+	}
 
 	function onFontWeightChange({ detail }) {
 		fontWeight = detail
@@ -46,6 +57,22 @@
 			}
 		})
 	}
+
+	onMount(() => {
+		setTimeout(() => {
+			notifyService
+				.question(
+					traduceFn('No lyrics found for ${songTitle}. Would you like to create it?', { songTitle: $playingSongStore.Title })
+				)
+				.then(response => {
+					if (response === true) {
+						window.ipc.saveLyrics('', $playingSongStore.Title, $playingSongStore.Artist).then(result => {
+							console.log(result)
+						})
+					}
+				})
+		}, 1000)
+	})
 </script>
 
 <lyrics-layout class="layout">
@@ -56,7 +83,11 @@
 
 		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
 
-		<LyricsControls {lyricsMode} on:lyricsModeChange={res => (lyricsMode = res.detail)} />
+		<LyricsControls
+			{lyricsMode}
+			on:lyricsModeChange={res => (lyricsMode = res.detail)}
+			on:saveLyrics={() => (triggerLyricSave = 'Ok')}
+		/>
 
 		<LyricsReadEditControls
 			{fontWeight}
@@ -67,7 +98,7 @@
 			on:textAlignmentChange={onTextAlignmentChange}
 		/>
 
-		<LyricsReadEdit {lyricsMode} {fontWeight} {fontSize} {textAlignment} />
+		<LyricsReadEdit {lyricsMode} {fontWeight} {fontSize} {textAlignment} {triggerLyricSave} />
 	</lyrics-body>
 </lyrics-layout>
 
@@ -75,7 +106,7 @@
 	lyrics-layout {
 		display: grid;
 
-		grid-template-columns: 1fr 4fr;
+		grid-template-columns: max-content auto;
 	}
 
 	lyrics-body {

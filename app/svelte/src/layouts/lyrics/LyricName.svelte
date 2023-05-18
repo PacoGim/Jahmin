@@ -1,4 +1,4 @@
-<lyrics-name> Night Running </lyrics-name>
+<lyrics-name></lyrics-name>
 
 <style>
 	lyrics-name {
@@ -15,5 +15,6 @@
 		color: #fff;
 
 		font-variation-settings: 'wght' 700;
+		min-height: 49px;
 	}
 </style>

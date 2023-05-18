@@ -10,43 +10,52 @@ const sanitize_filename_1 = __importDefault(require("sanitize-filename"));
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
 let lyricsFolderPath = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'lyrics');
 function saveLyrics(lyrics, songTile, songArtist) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
         if (songTile === null || songTile === undefined || songArtist === null || songArtist === undefined) {
-            return reject('Song Title or Song Artist not defined.');
+            return resolve({
+                code: -1,
+                message: 'Song Title or Song Artist not defined.'
+            });
         }
-        let lyricsPath = (0, sanitize_filename_1.default)(`${songTile})_(${songArtist}.txt`);
+        let lyricsPath = getCleanFileName(`${songTile}.${songArtist}` + '.txt');
         let lyricsFullPath = path_1.default.join(lyricsFolderPath, lyricsPath);
         if (!fs_1.default.existsSync(lyricsFolderPath)) {
             fs_1.default.mkdirSync(lyricsFolderPath, { recursive: true });
         }
-        if (lyrics === null) {
-            if (!fs_1.default.existsSync(lyricsFullPath)) {
-                fs_1.default.writeFile(lyricsFullPath, '', err => {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        resolve(`${songTile} lyrics saved!`);
-                    }
+        fs_1.default.writeFile(lyricsFullPath, lyrics, err => {
+            if (err) {
+                resolve({
+                    code: -1,
+                    message: 'Could not write file'
                 });
             }
             else {
-                resolve(`${songTile} lyrics saved!`);
+                resolve({
+                    code: 0,
+                    message: 'Lyrics saved!',
+                    data: {
+                        songTile,
+                        songArtist
+                    }
+                });
             }
-        }
-        else {
-            fs_1.default.writeFile(lyricsFullPath, lyrics, err => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(`${songTile} lyrics saved!`);
-                }
-            });
-        }
+        });
     });
 }
 exports.saveLyrics = saveLyrics;
+function getCleanFileName(str) {
+    return removeIllegalCharacters((0, sanitize_filename_1.default)(`${removeSpacesAndUppercaseFirst(str)}`));
+}
+function removeIllegalCharacters(str) {
+    let illegalChars = /[<>:"\/\\|?*\x00-\x1F]/g;
+    return str.replace(illegalChars, '');
+}
+function removeSpacesAndUppercaseFirst(str) {
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+}
 function getLyrics(songTile, songArtist) {
     return new Promise((resolve, reject) => {
         let lyricsPath = (0, sanitize_filename_1.default)(`${songTile})_(${songArtist}.txt`);

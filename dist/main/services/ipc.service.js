@@ -52,12 +52,13 @@ async function startIPC() {
     await (await Promise.resolve().then(() => __importStar(require('../ipc/equalizerRename.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/equalizerDelete.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/equalizerUpdate.ipc')))).default(electron_1.ipcMain);
+    await (await Promise.resolve().then(() => __importStar(require('../ipc/getOs.ipc')))).default(electron_1.ipcMain);
+    await (await Promise.resolve().then(() => __importStar(require('../ipc/getLangFile.ipc')))).default(electron_1.ipcMain);
+    await (await Promise.resolve().then(() => __importStar(require('../ipc/getCommunityEqualizerProfiles.ipc')))).default(electron_1.ipcMain);
+    /********************** Lyrics **********************/
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsSave.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsGet.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsListGet.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsDelete.ipc')))).default(electron_1.ipcMain);
-    await (await Promise.resolve().then(() => __importStar(require('../ipc/getOs.ipc')))).default(electron_1.ipcMain);
-    await (await Promise.resolve().then(() => __importStar(require('../ipc/getLangFile.ipc')))).default(electron_1.ipcMain);
-    await (await Promise.resolve().then(() => __importStar(require('../ipc/getCommunityEqualizerProfiles.ipc')))).default(electron_1.ipcMain);
 }
 exports.startIPC = startIPC;

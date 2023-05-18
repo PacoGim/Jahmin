@@ -243,3 +243,7 @@ config-edit-button:hover {
 	color: var(--color-bg-1);
 	background-color: var(--color-fg-1);
 }
+
+.iziToast-buttons-child {
+	color: #fff !important;
+}

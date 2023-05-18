@@ -1,78 +1,32 @@
 <script lang="ts">
+	import { playingSongStore } from '../../stores/main.store'
+
 	export let lyricsMode
 
 	export let fontWeight
 	export let fontSize
 	export let textAlignment
 
-	let lyric = `Totsuzen ni mō Upside Down
-Sekai wa kawari dasu
-Inori mo todokanai
-Boku ga kawari dasu
+	export let triggerLyricSave
 
-Imi o motomete hashiri tsuzukete
-Jibun ga dare ka wakaranaku naru
-Naki-sōdakedo maketakunaikara
+	$: {
+		if (triggerLyricSave !== undefined) {
+			triggerLyricSave = undefined
+			window.ipc.saveLyrics(lyric, $playingSongStore.Title, $playingSongStore.Artist).then(result => {
+				console.log(result)
+			})
+		}
+	}
 
-Oshiete
-Yoru ni haseru kono yurameki to
-Omoinomama ni tobimawatte
-Motto jiyū ni kakete ikou yo
-Hoshi o miagete sa
-
-Isshōbun no Ups and Downs
-Sekai wa ugokidasu
-Itami wa tomaranai
-Kakusei shite tobidase
-
-Imi mo naku mata hashiri tsuzukete
-Owari no mienai tabi o tsuzukeru
-Kirameku yō ni sekai o mitaikara
-You might also like
-YOASOBI - アイドル (Idol) (Romanized)
-Genius Romanizations
-Night Running
-Cage The Elephant
-NIGHT RUNNING
-シン サキウラ (Shin Sakiura)
-Oshiete
-Yoru ni haseru kono yurameki to
-Omoinomama ni tobimawatte
-Saigomade hashiri kittara
-Bokura wa dō naru no?
-
-Itsuka mata kono basho ni tatte
-Nandodemo tachiagaru kitto
-Saigomade mitodokete zutto
-Jiyū ni iki tetai
-
-Imi o motomete hashiri tsuzukete
-Jibun ga dare ka wakaranaku naru
-Nakisōdakedo maketakunai no
-
-Oshiete
-Yoru ni haseru kono yurameki to
-Omoinomama ni tobimawatte
-Saigomade hashiri kittara
-Bokura wa dō naru no?
-
-Itsuka mata kono basho ni tatte
-Nandodemo tachiagaru kitto
-Saigomade mitodokete zutto
-Jiyū ni iki tetai
-(Imi o motomete hashiri tsuzukete
-Jibun ga dare ka wakaranaku naru
-
-Imi mo naku mata hashiri tsuzukete
-Owari no mienai tabi o tsuzukeru)`
+	let lyric = 'Add a new lyrics bla bla bla'
 </script>
 
 <lyrics-read-edit class={lyricsMode === 'Read' ? 'read' : 'edit'}>
-	<!-- <lyrics-mode-name> Edit Mode </lyrics-mode-name> -->
-
 	<lyrics-text-area>
 		<textarea
-			style="text-align:{['left', 'center', 'right'][textAlignment]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
+			style="text-align:{['left', 'center', 'right'][
+				textAlignment
+			]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
 			value={lyric}
 			disabled={lyricsMode === 'Read' ? true : false}
 		/>
@@ -111,6 +65,8 @@ Owari no mienai tabi o tsuzukeru)`
 		background-color: var(--color-bg-2);
 		color: currentColor;
 
+		border: none;
+
 		border: 2px solid var(--color-accent-4);
 
 		padding: 1rem;
@@ -121,7 +77,7 @@ Owari no mienai tabi o tsuzukeru)`
 	}
 
 	textarea:disabled {
-		border-color: var(--color-bg-3);
+		border-color: transparent;
 		background-color: var(--color-bg-2);
 		color: currentColor;
 	}

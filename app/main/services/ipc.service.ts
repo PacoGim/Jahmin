@@ -28,11 +28,12 @@ export async function startIPC() {
 	await (await import('../ipc/equalizerRename.ipc')).default(ipcMain)
 	await (await import('../ipc/equalizerDelete.ipc')).default(ipcMain)
 	await (await import('../ipc/equalizerUpdate.ipc')).default(ipcMain)
+	await (await import('../ipc/getOs.ipc')).default(ipcMain)
+	await (await import('../ipc/getLangFile.ipc')).default(ipcMain)
+	await (await import('../ipc/getCommunityEqualizerProfiles.ipc')).default(ipcMain)
+	/********************** Lyrics **********************/
 	await (await import('../ipc/lyricsSave.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsGet.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsListGet.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsDelete.ipc')).default(ipcMain)
-	await (await import('../ipc/getOs.ipc')).default(ipcMain)
-	await (await import('../ipc/getLangFile.ipc')).default(ipcMain)
-	await (await import('../ipc/getCommunityEqualizerProfiles.ipc')).default(ipcMain)
 }
