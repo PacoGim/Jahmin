@@ -68,7 +68,7 @@ Owari no mienai tabi o tsuzukeru)`
 </script>
 
 <lyrics-read-edit class={lyricsMode === 'Read' ? 'read' : 'edit'}>
-	<lyrics-mode-name> Edit Mode </lyrics-mode-name>
+	<!-- <lyrics-mode-name> Edit Mode </lyrics-mode-name> -->
 
 	<lyrics-text-area>
 		<textarea
@@ -95,36 +95,6 @@ Owari no mienai tabi o tsuzukeru)`
 		overflow-y: auto;
 	}
 
-	lyrics-read-edit lyrics-mode-name {
-		display: grid;
-
-		font-size: 0.85rem;
-
-		padding: 0.5rem 0.75rem;
-		font-variation-settings: 'wght' 600;
-
-		width: fit-content;
-
-		border-radius: 5px 5px 0 0;
-
-		background-color: var(--color-accent-4);
-		color: #fff;
-
-		transition-property: opacity transform;
-		transition-duration: 300ms;
-		transition-timing-function: linear;
-	}
-
-	lyrics-read-edit.read lyrics-mode-name {
-		opacity: 0;
-		transform: translateY(100%);
-	}
-
-	lyrics-read-edit.edit lyrics-mode-name {
-		opacity: 1;
-		transform: translateY(0%);
-	}
-
 	lyrics-text-area {
 		width: 100%;
 		height: 100%;
@@ -136,7 +106,7 @@ Owari no mienai tabi o tsuzukeru)`
 		width: 100%;
 		height: 100%;
 
-		resize: vertical;
+		resize: none;
 
 		background-color: var(--color-bg-2);
 		color: currentColor;

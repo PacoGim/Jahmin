@@ -10,6 +10,7 @@
 
 <style>
 	lyrics-list {
+			background-color: var(--color-bg-2);
 		/* grid-area: lyrics-list; */
 		/* background-color: blue; */
 	}

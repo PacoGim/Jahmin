@@ -1,7 +1,6 @@
 <script lang="ts">
 	import LyricsList from './LyricsList.svelte'
 	import LyricName from './LyricName.svelte'
-	import LyricsCreate from './LyricsCreate.svelte'
 	import LyricsControls from './LyricsControls.svelte'
 	import LyricsReadEdit from './LyricsReadEdit.svelte'
 	import LyricsReadEditControls from './LyricsReadEditControls.svelte'
@@ -54,8 +53,11 @@
 
 	<lyrics-body>
 		<LyricName />
-		<LyricsCreate />
+
+		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
+
 		<LyricsControls {lyricsMode} on:lyricsModeChange={res => (lyricsMode = res.detail)} />
+
 		<LyricsReadEditControls
 			{fontWeight}
 			{fontSize}
@@ -64,6 +66,7 @@
 			on:fontSizeChange={onFontSizeChange}
 			on:textAlignmentChange={onTextAlignmentChange}
 		/>
+
 		<LyricsReadEdit {lyricsMode} {fontWeight} {fontSize} {textAlignment} />
 	</lyrics-body>
 </lyrics-layout>
@@ -78,14 +81,48 @@
 	lyrics-body {
 		display: grid;
 
-		grid-template-columns: auto max-content max-content;
+		background: var(--color-bg-3);
+
+		grid-template-columns: max-content auto max-content;
 		grid-template-rows: max-content max-content auto;
 
 		overflow: hidden;
 
 		grid-template-areas:
-			'lyrics-name lyrics-name lyrics-create'
-			'lyrics-controls lyrics-read-edit-controls lyrics-create'
+			'lyrics-name lyrics-name lyrics-name'
+			'lyrics-edit-mode-sign lyrics-controls lyrics-read-edit-controls'
 			'lyrics-read-edit lyrics-read-edit lyrics-read-edit';
+	}
+
+	lyrics-edit-mode-sign {
+		grid-area: lyrics-edit-mode-sign;
+
+		place-self: end;
+		margin-left: 1rem;
+		font-size: 0.85rem;
+
+		padding: 0.5rem 0.75rem;
+		font-variation-settings: 'wght' 600;
+
+		width: fit-content;
+
+		border-radius: 5px 5px 0 0;
+
+		background-color: var(--color-accent-4);
+		color: #fff;
+
+		transition-property: opacity transform;
+		transition-duration: 300ms;
+		transition-timing-function: linear;
+	}
+
+	lyrics-edit-mode-sign.read {
+		opacity: 0;
+		transform: translateY(100%);
+	}
+
+	lyrics-edit-mode-sign.edit {
+		opacity: 1;
+		transform: translateY(2px);
 	}
 </style>
