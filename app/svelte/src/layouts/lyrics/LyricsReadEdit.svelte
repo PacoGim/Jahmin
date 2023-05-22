@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
-	import { playingSongStore } from '../../stores/main.store'
 
 	let dispatch = createEventDispatcher()
 
@@ -10,10 +9,26 @@
 	export let fontSize
 	export let textAlignment
 
-	let lyric = ''
+	export let selectedLyric = { title: '', artist: '' }
+
+	let lyrics = ''
 
 	$: {
-		dispatch('newLyricValue', lyric)
+		dispatch('newLyricValue', lyrics)
+	}
+
+	$: {
+		getLyric(selectedLyric.title, selectedLyric.artist)
+	}
+
+	function getLyric(title: string, artist: string) {
+		window.ipc.getLyrics(title, artist).then(result => {
+			if (result.code === 0) {
+				lyrics = result.data.lyrics
+			} else {
+				lyrics = ''
+			}
+		})
 	}
 </script>
 
@@ -23,7 +38,7 @@
 			style="text-align:{['left', 'center', 'right'][
 				textAlignment
 			]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
-			bind:value={lyric}
+			bind:value={lyrics}
 			disabled={lyricsMode === 'Read' ? true : false}
 		/>
 	</lyrics-text-area>
@@ -48,6 +63,8 @@
 	lyrics-text-area {
 		width: 100%;
 		height: 100%;
+
+		margin-top: 1rem;
 
 		position: relative;
 	}

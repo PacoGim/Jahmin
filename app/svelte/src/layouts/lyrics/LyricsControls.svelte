@@ -23,6 +23,7 @@
 		height: fit-content;
 		align-self: center;
 		margin-bottom: 0.25rem;
+		margin-left: 1rem;
 	}
 
 	lyrics-controls button {

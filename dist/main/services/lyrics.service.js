@@ -60,20 +60,33 @@ function saveLyrics(lyrics, songTitle, songArtist) {
 exports.saveLyrics = saveLyrics;
 function getLyrics(songTitle, songArtist) {
     return new Promise((resolve, reject) => {
-        let lyricsPath = (0, sanitize_filename_1.default)(`${songTitle})_(${songArtist}.txt`);
-        fs_1.default.readFile(path_1.default.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
-            if (err) {
-                if (err.code === 'ENOENT') {
-                    resolve('');
+        if (!songTitle || !songArtist) {
+            return resolve({
+                code: -1,
+                message: 'Song Title or Song Artist not defined.'
+            });
+        }
+        let lyricsPath = getCleanFileName(`${songTitle}.${songArtist}` + '.txt');
+        let lyricsFullPath = path_1.default.join(lyricsFolderPath, lyricsPath);
+        let lyricsFileContent = fs_1.default.readFileSync(lyricsFullPath, { encoding: 'utf8' });
+        let songLyrics = lyricsFileContent.split('\n').slice(3).join('\n');
+        if (songLyrics) {
+            return resolve({
+                code: 0,
+                message: 'Lyrics found!',
+                data: {
+                    title: songTitle,
+                    artist: songArtist,
+                    lyrics: songLyrics
                 }
-                else {
-                    reject(err);
-                }
-            }
-            else {
-                resolve(lyrics);
-            }
-        });
+            });
+        }
+        else {
+            return resolve({
+                code: -1,
+                message: 'Lyrics not found'
+            });
+        }
     });
 }
 exports.getLyrics = getLyrics;

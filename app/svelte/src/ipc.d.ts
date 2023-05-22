@@ -23,7 +23,7 @@ declare global {
 			stopSongUpdate: () => Promise<>
 			rebuildArtCache: () => Promise<>
 			saveLyrics: (lyrics: string, songTile: string, songArtist: string) => Promise<PromiseResolveType>
-			getLyrics: (songTile: string, songArtist: string) => Promise<string>
+			getLyrics: (songTile: string, songArtist: string) => Promise<PromiseResolveType>
 			getLyricsList: () => Promise<{ title: string; artist: string }[]>
 			deleteLyrics: (
 				title: string,
@@ -47,6 +47,7 @@ declare global {
 			handleArt: (filePath: string, elementId: string, size: number) => void
 			verifyFolderTegrity: (folderRoot: string) => void
 			reloadApp: () => void
+			openGeniusWebpage: (songTitle: string, songArtist: string) => void
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt

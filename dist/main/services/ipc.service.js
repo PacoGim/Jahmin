@@ -38,6 +38,7 @@ async function startIPC() {
     await (await Promise.resolve().then(() => __importStar(require('../ipc/handleArt.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/verifyFolderTegrity.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/reloadApp.ipc')))).default(electron_1.ipcMain);
+    await (await Promise.resolve().then(() => __importStar(require('../ipc/openGeniusWebpage')))).default(electron_1.ipcMain);
     /********************** Two-way **********************/
     await (await Promise.resolve().then(() => __importStar(require('../ipc/configGet.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/getAlbumColors.ipc')))).default(electron_1.ipcMain);

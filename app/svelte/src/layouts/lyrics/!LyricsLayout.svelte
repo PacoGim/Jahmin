@@ -1,6 +1,6 @@
 <script lang="ts">
 	import LyricsList from './LyricsList.svelte'
-	import LyricName from './LyricName.svelte'
+	import LyricHeader from './LyricHeader.svelte'
 	import LyricsControls from './LyricsControls.svelte'
 	import LyricsReadEdit from './LyricsReadEdit.svelte'
 	import LyricsReadEditControls from './LyricsReadEditControls.svelte'
@@ -17,12 +17,17 @@
 	let fontSize = $config.userOptions.lyricsStyle.fontSize
 	let textAlignment = $config.userOptions.lyricsStyle.textAlignment
 
-	let lyric = ''
+	let selectedLyric = {
+		title: '',
+		artist: ''
+	}
+
+	let lyrics = ''
 
 	let lyricList = []
 
 	function saveNewLyricValue() {
-		window.ipc.saveLyrics(lyric, $playingSongStore.Title, $playingSongStore.Artist).then(result => {
+		window.ipc.saveLyrics(lyrics, selectedLyric.title, selectedLyric.artist).then(result => {
 			console.log(result)
 		})
 	}
@@ -34,10 +39,16 @@
 			let foundLyric = undefined
 
 			if ($onNewLyrics !== null) {
-				foundLyric = result.find(lyric => lyric.artist === $onNewLyrics.artist && lyric.title === $onNewLyrics.title)
+				selectedLyric = {
+					title: $onNewLyrics.title,
+					artist: $onNewLyrics.artist
+				}
+				foundLyric = result.find(lyrics => lyrics.artist === $onNewLyrics.artist && lyrics.title === $onNewLyrics.title)
 				onNewLyrics.set(null)
 			} else {
-				foundLyric = result.find(lyric => lyric.artist === $playingSongStore.Artist && lyric.title === $playingSongStore.Title)
+				foundLyric = result.find(
+					lyrics => lyrics.artist === $playingSongStore.Artist && lyrics.title === $playingSongStore.Title
+				)
 
 				if (foundLyric === undefined) {
 					notifyService
@@ -58,6 +69,11 @@
 								})
 							}
 						})
+				} else {
+					selectedLyric = {
+						artist: $playingSongStore.Artist,
+						title: $playingSongStore.Title
+					}
 				}
 			}
 		})
@@ -65,10 +81,16 @@
 </script>
 
 <lyrics-layout class="layout">
-	<LyricsList {lyricList} />
+	<LyricsList
+		{lyricList}
+		{selectedLyric}
+		on:selectedLyric={({ detail }) => {
+			selectedLyric = detail
+		}}
+	/>
 
 	<lyrics-body>
-		<LyricName />
+		<LyricHeader {selectedLyric} />
 
 		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
 
@@ -91,8 +113,9 @@
 
 		<LyricsReadEdit
 			on:newLyricValue={({ detail }) => {
-				lyric = detail
+				lyrics = detail
 			}}
+			{selectedLyric}
 			{lyricsMode}
 			{fontWeight}
 			{fontSize}
@@ -141,18 +164,18 @@
 		background-color: var(--color-accent-4);
 		color: #fff;
 
-		transition-property: opacity transform;
+		transition-property: opacity, transform;
 		transition-duration: 300ms;
 		transition-timing-function: linear;
 	}
 
 	lyrics-edit-mode-sign.read {
 		opacity: 0;
-		transform: translateY(100%);
+		transform: translateY(calc(120% + 1rem));
 	}
 
 	lyrics-edit-mode-sign.edit {
 		opacity: 1;
-		transform: translateY(2px);
+		transform: translateY(1rem);
 	}
 </style>

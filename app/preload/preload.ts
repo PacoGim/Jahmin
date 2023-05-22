@@ -43,6 +43,7 @@ const ipcFunctions = {
 	handleArt: (filePath: string, elementId: string, size: number) => ipcRenderer.send('handle-art', filePath, elementId, size),
 	verifyFolderTegrity: (folderRoot: string) => ipcRenderer.send('verify-folder-tegrity', folderRoot),
 	reloadApp: () => ipcRenderer.send('reload-app'),
+	openGeniusWebpage: (songTitle: string, songArtist: string) => ipcRenderer.send('open-genius-webpage', songTitle, songArtist),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),
