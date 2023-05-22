@@ -73,7 +73,7 @@ function getDefaultConfigFile(): ConfigType {
 			lyricsStyle: {
 				fontSize: 16,
 				fontWeight: 500,
-				textAlignement: 0
+				textAlignment: 0
 			}
 		},
 		songListTags: [

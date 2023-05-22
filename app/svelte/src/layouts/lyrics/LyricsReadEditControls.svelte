@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte'
+	import updateConfigFn from '../../functions/updateConfig.fn'
 
 	const dispatch = createEventDispatcher()
 
@@ -7,9 +8,38 @@
 	export let fontSize
 	export let textAlignment
 
-	$: dispatch('fontWeightChange', fontWeight)
-	$: dispatch('fontSizeChange', fontSize)
-	$: dispatch('textAlignmentChange', textAlignment)
+	$: {
+		dispatch('fontWeightChange', fontWeight)
+		updateConfigFn({
+			userOptions: {
+				lyricsStyle: {
+					fontWeight
+				}
+			}
+		})
+	}
+
+	$: {
+		dispatch('fontSizeChange', fontSize)
+		updateConfigFn({
+			userOptions: {
+				lyricsStyle: {
+					fontSize
+				}
+			}
+		})
+	}
+
+	$: {
+		dispatch('textAlignmentChange', textAlignment)
+		updateConfigFn({
+			userOptions: {
+				lyricsStyle: {
+					textAlignment
+				}
+			}
+		})
+	}
 
 	function onTextControlElementMouseEnterLeave(evt, state: 'addActiveClass' | 'removeActiveClass') {
 		let parentElement = evt.currentTarget as HTMLElement

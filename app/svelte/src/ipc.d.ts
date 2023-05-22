@@ -3,6 +3,7 @@
 import type { ConfigType, PartialConfigType } from '../../types/config.type'
 import type { EqualizerProfileType } from '../../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../../types/returnMessage.type'
+import type { PromiseResolveType } from '../../types/promiseResolve.type'
 import { SongType } from '../../types/song.type'
 
 export {}
@@ -21,7 +22,7 @@ declare global {
 			deleteEqualizer: (eqHash: string) => Promise<ReturnMessageType>
 			stopSongUpdate: () => Promise<>
 			rebuildArtCache: () => Promise<>
-			saveLyrics: (lyrics: string, songTile: string, songArtist: string) => Promise<string>
+			saveLyrics: (lyrics: string, songTile: string, songArtist: string) => Promise<PromiseResolveType>
 			getLyrics: (songTile: string, songArtist: string) => Promise<string>
 			getLyricsList: () => Promise<{ title: string; artist: string }[]>
 			deleteLyrics: (

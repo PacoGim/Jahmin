@@ -9,56 +9,58 @@ const fs_1 = __importDefault(require("fs"));
 const sanitize_filename_1 = __importDefault(require("sanitize-filename"));
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
 let lyricsFolderPath = path_1.default.join((0, getAppDataPath_fn_1.default)(), 'lyrics');
-function saveLyrics(lyrics, songTile, songArtist) {
+function saveLyrics(lyrics, songTitle, songArtist) {
     return new Promise(resolve => {
-        if (songTile === null || songTile === undefined || songArtist === null || songArtist === undefined) {
+        if (songTitle === null || songTitle === undefined || songArtist === null || songArtist === undefined) {
             return resolve({
                 code: -1,
                 message: 'Song Title or Song Artist not defined.'
             });
         }
-        let lyricsPath = getCleanFileName(`${songTile}.${songArtist}` + '.txt');
+        let lyricsPath = getCleanFileName(`${songTitle}.${songArtist}` + '.txt');
         let lyricsFullPath = path_1.default.join(lyricsFolderPath, lyricsPath);
         if (!fs_1.default.existsSync(lyricsFolderPath)) {
             fs_1.default.mkdirSync(lyricsFolderPath, { recursive: true });
         }
-        fs_1.default.writeFile(lyricsFullPath, lyrics, err => {
-            if (err) {
-                resolve({
-                    code: -1,
-                    message: 'Could not write file'
-                });
-            }
-            else {
-                resolve({
-                    code: 0,
-                    message: 'Lyrics saved!',
-                    data: {
-                        songTile,
-                        songArtist
-                    }
-                });
-            }
-        });
+        if (lyrics === 'SaveLyricsFromContextMenu' && fs_1.default.existsSync(lyricsFullPath)) {
+            return resolve({
+                code: 0,
+                message: 'Lyrics saved!',
+                data: {
+                    title: songTitle,
+                    artist: songArtist
+                }
+            });
+        }
+        else {
+            if (lyrics === 'SaveLyricsFromContextMenu')
+                lyrics = '';
+            lyrics = `Song Title: ${songTitle}\nSong Artist: ${songArtist}\n\n${lyrics}`;
+            fs_1.default.writeFile(lyricsFullPath, lyrics, err => {
+                if (err) {
+                    resolve({
+                        code: -1,
+                        message: 'Could not write file'
+                    });
+                }
+                else {
+                    resolve({
+                        code: 0,
+                        message: 'Lyrics saved!',
+                        data: {
+                            title: songTitle,
+                            artist: songArtist
+                        }
+                    });
+                }
+            });
+        }
     });
 }
 exports.saveLyrics = saveLyrics;
-function getCleanFileName(str) {
-    return removeIllegalCharacters((0, sanitize_filename_1.default)(`${removeSpacesAndUppercaseFirst(str)}`));
-}
-function removeIllegalCharacters(str) {
-    let illegalChars = /[<>:"\/\\|?*\x00-\x1F]/g;
-    return str.replace(illegalChars, '');
-}
-function removeSpacesAndUppercaseFirst(str) {
-    return str
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join('');
-}
-function getLyrics(songTile, songArtist) {
+function getLyrics(songTitle, songArtist) {
     return new Promise((resolve, reject) => {
-        let lyricsPath = (0, sanitize_filename_1.default)(`${songTile})_(${songArtist}.txt`);
+        let lyricsPath = (0, sanitize_filename_1.default)(`${songTitle})_(${songArtist}.txt`);
         fs_1.default.readFile(path_1.default.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
             if (err) {
                 if (err.code === 'ENOENT') {
@@ -77,18 +79,21 @@ function getLyrics(songTile, songArtist) {
 exports.getLyrics = getLyrics;
 function getLyricsList() {
     return new Promise((resolve, reject) => {
-        let lyricsList = fs_1.default
+        let lyricFilesPathList = fs_1.default
             .readdirSync(lyricsFolderPath)
             .filter(file => file.endsWith('.txt'))
-            .map(file => file.split('.')[0])
-            .map(file => {
-            let fileSplit = file.split(')_(');
+            .map(file => path_1.default.join(lyricsFolderPath, file));
+        let lyricList = lyricFilesPathList.map(lyricFilePath => {
+            let lyricsFileContent = fs_1.default.readFileSync(lyricFilePath, { encoding: 'utf8' });
+            let lyricsSongTitle = lyricsFileContent.split('\n')[0].split('Song Title: ')[1].trim();
+            let lyricsSongArtist = lyricsFileContent.split('\n')[1].split('Song Artist: ')[1].trim();
+            // let lyricsSongLyrics = lyricsFileContent.split('\n').slice(3).join('\n')
             return {
-                title: fileSplit[0],
-                artist: fileSplit[1]
+                title: lyricsSongTitle,
+                artist: lyricsSongArtist
             };
         });
-        resolve(lyricsList);
+        resolve(lyricList);
     });
 }
 exports.getLyricsList = getLyricsList;
@@ -119,3 +124,16 @@ function deleteLyrics(title, artist) {
     });
 }
 exports.deleteLyrics = deleteLyrics;
+function getCleanFileName(str) {
+    return removeIllegalCharacters((0, sanitize_filename_1.default)(`${removeSpacesAndUppercaseFirst(str)}`));
+}
+function removeIllegalCharacters(str) {
+    let illegalChars = /[<>:"\/\\|?*\x00-\x1F]/g;
+    return str.replace(illegalChars, '');
+}
+function removeSpacesAndUppercaseFirst(str) {
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
+}

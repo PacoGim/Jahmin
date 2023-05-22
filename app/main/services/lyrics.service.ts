@@ -8,19 +8,19 @@ import type { PromiseResolveType } from '../../types/promiseResolve.type'
 let lyricsFolderPath = path.join(getAppDataPathFn(), 'lyrics')
 
 function saveLyrics(
-	lyrics: string,
-	songTile: string | null | undefined,
+	lyrics: string | 'SaveLyricsFromContextMenu',
+	songTitle: string | null | undefined,
 	songArtist: string | null | undefined
 ): Promise<PromiseResolveType> {
 	return new Promise(resolve => {
-		if (songTile === null || songTile === undefined || songArtist === null || songArtist === undefined) {
+		if (songTitle === null || songTitle === undefined || songArtist === null || songArtist === undefined) {
 			return resolve({
 				code: -1,
 				message: 'Song Title or Song Artist not defined.'
 			})
 		}
 
-		let lyricsPath = getCleanFileName(`${songTile}.${songArtist}` + '.txt')
+		let lyricsPath = getCleanFileName(`${songTitle}.${songArtist}` + '.txt')
 
 		let lyricsFullPath = path.join(lyricsFolderPath, lyricsPath)
 
@@ -28,45 +28,44 @@ function saveLyrics(
 			fs.mkdirSync(lyricsFolderPath, { recursive: true })
 		}
 
-		fs.writeFile(lyricsFullPath, lyrics, err => {
-			if (err) {
-				resolve({
-					code: -1,
-					message: 'Could not write file'
-				})
-			} else {
-				resolve({
-					code: 0,
-					message: 'Lyrics saved!',
-					data: {
-						songTile,
-						songArtist
-					}
-				})
-			}
-		})
+		if (lyrics === 'SaveLyricsFromContextMenu' && fs.existsSync(lyricsFullPath)) {
+			return resolve({
+				code: 0,
+				message: 'Lyrics saved!',
+				data: {
+					title: songTitle,
+					artist: songArtist
+				}
+			})
+		} else {
+			if (lyrics === 'SaveLyricsFromContextMenu') lyrics = ''
+
+			lyrics = `Song Title: ${songTitle}\nSong Artist: ${songArtist}\n\n${lyrics}`
+
+			fs.writeFile(lyricsFullPath, lyrics, err => {
+				if (err) {
+					resolve({
+						code: -1,
+						message: 'Could not write file'
+					})
+				} else {
+					resolve({
+						code: 0,
+						message: 'Lyrics saved!',
+						data: {
+							title: songTitle,
+							artist: songArtist
+						}
+					})
+				}
+			})
+		}
 	})
 }
 
-function getCleanFileName(str: string) {
-	return removeIllegalCharacters(sanitize(`${removeSpacesAndUppercaseFirst(str)}`))
-}
-
-function removeIllegalCharacters(str: string) {
-	let illegalChars = /[<>:"\/\\|?*\x00-\x1F]/g
-	return str.replace(illegalChars, '')
-}
-
-function removeSpacesAndUppercaseFirst(str: string) {
-	return str
-		.split(' ')
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-		.join('')
-}
-
-function getLyrics(songTile: string, songArtist: string) {
+function getLyrics(songTitle: string, songArtist: string) {
 	return new Promise((resolve, reject) => {
-		let lyricsPath = sanitize(`${songTile})_(${songArtist}.txt`)
+		let lyricsPath = sanitize(`${songTitle})_(${songArtist}.txt`)
 
 		fs.readFile(path.join(lyricsFolderPath, lyricsPath), { encoding: 'utf8' }, (err, lyrics) => {
 			if (err) {
@@ -84,19 +83,25 @@ function getLyrics(songTile: string, songArtist: string) {
 
 function getLyricsList() {
 	return new Promise((resolve, reject) => {
-		let lyricsList = fs
+		let lyricFilesPathList = fs
 			.readdirSync(lyricsFolderPath)
 			.filter(file => file.endsWith('.txt'))
-			.map(file => file.split('.')[0])
-			.map(file => {
-				let fileSplit = file.split(')_(')
-				return {
-					title: fileSplit[0],
-					artist: fileSplit[1]
-				}
-			})
+			.map(file => path.join(lyricsFolderPath, file))
 
-		resolve(lyricsList)
+		let lyricList = lyricFilesPathList.map(lyricFilePath => {
+			let lyricsFileContent = fs.readFileSync(lyricFilePath, { encoding: 'utf8' })
+
+			let lyricsSongTitle = lyricsFileContent.split('\n')[0].split('Song Title: ')[1].trim()
+			let lyricsSongArtist = lyricsFileContent.split('\n')[1].split('Song Artist: ')[1].trim()
+			// let lyricsSongLyrics = lyricsFileContent.split('\n').slice(3).join('\n')
+
+			return {
+				title: lyricsSongTitle,
+				artist: lyricsSongArtist
+			}
+		})
+
+		resolve(lyricList)
 	})
 }
 
@@ -127,3 +132,19 @@ function deleteLyrics(title: string, artist: string) {
 }
 
 export { saveLyrics, getLyrics, getLyricsList, deleteLyrics }
+
+function getCleanFileName(str: string) {
+	return removeIllegalCharacters(sanitize(`${removeSpacesAndUppercaseFirst(str)}`))
+}
+
+function removeIllegalCharacters(str: string) {
+	let illegalChars = /[<>:"\/\\|?*\x00-\x1F]/g
+	return str.replace(illegalChars, '')
+}
+
+function removeSpacesAndUppercaseFirst(str: string) {
+	return str
+		.split(' ')
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.join('')
+}

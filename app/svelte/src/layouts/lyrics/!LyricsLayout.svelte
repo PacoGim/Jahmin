@@ -5,100 +5,99 @@
 	import LyricsReadEdit from './LyricsReadEdit.svelte'
 	import LyricsReadEditControls from './LyricsReadEditControls.svelte'
 	import { config } from '../../stores/config.store'
-	import updateConfigFn from '../../functions/updateConfig.fn'
 	import { onMount } from 'svelte'
-	import notifyService from '../../services/notify.service'
-	import iziToast from 'izitoast'
-	import traduceFn from '../../functions/traduce.fn'
 	import { playingSongStore } from '../../stores/main.store'
+	import { onNewLyrics } from '../../stores/crosscall.store'
+	import notifyService from '../../services/notify.service'
+	import traduceFn from '../../functions/traduce.fn'
 
 	let lyricsMode: 'Read' | 'Edit' = 'Read'
 
 	let fontWeight = $config.userOptions.lyricsStyle.fontWeight
 	let fontSize = $config.userOptions.lyricsStyle.fontSize
-	let textAlignment = $config.userOptions.lyricsStyle.textAlignement
+	let textAlignment = $config.userOptions.lyricsStyle.textAlignment
 
-	let triggerLyricSave = undefined
+	let lyric = ''
 
-	$: {
-		console.log(triggerLyricSave)
-	}
+	let lyricList = []
 
-	function onFontWeightChange({ detail }) {
-		fontWeight = detail
-
-		updateConfigFn({
-			userOptions: {
-				lyricsStyle: {
-					fontWeight
-				}
-			}
-		})
-	}
-
-	function onFontSizeChange({ detail }) {
-		fontSize = detail
-		updateConfigFn({
-			userOptions: {
-				lyricsStyle: {
-					fontSize
-				}
-			}
-		})
-	}
-
-	function onTextAlignmentChange({ detail }) {
-		textAlignment = detail
-		updateConfigFn({
-			userOptions: {
-				lyricsStyle: {
-					textAlignment
-				}
-			}
+	function saveNewLyricValue() {
+		window.ipc.saveLyrics(lyric, $playingSongStore.Title, $playingSongStore.Artist).then(result => {
+			console.log(result)
 		})
 	}
 
 	onMount(() => {
-		setTimeout(() => {
-			notifyService
-				.question(
-					traduceFn('No lyrics found for ${songTitle}. Would you like to create it?', { songTitle: $playingSongStore.Title })
-				)
-				.then(response => {
-					if (response === true) {
-						window.ipc.saveLyrics('', $playingSongStore.Title, $playingSongStore.Artist).then(result => {
-							console.log(result)
+		window.ipc.getLyricsList().then(result => {
+			lyricList = result
+
+			let foundLyric = undefined
+
+			if ($onNewLyrics !== null) {
+				foundLyric = result.find(lyric => lyric.artist === $onNewLyrics.artist && lyric.title === $onNewLyrics.title)
+				onNewLyrics.set(null)
+			} else {
+				foundLyric = result.find(lyric => lyric.artist === $playingSongStore.Artist && lyric.title === $playingSongStore.Title)
+
+				if (foundLyric === undefined) {
+					notifyService
+						.question(
+							traduceFn('No lyrics found for ${songTitle}. Would you like to create it?', {
+								songTitle: $playingSongStore.Title
+							})
+						)
+						.then(response => {
+							if (response === true) {
+								window.ipc.saveLyrics('', $playingSongStore.Title, $playingSongStore.Artist).then(result => {
+									lyricList.push({
+										artist: result.data.artist,
+										title: result.data.title
+									})
+
+									lyricList = lyricList
+								})
+							}
 						})
-					}
-				})
-		}, 1000)
+				}
+			}
+		})
 	})
 </script>
 
 <lyrics-layout class="layout">
-	<LyricsList />
+	<LyricsList {lyricList} />
 
 	<lyrics-body>
 		<LyricName />
 
 		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
 
-		<LyricsControls
-			{lyricsMode}
-			on:lyricsModeChange={res => (lyricsMode = res.detail)}
-			on:saveLyrics={() => (triggerLyricSave = 'Ok')}
-		/>
+		<LyricsControls {lyricsMode} on:lyricsModeChange={res => (lyricsMode = res.detail)} on:saveLyrics={saveNewLyricValue} />
 
 		<LyricsReadEditControls
 			{fontWeight}
 			{fontSize}
 			{textAlignment}
-			on:fontWeightChange={onFontWeightChange}
-			on:fontSizeChange={onFontSizeChange}
-			on:textAlignmentChange={onTextAlignmentChange}
+			on:fontWeightChange={({ detail }) => {
+				fontWeight = detail
+			}}
+			on:fontSizeChange={({ detail }) => {
+				fontSize = detail
+			}}
+			on:textAlignmentChange={({ detail }) => {
+				textAlignment = detail
+			}}
 		/>
 
-		<LyricsReadEdit {lyricsMode} {fontWeight} {fontSize} {textAlignment} {triggerLyricSave} />
+		<LyricsReadEdit
+			on:newLyricValue={({ detail }) => {
+				lyric = detail
+			}}
+			{lyricsMode}
+			{fontWeight}
+			{fontSize}
+			{textAlignment}
+		/>
 	</lyrics-body>
 </lyrics-layout>
 

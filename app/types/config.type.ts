@@ -50,7 +50,7 @@ export type BoundsType = {
 type LyricsStyle = {
 	fontWeight: number
 	fontSize: number
-	textAlignement: number
+	textAlignment: number
 }
 
 export type PartialConfigType = Partial<ConfigType>

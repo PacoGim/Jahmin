@@ -1,24 +1,13 @@
 <script lang="ts">
 	import limitCharactersFn from '../../functions/limitCharacters.fn'
+
+	export let lyricList = []
 </script>
 
 <lyrics-list>
-	<!-- <lyric-container
-		>{limitCharactersFn(
-			'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veritatis, blanditiis.',
-			30
-		)}</lyric-container
-	>
-	<lyric-container
-		>{limitCharactersFn('Quo, numquam hic reprehenderit veniam eligendi sed beatae optio necessitatibus.', 30)}</lyric-container
-	>
-	<lyric-container>{limitCharactersFn('Quos ad neque sed repellat reiciendis, enim hic nobis soluta.', 30)}</lyric-container>
-	<lyric-container
-		>{limitCharactersFn(
-			'Repudiandae vitae mollitia temporibus officiis nostrum? Autem non perspiciatis expedita.',
-			30
-		)}</lyric-container
-	> -->
+	{#each lyricList as lyric, index (index)}
+		<lyric-container>{limitCharactersFn(`${lyric.title} - ${lyric.artist}`, 40)}</lyric-container>
+	{/each}
 </lyrics-list>
 
 <style>
@@ -37,5 +26,6 @@
 		padding: 0.5rem 1rem;
 		margin: 0.5rem;
 		white-space: nowrap;
+		font-size: .9rem;
 	}
 </style>

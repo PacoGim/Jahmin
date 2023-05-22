@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte'
 	import { playingSongStore } from '../../stores/main.store'
+
+	let dispatch = createEventDispatcher()
 
 	export let lyricsMode
 
@@ -7,18 +10,11 @@
 	export let fontSize
 	export let textAlignment
 
-	export let triggerLyricSave
+	let lyric = ''
 
 	$: {
-		if (triggerLyricSave !== undefined) {
-			triggerLyricSave = undefined
-			window.ipc.saveLyrics(lyric, $playingSongStore.Title, $playingSongStore.Artist).then(result => {
-				console.log(result)
-			})
-		}
+		dispatch('newLyricValue', lyric)
 	}
-
-	let lyric = 'Add a new lyrics bla bla bla'
 </script>
 
 <lyrics-read-edit class={lyricsMode === 'Read' ? 'read' : 'edit'}>
@@ -27,7 +23,7 @@
 			style="text-align:{['left', 'center', 'right'][
 				textAlignment
 			]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
-			value={lyric}
+			bind:value={lyric}
 			disabled={lyricsMode === 'Read' ? true : false}
 		/>
 	</lyrics-text-area>
