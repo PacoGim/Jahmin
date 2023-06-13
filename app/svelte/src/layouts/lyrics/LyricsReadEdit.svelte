@@ -25,8 +25,10 @@
 		window.ipc.getLyrics(title, artist).then(result => {
 			if (result.code === 0) {
 				lyrics = result.data.lyrics
+				dispatch('lyricModeChange', 'Read')
 			} else {
 				lyrics = ''
+				dispatch('lyricModeChange', 'Edit')
 			}
 		})
 	}

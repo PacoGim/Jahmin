@@ -3,7 +3,7 @@
 	import LyricHeader from './LyricHeader.svelte'
 	import LyricsControls from './LyricsControls.svelte'
 	import LyricsReadEdit from './LyricsReadEdit.svelte'
-	import LyricsReadEditControls from './LyricsReadEditControls.svelte'
+	import LyricsTextControls from './LyricsTextControls.svelte'
 	import { config } from '../../stores/config.store'
 	import { onMount } from 'svelte'
 	import { playingSongStore } from '../../stores/main.store'
@@ -28,7 +28,15 @@
 
 	function saveNewLyricValue() {
 		window.ipc.saveLyrics(lyrics, selectedLyric.title, selectedLyric.artist).then(result => {
-			console.log(result)
+			if (result.code === 0) {
+				notifyService.success(
+					traduceFn('Lyrics for “${songTitle}” saved successfully!', {
+						songTitle: result.data.title
+					})
+				)
+			} else if (result.code === -1) {
+				notifyService.error(traduceFn(result.message))
+			}
 		})
 	}
 
@@ -39,6 +47,7 @@
 			let foundLyric = undefined
 
 			if ($onNewLyrics !== null) {
+				lyricsMode = 'Edit'
 				selectedLyric = {
 					title: $onNewLyrics.title,
 					artist: $onNewLyrics.artist
@@ -66,6 +75,11 @@
 									})
 
 									lyricList = lyricList
+
+									selectedLyric = {
+										artist: result.data.artist,
+										title: result.data.title
+									}
 								})
 							}
 						})
@@ -96,7 +110,7 @@
 
 		<LyricsControls {lyricsMode} on:lyricsModeChange={res => (lyricsMode = res.detail)} on:saveLyrics={saveNewLyricValue} />
 
-		<LyricsReadEditControls
+		<LyricsTextControls
 			{fontWeight}
 			{fontSize}
 			{textAlignment}
@@ -114,6 +128,9 @@
 		<LyricsReadEdit
 			on:newLyricValue={({ detail }) => {
 				lyrics = detail
+			}}
+			on:lyricModeChange={({ detail }) => {
+				lyricsMode = detail
 			}}
 			{selectedLyric}
 			{lyricsMode}
@@ -136,7 +153,7 @@
 
 		background: var(--color-bg-3);
 
-		grid-template-columns: max-content auto max-content;
+		grid-template-columns: min-content auto auto;
 		grid-template-rows: max-content max-content auto;
 
 		overflow: hidden;
@@ -154,6 +171,8 @@
 		margin-left: 1rem;
 		font-size: 0.85rem;
 
+		justify-self: flex-start;
+
 		padding: 0.5rem 0.75rem;
 		font-variation-settings: 'wght' 600;
 
@@ -163,6 +182,8 @@
 
 		background-color: var(--color-accent-4);
 		color: #fff;
+
+		white-space: nowrap;
 
 		transition-property: opacity, transform;
 		transition-duration: 300ms;

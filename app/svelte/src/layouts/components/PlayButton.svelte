@@ -27,6 +27,7 @@
 		display: block;
 		/* height: var(--button-size); */
 		/* width: var(--button-size); */
+
 		background-color: transparent;
 	}
 
@@ -35,10 +36,12 @@
 		top: 0;
 		left: 0;
 		display: block;
-		/* background-color: var(--art-color-dark); */
 		width: 100%;
 		height: 100%;
-		transition: background-color 300ms ease-in-out, clip-path 500ms cubic-bezier(0.075, 0.82, 0.165, 1);
+
+		transition-property: background-color, clip-path;
+		transition-duration: 300ms, 500ms;
+		transition-timing-function: linear, cubic-bezier(0.075, 0.82, 0.165, 1);
 	}
 
 	play-pause-button.playing left-part {

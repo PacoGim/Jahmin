@@ -1,4 +1,6 @@
 <script lang="ts">
+	import limitCharactersFn from '../../functions/limitCharacters.fn'
+
 	export let selectedLyric = {
 		title: '',
 		artist: ''
@@ -10,10 +12,17 @@
 </script>
 
 <lyrics-header>
-	<lyrics-name>{selectedLyric.title} - {selectedLyric.artist}</lyrics-name>
-	<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
-		>Find lyrics in <bold>Genius.com</bold></lyrics-genius
-	>
+	{#if selectedLyric.title && selectedLyric.artist}
+		<lyrics-name>{selectedLyric.title} - {selectedLyric.artist}</lyrics-name>
+		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
+			>Find <bold>“{limitCharactersFn(selectedLyric.title, 20)}”</bold> lyrics in <bold>Genius.com</bold></lyrics-genius
+		>
+	{:else}
+		<lyrics-name />
+		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
+			><bold>Genius.com</bold></lyrics-genius
+		>
+	{/if}
 </lyrics-header>
 
 <style>
@@ -34,8 +43,9 @@
 	}
 
 	lyrics-name {
-		font-size: 1.75rem;
+		font-size: 1.25rem;
 		font-variation-settings: 'wght' 700;
+		user-select: text;
 	}
 
 	lyrics-genius {

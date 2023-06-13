@@ -99,6 +99,7 @@
 		grid-template-columns: 160px 125px 200px;
 
 		margin: 0 1rem;
+		justify-content: center;
 
 		grid-area: lyrics-read-edit-controls;
 	}

@@ -214,6 +214,8 @@
 	lyrics-controls {
 		display: flex;
 		flex-direction: row;
+
+		justify-content: center;
 	}
 
 	event-wrapper {

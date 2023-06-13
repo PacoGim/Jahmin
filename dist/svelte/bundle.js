@@ -209,6 +209,9 @@ var app = (function () {
         const selected_option = select.querySelector(':checked');
         return selected_option && selected_option.__value;
     }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
+    }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, cancelable, detail);
@@ -9931,9 +9934,13 @@ var app = (function () {
         if (!stringToTraduce)
             return stringToTraduce;
         let language = (_b = (_a = get_store_value(config)) === null || _a === void 0 ? void 0 : _a.userOptions) === null || _b === void 0 ? void 0 : _b.language;
-        if (language === 'english')
-            return stringToTraduce;
-        let traduced = (_c = get_store_value(langFile)) === null || _c === void 0 ? void 0 : _c[stringToTraduce];
+        let traduced = undefined;
+        if (language === 'english') {
+            traduced = stringToTraduce;
+        }
+        else {
+            traduced = (_c = get_store_value(langFile)) === null || _c === void 0 ? void 0 : _c[stringToTraduce];
+        }
         if (!traduced) {
             console.log(`Missing "${stringToTraduce}" traduction in ${language}`);
         }
@@ -11914,15 +11921,15 @@ var app = (function () {
     			t = space();
     			right_part = element("right-part");
     			set_style(left_part, "background-color", /*customColor*/ ctx[1]);
-    			set_custom_element_data(left_part, "class", "svelte-4k1fw7");
+    			set_custom_element_data(left_part, "class", "svelte-6m05vl");
     			add_location(left_part, file$1k, 15, 1, 518);
     			set_style(right_part, "background-color", /*customColor*/ ctx[1]);
-    			set_custom_element_data(right_part, "class", "svelte-4k1fw7");
+    			set_custom_element_data(right_part, "class", "svelte-6m05vl");
     			add_location(right_part, file$1k, 17, 1, 574);
     			set_style(play_pause_button, "height", /*customSize*/ ctx[0]);
     			set_style(play_pause_button, "width", /*customSize*/ ctx[0]);
     			set_style(play_pause_button, "margin", /*customMargins*/ ctx[2]);
-    			set_custom_element_data(play_pause_button, "class", play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[3] ? '' : 'playing') + " svelte-4k1fw7"));
+    			set_custom_element_data(play_pause_button, "class", play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[3] ? '' : 'playing') + " svelte-6m05vl"));
     			set_custom_element_data(play_pause_button, "tabindex", "-1");
     			set_custom_element_data(play_pause_button, "role", "button");
     			add_location(play_pause_button, file$1k, 7, 0, 275);
@@ -11966,7 +11973,7 @@ var app = (function () {
     				set_style(play_pause_button, "margin", /*customMargins*/ ctx[2]);
     			}
 
-    			if (dirty & /*$isPlaying*/ 8 && play_pause_button_class_value !== (play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[3] ? '' : 'playing') + " svelte-4k1fw7"))) {
+    			if (dirty & /*$isPlaying*/ 8 && play_pause_button_class_value !== (play_pause_button_class_value = "" + (null_to_empty(/*$isPlaying*/ ctx[3] ? '' : 'playing') + " svelte-6m05vl"))) {
     				set_custom_element_data(play_pause_button, "class", play_pause_button_class_value);
     			}
     		},
@@ -19565,7 +19572,7 @@ var app = (function () {
     const file$16 = "src/layouts/status_bar/!StatusBar.svelte";
 
     // (32:2) {#if currentSong?.Title !== ''}
-    function create_if_block$d(ctx) {
+    function create_if_block$f(ctx) {
     	let bold0;
     	let t0_value = numberZeroPad(/*currentSong*/ ctx[0].Track) + "";
     	let t0;
@@ -19618,7 +19625,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$d.name,
+    		id: create_if_block$f.name,
     		type: "if",
     		source: "(32:2) {#if currentSong?.Title !== ''}",
     		ctx
@@ -19638,7 +19645,7 @@ var app = (function () {
     	let playbackoptions;
     	let current;
     	queues = new Queues({ $$inline: true });
-    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$d(ctx);
+    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$f(ctx);
     	albuminfo = new AlbumInfo({ $$inline: true });
     	playbackoptions = new PlaybackOptions({ $$inline: true });
 
@@ -19678,7 +19685,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$d(ctx);
+    					if_block = create_if_block$f(ctx);
     					if_block.c();
     					if_block.m(song_info, null);
     				}
@@ -19903,7 +19910,7 @@ var app = (function () {
     const file$15 = "src/components/Album.svelte";
 
     // (23:2) {:else}
-    function create_else_block$7(ctx) {
+    function create_else_block$9(ctx) {
     	let album_artist;
 
     	const block = {
@@ -19923,7 +19930,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$7.name,
+    		id: create_else_block$9.name,
     		type: "else",
     		source: "(23:2) {:else}",
     		ctx
@@ -19969,7 +19976,7 @@ var app = (function () {
     }
 
     // (19:2) {#if album['AlbumArtist'] !== undefined}
-    function create_if_block$c(ctx) {
+    function create_if_block$e(ctx) {
     	let album_artist;
     	let t_value = (/*album*/ ctx[0]['AlbumArtist'] || '') + "";
     	let t;
@@ -19995,7 +20002,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$c.name,
+    		id: create_if_block$e.name,
     		type: "if",
     		source: "(19:2) {#if album['AlbumArtist'] !== undefined}",
     		ctx
@@ -20029,9 +20036,9 @@ var app = (function () {
     		});
 
     	function select_block_type(ctx, dirty) {
-    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$c;
+    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$e;
     		if (/*album*/ ctx[0]['DynamicAlbumArtist'] !== undefined) return create_if_block_1$5;
-    		return create_else_block$7;
+    		return create_else_block$9;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -21023,7 +21030,7 @@ var app = (function () {
     const file$11 = "src/components/SongTag.svelte";
 
     // (62:0) {:else}
-    function create_else_block$6(ctx) {
+    function create_else_block$8(ctx) {
     	let star;
     	let current;
 
@@ -21068,7 +21075,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$6.name,
+    		id: create_else_block$8.name,
     		type: "else",
     		source: "(62:0) {:else}",
     		ctx
@@ -21078,7 +21085,7 @@ var app = (function () {
     }
 
     // (60:0) {#if tagName !== 'Rating'}
-    function create_if_block$b(ctx) {
+    function create_if_block$d(ctx) {
     	let span;
     	let t_value = /*parseTag*/ ctx[5](/*tagName*/ ctx[1], /*tagValue*/ ctx[2]) + "";
     	let t;
@@ -21121,7 +21128,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$b.name,
+    		id: create_if_block$d.name,
     		type: "if",
     		source: "(60:0) {#if tagName !== 'Rating'}",
     		ctx
@@ -21135,7 +21142,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$b, create_else_block$6];
+    	const if_block_creators = [create_if_block$d, create_else_block$8];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -21435,7 +21442,7 @@ var app = (function () {
     }
 
     // (82:2) {:else}
-    function create_else_block$5(ctx) {
+    function create_else_block$7(ctx) {
     	let songtag;
     	let current;
 
@@ -21481,7 +21488,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$5.name,
+    		id: create_else_block$7.name,
     		type: "else",
     		source: "(82:2) {:else}",
     		ctx
@@ -21513,7 +21520,7 @@ var app = (function () {
     }
 
     // (73:2) {#if tag.value === 'Title' && $songListTagConfig.find(configTag => configTag.value === 'DynamicArtists')}
-    function create_if_block$a(ctx) {
+    function create_if_block$c(ctx) {
     	let songtag;
     	let current;
 
@@ -21559,7 +21566,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$a.name,
+    		id: create_if_block$c.name,
     		type: "if",
     		source: "(73:2) {#if tag.value === 'Title' && $songListTagConfig.find(configTag => configTag.value === 'DynamicArtists')}",
     		ctx
@@ -21577,7 +21584,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$a, create_if_block_1$4, create_else_block$5];
+    	const if_block_creators = [create_if_block$c, create_if_block_1$4, create_else_block$7];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -26577,7 +26584,7 @@ var app = (function () {
     }
 
     // (61:3) {#if $selectedGroups[index]}
-    function create_if_block$9(ctx) {
+    function create_if_block$b(ctx) {
     	let group_value;
     	let t0;
     	let t1_value = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]].length + "";
@@ -26697,7 +26704,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$9.name,
+    		id: create_if_block$b.name,
     		type: "if",
     		source: "(61:3) {#if $selectedGroups[index]}",
     		ctx
@@ -26805,7 +26812,7 @@ var app = (function () {
     	let group_svlt_data_index_value;
     	let mounted;
     	let dispose;
-    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]] && create_if_block$9(ctx);
+    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[13]] && create_if_block$b(ctx);
 
     	const block = {
     		key: key_1,
@@ -26861,7 +26868,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$9(ctx);
+    					if_block = create_if_block$b(ctx);
     					if_block.c();
     					if_block.m(group_svlt, t2);
     				}
@@ -27098,7 +27105,7 @@ var app = (function () {
     const file$T = "src/layouts/library/!LibraryLayout.svelte";
 
     // (23:1) {:else}
-    function create_else_block$4(ctx) {
+    function create_else_block$6(ctx) {
     	let nosong;
     	let current;
     	nosong = new NoSong({ $$inline: true });
@@ -27127,7 +27134,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$4.name,
+    		id: create_else_block$6.name,
     		type: "else",
     		source: "(23:1) {:else}",
     		ctx
@@ -27137,7 +27144,7 @@ var app = (function () {
     }
 
     // (21:1) {#if $dbSongsStore.length > 0}
-    function create_if_block$8(ctx) {
+    function create_if_block$a(ctx) {
     	let artgrid;
     	let current;
     	artgrid = new ArtGrid({ $$inline: true });
@@ -27166,7 +27173,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$8.name,
+    		id: create_if_block$a.name,
     		type: "if",
     		source: "(21:1) {#if $dbSongsStore.length > 0}",
     		ctx
@@ -27188,7 +27195,7 @@ var app = (function () {
     	let t3;
     	let songlistbackground;
     	let current;
-    	const if_block_creators = [create_if_block$8, create_else_block$4];
+    	const if_block_creators = [create_if_block$a, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -30905,7 +30912,7 @@ var app = (function () {
     const file$w = "src/layouts/config/equalizer/EqualizerButtons.svelte";
 
     // (54:2) {:else}
-    function create_else_block$3(ctx) {
+    function create_else_block$5(ctx) {
     	let toggleofficon;
     	let current;
 
@@ -30940,7 +30947,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$3.name,
+    		id: create_else_block$5.name,
     		type: "else",
     		source: "(54:2) {:else}",
     		ctx
@@ -30950,7 +30957,7 @@ var app = (function () {
     }
 
     // (52:2) {#if $isEqualizerOn === true}
-    function create_if_block$7(ctx) {
+    function create_if_block$9(ctx) {
     	let toggleonicon;
     	let current;
 
@@ -30985,7 +30992,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$7.name,
+    		id: create_if_block$9.name,
     		type: "if",
     		source: "(52:2) {#if $isEqualizerOn === true}",
     		ctx
@@ -31027,7 +31034,7 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	const if_block_creators = [create_if_block$7, create_else_block$3];
+    	const if_block_creators = [create_if_block$9, create_else_block$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -32041,7 +32048,7 @@ var app = (function () {
     			t1 = space();
     			create_component(fetchingicon.$$.fragment);
     			add_location(span, file$q, 94, 3, 3653);
-    			set_custom_element_data(loading_community_profiles, "class", "svelte-670t9i");
+    			set_custom_element_data(loading_community_profiles, "class", "svelte-1kzqe74");
     			add_location(loading_community_profiles, file$q, 93, 2, 3621);
     		},
     		m: function mount(target, anchor) {
@@ -32100,13 +32107,13 @@ var app = (function () {
     			t3 = space();
     			button = element("button");
     			button.textContent = `${traduceFn('Refetch')}`;
-    			attr_dev(span0, "class", "svelte-670t9i");
+    			attr_dev(span0, "class", "svelte-1kzqe74");
     			add_location(span0, file$q, 88, 3, 3365);
-    			attr_dev(span1, "class", "svelte-670t9i");
+    			attr_dev(span1, "class", "svelte-1kzqe74");
     			add_location(span1, file$q, 89, 3, 3432);
-    			attr_dev(button, "class", "svelte-670t9i");
+    			attr_dev(button, "class", "svelte-1kzqe74");
     			add_location(button, file$q, 90, 3, 3493);
-    			set_custom_element_data(community_profile_fetch_error, "class", "svelte-670t9i");
+    			set_custom_element_data(community_profile_fetch_error, "class", "svelte-1kzqe74");
     			add_location(community_profile_fetch_error, file$q, 87, 2, 3330);
     		},
     		m: function mount(target, anchor) {
@@ -32144,7 +32151,7 @@ var app = (function () {
     }
 
     // (57:1) {#if communityProfiles && communityProfiles.length > 0}
-    function create_if_block$6(ctx) {
+    function create_if_block$8(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -32215,7 +32222,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$6.name,
+    		id: create_if_block$8.name,
     		type: "if",
     		source: "(57:1) {#if communityProfiles && communityProfiles.length > 0}",
     		ctx
@@ -32241,7 +32248,7 @@ var app = (function () {
     		c: function create() {
     			span = element("span");
     			create_component(warningicon.$$.fragment);
-    			attr_dev(span, "class", "warning");
+    			attr_dev(span, "class", "warning svelte-1kzqe74");
     			add_location(span, file$q, 67, 6, 2568);
     		},
     		m: function mount(target, anchor) {
@@ -32276,7 +32283,7 @@ var app = (function () {
     }
 
     // (80:4) {:else}
-    function create_else_block$2(ctx) {
+    function create_else_block$4(ctx) {
     	let button;
     	let downloadicon;
     	let t0;
@@ -32303,7 +32310,7 @@ var app = (function () {
     			create_component(downloadicon.$$.fragment);
     			t0 = space();
     			t1 = text(t1_value);
-    			attr_dev(button, "class", "svelte-670t9i");
+    			attr_dev(button, "class", "svelte-1kzqe74");
     			add_location(button, file$q, 80, 5, 3033);
     		},
     		m: function mount(target, anchor) {
@@ -32340,7 +32347,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$2.name,
+    		id: create_else_block$4.name,
     		type: "else",
     		source: "(80:4) {:else}",
     		ctx
@@ -32372,7 +32379,7 @@ var app = (function () {
     			t0 = space();
     			t1 = text(t1_value);
     			button.disabled = true;
-    			attr_dev(button, "class", "svelte-670t9i");
+    			attr_dev(button, "class", "svelte-1kzqe74");
     			add_location(button, file$q, 75, 5, 2862);
     		},
     		m: function mount(target, anchor) {
@@ -32442,7 +32449,7 @@ var app = (function () {
     		return /*keypress_handler*/ ctx[9](/*eqProfile*/ ctx[13]);
     	}
 
-    	const if_block_creators = [create_if_block_1$3, create_else_block$2];
+    	const if_block_creators = [create_if_block_1$3, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -32470,13 +32477,13 @@ var app = (function () {
 
     			set_custom_element_data(equalizer_name, "class", equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[13].hash
     			? 'current'
-    			: '') + " svelte-670t9i"));
+    			: '') + " svelte-1kzqe74"));
 
     			set_custom_element_data(equalizer_name, "tabindex", "-1");
     			set_custom_element_data(equalizer_name, "role", "button");
     			add_location(equalizer_name, file$q, 59, 4, 2277);
     			set_custom_element_data(equalizer_field, "id", equalizer_field_id_value = /*eqProfile*/ ctx[13].hash);
-    			set_custom_element_data(equalizer_field, "class", "svelte-670t9i");
+    			set_custom_element_data(equalizer_field, "class", "svelte-1kzqe74");
     			add_location(equalizer_field, file$q, 58, 3, 2235);
     			this.first = equalizer_field;
     		},
@@ -32529,7 +32536,7 @@ var app = (function () {
 
     			if (!current || dirty & /*$currentEqHash, communityProfiles*/ 3 && equalizer_name_class_value !== (equalizer_name_class_value = "" + (null_to_empty(/*$currentEqHash*/ ctx[1] === /*eqProfile*/ ctx[13].hash
     			? 'current'
-    			: '') + " svelte-670t9i"))) {
+    			: '') + " svelte-1kzqe74"))) {
     				set_custom_element_data(equalizer_name, "class", equalizer_name_class_value);
     			}
 
@@ -32599,7 +32606,7 @@ var app = (function () {
     	let current_block_type_index;
     	let if_block;
     	let current;
-    	const if_block_creators = [create_if_block$6, create_if_block_3$1, create_else_block_1];
+    	const if_block_creators = [create_if_block$8, create_if_block_3$1, create_else_block_1];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -32615,7 +32622,7 @@ var app = (function () {
     		c: function create() {
     			equalizer_profiles_community = element("equalizer-profiles-community");
     			if_block.c();
-    			set_custom_element_data(equalizer_profiles_community, "class", "smooth-colors svelte-670t9i");
+    			set_custom_element_data(equalizer_profiles_community, "class", "smooth-colors svelte-1kzqe74");
     			add_location(equalizer_profiles_community, file$q, 55, 0, 2066);
     		},
     		l: function claim(nodes) {
@@ -34104,7 +34111,7 @@ var app = (function () {
     }
 
     // (50:2) {#if $config.directories}
-    function create_if_block$5(ctx) {
+    function create_if_block$7(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -34175,7 +34182,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$5.name,
+    		id: create_if_block$7.name,
     		type: "if",
     		source: "(50:2) {#if $config.directories}",
     		ctx
@@ -34328,7 +34335,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	let if_block1 = /*$config*/ ctx[1].directories && create_if_block$5(ctx);
+    	let if_block1 = /*$config*/ ctx[1].directories && create_if_block$7(ctx);
 
     	addicon1 = new AddIcon({
     			props: {
@@ -34458,7 +34465,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block$5(ctx);
+    					if_block1 = create_if_block$7(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(section_body1, null);
@@ -34753,7 +34760,7 @@ var app = (function () {
     }
 
     // (26:4) {#if !$songListTagsValuesStore.includes(tag.value)}
-    function create_if_block$4(ctx) {
+    function create_if_block$6(ctx) {
     	let option;
     	let t_value = /*tag*/ ctx[7].name + "";
     	let t;
@@ -34778,7 +34785,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(26:4) {#if !$songListTagsValuesStore.includes(tag.value)}",
     		ctx
@@ -34792,7 +34799,7 @@ var app = (function () {
     	let first;
     	let show_if = !/*$songListTagsValuesStore*/ ctx[1].includes(/*tag*/ ctx[7].value);
     	let if_block_anchor;
-    	let if_block = show_if && create_if_block$4(ctx);
+    	let if_block = show_if && create_if_block$6(ctx);
 
     	const block = {
     		key: key_1,
@@ -34816,7 +34823,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$4(ctx);
+    					if_block = create_if_block$6(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -35166,7 +35173,7 @@ var app = (function () {
     }
 
     // (81:0) {:else}
-    function create_else_block$1(ctx) {
+    function create_else_block$3(ctx) {
     	let li;
     	let li_data_align_value;
     	let li_data_is_expanded_value;
@@ -35211,7 +35218,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$1.name,
+    		id: create_else_block$3.name,
     		type: "else",
     		source: "(81:0) {:else}",
     		ctx
@@ -35221,7 +35228,7 @@ var app = (function () {
     }
 
     // (33:0) {#if tag.value !== 'DynamicArtists'}
-    function create_if_block$3(ctx) {
+    function create_if_block$5(ctx) {
     	let li;
     	let tag_name;
     	let t0_value = /*getTagNameFromValue*/ ctx[3](/*tag*/ ctx[0].value) + "";
@@ -35600,7 +35607,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(33:0) {#if tag.value !== 'DynamicArtists'}",
     		ctx
@@ -35655,7 +35662,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$3, create_else_block$1];
+    	const if_block_creators = [create_if_block$5, create_else_block$3];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -40062,7 +40069,7 @@ var app = (function () {
     }
 
     // (83:3) {:else}
-    function create_else_block(ctx) {
+    function create_else_block$2(ctx) {
     	let span;
     	let t;
     	let toggleofficon;
@@ -40106,7 +40113,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
+    		id: create_else_block$2.name,
     		type: "else",
     		source: "(83:3) {:else}",
     		ctx
@@ -40116,7 +40123,7 @@ var app = (function () {
     }
 
     // (81:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}
-    function create_if_block$2(ctx) {
+    function create_if_block$4(ctx) {
     	let span;
     	let t;
     	let toggleonicon;
@@ -40160,7 +40167,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$2.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(81:3) {#if $songListTagsValuesStore.includes('DynamicArtists')}",
     		ctx
@@ -40194,7 +40201,7 @@ var app = (function () {
     		each_1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
-    	const if_block_creators = [create_if_block$2, create_else_block];
+    	const if_block_creators = [create_if_block$4, create_else_block$2];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -41369,7 +41376,7 @@ var app = (function () {
 
     function limitCharactersFn (value, maxCharacters = 20) {
         value = String(value);
-        if (value.length + 3 > maxCharacters) {
+        if (value.length > maxCharacters) {
             return value.substring(0, maxCharacters) + '...';
         }
         else {
@@ -41509,7 +41516,7 @@ var app = (function () {
     }
 
     // (83:6) {#if $playingSongStore.ID === song.ID && index === 0}
-    function create_if_block$1(ctx) {
+    function create_if_block$3(ctx) {
     	let playbutton;
     	let current;
 
@@ -41546,7 +41553,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$1.name,
+    		id: create_if_block$3.name,
     		type: "if",
     		source: "(83:6) {#if $playingSongStore.ID === song.ID && index === 0}",
     		ctx
@@ -41562,7 +41569,7 @@ var app = (function () {
     	let t1_value = limitCharactersFn(/*song*/ ctx[15][/*tag*/ ctx[18]], 75) + "";
     	let t1;
     	let current;
-    	let if_block = /*$playingSongStore*/ ctx[3].ID === /*song*/ ctx[15].ID && /*index*/ ctx[17] === 0 && create_if_block$1(ctx);
+    	let if_block = /*$playingSongStore*/ ctx[3].ID === /*song*/ ctx[15].ID && /*index*/ ctx[17] === 0 && create_if_block$3(ctx);
 
     	const block = {
     		key: key_1,
@@ -41593,7 +41600,7 @@ var app = (function () {
     						transition_in(if_block, 1);
     					}
     				} else {
-    					if_block = create_if_block$1(ctx);
+    					if_block = create_if_block$3(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(song_data, t0);
@@ -43329,30 +43336,148 @@ var app = (function () {
     }
 
     /* src/layouts/lyrics/LyricsList.svelte generated by Svelte v3.58.0 */
+
+    const { console: console_1 } = globals;
     const file$6 = "src/layouts/lyrics/LyricsList.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[6] = list[i];
-    	child_ctx[8] = i;
+    	child_ctx[11] = list[i];
+    	child_ctx[13] = i;
     	return child_ctx;
     }
 
-    // (15:1) {#each lyricList as lyrics, index (index)}
+    // (52:3) {:else}
+    function create_else_block$1(ctx) {
+    	let t_value = limitCharactersFn(`${/*lyrics*/ ctx[11].title} - ${/*lyrics*/ ctx[11].artist}`, 40) + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(t_value);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*lyricList*/ 2 && t_value !== (t_value = limitCharactersFn(`${/*lyrics*/ ctx[11].title} - ${/*lyrics*/ ctx[11].artist}`, 40) + "")) set_data_dev(t, t_value);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$1.name,
+    		type: "else",
+    		source: "(52:3) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (46:3) {#if lyrics.title === $playingSongStore.Title && lyrics.artist === $playingSongStore.Artist}
+    function create_if_block$2(ctx) {
+    	let playbutton;
+    	let t0;
+    	let t1_value = limitCharactersFn(`${/*lyrics*/ ctx[11].title} - ${/*lyrics*/ ctx[11].artist}`, 38) + "";
+    	let t1;
+    	let current;
+
+    	playbutton = new PlayButton({
+    			props: {
+    				customSize: "0.75rem",
+    				customMargins: "0 .25rem 0 0",
+    				customColor: /*lyrics*/ ctx[11].title === /*selectedLyric*/ ctx[0].title && /*lyrics*/ ctx[11].artist === /*selectedLyric*/ ctx[0].artist
+    				? '#fff'
+    				: 'var(--color-fg-1)'
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(playbutton.$$.fragment);
+    			t0 = space();
+    			t1 = text(t1_value);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(playbutton, target, anchor);
+    			insert_dev(target, t0, anchor);
+    			insert_dev(target, t1, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const playbutton_changes = {};
+
+    			if (dirty & /*lyricList, selectedLyric*/ 3) playbutton_changes.customColor = /*lyrics*/ ctx[11].title === /*selectedLyric*/ ctx[0].title && /*lyrics*/ ctx[11].artist === /*selectedLyric*/ ctx[0].artist
+    			? '#fff'
+    			: 'var(--color-fg-1)';
+
+    			playbutton.$set(playbutton_changes);
+    			if ((!current || dirty & /*lyricList*/ 2) && t1_value !== (t1_value = limitCharactersFn(`${/*lyrics*/ ctx[11].title} - ${/*lyrics*/ ctx[11].artist}`, 38) + "")) set_data_dev(t1, t1_value);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(playbutton.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(playbutton.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(playbutton, detaching);
+    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(t1);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$2.name,
+    		type: "if",
+    		source: "(46:3) {#if lyrics.title === $playingSongStore.Title && lyrics.artist === $playingSongStore.Artist}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (37:1) {#each lyricList as lyrics, index (index)}
     function create_each_block(key_1, ctx) {
     	let lyrics_container;
-    	let t_value = limitCharactersFn(`${/*lyrics*/ ctx[6].title} - ${/*lyrics*/ ctx[6].artist}`, 40) + "";
+    	let current_block_type_index;
+    	let if_block;
     	let t;
-    	let lyrics_container_class_value;
+    	let current;
     	let mounted;
     	let dispose;
+    	const if_block_creators = [create_if_block$2, create_else_block$1];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*lyrics*/ ctx[11].title === /*$playingSongStore*/ ctx[2].Title && /*lyrics*/ ctx[11].artist === /*$playingSongStore*/ ctx[2].Artist) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[3](/*lyrics*/ ctx[6]);
+    		return /*click_handler*/ ctx[5](/*lyrics*/ ctx[11]);
+    	}
+
+    	function dblclick_handler() {
+    		return /*dblclick_handler*/ ctx[6](/*lyrics*/ ctx[11]);
     	}
 
     	function keypress_handler() {
-    		return /*keypress_handler*/ ctx[4](/*lyrics*/ ctx[6]);
+    		return /*keypress_handler*/ ctx[7](/*lyrics*/ ctx[11]);
     	}
 
     	const block = {
@@ -43360,24 +43485,25 @@ var app = (function () {
     		first: null,
     		c: function create() {
     			lyrics_container = element("lyrics-container");
-    			t = text(t_value);
-
-    			set_custom_element_data(lyrics_container, "class", lyrics_container_class_value = "" + (null_to_empty(/*lyrics*/ ctx[6].title === /*selectedLyric*/ ctx[0].title && /*lyrics*/ ctx[6].artist === /*selectedLyric*/ ctx[0].artist
-    			? 'selected'
-    			: null) + " svelte-1etd696"));
-
+    			if_block.c();
+    			t = space();
     			set_custom_element_data(lyrics_container, "tabindex", "-1");
     			set_custom_element_data(lyrics_container, "role", "button");
-    			add_location(lyrics_container, file$6, 15, 2, 438);
+    			set_custom_element_data(lyrics_container, "class", "svelte-3swmve");
+    			toggle_class(lyrics_container, "selected", /*lyrics*/ ctx[11].title === /*selectedLyric*/ ctx[0].title && /*lyrics*/ ctx[11].artist === /*selectedLyric*/ ctx[0].artist);
+    			add_location(lyrics_container, file$6, 37, 2, 1477);
     			this.first = lyrics_container;
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, lyrics_container, anchor);
+    			if_blocks[current_block_type_index].m(lyrics_container, null);
     			append_dev(lyrics_container, t);
+    			current = true;
 
     			if (!mounted) {
     				dispose = [
     					listen_dev(lyrics_container, "click", click_handler, false, false, false, false),
+    					listen_dev(lyrics_container, "dblclick", dblclick_handler, false, false, false, false),
     					listen_dev(lyrics_container, "keypress", keypress_handler, false, false, false, false)
     				];
 
@@ -43386,16 +43512,48 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*lyricList*/ 2 && t_value !== (t_value = limitCharactersFn(`${/*lyrics*/ ctx[6].title} - ${/*lyrics*/ ctx[6].artist}`, 40) + "")) set_data_dev(t, t_value);
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
 
-    			if (dirty & /*lyricList, selectedLyric*/ 3 && lyrics_container_class_value !== (lyrics_container_class_value = "" + (null_to_empty(/*lyrics*/ ctx[6].title === /*selectedLyric*/ ctx[0].title && /*lyrics*/ ctx[6].artist === /*selectedLyric*/ ctx[0].artist
-    			? 'selected'
-    			: null) + " svelte-1etd696"))) {
-    				set_custom_element_data(lyrics_container, "class", lyrics_container_class_value);
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(lyrics_container, t);
     			}
+
+    			if (!current || dirty & /*lyricList, selectedLyric*/ 3) {
+    				toggle_class(lyrics_container, "selected", /*lyrics*/ ctx[11].title === /*selectedLyric*/ ctx[0].title && /*lyrics*/ ctx[11].artist === /*selectedLyric*/ ctx[0].artist);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(lyrics_container);
+    			if_blocks[current_block_type_index].d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -43405,7 +43563,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(15:1) {#each lyricList as lyrics, index (index)}",
+    		source: "(37:1) {#each lyricList as lyrics, index (index)}",
     		ctx
     	});
 
@@ -43416,9 +43574,10 @@ var app = (function () {
     	let lyrics_list;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
+    	let current;
     	let each_value = /*lyricList*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[8];
+    	const get_key = ctx => /*index*/ ctx[13];
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -43435,8 +43594,8 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			set_custom_element_data(lyrics_list, "class", "svelte-1etd696");
-    			add_location(lyrics_list, file$6, 13, 0, 378);
+    			set_custom_element_data(lyrics_list, "class", "svelte-3swmve");
+    			add_location(lyrics_list, file$6, 35, 0, 1417);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -43449,17 +43608,35 @@ var app = (function () {
     					each_blocks[i].m(lyrics_list, null);
     				}
     			}
+
+    			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*lyricList, selectedLyric, selectLyric, limitCharactersFn*/ 7) {
+    			if (dirty & /*lyricList, selectedLyric, selectLyric, playSong, limitCharactersFn, $playingSongStore*/ 31) {
     				each_value = /*lyricList*/ ctx[1];
     				validate_each_argument(each_value);
+    				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, lyrics_list, destroy_block, create_each_block, null, get_each_context);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, lyrics_list, outro_and_destroy_block, create_each_block, null, get_each_context);
+    				check_outros();
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(lyrics_list);
 
@@ -43480,7 +43657,20 @@ var app = (function () {
     	return block;
     }
 
+    function myAction(node) {
+    	console.log(node);
+    }
+
     function instance$6($$self, $$props, $$invalidate) {
+    	let $playbackStore;
+    	let $dbSongsStore;
+    	let $playingSongStore;
+    	validate_store(playbackStore, 'playbackStore');
+    	component_subscribe($$self, playbackStore, $$value => $$invalidate(8, $playbackStore = $$value));
+    	validate_store(dbSongsStore, 'dbSongsStore');
+    	component_subscribe($$self, dbSongsStore, $$value => $$invalidate(9, $dbSongsStore = $$value));
+    	validate_store(playingSongStore, 'playingSongStore');
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(2, $playingSongStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('LyricsList', slots, []);
     	const dispatch = createEventDispatcher();
@@ -43491,13 +43681,30 @@ var app = (function () {
     		dispatch('selectedLyric', { title, artist });
     	}
 
+    	function playSong(songTitle, songArtist) {
+    		let songPlaybackIndex = $playbackStore.findIndex(value => value.Title === songTitle && value.Artist === songArtist);
+    		let songToPlay = $dbSongsStore.find(song => song.Title === songTitle && song.Artist === songArtist);
+    		let newPlayback = undefined;
+
+    		if (songPlaybackIndex !== -1) {
+    			newPlayback = $playbackStore;
+    		} else if (songPlaybackIndex === -1) {
+    			newPlayback = [songToPlay];
+    		}
+
+    		if (songToPlay) {
+    			setNewPlaybackFn(getDirectoryFn(songToPlay.SourceFile), newPlayback, songToPlay.ID, { playNow: true });
+    		}
+    	}
+
     	const writable_props = ['selectedLyric', 'lyricList'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<LyricsList> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<LyricsList> was created with unknown prop '${key}'`);
     	});
 
     	const click_handler = lyrics => selectLyric(lyrics.title, lyrics.artist);
+    	const dblclick_handler = lyrics => playSong(lyrics.title, lyrics.artist);
     	const keypress_handler = lyrics => selectLyric(lyrics.title, lyrics.artist);
 
     	$$self.$$set = $$props => {
@@ -43508,10 +43715,21 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		createEventDispatcher,
     		limitCharactersFn,
+    		dbSongsStore,
+    		playbackStore,
+    		playingSongStore,
+    		setNewPlaybackFn,
+    		getDirectoryFn,
+    		PlayButton,
     		dispatch,
     		selectedLyric,
     		lyricList,
-    		selectLyric
+    		selectLyric,
+    		playSong,
+    		myAction,
+    		$playbackStore,
+    		$dbSongsStore,
+    		$playingSongStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -43523,7 +43741,16 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [selectedLyric, lyricList, selectLyric, click_handler, keypress_handler];
+    	return [
+    		selectedLyric,
+    		lyricList,
+    		$playingSongStore,
+    		selectLyric,
+    		playSong,
+    		click_handler,
+    		dblclick_handler,
+    		keypress_handler
+    	];
     }
 
     class LyricsList extends SvelteComponentDev {
@@ -43557,58 +43784,36 @@ var app = (function () {
     }
 
     /* src/layouts/lyrics/LyricHeader.svelte generated by Svelte v3.58.0 */
-
     const file$5 = "src/layouts/lyrics/LyricHeader.svelte";
 
-    function create_fragment$5(ctx) {
-    	let lyrics_header;
+    // (17:1) {:else}
+    function create_else_block(ctx) {
     	let lyrics_name;
-    	let t0_value = /*selectedLyric*/ ctx[0].title + "";
     	let t0;
-    	let t1;
-    	let t2_value = /*selectedLyric*/ ctx[0].artist + "";
-    	let t2;
-    	let t3;
     	let lyrics_genius;
-    	let t4;
     	let bold;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
-    			lyrics_header = element("lyrics-header");
     			lyrics_name = element("lyrics-name");
-    			t0 = text(t0_value);
-    			t1 = text(" - ");
-    			t2 = text(t2_value);
-    			t3 = space();
+    			t0 = space();
     			lyrics_genius = element("lyrics-genius");
-    			t4 = text("Find lyrics in ");
     			bold = element("bold");
     			bold.textContent = "Genius.com";
-    			set_custom_element_data(lyrics_name, "class", "svelte-p2koez");
-    			add_location(lyrics_name, file$5, 10, 1, 218);
-    			add_location(bold, file$5, 12, 18, 415);
+    			set_custom_element_data(lyrics_name, "class", "svelte-o306e0");
+    			add_location(lyrics_name, file$5, 17, 2, 651);
+    			add_location(bold, file$5, 19, 4, 777);
     			set_custom_element_data(lyrics_genius, "tabindex", "-1");
     			set_custom_element_data(lyrics_genius, "role", "button");
-    			set_custom_element_data(lyrics_genius, "class", "svelte-p2koez");
-    			add_location(lyrics_genius, file$5, 11, 1, 293);
-    			set_custom_element_data(lyrics_header, "class", "svelte-p2koez");
-    			add_location(lyrics_header, file$5, 9, 0, 201);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    			set_custom_element_data(lyrics_genius, "class", "svelte-o306e0");
+    			add_location(lyrics_genius, file$5, 18, 2, 669);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, lyrics_header, anchor);
-    			append_dev(lyrics_header, lyrics_name);
-    			append_dev(lyrics_name, t0);
-    			append_dev(lyrics_name, t1);
-    			append_dev(lyrics_name, t2);
-    			append_dev(lyrics_header, t3);
-    			append_dev(lyrics_header, lyrics_genius);
-    			append_dev(lyrics_genius, t4);
+    			insert_dev(target, lyrics_name, anchor);
+    			insert_dev(target, t0, anchor);
+    			insert_dev(target, lyrics_genius, anchor);
     			append_dev(lyrics_genius, bold);
 
     			if (!mounted) {
@@ -43620,16 +43825,165 @@ var app = (function () {
     				mounted = true;
     			}
     		},
-    		p: function update(ctx, [dirty]) {
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(lyrics_name);
+    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(lyrics_genius);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(17:1) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (12:1) {#if selectedLyric.title && selectedLyric.artist}
+    function create_if_block$1(ctx) {
+    	let lyrics_name;
+    	let t0_value = /*selectedLyric*/ ctx[0].title + "";
+    	let t0;
+    	let t1;
+    	let t2_value = /*selectedLyric*/ ctx[0].artist + "";
+    	let t2;
+    	let t3;
+    	let lyrics_genius;
+    	let t4;
+    	let bold0;
+    	let t5;
+    	let t6_value = limitCharactersFn(/*selectedLyric*/ ctx[0].title, 20) + "";
+    	let t6;
+    	let t7;
+    	let t8;
+    	let bold1;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			lyrics_name = element("lyrics-name");
+    			t0 = text(t0_value);
+    			t1 = text(" - ");
+    			t2 = text(t2_value);
+    			t3 = space();
+    			lyrics_genius = element("lyrics-genius");
+    			t4 = text("Find ");
+    			bold0 = element("bold");
+    			t5 = text("“");
+    			t6 = text(t6_value);
+    			t7 = text("”");
+    			t8 = text(" lyrics in ");
+    			bold1 = element("bold");
+    			bold1.textContent = "Genius.com";
+    			set_custom_element_data(lyrics_name, "class", "svelte-o306e0");
+    			add_location(lyrics_name, file$5, 12, 2, 338);
+    			add_location(bold0, file$5, 14, 9, 527);
+    			add_location(bold1, file$5, 14, 79, 597);
+    			set_custom_element_data(lyrics_genius, "tabindex", "-1");
+    			set_custom_element_data(lyrics_genius, "role", "button");
+    			set_custom_element_data(lyrics_genius, "class", "svelte-o306e0");
+    			add_location(lyrics_genius, file$5, 13, 2, 414);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, lyrics_name, anchor);
+    			append_dev(lyrics_name, t0);
+    			append_dev(lyrics_name, t1);
+    			append_dev(lyrics_name, t2);
+    			insert_dev(target, t3, anchor);
+    			insert_dev(target, lyrics_genius, anchor);
+    			append_dev(lyrics_genius, t4);
+    			append_dev(lyrics_genius, bold0);
+    			append_dev(bold0, t5);
+    			append_dev(bold0, t6);
+    			append_dev(bold0, t7);
+    			append_dev(lyrics_genius, t8);
+    			append_dev(lyrics_genius, bold1);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(lyrics_genius, "click", /*openGeniusWebpage*/ ctx[1], false, false, false, false),
+    					listen_dev(lyrics_genius, "keypress", /*openGeniusWebpage*/ ctx[1], false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
     			if (dirty & /*selectedLyric*/ 1 && t0_value !== (t0_value = /*selectedLyric*/ ctx[0].title + "")) set_data_dev(t0, t0_value);
     			if (dirty & /*selectedLyric*/ 1 && t2_value !== (t2_value = /*selectedLyric*/ ctx[0].artist + "")) set_data_dev(t2, t2_value);
+    			if (dirty & /*selectedLyric*/ 1 && t6_value !== (t6_value = limitCharactersFn(/*selectedLyric*/ ctx[0].title, 20) + "")) set_data_dev(t6, t6_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(lyrics_name);
+    			if (detaching) detach_dev(t3);
+    			if (detaching) detach_dev(lyrics_genius);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(12:1) {#if selectedLyric.title && selectedLyric.artist}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$5(ctx) {
+    	let lyrics_header;
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*selectedLyric*/ ctx[0].title && /*selectedLyric*/ ctx[0].artist) return create_if_block$1;
+    		return create_else_block;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
+
+    	const block = {
+    		c: function create() {
+    			lyrics_header = element("lyrics-header");
+    			if_block.c();
+    			set_custom_element_data(lyrics_header, "class", "svelte-o306e0");
+    			add_location(lyrics_header, file$5, 10, 0, 269);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, lyrics_header, anchor);
+    			if_block.m(lyrics_header, null);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(lyrics_header, null);
+    				}
+    			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(lyrics_header);
-    			mounted = false;
-    			run_all(dispose);
+    			if_block.d();
     		}
     	};
 
@@ -43663,7 +44017,11 @@ var app = (function () {
     		if ('selectedLyric' in $$props) $$invalidate(0, selectedLyric = $$props.selectedLyric);
     	};
 
-    	$$self.$capture_state = () => ({ selectedLyric, openGeniusWebpage });
+    	$$self.$capture_state = () => ({
+    		limitCharactersFn,
+    		selectedLyric,
+    		openGeniusWebpage
+    	});
 
     	$$self.$inject_state = $$props => {
     		if ('selectedLyric' in $$props) $$invalidate(0, selectedLyric = $$props.selectedLyric);
@@ -43882,11 +44240,11 @@ var app = (function () {
     			set_style(textarea, "font-variation-settings", "'wght' " + /*fontWeight*/ ctx[1]);
     			textarea.disabled = textarea_disabled_value = /*lyricsMode*/ ctx[0] === 'Read' ? true : false;
     			attr_dev(textarea, "class", "svelte-ew5wf2");
-    			add_location(textarea, file$3, 28, 2, 716);
+    			add_location(textarea, file$3, 30, 2, 814);
     			set_custom_element_data(lyrics_text_area, "class", "svelte-ew5wf2");
-    			add_location(lyrics_text_area, file$3, 27, 1, 695);
+    			add_location(lyrics_text_area, file$3, 29, 1, 793);
     			set_custom_element_data(lyrics_read_edit, "class", lyrics_read_edit_class_value = "" + (null_to_empty(/*lyricsMode*/ ctx[0] === 'Read' ? 'read' : 'edit') + " svelte-ew5wf2"));
-    			add_location(lyrics_read_edit, file$3, 26, 0, 627);
+    			add_location(lyrics_read_edit, file$3, 28, 0, 725);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -43966,8 +44324,10 @@ var app = (function () {
     		window.ipc.getLyrics(title, artist).then(result => {
     			if (result.code === 0) {
     				$$invalidate(4, lyrics = result.data.lyrics);
+    				dispatch('lyricModeChange', 'Read');
     			} else {
     				$$invalidate(4, lyrics = '');
+    				dispatch('lyricModeChange', 'Edit');
     			}
     		});
     	}
@@ -44121,8 +44481,8 @@ var app = (function () {
     	}
     }
 
-    /* src/layouts/lyrics/LyricsReadEditControls.svelte generated by Svelte v3.58.0 */
-    const file$2 = "src/layouts/lyrics/LyricsReadEditControls.svelte";
+    /* src/layouts/lyrics/LyricsTextControls.svelte generated by Svelte v3.58.0 */
+    const file$2 = "src/layouts/lyrics/LyricsTextControls.svelte";
 
     function create_fragment$2(ctx) {
     	let lyrics_read_edit_controls;
@@ -44179,41 +44539,41 @@ var app = (function () {
     			t10 = space();
     			range_input2 = element("range-input");
     			input2 = element("input");
-    			set_custom_element_data(text_control_name0, "class", "svelte-cypv31");
+    			set_custom_element_data(text_control_name0, "class", "svelte-kub021");
     			add_location(text_control_name0, file$2, 60, 2, 1813);
     			attr_dev(input0, "type", "range");
     			attr_dev(input0, "min", "200");
     			attr_dev(input0, "max", "1000");
     			attr_dev(input0, "step", "50");
-    			attr_dev(input0, "class", "svelte-cypv31");
+    			attr_dev(input0, "class", "svelte-kub021");
     			add_location(input0, file$2, 63, 3, 1901);
-    			set_custom_element_data(range_input0, "class", "svelte-cypv31");
+    			set_custom_element_data(range_input0, "class", "svelte-kub021");
     			add_location(range_input0, file$2, 62, 2, 1884);
-    			set_custom_element_data(text_weight, "class", "text-control svelte-cypv31");
+    			set_custom_element_data(text_weight, "class", "text-control svelte-kub021");
     			add_location(text_weight, file$2, 59, 1, 1776);
-    			set_custom_element_data(text_control_name1, "class", "svelte-cypv31");
+    			set_custom_element_data(text_control_name1, "class", "svelte-kub021");
     			add_location(text_control_name1, file$2, 68, 2, 2049);
     			attr_dev(input1, "type", "range");
     			attr_dev(input1, "min", "8");
     			attr_dev(input1, "max", "24");
-    			attr_dev(input1, "class", "svelte-cypv31");
+    			attr_dev(input1, "class", "svelte-kub021");
     			add_location(input1, file$2, 71, 3, 2133);
-    			set_custom_element_data(range_input1, "class", "svelte-cypv31");
+    			set_custom_element_data(range_input1, "class", "svelte-kub021");
     			add_location(range_input1, file$2, 70, 2, 2116);
-    			set_custom_element_data(text_size, "class", "text-control svelte-cypv31");
+    			set_custom_element_data(text_size, "class", "text-control svelte-kub021");
     			add_location(text_size, file$2, 67, 1, 2014);
-    			set_custom_element_data(text_control_name2, "class", "svelte-cypv31");
+    			set_custom_element_data(text_control_name2, "class", "svelte-kub021");
     			add_location(text_control_name2, file$2, 76, 2, 2264);
     			attr_dev(input2, "type", "range");
     			attr_dev(input2, "min", "0");
     			attr_dev(input2, "max", "2");
-    			attr_dev(input2, "class", "svelte-cypv31");
+    			attr_dev(input2, "class", "svelte-kub021");
     			add_location(input2, file$2, 79, 3, 2387);
-    			set_custom_element_data(range_input2, "class", "svelte-cypv31");
+    			set_custom_element_data(range_input2, "class", "svelte-kub021");
     			add_location(range_input2, file$2, 78, 2, 2370);
-    			set_custom_element_data(text_align, "class", "text-control svelte-cypv31");
+    			set_custom_element_data(text_align, "class", "text-control svelte-kub021");
     			add_location(text_align, file$2, 75, 1, 2228);
-    			set_custom_element_data(lyrics_read_edit_controls, "class", "svelte-cypv31");
+    			set_custom_element_data(lyrics_read_edit_controls, "class", "svelte-kub021");
     			add_location(lyrics_read_edit_controls, file$2, 58, 0, 1747);
     		},
     		l: function claim(nodes) {
@@ -44316,7 +44676,7 @@ var app = (function () {
 
     function instance$2($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('LyricsReadEditControls', slots, []);
+    	validate_slots('LyricsTextControls', slots, []);
     	const dispatch = createEventDispatcher();
     	let { fontWeight } = $$props;
     	let { fontSize } = $$props;
@@ -44333,22 +44693,22 @@ var app = (function () {
 
     	$$self.$$.on_mount.push(function () {
     		if (fontWeight === undefined && !('fontWeight' in $$props || $$self.$$.bound[$$self.$$.props['fontWeight']])) {
-    			console.warn("<LyricsReadEditControls> was created without expected prop 'fontWeight'");
+    			console.warn("<LyricsTextControls> was created without expected prop 'fontWeight'");
     		}
 
     		if (fontSize === undefined && !('fontSize' in $$props || $$self.$$.bound[$$self.$$.props['fontSize']])) {
-    			console.warn("<LyricsReadEditControls> was created without expected prop 'fontSize'");
+    			console.warn("<LyricsTextControls> was created without expected prop 'fontSize'");
     		}
 
     		if (textAlignment === undefined && !('textAlignment' in $$props || $$self.$$.bound[$$self.$$.props['textAlignment']])) {
-    			console.warn("<LyricsReadEditControls> was created without expected prop 'textAlignment'");
+    			console.warn("<LyricsTextControls> was created without expected prop 'textAlignment'");
     		}
     	});
 
     	const writable_props = ['fontWeight', 'fontSize', 'textAlignment'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<LyricsReadEditControls> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<LyricsTextControls> was created with unknown prop '${key}'`);
     	});
 
     	function input0_change_input_handler() {
@@ -44435,7 +44795,7 @@ var app = (function () {
     	];
     }
 
-    class LyricsReadEditControls extends SvelteComponentDev {
+    class LyricsTextControls extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
 
@@ -44447,40 +44807,38 @@ var app = (function () {
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "LyricsReadEditControls",
+    			tagName: "LyricsTextControls",
     			options,
     			id: create_fragment$2.name
     		});
     	}
 
     	get fontWeight() {
-    		throw new Error("<LyricsReadEditControls>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<LyricsTextControls>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set fontWeight(value) {
-    		throw new Error("<LyricsReadEditControls>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<LyricsTextControls>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	get fontSize() {
-    		throw new Error("<LyricsReadEditControls>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<LyricsTextControls>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set fontSize(value) {
-    		throw new Error("<LyricsReadEditControls>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<LyricsTextControls>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	get textAlignment() {
-    		throw new Error("<LyricsReadEditControls>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<LyricsTextControls>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set textAlignment(value) {
-    		throw new Error("<LyricsReadEditControls>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<LyricsTextControls>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
     /* src/layouts/lyrics/!LyricsLayout.svelte generated by Svelte v3.58.0 */
-
-    const { console: console_1 } = globals;
     const file$1 = "src/layouts/lyrics/!LyricsLayout.svelte";
 
     function create_fragment$1(ctx) {
@@ -44496,7 +44854,7 @@ var app = (function () {
     	let t3;
     	let lyricscontrols;
     	let t4;
-    	let lyricsreadeditcontrols;
+    	let lyricstextcontrols;
     	let t5;
     	let lyricsreadedit;
     	let current;
@@ -44524,7 +44882,7 @@ var app = (function () {
     	lyricscontrols.$on("lyricsModeChange", /*lyricsModeChange_handler*/ ctx[9]);
     	lyricscontrols.$on("saveLyrics", /*saveNewLyricValue*/ ctx[7]);
 
-    	lyricsreadeditcontrols = new LyricsReadEditControls({
+    	lyricstextcontrols = new LyricsTextControls({
     			props: {
     				fontWeight: /*fontWeight*/ ctx[1],
     				fontSize: /*fontSize*/ ctx[2],
@@ -44533,9 +44891,9 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	lyricsreadeditcontrols.$on("fontWeightChange", /*fontWeightChange_handler*/ ctx[10]);
-    	lyricsreadeditcontrols.$on("fontSizeChange", /*fontSizeChange_handler*/ ctx[11]);
-    	lyricsreadeditcontrols.$on("textAlignmentChange", /*textAlignmentChange_handler*/ ctx[12]);
+    	lyricstextcontrols.$on("fontWeightChange", /*fontWeightChange_handler*/ ctx[10]);
+    	lyricstextcontrols.$on("fontSizeChange", /*fontSizeChange_handler*/ ctx[11]);
+    	lyricstextcontrols.$on("textAlignmentChange", /*textAlignmentChange_handler*/ ctx[12]);
 
     	lyricsreadedit = new LyricsReadEdit({
     			props: {
@@ -44549,6 +44907,7 @@ var app = (function () {
     		});
 
     	lyricsreadedit.$on("newLyricValue", /*newLyricValue_handler*/ ctx[13]);
+    	lyricsreadedit.$on("lyricModeChange", /*lyricModeChange_handler*/ ctx[14]);
 
     	const block = {
     		c: function create() {
@@ -44563,15 +44922,15 @@ var app = (function () {
     			t3 = space();
     			create_component(lyricscontrols.$$.fragment);
     			t4 = space();
-    			create_component(lyricsreadeditcontrols.$$.fragment);
+    			create_component(lyricstextcontrols.$$.fragment);
     			t5 = space();
     			create_component(lyricsreadedit.$$.fragment);
-    			set_custom_element_data(lyrics_edit_mode_sign, "class", lyrics_edit_mode_sign_class_value = "" + (null_to_empty(/*lyricsMode*/ ctx[0] === 'Read' ? 'read' : 'edit') + " svelte-8kmap4"));
-    			add_location(lyrics_edit_mode_sign, file$1, 80, 2, 2907);
-    			set_custom_element_data(lyrics_body, "class", "svelte-8kmap4");
-    			add_location(lyrics_body, file$1, 77, 1, 2856);
-    			set_custom_element_data(lyrics_layout, "class", "layout svelte-8kmap4");
-    			add_location(lyrics_layout, file$1, 68, 0, 2705);
+    			set_custom_element_data(lyrics_edit_mode_sign, "class", lyrics_edit_mode_sign_class_value = "" + (null_to_empty(/*lyricsMode*/ ctx[0] === 'Read' ? 'read' : 'edit') + " svelte-qvmu3d"));
+    			add_location(lyrics_edit_mode_sign, file$1, 92, 2, 3406);
+    			set_custom_element_data(lyrics_body, "class", "svelte-qvmu3d");
+    			add_location(lyrics_body, file$1, 89, 1, 3355);
+    			set_custom_element_data(lyrics_layout, "class", "layout svelte-qvmu3d");
+    			add_location(lyrics_layout, file$1, 80, 0, 3204);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -44588,7 +44947,7 @@ var app = (function () {
     			append_dev(lyrics_body, t3);
     			mount_component(lyricscontrols, lyrics_body, null);
     			append_dev(lyrics_body, t4);
-    			mount_component(lyricsreadeditcontrols, lyrics_body, null);
+    			mount_component(lyricstextcontrols, lyrics_body, null);
     			append_dev(lyrics_body, t5);
     			mount_component(lyricsreadedit, lyrics_body, null);
     			current = true;
@@ -44602,18 +44961,18 @@ var app = (function () {
     			if (dirty & /*selectedLyric*/ 16) lyricheader_changes.selectedLyric = /*selectedLyric*/ ctx[4];
     			lyricheader.$set(lyricheader_changes);
 
-    			if (!current || dirty & /*lyricsMode*/ 1 && lyrics_edit_mode_sign_class_value !== (lyrics_edit_mode_sign_class_value = "" + (null_to_empty(/*lyricsMode*/ ctx[0] === 'Read' ? 'read' : 'edit') + " svelte-8kmap4"))) {
+    			if (!current || dirty & /*lyricsMode*/ 1 && lyrics_edit_mode_sign_class_value !== (lyrics_edit_mode_sign_class_value = "" + (null_to_empty(/*lyricsMode*/ ctx[0] === 'Read' ? 'read' : 'edit') + " svelte-qvmu3d"))) {
     				set_custom_element_data(lyrics_edit_mode_sign, "class", lyrics_edit_mode_sign_class_value);
     			}
 
     			const lyricscontrols_changes = {};
     			if (dirty & /*lyricsMode*/ 1) lyricscontrols_changes.lyricsMode = /*lyricsMode*/ ctx[0];
     			lyricscontrols.$set(lyricscontrols_changes);
-    			const lyricsreadeditcontrols_changes = {};
-    			if (dirty & /*fontWeight*/ 2) lyricsreadeditcontrols_changes.fontWeight = /*fontWeight*/ ctx[1];
-    			if (dirty & /*fontSize*/ 4) lyricsreadeditcontrols_changes.fontSize = /*fontSize*/ ctx[2];
-    			if (dirty & /*textAlignment*/ 8) lyricsreadeditcontrols_changes.textAlignment = /*textAlignment*/ ctx[3];
-    			lyricsreadeditcontrols.$set(lyricsreadeditcontrols_changes);
+    			const lyricstextcontrols_changes = {};
+    			if (dirty & /*fontWeight*/ 2) lyricstextcontrols_changes.fontWeight = /*fontWeight*/ ctx[1];
+    			if (dirty & /*fontSize*/ 4) lyricstextcontrols_changes.fontSize = /*fontSize*/ ctx[2];
+    			if (dirty & /*textAlignment*/ 8) lyricstextcontrols_changes.textAlignment = /*textAlignment*/ ctx[3];
+    			lyricstextcontrols.$set(lyricstextcontrols_changes);
     			const lyricsreadedit_changes = {};
     			if (dirty & /*selectedLyric*/ 16) lyricsreadedit_changes.selectedLyric = /*selectedLyric*/ ctx[4];
     			if (dirty & /*lyricsMode*/ 1) lyricsreadedit_changes.lyricsMode = /*lyricsMode*/ ctx[0];
@@ -44627,7 +44986,7 @@ var app = (function () {
     			transition_in(lyricslist.$$.fragment, local);
     			transition_in(lyricheader.$$.fragment, local);
     			transition_in(lyricscontrols.$$.fragment, local);
-    			transition_in(lyricsreadeditcontrols.$$.fragment, local);
+    			transition_in(lyricstextcontrols.$$.fragment, local);
     			transition_in(lyricsreadedit.$$.fragment, local);
     			current = true;
     		},
@@ -44635,7 +44994,7 @@ var app = (function () {
     			transition_out(lyricslist.$$.fragment, local);
     			transition_out(lyricheader.$$.fragment, local);
     			transition_out(lyricscontrols.$$.fragment, local);
-    			transition_out(lyricsreadeditcontrols.$$.fragment, local);
+    			transition_out(lyricstextcontrols.$$.fragment, local);
     			transition_out(lyricsreadedit.$$.fragment, local);
     			current = false;
     		},
@@ -44644,7 +45003,7 @@ var app = (function () {
     			destroy_component(lyricslist);
     			destroy_component(lyricheader);
     			destroy_component(lyricscontrols);
-    			destroy_component(lyricsreadeditcontrols);
+    			destroy_component(lyricstextcontrols);
     			destroy_component(lyricsreadedit);
     		}
     	};
@@ -44665,11 +45024,11 @@ var app = (function () {
     	let $onNewLyrics;
     	let $config;
     	validate_store(playingSongStore, 'playingSongStore');
-    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(14, $playingSongStore = $$value));
+    	component_subscribe($$self, playingSongStore, $$value => $$invalidate(15, $playingSongStore = $$value));
     	validate_store(onNewLyrics, 'onNewLyrics');
-    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(15, $onNewLyrics = $$value));
+    	component_subscribe($$self, onNewLyrics, $$value => $$invalidate(16, $onNewLyrics = $$value));
     	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(16, $config = $$value));
+    	component_subscribe($$self, config, $$value => $$invalidate(17, $config = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('LyricsLayout', slots, []);
     	let lyricsMode = 'Read';
@@ -44682,7 +45041,11 @@ var app = (function () {
 
     	function saveNewLyricValue() {
     		window.ipc.saveLyrics(lyrics, selectedLyric.title, selectedLyric.artist).then(result => {
-    			console.log(result);
+    			if (result.code === 0) {
+    				notifyService.success(traduceFn('Lyrics for “${songTitle}” saved successfully!', { songTitle: result.data.title }));
+    			} else if (result.code === -1) {
+    				notifyService.error(traduceFn(result.message));
+    			}
     		});
     	}
 
@@ -44692,6 +45055,8 @@ var app = (function () {
     			let foundLyric = undefined;
 
     			if ($onNewLyrics !== null) {
+    				$$invalidate(0, lyricsMode = 'Edit');
+
     				$$invalidate(4, selectedLyric = {
     					title: $onNewLyrics.title,
     					artist: $onNewLyrics.artist
@@ -44712,6 +45077,11 @@ var app = (function () {
     								});
 
     								$$invalidate(6, lyricList);
+
+    								$$invalidate(4, selectedLyric = {
+    									artist: result.data.artist,
+    									title: result.data.title
+    								});
     							});
     						}
     					});
@@ -44728,7 +45098,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<LyricsLayout> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<LyricsLayout> was created with unknown prop '${key}'`);
     	});
 
     	const selectedLyric_handler = ({ detail }) => {
@@ -44753,12 +45123,16 @@ var app = (function () {
     		$$invalidate(5, lyrics = detail);
     	};
 
+    	const lyricModeChange_handler = ({ detail }) => {
+    		$$invalidate(0, lyricsMode = detail);
+    	};
+
     	$$self.$capture_state = () => ({
     		LyricsList,
     		LyricHeader,
     		LyricsControls,
     		LyricsReadEdit,
-    		LyricsReadEditControls,
+    		LyricsTextControls,
     		config,
     		onMount,
     		playingSongStore,
@@ -44806,7 +45180,8 @@ var app = (function () {
     		fontWeightChange_handler,
     		fontSizeChange_handler,
     		textAlignmentChange_handler,
-    		newLyricValue_handler
+    		newLyricValue_handler,
+    		lyricModeChange_handler
     	];
     }
 

@@ -6,10 +6,13 @@ export default function (stringToTraduce: string, values: object = undefined) {
 	if (!stringToTraduce) return stringToTraduce
 
 	let language = get(config)?.userOptions?.language
+	let traduced = undefined
 
-	if (language === 'english') return stringToTraduce
-
-	let traduced = get(langFile)?.[stringToTraduce]
+	if (language === 'english') {
+		traduced = stringToTraduce
+	} else {
+		traduced = get(langFile)?.[stringToTraduce]
+	}
 
 	if (!traduced) {
 		console.log(`Missing "${stringToTraduce}" traduction in ${language}`)

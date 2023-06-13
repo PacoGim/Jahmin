@@ -168,6 +168,11 @@
 		opacity: 1;
 	}
 
+	equalizer-name span.warning{
+		display: flex;
+
+	}
+
 	button {
 		display: flex;
 		align-items: center;
