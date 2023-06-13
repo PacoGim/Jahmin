@@ -4,12 +4,17 @@
 	const dispatch = createEventDispatcher()
 
 	export let lyricsMode
+	export let isLyricsDirty = false
 </script>
 
 <lyrics-controls>
 	<button class={lyricsMode === 'Read' ? 'selected' : ''} on:click={() => dispatch('lyricsModeChange', 'Read')}>Read</button>
 	<button class={lyricsMode === 'Edit' ? 'selected' : ''} on:click={() => dispatch('lyricsModeChange', 'Edit')}>Edit</button>
-	<button class={lyricsMode === 'Edit' ? 'active' : 'inactive'} on:click={() => dispatch('saveLyrics')}>Save</button>
+	<button
+		class={isLyricsDirty === false ? 'inactive' : 'active'}
+		class:wiggle={isLyricsDirty === true && lyricsMode === 'Read'}
+		on:click={() => dispatch('saveLyrics')}>Save</button
+	>
 </lyrics-controls>
 
 <style>
@@ -63,10 +68,31 @@
 		color: var(--color-accent-1);
 		background-color: var(--color-bg-3);
 		box-shadow: inset 0 0 0 2px var(--color-accent-1);
+		pointer-events: none;
 	}
 
 	lyrics-controls button:first-of-type {
 		margin-left: 0.5rem;
 		margin-right: 1rem;
+	}
+
+	button.wiggle {
+		animation: wiggle 750ms infinite;
+		animation-timing-function: linear;
+	}
+
+	@keyframes wiggle {
+		0% {
+			transform: rotate(0deg);
+		}
+		25% {
+			transform: rotate(-10deg);
+		}
+		75% {
+			transform: rotate(10deg);
+		}
+		100% {
+			transform: rotate(0deg);
+		}
 	}
 </style>

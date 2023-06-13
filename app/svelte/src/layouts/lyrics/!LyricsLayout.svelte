@@ -26,6 +26,10 @@
 
 	let lyricList = []
 
+	let isLyricsDirty = false
+
+	let triggerTempLyricsChange = null
+
 	function saveNewLyricValue() {
 		window.ipc.saveLyrics(lyrics, selectedLyric.title, selectedLyric.artist).then(result => {
 			if (result.code === 0) {
@@ -34,6 +38,7 @@
 						songTitle: result.data.title
 					})
 				)
+				triggerTempLyricsChange = lyrics
 			} else if (result.code === -1) {
 				notifyService.error(traduceFn(result.message))
 			}
@@ -44,7 +49,7 @@
 		window.ipc.getLyricsList().then(result => {
 			lyricList = result
 
-			let foundLyric = undefined
+			let foundLyrics = undefined
 
 			if ($onNewLyrics !== null) {
 				lyricsMode = 'Edit'
@@ -52,14 +57,15 @@
 					title: $onNewLyrics.title,
 					artist: $onNewLyrics.artist
 				}
-				foundLyric = result.find(lyrics => lyrics.artist === $onNewLyrics.artist && lyrics.title === $onNewLyrics.title)
+				foundLyrics = result.find(lyrics => lyrics.artist === $onNewLyrics.artist && lyrics.title === $onNewLyrics.title)
+
 				onNewLyrics.set(null)
 			} else {
-				foundLyric = result.find(
+				foundLyrics = result.find(
 					lyrics => lyrics.artist === $playingSongStore.Artist && lyrics.title === $playingSongStore.Title
 				)
 
-				if (foundLyric === undefined) {
+				if (foundLyrics === undefined) {
 					notifyService
 						.question(
 							traduceFn('No lyrics found for ${songTitle}. Would you like to create it?', {
@@ -104,11 +110,16 @@
 	/>
 
 	<lyrics-body>
-		<LyricHeader {selectedLyric} />
+		<LyricHeader {selectedLyric} {isLyricsDirty} />
 
 		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
 
-		<LyricsControls {lyricsMode} on:lyricsModeChange={res => (lyricsMode = res.detail)} on:saveLyrics={saveNewLyricValue} />
+		<LyricsControls
+			{lyricsMode}
+			{isLyricsDirty}
+			on:lyricsModeChange={res => (lyricsMode = res.detail)}
+			on:saveLyrics={saveNewLyricValue}
+		/>
 
 		<LyricsTextControls
 			{fontWeight}
@@ -132,6 +143,10 @@
 			on:lyricModeChange={({ detail }) => {
 				lyricsMode = detail
 			}}
+			on:isLyricsDirty={({ detail }) => {
+				isLyricsDirty = detail
+			}}
+			{triggerTempLyricsChange}
 			{selectedLyric}
 			{lyricsMode}
 			{fontWeight}

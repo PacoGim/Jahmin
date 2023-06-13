@@ -11,17 +11,31 @@
 
 	export let selectedLyric = { title: '', artist: '' }
 
+	export let triggerTempLyricsChange = null
+
 	let lyrics = ''
+	let tempLyrics = ''
+
+	$: {
+		if (triggerTempLyricsChange !== null) {
+			tempLyrics = triggerTempLyricsChange
+			triggerTempLyricsChange = null
+		}
+	}
+
+	$: {
+		dispatch('isLyricsDirty', lyrics !== tempLyrics)
+	}
 
 	$: {
 		dispatch('newLyricValue', lyrics)
 	}
 
 	$: {
-		getLyric(selectedLyric.title, selectedLyric.artist)
+		getLyrics(selectedLyric.title, selectedLyric.artist)
 	}
 
-	function getLyric(title: string, artist: string) {
+	function getLyrics(title: string, artist: string) {
 		window.ipc.getLyrics(title, artist).then(result => {
 			if (result.code === 0) {
 				lyrics = result.data.lyrics
@@ -30,6 +44,7 @@
 				lyrics = ''
 				dispatch('lyricModeChange', 'Edit')
 			}
+			tempLyrics = lyrics
 		})
 	}
 </script>
