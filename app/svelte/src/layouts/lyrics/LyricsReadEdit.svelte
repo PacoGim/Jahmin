@@ -9,7 +9,7 @@
 	export let fontSize
 	export let textAlignment
 
-	export let selectedLyrics = { title: '', artist: '' }
+	export let selectedLyrics = null
 
 	export let triggerTempLyricsChange = null
 
@@ -32,7 +32,9 @@
 	}
 
 	$: {
-		getLyrics(selectedLyrics.title, selectedLyrics.artist)
+		if (selectedLyrics !== null) {
+			getLyrics(selectedLyrics.title, selectedLyrics.artist)
+		}
 	}
 
 	function getLyrics(title: string, artist: string) {
@@ -45,11 +47,6 @@
 				} else {
 					dispatch('lyricModeChange', 'Read')
 				}
-			} else if (result.code === -1) {
-
-
-				// TODO Response properly if the user deletes a selected lyrics
-
 			}
 			tempLyrics = lyrics
 		})

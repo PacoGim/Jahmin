@@ -4,10 +4,7 @@
 
 	export let isLyricsDirty = false
 
-	export let selectedLyrics = {
-		title: '',
-		artist: ''
-	}
+	export let selectedLyrics = null
 
 	function openGeniusWebpage() {
 		window.ipc.openGeniusWebpage(selectedLyrics.title, selectedLyrics.artist)
@@ -15,19 +12,24 @@
 </script>
 
 <lyrics-header>
-	{#if selectedLyrics.title && selectedLyrics.artist}
+	{#if selectedLyrics !== null}
+		<!-- ▼▼▼▼▼▼▼▼▼▼ If lyrics are selected ▼▼▼▼▼▼▼▼▼▼ -->
+
 		<lyrics-name isDirty={isLyricsDirty}>{selectedLyrics.title} - {selectedLyrics.artist}</lyrics-name>
 
 		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button">
 			Genius.com
 			<SearchIcon style="height: 1rem; margin-left: .25rem;" />
 		</lyrics-genius>
+
+		<!-- ▲▲▲▲▲▲▲▲▲▲ If lyrics are selected ▲▲▲▲▲▲▲▲▲▲ -->
 	{:else}
-		<lyrics-name />
+		<!-- ▼▼▼▼▼▼▼▼▼▼ If no lyrics are selected ▼▼▼▼▼▼▼▼▼▼ -->
+		<lyrics-name isDirty={false}>No Lyrics Selected!</lyrics-name>
 		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
 			><bold>Genius.com</bold></lyrics-genius
 		>
-	{/if}
+	{/if}<!-- ▲▲▲▲▲▲▲▲▲▲ If no lyrics are selected ▲▲▲▲▲▲▲▲▲▲ -->
 </lyrics-header>
 
 <style>
@@ -44,7 +46,6 @@
 
 		/* background-color: var(--color-accent-1); */
 		background: linear-gradient(90deg, rgba(102, 116, 209, 1) 0%, hsl(211, 75%, 58%) 100%);
-
 
 		color: #fff;
 	}

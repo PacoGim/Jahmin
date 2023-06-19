@@ -28,7 +28,7 @@ declare global {
 			deleteLyrics: (
 				title: string,
 				artist: string
-			) => Promise<{ isError: boolean; message: string; data: { title: string; artist: string } }>
+			) => Promise<PromiseResolveType>
 			getArtCacheSize: () => Promise<string>
 			fileExists: (filePath: string) => Promise<boolean>
 			getOs: () => Promise<string>
@@ -69,6 +69,7 @@ declare global {
 			onMediaKeyPressed: (callback: any) => void
 			onGlobalShortcutsRegistered: (callback: any) => void
 			onLyricsDeleted: (callback: any) => void
+			onConfirmLyricsDeletion: (callback: any) => void
 		}
 	}
 }

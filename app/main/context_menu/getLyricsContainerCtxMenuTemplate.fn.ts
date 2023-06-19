@@ -13,9 +13,14 @@ export default function (data: DataType) {
 	template.push({
 		label: `Delete Lyrics`,
 		click: () => {
-			deleteLyrics(data.lyricsTitle, data.lyricsArtist).then(response => {
-				sendWebContentsFn('lyrics-deleted', response)
+			sendWebContentsFn('confirm-lyrics-deletion', {
+				lyricsTitle: data.lyricsTitle,
+				lyricsArtist: data.lyricsArtist
 			})
+
+			// deleteLyrics(data.lyricsTitle, data.lyricsArtist).then(response => {
+			// sendWebContentsFn('lyrics-deleted', response)
+			// })
 		}
 	})
 

@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
 	import limitCharactersFn from '../../functions/limitCharacters.fn'
-	import { dbSongsStore, playbackStore, playingSongStore } from '../../stores/main.store'
+	import { dbSongsStore, layoutToShow, playbackStore, playingSongStore } from '../../stores/main.store'
 	import setNewPlaybackFn from '../../functions/setNewPlayback.fn'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import PlayButton from '../components/PlayButton.svelte'
+	import { confirmService } from '../../stores/service.store'
+	import { get } from 'svelte/store'
+	import traduceFn from '../../functions/traduce.fn'
 
 	const dispatch = createEventDispatcher()
 
@@ -35,28 +38,45 @@
 		}
 	}
 
-	window.ipc.onLyricsDeleted((_, response) => {
-		if (response.code === 0) {
-			let foundItemIndex = lyricsList.findIndex(
-				item => item.title === response.data.title && item.artist === response.data.artist
-			)
+	/*
 
-			if (foundItemIndex !== -1) {
-				lyricsList.splice(foundItemIndex, 1)
-				lyricsList = lyricsList
-
-				if (selectedLyrics.title === response.data.title && selectedLyrics.artist === response.data.artist) {
-					dispatch('selectedLyrics', {
-						title: '',
-						artist: ''
-					})
-				}
-			}
-		} else if (response.code === -1) {
-
-
-
+			textToConfirm: traduceFn('Delete equalizer "${eqName}"?', { eqName: traduceFn(eqName) }),
+		title: traduceFn('Delete Equalizer'),
+		data: {
+			name: eqName
 		}
+
+	*/
+
+	window.ipc.onConfirmLyricsDeletion((_, data) => {
+		get(confirmService)
+			.showConfirm({
+				textToConfirm: `The Lyrics ${data.lyricsTitle} will be deleted, is that OK?`,
+				title: 'Delete Lyrics'
+			})
+			.then(() => {
+				get(confirmService).closeConfirm()
+				window.ipc.deleteLyrics(data.lyricsTitle, data.lyricsArtist).then(response => {
+					if (response.code === 0) {
+						let foundItemIndex = lyricsList.findIndex(
+							item => item.title === response.data.title && item.artist === response.data.artist
+						)
+
+						if (foundItemIndex !== -1) {
+							lyricsList.splice(foundItemIndex, 1)
+							lyricsList = lyricsList
+
+							if (selectedLyrics.title === response.data.title && selectedLyrics.artist === response.data.artist) {
+
+								// $layoutToShow='Config'
+								// $layoutToShow='Lyrics'
+
+							}
+						}
+					} else if (response.code === -1) {
+					}
+				})
+			})
 	})
 
 	// class:playing={lyrics.title === $playingSongStore.Title && lyrics.artist === $playingSongStore.Artist}

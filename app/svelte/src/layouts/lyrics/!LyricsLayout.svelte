@@ -17,10 +17,7 @@
 	let fontSize = $config.userOptions.lyricsStyle.fontSize
 	let textAlignment = $config.userOptions.lyricsStyle.textAlignment
 
-	let selectedLyrics = {
-		title: '',
-		artist: ''
-	}
+	let selectedLyrics = null
 
 	let lyrics = ''
 
