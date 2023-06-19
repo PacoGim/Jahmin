@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { handleContextMenuEvent } from '../../services/contextMenu.service'
+	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
 	import { groupSongs } from '../../services/groupSongs.service'
 	import { config } from '../../stores/config.store'
 

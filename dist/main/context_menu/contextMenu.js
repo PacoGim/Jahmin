@@ -8,6 +8,7 @@ const electron_1 = require("electron");
 const getAlbumContextMenuTemplate_fn_1 = __importDefault(require("./getAlbumContextMenuTemplate.fn"));
 const getGroupNameContextMenuTemplate_fn_1 = __importDefault(require("./getGroupNameContextMenuTemplate.fn"));
 const getSongListContextMenuTemplate_fn_1 = __importDefault(require("./getSongListContextMenuTemplate.fn"));
+const getLyricsContainerCtxMenuTemplate_fn_1 = __importDefault(require("./getLyricsContainerCtxMenuTemplate.fn"));
 function loadContextMenu(event, menuToOpen, data) {
     let template = [];
     if (menuToOpen === 'AlbumContextMenu') {
@@ -18,6 +19,9 @@ function loadContextMenu(event, menuToOpen, data) {
     }
     else if (menuToOpen === 'GroupNameContextMenu') {
         template = (0, getGroupNameContextMenuTemplate_fn_1.default)(data);
+    }
+    else if (menuToOpen === 'LyricsContainerContextMenu') {
+        template = (0, getLyricsContainerCtxMenuTemplate_fn_1.default)(data);
     }
     const menu = electron_1.Menu.buildFromTemplate(template);
     //@ts-expect-error

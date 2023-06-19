@@ -17,7 +17,7 @@
 	let fontSize = $config.userOptions.lyricsStyle.fontSize
 	let textAlignment = $config.userOptions.lyricsStyle.textAlignment
 
-	let selectedLyric = {
+	let selectedLyrics = {
 		title: '',
 		artist: ''
 	}
@@ -31,7 +31,7 @@
 	let triggerTempLyricsChange = null
 
 	function saveNewLyricValue() {
-		window.ipc.saveLyrics(lyrics, selectedLyric.title, selectedLyric.artist).then(result => {
+		window.ipc.saveLyrics(lyrics, selectedLyrics.title, selectedLyrics.artist).then(result => {
 			if (result.code === 0) {
 				notifyService.success(
 					traduceFn('Lyrics for “${songTitle}” saved successfully!', {
@@ -53,7 +53,7 @@
 
 			if ($onNewLyrics !== null) {
 				lyricsMode = 'Edit'
-				selectedLyric = {
+				selectedLyrics = {
 					title: $onNewLyrics.title,
 					artist: $onNewLyrics.artist
 				}
@@ -82,7 +82,7 @@
 
 									lyricList = lyricList
 
-									selectedLyric = {
+									selectedLyrics = {
 										artist: result.data.artist,
 										title: result.data.title
 									}
@@ -90,7 +90,7 @@
 							}
 						})
 				} else {
-					selectedLyric = {
+					selectedLyrics = {
 						artist: $playingSongStore.Artist,
 						title: $playingSongStore.Title
 					}
@@ -102,15 +102,15 @@
 
 <lyrics-layout class="layout">
 	<LyricsList
-		{lyricList}
-		{selectedLyric}
-		on:selectedLyric={({ detail }) => {
-			selectedLyric = detail
+		lyricsList={lyricList}
+		selectedLyrics={selectedLyrics}
+		on:selectedLyrics={({ detail }) => {
+			selectedLyrics = detail
 		}}
 	/>
 
 	<lyrics-body>
-		<LyricHeader {selectedLyric} {isLyricsDirty} />
+		<LyricHeader {selectedLyrics} {isLyricsDirty} />
 
 		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
 
@@ -147,7 +147,7 @@
 				isLyricsDirty = detail
 			}}
 			{triggerTempLyricsChange}
-			{selectedLyric}
+			{selectedLyrics}
 			{lyricsMode}
 			{fontWeight}
 			{fontSize}

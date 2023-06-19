@@ -1,5 +1,5 @@
 import path from 'path'
-import fs from 'fs'
+import fs, { existsSync } from 'fs'
 import sanitize from 'sanitize-filename'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
 
@@ -92,8 +92,13 @@ function getLyrics(songTitle: string, songArtist: string): Promise<PromiseResolv
 			})
 		} else {
 			return resolve({
-				code: -1,
-				message: 'Lyrics not found'
+				code: 0,
+				message: 'Lyrics not found!',
+				data: {
+					title: songTitle,
+					artist: songArtist,
+					lyrics: ''
+				}
 			})
 		}
 	})
@@ -123,28 +128,37 @@ function getLyricsList() {
 	})
 }
 
-function deleteLyrics(title: string, artist: string) {
+function deleteLyrics(songTitle: string, songArtist: string): Promise<PromiseResolveType> {
 	return new Promise((resolve, reject) => {
-		let lyricsPath = sanitize(`${title})_(${artist}.txt`)
-		let lyricsAbsolutePath = path.join(lyricsFolderPath, lyricsPath)
+		if (!songTitle || !songArtist) {
+			return resolve({
+				code: -1,
+				message: 'Song Title or Song Artist not defined.'
+			})
+		}
 
-		if (fs.existsSync(lyricsAbsolutePath)) {
-			fs.unlink(lyricsAbsolutePath, err => {
+		let lyricsPath = getCleanFileName(`${songTitle}.${songArtist}` + '.txt')
+
+		let lyricsFullPath = path.join(lyricsFolderPath, lyricsPath)
+
+		if (fs.existsSync(lyricsFullPath)) {
+			fs.unlink(lyricsFullPath, err => {
 				if (err) {
-					resolve({ isError: true, message: 'Error when deleting' })
+					resolve({
+						code: -1,
+						message: 'Error when deleting'
+					})
 				} else {
 					resolve({
-						isError: false,
-						message: 'Deleted successfully',
+						code: 0,
+						message: `Lyrics for ${songTitle} by ${songArtist} deleted successfully`,
 						data: {
-							title,
-							artist
+							title: songTitle,
+							artist: songArtist
 						}
 					})
 				}
 			})
-		} else {
-			resolve({ isError: true, message: 'Lyrics not found' })
 		}
 	})
 }

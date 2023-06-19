@@ -83,8 +83,13 @@ function getLyrics(songTitle, songArtist) {
         }
         else {
             return resolve({
-                code: -1,
-                message: 'Lyrics not found'
+                code: 0,
+                message: 'Lyrics not found!',
+                data: {
+                    title: songTitle,
+                    artist: songArtist,
+                    lyrics: ''
+                }
             });
         }
     });
@@ -110,29 +115,35 @@ function getLyricsList() {
     });
 }
 exports.getLyricsList = getLyricsList;
-function deleteLyrics(title, artist) {
+function deleteLyrics(songTitle, songArtist) {
     return new Promise((resolve, reject) => {
-        let lyricsPath = (0, sanitize_filename_1.default)(`${title})_(${artist}.txt`);
-        let lyricsAbsolutePath = path_1.default.join(lyricsFolderPath, lyricsPath);
-        if (fs_1.default.existsSync(lyricsAbsolutePath)) {
-            fs_1.default.unlink(lyricsAbsolutePath, err => {
+        if (!songTitle || !songArtist) {
+            return resolve({
+                code: -1,
+                message: 'Song Title or Song Artist not defined.'
+            });
+        }
+        let lyricsPath = getCleanFileName(`${songTitle}.${songArtist}` + '.txt');
+        let lyricsFullPath = path_1.default.join(lyricsFolderPath, lyricsPath);
+        if (fs_1.default.existsSync(lyricsFullPath)) {
+            fs_1.default.unlink(lyricsFullPath, err => {
                 if (err) {
-                    resolve({ isError: true, message: 'Error when deleting' });
+                    resolve({
+                        code: -1,
+                        message: 'Error when deleting'
+                    });
                 }
                 else {
                     resolve({
-                        isError: false,
-                        message: 'Deleted successfully',
+                        code: 0,
+                        message: `Lyrics for ${songTitle} by ${songArtist} deleted successfully`,
                         data: {
-                            title,
-                            artist
+                            title: songTitle,
+                            artist: songArtist
                         }
                     });
                 }
             });
-        }
-        else {
-            resolve({ isError: true, message: 'Lyrics not found' });
         }
     });
 }

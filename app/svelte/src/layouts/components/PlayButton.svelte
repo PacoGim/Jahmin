@@ -24,7 +24,7 @@
 <style>
 	play-pause-button {
 		position: relative;
-		display: block;
+		display: inline-block;
 		/* height: var(--button-size); */
 		/* width: var(--button-size); */
 

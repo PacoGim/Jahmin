@@ -1,24 +1,27 @@
 <script lang="ts">
 	import limitCharactersFn from '../../functions/limitCharacters.fn'
+	import SearchIcon from '../../icons/SearchIcon.svelte'
 
 	export let isLyricsDirty = false
 
-	export let selectedLyric = {
+	export let selectedLyrics = {
 		title: '',
 		artist: ''
 	}
 
 	function openGeniusWebpage() {
-		window.ipc.openGeniusWebpage(selectedLyric.title, selectedLyric.artist)
+		window.ipc.openGeniusWebpage(selectedLyrics.title, selectedLyrics.artist)
 	}
 </script>
 
 <lyrics-header>
-	{#if selectedLyric.title && selectedLyric.artist}
-		<lyrics-name isDirty={isLyricsDirty}>{selectedLyric.title} - {selectedLyric.artist}</lyrics-name>
-		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
-			>Find <bold>“{limitCharactersFn(selectedLyric.title, 20)}”</bold> lyrics in <bold>Genius.com</bold></lyrics-genius
-		>
+	{#if selectedLyrics.title && selectedLyrics.artist}
+		<lyrics-name isDirty={isLyricsDirty}>{selectedLyrics.title} - {selectedLyrics.artist}</lyrics-name>
+
+		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button">
+			Genius.com
+			<SearchIcon style="height: 1rem; margin-left: .25rem;" />
+		</lyrics-genius>
 	{:else}
 		<lyrics-name />
 		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
@@ -39,7 +42,9 @@
 
 		border-radius: 3px;
 
-		background-color: var(--color-accent-1);
+		/* background-color: var(--color-accent-1); */
+		background: linear-gradient(90deg, rgba(102, 116, 209, 1) 0%, hsl(211, 75%, 58%) 100%);
+
 
 		color: #fff;
 	}
@@ -74,13 +79,20 @@
 	lyrics-genius {
 		background-color: var(--color-accent-3);
 		padding: 0.5rem 0.75rem;
-		border-radius: 100vmax;
+		border-radius: 3px;
 		cursor: pointer;
+		font-variation-settings: 'wght' 700;
 
-		flex: 1;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
 
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		transition: font-variation-settings 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+		box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25); /* x | y | blur | spread | color */
+	}
+
+	lyrics-genius:hover {
+		font-variation-settings: 'wght' 900;
 	}
 </style>

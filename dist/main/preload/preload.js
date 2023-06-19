@@ -55,7 +55,8 @@ const ipcFunctions = {
     onSongPlayAfter: (callback) => electron_1.ipcRenderer.on('song-play-after', callback),
     onChangeSongAmount: (callback) => electron_1.ipcRenderer.on('change-song-amount', callback),
     onMediaKeyPressed: (callback) => electron_1.ipcRenderer.on('media-key-pressed', callback),
-    onGlobalShortcutsRegistered: (callback) => electron_1.ipcRenderer.on('global-shortcuts-registered', callback)
+    onGlobalShortcutsRegistered: (callback) => electron_1.ipcRenderer.on('global-shortcuts-registered', callback),
+    onLyricsDeleted: (callback) => electron_1.ipcRenderer.on('lyrics-deleted', callback)
 };
 electron_1.contextBridge.exposeInMainWorld('ipc', ipcFunctions);
 function getCommunityEqualizerProfiles() {

@@ -9,7 +9,7 @@
 	export let fontSize
 	export let textAlignment
 
-	export let selectedLyric = { title: '', artist: '' }
+	export let selectedLyrics = { title: '', artist: '' }
 
 	export let triggerTempLyricsChange = null
 
@@ -32,17 +32,24 @@
 	}
 
 	$: {
-		getLyrics(selectedLyric.title, selectedLyric.artist)
+		getLyrics(selectedLyrics.title, selectedLyrics.artist)
 	}
 
 	function getLyrics(title: string, artist: string) {
 		window.ipc.getLyrics(title, artist).then(result => {
 			if (result.code === 0) {
 				lyrics = result.data.lyrics
-				dispatch('lyricModeChange', 'Read')
-			} else {
-				lyrics = ''
-				dispatch('lyricModeChange', 'Edit')
+
+				if (lyrics === '') {
+					dispatch('lyricModeChange', 'Edit')
+				} else {
+					dispatch('lyricModeChange', 'Read')
+				}
+			} else if (result.code === -1) {
+
+
+				// TODO Response properly if the user deletes a selected lyrics
+
 			}
 			tempLyrics = lyrics
 		})

@@ -62,7 +62,8 @@ const ipcFunctions = {
 	onSongPlayAfter: (callback: any) => ipcRenderer.on('song-play-after', callback),
 	onChangeSongAmount: (callback: any) => ipcRenderer.on('change-song-amount', callback),
 	onMediaKeyPressed: (callback: any) => ipcRenderer.on('media-key-pressed', callback),
-	onGlobalShortcutsRegistered: (callback: any) => ipcRenderer.on('global-shortcuts-registered', callback)
+	onGlobalShortcutsRegistered: (callback: any) => ipcRenderer.on('global-shortcuts-registered', callback),
+	onLyricsDeleted: (callback: any) => ipcRenderer.on('lyrics-deleted', callback)
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)

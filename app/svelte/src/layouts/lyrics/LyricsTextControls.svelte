@@ -60,7 +60,7 @@
 		let textControlElements = document.querySelectorAll('.text-control')
 
 		textControlElements.forEach(element => {
-			element.addEventListener('mouseenter', evt => onTextControlElementMouseEnterLeave(evt, 'addActiveClass'))
+			element.addEventListener('click', evt => onTextControlElementMouseEnterLeave(evt, 'addActiveClass'))
 			element.addEventListener('mouseleave', evt => onTextControlElementMouseEnterLeave(evt, 'removeActiveClass'))
 		})
 	})
@@ -109,6 +109,8 @@
 		flex-direction: column;
 		text-align: center;
 		justify-content: center;
+
+		cursor: pointer;
 
 		position: relative;
 
@@ -163,9 +165,9 @@
 
 		outline: none;
 
-		background-color: var(--color-fg-1);
+		background-color: #fff;
 
-		box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25); /* x | y | blur | spread | color */
+		box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.2);
 	}
 
 	input[type='range']::-webkit-slider-thumb {
@@ -175,7 +177,7 @@
 		height: 12px;
 		outline: none;
 		background-color: var(--color-accent-1);
-		box-shadow: 0px 0px 0px 3px var(--color-fg-1), 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+		box-shadow: 0px 0px 0px 4px #fff, 0px 0px 4px 6px rgba(0, 0, 0, 0.2);
 
 		transition: background-color 300ms linear;
 	}

@@ -14,7 +14,7 @@ import {
 	windowResize
 } from '../stores/main.store'
 import { selectedConfigOptionName } from '../stores/session.store'
-import { handleContextMenuEvent } from './contextMenu.service'
+import { handleContextMenuEvent } from './contextMenu/!contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
 import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVariables.fn'
