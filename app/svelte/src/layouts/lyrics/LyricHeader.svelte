@@ -1,5 +1,4 @@
 <script lang="ts">
-	import limitCharactersFn from '../../functions/limitCharacters.fn'
 	import SearchIcon from '../../icons/SearchIcon.svelte'
 
 	export let isLyricsDirty = false
@@ -26,9 +25,10 @@
 	{:else}
 		<!-- ▼▼▼▼▼▼▼▼▼▼ If no lyrics are selected ▼▼▼▼▼▼▼▼▼▼ -->
 		<lyrics-name isDirty={false}>No Lyrics Selected!</lyrics-name>
-		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button"
-			><bold>Genius.com</bold></lyrics-genius
-		>
+		<lyrics-genius on:click={openGeniusWebpage} on:keypress={openGeniusWebpage} tabindex="-1" role="button">
+			Genius.com
+			<SearchIcon style="height: 1rem; margin-left: .25rem;" />
+		</lyrics-genius>
 	{/if}<!-- ▲▲▲▲▲▲▲▲▲▲ If no lyrics are selected ▲▲▲▲▲▲▲▲▲▲ -->
 </lyrics-header>
 
@@ -79,6 +79,7 @@
 
 	lyrics-genius {
 		background-color: var(--color-accent-3);
+		background: linear-gradient(to bottom right, var(--color-accent-3), hsl(343, 96%, 75%));
 		padding: 0.5rem 0.75rem;
 		border-radius: 3px;
 		cursor: pointer;

@@ -38,16 +38,6 @@
 		}
 	}
 
-	/*
-
-			textToConfirm: traduceFn('Delete equalizer "${eqName}"?', { eqName: traduceFn(eqName) }),
-		title: traduceFn('Delete Equalizer'),
-		data: {
-			name: eqName
-		}
-
-	*/
-
 	window.ipc.onConfirmLyricsDeletion((_, data) => {
 		get(confirmService)
 			.showConfirm({
@@ -67,25 +57,21 @@
 							lyricsList = lyricsList
 
 							if (selectedLyrics.title === response.data.title && selectedLyrics.artist === response.data.artist) {
-
-								// $layoutToShow='Config'
-								// $layoutToShow='Lyrics'
-
+								dispatch('selectedLyrics', null)
 							}
 						}
 					} else if (response.code === -1) {
+						dispatch('selectedLyrics', null)
 					}
 				})
 			})
 	})
-
-	// class:playing={lyrics.title === $playingSongStore.Title && lyrics.artist === $playingSongStore.Artist}
 </script>
 
 <lyrics-list>
 	{#each lyricsList as lyrics, index (index)}
 		<lyrics-container
-			class:selected={lyrics.title === selectedLyrics.title && lyrics.artist === selectedLyrics.artist}
+			class:selected={lyrics.title === selectedLyrics?.title && lyrics.artist === selectedLyrics?.artist}
 			on:click={() => selectLyric(lyrics.title, lyrics.artist)}
 			on:dblclick={() => playSong(lyrics.title, lyrics.artist)}
 			on:keypress={() => selectLyric(lyrics.title, lyrics.artist)}

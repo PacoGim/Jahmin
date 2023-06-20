@@ -3,7 +3,7 @@
 
 	let dispatch = createEventDispatcher()
 
-	export let lyricsMode
+	export let lyricsMode: 'Read' | 'Edit' | 'Disabled'
 
 	export let fontWeight
 	export let fontSize
@@ -53,15 +53,34 @@
 	}
 </script>
 
-<lyrics-read-edit class={lyricsMode === 'Read' ? 'read' : 'edit'}>
+<lyrics-read-edit class={lyricsMode.toLowerCase()}>
 	<lyrics-text-area>
-		<textarea
-			style="text-align:{['left', 'center', 'right'][
-				textAlignment
-			]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
-			bind:value={lyrics}
-			disabled={lyricsMode === 'Read' ? true : false}
-		/>
+		{#if lyricsMode !== 'Disabled'}
+			<!-- ▼▼▼▼▼▼▼▼▼▼ If the lyrics mode is not Disabled (Lyrics selected) ▼▼▼▼▼▼▼▼▼▼ -->
+			<textarea
+				style="text-align:{['left', 'center', 'right'][
+					textAlignment
+				]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
+				bind:value={lyrics}
+				disabled={lyricsMode === 'Read' ? true : false}
+			/>
+			<!-- ▲▲▲▲▲▲▲▲▲▲ If the lyrics mode is not Disabled (Lyrics selected) ▲▲▲▲▲▲▲▲▲▲ -->
+		{:else if lyricsMode === 'Disabled'}
+			<!-- ▼▼▼▼▼▼▼▼▼▼ If the lyrics mode is disabled (No lyrics selected) ▼▼▼▼▼▼▼▼▼▼ -->
+
+			<no-lyrics-selected>
+				<container>
+					<container-header> No lyrics selected </container-header>
+
+					<container-body>
+						<p>You can select lyrics on the left panel.</p>
+						<p>If you don't have any lyrics yet, you can right click a song and click on Show/Edit Lyrics.</p>
+					</container-body>
+				</container>
+			</no-lyrics-selected>
+
+			<!-- ▲▲▲▲▲▲▲▲▲▲ If the lyrics mode is disabled (No lyrics selected) ▲▲▲▲▲▲▲▲▲▲ -->
+		{/if}
 	</lyrics-text-area>
 </lyrics-read-edit>
 
@@ -114,5 +133,40 @@
 		border-color: transparent;
 		background-color: var(--color-bg-2);
 		color: currentColor;
+	}
+
+	no-lyrics-selected {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		height: 50%;
+	}
+	no-lyrics-selected container {
+		width: 400px;
+		padding: 1rem;
+		background-color: var(--color-bg-2);
+		/* background: linear-gradient(to bottom right, #deefff, var(--color-bg-2)); */
+		border-radius: 5px;
+		/* border: 2px solid var(--color-bg-3); */
+		box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1); /* x | y | blur | spread | color */
+	}
+
+	no-lyrics-selected container > * {
+		display: block;
+	}
+
+	no-lyrics-selected container container-header {
+		font-variation-settings: 'wght' 700;
+		color: var(--color-accent-2);
+	}
+
+	no-lyrics-selected container container-body {
+		font-variation-settings: 'wght' 600;
+		margin: 1rem;
+	}
+
+	no-lyrics-selected container container-body p:first-of-type {
+		margin-bottom: 0.5rem;
 	}
 </style>

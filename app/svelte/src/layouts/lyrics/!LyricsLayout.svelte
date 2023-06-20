@@ -11,7 +11,7 @@
 	import notifyService from '../../services/notify.service'
 	import traduceFn from '../../functions/traduce.fn'
 
-	let lyricsMode: 'Read' | 'Edit' = 'Read'
+	let lyricsMode: 'Read' | 'Edit' | 'Disabled' = 'Read'
 
 	let fontWeight = $config.userOptions.lyricsStyle.fontWeight
 	let fontSize = $config.userOptions.lyricsStyle.fontSize
@@ -26,6 +26,12 @@
 	let isLyricsDirty = false
 
 	let triggerTempLyricsChange = null
+
+	$: {
+		if (selectedLyrics === null) {
+			lyricsMode = 'Disabled'
+		}
+	}
 
 	function saveNewLyricValue() {
 		window.ipc.saveLyrics(lyrics, selectedLyrics.title, selectedLyrics.artist).then(result => {
@@ -65,9 +71,12 @@
 				if (foundLyrics === undefined) {
 					notifyService
 						.question(
-							traduceFn('No lyrics found for ${songTitle}. Would you like to create it?', {
+							traduceFn('No lyrics found for <bold>“${songTitle}”</bold>. Would you like to create it?', {
 								songTitle: $playingSongStore.Title
-							})
+							}),
+							{
+								position: 'topCenter'
+							}
 						)
 						.then(response => {
 							if (response === true) {
@@ -100,7 +109,7 @@
 <lyrics-layout class="layout">
 	<LyricsList
 		lyricsList={lyricList}
-		selectedLyrics={selectedLyrics}
+		{selectedLyrics}
 		on:selectedLyrics={({ detail }) => {
 			selectedLyrics = detail
 		}}
@@ -109,7 +118,7 @@
 	<lyrics-body>
 		<LyricHeader {selectedLyrics} {isLyricsDirty} />
 
-		<lyrics-edit-mode-sign class={lyricsMode === 'Read' ? 'read' : 'edit'}>Edit Mode</lyrics-edit-mode-sign>
+		<lyrics-edit-mode-sign class={lyricsMode.toLowerCase()}>Edit Mode</lyrics-edit-mode-sign>
 
 		<LyricsControls
 			{lyricsMode}
@@ -122,6 +131,7 @@
 			{fontWeight}
 			{fontSize}
 			{textAlignment}
+			{lyricsMode}
 			on:fontWeightChange={({ detail }) => {
 				fontWeight = detail
 			}}
@@ -202,7 +212,8 @@
 		transition-timing-function: linear;
 	}
 
-	lyrics-edit-mode-sign.read {
+	lyrics-edit-mode-sign.read,
+	lyrics-edit-mode-sign.disabled {
 		opacity: 0;
 		transform: translateY(calc(120% + 1rem));
 	}

@@ -3,11 +3,11 @@
 
 	const dispatch = createEventDispatcher()
 
-	export let lyricsMode
+	export let lyricsMode: 'Read' | 'Edit' | 'Disabled'
 	export let isLyricsDirty = false
 </script>
 
-<lyrics-controls>
+<lyrics-controls class={lyricsMode.toLowerCase()}>
 	<button class={lyricsMode === 'Read' ? 'selected' : ''} on:click={() => dispatch('lyricsModeChange', 'Read')}>Read</button>
 	<button class={lyricsMode === 'Edit' ? 'selected' : ''} on:click={() => dispatch('lyricsModeChange', 'Edit')}>Edit</button>
 	<button
@@ -29,6 +29,15 @@
 		align-self: center;
 		margin-bottom: 0.25rem;
 		margin-left: 1rem;
+		opacity: 1;
+		pointer-events: all;
+
+		transition: opacity 300ms ease-in-out;
+	}
+
+	lyrics-controls.disabled {
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	lyrics-controls button {

@@ -76,6 +76,6 @@
   "Equalizer renamed to \"${newName}\"": "Égaliseur renommé en \"${newName}\"",
   "Name ${newName} already exists": "Le nom ${newName} existe déjà",
   "Equalizer ${newName} not found. We suggest you delete the profile manually and restart the app.": "Égaliseur ${newName} introuvable. Nous vous suggérons de supprimer le profil manuellement et de redémarrer l'application.",
-  "No lyrics found for “${songTitle}”. Would you like to create it?": "Aucune paroles trouvées pour ${songTitle}. Voudriez-vous les créer?",
+  "No lyrics found for <bold>“${songTitle}”</bold>. Would you like to create it?": "Aucune paroles trouvées pour <bold>“${songTitle}”</bold>. Voudriez-vous les créer?",
   "Lyrics for “${songTitle}” saved successfully!": "Les lyrics de “${songTitle}” ont été enregistrées avec succès !"
 }

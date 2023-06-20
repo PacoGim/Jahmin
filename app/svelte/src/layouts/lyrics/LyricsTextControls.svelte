@@ -7,6 +7,7 @@
 	export let fontWeight
 	export let fontSize
 	export let textAlignment
+	export let lyricsMode: 'Read' | 'Edit' | 'Disabled'
 
 	$: {
 		dispatch('fontWeightChange', fontWeight)
@@ -66,7 +67,7 @@
 	})
 </script>
 
-<lyrics-read-edit-controls>
+<lyrics-read-edit-controls class={lyricsMode.toLowerCase()}>
 	<text-weight class="text-control">
 		<text-control-name> Text Weight : {fontWeight} </text-control-name>
 
@@ -102,6 +103,16 @@
 		justify-content: center;
 
 		grid-area: lyrics-read-edit-controls;
+
+		opacity: 1;
+		pointer-events: all;
+
+		transition: opacity 300ms ease-in-out;
+	}
+
+	lyrics-read-edit-controls.disabled {
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	.text-control {

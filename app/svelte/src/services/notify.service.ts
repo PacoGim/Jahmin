@@ -23,7 +23,7 @@ function error(message: string, customConfig: IziToastSettings = {}) {
 	})
 }
 
-function question(message:string) {
+function question(message: string, customConfig: IziToastSettings = {}) {
 	return new Promise((resolve, reject) => {
 		promiseResolve = resolve
 
@@ -39,6 +39,7 @@ function question(message:string) {
 			zindex: 999,
 			message,
 			position: 'topRight',
+			...customConfig,
 			buttons: [
 				[
 					`<button style="margin-right:.75rem;">${traduceFn('Yes')}</button>`,
