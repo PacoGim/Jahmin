@@ -15,39 +15,39 @@
 </script>
 
 <config-section>
-	<OptionSectionCompact title={traduceFn('Language')}>
+	<OptionSectionCompact title={'Language'}>
 		<LanguageConfig />
 	</OptionSectionCompact>
 
-	<OptionSection title={traduceFn('Day | Night Mode')}>
+	<OptionSection title={'Day | Night Mode'}>
 		<DayNightThemeConfig />
 	</OptionSection>
 
-	<OptionSection title={traduceFn('Color Contrast Ratio')}>
+	<OptionSection title={'Color Contrast Ratio'}>
 		<ColorContrastConfig />
 	</OptionSection>
 
-	<OptionSection title={traduceFn('Other Options')} />
+	<OptionSection title={'Other Options'}>
+		<OptionSectionCompact title={traduceFn('Font Size : ${fontSize}', { fontSize: $config.userOptions.fontSize })}>
+			<FontSizeConfig />
+		</OptionSectionCompact>
 
-	<OptionSectionCompact title="{traduceFn('Font Size')}: {$config.userOptions.fontSize}">
-		<FontSizeConfig />
-	</OptionSectionCompact>
+		<OptionSectionCompact title={traduceFn('Grid Art Size : ${artSize}', { artSize: $config.userOptions.artSize })}>
+			<GridArtSize />
+		</OptionSectionCompact>
 
-	<OptionSectionCompact title="{traduceFn('Grid Art Size')}: {$config.userOptions.artSize}">
-		<GridArtSize />
-	</OptionSectionCompact>
+		<OptionSectionCompact title={traduceFn('Grid Art Gap : ${gridGap}', { gridGap: $config.userOptions.gridGap })}>
+			<GridGapSize />
+		</OptionSectionCompact>
 
-	<OptionSectionCompact title="{traduceFn('Grid Art Gap')}: {$config.userOptions.gridGap}">
-		<GridGapSize />
-	</OptionSectionCompact>
+		<OptionSectionCompact title={traduceFn('Clean Art Cache')}>
+			<RebuildArtCacheConfig />
+		</OptionSectionCompact>
 
-	<OptionSectionCompact title={traduceFn('Clean Art Cache')}>
-		<RebuildArtCacheConfig />
-	</OptionSectionCompact>
-
-	<OptionSectionCompact>
-		<AlwaysShowAlbumOverlay />
-	</OptionSectionCompact>
+		<OptionSectionCompact>
+			<AlwaysShowAlbumOverlay />
+		</OptionSectionCompact>
+	</OptionSection>
 </config-section>
 
 <style>

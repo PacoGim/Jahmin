@@ -7,14 +7,13 @@
 
 	import type { SelectedTagNameType } from '../../../types/selectedTag.type'
 	import Star from './Star.svelte'
+	import OpusIcon from '../icons/OpusIcon.svelte'
 
 	export let align
 	export let tagName: SelectedTagNameType | any
 	export let tagValue: any
 
 	let originalTagValue: any
-
-
 
 	let dispatch = createEventDispatcher()
 
@@ -75,10 +74,14 @@
 	}
 </script>
 
-{#if tagName !== 'Rating'}
-	<span class={tagName} data-tippy-content={originalTagValue} style="justify-self: {align}">{parseTag(tagName, tagValue)}</span>
-{:else}
+{#if tagName === 'Rating'}
 	<Star on:starChange={evt => dispatch('starChange', evt.detail)} {align} songRating={tagValue} hook="song-list-item" />
+{:else if tagName === 'Extension'}
+	{#if tagValue === 'opus'}
+		<OpusIcon />
+	{/if}
+{:else}
+	<span class={tagName} data-tippy-content={originalTagValue} style="justify-self: {align}">{parseTag(tagName, tagValue)}</span>
 {/if}
 
 <style>

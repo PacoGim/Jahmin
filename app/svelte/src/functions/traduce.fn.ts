@@ -2,6 +2,8 @@ import { get } from 'svelte/store'
 import { config } from '../stores/config.store'
 import { langFile } from '../stores/main.store'
 
+import DOMPurify from 'dompurify'
+
 export default function (stringToTraduce: string, values: object = undefined) {
 	if (!stringToTraduce) return stringToTraduce
 
@@ -15,7 +17,8 @@ export default function (stringToTraduce: string, values: object = undefined) {
 	}
 
 	if (!traduced) {
-		console.log(`Missing "${stringToTraduce}" traduction in ${language}`)
+		console.log(`Missing %c${stringToTraduce}%c traduction in ${language}`, 'font-weight: bold', '');
+		traduced = stringToTraduce
 	} else {
 		if (values !== undefined) {
 			for (let key in values) {
@@ -24,5 +27,12 @@ export default function (stringToTraduce: string, values: object = undefined) {
 		}
 	}
 
-	return traduced || stringToTraduce
+	return sanitizeHTML(traduced)
+}
+
+function sanitizeHTML(html) {
+	const cleanHTML = DOMPurify.sanitize(html, {
+		ALLOWED_TAGS: ['shift-button','bold']
+	})
+	return cleanHTML
 }

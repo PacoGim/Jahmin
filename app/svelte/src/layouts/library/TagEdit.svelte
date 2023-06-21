@@ -380,6 +380,7 @@
 
 <style>
 	tag-edit-svlt {
+		/* line-height: 17px; */
 		background-color: rgba(255, 255, 255, 0.05);
 
 		overflow-y: overlay;

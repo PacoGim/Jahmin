@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
+	import traduceFn from '../../functions/traduce.fn'
 
 	let dispatch = createEventDispatcher()
 
@@ -70,11 +71,11 @@
 
 			<no-lyrics-selected>
 				<container>
-					<container-header> No lyrics selected </container-header>
+					<container-header>{traduceFn('No lyrics selected')}</container-header>
 
 					<container-body>
-						<p>You can select lyrics on the left panel.</p>
-						<p>If you don't have any lyrics yet, you can right click a song and click on Show/Edit Lyrics.</p>
+						<p>{traduceFn('You can select lyrics on the left panel')}</p>
+						<p>{@html traduceFn("If you don't have any lyrics yet, you can right click a song and click on <bold>Show/Edit Lyrics</bold>")}</p>
 					</container-body>
 				</container>
 			</no-lyrics-selected>

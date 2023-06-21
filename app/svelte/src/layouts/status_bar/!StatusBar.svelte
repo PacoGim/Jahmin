@@ -13,6 +13,7 @@
 
 	import Queues from './Queues.svelte'
 	import PlaybackOptions from './PlaybackOptions.svelte'
+	import traduceFn from '../../functions/traduce.fn'
 
 	let currentSong: PartialSongType = {
 		Track: 0,
@@ -21,14 +22,20 @@
 	}
 
 	let tippySongInfoId = generateId()
+	let songInfo=''
 
 	$: {
 		if ($playingSongStore) {
 			currentSong = $playingSongStore
 
+			songInfo = traduceFn('<bold>${trackNumber}</bold> <bold>${songTitle}</bold> by <bold>${songArtist}</bold>', {
+				trackNumber: numberZeroPad(currentSong.Track),
+				songTitle: currentSong.Title || '',
+				songArtist: currentSong.Artist || ''
+			})
+
 			tippyService(tippySongInfoId, null, {
-				content: `<bold>${numberZeroPad(currentSong.Track)}</bold> <bold>${currentSong.Title || ''}</bold> by
-		<bold>${currentSong.Artist || ''}</bold>`
+				content: songInfo
 			})
 		}
 	}
@@ -42,8 +49,7 @@
 	<Queues />
 	<song-info>
 		{#if currentSong?.Title !== ''}
-			<bold>{numberZeroPad(currentSong.Track)}</bold> <bold>{currentSong.Title || ''}</bold> by
-			<bold>{currentSong.Artist || ''}</bold>
+			{@html songInfo}
 		{/if}
 	</song-info>
 	<AlbumInfo />

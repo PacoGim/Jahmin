@@ -51,6 +51,8 @@
   "Rename Equalizer Preset": "Renommer l'Égaliseur",
   "Delete Equalizer": "Effacer l'Égaliseur",
   "Equalizer successfully deleted": "Égaliseur supprimé avec succès",
+  "No lyrics selected": "Aucun lyrics sélectionnés",
+  "You can select lyrics on the left panel": "Vous pouvez sélectionner les lyrics dans le panneau de gauche",
   "############ Sentences ############": "",
   "I can't find any songs!": "Je ne trouve aucune chanson!",
   "Click here to add songs": "Cliquez ici pour ajouter des chansons",
@@ -77,5 +79,12 @@
   "Name ${newName} already exists": "Le nom ${newName} existe déjà",
   "Equalizer ${newName} not found. We suggest you delete the profile manually and restart the app.": "Égaliseur ${newName} introuvable. Nous vous suggérons de supprimer le profil manuellement et de redémarrer l'application.",
   "No lyrics found for <bold>“${songTitle}”</bold>. Would you like to create it?": "Aucune paroles trouvées pour <bold>“${songTitle}”</bold>. Voudriez-vous les créer?",
-  "Lyrics for “${songTitle}” saved successfully!": "Les lyrics de “${songTitle}” ont été enregistrées avec succès !"
+  "Lyrics for “${songTitle}” saved successfully!": "Les lyrics de “${songTitle}” ont été enregistrées avec succès !",
+  "############ Styled content ############": "",
+  "Hold <shift-button> ⇧ Shift </shift-button> to be more accurate": "Maintenez <shift-button> ⇧ Maj </shift-button> pour être plus précis",
+  "Font Size : ${fontSize}": "Taille de police : ${fontSize}",
+  "Grid Art Size : ${artSize}": "Taille de la grille d'album : ${artSize}",
+  "Grid Art Gap : ${gridGap}": "Taille espace de la grille d'album : ${gridGap}",
+  "<bold>${trackNumber}</bold> <bold>${songTitle}</bold> by <bold>${songArtist}</bold>": "<bold>${trackNumber}</bold> <bold>${songTitle}</bold> par <bold>${songArtist}</bold>",
+  "If you don't have any lyrics yet, you can right click a song and click on <bold>Show/Edit Lyrics</bold>": "Si vous n’avez pas encore de lyrics, vous pouvez cliquer avec le bouton droit de la souris sur une chanson et cliquer sur <bold>Afficher/Modifier les lyrics</bold>"
 }

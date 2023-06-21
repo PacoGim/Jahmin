@@ -11,7 +11,7 @@
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import traduceFn from '../../../functions/traduce.fn'
 	// transition: fill var(--theme-transition-duration) linear;
-	let iconsStyle = 'height: 4rem;margin-bottom: 1rem;fill: var(--color-fg-1);'
+	let iconsStyle = 'height: 4rem;fill: var(--color-fg-1);'
 
 	function saveThemeToConfig(themeName: string) {
 		updateConfigFn({
@@ -24,9 +24,9 @@
 
 <day-night-theme-config>
 	<theme-section
-		class="smooth-colors"
 		data-theme="SystemBased"
 		data-selected={$config.userOptions.theme === 'SystemBased' ? 'true' : 'false'}
+		class="smooth-colors"
 		on:click={() => saveThemeToConfig('SystemBased')}
 		on:keypress={() => saveThemeToConfig('SystemBased')}
 		tabindex="-1"
@@ -50,15 +50,15 @@
 		<theme-name>{traduceFn('System Based')}</theme-name>
 	</theme-section>
 	<theme-section
-		class="smooth-colors"
 		data-theme="Day"
 		data-selected={$config.userOptions.theme === 'Day' ? 'true' : 'false'}
+		class="smooth-colors"
 		on:click={() => saveThemeToConfig('Day')}
 		on:keypress={() => saveThemeToConfig('Day')}
 		tabindex="-1"
 		role="button"
 	>
-		<section-icon class="smooth-colors">
+		<section-icon>
 			<SunFillIcon
 				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Day'
 					? '1'
@@ -82,7 +82,7 @@
 		tabindex="-1"
 		role="button"
 	>
-		<section-icon class="smooth-colors">
+		<section-icon>
 			<MoonFillIcon
 				style="transition:fill 1000ms linear var(--theme-transition-duration);opacity:{$config.userOptions.theme === 'Night'
 					? '1'
@@ -114,13 +114,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		width: 128px;
-		height: 128px;
+		/* justify-content: center; */
+		justify-content: space-evenly;
+		width: 9rem;
+		height: 9rem;
 		cursor: pointer;
 		border: var(--color-fg-3) solid 2px;
 		border-radius: 4px;
-		padding: 0.5rem;
+		padding: 0.25rem;
 	}
 
 	theme-section[data-selected='true'] {
