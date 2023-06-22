@@ -27,6 +27,8 @@ export type UserOptionsType = {
 	alwaysShowAlbumOverlay: boolean
 	isFullscreen: boolean
 	lyricsStyle: LyricsStyle
+	showDynamicArtists: boolean
+	showExtensionsIcons: boolean
 }
 
 export enum ThemeOptions {

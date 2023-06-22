@@ -68,6 +68,8 @@ function getDefaultConfigFile(): ConfigType {
 			sortOrder: 'asc',
 			pauseAnimatedArtWhenAppUnfocused: false,
 			alwaysShowAlbumOverlay: false,
+			showDynamicArtists: true,
+			showExtensionsIcons: true,
 			isFullscreen: false,
 			equalizerHash: '3qu',
 			lyricsStyle: {

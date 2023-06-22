@@ -120,6 +120,7 @@ function handleNewVideoArt(data) {
 	// If the window is in focus, start playing the video.
 	if (document.hasFocus() === true) {
 		// Plays the video art.
+		// TODO add config check here
 		videoElement.play()
 	}
 }

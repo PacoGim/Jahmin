@@ -3,6 +3,7 @@
 	import generateId from '../functions/generateId.fn'
 
 	import intersectionObserverFn from '../functions/intersectionObserver.fn'
+	import { config } from '../stores/config.store'
 	import { reloadArts } from '../stores/main.store'
 
 	export let intersectionRoot = undefined

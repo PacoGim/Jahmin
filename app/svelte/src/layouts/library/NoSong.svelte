@@ -1,10 +1,9 @@
 <script lang="ts">
   import traduceFn from '../../functions/traduce.fn'
-	import { layoutToShow } from '../../stores/main.store'
-	import { selectedConfigOptionName } from '../../stores/session.store'
+	import { configOptionSelected, layoutToShow } from '../../stores/main.store'
 
 	function handleAddFolder() {
-		$selectedConfigOptionName = 'Library'
+		$configOptionSelected = 'Library'
 		$layoutToShow = 'Config'
 	}
 </script>

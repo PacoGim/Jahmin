@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import { selectedConfigOptionName } from '../../stores/session.store'
-
 	import AppearanceConfig from './appearance/!AppearanceConfig.svelte'
 	import EqualizerConfig from './equalizer/!EqualizerConfig.svelte'
 	import LibraryConfig from './library/!LibraryConfig.svelte'
 	import SongListTagsConfig from './song_list_tags/!SongListTagsConfig.svelte'
 	import traduceFn from '../../functions/traduce.fn'
+	import { configOptionSelected } from '../../stores/main.store'
 
 	const options: {
 		name: 'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'
@@ -31,7 +30,6 @@
 		}
 	]
 
-	let selectedOption = undefined
 	let currentComponent = undefined
 
 	function loadComponent(optionName: string) {
@@ -39,14 +37,12 @@
 
 		if (option.component && option.name) {
 			currentComponent = option.component
-			selectedOption = option.name
-
-			$selectedConfigOptionName = option.name
+			$configOptionSelected = option.name
 		}
 	}
 
 	onMount(() => {
-		loadComponent($selectedConfigOptionName)
+		loadComponent($configOptionSelected)
 	})
 </script>
 
@@ -55,7 +51,7 @@
 		{#each options as option, index (index)}
 			<option-svlt
 				class="smooth-colors"
-				data-selected={selectedOption === option.name}
+				data-selected={$configOptionSelected === option.name}
 				on:click={() => loadComponent(option.name)}
 				on:keypress={() => loadComponent(option.name)}
 				tabindex="-1"

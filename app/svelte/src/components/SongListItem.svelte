@@ -8,7 +8,7 @@
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'
 	import PlayButton from '../layouts/components/PlayButton.svelte'
-  import { songListTagConfig } from '../stores/config.store'
+  import { showDynamicArtistsConfig, songListTagConfig } from '../stores/config.store'
 
 	export let song: SongType
 	export let index: number
@@ -90,7 +90,7 @@
 		<PlayButton customSize="0.75rem" customColor="#fff" />
 	{/if}
 	{#each $songListTagConfig as tag, index (index)}
-		{#if tag.value === 'Title' && $songListTagConfig.find(configTag => configTag.value === 'DynamicArtists')}
+		{#if tag.value === 'Title' && $showDynamicArtistsConfig}
 			<SongTag
 				tagName={tag.value}
 				tagValue={`${song[tag.value]} ${song.DynamicArtists}` || ''}

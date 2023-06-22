@@ -8,6 +8,8 @@
 	import type { SelectedTagNameType } from '../../../types/selectedTag.type'
 	import Star from './Star.svelte'
 	import OpusIcon from '../icons/OpusIcon.svelte'
+	import Mp3Icon from '../icons/MP3Icon.svelte'
+  import FlacIcon from '../icons/FlacIcon.svelte'
 
 	export let align
 	export let tagName: SelectedTagNameType | any
@@ -78,7 +80,13 @@
 	<Star on:starChange={evt => dispatch('starChange', evt.detail)} {align} songRating={tagValue} hook="song-list-item" />
 {:else if tagName === 'Extension'}
 	{#if tagValue === 'opus'}
-		<OpusIcon />
+		<OpusIcon style="width: 2rem;fill: currentColor;" />
+	{/if}
+	{#if tagValue === 'mp3'}
+		<Mp3Icon style="width: 2rem;fill: currentColor;" />
+	{/if}
+	{#if tagValue === 'flac'}
+		<FlacIcon style="width: 2rem;fill: currentColor;" />
 	{/if}
 {:else}
 	<span class={tagName} data-tippy-content={originalTagValue} style="justify-self: {align}">{parseTag(tagName, tagValue)}</span>

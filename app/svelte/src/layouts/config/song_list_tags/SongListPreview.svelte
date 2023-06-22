@@ -1,11 +1,11 @@
 <script lang="ts">
 	import SongTag from '../../../components/SongTag.svelte'
 	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
-	import ToggleOffIcon from '../../../icons/ToggleOffIcon.svelte'
-	import ToggleOnIcon from '../../../icons/ToggleOnIcon.svelte'
 	import { songListTagsValuesStore } from '../../../stores/main.store'
-	import { config, songListTagConfig } from '../../../stores/config.store'
+	import { config, showDynamicArtistsConfig, showExtensionsIconsConfig, songListTagConfig } from '../../../stores/config.store'
 	import type { PartialSongType } from '../../../../../types/song.type'
+	import ToggleIcon from '../../../icons/ToggleIcon.svelte'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 
 	let gridStyle = ''
 
@@ -42,35 +42,26 @@
 	}
 
 	function toggleDynamicArtists() {
-		let dynamicArtistsTagIndex = $config.songListTags.findIndex(tag => tag.value === 'DynamicArtists')
-		let titleTagIndex = $config.songListTags.findIndex(tag => tag.value === 'Title')
-
-		if (dynamicArtistsTagIndex === -1) {
-			if (titleTagIndex === -1) {
-				$config.songListTags.push({
-					value: 'Title',
-					isExpanded: false,
-					align: 'center'
-				})
+		updateConfigFn({
+			userOptions: {
+				showDynamicArtists: !$showDynamicArtistsConfig
 			}
+		})
+	}
 
-			$config.songListTags.push({
-				value: 'DynamicArtists',
-				isExpanded: false,
-				align: 'center'
-			})
-		} else {
-			$config.songListTags.splice(dynamicArtistsTagIndex, 1)
-		}
-
-		$config.songListTags = $config.songListTags
+	function toggleExtensionsIcons() {
+		updateConfigFn({
+			userOptions: {
+				showExtensionsIcons: !$showExtensionsIconsConfig
+			}
+		})
 	}
 </script>
 
 <song-list-preview>
 	<grid-tags style="grid-template-columns:{gridStyle};">
 		{#each $config.songListTags as selectedTag, index (index)}
-			{#if selectedTag.value === 'Title' && $songListTagsValuesStore.includes('DynamicArtists')}
+			{#if selectedTag.value === 'Title' && $showDynamicArtistsConfig}
 				<SongTag
 					tagName={selectedTag.value}
 					tagValue={`${sampleSong.Title} ${sampleSong.DynamicArtists}` || ''}
@@ -85,15 +76,18 @@
 			{/if}
 		{/each}
 	</grid-tags>
-	<enable-dynamic-artists>
+
+	<enable-dynamic-artists class="toggleButton">
 		<button on:click={toggleDynamicArtists}>
-			{#if $songListTagsValuesStore.includes('DynamicArtists')}
-				<span>Dynamic Artists <ToggleOnIcon style="height: 1.25rem;fill:#fff;margin-left: 0.5rem;" /> </span>
-			{:else}
-				<span>Dynamic Artists <ToggleOffIcon style="height: 1.25rem;fill:#fff;margin-left: 0.5rem;" /></span>
-			{/if}
+			<span>Dynamic Artists <ToggleIcon toggle={$showDynamicArtistsConfig ? 'on' : 'off'} /></span>
 		</button>
 	</enable-dynamic-artists>
+
+	<toggle-extension-icons class="toggleButton">
+		<button on:click={toggleExtensionsIcons}>
+			<span>Extension Icon <ToggleIcon toggle={$showExtensionsIconsConfig ? 'on' : 'off'} /></span>
+		</button>
+	</toggle-extension-icons>
 </song-list-preview>
 
 <style>
@@ -119,14 +113,17 @@
 		color: var(--color-bg-1);
 	}
 
-	enable-dynamic-artists {
+	.toggleButton {
 		display: flex;
 		justify-content: center;
 		width: fit-content;
 		margin-top: 1rem;
 	}
 
-	enable-dynamic-artists button span {
+	.toggleButton button {
+		/* background-color: red; */
+	}
+	.toggleButton button span {
 		display: flex;
 		align-items: center;
 	}

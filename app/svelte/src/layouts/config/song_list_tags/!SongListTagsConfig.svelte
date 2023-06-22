@@ -10,7 +10,6 @@
 
 	let isMounted = false
 
-	// TODO Check this more in depth
 	$: saveSelectedTagsToConfig($config.songListTags)
 
 	function saveSelectedTagsToConfig(newSelectedTags: SelectedTagType[]) {

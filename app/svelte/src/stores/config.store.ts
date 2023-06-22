@@ -10,6 +10,8 @@ export let artSizeConfig: Writable<number> = writable(0)
 export let fontSizeConfig: Writable<number> = writable(0)
 export let songListTagConfig: Writable<any[]> = writable([])
 export let alwaysShowAlbumOverlayConfig: Writable<boolean> = writable(false)
+export let showDynamicArtistsConfig: Writable<boolean> = writable(true)
+export let showExtensionsIconsConfig: Writable<boolean> = writable(true)
 
 config.subscribe(value => {
 	if (get(songAmountConfig) !== value?.userOptions?.songAmount) {
@@ -38,5 +40,13 @@ config.subscribe(value => {
 
 	if (get(alwaysShowAlbumOverlayConfig) !== value?.userOptions.alwaysShowAlbumOverlay) {
 		alwaysShowAlbumOverlayConfig.set(value?.userOptions.alwaysShowAlbumOverlay)
+	}
+
+	if (get(showDynamicArtistsConfig) !== value?.userOptions.showDynamicArtists) {
+		showDynamicArtistsConfig.set(value?.userOptions.showDynamicArtists)
+	}
+
+	if (get(showExtensionsIconsConfig) !== value?.userOptions.showExtensionsIcons) {
+		showExtensionsIconsConfig.set(value?.userOptions.showExtensionsIcons)
 	}
 })

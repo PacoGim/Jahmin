@@ -3,6 +3,7 @@ import { get } from 'svelte/store'
 import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 import parseJsonFn from '../functions/parseJson.fn'
 import {
+	configOptionSelected,
 	currentAudioElement,
 	externalSongProgressChange,
 	isAppIdle,
@@ -13,7 +14,6 @@ import {
 	selectedAlbumsDir,
 	windowResize
 } from '../stores/main.store'
-import { selectedConfigOptionName } from '../stores/session.store'
 import { handleContextMenuEvent } from './contextMenu/!contextMenu.service'
 import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
@@ -99,6 +99,7 @@ export default function () {
 	window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
 
 	window.addEventListener('blur', () => {
+		// TODO add config check here
 		document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
 			videoElement.pause()
 		})
@@ -148,7 +149,7 @@ function afterLanguageChangeReload() {
 	let afterReload: any = parseJsonFn(localStorage.getItem('afterReload'))
 
 	if (afterReload !== undefined && afterReload !== null) {
-		selectedConfigOptionName.set('Appearance')
+		configOptionSelected.set('Appearance')
 		layoutToShow.set('Config')
 
 		currentAudioElement.subscribe(audioPlayer => {
