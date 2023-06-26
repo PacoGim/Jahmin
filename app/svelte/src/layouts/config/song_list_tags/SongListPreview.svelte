@@ -21,7 +21,7 @@
 		Date_Year: 2018,
 		DiscNumber: 1,
 		Duration: 204,
-		Extension: 'opus',
+		Extension: 'm4a',
 		Genre: 'Hip hop',
 		Rating: 100,
 		SampleRate: 48000,
@@ -120,9 +120,6 @@
 		margin-top: 1rem;
 	}
 
-	.toggleButton button {
-		/* background-color: red; */
-	}
 	.toggleButton button span {
 		display: flex;
 		align-items: center;

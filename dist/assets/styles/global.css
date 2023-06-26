@@ -57,6 +57,8 @@ button {
 
 	display: flex;
 	align-items: center;
+	justify-content: center;
+	flex-direction: row;
 	font-size: 0.85rem;
 	font-variation-settings: 'wght' 600;
 

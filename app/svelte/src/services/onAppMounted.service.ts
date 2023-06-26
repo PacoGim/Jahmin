@@ -19,6 +19,7 @@ import cssVariablesService from './cssVariables.service'
 import { runThemeHandler } from './themeHandler.service'
 import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVariables.fn'
 import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
+import { pauseAnimatedArtWhenAppUnfocusedConfig } from '../stores/config.store'
 
 let appIdleDebounce = getAppIdleDebounce()
 
@@ -99,18 +100,19 @@ export default function () {
 	window.addEventListener('contextmenu', (e: MouseEvent) => handleContextMenuEvent(e))
 
 	window.addEventListener('blur', () => {
-		// TODO add config check here
-		document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
-			videoElement.pause()
-		})
+		if (get(pauseAnimatedArtWhenAppUnfocusedConfig) === true) {
+			document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
+				videoElement.pause()
+			})
 
-		document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement) => {
-			let art: HTMLElement = artElement.querySelector('.animated')
-			let staticArt: HTMLElement = artElement.querySelector('.static')
+			document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement) => {
+				let art: HTMLElement = artElement.querySelector('.animated')
+				let staticArt: HTMLElement = artElement.querySelector('.static')
 
-			art.style.display = 'none'
-			staticArt.style.display = 'block'
-		})
+				art.style.display = 'none'
+				staticArt.style.display = 'block'
+			})
+		}
 	})
 
 	window.addEventListener('focus', () => {

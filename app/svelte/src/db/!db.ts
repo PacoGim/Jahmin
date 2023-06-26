@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import 'dexie-observable';
+import 'dexie-observable'
 import type { SongType } from '../../../types/song.type'
 import { setDB } from './!dbObject'
 
@@ -73,5 +73,5 @@ async function runQueue() {
 
 	setTimeout(() => {
 		runQueue()
-	}, 250)
+	}, 1000)
 }

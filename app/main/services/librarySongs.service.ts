@@ -20,12 +20,15 @@ import removeDuplicateObjectsFromArrayFn from '../functions/removeDuplicateObjec
 import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn'
 import isAudioFileFn from '../functions/isAudioFile.fn'
 
+export let maxTaskQueueLength: number = 0
+
 const TOTAL_CPUS = cpus().length
 
 let isQueueRunning = false
 let taskQueue: any[] = []
 
-export let maxTaskQueueLength: number = 0
+let timeToProcess: number | undefined = undefined
+let lastProcessTime: number | undefined = undefined
 
 export async function fetchSongsTag(dbSongs: SongType[]) {
 	const config = getConfig()
@@ -62,7 +65,7 @@ function processQueue() {
 function getTask(processIndex: number, processesRunning: boolean[]) {
 	taskQueue = removeDuplicateObjectsFromArrayFn(taskQueue)
 
-	taskQueue = sortByOrderFn(taskQueue, 'type', ['delete', 'update', 'insert', 'external-update'])
+	taskQueue = sortByOrderFn(taskQueue, 'type', ['delete', 'update', 'external-update', 'insert'])
 
 	if (taskQueue.length > maxTaskQueueLength) {
 		maxTaskQueueLength = taskQueue.length
@@ -82,15 +85,23 @@ function getTask(processIndex: number, processesRunning: boolean[]) {
 	}
 
 	if (task.type === 'insert') {
+		lastProcessTime = Date.now()
+
 		getSongTagsFn(task.path)
 			.then(tags => {
+				if (timeToProcess === undefined || Math.floor(Math.random() * (100 - 0 + 1) + 0) === 100) {
+					timeToProcess = Date.now() - lastProcessTime!
+				}
+
 				sendWebContentsFn('web-storage', {
 					type: 'insert',
 					data: tags
 				})
 			})
 			.catch()
-			.finally(() => getTask(processIndex, processesRunning))
+			.finally(() => {
+				getTask(processIndex, processesRunning)
+			})
 	} else if (task.type === 'update') {
 		handleUpdateTask(task, processIndex, processesRunning)
 	} else if (task.type === 'external-update') {
@@ -142,7 +153,7 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 		.finally(() => {
 			// console.log('Done')
 			// setTimeout(() => {
-				// watchPaths([task.path])
+			// watchPaths([task.path])
 			// }, 10000)
 
 			getTask(processIndex, processesRunning)
@@ -189,7 +200,8 @@ export function sendSongSyncQueueProgress() {
 	sendWebContentsFn('song-sync-queue-progress', {
 		isSongUpdating: taskQueue.find(task => task.type === 'update') !== undefined,
 		currentLength: taskQueue.length,
-		maxLength: maxTaskQueueLength
+		maxLength: maxTaskQueueLength,
+		timeToProcess
 	})
 
 	if (!(taskQueue.length === 0 && maxTaskQueueLength === 0)) {

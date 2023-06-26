@@ -12,15 +12,20 @@
 	import RefreshIcon from '../../icons/RefreshIcon.svelte'
 	import notifyService from '../../services/notify.service'
 	import cssVariablesService from '../../services/cssVariables.service'
+	import parseDuration from '../../functions/parseDuration.fn'
+	import formatNumberFn from '../../functions/formatNumber.fn'
 
 	let isMounted = false
 
 	let currentSongSyncProgress = 0
 	let tippySongUpdateId = generateId()
+	let tippyTimeLeftId = generateId()
 
 	$: calculateProgress($songSyncQueueProgress)
 
 	$: if (isMounted) loadSongUpdateTippy($songSyncQueueProgress.isSongUpdating)
+
+	$: if (isMounted) loadTimeLeftTippy($songSyncQueueProgress)
 
 	function calculateProgress(songSyncQueueProgress) {
 		currentSongSyncProgress = 100 - Math.ceil((100 / songSyncQueueProgress.maxLength) * songSyncQueueProgress.currentLength)
@@ -52,6 +57,16 @@
 		}
 	}
 
+	function loadTimeLeftTippy(songSyncQueueProgress) {
+		if (songSyncQueueProgress.timeToProcess) {
+			tippyService(tippyTimeLeftId, 'song-sync-queue song-sync-queue-progress', {
+				content: `Time left: <bold>${parseDuration(
+					(songSyncQueueProgress.currentLength * songSyncQueueProgress.timeToProcess) / 1000
+				)}</bold> - Songs Left: <bold>${formatNumberFn(songSyncQueueProgress.currentLength, 2)}</bold>`
+			})
+		}
+	}
+
 	onMount(() => {
 		isMounted = true
 	})
@@ -69,7 +84,7 @@
 		</span>
 		<song-sync-queue-progress data-progress={currentSongSyncProgress} />
 	</song-sync-queue>
-	<song-update on:click={() => stopSongUpdate()}>
+	<song-update on:click={() => stopSongUpdate()} on:keypress={() => stopSongUpdate()} tabindex="-1" role="button">
 		<song-update-icon data-is-song-updating={$songSyncQueueProgress.isSongUpdating}>
 			<RefreshIcon style="fill:var(--art-color-dark);height: 20px;width: 20px;" />
 		</song-update-icon>

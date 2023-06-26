@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte'
 	import tippy from 'tippy.js'
-	import generateId from '../functions/generateId.fn'
 	import parseDuration from '../functions/parseDuration.fn'
-	import tippyService, { defaultTippyOptions } from '../services/tippy.service'
+	import { defaultTippyOptions } from '../services/tippy.service'
 
 	import type { SelectedTagNameType } from '../../../types/selectedTag.type'
 	import Star from './Star.svelte'
-	import OpusIcon from '../icons/OpusIcon.svelte'
-	import Mp3Icon from '../icons/MP3Icon.svelte'
-  import FlacIcon from '../icons/FlacIcon.svelte'
+
+	import ExtensionTag from './ExtensionTag.svelte'
 
 	export let align
 	export let tagName: SelectedTagNameType | any
@@ -79,15 +77,7 @@
 {#if tagName === 'Rating'}
 	<Star on:starChange={evt => dispatch('starChange', evt.detail)} {align} songRating={tagValue} hook="song-list-item" />
 {:else if tagName === 'Extension'}
-	{#if tagValue === 'opus'}
-		<OpusIcon style="width: 2rem;fill: currentColor;" />
-	{/if}
-	{#if tagValue === 'mp3'}
-		<Mp3Icon style="width: 2rem;fill: currentColor;" />
-	{/if}
-	{#if tagValue === 'flac'}
-		<FlacIcon style="width: 2rem;fill: currentColor;" />
-	{/if}
+	<ExtensionTag extension={tagValue} />
 {:else}
 	<span class={tagName} data-tippy-content={originalTagValue} style="justify-self: {align}">{parseTag(tagName, tagValue)}</span>
 {/if}

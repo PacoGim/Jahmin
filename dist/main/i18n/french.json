@@ -68,6 +68,7 @@
   "The Default profile can't be deleted": "Le profil par défaut ne peut pas être supprimé",
   "The Default profile can't be renamed": "Le profil par défaut ne peut pas être renommé",
   "Could not write file": "Impossible d’écrire le fichier",
+  "Pause animated art when app is unfocused": "Mettre en pause l'art animé lorsque l'application n'est pas ciblée",
   "############ Equalizer profiles names ############": "",
   "Default": "Défaut",
   "Polyvalent": "Polyvalent",

@@ -12,6 +12,7 @@ export let songListTagConfig: Writable<any[]> = writable([])
 export let alwaysShowAlbumOverlayConfig: Writable<boolean> = writable(false)
 export let showDynamicArtistsConfig: Writable<boolean> = writable(true)
 export let showExtensionsIconsConfig: Writable<boolean> = writable(true)
+export let pauseAnimatedArtWhenAppUnfocusedConfig: Writable<boolean> = writable(true)
 
 config.subscribe(value => {
 	if (get(songAmountConfig) !== value?.userOptions?.songAmount) {
@@ -48,5 +49,9 @@ config.subscribe(value => {
 
 	if (get(showExtensionsIconsConfig) !== value?.userOptions.showExtensionsIcons) {
 		showExtensionsIconsConfig.set(value?.userOptions.showExtensionsIcons)
+	}
+
+	if (get(pauseAnimatedArtWhenAppUnfocusedConfig) !== value?.userOptions.pauseAnimatedArtWhenAppUnfocused) {
+		pauseAnimatedArtWhenAppUnfocusedConfig.set(value?.userOptions.pauseAnimatedArtWhenAppUnfocused)
 	}
 })

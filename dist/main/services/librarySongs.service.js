@@ -19,10 +19,12 @@ const isExcludedPaths_fn_1 = __importDefault(require("../functions/isExcludedPat
 const removeDuplicateObjectsFromArray_fn_1 = __importDefault(require("../functions/removeDuplicateObjectsFromArray.fn"));
 const getAllFilesInFoldersDeep_fn_1 = __importDefault(require("../functions/getAllFilesInFoldersDeep.fn"));
 const isAudioFile_fn_1 = __importDefault(require("../functions/isAudioFile.fn"));
+exports.maxTaskQueueLength = 0;
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let isQueueRunning = false;
 let taskQueue = [];
-exports.maxTaskQueueLength = 0;
+let timeToProcess = undefined;
+let lastProcessTime = undefined;
 async function fetchSongsTag(dbSongs) {
     const config = (0, config_service_1.getConfig)();
     if (config?.directories === undefined) {
@@ -50,7 +52,7 @@ function processQueue() {
 // Shifts a task from array and gets the tags.
 function getTask(processIndex, processesRunning) {
     taskQueue = (0, removeDuplicateObjectsFromArray_fn_1.default)(taskQueue);
-    taskQueue = (0, sortByOrder_fn_1.default)(taskQueue, 'type', ['delete', 'update', 'insert', 'external-update']);
+    taskQueue = (0, sortByOrder_fn_1.default)(taskQueue, 'type', ['delete', 'update', 'external-update', 'insert']);
     if (taskQueue.length > exports.maxTaskQueueLength) {
         exports.maxTaskQueueLength = taskQueue.length;
     }
@@ -65,15 +67,21 @@ function getTask(processIndex, processesRunning) {
         return;
     }
     if (task.type === 'insert') {
+        lastProcessTime = Date.now();
         (0, getSongTags_fn_1.default)(task.path)
             .then(tags => {
+            if (timeToProcess === undefined || Math.floor(Math.random() * (100 - 0 + 1) + 0) === 100) {
+                timeToProcess = Date.now() - lastProcessTime;
+            }
             (0, sendWebContents_fn_1.default)('web-storage', {
                 type: 'insert',
                 data: tags
             });
         })
             .catch()
-            .finally(() => getTask(processIndex, processesRunning));
+            .finally(() => {
+            getTask(processIndex, processesRunning);
+        });
     }
     else if (task.type === 'update') {
         handleUpdateTask(task, processIndex, processesRunning);
@@ -164,7 +172,8 @@ function sendSongSyncQueueProgress() {
     (0, sendWebContents_fn_1.default)('song-sync-queue-progress', {
         isSongUpdating: taskQueue.find(task => task.type === 'update') !== undefined,
         currentLength: taskQueue.length,
-        maxLength: exports.maxTaskQueueLength
+        maxLength: exports.maxTaskQueueLength,
+        timeToProcess
     });
     if (!(taskQueue.length === 0 && exports.maxTaskQueueLength === 0)) {
         setTimeout(() => {

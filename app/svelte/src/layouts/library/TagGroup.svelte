@@ -66,11 +66,15 @@
 				tabindex="-1"
 				role="button"
 				data-name={group}
-				data-index={index}>{group}</group-name
+				data-index={index}
+			>
+				<button>
+					{group}
+				</button></group-name
 			>
 
 			{#if $selectedGroups[index]}
-				<group-value
+				<!-- <group-value
 					class={$config.group.groupByValues[index] === 'undefined' ? 'selected' : null}
 					on:click={() => setNewGroupValue(index, 'undefined')}
 					on:keypress={() => setNewGroupValue(index, 'undefined')}
@@ -78,7 +82,7 @@
 					role="button"
 				>
 					All ({$selectedGroups[index].length})
-				</group-value>
+				</group-value> -->
 				{#each $selectedGroups[index] as groupValue}
 					<group-value
 						class={$config.group.groupByValues[index] === groupValue ? 'selected' : null}
@@ -107,6 +111,8 @@
 		display: flex;
 		flex-direction: row;
 
+		overflow-y: auto;
+
 		color: var(--color-fg-1);
 
 		/* overflow-y: hidden; */
@@ -114,7 +120,7 @@
 
 	group-svlt {
 		height: 100%;
-		display: flex;
+		/* display: flex; */
 		overflow-y: auto;
 		flex-direction: column;
 		/* width: min-content; */
@@ -127,17 +133,30 @@
 	}
 
 	group-svlt group-name {
-		padding: 0.5rem 0.66rem;
+		/* padding: 0.5rem 0.66rem; */
+		padding:0.5rem;
+		padding-bottom: 0;
 
 		/* background-color: var(--color-bg-2); */
 		background-color: rgba(255, 255, 255, 0.05);
 		font-size: 1rem;
 
 		text-align: center;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		width: 100%;
 
 		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
 
 		cursor: pointer;
+	}
+
+	group-svlt group-name button {
+		width: 100%;
+		display: flex;
+		justify-content: center;
 	}
 
 	group-value {
@@ -166,9 +185,9 @@
 		transition-timing-function: linear;
 	}
 
-	group-value:first-of-type {
-		margin-top: 1rem;
-	}
+	/* group-value:first-of-type { */
+		/* margin-top: 1rem; */
+	/* } */
 
 	group-value.selected {
 		background-color: hsl(var(--art-hue), var(--art-saturation), 50%);

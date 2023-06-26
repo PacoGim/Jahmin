@@ -2,7 +2,9 @@
 	import OptionSection from '../../../components/OptionSection.svelte'
 	import OptionSectionCompact from '../../../components/OptionSectionCompact.svelte'
 	import traduceFn from '../../../functions/traduce.fn'
-	import { config } from '../../../stores/config.store'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
+	import ToggleIcon from '../../../icons/ToggleIcon.svelte'
+	import { config, pauseAnimatedArtWhenAppUnfocusedConfig } from '../../../stores/config.store'
 	import AlwaysShowAlbumOverlay from './AlwaysShowAlbumOverlay.svelte'
 
 	import ColorContrastConfig from './ColorContrastConfig.svelte'
@@ -46,6 +48,21 @@
 
 		<OptionSectionCompact>
 			<AlwaysShowAlbumOverlay />
+		</OptionSectionCompact>
+
+		<OptionSectionCompact>
+			<button
+				on:click={() => {
+					updateConfigFn({
+						userOptions: {
+							pauseAnimatedArtWhenAppUnfocused: !$pauseAnimatedArtWhenAppUnfocusedConfig
+						}
+					})
+				}}
+			>
+				{traduceFn('Pause animated art when app is unfocused')}
+				<ToggleIcon toggle={$pauseAnimatedArtWhenAppUnfocusedConfig === true ? 'on' : 'off'} />
+			</button>
 		</OptionSectionCompact>
 	</OptionSection>
 </config-section>

@@ -89,7 +89,7 @@ function getDefaultConfigFile() {
             fontSize: 16,
             sortBy: 'Track',
             sortOrder: 'asc',
-            pauseAnimatedArtWhenAppUnfocused: false,
+            pauseAnimatedArtWhenAppUnfocused: true,
             alwaysShowAlbumOverlay: false,
             showDynamicArtists: true,
             showExtensionsIcons: true,
