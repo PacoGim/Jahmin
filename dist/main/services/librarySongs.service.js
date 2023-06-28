@@ -14,7 +14,6 @@ const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebConten
 const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"));
 const getSongTags_fn_1 = __importDefault(require("../functions/getSongTags.fn"));
 const updateSongTags_fn_1 = __importDefault(require("../functions/updateSongTags.fn"));
-const hashString_fn_1 = __importDefault(require("../functions/hashString.fn"));
 const isExcludedPaths_fn_1 = __importDefault(require("../functions/isExcludedPaths.fn"));
 const removeDuplicateObjectsFromArray_fn_1 = __importDefault(require("../functions/removeDuplicateObjectsFromArray.fn"));
 const getAllFilesInFoldersDeep_fn_1 = __importDefault(require("../functions/getAllFilesInFoldersDeep.fn"));
@@ -25,6 +24,13 @@ let isQueueRunning = false;
 let taskQueue = [];
 let timeToProcess = undefined;
 let lastProcessTime = undefined;
+let dbWorker;
+(0, workers_service_1.getWorker)('database').then(worker => {
+    dbWorker = worker;
+    dbWorker.on('message', (response) => {
+        console.log(response);
+    });
+});
 async function fetchSongsTag(dbSongs) {
     const config = (0, config_service_1.getConfig)();
     if (config?.directories === undefined) {
@@ -73,10 +79,15 @@ function getTask(processIndex, processesRunning) {
             if (timeToProcess === undefined || Math.floor(Math.random() * (100 - 0 + 1) + 0) === 100) {
                 timeToProcess = Date.now() - lastProcessTime;
             }
-            (0, sendWebContents_fn_1.default)('web-storage', {
-                type: 'insert',
+            dbWorker.postMessage({
+                type: 'create',
                 data: tags
             });
+            // console.log(tags?.Title, ' ', tags?.ID % 4)
+            // sendWebContentsFn('web-storage', {
+            // 	type: 'insert',
+            // 	data: tags
+            // })
         })
             .catch()
             .finally(() => {
@@ -90,10 +101,10 @@ function getTask(processIndex, processesRunning) {
         handleExternalUpdateTask(task, processIndex, processesRunning);
     }
     else if (task.type === 'delete') {
-        (0, sendWebContents_fn_1.default)('web-storage', {
-            type: 'delete',
-            data: (0, hashString_fn_1.default)(task.path, 'number')
-        });
+        // sendWebContentsFn('web-storage', {
+        // 	type: 'delete',
+        // 	data: hashFn(task.path, 'number')
+        // })
         getTask(processIndex, processesRunning);
     }
 }
@@ -111,23 +122,23 @@ async function handleUpdateTask(task, processIndex, processesRunning) {
         // Result can be 0 | 1 | -1
         // -1 means error.
         if (result === -1) {
-            (0, sendWebContents_fn_1.default)('web-storage', {
-                type: task.type,
-                data: undefined
-            });
+            // sendWebContentsFn('web-storage', {
+            // 	type: task.type,
+            // 	data: undefined
+            // })
         }
         else {
             // Removes Mp3 Popularimeter (Rating) tag.
             if (newTags?.popularimeter) {
                 delete newTags.popularimeter;
             }
-            (0, sendWebContents_fn_1.default)('web-storage', {
-                type: task.type,
-                data: {
-                    id: (0, hashString_fn_1.default)(task.path, 'number'),
-                    newTags
-                }
-            });
+            // sendWebContentsFn('web-storage', {
+            // 	type: task.type,
+            // 	data: {
+            // 		id: hashFn(task.path, 'number'),
+            // 		newTags
+            // 	}
+            // })
         }
     })
         .catch()
@@ -142,13 +153,13 @@ async function handleUpdateTask(task, processIndex, processesRunning) {
 async function handleExternalUpdateTask(task, processIndex, processesRunning) {
     let newTags = undefined;
     newTags = await (0, getSongTags_fn_1.default)(task.path).catch();
-    (0, sendWebContents_fn_1.default)('web-storage', {
-        type: task.type,
-        data: {
-            id: (0, hashString_fn_1.default)(task.path, 'number'),
-            newTags
-        }
-    });
+    // sendWebContentsFn('web-storage', {
+    // 	type: task.type,
+    // 	data: {
+    // 		id: hashFn(task.path, 'number'),
+    // 		newTags
+    // 	}
+    // })
     getTask(processIndex, processesRunning);
 }
 function addToTaskQueue(path, type, data = undefined) {
@@ -198,7 +209,7 @@ function filterSongs(audioFilesFound = [], dbSongs) {
             }
             if (data.type === 'songsToDelete') {
                 if (data.songs.length > 0) {
-                    (0, sendWebContents_fn_1.default)('web-storage-bulk-delete', data.songs);
+                    // sendWebContentsFn('web-storage-bulk-delete', data.songs)
                 }
             }
         });

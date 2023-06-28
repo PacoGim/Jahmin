@@ -19,6 +19,7 @@ import isExcludedPathsFn from '../functions/isExcludedPaths.fn'
 import removeDuplicateObjectsFromArrayFn from '../functions/removeDuplicateObjectsFromArray.fn'
 import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn'
 import isAudioFileFn from '../functions/isAudioFile.fn'
+import getAppDataPathFn from '../functions/getAppDataPath.fn'
 
 export let maxTaskQueueLength: number = 0
 
@@ -29,6 +30,16 @@ let taskQueue: any[] = []
 
 let timeToProcess: number | undefined = undefined
 let lastProcessTime: number | undefined = undefined
+
+let dbWorker: Worker
+
+getWorker('database').then(worker => {
+	dbWorker = worker
+
+	dbWorker.on('message', (response: any) => {
+		console.log(response)
+	})
+})
 
 export async function fetchSongsTag(dbSongs: SongType[]) {
 	const config = getConfig()
@@ -93,10 +104,17 @@ function getTask(processIndex: number, processesRunning: boolean[]) {
 					timeToProcess = Date.now() - lastProcessTime!
 				}
 
-				sendWebContentsFn('web-storage', {
-					type: 'insert',
+				dbWorker.postMessage({
+					type: 'create',
 					data: tags
 				})
+
+				// console.log(tags?.Title, ' ', tags?.ID % 4)
+
+				// sendWebContentsFn('web-storage', {
+				// 	type: 'insert',
+				// 	data: tags
+				// })
 			})
 			.catch()
 			.finally(() => {
@@ -107,10 +125,10 @@ function getTask(processIndex: number, processesRunning: boolean[]) {
 	} else if (task.type === 'external-update') {
 		handleExternalUpdateTask(task, processIndex, processesRunning)
 	} else if (task.type === 'delete') {
-		sendWebContentsFn('web-storage', {
-			type: 'delete',
-			data: hashFn(task.path, 'number')
-		})
+		// sendWebContentsFn('web-storage', {
+		// 	type: 'delete',
+		// 	data: hashFn(task.path, 'number')
+		// })
 		getTask(processIndex, processesRunning)
 	}
 }
@@ -130,23 +148,23 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 			// Result can be 0 | 1 | -1
 			// -1 means error.
 			if (result === -1) {
-				sendWebContentsFn('web-storage', {
-					type: task.type,
-					data: undefined
-				})
+				// sendWebContentsFn('web-storage', {
+				// 	type: task.type,
+				// 	data: undefined
+				// })
 			} else {
 				// Removes Mp3 Popularimeter (Rating) tag.
 				if (newTags?.popularimeter) {
 					delete newTags.popularimeter
 				}
 
-				sendWebContentsFn('web-storage', {
-					type: task.type,
-					data: {
-						id: hashFn(task.path, 'number'),
-						newTags
-					}
-				})
+				// sendWebContentsFn('web-storage', {
+				// 	type: task.type,
+				// 	data: {
+				// 		id: hashFn(task.path, 'number'),
+				// 		newTags
+				// 	}
+				// })
 			}
 		})
 		.catch()
@@ -165,13 +183,13 @@ async function handleExternalUpdateTask(task: any, processIndex: number, process
 
 	newTags = await getSongTagsFn(task.path).catch()
 
-	sendWebContentsFn('web-storage', {
-		type: task.type,
-		data: {
-			id: hashFn(task.path, 'number'),
-			newTags
-		}
-	})
+	// sendWebContentsFn('web-storage', {
+	// 	type: task.type,
+	// 	data: {
+	// 		id: hashFn(task.path, 'number'),
+	// 		newTags
+	// 	}
+	// })
 
 	getTask(processIndex, processesRunning)
 }
@@ -230,7 +248,7 @@ function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
 
 			if (data.type === 'songsToDelete') {
 				if (data.songs.length > 0) {
-					sendWebContentsFn('web-storage-bulk-delete', data.songs)
+					// sendWebContentsFn('web-storage-bulk-delete', data.songs)
 				}
 			}
 		})

@@ -73,5 +73,5 @@ async function runQueue() {
 
 	setTimeout(() => {
 		runQueue()
-	}, 1000)
+	}, 5000)
 }

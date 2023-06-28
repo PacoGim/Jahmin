@@ -91,6 +91,8 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 		tags.SampleRate = METADATA.format.sampleRate || null
 		tags.Size = STATS.size
 
+		tags.PlayCount = 0
+
 		resolve(tags)
 	})
 }

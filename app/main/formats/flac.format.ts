@@ -22,7 +22,6 @@ getWorker('ffmpeg').then(worker => {
 
 	ffmpegWorker.on('message', async (response: any) => {
 		if (response.id === ffmpegDeferredPromiseId) {
-
 			// TODO Add Size matching check just in case
 
 			if (fs.existsSync(response.tempFileName)) {
@@ -124,6 +123,8 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 		tags.LastModified = STATS.mtimeMs
 		tags.SampleRate = METADATA.format.sampleRate || null
 		tags.Size = STATS.size
+
+		tags.PlayCount = 0
 
 		resolve(tags)
 	})

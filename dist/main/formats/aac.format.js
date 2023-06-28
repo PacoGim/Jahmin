@@ -95,7 +95,8 @@ function getAacTags(filePath) {
             Duration: (0, truncToDecimalPoint_fn_1.default)(METADATA.Duration, 3) || null,
             LastModified: STATS.mtimeMs,
             SampleRate: METADATA.AudioSampleRate || null,
-            Size: STATS.size
+            Size: STATS.size,
+            PlayCount: 0
         });
     });
 }

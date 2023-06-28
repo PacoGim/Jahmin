@@ -111,6 +111,7 @@ async function getOpusTags(filePath) {
                 tags.LastModified = stats.mtimeMs;
                 tags.SampleRate = METADATA.format.sampleRate || null;
                 tags.Size = stats.size;
+                tags.PlayCount = 0;
                 resolve(tags);
             }
         });

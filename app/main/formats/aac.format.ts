@@ -84,7 +84,8 @@ export function getAacTags(filePath: string): Promise<SongType> {
 			Duration: truncToDecimalPointFn(METADATA.Duration, 3) || null,
 			LastModified: STATS.mtimeMs,
 			SampleRate: METADATA.AudioSampleRate || null,
-			Size: STATS.size
+			Size: STATS.size,
+			PlayCount: 0
 		})
 	})
 }

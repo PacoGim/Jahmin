@@ -109,6 +109,8 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 				tags.SampleRate = METADATA.format.sampleRate || null
 				tags.Size = stats.size
 
+				tags.PlayCount = 0
+
 				resolve(tags)
 			}
 		})

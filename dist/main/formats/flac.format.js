@@ -126,6 +126,7 @@ async function getFlacTags(filePath) {
         tags.LastModified = STATS.mtimeMs;
         tags.SampleRate = METADATA.format.sampleRate || null;
         tags.Size = STATS.size;
+        tags.PlayCount = 0;
         resolve(tags);
     });
 }

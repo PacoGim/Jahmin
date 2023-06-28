@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.killWorker = exports.killAllWorkers = exports.getWorker = void 0;
 const worker_threads_1 = require("worker_threads");
 const path_1 = require("path");
+const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
 let workersName = [
     'exifToolRead',
     'exifToolWrite',
@@ -11,7 +15,8 @@ let workersName = [
     'musicMetadata',
     'nodeID3',
     'sharp',
-    'songFilter'
+    'songFilter',
+    'database'
 ];
 let workers = [];
 function getWorker(workerName) {
@@ -25,6 +30,9 @@ function getWorker(workerName) {
                 worker: newWorker
             });
             resolve(newWorker);
+            if (workerName === 'database') {
+                initDbWorker();
+            }
         }
         else {
             resolve(worker?.worker);
@@ -32,6 +40,15 @@ function getWorker(workerName) {
     });
 }
 exports.getWorker = getWorker;
+async function initDbWorker() {
+    let dbWorker = await getWorker('database');
+    dbWorker.postMessage({
+        type: 'initDb',
+        data: {
+            appDataPath: (0, getAppDataPath_fn_1.default)()
+        }
+    });
+}
 function killAllWorkers() {
     workers.forEach(worker => worker.worker.terminate());
 }

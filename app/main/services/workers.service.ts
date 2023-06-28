@@ -1,5 +1,6 @@
 import { Worker } from 'worker_threads'
 import { join as pathJoin } from 'path'
+import getAppDataPathFn from '../functions/getAppDataPath.fn'
 
 let workersName = [
 	'exifToolRead',
@@ -9,10 +10,11 @@ let workersName = [
 	'musicMetadata',
 	'nodeID3',
 	'sharp',
-	'songFilter'
+	'songFilter',
+	'database'
 ] as const
 
-type WorkersNameType = typeof workersName[number]
+type WorkersNameType = (typeof workersName)[number]
 
 let workers: WorkerType[] = []
 
@@ -30,8 +32,23 @@ export function getWorker(workerName: WorkersNameType): Promise<Worker> {
 			})
 
 			resolve(newWorker)
+
+			if (workerName === 'database') {
+				initDbWorker()
+			}
 		} else {
 			resolve(worker?.worker)
+		}
+	})
+}
+
+async function initDbWorker() {
+	let dbWorker = await getWorker('database')
+
+	dbWorker.postMessage({
+		type: 'initDb',
+		data: {
+			appDataPath: getAppDataPathFn()
 		}
 	})
 }

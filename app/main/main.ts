@@ -11,7 +11,6 @@ import { startIPC } from './services/ipc.service'
 import path from 'path'
 
 import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.fn'
-import sendWebContentsFn from './functions/sendWebContents.fn'
 
 let browserWindow: BrowserWindow
 

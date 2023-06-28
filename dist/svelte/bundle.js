@@ -9113,7 +9113,7 @@ var app = (function () {
         }
         setTimeout(() => {
             runQueue();
-        }, 1000);
+        }, 5000);
     }
 
     function getAllSongsFn () {
