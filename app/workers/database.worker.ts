@@ -1,5 +1,7 @@
 import { parentPort } from 'worker_threads'
-import { addToQueue } from './db/index.db.js'
+import { addTaskToQueue } from './db/!db.js'
+import initDBFn from './db/initDB.fn.js'
+import { eventEmitter } from './db/dbVersion.fn.js'
 
 type MessageType = {
 	type: 'initDb' | 'create' | 'update' | 'delete'
@@ -27,20 +29,27 @@ parentPort!.on('message', msg => {
 	}
 })
 
+eventEmitter.on('dbVersionChange', newValue => {
+	parentPort!.postMessage({
+		type: 'dbVersionChange',
+		data: newValue
+	})
+})
+
 function create(msg: MessageType) {
-	addToQueue({ data: msg.data, type: 'create' }, { at: 'end' })
+	addTaskToQueue(msg.data, 'create')
 }
 
 function update(msg: MessageType) {
-	addToQueue({ data: msg.data, type: 'update' }, { at: 'start' })
+	addTaskToQueue(msg.data, 'update')
 }
 
 function delete_(msg: MessageType) {
-	addToQueue({ data: msg.data, type: 'delete' }, { at: 'start' })
+	addTaskToQueue(msg.data, 'delete')
 }
 
 function initDb(msg: MessageType) {
-	import('./db/index.db.js').then(newDb => {
-		newDb.init(msg.data.appDataPath)
+	import('./db/!db.js').then(() => {
+		initDBFn(msg.data.appDataPath)
 	})
 }

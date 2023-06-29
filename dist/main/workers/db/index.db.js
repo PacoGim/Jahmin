@@ -12,6 +12,7 @@ let db = undefined;
 let isQueueRunning = false;
 let processDataQueue = [];
 function init(appDataPath) {
+    console.log('New stuff');
     const dbPath = path_1.default.join(appDataPath, 'database');
     if (fs_1.default.existsSync(dbPath) === false) {
         fs_1.default.mkdirSync(dbPath);
@@ -57,51 +58,26 @@ function runQueue() {
     let tasks = processDataQueue.map(task => {
         return task.data;
     });
-    // console.log(tasks[0])
-    /*
-     let query = `INSERT INTO songs (
-            ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth, isEnabled, DynamicArtists
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  */
-    let placeholders = tasks.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-    let query = `INSERT INTO songs (
-    ID,
-    Extension,
-    SourceFile,
-    Album,
-    AlbumArtist,
-    Artist,
-    Comment,
-    Composer,
-    Date_Year,
-    Date_Month,
-    DiscNumber,
-    Date_Day,
-    Genre,
-    Rating,
-    Title,
-    Track,
-    BitDepth,
-    BitRate,
-    Duration,
-    LastModified,
-    SampleRate,
-    Size,
-    PlayCount) VALUES ${placeholders}`;
-    let flatDocuments = tasks.map(doc => Object.values(doc)).flat();
-    // console.log(query)
-    // console.log(flatDocuments)
-    db.run(query, flatDocuments);
-    setTimeout(() => {
-        db.all(`SELECT * FROM songs`, [], (err, rows) => {
-            if (err) {
-                throw err;
-            }
-            rows.forEach(row => {
-                console.log(row);
+    // console.log(tasks)
+    db.serialize(() => {
+        const stmt = db.prepare(`INSERT INTO songs (
+      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        for (const row of tasks) {
+            stmt.run(row.ID, row.PlayCount, row.Album, row.AlbumArtist, row.Artist, row.Composer, row.Genre, row.Title, row.Track, row.Rating, row.Comment, row.DiscNumber, row.Date_Year, row.Date_Month, row.Date_Day, row.SourceFile, row.Extension, row.Size, row.Duration, row.SampleRate, row.LastModified, row.BitRate, row.BitDepth);
+        }
+        stmt.finalize();
+        setTimeout(() => {
+            db.all(`SELECT * FROM songs`, [], (err, rows) => {
+                if (err) {
+                    throw err;
+                }
+                rows.forEach(row => {
+                    console.log(row);
+                });
             });
-        });
-    }, 2000);
+        }, 2000);
+    });
 }
 function addToQueue(data, { at }) {
     if (at === 'end') {
