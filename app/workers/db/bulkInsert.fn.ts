@@ -1,18 +1,23 @@
 import { SongType } from '../../types/song.type'
 import { getDb } from './initDB.fn'
-import bulkReadFn from './bulkRead.fn'
+import {selectByIds, selectByKeyValue} from './bulkRead.fn'
 import { updateVersion } from './dbVersion.fn'
 
 export default function (songs: SongType[]) {
 	return new Promise(async (resolve, reject) => {
 		let ids = songs.map(song => song.ID)
 
-		let foundSongs = (await bulkReadFn(ids)) || []
+		let foundSongs = (await selectByIds(ids)) || []
 
 		if (foundSongs !== null && foundSongs.length > 0) {
 			let foundIds = foundSongs.map(row => row.ID)
 
 			songs = songs.filter(doc => !foundIds.includes(doc.ID))
+		}
+
+		if (songs.length === 0) {
+			resolve(songs)
+			return
 		}
 
 		const stmt = getDb().prepare(`INSERT INTO songs (
@@ -49,6 +54,7 @@ export default function (songs: SongType[]) {
 
 		stmt.finalize(() => {
 			updateVersion()
+			console.log(songs.length)
 			resolve(songs)
 		})
 	})

@@ -8,20 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const initDB_fn_1 = require("./initDB.fn");
-const bulkRead_fn_1 = __importDefault(require("./bulkRead.fn"));
+const bulkRead_fn_1 = require("./bulkRead.fn");
 const dbVersion_fn_1 = require("./dbVersion.fn");
 function default_1(songs) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         let ids = songs.map(song => song.ID);
-        let foundSongs = (yield (0, bulkRead_fn_1.default)(ids)) || [];
+        let foundSongs = (yield (0, bulkRead_fn_1.selectByIds)(ids)) || [];
         if (foundSongs !== null && foundSongs.length > 0) {
             let foundIds = foundSongs.map(row => row.ID);
             songs = songs.filter(doc => !foundIds.includes(doc.ID));
+        }
+        if (songs.length === 0) {
+            resolve(songs);
+            return;
         }
         const stmt = (0, initDB_fn_1.getDb)().prepare(`INSERT INTO songs (
       ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth
@@ -31,6 +32,7 @@ function default_1(songs) {
         }
         stmt.finalize(() => {
             (0, dbVersion_fn_1.updateVersion)();
+            console.log(songs.length);
             resolve(songs);
         });
     }));

@@ -2,10 +2,16 @@ import { parentPort } from 'worker_threads'
 import { addTaskToQueue } from './db/!db.js'
 import initDBFn from './db/initDB.fn.js'
 import { eventEmitter } from './db/dbVersion.fn.js'
+import { selectColumns } from './db/bulkRead.fn.js'
 
 type MessageType = {
 	type: 'initDb' | 'create' | 'update' | 'delete'
-	data: any
+	data:
+		| {
+				queryType?: 'select columns'
+				columns?: string[]
+		  }
+		| any
 }
 
 parentPort!.on('message', msg => {
@@ -22,10 +28,9 @@ parentPort!.on('message', msg => {
 		case 'delete':
 			delete_(msg)
 			break
-	}
-
-	if (msg.text === 'initDb') {
-		initDb(msg)
+		case 'read':
+			read(msg)
+			break
 	}
 })
 
@@ -46,6 +51,20 @@ function update(msg: MessageType) {
 
 function delete_(msg: MessageType) {
 	addTaskToQueue(msg.data, 'delete')
+}
+
+function read(msg: MessageType) {
+	if (msg.data.queryType === 'select columns') {
+		selectColumns(msg.data.columns).then(data => {
+			parentPort!.postMessage({
+				type: 'read',
+				data: {
+					fields: data,
+					...msg.data
+				}
+			})
+		})
+	}
 }
 
 function initDb(msg: MessageType) {

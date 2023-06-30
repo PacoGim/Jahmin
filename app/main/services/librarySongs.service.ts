@@ -20,6 +20,7 @@ import removeDuplicateObjectsFromArrayFn from '../functions/removeDuplicateObjec
 import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn'
 import isAudioFileFn from '../functions/isAudioFile.fn'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
+import generateId from '../functions/generateId.fn'
 
 export let maxTaskQueueLength: number = 0
 
@@ -37,11 +38,13 @@ getWorker('database').then(worker => {
 	dbWorker = worker
 
 	dbWorker.on('message', (response: any) => {
-		console.log(response)
+		if (response.type !== 'read') {
+			console.log(response)
+		}
 	})
 })
 
-export async function fetchSongsTag(dbSongs: SongType[]) {
+export async function fetchSongsTag() {
 	const config = getConfig()
 
 	if (config?.directories === undefined) {
@@ -59,8 +62,24 @@ export async function fetchSongsTag(dbSongs: SongType[]) {
 		.filter(file => isAudioFileFn(file))
 		.sort((a, b) => a.localeCompare(b))
 
-	filterSongs(audioFiles, dbSongs)
-	startChokidarWatch(config.directories.add, config.directories.exclude)
+	let workerMsgId = generateId()
+
+	dbWorker.postMessage({
+		type: 'read',
+		data: {
+			workerMsgId,
+			queryType: 'select columns',
+			columns: ['SourceFile']
+		}
+	})
+
+	dbWorker.on('message', (response: any) => {
+		if (workerMsgId === response.data.workerMsgId) {
+			filterSongs(audioFiles, response.data.fields)
+		}
+	})
+
+	// startChokidarWatch(config.directories.add, config.directories.exclude)
 }
 
 // Splits excecution based on the amount of cpus.
@@ -237,26 +256,24 @@ export function stopSongsUpdating() {
 	})
 }
 
-function filterSongs(audioFilesFound: string[] = [], dbSongs: SongType[]) {
-	return new Promise(async (resolve, reject) => {
-		let worker = (await getWorker('songFilter')) as Worker
+async function filterSongs(audioFilesFound: string[] = [], dbSongs: { SourceFile: string }[]) {
+	let worker = (await getWorker('songFilter')) as Worker
 
-		worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
-			if (data.type === 'songsToAdd') {
-				data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
+	worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
+		if (data.type === 'songsToAdd') {
+			data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
+		}
+
+		if (data.type === 'songsToDelete') {
+			if (data.songs.length > 0) {
+				// sendWebContentsFn('web-storage-bulk-delete', data.songs)
 			}
+		}
+	})
 
-			if (data.type === 'songsToDelete') {
-				if (data.songs.length > 0) {
-					// sendWebContentsFn('web-storage-bulk-delete', data.songs)
-				}
-			}
-		})
-
-		worker.postMessage({
-			dbSongs,
-			userSongs: audioFilesFound
-		})
+	worker.postMessage({
+		dbSongs,
+		userSongs: audioFilesFound
 	})
 }
 

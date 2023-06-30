@@ -1,5 +1,4 @@
 import { parentPort } from 'worker_threads'
-import hashFn from '../functions/hashString.fn'
 import { SongType } from '../types/song.type'
 
 type FilterSongData = {
@@ -10,18 +9,20 @@ type FilterSongData = {
 parentPort?.on('message', (data: FilterSongData) => {
 	let { userSongs, dbSongs } = data
 
-	let dbSongsId = dbSongs.map(song => hashFn(song.SourceFile, 'number'))
+	let dbSourceFiles = dbSongs.map(song => song.SourceFile)
 
-	userSongs.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-
-	let songsToAdd = userSongs.filter(songPath => !dbSongsId.includes(hashFn(songPath, 'number')))
+	let songsToAdd = userSongs
+		.filter(songPath => dbSourceFiles.indexOf(songPath) === -1)
+		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
 	parentPort?.postMessage({
 		type: 'songsToAdd',
 		songs: songsToAdd
 	})
 
-	let songsToDelete = dbSongs.filter(song => !userSongs.includes(song.SourceFile)).map(song => song.ID)
+	let songsToDelete = dbSourceFiles
+		.filter(songPath => userSongs.indexOf(songPath) === -1)
+		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
 	parentPort?.postMessage({
 		type: 'songsToDelete',

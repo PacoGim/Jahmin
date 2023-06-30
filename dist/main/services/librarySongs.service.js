@@ -8,7 +8,6 @@ const os_1 = require("os");
 /********************** Services **********************/
 const workers_service_1 = require("./workers.service");
 const config_service_1 = require("./config.service");
-const chokidar_service_1 = require("./chokidar.service");
 /********************** Functions **********************/
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"));
@@ -18,6 +17,7 @@ const isExcludedPaths_fn_1 = __importDefault(require("../functions/isExcludedPat
 const removeDuplicateObjectsFromArray_fn_1 = __importDefault(require("../functions/removeDuplicateObjectsFromArray.fn"));
 const getAllFilesInFoldersDeep_fn_1 = __importDefault(require("../functions/getAllFilesInFoldersDeep.fn"));
 const isAudioFile_fn_1 = __importDefault(require("../functions/isAudioFile.fn"));
+const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 exports.maxTaskQueueLength = 0;
 const TOTAL_CPUS = (0, os_1.cpus)().length;
 let isQueueRunning = false;
@@ -28,10 +28,12 @@ let dbWorker;
 (0, workers_service_1.getWorker)('database').then(worker => {
     dbWorker = worker;
     dbWorker.on('message', (response) => {
-        console.log(response);
+        if (response.type !== 'read') {
+            console.log(response);
+        }
     });
 });
-async function fetchSongsTag(dbSongs) {
+async function fetchSongsTag() {
     const config = (0, config_service_1.getConfig)();
     if (config?.directories === undefined) {
         return;
@@ -44,8 +46,21 @@ async function fetchSongsTag(dbSongs) {
         .filter(path => (0, isExcludedPaths_fn_1.default)(path, config.directories.exclude))
         .filter(file => (0, isAudioFile_fn_1.default)(file))
         .sort((a, b) => a.localeCompare(b));
-    filterSongs(audioFiles, dbSongs);
-    (0, chokidar_service_1.startChokidarWatch)(config.directories.add, config.directories.exclude);
+    let workerMsgId = (0, generateId_fn_1.default)();
+    dbWorker.postMessage({
+        type: 'read',
+        data: {
+            workerMsgId,
+            queryType: 'select columns',
+            columns: ['SourceFile']
+        }
+    });
+    dbWorker.on('message', (response) => {
+        if (workerMsgId === response.data.workerMsgId) {
+            filterSongs(audioFiles, response.data.fields);
+        }
+    });
+    // startChokidarWatch(config.directories.add, config.directories.exclude)
 }
 exports.fetchSongsTag = fetchSongsTag;
 // Splits excecution based on the amount of cpus.
@@ -200,23 +215,21 @@ function stopSongsUpdating() {
     });
 }
 exports.stopSongsUpdating = stopSongsUpdating;
-function filterSongs(audioFilesFound = [], dbSongs) {
-    return new Promise(async (resolve, reject) => {
-        let worker = (await (0, workers_service_1.getWorker)('songFilter'));
-        worker.on('message', (data) => {
-            if (data.type === 'songsToAdd') {
-                data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
+async function filterSongs(audioFilesFound = [], dbSongs) {
+    let worker = (await (0, workers_service_1.getWorker)('songFilter'));
+    worker.on('message', (data) => {
+        if (data.type === 'songsToAdd') {
+            data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')));
+        }
+        if (data.type === 'songsToDelete') {
+            if (data.songs.length > 0) {
+                // sendWebContentsFn('web-storage-bulk-delete', data.songs)
             }
-            if (data.type === 'songsToDelete') {
-                if (data.songs.length > 0) {
-                    // sendWebContentsFn('web-storage-bulk-delete', data.songs)
-                }
-            }
-        });
-        worker.postMessage({
-            dbSongs,
-            userSongs: audioFilesFound
-        });
+        }
+    });
+    worker.postMessage({
+        dbSongs,
+        userSongs: audioFilesFound
     });
 }
 function getMaxTaskQueueLength() {
