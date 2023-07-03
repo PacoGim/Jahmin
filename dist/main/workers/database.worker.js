@@ -7,7 +7,7 @@ const worker_threads_1 = require("worker_threads");
 const _db_js_1 = require("./db/!db.js");
 const initDB_fn_js_1 = __importDefault(require("./db/initDB.fn.js"));
 const dbVersion_fn_js_1 = require("./db/dbVersion.fn.js");
-const bulkRead_fn_js_1 = require("./db/bulkRead.fn.js");
+const bulkRead_fn_js_1 = __importDefault(require("./db/bulkRead.fn.js"));
 worker_threads_1.parentPort.on('message', msg => {
     switch (msg.type) {
         case 'initDb':
@@ -43,11 +43,11 @@ function delete_(msg) {
     (0, _db_js_1.addTaskToQueue)(msg.data, 'delete');
 }
 function read(msg) {
-    if (msg.data.queryType === 'select columns') {
-        (0, bulkRead_fn_js_1.selectColumns)(msg.data.columns).then(data => {
+    if (msg.data.queryType === 'select generic') {
+        (0, bulkRead_fn_js_1.default)(Object.assign(Object.assign({}, msg.data.queryData), { queryId: msg.data.queryId })).then(data => {
             worker_threads_1.parentPort.postMessage({
                 type: 'read',
-                data: Object.assign({ fields: data }, msg.data)
+                data
             });
         });
     }

@@ -19882,108 +19882,36 @@ var app = (function () {
     }
 
     async function groupSongs(groups, groupValues) {
-        let songs = await getAllSongsFn();
-        groups = normalizeGroupNames(groups);
-        groups.forEach((group, index) => {
-            runGroupSongs(songs, groups, groupValues, index);
+        window.ipc
+            .bulkRead({
+            queryId: generateId(),
+            queryType: 'select generic',
+            queryData: {
+                select: ['genre'],
+                group: ['genre']
+            }
+        })
+            .then(result => {
+            console.log(result.data.data);
         });
-    }
-    function runGroupSongs(songs, groups, groupValues, index) {
-        let filteredSongs = [];
-        let groupedValues = [];
-        /********************** First Index **********************/
-        // For the first index there is no need to filter the songs.
-        if (index === 0) {
-            // Group songs by value.
-            let firstIndexGroupedSongs = Array.from(new Set(songs.map(song => song[groups[index]])));
-            // If too many values, slice the array to prevent performance issues.
-            if (firstIndexGroupedSongs.length > 500) {
-                firstIndexGroupedSongs = firstIndexGroupedSongs.slice(0, 500);
-                // sendWebContents('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` })
-            }
-            // Sort array.
-            firstIndexGroupedSongs = firstIndexGroupedSongs.sort((a, b) => {
-                return String(a).localeCompare(String(b), undefined, { numeric: true });
-            });
-            let selectedGroupsLocal;
-            selectedGroups.subscribe(value => {
-                selectedGroupsLocal = value;
-            })();
-            selectedGroupsLocal[index] = firstIndexGroupedSongs;
-            selectedGroups.set(selectedGroupsLocal);
-            return;
-        }
-        /********************** Song Filtering **********************/
-        // Filter out all songs by value.
-        filteredSongs = filterSongsByValue(songs, groups, groupValues, index);
-        // Group unique values.
-        filteredSongs.forEach(song => {
-            let value = song[groups[index]];
-            if (!groupedValues.includes(value)) {
-                groupedValues.push(value);
-            }
-        });
-        // If too many values, slice the array to prevent performance issues.
-        if (groupedValues.length > 500) {
-            groupedValues = groupedValues.slice(0, 500);
-            // sendWebContents('notify', { type: 'error', message: `Only the first 500 ${groups[index]} will be shown.` })
-        }
-        let selectedGroupsLocal;
-        selectedGroups.subscribe(value => {
-            selectedGroupsLocal = value;
-        })();
-        selectedGroupsLocal[index] = groupedValues.sort((a, b) => {
-            if (a && b) {
-                a = String(a).toLowerCase();
-                b = String(b).toLowerCase();
-                return a.localeCompare(b, undefined, { numeric: true });
-            }
-            else {
-                return false;
-            }
-        });
-        selectedGroups.set(selectedGroupsLocal);
-        /********************** Album Grouping **********************/
-        // If last index, group unique albums.
-        if (index === groups.length - 1) ;
-    }
-    function filterSongsByValue(songs, groups, groupValues, index) {
-        let filteredSongs = songs;
-        groups.forEach((group, groupIndex) => {
-            if (groupIndex >= index) {
-                return;
-            }
-            filteredSongs = filteredSongs.filter(song => {
-                if (groupValues[groupIndex] === undefined || groupValues[groupIndex] === 'undefined') {
-                    return true;
-                }
-                if (song[group] === groupValues[groupIndex]) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            });
-        });
-        return filteredSongs;
-    }
-    function normalizeGroupNames(groups) {
-        if (!groups) {
-            return groups;
-        }
-        groups = groups.map(group => {
-            switch (group) {
-                case 'Album Artist':
-                    return 'AlbumArtist';
-                case 'Disc #':
-                    return 'DiscNumber';
-                case 'Year':
-                    return 'Date_Year';
-                default:
-                    return group;
-            }
-        });
-        return groups;
+        /*
+
+            select: [title, genre, etc]
+            where: [{title:'any'}, {genre:'any'}, etc]
+            group: [title, genre, etc]
+            order: [title, genre, etc]
+
+            select title, genre from songs where title="any" and genre="any" group by title and genre order by title and genre
+
+
+        */
+        // let songs = await getAllSongsFn()
+        // console.log(groups, groupValues)
+        // console.log(songs)
+        // groups = normalizeGroupNames(groups)
+        // groups.forEach((group, index) => {
+        // 	runGroupSongs(songs, groups, groupValues, index)
+        // })
     }
 
     /* src/components/Album.svelte generated by Svelte v3.58.0 */

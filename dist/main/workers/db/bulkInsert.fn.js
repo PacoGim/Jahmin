@@ -32,7 +32,7 @@ function default_1(songs) {
         }
         stmt.finalize(() => {
             (0, dbVersion_fn_1.updateVersion)();
-            console.log(songs.length);
+            // console.log(songs.length)
             resolve(songs);
         });
     }));

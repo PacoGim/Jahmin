@@ -39,7 +39,7 @@ getWorker('database').then(worker => {
 
 	dbWorker.on('message', (response: any) => {
 		if (response.type !== 'read') {
-			console.log(response)
+			// console.log(response)
 		}
 	})
 })

@@ -29,7 +29,7 @@ let dbWorker;
     dbWorker = worker;
     dbWorker.on('message', (response) => {
         if (response.type !== 'read') {
-            console.log(response);
+            // console.log(response)
         }
     });
 });

@@ -61,5 +61,7 @@ async function startIPC() {
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsGet.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsListGet.ipc')))).default(electron_1.ipcMain);
     await (await Promise.resolve().then(() => __importStar(require('../ipc/lyricsDelete.ipc')))).default(electron_1.ipcMain);
+    /********************** Database **********************/
+    await (await Promise.resolve().then(() => __importStar(require('../ipc/database/bulkRead.ipc')))).default(electron_1.ipcMain);
 }
 exports.startIPC = startIPC;

@@ -54,7 +54,7 @@ export default function (songs: SongType[]) {
 
 		stmt.finalize(() => {
 			updateVersion()
-			console.log(songs.length)
+			// console.log(songs.length)
 			resolve(songs)
 		})
 	})

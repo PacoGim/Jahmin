@@ -64,10 +64,25 @@ const ipcFunctions = {
 	onMediaKeyPressed: (callback: any) => ipcRenderer.on('media-key-pressed', callback),
 	onGlobalShortcutsRegistered: (callback: any) => ipcRenderer.on('global-shortcuts-registered', callback),
 	onLyricsDeleted: (callback: any) => ipcRenderer.on('lyrics-deleted', callback),
-	onConfirmLyricsDeletion: (callback: any) => ipcRenderer.on('confirm-lyrics-deletion', callback)
+	onConfirmLyricsDeletion: (callback: any) => ipcRenderer.on('confirm-lyrics-deletion', callback),
+	/********************** Database **********************/
+	bulkRead
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
+
+function bulkRead(data: {
+	queryId: string
+	queryType: 'select generic'
+	queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
+}) {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('bulk-read', data)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
 
 function getCommunityEqualizerProfiles() {
 	return new Promise((resolve, reject) => {

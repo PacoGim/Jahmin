@@ -2,6 +2,38 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectColumns = exports.selectByIds = exports.selectByKeyValue = void 0;
 const initDB_fn_1 = require("./initDB.fn");
+function selectGeneric(queryData) {
+    return new Promise((resolve, reject) => {
+        let sqliteQuery = buildSqliteQuery(queryData);
+        (0, initDB_fn_1.getDb)().all(sqliteQuery, [], (err, songs) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve({
+                queryId: queryData.queryId,
+                data: songs
+            });
+        });
+    });
+}
+exports.default = selectGeneric;
+function buildSqliteQuery(queryData) {
+    let query = `SELECT ${queryData.select.join(',')} FROM songs`;
+    if (queryData.where) {
+        query += ` WHERE ${queryData.where
+            .map(where => {
+            return `${Object.keys(where)[0]} = ${where[Object.keys(where)[0]]}`;
+        })
+            .join(' AND ')}`;
+    }
+    if (queryData.group) {
+        query += ` GROUP BY ${queryData.group.join(',')}`;
+    }
+    if (queryData.order) {
+        query += ` ORDER BY ${queryData.order.join(',')}`;
+    }
+    return query;
+}
 function selectByKeyValue(key, value) {
     return new Promise((resolve, reject) => {
         (0, initDB_fn_1.getDb)().get(`SELECT * FROM songs WHERE ${key} = ?`, [value], (err, row) => {

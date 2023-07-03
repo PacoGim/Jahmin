@@ -37,4 +37,6 @@ export async function startIPC() {
 	await (await import('../ipc/lyricsGet.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsListGet.ipc')).default(ipcMain)
 	await (await import('../ipc/lyricsDelete.ipc')).default(ipcMain)
+	/********************** Database **********************/
+	await (await import('../ipc/database/bulkRead.ipc')).default(ipcMain)
 }

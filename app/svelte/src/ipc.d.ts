@@ -25,10 +25,7 @@ declare global {
 			saveLyrics: (lyrics: string, songTile: string, songArtist: string) => Promise<PromiseResolveType>
 			getLyrics: (songTile: string, songArtist: string) => Promise<PromiseResolveType>
 			getLyricsList: () => Promise<{ title: string; artist: string }[]>
-			deleteLyrics: (
-				title: string,
-				artist: string
-			) => Promise<PromiseResolveType>
+			deleteLyrics: (title: string, artist: string) => Promise<PromiseResolveType>
 			getArtCacheSize: () => Promise<string>
 			fileExists: (filePath: string) => Promise<boolean>
 			getOs: () => Promise<string>
@@ -70,6 +67,18 @@ declare global {
 			onGlobalShortcutsRegistered: (callback: any) => void
 			onLyricsDeleted: (callback: any) => void
 			onConfirmLyricsDeletion: (callback: any) => void
+			/********************** Database **********************/
+			bulkRead: (data: {
+				queryId: string
+				queryType: 'select generic'
+				queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
+			}) => Promise<{
+				type: 'read'
+				data: {
+					queryId: string
+					data: SongType[]
+				}
+			}>
 		}
 	}
 }
