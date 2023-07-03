@@ -1,5 +1,6 @@
 import { Worker } from 'worker_threads'
 import { getWorker } from '../../services/workers.service'
+import generateId from '../../functions/generateId.fn'
 
 let worker: Worker
 
@@ -12,13 +13,14 @@ export default function (ipcMain: Electron.IpcMain) {
 			evt,
 			data: {
 				queryId: string
-				queryType: 'select generic'
 				queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
 			}
 		) => {
+			data.queryId = generateId()
+
 			const result = await new Promise<any[]>(resolve => {
 				worker.on('message', response => {
-					if (data.queryId === response.data.queryId) {
+					if (data.queryId === response.results.queryId) {
 						return resolve(response)
 					}
 				})

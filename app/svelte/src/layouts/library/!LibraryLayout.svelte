@@ -17,7 +17,7 @@
 	}
 
 	onMount(() => {
-		groupSongs($config.group.groupBy, $config.group.groupByValues)
+		// groupSongs($config.group.groupBy, $config.group.groupByValues)
 	})
 </script>
 

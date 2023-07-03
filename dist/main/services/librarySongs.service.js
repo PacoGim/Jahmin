@@ -46,18 +46,21 @@ async function fetchSongsTag() {
         .filter(path => (0, isExcludedPaths_fn_1.default)(path, config.directories.exclude))
         .filter(file => (0, isAudioFile_fn_1.default)(file))
         .sort((a, b) => a.localeCompare(b));
-    let workerMsgId = (0, generateId_fn_1.default)();
+    let queryId = (0, generateId_fn_1.default)();
+    // queryId?: string
+    // queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
     dbWorker.postMessage({
         type: 'read',
         data: {
-            workerMsgId,
-            queryType: 'select columns',
-            columns: ['SourceFile']
+            queryId,
+            queryData: {
+                select: ['SourceFile']
+            }
         }
     });
     dbWorker.on('message', (response) => {
-        if (workerMsgId === response.data.workerMsgId) {
-            filterSongs(audioFiles, response.data.fields);
+        if (queryId === response.results.queryId) {
+            filterSongs(audioFiles, response.results.data);
         }
     });
     // startChokidarWatch(config.directories.add, config.directories.exclude)

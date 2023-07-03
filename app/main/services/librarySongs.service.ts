@@ -62,20 +62,24 @@ export async function fetchSongsTag() {
 		.filter(file => isAudioFileFn(file))
 		.sort((a, b) => a.localeCompare(b))
 
-	let workerMsgId = generateId()
+	let queryId = generateId()
+
+	// queryId?: string
+	// queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
 
 	dbWorker.postMessage({
 		type: 'read',
 		data: {
-			workerMsgId,
-			queryType: 'select columns',
-			columns: ['SourceFile']
+			queryId,
+			queryData: {
+				select: ['SourceFile']
+			}
 		}
 	})
 
 	dbWorker.on('message', (response: any) => {
-		if (workerMsgId === response.data.workerMsgId) {
-			filterSongs(audioFiles, response.data.fields)
+		if (queryId === response.results.queryId) {
+			filterSongs(audioFiles, response.results.data)
 		}
 	})
 

@@ -1,14 +1,13 @@
-import getAllSongsFn from '../db/getAllSongs.fn'
 import { hash } from '../functions/hashString.fn'
 import { selectedGroups } from '../stores/main.store'
 import type { SongType } from '../../../types/song.type'
 import generateId from '../functions/generateId.fn'
 
 export async function groupSongs(groups: string[], groupValues: string[]) {
-	window.ipc
+	console.log('Running...')
+	/* 	window.ipc
 		.bulkRead({
 			queryId: generateId(),
-			queryType: 'select generic',
 			queryData: {
 				select: ['genre'],
 				group: ['genre']
@@ -17,18 +16,7 @@ export async function groupSongs(groups: string[], groupValues: string[]) {
 		.then(result => {
 			console.log(result.data.data)
 		})
-
-	/*
-
-		select: [title, genre, etc]
-		where: [{title:'any'}, {genre:'any'}, etc]
-		group: [title, genre, etc]
-		order: [title, genre, etc]
-
-		select title, genre from songs where title="any" and genre="any" group by title and genre order by title and genre
-
-
-	*/
+ */
 
 	// let songs = await getAllSongsFn()
 

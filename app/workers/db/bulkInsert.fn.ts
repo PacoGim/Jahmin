@@ -1,6 +1,6 @@
 import { SongType } from '../../types/song.type'
 import { getDb } from './initDB.fn'
-import {selectByIds, selectByKeyValue} from './bulkRead.fn'
+import { selectByIds } from './bulkRead.fn'
 import { updateVersion } from './dbVersion.fn'
 
 export default function (songs: SongType[]) {

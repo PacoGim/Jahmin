@@ -72,8 +72,7 @@ const ipcFunctions = {
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
 
 function bulkRead(data: {
-	queryId: string
-	queryType: 'select generic'
+	queryId?: string
 	queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
 }) {
 	return new Promise((resolve, reject) => {
@@ -260,4 +259,8 @@ function getArtCacheSize(): Promise<string> {
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})
+}
+
+function generateId() {
+	return BigInt(`${String(Math.random()).substring(2)}${Date.now()}`).toString(36)
 }

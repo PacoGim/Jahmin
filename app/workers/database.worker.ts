@@ -2,14 +2,13 @@ import { parentPort } from 'worker_threads'
 import { addTaskToQueue } from './db/!db.js'
 import initDBFn from './db/initDB.fn.js'
 import { eventEmitter } from './db/dbVersion.fn.js'
-import selectGeneric, { selectColumns } from './db/bulkRead.fn.js'
+import { selectGeneric } from './db/bulkRead.fn.js'
 
 type MessageType = {
 	type: 'initDb' | 'create' | 'update' | 'delete'
 	data:
 		| {
 				queryId: string
-				queryType: 'select generic'
 				queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
 		  }
 		| any
@@ -55,14 +54,12 @@ function delete_(msg: MessageType) {
 }
 
 function read(msg: MessageType) {
-	if (msg.data.queryType === 'select generic') {
-		selectGeneric({ ...msg.data.queryData, queryId: msg.data.queryId }).then(data => {
-			parentPort!.postMessage({
-				type: 'read',
-				data
-			})
+	selectGeneric({ ...msg.data.queryData, queryId: msg.data.queryId }).then(data => {
+		parentPort!.postMessage({
+			type: 'read',
+			results: data
 		})
-	}
+	})
 }
 
 function initDb(msg: MessageType) {

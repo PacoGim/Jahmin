@@ -1,7 +1,7 @@
 import { SongType } from '../../types/song.type'
 import { getDb } from './initDB.fn'
 
-export default function selectGeneric(queryData: {
+export function selectGeneric(queryData: {
 	queryId: string
 	select: string[]
 	where?: { [key: string]: string }[]
@@ -35,7 +35,7 @@ function buildSqliteQuery(queryData: {
 	if (queryData.where) {
 		query += ` WHERE ${queryData.where
 			.map(where => {
-				return `${Object.keys(where)[0]} = ${where[Object.keys(where)[0]]}`
+				return `${Object.keys(where)[0]} = "${where[Object.keys(where)[0]]}"`
 			})
 			.join(' AND ')}`
 	}
@@ -49,17 +49,6 @@ function buildSqliteQuery(queryData: {
 	}
 
 	return query
-}
-
-export function selectByKeyValue(key: string, value: string) {
-	return new Promise((resolve, reject) => {
-		getDb().get(`SELECT * FROM songs WHERE ${key} = ?`, [value], (err, row) => {
-			if (err) {
-				return reject(err)
-			}
-			resolve(row)
-		})
-	})
 }
 
 export function selectByIds(ids: number[] = []): Promise<SongType[] | null> {

@@ -69,12 +69,11 @@ declare global {
 			onConfirmLyricsDeletion: (callback: any) => void
 			/********************** Database **********************/
 			bulkRead: (data: {
-				queryId: string
-				queryType: 'select generic'
+				queryId?: string
 				queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
 			}) => Promise<{
 				type: 'read'
-				data: {
+				results: {
 					queryId: string
 					data: SongType[]
 				}

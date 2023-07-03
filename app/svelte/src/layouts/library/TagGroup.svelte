@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte'
 	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
 	import { groupSongs } from '../../services/groupSongs.service'
 	import { config } from '../../stores/config.store'
@@ -7,11 +8,26 @@
 
 	let isFirstGroupSongs = true
 
-	$: {
+	/*
+		Groups located in config file
+
+		When the db updates -> Send the new grouping to Renderer with send web contents.
+
+		If the user changes the grouping, save it first to the config file, then query the db.
+	 */
+
+
+	 onMount(()=>{
+
+			console.log($config.group)
+
+	 })
+
+	/* 	$: {
 		if ($dbSongsStore) {
 			runSongGroup()
 		}
-	}
+	} */
 
 	// $: {
 	// 	$config.group.groupBy
@@ -22,7 +38,7 @@
 	// 	}
 	// }
 
-	$: {
+	/* 	$: {
 		if ($triggerGroupingChangeEvent.length > 0) {
 			$triggerGroupingChangeEvent.forEach((grouping, index) => {
 				setNewGroupValue(index, grouping)
@@ -30,31 +46,31 @@
 
 			$triggerGroupingChangeEvent = []
 		}
-	}
+	} */
 
 	// TODO: Add Configuration for the amount of groups.
 
-	function runSongGroup() {
-		for (let i = 0; i < $config.group.groupBy.length; i++) {
-			if ($selectedGroups[i] === undefined) {
-				$selectedGroups[i] = []
-			}
-		}
+	// function runSongGroup() {
+	// 	for (let i = 0; i < $config.group.groupBy.length; i++) {
+	// 		if ($selectedGroups[i] === undefined) {
+	// 			$selectedGroups[i] = []
+	// 		}
+	// 	}
 
-		groupSongs($config.group.groupBy, $config.group.groupByValues)
-	}
+		// groupSongs($config.group.groupBy, $config.group.groupByValues)
+	// }
 
-	function setNewGroupValue(index, groupValue) {
-		for (let i = index; i < $config.group.groupBy.length; i++) {
-			if (i === index) {
-				$config.group.groupByValues[i] = groupValue
-			} else {
-				$config.group.groupByValues[i] = 'undefined'
-			}
-		}
+	// function setNewGroupValue(index, groupValue) {
+	// 	for (let i = index; i < $config.group.groupBy.length; i++) {
+	// 		if (i === index) {
+	// 			$config.group.groupByValues[i] = groupValue
+	// 		} else {
+	// 			$config.group.groupByValues[i] = 'undefined'
+	// 		}
+	// 	}
 
-		groupSongs($config.group.groupBy, $config.group.groupByValues)
-	}
+		// groupSongs($config.group.groupBy, $config.group.groupByValues)
+	// }
 </script>
 
 <tag-group-svlt>
@@ -134,7 +150,7 @@
 
 	group-svlt group-name {
 		/* padding: 0.5rem 0.66rem; */
-		padding:0.5rem;
+		padding: 0.5rem;
 		padding-bottom: 0;
 
 		/* background-color: var(--color-bg-2); */
@@ -186,7 +202,7 @@
 	}
 
 	/* group-value:first-of-type { */
-		/* margin-top: 1rem; */
+	/* margin-top: 1rem; */
 	/* } */
 
 	group-value.selected {
