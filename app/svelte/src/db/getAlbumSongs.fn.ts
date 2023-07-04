@@ -9,3 +9,17 @@ export default function (rootDir: string): Promise<SongType[]> {
 		})
 	})
 }
+
+/*
+
+	{
+
+		Title: 'The Best Song',
+		Artist: 'The Best Artist',
+		Album: 'The Best Album',
+		SourceFile: 'C:\\Users\\User\\Music\\The Best Album\\The Best Song.mp3',
+		Directory: 'C:\\Users\\User\\Music\\The Best Album',
+	}
+
+
+*/

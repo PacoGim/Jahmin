@@ -20,8 +20,10 @@ export default function (ipcMain: Electron.IpcMain) {
 
 			const result = await new Promise<any[]>(resolve => {
 				worker.on('message', response => {
-					if (data.queryId === response.results.queryId) {
-						return resolve(response)
+					if (response.type === 'read') {
+						if (data.queryId === response.results.queryId) {
+							return resolve(response)
+						}
 					}
 				})
 

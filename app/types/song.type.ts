@@ -1,6 +1,7 @@
 export type SongType = {
 	[index: string]: string | number | undefined | null | boolean
 	ID: number
+	Directory: string
 	PlayCount?: number | null
 	Album?: string | null // Modifiable
 	AlbumArtist?: string | null // Modifiable

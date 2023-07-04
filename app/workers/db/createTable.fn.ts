@@ -25,7 +25,8 @@ export default function (db: Database) {
     LastModified INTEGER,
     SampleRate INTEGER,
     Size INTEGER,
-    PlayCount INTEGER
+    PlayCount INTEGER,
+    Directory TEXT
     )`)
 	console.timeEnd('Inside Create table fn')
 }

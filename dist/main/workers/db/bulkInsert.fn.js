@@ -25,10 +25,10 @@ function default_1(songs) {
             return;
         }
         const stmt = (0, initDB_fn_1.getDb)().prepare(`INSERT INTO songs (
-      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth, Directory
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`);
         for (const row of songs) {
-            stmt.run(row.ID, row.PlayCount, row.Album, row.AlbumArtist, row.Artist, row.Composer, row.Genre, row.Title, row.Track, row.Rating, row.Comment, row.DiscNumber, row.Date_Year, row.Date_Month, row.Date_Day, row.SourceFile, row.Extension, row.Size, row.Duration, row.SampleRate, row.LastModified, row.BitRate, row.BitDepth);
+            stmt.run(row.ID, row.PlayCount, row.Album, row.AlbumArtist, row.Artist, row.Composer, row.Genre, row.Title, row.Track, row.Rating, row.Comment, row.DiscNumber, row.Date_Year, row.Date_Month, row.Date_Day, row.SourceFile, row.Extension, row.Size, row.Duration, row.SampleRate, row.LastModified, row.BitRate, row.BitDepth, row.Directory);
         }
         stmt.finalize(() => {
             (0, dbVersion_fn_1.updateVersion)();

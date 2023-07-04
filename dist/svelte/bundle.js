@@ -9143,6 +9143,19 @@ var app = (function () {
             });
         });
     }
+    /*
+
+        {
+
+            Title: 'The Best Song',
+            Artist: 'The Best Artist',
+            Album: 'The Best Album',
+            SourceFile: 'C:\\Users\\User\\Music\\The Best Album\\The Best Song.mp3',
+            Directory: 'C:\\Users\\User\\Music\\The Best Album',
+        }
+
+
+    */
 
     function shuffleArrayFn (inputArray) {
         let arrayCopy = [...inputArray].map(item => {
@@ -9682,15 +9695,12 @@ var app = (function () {
     	let $selectedAlbumsDir;
     	let $playbackStore;
     	let $songListStore;
-    	let $config;
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
     	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(1, $selectedAlbumsDir = $$value));
     	validate_store(playbackStore, 'playbackStore');
     	component_subscribe($$self, playbackStore, $$value => $$invalidate(2, $playbackStore = $$value));
     	validate_store(songListStore, 'songListStore');
     	component_subscribe($$self, songListStore, $$value => $$invalidate(3, $songListStore = $$value));
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(4, $config = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('PlayerMiddleware', slots, []);
     	let allSongs = [];
@@ -9699,11 +9709,20 @@ var app = (function () {
     		$$invalidate(0, allSongs = []);
 
     		albumRootDirList.forEach(albumRootDir => {
-    			getAlbumSongsFn(albumRootDir).then(songs => {
-    				let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
-    				$$invalidate(0, allSongs = [...allSongs, ...sortedSongs]);
+    			window.ipc.bulkRead({
+    				queryData: {
+    					select: ['*'],
+    					where: [{ Directory: albumRootDir }],
+    					order: ['Track Asc']
+    				}
+    			}).then(response => {
+    				$$invalidate(0, allSongs = [...allSongs, ...response.results.data]);
     			});
-    		});
+    		}); /* getAlbumSongsFn(albumRootDir).then(songs => {
+        let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+        allSongs = [...allSongs, ...sortedSongs]
+    }) */
     	}
 
     	function loadPreviousState() {
@@ -9762,8 +9781,7 @@ var app = (function () {
     		loadPreviousState,
     		$selectedAlbumsDir,
     		$playbackStore,
-    		$songListStore,
-    		$config
+    		$songListStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -20255,7 +20273,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(art_grid_svlt, "class", "svelte-1brq1yb");
-    			add_location(art_grid_svlt, file$1a, 82, 0, 3303);
+    			add_location(art_grid_svlt, file$1a, 82, 0, 3169);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20347,7 +20365,7 @@ var app = (function () {
     	let albums;
 
     	function updateArtGridAlbums(groupBy, groupByValues) {
-    		let whereQuery = [];
+    		let whereQuery = [{ Album: 'not null' }];
 
     		for (let index in groupBy) {
     			let tempWhere = {};
@@ -20355,9 +20373,6 @@ var app = (function () {
     			whereQuery.push(tempWhere);
     		}
 
-    		/*
-    SELECT SUBSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', 1, INSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', '/') - 1);
-    */
     		window.ipc.bulkRead({
     			queryData: {
     				select: ['Sourcefile', 'Album', 'AlbumArtist'],
@@ -20366,10 +20381,12 @@ var app = (function () {
     			}
     		}).then(response => {
     			$$invalidate(0, albums = response.results.data.map(item => {
+    				let rootDir = getDirectoryFn(item.SourceFile);
+
     				return Object.assign(
     					{
-    						RootDir: getDirectoryFn(item.SourceFile),
-    						ID: hash$2(getDirectoryFn(item.SourceFile), 'text')
+    						RootDir: rootDir,
+    						ID: hash$2(rootDir, 'text')
     					},
     					item
     				);
@@ -41977,9 +41994,19 @@ var app = (function () {
     		// Get all song from albums
     		const rootDir = element.getAttribute('rootDir');
 
-    		let songs = await getAlbumSongsFn(rootDir);
-    		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group);
+    		let dbSongs = await window.ipc.bulkRead({
+    			queryData: {
+    				select: ['*'],
+    				where: [{ Directory: rootDir }]
+    			}
+    		});
 
+    		let sortedSongs = dbSongs.results.data;
+
+    		// let songs = await getAlbumSongsFn(rootDir)
+    		// let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+    		// console.log(sortedSongs)
+    		// console.log(sortedSongs)
     		if (evtType === 'dblclick') {
     			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true });
     			saveGroupingConfig();

@@ -32,6 +32,7 @@ const stringHash = require('string-hash');
 const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const workers_service_1 = require("../services/workers.service");
+const getDirectory_fn_1 = __importDefault(require("../functions/getDirectory.fn"));
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise = undefined;
 let ffmpegDeferredPromiseId;
@@ -84,7 +85,8 @@ async function getOpusTags(filePath) {
         let tags = {
             ID: stringHash(filePath),
             Extension: 'opus',
-            SourceFile: filePath
+            SourceFile: filePath,
+            Directory: (0, getDirectory_fn_1.default)(filePath)
         };
         fs.stat(filePath, (err, stats) => {
             if (err) {

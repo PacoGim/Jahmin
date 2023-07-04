@@ -9,6 +9,7 @@ import { FlacTagType } from '../../types/flacTagType'
 import { SongType } from '../../types/song.type'
 
 import { Worker } from 'worker_threads'
+import getDirectoryFn from '../functions/getDirectory.fn'
 
 // const mm = require('music-metadata')
 
@@ -95,7 +96,8 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 		let tags: SongType = {
 			ID: stringHash(filePath),
 			Extension: 'flac',
-			SourceFile: filePath
+			SourceFile: filePath,
+			Directory: getDirectoryFn(filePath)
 		}
 
 		const STATS = fs.statSync(filePath)

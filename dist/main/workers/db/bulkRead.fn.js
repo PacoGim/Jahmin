@@ -22,7 +22,12 @@ function buildSqliteQuery(queryData) {
     if (queryData.where) {
         query += ` WHERE ${queryData.where
             .map(where => {
-            return `${Object.keys(where)[0]} = "${where[Object.keys(where)[0]]}"`;
+            if (where[Object.keys(where)[0]] === 'not null') {
+                return `${Object.keys(where)[0]} is not null`;
+            }
+            else {
+                return `${Object.keys(where)[0]} = "${where[Object.keys(where)[0]]}"`;
+            }
         })
             .join(' AND ')}`;
     }

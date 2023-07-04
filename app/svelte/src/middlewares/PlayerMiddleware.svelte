@@ -17,7 +17,7 @@
 		songListStore,
 		triggerScrollToSongEvent
 	} from '../stores/main.store'
-  import setMediaSessionDataFn from '../functions/setMediaSessionData.fn'
+	import setMediaSessionDataFn from '../functions/setMediaSessionData.fn'
 
 	let allSongs = []
 
@@ -33,15 +33,30 @@
 		}
 	}
 
-
 	function fillSongList(albumRootDirList: string[] = []) {
 		allSongs = []
 		albumRootDirList.forEach(albumRootDir => {
-			getAlbumSongsFn(albumRootDir).then(songs => {
+			window.ipc
+				.bulkRead({
+					queryData: {
+						select: ['*'],
+						where: [
+							{
+								Directory: albumRootDir
+							}
+						],
+						order: ['Track Asc']
+					}
+				})
+				.then(response => {
+					allSongs = [...allSongs, ...response.results.data]
+				})
+
+			/* getAlbumSongsFn(albumRootDir).then(songs => {
 				let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
 
 				allSongs = [...allSongs, ...sortedSongs]
-			})
+			}) */
 		})
 	}
 

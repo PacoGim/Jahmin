@@ -9,6 +9,7 @@ import { OpusTagType } from '../../types/opus.type'
 import { SongType } from '../../types/song.type'
 
 import { Worker } from 'worker_threads'
+import getDirectoryFn from '../functions/getDirectory.fn'
 
 /********************** Write Opus Tags **********************/
 let ffmpegDeferredPromise: any = undefined
@@ -76,7 +77,8 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 		let tags: SongType = {
 			ID: stringHash(filePath),
 			Extension: 'opus',
-			SourceFile: filePath
+			SourceFile: filePath,
+			Directory: getDirectoryFn(filePath)
 		}
 
 		fs.stat(filePath, (err, stats) => {

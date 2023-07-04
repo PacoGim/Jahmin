@@ -113,9 +113,26 @@
 
 		const rootDir = element.getAttribute('rootDir')
 
-		let songs = await getAlbumSongsFn(rootDir)
+		let dbSongs = await window.ipc.bulkRead({
+			queryData: {
+				select: ['*'],
+				where: [
+					{
+						Directory: rootDir
+					}
+				]
+			}
+		})
 
-		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+		let sortedSongs = dbSongs.results.data
+
+		// let songs = await getAlbumSongsFn(rootDir)
+
+		// let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+
+		// console.log(sortedSongs)
+
+		// console.log(sortedSongs)
 
 		if (evtType === 'dblclick') {
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })

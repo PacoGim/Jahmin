@@ -21,8 +21,8 @@ export default function (songs: SongType[]) {
 		}
 
 		const stmt = getDb().prepare(`INSERT INTO songs (
-      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth, Directory
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`)
 
 		for (const row of songs) {
 			stmt.run(
@@ -48,7 +48,8 @@ export default function (songs: SongType[]) {
 				row.SampleRate,
 				row.LastModified,
 				row.BitRate,
-				row.BitDepth
+				row.BitDepth,
+				row.Directory
 			)
 		}
 

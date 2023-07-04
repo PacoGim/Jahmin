@@ -7,6 +7,7 @@ import { EditTag } from '../../types/editTag.type'
 import { SongType } from '../../types/song.type'
 
 import { Worker } from 'worker_threads'
+import getDirectoryFn from '../functions/getDirectory.fn'
 
 /********************** Write Aac Tags **********************/
 let tagWriteDeferredPromise: any = undefined
@@ -71,6 +72,7 @@ export function getAacTags(filePath: string): Promise<SongType> {
 
 		resolve({
 			ID: stringHash(filePath),
+			Directory:getDirectoryFn(filePath),
 			Extension: METADATA.FileTypeExtension,
 			SourceFile: filePath,
 			Album: METADATA.Album || null,

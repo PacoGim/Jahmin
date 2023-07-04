@@ -33,6 +33,7 @@ const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const workers_service_1 = require("../services/workers.service");
+const getDirectory_fn_1 = __importDefault(require("../functions/getDirectory.fn"));
 // const mm = require('music-metadata')
 /********************** Write Flac Tags **********************/
 let ffmpegDeferredPromise = undefined;
@@ -102,7 +103,8 @@ async function getFlacTags(filePath) {
         let tags = {
             ID: stringHash(filePath),
             Extension: 'flac',
-            SourceFile: filePath
+            SourceFile: filePath,
+            Directory: (0, getDirectory_fn_1.default)(filePath)
         };
         const STATS = fs.statSync(filePath);
         let nativeTags = mergeNatives(METADATA.native);

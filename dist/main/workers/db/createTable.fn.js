@@ -25,7 +25,8 @@ function default_1(db) {
     LastModified INTEGER,
     SampleRate INTEGER,
     Size INTEGER,
-    PlayCount INTEGER
+    PlayCount INTEGER,
+    Directory TEXT
     )`);
     console.timeEnd('Inside Create table fn');
 }

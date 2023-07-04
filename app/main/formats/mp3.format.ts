@@ -10,6 +10,7 @@ import { getWorker } from '../services/workers.service'
 import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
 
 import { Worker } from 'worker_threads'
+import getDirectoryFn from '../functions/getDirectory.fn'
 
 /********************** Write Mp3 Tags **********************/
 let tagWriteDeferredPromise: any = undefined
@@ -63,7 +64,8 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 		let tags: SongType = {
 			ID: stringHash(filePath),
 			Extension: 'mp3',
-			SourceFile: filePath
+			SourceFile: filePath,
+			Directory:getDirectoryFn(filePath),
 		}
 
 		const STATS = fs.statSync(filePath)

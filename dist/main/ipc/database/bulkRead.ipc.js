@@ -12,8 +12,10 @@ function default_1(ipcMain) {
         data.queryId = (0, generateId_fn_1.default)();
         const result = await new Promise(resolve => {
             worker.on('message', response => {
-                if (data.queryId === response.results.queryId) {
-                    return resolve(response);
+                if (response.type === 'read') {
+                    if (data.queryId === response.results.queryId) {
+                        return resolve(response);
+                    }
                 }
             });
             worker.postMessage({

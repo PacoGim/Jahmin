@@ -32,6 +32,7 @@ const stringHash = require('string-hash');
 const renameObjectKey_fn_1 = require("../functions/renameObjectKey.fn");
 const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDecimalPoint.fn"));
 const workers_service_1 = require("../services/workers.service");
+const getDirectory_fn_1 = __importDefault(require("../functions/getDirectory.fn"));
 /********************** Write Aac Tags **********************/
 let tagWriteDeferredPromise = undefined;
 let exifToolWriteWorker;
@@ -80,6 +81,7 @@ function getAacTags(filePath) {
             METADATA.RatingPercent = METADATA.Rating;
         resolve({
             ID: stringHash(filePath),
+            Directory: (0, getDirectory_fn_1.default)(filePath),
             Extension: METADATA.FileTypeExtension,
             SourceFile: filePath,
             Album: METADATA.Album || null,

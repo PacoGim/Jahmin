@@ -59,8 +59,10 @@ async function fetchSongsTag() {
         }
     });
     dbWorker.on('message', (response) => {
-        if (queryId === response.results.queryId) {
-            filterSongs(audioFiles, response.results.data);
+        if (response.type === 'read') {
+            if (queryId === response.results.queryId) {
+                filterSongs(audioFiles, response.results.data);
+            }
         }
     });
     // startChokidarWatch(config.directories.add, config.directories.exclude)

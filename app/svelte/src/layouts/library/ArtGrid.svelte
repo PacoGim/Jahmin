@@ -28,7 +28,9 @@
 	}
 
 	function updateArtGridAlbums(groupBy, groupByValues) {
-		let whereQuery: any = []
+		let whereQuery: any = [{
+			Album: 'not null'
+		}]
 
 		for (let index in groupBy) {
 			let tempWhere = {}
@@ -37,9 +39,6 @@
 			whereQuery.push(tempWhere)
 		}
 
-		/*
-SELECT SUBSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', 1, INSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', '/') - 1);
-		*/
 		window.ipc
 			.bulkRead({
 				queryData: {
@@ -50,9 +49,11 @@ SELECT SUBSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus
 			})
 			.then(response => {
 				albums = response.results.data.map(item => {
+					let rootDir = getDirectoryFn(item.SourceFile)
+
 					return {
-						RootDir: getDirectoryFn(item.SourceFile),
-						ID: hash(getDirectoryFn(item.SourceFile), 'text'),
+						RootDir: rootDir,
+						ID: hash(rootDir, 'text'),
 						...item
 					}
 				})
