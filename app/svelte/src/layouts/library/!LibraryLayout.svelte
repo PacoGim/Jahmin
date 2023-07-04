@@ -17,12 +17,14 @@
 	}
 
 	onMount(() => {
-		// groupSongs($config.group.groupBy, $config.group.groupByValues)
+
+
+
 	})
 </script>
 
 <library-layout class="layout">
-	{#if $dbSongsStore.length > 0}
+	{#if $dbSongsStore.length > 0 || true}
 		<ArtGrid />
 	{:else}
 		<NoSong />

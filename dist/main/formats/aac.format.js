@@ -45,6 +45,12 @@ function writeAacTags(filePath, newTags) {
     return new Promise((resolve, reject) => {
         newTags = normalizeNewTags(newTags);
         tagWriteDeferredPromise = resolve;
+        (0, workers_service_1.getWorker)('exifToolWrite').then(worker => {
+            exifToolWriteWorker = worker;
+            exifToolWriteWorker.on('message', (response) => {
+                tagWriteDeferredPromise(response);
+            });
+        });
         exifToolWriteWorker?.postMessage({ filePath, newTags });
     });
 }

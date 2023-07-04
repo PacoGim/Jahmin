@@ -37,6 +37,7 @@ function getWorker(workerName) {
         else {
             resolve(worker?.worker);
         }
+        console.log(`T:${workers.length} - Worker called: ${workerName}`);
     });
 }
 exports.getWorker = getWorker;

@@ -4,10 +4,12 @@
 	import Album from '../../components/Album.svelte'
 
 	import { dbSongsStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
-	import { artSizeConfig, gridGapConfig, config } from '../../stores/config.store'
+	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValuesConfig } from '../../stores/config.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
+	import getDirectoryFn from '../../functions/getDirectory.fn'
+	import { hash } from '../../functions/hashString.fn'
 
 	let albums
 
@@ -15,10 +17,8 @@
 	$: if ($artSizeConfig !== undefined) cssVariablesService.set('art-dimension', `${$artSizeConfig}px`)
 	$: if ($gridGapConfig !== undefined) cssVariablesService.set('grid-gap', `${$gridGapConfig}px`)
 
-	$: {
-		if ($dbSongsStore && $config.group.groupByValues && $config.group.groupBy) {
-			updateArtGridAlbums()
-		}
+	$: if (/* Add the db versioning later */ $groupByConfig || $groupByValuesConfig) {
+		updateArtGridAlbums($groupByConfig, $groupByValuesConfig)
 	}
 
 	$: {
@@ -27,8 +27,38 @@
 		}
 	}
 
-	function updateArtGridAlbums() {
-		let songsFiltered = []
+	function updateArtGridAlbums(groupBy, groupByValues) {
+		let whereQuery: any = []
+
+		for (let index in groupBy) {
+			let tempWhere = {}
+			tempWhere[groupBy[index]] = groupByValues[index]
+
+			whereQuery.push(tempWhere)
+		}
+
+		/*
+SELECT SUBSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', 1, INSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', '/') - 1);
+		*/
+		window.ipc
+			.bulkRead({
+				queryData: {
+					select: ['Sourcefile', 'Album', 'AlbumArtist'],
+					where: whereQuery,
+					group: ['Album']
+				}
+			})
+			.then(response => {
+				albums = response.results.data.map(item => {
+					return {
+						RootDir: getDirectoryFn(item.SourceFile),
+						ID: hash(getDirectoryFn(item.SourceFile), 'text'),
+						...item
+					}
+				})
+			})
+
+		/* 		let songsFiltered = []
 
 		$config.group.groupBy.forEach((group, index) => {
 			songsFiltered = $dbSongsStore.filter(song => {
@@ -37,12 +67,11 @@
 		})
 
 		groupSongsByAlbumFn(songsFiltered).then(groupedAlbums => {
-
 			// TODO add user controlled album sorting.
 			albums = groupedAlbums.sort((a, b) => {
 				return a.RootDir.localeCompare(b.RootDir)
 			})
-		})
+		}) */
 	}
 
 	function selecteAllAlbums() {
@@ -63,6 +92,7 @@
 		/* 	groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
 		}) */
+		// console.log('Hello?')
 	})
 
 	onDestroy(() => {

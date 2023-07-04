@@ -11,6 +11,7 @@ const getWindowOptions_fn_1 = __importDefault(require("./functions/getWindowOpti
 const ipc_service_1 = require("./services/ipc.service");
 const path_1 = __importDefault(require("path"));
 const calculateWindowBoundaries_fn_1 = __importDefault(require("./functions/calculateWindowBoundaries.fn"));
+const events_1 = require("events");
 let browserWindow;
 (0, chokidar_1.watch)([
     path_1.default.join(__dirname, '../svelte'),
@@ -23,6 +24,8 @@ let browserWindow;
 electron_1.app.whenReady().then(() => {
     createWindow();
     (0, ipc_service_1.startIPC)();
+    // TODO Remove this when we have a better solution for the max listeners problem.
+    (0, events_1.setMaxListeners)(20);
     if ((0, config_service_1.getConfig)().userOptions.isFullscreen === true) {
         getMainWindow().maximize();
     }

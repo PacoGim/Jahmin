@@ -27,6 +27,14 @@ export function writeAacTags(filePath: string, newTags: any): Promise<any> {
 
 		tagWriteDeferredPromise = resolve
 
+		getWorker('exifToolWrite').then(worker => {
+			exifToolWriteWorker = worker
+
+			exifToolWriteWorker.on('message', (response: any) => {
+				tagWriteDeferredPromise(response)
+			})
+		})
+
 		exifToolWriteWorker?.postMessage({ filePath, newTags })
 	})
 }

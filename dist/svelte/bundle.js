@@ -7328,7 +7328,6 @@ var app = (function () {
     let selectedSongsStore = writable([]);
     /********************** Database **********************/
     let dbSongsStore = writable([]);
-    let dbVersionStore = writable(Date.now());
     /********************** Keyboard Events **********************/
     let keyPressed = writable(undefined);
     let keyModifier = writable(undefined);
@@ -7340,8 +7339,6 @@ var app = (function () {
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
     let currentAudioElement = writable(undefined);
-    /********************** Song Group **********************/
-    let selectedGroups = writable([]);
     // Allows to share with the rest of the app whether the player is playing or not.
     let isPlaying = writable(false);
     /********************** Queue Progress **********************/
@@ -7563,6 +7560,8 @@ var app = (function () {
     }
 
     let config = writable(undefined);
+    let groupByConfig = writable([]);
+    let groupByValuesConfig = writable([]);
     let songAmountConfig = writable(0);
     let themeConfig = writable('');
     let gridGapConfig = writable(0);
@@ -7575,6 +7574,12 @@ var app = (function () {
     let pauseAnimatedArtWhenAppUnfocusedConfig = writable(true);
     config.subscribe(value => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        if (get_store_value(groupByConfig) !== (value === null || value === void 0 ? void 0 : value.group.groupBy)) {
+            groupByConfig.set(value === null || value === void 0 ? void 0 : value.group.groupBy);
+        }
+        if (get_store_value(groupByValuesConfig) !== (value === null || value === void 0 ? void 0 : value.group.groupByValues)) {
+            groupByValuesConfig.set(value === null || value === void 0 ? void 0 : value.group.groupByValues);
+        }
         if (get_store_value(songAmountConfig) !== ((_a = value === null || value === void 0 ? void 0 : value.userOptions) === null || _a === void 0 ? void 0 : _a.songAmount)) {
             songAmountConfig.set((_b = value === null || value === void 0 ? void 0 : value.userOptions) === null || _b === void 0 ? void 0 : _b.songAmount);
         }
@@ -9180,151 +9185,29 @@ var app = (function () {
         // })
     }
 
-    var isMergeableObject = function isMergeableObject(value) {
-    	return isNonNullObject(value)
-    		&& !isSpecial(value)
-    };
-
-    function isNonNullObject(value) {
-    	return !!value && typeof value === 'object'
-    }
-
-    function isSpecial(value) {
-    	var stringValue = Object.prototype.toString.call(value);
-
-    	return stringValue === '[object RegExp]'
-    		|| stringValue === '[object Date]'
-    		|| isReactElement(value)
-    }
-
-    // see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
-    var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
-    var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
-
-    function isReactElement(value) {
-    	return value.$$typeof === REACT_ELEMENT_TYPE
-    }
-
-    function emptyTarget(val) {
-    	return Array.isArray(val) ? [] : {}
-    }
-
-    function cloneUnlessOtherwiseSpecified(value, options) {
-    	return (options.clone !== false && options.isMergeableObject(value))
-    		? deepmerge(emptyTarget(value), value, options)
-    		: value
-    }
-
-    function defaultArrayMerge(target, source, options) {
-    	return target.concat(source).map(function(element) {
-    		return cloneUnlessOtherwiseSpecified(element, options)
-    	})
-    }
-
-    function getMergeFunction(key, options) {
-    	if (!options.customMerge) {
-    		return deepmerge
-    	}
-    	var customMerge = options.customMerge(key);
-    	return typeof customMerge === 'function' ? customMerge : deepmerge
-    }
-
-    function getEnumerableOwnPropertySymbols(target) {
-    	return Object.getOwnPropertySymbols
-    		? Object.getOwnPropertySymbols(target).filter(function(symbol) {
-    			return Object.propertyIsEnumerable.call(target, symbol)
-    		})
-    		: []
-    }
-
-    function getKeys(target) {
-    	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
-    }
-
-    function propertyIsOnObject(object, property) {
-    	try {
-    		return property in object
-    	} catch(_) {
-    		return false
-    	}
-    }
-
-    // Protects from prototype poisoning and unexpected merging up the prototype chain.
-    function propertyIsUnsafe(target, key) {
-    	return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-    		&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-    			&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
-    }
-
-    function mergeObject(target, source, options) {
-    	var destination = {};
-    	if (options.isMergeableObject(target)) {
-    		getKeys(target).forEach(function(key) {
-    			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
-    		});
-    	}
-    	getKeys(source).forEach(function(key) {
-    		if (propertyIsUnsafe(target, key)) {
-    			return
-    		}
-
-    		if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
-    			destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
-    		} else {
-    			destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
-    		}
-    	});
-    	return destination
-    }
-
-    function deepmerge(target, source, options) {
-    	options = options || {};
-    	options.arrayMerge = options.arrayMerge || defaultArrayMerge;
-    	options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-    	// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
-    	// implementations can use it. The caller may not replace it.
-    	options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
-
-    	var sourceIsArray = Array.isArray(source);
-    	var targetIsArray = Array.isArray(target);
-    	var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
-
-    	if (!sourceAndTargetTypesMatch) {
-    		return cloneUnlessOtherwiseSpecified(source, options)
-    	} else if (sourceIsArray) {
-    		return options.arrayMerge(target, source, options)
-    	} else {
-    		return mergeObject(target, source, options)
-    	}
-    }
-
-    deepmerge.all = function deepmergeAll(array, options) {
-    	if (!Array.isArray(array)) {
-    		throw new Error('first argument should be an array')
-    	}
-
-    	return array.reduce(function(prev, next) {
-    		return deepmerge(prev, next, options)
-    	}, {})
-    };
-
-    var deepmerge_1 = deepmerge;
-
-    var cjs = deepmerge_1;
-
-    var deepmerge$1 = /*@__PURE__*/getDefaultExportFromCjs(cjs);
-
     function updateConfigFn (newConfig, { doUpdateLocalConfig } = { doUpdateLocalConfig: true }) {
         return new Promise((resolve, reject) => {
             if (doUpdateLocalConfig === true) {
                 let mergedConfig;
-                mergedConfig = deepmerge$1(get_store_value(config), newConfig);
+                mergedConfig = mergeConfig(get_store_value(config), newConfig);
                 config.set(mergedConfig);
             }
             window.ipc.saveConfig(newConfig).then(() => {
                 resolve('ok');
             });
         });
+    }
+    function mergeConfig(existingConfig, newConfig) {
+        const result = Object.assign({}, existingConfig);
+        for (const key in newConfig) {
+            if (typeof newConfig[key] === 'object' && !Array.isArray(newConfig[key])) {
+                result[key] = mergeConfig(result[key], newConfig[key]);
+            }
+            else {
+                result[key] = newConfig[key];
+            }
+        }
+        return result;
     }
 
     function generateId() {
@@ -19673,7 +19556,7 @@ var app = (function () {
     const file$1c = "src/layouts/status_bar/!StatusBar.svelte";
 
     // (38:2) {#if currentSong?.Title !== ''}
-    function create_if_block$h(ctx) {
+    function create_if_block$g(ctx) {
     	let html_tag;
     	let html_anchor;
 
@@ -19698,7 +19581,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$h.name,
+    		id: create_if_block$g.name,
     		type: "if",
     		source: "(38:2) {#if currentSong?.Title !== ''}",
     		ctx
@@ -19718,7 +19601,7 @@ var app = (function () {
     	let playbackoptions;
     	let current;
     	queues = new Queues({ $$inline: true });
-    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$h(ctx);
+    	let if_block = /*currentSong*/ ctx[0]?.Title !== '' && create_if_block$g(ctx);
     	albuminfo = new AlbumInfo({ $$inline: true });
     	playbackoptions = new PlaybackOptions({ $$inline: true });
 
@@ -19758,7 +19641,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$h(ctx);
+    					if_block = create_if_block$g(ctx);
     					if_block.c();
     					if_block.m(song_info, null);
     				}
@@ -19974,7 +19857,7 @@ var app = (function () {
     }
 
     // (19:2) {#if album['AlbumArtist'] !== undefined}
-    function create_if_block$g(ctx) {
+    function create_if_block$f(ctx) {
     	let album_artist;
     	let t_value = (/*album*/ ctx[0]['AlbumArtist'] || '') + "";
     	let t;
@@ -20000,7 +19883,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$g.name,
+    		id: create_if_block$f.name,
     		type: "if",
     		source: "(19:2) {#if album['AlbumArtist'] !== undefined}",
     		ctx
@@ -20034,7 +19917,7 @@ var app = (function () {
     		});
 
     	function select_block_type(ctx, dirty) {
-    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$g;
+    		if (/*album*/ ctx[0]['AlbumArtist'] !== undefined) return create_if_block$f;
     		if (/*album*/ ctx[0]['DynamicAlbumArtist'] !== undefined) return create_if_block_1$8;
     		return create_else_block$9;
     	}
@@ -20281,6 +20164,8 @@ var app = (function () {
     }
 
     /* src/layouts/library/ArtGrid.svelte generated by Svelte v3.58.0 */
+
+    const { Object: Object_1$2 } = globals;
     const file$1a = "src/layouts/library/ArtGrid.svelte";
 
     function get_each_context$e(ctx, list, i) {
@@ -20289,7 +20174,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (59:1) {#each albums || [] as album (album.ID)}
+    // (84:1) {#each albums || [] as album (album.ID)}
     function create_each_block$e(key_1, ctx) {
     	let first;
     	let album;
@@ -20338,7 +20223,7 @@ var app = (function () {
     		block,
     		id: create_each_block$e.name,
     		type: "each",
-    		source: "(59:1) {#each albums || [] as album (album.ID)}",
+    		source: "(84:1) {#each albums || [] as album (album.ID)}",
     		ctx
     	});
 
@@ -20370,7 +20255,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(art_grid_svlt, "class", "svelte-1brq1yb");
-    			add_location(art_grid_svlt, file$1a, 57, 0, 2271);
+    			add_location(art_grid_svlt, file$1a, 82, 0, 3303);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20434,25 +20319,25 @@ var app = (function () {
 
     function instance$1e($$self, $$props, $$invalidate) {
     	let $selectedAlbumsDir;
-    	let $config;
-    	let $dbSongsStore;
     	let $elementMap;
     	let $keyPressed;
     	let $keyModifier;
+    	let $groupByValuesConfig;
+    	let $groupByConfig;
     	let $gridGapConfig;
     	let $artSizeConfig;
     	validate_store(selectedAlbumsDir, 'selectedAlbumsDir');
     	component_subscribe($$self, selectedAlbumsDir, $$value => $$invalidate(8, $selectedAlbumsDir = $$value));
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(1, $config = $$value));
-    	validate_store(dbSongsStore, 'dbSongsStore');
-    	component_subscribe($$self, dbSongsStore, $$value => $$invalidate(2, $dbSongsStore = $$value));
     	validate_store(elementMap, 'elementMap');
-    	component_subscribe($$self, elementMap, $$value => $$invalidate(3, $elementMap = $$value));
+    	component_subscribe($$self, elementMap, $$value => $$invalidate(1, $elementMap = $$value));
     	validate_store(keyPressed, 'keyPressed');
-    	component_subscribe($$self, keyPressed, $$value => $$invalidate(4, $keyPressed = $$value));
+    	component_subscribe($$self, keyPressed, $$value => $$invalidate(2, $keyPressed = $$value));
     	validate_store(keyModifier, 'keyModifier');
-    	component_subscribe($$self, keyModifier, $$value => $$invalidate(5, $keyModifier = $$value));
+    	component_subscribe($$self, keyModifier, $$value => $$invalidate(3, $keyModifier = $$value));
+    	validate_store(groupByValuesConfig, 'groupByValuesConfig');
+    	component_subscribe($$self, groupByValuesConfig, $$value => $$invalidate(4, $groupByValuesConfig = $$value));
+    	validate_store(groupByConfig, 'groupByConfig');
+    	component_subscribe($$self, groupByConfig, $$value => $$invalidate(5, $groupByConfig = $$value));
     	validate_store(gridGapConfig, 'gridGapConfig');
     	component_subscribe($$self, gridGapConfig, $$value => $$invalidate(6, $gridGapConfig = $$value));
     	validate_store(artSizeConfig, 'artSizeConfig');
@@ -20461,22 +20346,49 @@ var app = (function () {
     	validate_slots('ArtGrid', slots, []);
     	let albums;
 
-    	function updateArtGridAlbums() {
-    		let songsFiltered = [];
+    	function updateArtGridAlbums(groupBy, groupByValues) {
+    		let whereQuery = [];
 
-    		$config.group.groupBy.forEach((group, index) => {
-    			songsFiltered = $dbSongsStore.filter(song => {
-    				return song[$config.group.groupBy[index]] === $config.group.groupByValues[index];
-    			});
-    		});
+    		for (let index in groupBy) {
+    			let tempWhere = {};
+    			tempWhere[groupBy[index]] = groupByValues[index];
+    			whereQuery.push(tempWhere);
+    		}
 
-    		groupSongsByAlbumFn(songsFiltered).then(groupedAlbums => {
-    			// TODO add user controlled album sorting.
-    			$$invalidate(0, albums = groupedAlbums.sort((a, b) => {
-    				return a.RootDir.localeCompare(b.RootDir);
+    		/*
+    SELECT SUBSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', 1, INSTR('/Volumes/Seagate/Music/Harsh/Black Sabbath - 13/495 So Tired.opus', '/') - 1);
+    */
+    		window.ipc.bulkRead({
+    			queryData: {
+    				select: ['Sourcefile', 'Album', 'AlbumArtist'],
+    				where: whereQuery,
+    				group: ['Album']
+    			}
+    		}).then(response => {
+    			$$invalidate(0, albums = response.results.data.map(item => {
+    				return Object.assign(
+    					{
+    						RootDir: getDirectoryFn(item.SourceFile),
+    						ID: hash$2(getDirectoryFn(item.SourceFile), 'text')
+    					},
+    					item
+    				);
     			}));
     		});
-    	}
+    	} /* 		let songsFiltered = []
+
+    $config.group.groupBy.forEach((group, index) => {
+        songsFiltered = $dbSongsStore.filter(song => {
+            return song[$config.group.groupBy[index]] === $config.group.groupByValues[index]
+        })
+    })
+
+    groupSongsByAlbumFn(songsFiltered).then(groupedAlbums => {
+        // TODO add user controlled album sorting.
+        albums = groupedAlbums.sort((a, b) => {
+            return a.RootDir.localeCompare(b.RootDir)
+        })
+    }) */
 
     	function selecteAllAlbums() {
     		let albumElements = document.querySelectorAll('art-grid-svlt album');
@@ -20496,7 +20408,7 @@ var app = (function () {
     	//TODO Improve this part.
     	/* 	groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
         document.querySelector('art-grid-svlt').scrollTop = 0
-    }) */
+    }) */ // console.log('Hello?')
 
     	onDestroy(() => {
     		
@@ -20504,7 +20416,7 @@ var app = (function () {
 
     	const writable_props = [];
 
-    	Object.keys($$props).forEach(key => {
+    	Object_1$2.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ArtGrid> was created with unknown prop '${key}'`);
     	});
 
@@ -20520,17 +20432,21 @@ var app = (function () {
     		artSizeConfig,
     		gridGapConfig,
     		config,
+    		groupByConfig,
+    		groupByValuesConfig,
     		groupSongsByAlbumFn,
     		cssVariablesService,
+    		getDirectoryFn,
+    		hash: hash$2,
     		albums,
     		updateArtGridAlbums,
     		selecteAllAlbums,
     		$selectedAlbumsDir,
-    		$config,
-    		$dbSongsStore,
     		$elementMap,
     		$keyPressed,
     		$keyModifier,
+    		$groupByValuesConfig,
+    		$groupByConfig,
     		$gridGapConfig,
     		$artSizeConfig
     	});
@@ -20553,15 +20469,14 @@ var app = (function () {
     			if ($gridGapConfig !== undefined) cssVariablesService.set('grid-gap', `${$gridGapConfig}px`);
     		}
 
-    		if ($$self.$$.dirty & /*$dbSongsStore, $config*/ 6) {
-    			{
-    				if ($dbSongsStore && $config.group.groupByValues && $config.group.groupBy) {
-    					updateArtGridAlbums();
-    				}
+    		if ($$self.$$.dirty & /*$groupByConfig, $groupByValuesConfig*/ 48) {
+    			if (/* Add the db versioning later */
+    			$groupByConfig || $groupByValuesConfig) {
+    				updateArtGridAlbums($groupByConfig, $groupByValuesConfig);
     			}
     		}
 
-    		if ($$self.$$.dirty & /*$keyModifier, $keyPressed, $elementMap*/ 56) {
+    		if ($$self.$$.dirty & /*$keyModifier, $keyPressed, $elementMap*/ 14) {
     			{
     				if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('art-grid-svlt')) {
     					selecteAllAlbums();
@@ -20572,11 +20487,11 @@ var app = (function () {
 
     	return [
     		albums,
-    		$config,
-    		$dbSongsStore,
     		$elementMap,
     		$keyPressed,
     		$keyModifier,
+    		$groupByValuesConfig,
+    		$groupByConfig,
     		$gridGapConfig,
     		$artSizeConfig
     	];
@@ -21430,7 +21345,7 @@ var app = (function () {
     }
 
     // (9:1) {#if $showExtensionsIconsConfig}
-    function create_if_block$f(ctx) {
+    function create_if_block$e(ctx) {
     	let t0;
     	let t1;
     	let t2;
@@ -21565,7 +21480,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$f.name,
+    		id: create_if_block$e.name,
     		type: "if",
     		source: "(9:1) {#if $showExtensionsIconsConfig}",
     		ctx
@@ -21738,7 +21653,7 @@ var app = (function () {
     	let current_block_type_index;
     	let if_block;
     	let current;
-    	const if_block_creators = [create_if_block$f, create_else_block$8];
+    	const if_block_creators = [create_if_block$e, create_else_block$8];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -21988,7 +21903,7 @@ var app = (function () {
     }
 
     // (60:0) {#if tagName === 'Rating'}
-    function create_if_block$e(ctx) {
+    function create_if_block$d(ctx) {
     	let star;
     	let current;
 
@@ -22033,7 +21948,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$e.name,
+    		id: create_if_block$d.name,
     		type: "if",
     		source: "(60:0) {#if tagName === 'Rating'}",
     		ctx
@@ -22047,7 +21962,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$e, create_if_block_1$6, create_else_block$7];
+    	const if_block_creators = [create_if_block$d, create_if_block_1$6, create_else_block$7];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -22426,7 +22341,7 @@ var app = (function () {
     }
 
     // (73:2) {#if tag.value === 'Title' && $showDynamicArtistsConfig}
-    function create_if_block$d(ctx) {
+    function create_if_block$c(ctx) {
     	let songtag;
     	let current;
 
@@ -22472,7 +22387,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$d.name,
+    		id: create_if_block$c.name,
     		type: "if",
     		source: "(73:2) {#if tag.value === 'Title' && $showDynamicArtistsConfig}",
     		ctx
@@ -22489,7 +22404,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$d, create_if_block_1$5, create_else_block$6];
+    	const if_block_creators = [create_if_block$c, create_if_block_1$5, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -27475,98 +27390,25 @@ var app = (function () {
     }
 
     /* src/layouts/library/TagGroup.svelte generated by Svelte v3.58.0 */
-
-    const { console: console_1$1 } = globals;
-
     const file$W = "src/layouts/library/TagGroup.svelte";
 
     function get_each_context$b(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[5] = list[i];
-    	child_ctx[7] = i;
+    	child_ctx[7] = list[i];
+    	child_ctx[9] = i;
     	return child_ctx;
     }
 
     function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
+    	child_ctx[10] = list[i];
     	return child_ctx;
     }
 
-    // (76:3) {#if $selectedGroups[index]}
-    function create_if_block$c(ctx) {
-    	let each_1_anchor;
-    	let each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[7]];
-    	validate_each_argument(each_value_1);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1$2(get_each_context_1$2(ctx, each_value_1, i));
-    	}
-
-    	const block = {
-    		c: function create() {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			each_1_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				if (each_blocks[i]) {
-    					each_blocks[i].m(target, anchor);
-    				}
-    			}
-
-    			insert_dev(target, each_1_anchor, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*$config, $selectedGroups, setNewGroupValue*/ 3) {
-    				each_value_1 = /*$selectedGroups*/ ctx[1][/*index*/ ctx[7]];
-    				validate_each_argument(each_value_1);
-    				let i;
-
-    				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$2(ctx, each_value_1, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block_1$2(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value_1.length;
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			destroy_each(each_blocks, detaching);
-    			if (detaching) detach_dev(each_1_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$c.name,
-    		type: "if",
-    		source: "(76:3) {#if $selectedGroups[index]}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (86:4) {#each $selectedGroups[index] as groupValue}
+    // (50:3) {#each groupedSongs as groupValue}
     function create_each_block_1$2(ctx) {
     	let group_value;
-    	let t0_value = /*groupValue*/ ctx[8] + "";
+    	let t0_value = /*groupValue*/ ctx[10] + "";
     	let t0;
     	let t1;
     	let group_value_class_value;
@@ -27579,13 +27421,13 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
 
-    			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[7]] === /*groupValue*/ ctx[8]
+    			set_custom_element_data(group_value, "class", group_value_class_value = "" + (null_to_empty(/*$groupByValuesConfig*/ ctx[2][/*index*/ ctx[9]] === /*groupValue*/ ctx[10]
     			? 'selected'
     			: null) + " svelte-1lvkh3l"));
 
     			set_custom_element_data(group_value, "tabindex", "-1");
     			set_custom_element_data(group_value, "role", "button");
-    			add_location(group_value, file$W, 86, 5, 2566);
+    			add_location(group_value, file$W, 50, 4, 1633);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, group_value, anchor);
@@ -27598,7 +27440,7 @@ var app = (function () {
     						group_value,
     						"click",
     						function () {
-    							if (is_function(setNewGroupValue(/*index*/ ctx[7], /*groupValue*/ ctx[8]))) setNewGroupValue(/*index*/ ctx[7], /*groupValue*/ ctx[8]).apply(this, arguments);
+    							if (is_function(/*setNewGroupValue*/ ctx[3](/*groupValue*/ ctx[10]))) /*setNewGroupValue*/ ctx[3](/*groupValue*/ ctx[10]).apply(this, arguments);
     						},
     						false,
     						false,
@@ -27609,7 +27451,7 @@ var app = (function () {
     						group_value,
     						"keypress",
     						function () {
-    							if (is_function(setNewGroupValue(/*index*/ ctx[7], /*groupValue*/ ctx[8]))) setNewGroupValue(/*index*/ ctx[7], /*groupValue*/ ctx[8]).apply(this, arguments);
+    							if (is_function(/*setNewGroupValue*/ ctx[3](/*groupValue*/ ctx[10]))) /*setNewGroupValue*/ ctx[3](/*groupValue*/ ctx[10]).apply(this, arguments);
     						},
     						false,
     						false,
@@ -27623,9 +27465,9 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*$selectedGroups, $config*/ 3 && t0_value !== (t0_value = /*groupValue*/ ctx[8] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*groupedSongs*/ 2 && t0_value !== (t0_value = /*groupValue*/ ctx[10] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*$config, $selectedGroups*/ 3 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$config*/ ctx[0].group.groupByValues[/*index*/ ctx[7]] === /*groupValue*/ ctx[8]
+    			if (dirty & /*$groupByValuesConfig, $groupByConfig, groupedSongs*/ 7 && group_value_class_value !== (group_value_class_value = "" + (null_to_empty(/*$groupByValuesConfig*/ ctx[2][/*index*/ ctx[9]] === /*groupValue*/ ctx[10]
     			? 'selected'
     			: null) + " svelte-1lvkh3l"))) {
     				set_custom_element_data(group_value, "class", group_value_class_value);
@@ -27642,19 +27484,19 @@ var app = (function () {
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(86:4) {#each $selectedGroups[index] as groupValue}",
+    		source: "(50:3) {#each groupedSongs as groupValue}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (61:1) {#each $config.group.groupBy || [] as group, index (index)}
+    // (34:1) {#each $groupByConfig || [] as group, index (index)}
     function create_each_block$b(key_1, ctx) {
     	let group_svlt;
     	let group_name;
     	let button;
-    	let t0_value = /*group*/ ctx[5] + "";
+    	let t0_value = /*group*/ ctx[7] + "";
     	let t0;
     	let group_name_data_name_value;
     	let group_name_data_index_value;
@@ -27663,7 +27505,13 @@ var app = (function () {
     	let group_svlt_data_index_value;
     	let mounted;
     	let dispose;
-    	let if_block = /*$selectedGroups*/ ctx[1][/*index*/ ctx[7]] && create_if_block$c(ctx);
+    	let each_value_1 = /*groupedSongs*/ ctx[1];
+    	validate_each_argument(each_value_1);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1$2(get_each_context_1$2(ctx, each_value_1, i));
+    	}
 
     	const block = {
     		key: key_1,
@@ -27674,19 +27522,23 @@ var app = (function () {
     			button = element("button");
     			t0 = text(t0_value);
     			t1 = space();
-    			if (if_block) if_block.c();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
     			t2 = space();
     			attr_dev(button, "class", "svelte-1lvkh3l");
-    			add_location(button, file$W, 70, 4, 2089);
+    			add_location(button, file$W, 43, 4, 1496);
     			set_custom_element_data(group_name, "tabindex", "-1");
     			set_custom_element_data(group_name, "role", "button");
-    			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[5]);
-    			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[7]);
+    			set_custom_element_data(group_name, "data-name", group_name_data_name_value = /*group*/ ctx[7]);
+    			set_custom_element_data(group_name, "data-index", group_name_data_index_value = /*index*/ ctx[9]);
     			set_custom_element_data(group_name, "class", "svelte-1lvkh3l");
-    			add_location(group_name, file$W, 62, 3, 1892);
-    			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[7]);
+    			add_location(group_name, file$W, 35, 3, 1299);
+    			set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value = /*index*/ ctx[9]);
     			set_custom_element_data(group_svlt, "class", "svelte-1lvkh3l");
-    			add_location(group_svlt, file$W, 61, 2, 1857);
+    			add_location(group_svlt, file$W, 34, 2, 1264);
     			this.first = group_svlt;
     		},
     		m: function mount(target, anchor) {
@@ -27695,13 +27547,19 @@ var app = (function () {
     			append_dev(group_name, button);
     			append_dev(button, t0);
     			append_dev(group_svlt, t1);
-    			if (if_block) if_block.m(group_svlt, null);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(group_svlt, null);
+    				}
+    			}
+
     			append_dev(group_svlt, t2);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(group_name, "click", /*click_handler*/ ctx[2], false, false, false, false),
-    					listen_dev(group_name, "keypress", /*keypress_handler*/ ctx[3], false, false, false, false)
+    					listen_dev(group_name, "click", /*click_handler*/ ctx[4], false, false, false, false),
+    					listen_dev(group_name, "keypress", /*keypress_handler*/ ctx[5], false, false, false, false)
     				];
 
     				mounted = true;
@@ -27709,36 +27567,47 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*$config*/ 1 && t0_value !== (t0_value = /*group*/ ctx[5] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*$groupByConfig*/ 1 && t0_value !== (t0_value = /*group*/ ctx[7] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*$config*/ 1 && group_name_data_name_value !== (group_name_data_name_value = /*group*/ ctx[5])) {
+    			if (dirty & /*$groupByConfig*/ 1 && group_name_data_name_value !== (group_name_data_name_value = /*group*/ ctx[7])) {
     				set_custom_element_data(group_name, "data-name", group_name_data_name_value);
     			}
 
-    			if (dirty & /*$config*/ 1 && group_name_data_index_value !== (group_name_data_index_value = /*index*/ ctx[7])) {
+    			if (dirty & /*$groupByConfig*/ 1 && group_name_data_index_value !== (group_name_data_index_value = /*index*/ ctx[9])) {
     				set_custom_element_data(group_name, "data-index", group_name_data_index_value);
     			}
 
-    			if (/*$selectedGroups*/ ctx[1][/*index*/ ctx[7]]) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block$c(ctx);
-    					if_block.c();
-    					if_block.m(group_svlt, t2);
+    			if (dirty & /*$groupByValuesConfig, $groupByConfig, groupedSongs, setNewGroupValue*/ 15) {
+    				each_value_1 = /*groupedSongs*/ ctx[1];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$2(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_1$2(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(group_svlt, t2);
+    					}
     				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
     			}
 
-    			if (dirty & /*$config*/ 1 && group_svlt_data_index_value !== (group_svlt_data_index_value = /*index*/ ctx[7])) {
+    			if (dirty & /*$groupByConfig*/ 1 && group_svlt_data_index_value !== (group_svlt_data_index_value = /*index*/ ctx[9])) {
     				set_custom_element_data(group_svlt, "data-index", group_svlt_data_index_value);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(group_svlt);
-    			if (if_block) if_block.d();
+    			destroy_each(each_blocks, detaching);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -27748,7 +27617,7 @@ var app = (function () {
     		block,
     		id: create_each_block$b.name,
     		type: "each",
-    		source: "(61:1) {#each $config.group.groupBy || [] as group, index (index)}",
+    		source: "(34:1) {#each $groupByConfig || [] as group, index (index)}",
     		ctx
     	});
 
@@ -27759,9 +27628,9 @@ var app = (function () {
     	let tag_group_svlt;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
-    	let each_value = /*$config*/ ctx[0].group.groupBy || [];
+    	let each_value = /*$groupByConfig*/ ctx[0] || [];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[7];
+    	const get_key = ctx => /*index*/ ctx[9];
     	validate_each_keys(ctx, each_value, get_each_context$b, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -27779,7 +27648,7 @@ var app = (function () {
     			}
 
     			set_custom_element_data(tag_group_svlt, "class", "svelte-1lvkh3l");
-    			add_location(tag_group_svlt, file$W, 59, 0, 1777);
+    			add_location(tag_group_svlt, file$W, 32, 0, 1191);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -27794,8 +27663,8 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*$config, $selectedGroups, setNewGroupValue, handleContextMenuEvent*/ 3) {
-    				each_value = /*$config*/ ctx[0].group.groupBy || [];
+    			if (dirty & /*$groupByConfig, groupedSongs, $groupByValuesConfig, setNewGroupValue, handleContextMenuEvent*/ 15) {
+    				each_value = /*$groupByConfig*/ ctx[0] || [];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context$b, get_key);
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, tag_group_svlt, destroy_block, create_each_block$b, null, get_each_context$b);
@@ -27824,59 +27693,86 @@ var app = (function () {
     }
 
     function instance$_($$self, $$props, $$invalidate) {
-    	let $config;
-    	let $selectedGroups;
-    	validate_store(config, 'config');
-    	component_subscribe($$self, config, $$value => $$invalidate(0, $config = $$value));
-    	validate_store(selectedGroups, 'selectedGroups');
-    	component_subscribe($$self, selectedGroups, $$value => $$invalidate(1, $selectedGroups = $$value));
+    	let $groupByConfig;
+    	let $groupByValuesConfig;
+    	validate_store(groupByConfig, 'groupByConfig');
+    	component_subscribe($$self, groupByConfig, $$value => $$invalidate(0, $groupByConfig = $$value));
+    	validate_store(groupByValuesConfig, 'groupByValuesConfig');
+    	component_subscribe($$self, groupByValuesConfig, $$value => $$invalidate(2, $groupByValuesConfig = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TagGroup', slots, []);
-    	let isFirstGroupSongs = true;
+    	let groupedSongs = [];
 
-    	/*
-        Groups located in config file
+    	// $:console.log($groupByConfig , $groupByValuesConfig)
+    	function groupSongs(groupBy) {
+    		// For now, for the sake of finishing the app, multiple grouping is not going to be implemented, but the app will be ready for it later (Using an array of strings instead of just a string)
+    		window.ipc.bulkRead({
+    			queryData: {
+    				select: [`distinct ${groupBy[0]}`],
+    				order: [groupBy[0]]
+    			}
+    		}).then(response => {
+    			var _a;
 
-        When the db updates -> Send the new grouping to Renderer with send web contents.
+    			let result = (_a = response === null || response === void 0
+    			? void 0
+    			: response.results) === null || _a === void 0
+    			? void 0
+    			: _a.data;
 
-        If the user changes the grouping, save it first to the config file, then query the db.
-     */
-    	onMount(() => {
-    		console.log($config.group);
-    	});
+    			if (result.length > 0) {
+    				$$invalidate(1, groupedSongs = result.map(item => item[groupBy[0]]));
+    			}
+    		});
+    	}
+
+    	function setNewGroupValue(groupValue) {
+    		updateConfigFn({ group: { groupByValues: [groupValue] } });
+    	}
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<TagGroup> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<TagGroup> was created with unknown prop '${key}'`);
     	});
 
     	const click_handler = e => handleContextMenuEvent(e);
     	const keypress_handler = e => handleContextMenuEvent(e);
 
     	$$self.$capture_state = () => ({
-    		onMount,
     		handleContextMenuEvent,
+    		groupByConfig,
+    		groupByValuesConfig,
+    		updateConfigFn,
+    		groupedSongs,
     		groupSongs,
-    		config,
-    		dbSongsStore,
-    		dbVersionStore,
-    		selectedGroups,
-    		triggerGroupingChangeEvent,
-    		isFirstGroupSongs,
-    		$config,
-    		$selectedGroups
+    		setNewGroupValue,
+    		$groupByConfig,
+    		$groupByValuesConfig
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('isFirstGroupSongs' in $$props) isFirstGroupSongs = $$props.isFirstGroupSongs;
+    		if ('groupedSongs' in $$props) $$invalidate(1, groupedSongs = $$props.groupedSongs);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [$config, $selectedGroups, click_handler, keypress_handler];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$groupByConfig*/ 1) {
+    			groupSongs($groupByConfig);
+    		}
+    	};
+
+    	return [
+    		$groupByConfig,
+    		groupedSongs,
+    		$groupByValuesConfig,
+    		setNewGroupValue,
+    		click_handler,
+    		keypress_handler
+    	];
     }
 
     class TagGroup extends SvelteComponentDev {
@@ -27896,7 +27792,7 @@ var app = (function () {
     /* src/layouts/library/!LibraryLayout.svelte generated by Svelte v3.58.0 */
     const file$V = "src/layouts/library/!LibraryLayout.svelte";
 
-    // (23:1) {:else}
+    // (22:1) {:else}
     function create_else_block$5(ctx) {
     	let nosong;
     	let current;
@@ -27928,14 +27824,14 @@ var app = (function () {
     		block,
     		id: create_else_block$5.name,
     		type: "else",
-    		source: "(23:1) {:else}",
+    		source: "(22:1) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (21:1) {#if $dbSongsStore.length > 0}
+    // (20:1) {#if $dbSongsStore.length > 0 || true}
     function create_if_block$b(ctx) {
     	let artgrid;
     	let current;
@@ -27967,7 +27863,7 @@ var app = (function () {
     		block,
     		id: create_if_block$b.name,
     		type: "if",
-    		source: "(21:1) {#if $dbSongsStore.length > 0}",
+    		source: "(20:1) {#if $dbSongsStore.length > 0 || true}",
     		ctx
     	});
 
@@ -27991,7 +27887,7 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*$dbSongsStore*/ ctx[0].length > 0) return 0;
+    		if (/*$dbSongsStore*/ ctx[0].length > 0 || true) return 0;
     		return 1;
     	}
 
@@ -28015,7 +27911,7 @@ var app = (function () {
     			t3 = space();
     			create_component(songlistbackground.$$.fragment);
     			set_custom_element_data(library_layout, "class", "layout svelte-1azkv78");
-    			add_location(library_layout, file$V, 19, 0, 784);
+    			add_location(library_layout, file$V, 18, 0, 714);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -28106,7 +28002,7 @@ var app = (function () {
 
     	onMount(() => {
     		
-    	}); // groupSongs($config.group.groupBy, $config.group.groupByValues)
+    	});
 
     	const writable_props = [];
 

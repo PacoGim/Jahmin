@@ -1,4 +1,3 @@
-import deepmerge from 'deepmerge'
 import { get } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
 import { config } from '../stores/config.store'
@@ -8,7 +7,7 @@ export default function (newConfig: ConfigType | any, { doUpdateLocalConfig } = 
 		if (doUpdateLocalConfig === true) {
 			let mergedConfig
 
-			mergedConfig = deepmerge(get(config), newConfig)
+			mergedConfig = mergeConfig(get(config), newConfig)
 
 			config.set(mergedConfig)
 		}
@@ -17,4 +16,16 @@ export default function (newConfig: ConfigType | any, { doUpdateLocalConfig } = 
 			resolve('ok')
 		})
 	})
+}
+
+function mergeConfig(existingConfig: ConfigType, newConfig: ConfigType): any {
+	const result = { ...existingConfig }
+	for (const key in newConfig) {
+		if (typeof newConfig[key] === 'object' && !Array.isArray(newConfig[key])) {
+			result[key] = mergeConfig(result[key], newConfig[key])
+		} else {
+			result[key] = newConfig[key]
+		}
+	}
+	return result
 }

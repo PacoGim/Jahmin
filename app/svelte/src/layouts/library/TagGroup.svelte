@@ -1,80 +1,44 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
 	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
-	import { groupSongs } from '../../services/groupSongs.service'
-	import { config } from '../../stores/config.store'
+	import { groupByConfig, groupByValuesConfig } from '../../stores/config.store'
 
-	import { dbSongsStore, dbVersionStore, selectedGroups, triggerGroupingChangeEvent } from '../../stores/main.store'
+	import updateConfigFn from '../../functions/updateConfig.fn'
 
-	let isFirstGroupSongs = true
+	let groupedSongs = []
 
-	/*
-		Groups located in config file
+	$: groupSongs($groupByConfig)
 
-		When the db updates -> Send the new grouping to Renderer with send web contents.
+	// $:console.log($groupByConfig , $groupByValuesConfig)
 
-		If the user changes the grouping, save it first to the config file, then query the db.
-	 */
-
-
-	 onMount(()=>{
-
-			console.log($config.group)
-
-	 })
-
-	/* 	$: {
-		if ($dbSongsStore) {
-			runSongGroup()
-		}
-	} */
-
-	// $: {
-	// 	$config.group.groupBy
-	// 	if (isFirstGroupSongs === true) {
-	// 		isFirstGroupSongs = false
-	// 	} else {
-	// 		runSongGroup()
-	// 	}
-	// }
-
-	/* 	$: {
-		if ($triggerGroupingChangeEvent.length > 0) {
-			$triggerGroupingChangeEvent.forEach((grouping, index) => {
-				setNewGroupValue(index, grouping)
+	function groupSongs(groupBy: string[]) {
+		// For now, for the sake of finishing the app, multiple grouping is not going to be implemented, but the app will be ready for it later (Using an array of strings instead of just a string)
+		window.ipc
+			.bulkRead({
+				queryData: {
+					select: [`distinct ${groupBy[0]}`],
+					order: [groupBy[0]]
+				}
 			})
+			.then(response => {
+				let result = response?.results?.data
 
-			$triggerGroupingChangeEvent = []
-		}
-	} */
+				if (result.length > 0) {
+					groupedSongs = result.map(item => item[groupBy[0]])
+				}
+			})
+	}
 
-	// TODO: Add Configuration for the amount of groups.
-
-	// function runSongGroup() {
-	// 	for (let i = 0; i < $config.group.groupBy.length; i++) {
-	// 		if ($selectedGroups[i] === undefined) {
-	// 			$selectedGroups[i] = []
-	// 		}
-	// 	}
-
-		// groupSongs($config.group.groupBy, $config.group.groupByValues)
-	// }
-
-	// function setNewGroupValue(index, groupValue) {
-	// 	for (let i = index; i < $config.group.groupBy.length; i++) {
-	// 		if (i === index) {
-	// 			$config.group.groupByValues[i] = groupValue
-	// 		} else {
-	// 			$config.group.groupByValues[i] = 'undefined'
-	// 		}
-	// 	}
-
-		// groupSongs($config.group.groupBy, $config.group.groupByValues)
-	// }
+	function setNewGroupValue(groupValue) {
+		updateConfigFn({
+			group: {
+				groupByValues: [groupValue]
+			}
+		})
+	}
 </script>
 
 <tag-group-svlt>
-	{#each $config.group.groupBy || [] as group, index (index)}
+	{#each $groupByConfig || [] as group, index (index)}
 		<group-svlt data-index={index}>
 			<group-name
 				on:click={e => handleContextMenuEvent(e)}
@@ -89,28 +53,19 @@
 				</button></group-name
 			>
 
-			{#if $selectedGroups[index]}
-				<!-- <group-value
-					class={$config.group.groupByValues[index] === 'undefined' ? 'selected' : null}
-					on:click={() => setNewGroupValue(index, 'undefined')}
-					on:keypress={() => setNewGroupValue(index, 'undefined')}
+			<!-- {#if $selectedGroups[index]} -->
+			{#each groupedSongs as groupValue}
+				<group-value
+					class={$groupByValuesConfig[index] === groupValue ? 'selected' : null}
+					on:click={setNewGroupValue(groupValue)}
+					on:keypress={setNewGroupValue(groupValue)}
 					tabindex="-1"
 					role="button"
 				>
-					All ({$selectedGroups[index].length})
-				</group-value> -->
-				{#each $selectedGroups[index] as groupValue}
-					<group-value
-						class={$config.group.groupByValues[index] === groupValue ? 'selected' : null}
-						on:click={setNewGroupValue(index, groupValue)}
-						on:keypress={setNewGroupValue(index, groupValue)}
-						tabindex="-1"
-						role="button"
-					>
-						{groupValue}
-					</group-value>
-				{/each}
-			{/if}
+					{groupValue}
+				</group-value>
+			{/each}
+			<!-- {/if} -->
 		</group-svlt>
 	{/each}
 </tag-group-svlt>
