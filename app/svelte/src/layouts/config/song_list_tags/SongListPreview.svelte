@@ -28,8 +28,7 @@
 		Size: 4078741,
 		Title: 'Running From My Shadow',
 		Track: 13,
-		PlayCount: 10,
-		DynamicArtists: '(feat. Mike Shinoda//Grandson)'
+		PlayCount: 10
 	}
 
 	$: {
@@ -61,19 +60,19 @@
 <song-list-preview>
 	<grid-tags style="grid-template-columns:{gridStyle};">
 		{#each $config.songListTags as selectedTag, index (index)}
-			{#if selectedTag.value === 'Title' && $showDynamicArtistsConfig}
+			<!-- {#if selectedTag.value === 'Title' && $showDynamicArtistsConfig} -->
 				<SongTag
 					tagName={selectedTag.value}
 					tagValue={`${sampleSong.Title} ${sampleSong.DynamicArtists}` || ''}
 					align={selectedTag?.align?.toLowerCase()}
 				/>
-			{:else if selectedTag.value !== 'DynamicArtists'}
+			<!-- {:else if selectedTag.value !== 'DynamicArtists'}
 				<SongTag
 					tagName={selectedTag.value}
 					tagValue={sampleSong[selectedTag.value] || ''}
 					align={selectedTag?.align?.toLowerCase()}
-				/>
-			{/if}
+				/> -->
+			<!-- {/if} -->
 		{/each}
 	</grid-tags>
 

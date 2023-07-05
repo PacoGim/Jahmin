@@ -25,7 +25,6 @@ export type SongType = {
 	BitRate?: number | null
 	BitDepth?: number | null
 	isEnabled?: boolean
-	DynamicArtists?: string | null
 }
 
 export type PartialSongType = Partial<SongType>

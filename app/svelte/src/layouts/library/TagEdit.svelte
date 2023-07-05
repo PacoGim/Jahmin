@@ -4,7 +4,7 @@
 	import { filterSongsToEdit, getObjectDifference, groupSongsByValues } from '../../services/tagEdit.service'
 
 	import type { PartialSongType, SongType } from '../../../../types/song.type'
-	import Star from '../../components/Star.svelte'
+	import RatingTag from '../../components/tags/RatingTag.svelte'
 	import { onMount } from 'svelte'
 	import UndoIcon from '../../icons/UndoIcon.svelte'
 	import AlbumArt from '../../components/AlbumArt.svelte'
@@ -341,7 +341,7 @@
 
 	<tag-container data-tag="Rating">
 		<tag-name>Rating <UndoIcon /> </tag-name>
-		<Star on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
+		<RatingTag on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
 	</tag-container>
 
 	<album-art>

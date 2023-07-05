@@ -3,10 +3,12 @@
 	import { groupByConfig, groupByValuesConfig } from '../../stores/config.store'
 
 	import updateConfigFn from '../../functions/updateConfig.fn'
+	import { dbVersionStore } from '../../stores/main.store'
 
 	let groupedSongs = []
 
 	$: groupSongs($groupByConfig)
+	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig) : null
 
 	function groupSongs(groupBy: string[]) {
 		// For now, for the sake of finishing the app, multiple grouping is not going to be implemented, but the app will be ready for it later (Using an array of strings instead of just a string)

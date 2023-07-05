@@ -15,12 +15,17 @@
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
 		artCompressQueueLength,
+		dbVersionStore,
 		layoutToShow,
 		playbackStore,
 		playingSongStore,
 		selectedAlbumsDir,
 		songSyncQueueProgress
 	} from '../stores/main.store'
+
+	window.ipc.onDatabaseUpdate((_, response) => {
+		dbVersionStore.set(response)
+	})
 
 	window.ipc.onGetAllSongsFromRenderer(() => {
 		getAllSongsFn().then(songs => {

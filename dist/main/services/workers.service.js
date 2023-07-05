@@ -7,6 +7,7 @@ exports.killWorker = exports.killAllWorkers = exports.getWorker = void 0;
 const worker_threads_1 = require("worker_threads");
 const path_1 = require("path");
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
+const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
 let workersName = [
     'exifToolRead',
     'exifToolWrite',
@@ -31,7 +32,7 @@ function getWorker(workerName) {
             });
             resolve(newWorker);
             if (workerName === 'database') {
-                initDbWorker();
+                dbWorkerInit();
             }
         }
         else {
@@ -41,12 +42,17 @@ function getWorker(workerName) {
     });
 }
 exports.getWorker = getWorker;
-async function initDbWorker() {
+async function dbWorkerInit() {
     let dbWorker = await getWorker('database');
     dbWorker.postMessage({
         type: 'initDb',
         data: {
             appDataPath: (0, getAppDataPath_fn_1.default)()
+        }
+    });
+    dbWorker.on('message', results => {
+        if (results.type === 'dbVersionChange') {
+            (0, sendWebContents_fn_1.default)('database-update', results.data);
         }
     });
 }

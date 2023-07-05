@@ -1,57 +1,25 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte'
+	import { createEventDispatcher } from 'svelte'
 	import tippy from 'tippy.js'
 	import parseDuration from '../functions/parseDuration.fn'
 	import { defaultTippyOptions } from '../services/tippy.service'
 
 	import type { SelectedTagNameType } from '../../../types/selectedTag.type'
-	import Star from './Star.svelte'
 
-	import ExtensionTag from './ExtensionTag.svelte'
+	import RatingTag from './tags/RatingTag.svelte'
+	import ExtensionTag from './tags/ExtensionTag.svelte'
+	import TitleTag from './tags/TitleTag.svelte'
 
-	export let align
-	export let tagName: SelectedTagNameType | any
-	export let tagValue: any
+	// export let align
+	// export let tagName: SelectedTagNameType | any
+	// export let tagValue: any
+
+	export let tag
+	export let song
 
 	let originalTagValue: any
 
 	let dispatch = createEventDispatcher()
-
-	/* 	$: {
-		data
-		applyChangeToTag()
-	} */
-
-	/*function applyChangeToTag() {
-		if (tagName === 'Duration') {
-			data = parseDuration(data)
-		} else if (tagName === 'Rating') {
-			data = '★★★★★'
-		} else if (tagName === 'BitRate') {
-			data = data.toFixed(0) + ' kbps'
-		} else if (tagName === 'SampleRate') {
-			data = data.toFixed(0) + ' Hz'
-		} else if (tagName === 'Size') {
-			data = truncateString(bytesToMebibytes(data)) + ' MiB'
-		} else if (tagName === 'PlayCount') {
-			if (data > 999) {
-				tippy('[data-tippy-content]')
-				// data = '•••'
-			} else {
-				data = data || '0'
-			}
-		}
-	}*/
-
-	function bytesToMebibytes(bytesValue: number) {
-		return bytesValue / Math.pow(2, 20)
-	}
-
-	function truncateString(value: string | number | string[]) {
-		value = String(value).split('.')
-
-		return `${value[0]}.${value[1].substring(0, 2)}`
-	}
 
 	function parseTag(tagName, tagValue) {
 		if (tagName === 'Duration') return parseDuration(tagValue)
@@ -74,20 +42,40 @@
 	}
 </script>
 
-{#if tagName === 'Rating'}
+<song-tag>
+	{#if tag.value === 'Title'}
+		<TitleTag {song} align={tag.align} />
+	{:else if tag.value === 'Rating'}
+		<RatingTag
+			on:starChange={evt => dispatch('starChange', evt.detail)}
+			align={tag.align}
+			songRating={song[tag.value]}
+			hook="song-list-item"
+		/>
+	{:else if tag.value === 'Duration'}
+		{parseDuration(song[tag.value])}
+	{:else}
+		{song[tag.value]}
+	{/if}
+
+	<!-- {tag.value} -->
+</song-tag>
+
+<!-- {#if tagName === 'Rating'}
 	<Star on:starChange={evt => dispatch('starChange', evt.detail)} {align} songRating={tagValue} hook="song-list-item" />
 {:else if tagName === 'Extension'}
 	<ExtensionTag extension={tagValue} />
 {:else}
 	<span class={tagName} data-tippy-content={originalTagValue} style="justify-self: {align}">{parseTag(tagName, tagValue)}</span>
-{/if}
+{/if} -->
 
 <style>
-	span {
+	song-tag {
 		margin: 0 0.5rem;
+		display: inline-grid;
 	}
 
-	span.PlayCount {
+	song-tag.PlayCount {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -101,7 +89,7 @@
 		/* color: var(--art-color-dark); */
 	}
 
-	span.Title {
+	song-tag.Title {
 		display: -webkit-box;
 		-webkit-line-clamp: 1;
 		-webkit-box-orient: vertical;

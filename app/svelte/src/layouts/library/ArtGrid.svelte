@@ -3,7 +3,7 @@
 
 	import Album from '../../components/Album.svelte'
 
-	import { dbSongsStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
+	import { dbSongsStore, dbVersionStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
 	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValuesConfig } from '../../stores/config.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
@@ -21,6 +21,8 @@
 	$: if (/* Add the db versioning later */ $groupByConfig || $groupByValuesConfig) {
 		updateArtGridAlbums($groupByConfig, $groupByValuesConfig)
 	}
+
+	$: $dbVersionStore !== 0 ? updateArtGridAlbums($groupByConfig, $groupByValuesConfig) : null
 
 	$: {
 		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('art-grid-svlt')) {
@@ -45,7 +47,7 @@
 		window.ipc
 			.bulkRead({
 				queryData: {
-					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'Directory','Date_Year'],
+					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'Directory', 'Date_Year'],
 					andWhere: whereQuery,
 					group: ['Album'],
 					order: ['Album'] //TODO add the proper sorting here and in Player middleware

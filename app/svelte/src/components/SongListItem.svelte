@@ -3,12 +3,12 @@
 
 	import type { SongType } from '../../../types/song.type'
 
-	import {  playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
+	import { playingSongStore, selectedSongsStore, songListItemElement } from '../stores/main.store'
 
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'
 	import PlayButton from '../layouts/components/PlayButton.svelte'
-  import { showDynamicArtistsConfig, songListTagConfig } from '../stores/config.store'
+	import { showDynamicArtistsConfig, songListTagConfig } from '../stores/config.store'
 
 	export let song: SongType
 	export let index: number
@@ -18,10 +18,10 @@
 
 	$: isSongPlaying = $playingSongStore?.ID === song?.ID
 
-	$: {
-		song
-		setDynamicArtists()
-	}
+	// $: {
+		// song
+		// setDynamicArtists()
+	// }
 
 	$: {
 		song
@@ -89,7 +89,11 @@
 	{#if isSongPlaying === true}
 		<PlayButton customSize="0.75rem" customColor="#fff" />
 	{/if}
+
 	{#each $songListTagConfig as tag, index (index)}
+		<SongTag {song} {tag} on:starChange={setStar} />
+
+		<!--
 		{#if tag.value === 'Title' && $showDynamicArtistsConfig}
 			<SongTag
 				tagName={tag.value}
@@ -98,10 +102,11 @@
 				on:starChange={setStar}
 			/>
 		{:else if tag.value === 'DynamicArtists' || !$songListTagConfig.find(configTag => configTag.value === 'Title')}
-			<!-- Empty -->
+
 		{:else}
 			<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />
 		{/if}
+	-->
 	{/each}
 </song-list-item>
 

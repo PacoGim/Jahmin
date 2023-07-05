@@ -1,8 +1,8 @@
 <script lang="ts">
-	import FlacIcon from '../icons/FlacIcon.svelte'
-	import Mp3Icon from '../icons/MP3Icon.svelte'
-	import OpusIcon from '../icons/OpusIcon.svelte'
-	import { showExtensionsIconsConfig } from '../stores/config.store'
+	import FlacIcon from '../../icons/FlacIcon.svelte'
+	import Mp3Icon from '../../icons/MP3Icon.svelte'
+	import OpusIcon from '../../icons/OpusIcon.svelte'
+	import { showExtensionsIconsConfig } from '../../stores/config.store'
 
 	export let extension
 </script>

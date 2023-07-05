@@ -58,6 +58,7 @@ const ipcFunctions = {
     onGlobalShortcutsRegistered: (callback) => electron_1.ipcRenderer.on('global-shortcuts-registered', callback),
     onLyricsDeleted: (callback) => electron_1.ipcRenderer.on('lyrics-deleted', callback),
     onConfirmLyricsDeletion: (callback) => electron_1.ipcRenderer.on('confirm-lyrics-deletion', callback),
+    onDatabaseUpdate: (callback) => electron_1.ipcRenderer.on('database-update', callback),
     /********************** Database **********************/
     bulkRead
 };

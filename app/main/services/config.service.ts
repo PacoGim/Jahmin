@@ -103,11 +103,6 @@ function getDefaultConfigFile(): ConfigType {
 				align: 'left',
 				value: 'Duration',
 				isExpanded: false
-			},
-			{
-				align: 'center',
-				value: 'DynamicArtists',
-				isExpanded: false
 			}
 		]
 	}

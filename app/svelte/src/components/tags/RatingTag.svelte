@@ -49,7 +49,7 @@
 	}
 </script>
 
-<stars
+<rating-tag
 	on:click={dispatch('starChange', { rating: starRating * 10 })}
 	on:keypress={dispatch('starChange', { rating: starRating * 10 })}
 	tabindex="-1"
@@ -87,7 +87,7 @@
 		src={`assets/img/star/star-${starRating}.svg`}
 		alt=""
 	/>
-</stars>
+</rating-tag>
 
 <!-- <button
 	class="{klass} {showUndo ? 'show-undo' : ''}"
@@ -100,18 +100,18 @@
 	:global(img.starFilter.tag-edit-star) {
 		filter: var(--filter-hl);
 	}
-	stars {
+	rating-tag {
 		display: flex;
 		align-items: center;
 		cursor: pointer;
 		margin: 0 0.5rem;
 	}
 
-	stars:hover img.delete-star {
+	rating-tag:hover img.delete-star {
 		opacity: 0.5;
 	}
 
-	stars.tag-edit-star {
+	rating-tag.tag-edit-star {
 		grid-area: star;
 		justify-self: center;
 		/* width: 100%; */

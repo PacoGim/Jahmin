@@ -1,6 +1,7 @@
 import { Worker } from 'worker_threads'
 import { join as pathJoin } from 'path'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
+import sendWebContentsFn from '../functions/sendWebContents.fn'
 
 let workersName = [
 	'exifToolRead',
@@ -34,7 +35,7 @@ export function getWorker(workerName: WorkersNameType): Promise<Worker> {
 			resolve(newWorker)
 
 			if (workerName === 'database') {
-				initDbWorker()
+				dbWorkerInit()
 			}
 		} else {
 			resolve(worker?.worker)
@@ -44,13 +45,19 @@ export function getWorker(workerName: WorkersNameType): Promise<Worker> {
 	})
 }
 
-async function initDbWorker() {
+async function dbWorkerInit() {
 	let dbWorker = await getWorker('database')
 
 	dbWorker.postMessage({
 		type: 'initDb',
 		data: {
 			appDataPath: getAppDataPathFn()
+		}
+	})
+
+	dbWorker.on('message', results => {
+		if (results.type === 'dbVersionChange') {
+			sendWebContentsFn('database-update', results.data)
 		}
 	})
 }

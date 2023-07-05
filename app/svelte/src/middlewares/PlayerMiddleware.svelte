@@ -10,6 +10,7 @@
 	import { config } from '../stores/config.store'
 
 	import {
+		dbVersionStore,
 		playbackStore,
 		playingSongStore,
 		selectedAlbumDir,
@@ -22,10 +23,9 @@
 	let allSongs = []
 
 	$: fillSongList($selectedAlbumsDir)
+	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir) : null
 
-	$: {
-		$songListStore = allSongs
-	}
+	$: $songListStore = allSongs
 
 	$: {
 		if ($selectedAlbumsDir !== undefined) {
@@ -35,10 +35,9 @@
 
 	function fillSongList(albumRootDirList: string[] = []) {
 		if (albumRootDirList.length === 0) {
+			allSongs = []
 			return
 		}
-
-		allSongs = []
 
 		let whereQuery = albumRootDirList.map(rootDir => {
 			return { Directory: rootDir }
@@ -53,7 +52,10 @@
 				}
 			})
 			.then(response => {
-				allSongs = [...allSongs, ...response.results.data]
+				if (JSON.stringify(allSongs) !== JSON.stringify(response.results.data)) {
+					allSongs = []
+					allSongs = [...allSongs, ...response.results.data]
+				}
 			})
 	}
 

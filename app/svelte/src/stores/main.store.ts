@@ -34,7 +34,7 @@ export let selectedSongsStore: Writable<number[]> = writable([])
 
 /********************** Database **********************/
 export let dbSongsStore: Writable<SongType[]> = writable([])
-export let dbVersionStore: Writable<number | undefined> = writable(Date.now())
+export let dbVersionStore: Writable<number | undefined> = writable(0)
 
 /********************** Keyboard Events **********************/
 export let keyPressed: Writable<string | undefined> = writable(undefined)

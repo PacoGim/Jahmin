@@ -25,4 +25,3 @@ export type SelectedTagNameType =
 	| 'SampleRate'
 	| 'Size'
 	| 'PlayCount'
-	| 'DynamicArtists'
