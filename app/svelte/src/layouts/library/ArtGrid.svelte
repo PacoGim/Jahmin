@@ -10,6 +10,7 @@
 	import cssVariablesService from '../../services/cssVariables.service'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import { hash } from '../../functions/hashString.fn'
+	import getDynamicAlbumArtistsFn from '../../functions/getDynamicAlbumArtists.fn'
 
 	let albums
 
@@ -28,9 +29,11 @@
 	}
 
 	function updateArtGridAlbums(groupBy, groupByValues) {
-		let whereQuery: any = [{
-			Album: 'not null'
-		}]
+		let whereQuery: any = [
+			{
+				Album: 'not null'
+			}
+		]
 
 		for (let index in groupBy) {
 			let tempWhere = {}
@@ -42,18 +45,16 @@
 		window.ipc
 			.bulkRead({
 				queryData: {
-					select: ['Sourcefile', 'Album', 'AlbumArtist'],
-					where: whereQuery,
-					group: ['Album']
+					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'Directory','Date_Year'],
+					andWhere: whereQuery,
+					group: ['Album'],
+					order: ['Album'] //TODO add the proper sorting here and in Player middleware
 				}
 			})
 			.then(response => {
-				albums = response.results.data.map(item => {
-					let rootDir = getDirectoryFn(item.SourceFile)
-
+				albums = response.results.data.map((item, index, songArray) => {
 					return {
-						RootDir: rootDir,
-						ID: hash(rootDir, 'text'),
+						ID: hash(item.Directory, 'text'),
 						...item
 					}
 				})

@@ -9,20 +9,18 @@
 
 <album
 	alwaysShowOverlay={$config.userOptions.alwaysShowAlbumOverlay}
-	rootDir={album.RootDir}
-	class={$selectedAlbumsDir?.includes(album?.RootDir) ? 'selected' : ''}
+	rootDir={album.Directory}
+	class={$selectedAlbumsDir?.includes(album?.Directory) ? 'selected' : ''}
 >
-	<AlbumArt imageSourceLocation={album.RootDir} intersectionRoot="art-grid-svlt" />
+	<AlbumArt imageSourceLocation={album.Directory} intersectionRoot="art-grid-svlt" />
 
 	<overlay-gradient />
 
 	<album-details>
-		<album-name>{album['Name'] || ''}</album-name>
+		<album-name>{album.Album || ''}</album-name>
 
-		{#if album['AlbumArtist'] !== undefined}
-			<album-artist>{album['AlbumArtist'] || ''}</album-artist>
-		{:else if album['DynamicAlbumArtist'] !== undefined}
-			<album-artist>{album['DynamicAlbumArtist'] || ''}</album-artist>
+		{#if album.AlbumArtist !== undefined}
+			<album-artist>{album.AlbumArtist || ''}</album-artist>
 		{:else}
 			<album-artist />
 		{/if}

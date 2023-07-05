@@ -8,8 +8,6 @@
 
 	$: groupSongs($groupByConfig)
 
-	// $:console.log($groupByConfig , $groupByValuesConfig)
-
 	function groupSongs(groupBy: string[]) {
 		// For now, for the sake of finishing the app, multiple grouping is not going to be implemented, but the app will be ready for it later (Using an array of strings instead of just a string)
 		window.ipc

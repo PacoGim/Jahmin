@@ -9,7 +9,13 @@ type MessageType = {
 	data:
 		| {
 				queryId: string
-				queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
+				queryData: {
+					select: string[]
+					andWhere?: { [key: string]: string }[]
+					orWhere?: { [key: string]: string }[]
+					group?: string[]
+					order?: string[]
+				}
 		  }
 		| any
 }

@@ -1,7 +1,7 @@
 export type ConfigType = {
 	bounds?: BoundsType
-	directories: DirectoriesType
-	group?: GroupType
+	directories: PartialDirectoriesType
+	group?: PartialGroupType
 	groupOnlyByFolder?: boolean
 	songListTags?: any[]
 	userOptions: PartialUserOptionsType
@@ -55,5 +55,8 @@ type LyricsStyle = {
 	textAlignment: number
 }
 
-export type PartialConfigType = Partial<ConfigType>
 type PartialUserOptionsType = Partial<UserOptionsType>
+type PartialDirectoriesType = Partial<DirectoriesType>
+type PartialGroupType = Partial<GroupType>
+
+export type PartialConfigType = Partial<ConfigType>

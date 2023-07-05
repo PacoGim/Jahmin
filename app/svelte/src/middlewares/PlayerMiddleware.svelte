@@ -34,30 +34,27 @@
 	}
 
 	function fillSongList(albumRootDirList: string[] = []) {
+		if (albumRootDirList.length === 0) {
+			return
+		}
+
 		allSongs = []
-		albumRootDirList.forEach(albumRootDir => {
-			window.ipc
-				.bulkRead({
-					queryData: {
-						select: ['*'],
-						where: [
-							{
-								Directory: albumRootDir
-							}
-						],
-						order: ['Track Asc']
-					}
-				})
-				.then(response => {
-					allSongs = [...allSongs, ...response.results.data]
-				})
 
-			/* getAlbumSongsFn(albumRootDir).then(songs => {
-				let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-
-				allSongs = [...allSongs, ...sortedSongs]
-			}) */
+		let whereQuery = albumRootDirList.map(rootDir => {
+			return { Directory: rootDir }
 		})
+
+		window.ipc
+			.bulkRead({
+				queryData: {
+					select: ['*'],
+					orWhere: whereQuery,
+					order: ['Album', 'Track'] //TODO add the proper sorting here and in art grid
+				}
+			})
+			.then(response => {
+				allSongs = [...allSongs, ...response.results.data]
+			})
 	}
 
 	function loadPreviousState() {

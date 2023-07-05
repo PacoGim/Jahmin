@@ -23,8 +23,6 @@ let browserWindow;
 electron_1.app.whenReady().then(() => {
     createWindow();
     (0, ipc_service_1.startIPC)();
-    // TODO Remove this when we have a better solution for the max listeners problem.
-    // setMaxListeners(40)
     if ((0, config_service_1.getConfig)().userOptions.isFullscreen === true) {
         getMainWindow().maximize();
     }

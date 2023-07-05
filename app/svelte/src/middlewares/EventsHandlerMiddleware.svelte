@@ -105,41 +105,28 @@
 	}
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
-		// console.log($selectedAlbumsDir)
-
-		let tempSelectedAlbums = [...$selectedAlbumsDir] || []
-
 		// Get all song from albums
 
 		const rootDir = element.getAttribute('rootDir')
 
-		let dbSongs = await window.ipc.bulkRead({
-			queryData: {
-				select: ['*'],
-				where: [
-					{
-						Directory: rootDir
-					}
-				]
-			}
-		})
-
-		let sortedSongs = dbSongs.results.data
-
-		// let songs = await getAlbumSongsFn(rootDir)
-
-		// let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-
-		// console.log(sortedSongs)
-
-		// console.log(sortedSongs)
-
 		if (evtType === 'dblclick') {
+			let dbSongs = await window.ipc.bulkRead({
+				queryData: {
+					select: ['*'],
+					andWhere: [
+						{
+							Directory: rootDir
+						}
+					],
+					order: [`${$config.userOptions.sortBy} ${$config.userOptions.sortOrder}`]
+				}
+			})
+
+			let sortedSongs = dbSongs.results.data
+
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
-			// $songListStore = sortedSongs
-
 			if ($keyModifier === 'ctrlKey') {
 				$selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)
 			} else {
@@ -151,14 +138,14 @@
 			// When clicking on an album, reset selected songs. Prevents songs from being selected after changing albums.
 			$selectedSongsStore = []
 
-			if (
-				$selectedAlbumsDir.sort((a, b) => a.localeCompare(b)).toString() !==
-				tempSelectedAlbums.sort((a, b) => a.localeCompare(b)).toString()
-			) {
-				setTimeout(() => {
-					$triggerScrollToSongEvent = sortedSongs[0].ID
-				}, 10)
-			}
+			// if (
+			// 	$selectedAlbumsDir.sort((a, b) => a.localeCompare(b)).toString() !==
+			// 	tempSelectedAlbums.sort((a, b) => a.localeCompare(b)).toString()
+			// ) {
+			// 	setTimeout(() => {
+			// 		$triggerScrollToSongEvent = sortedSongs[0].ID
+			// 	}, 10)
+			// }
 		}
 	}
 

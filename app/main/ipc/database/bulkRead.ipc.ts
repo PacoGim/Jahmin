@@ -15,7 +15,13 @@ export default function (ipcMain: Electron.IpcMain) {
 			evt,
 			data: {
 				queryId: string
-				queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
+				queryData: {
+					select: string[]
+					where?: { [key: string]: string }[]
+					orWhere?: { [key: string]: string }[]
+					group?: string[]
+					order?: string[]
+				}
 			}
 		) => {
 			// Generate a unique ID for the query

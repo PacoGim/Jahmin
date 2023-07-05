@@ -73,7 +73,13 @@ contextBridge.exposeInMainWorld('ipc', ipcFunctions)
 
 function bulkRead(data: {
 	queryId?: string
-	queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
+	queryData: {
+		select: string[]
+		andWhere?: { [key: string]: string }[]
+		orWhere?: { [key: string]: string }[]
+		group?: string[]
+		order?: string[]
+	}
 }) {
 	return new Promise((resolve, reject) => {
 		ipcRenderer

@@ -26,14 +26,15 @@ export function selectGeneric(queryData: {
 
 function buildSqliteQuery(queryData: {
 	select: string[]
-	where?: { [key: string]: string }[]
+	andWhere?: { [key: string]: string }[]
+	orWhere?: { [key: string]: string }[]
 	group?: string[]
 	order?: string[]
 }) {
 	let query = `SELECT ${queryData.select.join(',')} FROM songs`
 
-	if (queryData.where) {
-		query += ` WHERE ${queryData.where
+	if (queryData.andWhere) {
+		query += ` WHERE ${queryData.andWhere
 			.map(where => {
 				if (where[Object.keys(where)[0]] === 'not null') {
 					return `${Object.keys(where)[0]} is not null`
@@ -42,6 +43,18 @@ function buildSqliteQuery(queryData: {
 				}
 			})
 			.join(' AND ')}`
+	}
+
+	if (queryData.orWhere) {
+		query += ` WHERE ${queryData.orWhere
+			.map(where => {
+				if (where[Object.keys(where)[0]] === 'not null') {
+					return `${Object.keys(where)[0]} is not null`
+				} else {
+					return `${Object.keys(where)[0]} = "${where[Object.keys(where)[0]]}"`
+				}
+			})
+			.join(' OR ')}`
 	}
 
 	if (queryData.group) {
