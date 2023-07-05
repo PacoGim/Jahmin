@@ -8,7 +8,7 @@
     "tsc-watch:main": "cd app/main && npx tsc --watch",
     "tsc-watch:preload": "cd app/preload && npx tsc --watch",
     "tsc-watch:workers": "cd app/workers && npx tsc --watch",
-    "electron": "electron .",
+    "electron": "electron --trace-warnings .",
     "svelte:dev": "cd app/svelte && npm run dev",
     "dev": "concurrently \"npm run tsc-watch:main\" \"npm run tsc-watch:preload\"  \"npm run tsc-watch:workers\" \"npm run svelte:dev\"",
     "start": "electron-forge start",

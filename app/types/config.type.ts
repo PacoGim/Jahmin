@@ -4,7 +4,7 @@ export type ConfigType = {
 	group?: GroupType
 	groupOnlyByFolder?: boolean
 	songListTags?: any[]
-	userOptions: UserOptionsType
+	userOptions: PartialUserOptionsType
 }
 
 type DirectoriesType = {
@@ -56,3 +56,4 @@ type LyricsStyle = {
 }
 
 export type PartialConfigType = Partial<ConfigType>
+type PartialUserOptionsType = Partial<UserOptionsType>

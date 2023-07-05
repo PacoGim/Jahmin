@@ -28,9 +28,6 @@ app.whenReady().then(() => {
 	createWindow()
 	startIPC()
 
-	// TODO Remove this when we have a better solution for the max listeners problem.
-	setMaxListeners(20)
-
 	if (getConfig().userOptions.isFullscreen === true) {
 		getMainWindow().maximize()
 	}
