@@ -6,7 +6,6 @@
 	export let songRating = 0
 	export let hook
 	export let klass: '' | 'tag-edit-star' = ''
-	export let align: string = 'center'
 
 	let starRating = 0
 	let starRatingTemp = 0 // Keeps track of the user selected rating.
@@ -55,7 +54,6 @@
 	tabindex="-1"
 	role="button"
 	class={klass}
-	style="justify-self: {align}"
 >
 	<img
 		on:click={() => {

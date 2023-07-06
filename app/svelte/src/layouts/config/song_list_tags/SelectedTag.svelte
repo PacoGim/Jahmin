@@ -3,7 +3,7 @@
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
 	import MoveIcon from '../../../icons/MoveIcon.svelte'
-	import { config } from '../../../stores/config.store'
+	import { songListTagConfig } from '../../../stores/config.store'
 
 	export let tag
 	export let index
@@ -14,81 +14,91 @@
 
 	function removeTagFromTagList(tagIndex: number) {
 		// Remove tag from config
-		$config.songListTags.splice(tagIndex, 1)
+		$songListTagConfig.splice(tagIndex, 1)
 
-		// Find Dynamic Artists and Title tag index
-		let dynamicArtistsTagIndex = $config.songListTags.findIndex(tag => tag.value === 'DynamicArtists')
-		let titleTagIndex = $config.songListTags.findIndex(tag => tag.value === 'Title')
-
-		// If Dynamic Artists tag is found but Title is NOT found, remove Dynamic Artists tag
-		if (dynamicArtistsTagIndex !== -1 && titleTagIndex === -1) {
-			$config.songListTags.splice(dynamicArtistsTagIndex, 1)
+		if ($songListTagConfig.length === 0) {
+			$songListTagConfig = [
+				{
+					align: 'center',
+					value: 'Track',
+					isExpanded: false
+				},
+				{
+					align: 'left',
+					value: 'Title',
+					isExpanded: true
+				},
+				{
+					align: 'center',
+					value: 'PlayCount',
+					isExpanded: false
+				},
+				{
+					align: 'center',
+					value: 'Rating',
+					isExpanded: false
+				},
+				{
+					align: 'left',
+					value: 'Duration',
+					isExpanded: false
+				}
+			]
 		}
 
-		if ($config.songListTags.length === 0) {
-			$config.songListTags.push({
-				value: 'Album',
-				isExpanded: false,
-				align: 'center'
-			})
-		}
-
-		$config.songListTags = $config.songListTags
+		$songListTagConfig = $songListTagConfig
 	}
 </script>
 
 <!-- Center end start -->
-{#if tag.value !== 'DynamicArtists'}
-	<li data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value}>
-		<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
-		<select bind:value={$config.songListTags[index].value}>
-			{#each songListTagsVar as tag, index (index)}
-				<option value={tag.value}>{tag.name}</option>
-			{/each}
-		</select>
-		<tag-empty-space />
-		<tag-expand data-is-expanded={$config.songListTags[index].isExpanded}>
-			<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$config.songListTags[index].isExpanded} />
-			<label for="{index}-{tag.value}-expand">Expanded</label>
-		</tag-expand>
 
-		<tag-aligns data-is-active={$config.songListTags[index].isExpanded}>
-			<tag-align-left class="tag-align">
-				<input id="{index}-{tag.value}-l" type="radio" bind:group={$config.songListTags[index].align} value="start" />
-				<label for="{index}-{tag.value}-l">L</label>
-			</tag-align-left>
+<li data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value}>
+	<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
+	<select bind:value={$songListTagConfig[index].value}>
+		{#each songListTagsVar as tag, index (index)}
+			<option value={tag.value}>{tag.name}</option>
+		{/each}
+	</select>
+	<tag-empty-space />
+	<tag-expand data-is-expanded={$songListTagConfig[index].isExpanded}>
+		<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$songListTagConfig[index].isExpanded} />
+		<label for="{index}-{tag.value}-expand">Expanded</label>
+	</tag-expand>
 
-			<tag-align-center class="tag-align">
-				<input id="{index}-{tag.value}-c" type="radio" bind:group={$config.songListTags[index].align} value="center" />
-				<label for="{index}-{tag.value}-c">C</label>
-			</tag-align-center>
+	<tag-aligns data-is-active={$songListTagConfig[index].isExpanded}>
+		<tag-align-left class="tag-align">
+			<input id="{index}-{tag.value}-l" type="radio" bind:group={$songListTagConfig[index].align} value="start" />
+			<label for="{index}-{tag.value}-l">L</label>
+		</tag-align-left>
 
-			<tag-align-right class="tag-align">
-				<input id="{index}-{tag.value}-r" type="radio" bind:group={$config.songListTags[index].align} value="end" />
-				<label for="{index}-{tag.value}-r">R</label>
-			</tag-align-right>
-		</tag-aligns>
+		<tag-align-center class="tag-align">
+			<input id="{index}-{tag.value}-c" type="radio" bind:group={$songListTagConfig[index].align} value="center" />
+			<label for="{index}-{tag.value}-c">C</label>
+		</tag-align-center>
 
-		<move-icon>
-			<MoveIcon style="height: 1.25rem;fill:var(--color-fg-1);margin:0 1rem;" />
-		</move-icon>
+		<tag-align-right class="tag-align">
+			<input id="{index}-{tag.value}-r" type="radio" bind:group={$songListTagConfig[index].align} value="end" />
+			<label for="{index}-{tag.value}-r">R</label>
+		</tag-align-right>
+	</tag-aligns>
 
-		<delete-icon
-			on:click={() => {
-				removeTagFromTagList(index)
-			}}
-			on:keypress={() => {
-				removeTagFromTagList(index)
-			}}
-			tabindex="-1"
-			role="button"
-		>
-			<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);" />
-		</delete-icon>
-	</li>
-{:else}
-	<li class="not-display" data-index={index} data-align={tag.align} data-is-expanded={tag.isExpanded} data-value={tag.value} />
-{/if}
+	<move-icon>
+		<MoveIcon style="height: 1.25rem;fill:var(--color-fg-1);margin:0 1rem;" />
+	</move-icon>
+
+	<delete-icon
+		on:click={() => {
+			removeTagFromTagList(index)
+		}}
+		on:keypress={() => {
+			removeTagFromTagList(index)
+		}}
+		tabindex="-1"
+		role="button"
+	>
+		<DeleteIcon style="height: 1.25rem;fill:var(--color-fg-1);" />
+	</delete-icon>
+</li>
 
 <style>
 	li {
@@ -99,10 +109,6 @@
 		padding: 0.5rem 1rem;
 		margin: 1rem 0;
 		background-color: var(--color-bg-2);
-	}
-
-	li.not-display {
-		display: none;
 	}
 
 	:global(li.slow-transition) {

@@ -48,7 +48,7 @@ export let windowResize: Writable<number> = writable(undefined)
 
 /********************** ConfigLayout **********************/
 export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
-export let configOptionSelected: Writable<'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'> = writable('Appearance')
+export let configOptionSelected: Writable<'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'> = writable('Song List Tags')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
@@ -85,8 +85,6 @@ export let songSyncQueueProgress: Writable<{
 })
 
 export let songListItemElement: Writable<HTMLElement | undefined> = writable(undefined)
-
-export let songListTagsValuesStore: Writable<string[]> = writable([])
 
 export let reloadArts: Writable<number> = writable(Math.random())
 

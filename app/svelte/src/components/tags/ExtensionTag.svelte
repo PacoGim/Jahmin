@@ -28,8 +28,10 @@
 
 <style>
 	extension-tag {
+		width: 2rem;
 		display: flex;
 		margin: 0 0.5rem;
+		justify-content: center;
 	}
 
 	m4a-icon {

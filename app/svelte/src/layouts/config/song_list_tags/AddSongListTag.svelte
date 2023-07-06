@@ -1,16 +1,16 @@
 <script lang="ts">
 	import songListTagsVar from '../../../global/songListTags.var'
-	import { songListTagsValuesStore } from '../../../stores/main.store'
 	import type { SelectedTagNameType } from '../../../../../types/selectedTag.type'
-	import { config } from '../../../stores/config.store'
+	import { songListTagConfig } from '../../../stores/config.store'
 
 	let optionBind: SelectedTagNameType = 'ChooseTag'
 
 	function addTag() {
-		if ($config.songListTags.find(tag => tag.value === optionBind) === undefined) {
-			$config.songListTags.push({ value: optionBind, isExpanded: false, align: 'center' })
-			$config.songListTags = $config.songListTags
+		if ($songListTagConfig.find(tag => tag.value === optionBind) === undefined) {
+			$songListTagConfig.push({ value: optionBind, isExpanded: false, align: 'center' })
+			$songListTagConfig = $songListTagConfig
 		}
+		optionBind = 'ChooseTag'
 	}
 
 	function getOptionNameFromValue(value: string) {
@@ -29,7 +29,7 @@
 		<select bind:value={optionBind} on:change={() => addTag()}>
 			<option value="ChooseTag" disabled>Choose tag to add</option>
 			{#each songListTagsVar as tag, index (index)}
-				{#if !$songListTagsValuesStore.includes(tag.value)}
+				{#if !$songListTagConfig.find(item => item.value === tag.value)}
 					<option value={tag.value}>{tag.name}</option>
 				{/if}
 			{/each}

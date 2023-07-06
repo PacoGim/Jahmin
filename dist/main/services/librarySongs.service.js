@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.stopSongsUpdating = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.fetchSongsTag = exports.maxTaskQueueLength = void 0;
+//@ts-nocheck
 const os_1 = require("os");
 /********************** Services **********************/
 const workers_service_1 = require("./workers.service");

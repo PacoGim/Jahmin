@@ -3,7 +3,7 @@
 
 	import SortableService from '../../../services/sortable.service'
 	import { onMount } from 'svelte'
-	import { config, songListTagConfig } from '../../../stores/config.store'
+	import { songListTagConfig } from '../../../stores/config.store'
 
 	$: if ($songListTagConfig.length > 0) createSortableList()
 
@@ -34,7 +34,7 @@
 			})
 		})
 
-		$config.songListTags = newTags
+		$songListTagConfig = [...newTags]
 	}
 
 	onMount(() => {
@@ -44,7 +44,7 @@
 
 <selected-tags-list>
 	<ul id="items">
-		{#each $config.songListTags as tag, index (`${tag.value}${index}`)}
+		{#each $songListTagConfig as tag, index (`${tag.value}${index}`)}
 			<SelectedTag {tag} {index} />
 		{/each}
 	</ul>

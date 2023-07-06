@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import OptionSection from '../../../components/OptionSection.svelte'
-	import { config } from '../../../stores/config.store'
 	import type { SelectedTagType } from '../../../../../types/selectedTag.type'
 	import AddSongListTag from './AddSongListTag.svelte'
 	import SelectedTagList from './SelectedTagList.svelte'
 	import SongListPreview from './SongListPreview.svelte'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
+	import { songListTagConfig } from '../../../stores/config.store'
 
 	let isMounted = false
 
-	$: saveSelectedTagsToConfig($config.songListTags)
+	$: saveSelectedTagsToConfig($songListTagConfig)
 
 	function saveSelectedTagsToConfig(newSelectedTags: SelectedTagType[]) {
 		if (isMounted === true) {

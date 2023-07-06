@@ -1,27 +1,24 @@
 <script lang="ts">
-	import type { SongType } from '../../../../types/song.type'
+	import type { PartialSongType } from '../../../../types/song.type'
 	import getDynamicArtistsFn from '../../functions/getDynamicArtists.fn'
 	import { showDynamicArtistsConfig } from '../../stores/config.store'
 
-	export let song: SongType
-	export let align
+	export let song: PartialSongType
 </script>
 
-<title-tag style="justify-self: {align}">
-	<!-- <content> -->
+<title-tag>
 	{song.Title}
 	{#if $showDynamicArtistsConfig === true}
 		{getDynamicArtistsFn(song.Artist, song.AlbumArtist)}
 	{/if}
-	<!-- </content> -->
 </title-tag>
 
 <style>
 	title-tag {
-		display: -webkit-box;
+		/* display: -webkit-box;
 		-webkit-line-clamp: 1;
 		-webkit-box-orient: vertical;
-		overflow: hidden;
+		overflow: hidden; */
 		max-height: 22px;
 	}
 </style>

@@ -28,3 +28,14 @@ export default function (id: string, query: string | Element, options: any) {
 		tippyInstances.set(id, tippy(query, Object.assign(defaultTippyOptions, options)))
 	}
 }
+
+export function deleteInstance(id: string) {
+	let tippyInstance = tippyInstances.get(id)
+
+	// If exists, update content.
+	if (tippyInstance) {
+		//@ts-ignore
+		tippyInstance.destroy()
+		tippyInstances.delete(id)
+	}
+}

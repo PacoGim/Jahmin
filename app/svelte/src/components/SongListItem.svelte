@@ -19,8 +19,8 @@
 	$: isSongPlaying = $playingSongStore?.ID === song?.ID
 
 	// $: {
-		// song
-		// setDynamicArtists()
+	// song
+	// setDynamicArtists()
 	// }
 
 	$: {
@@ -45,29 +45,14 @@
 		let tempGridStyle = tagToGridStyleFn($songListTagConfig)
 
 		if (song.isEnabled === false) {
-			tempGridStyle = 'max-content ' + tempGridStyle
+			tempGridStyle = 'minmax(min-content, max-content) ' + tempGridStyle
 		}
 
 		if (isSongPlaying) {
-			tempGridStyle = 'max-content ' + tempGridStyle
+			tempGridStyle = 'minmax(min-content, max-content) ' + tempGridStyle
 		}
 
 		gridStyle = tempGridStyle
-	}
-
-	function setDynamicArtists() {
-		if (!song?.AlbumArtist || !song?.Artist) {
-			song.DynamicArtists = ''
-			return
-		}
-
-		let splitArtists = song.Artist.split('//').filter(artist => !song.AlbumArtist.includes(artist))
-
-		if (splitArtists.length > 0) {
-			song.DynamicArtists = `(feat. ${splitArtists.join('//')})`
-		} else {
-			song.DynamicArtists = ''
-		}
 	}
 
 	function setStar(starChangeEvent) {
@@ -80,7 +65,7 @@
 <song-list-item
 	data-id={song.ID}
 	data-index={index}
-	style="grid-template-columns:{gridStyle};"
+	style="grid-auto-columns:{gridStyle};"
 	class="
 	{song.isEnabled === false ? 'disabled' : ''}
 	{$playingSongStore?.ID === song.ID ? 'playing' : ''}
@@ -92,21 +77,6 @@
 
 	{#each $songListTagConfig as tag, index (index)}
 		<SongTag {song} {tag} on:starChange={setStar} />
-
-		<!--
-		{#if tag.value === 'Title' && $showDynamicArtistsConfig}
-			<SongTag
-				tagName={tag.value}
-				tagValue={`${song[tag.value]} ${song.DynamicArtists}` || ''}
-				align={tag?.align?.toLowerCase()}
-				on:starChange={setStar}
-			/>
-		{:else if tag.value === 'DynamicArtists' || !$songListTagConfig.find(configTag => configTag.value === 'Title')}
-
-		{:else}
-			<SongTag tagName={tag.value} tagValue={song[tag.value] || ''} align={tag?.align?.toLowerCase()} on:starChange={setStar} />
-		{/if}
-	-->
 	{/each}
 </song-list-item>
 
@@ -121,12 +91,6 @@
 		max-height: var(--song-list-item-height);
 		height: var(--song-list-item-height);
 
-		display: grid;
-		/* grid-template-columns: max-content auto max-content max-content max-content; */
-		grid-template-rows: auto;
-
-		/* margin: 0.25rem 0; */
-		/* border-bottom: 0.25rem transparent solid; */
 		border: 0.125rem transparent solid;
 		background-clip: padding-box;
 		padding: 0.5rem 0.5rem;
@@ -134,10 +98,13 @@
 
 		border-radius: 10px;
 
-		/* transition-property: font-variation-settings, box-shadow, background-color; */
 		transition-property: font-variation-settings, background-color, box-shadow;
 		transition-duration: 250ms, 500ms, 500ms;
 		transition-timing-function: ease-in-out;
+
+		display: grid;
+		grid-template-rows: auto;
+		grid-auto-flow: column;
 	}
 
 	song-list-item:first-of-type {
