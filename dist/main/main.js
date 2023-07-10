@@ -36,7 +36,7 @@ electron_1.app.whenReady().then(() => {
     });
 });
 electron_1.app.on('will-quit', () => {
-    // Unregister all shortcuts. This is a test
+    // Unregister all shortcuts.
     electron_1.globalShortcut.unregisterAll();
 });
 function createWindow() {

@@ -8,9 +8,9 @@
 
 <style>
 	generic-tag {
-		/* display: -webkit-box;
-		-webkit-line-clamp: 1;
-		-webkit-box-orient: vertical;
-		overflow: hidden; */
+		/* display: inline-block; */
+		width: 4rem;
+		max-width: 4rem;
+		min-width: 4rem;
 	}
 </style>

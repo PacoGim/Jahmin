@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SongTag from '../../../components/SongTag.svelte'
 	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
-	import { showDynamicArtistsConfig, showExtensionsIconsConfig, songListTagConfig } from '../../../stores/config.store'
+	import { dateOrderConfig, showDynamicArtistsConfig, showExtensionsIconsConfig, songListTagConfig } from '../../../stores/config.store'
 	import type { PartialSongType } from '../../../../../types/song.type'
 	import ToggleIcon from '../../../icons/ToggleIcon.svelte'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
@@ -34,6 +34,8 @@
 	$: {
 		gridStyle = tagToGridStyleFn($songListTagConfig)
 	}
+
+	$:console.log($dateOrderConfig)
 
 	function toggleDynamicArtists() {
 		updateConfigFn({
@@ -71,6 +73,9 @@
 			<span>Extension Icon <ToggleIcon toggle={$showExtensionsIconsConfig ? 'on' : 'off'} /></span>
 		</button>
 	</toggle-extension-icons>
+
+
+
 </song-list-preview>
 
 <style>

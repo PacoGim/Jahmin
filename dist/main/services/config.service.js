@@ -93,6 +93,7 @@ function getDefaultConfigFile() {
             alwaysShowAlbumOverlay: false,
             showDynamicArtists: true,
             showExtensionsIcons: true,
+            dateOrder: ['year'],
             isFullscreen: false,
             equalizerHash: '3qu',
             lyricsStyle: {
