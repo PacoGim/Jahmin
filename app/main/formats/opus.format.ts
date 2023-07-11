@@ -3,7 +3,7 @@ const stringHash = require('string-hash')
 
 import generateId from '../functions/generateId.fn'
 import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
-import { getWorker } from '../services/workers.service'
+import { getWorker, useWorker } from '../services/workers.service'
 import { EditTag } from '../../types/editTag.type'
 import { OpusTagType } from '../../types/opus.type'
 import { SongType } from '../../types/song.type'
@@ -12,56 +12,35 @@ import { Worker } from 'worker_threads'
 import getDirectoryFn from '../functions/getDirectory.fn'
 
 /********************** Write Opus Tags **********************/
-let ffmpegDeferredPromise: any = undefined
-let ffmpegDeferredPromiseId: string
-
 let ffmpegWorker: Worker
 
-getWorker('ffmpeg').then(worker => {
-	ffmpegWorker = worker
-
-	ffmpegWorker.on('message', async (response: any) => {
-		if (response.id === ffmpegDeferredPromiseId) {
-			// TODO Add Size matching check just in case
-
-			if (fs.existsSync(response.tempFileName)) {
-				fs.unlinkSync(response.filePath)
-				fs.renameSync(response.tempFileName, response.filePath)
-			}
-			ffmpegDeferredPromise(response.status)
-		}
-	})
-})
+getWorker('ffmpeg').then(worker => (ffmpegWorker = worker))
 
 export function writeOpusTags(filePath: string, newTags: any): Promise<any> {
 	return new Promise((resolve, reject) => {
-		ffmpegDeferredPromise = resolve
-		ffmpegDeferredPromiseId = generateId()
-
 		let ffmpegString = objectToFfmpegString(newTags)
 		let tempFileName = filePath.replace(/(\.opus)$/, '.temp.opus')
 
 		let command = `-i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`
 
-		ffmpegWorker?.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command })
+		useWorker({ filePath, tempFileName, command }, ffmpegWorker).then(response => {
+			fs.access(response.results.tempFileName, err => {
+				if (!err) {
+					fs.unlink(response.results.filePath, () => {
+						fs.rename(response.results.tempFileName, response.results.filePath, () => {
+							resolve(response)
+						})
+					})
+				}
+			})
+		})
 	})
 }
 
 /********************** Get Opus Tags **********************/
 let mmWorker: Worker
 
-getWorker('musicMetadata').then(worker => {
-	mmWorker = worker
-
-	mmWorker.on('message', data => {
-		if (mmDeferredPromises.has(data.filePath)) {
-			mmDeferredPromises.get(data.filePath)(data.metadata)
-			mmDeferredPromises.delete(data.filePath)
-		}
-	})
-})
-
-let mmDeferredPromises: Map<string, any> = new Map<string, any>()
+getWorker('musicMetadata').then(worker => (mmWorker = worker))
 
 export async function getOpusTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
@@ -69,52 +48,51 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 			return reject('File not found')
 		}
 
-		const METADATA: any = await new Promise((resolve, reject) => {
-			mmDeferredPromises.set(filePath, resolve)
-			mmWorker?.postMessage(filePath)
-		})
+		useWorker({ filePath }, mmWorker).then(response => {
+			const metadata = response.results.metadata
 
-		let tags: SongType = {
-			ID: stringHash(filePath),
-			Extension: 'opus',
-			SourceFile: filePath,
-			Directory: getDirectoryFn(filePath)
-		}
-
-		fs.stat(filePath, (err, stats) => {
-			if (err) {
-				return reject(err)
+			let tags: SongType = {
+				ID: stringHash(filePath),
+				Extension: 'opus',
+				SourceFile: filePath,
+				Directory: getDirectoryFn(filePath)
 			}
 
-			if (stats) {
-				let nativeTags: OpusTagType = mergeNatives(METADATA.native)
+			fs.stat(filePath, (err, stats) => {
+				if (err) {
+					return reject(err)
+				}
 
-				let dateParsed = getDate(String(nativeTags.DATE))
+				if (stats) {
+					let nativeTags: OpusTagType = mergeNatives(metadata.native)
 
-				tags.Album = nativeTags?.ALBUM || null
-				tags.AlbumArtist = nativeTags?.ALBUMARTIST || null
-				tags.Artist = nativeTags?.ARTIST || null
-				tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || null
-				tags.Composer = nativeTags?.COMPOSER || null
-				tags.Date_Year = dateParsed.year || null
-				tags.Date_Month = dateParsed.month || null
-				tags.Date_Day = dateParsed.day || null
-				tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
-				tags.Genre = nativeTags?.GENRE || null
-				tags.Rating = Number(nativeTags?.RATING) || null
-				tags.Title = nativeTags?.TITLE || null
-				tags.Track = Number(nativeTags?.TRACKNUMBER) || null
+					let dateParsed = getDate(String(nativeTags.DATE))
 
-				tags.BitRate = METADATA.format.bitrate / 1000 || null
-				tags.Duration = truncToDecimalPointFn(METADATA.format.duration, 3) || null
-				tags.LastModified = stats.mtimeMs
-				tags.SampleRate = METADATA.format.sampleRate || null
-				tags.Size = stats.size
+					tags.Album = nativeTags?.ALBUM || null
+					tags.AlbumArtist = nativeTags?.ALBUMARTIST || null
+					tags.Artist = nativeTags?.ARTIST || null
+					tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || null
+					tags.Composer = nativeTags?.COMPOSER || null
+					tags.Date_Year = dateParsed.year || null
+					tags.Date_Month = dateParsed.month || null
+					tags.Date_Day = dateParsed.day || null
+					tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
+					tags.Genre = nativeTags?.GENRE || null
+					tags.Rating = Number(nativeTags?.RATING) || null
+					tags.Title = nativeTags?.TITLE || null
+					tags.Track = Number(nativeTags?.TRACKNUMBER) || null
 
-				tags.PlayCount = 0
+					tags.BitRate = metadata.format.bitrate / 1000 || null
+					tags.Duration = truncToDecimalPointFn(metadata.format.duration, 3) || null
+					tags.LastModified = stats.mtimeMs
+					tags.SampleRate = metadata.format.sampleRate || null
+					tags.Size = stats.size
 
-				resolve(tags)
-			}
+					tags.PlayCount = 0
+
+					resolve(tags)
+				}
+			})
 		})
 	})
 }

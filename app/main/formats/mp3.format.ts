@@ -6,49 +6,28 @@ import { SongType } from '../../types/song.type'
 import { Mp3TagType } from '../../types/mp3TagType'
 import { EditTag } from '../../types/editTag.type'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
-import { getWorker } from '../services/workers.service'
+import { getWorker, useWorker } from '../services/workers.service'
 import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
 
 import { Worker } from 'worker_threads'
 import getDirectoryFn from '../functions/getDirectory.fn'
 
 /********************** Write Mp3 Tags **********************/
-let tagWriteDeferredPromise: any = undefined
-
 let nodeId3Worker: Worker
-getWorker('nodeID3').then(worker => {
-	nodeId3Worker = worker
-
-	nodeId3Worker.on('message', (response: any) => {
-		tagWriteDeferredPromise(response)
-	})
-})
+getWorker('nodeID3').then(worker => (nodeId3Worker = worker))
 
 export function writeMp3Tags(filePath: string, newTags: any): Promise<any> {
 	return new Promise((resolve, reject) => {
 		newTags = normalizeNewTags(newTags)
 
-		tagWriteDeferredPromise = resolve
-
-		nodeId3Worker?.postMessage({ filePath, newTags })
+		useWorker({ filePath, newTags }, nodeId3Worker).then(response => resolve(response))
 	})
 }
 
 /********************** Get Mp3 Tags **********************/
-let deferredPromise: Map<string, any> = new Map<string, any>()
-
 let mmWorker: Worker
 
-getWorker('musicMetadata').then(worker => {
-	mmWorker = worker
-
-	mmWorker.on('message', data => {
-		if (deferredPromise.has(data.filePath)) {
-			deferredPromise.get(data.filePath)(data.metadata)
-			deferredPromise.delete(data.filePath)
-		}
-	})
-})
+getWorker('musicMetadata').then(worker => (mmWorker = worker))
 
 export async function getMp3Tags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
@@ -56,46 +35,45 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 			return reject('File not found')
 		}
 
-		const METADATA: any = await new Promise((resolve, reject) => {
-			deferredPromise.set(filePath, resolve)
-			mmWorker?.postMessage(filePath)
+		useWorker({ filePath }, mmWorker).then(response => {
+			const metadata = response.results.metadata
+
+			let tags: SongType = {
+				ID: stringHash(filePath),
+				Extension: 'mp3',
+				SourceFile: filePath,
+				Directory: getDirectoryFn(filePath)
+			}
+
+			const STATS = fs.statSync(filePath)
+			let nativeTags: Mp3TagType = mergeNatives(metadata.native)
+
+			let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
+
+			tags.Album = nativeTags?.TALB || null
+			tags.AlbumArtist = nativeTags?.TPE2 || null
+			tags.Artist = nativeTags?.TPE1 || null
+			tags.Comment = nativeTags?.COMM?.text || null
+			tags.Composer = nativeTags?.TCOM || null
+			tags.Date_Year = dateParsed.year || null
+			tags.Date_Month = dateParsed.month || null
+			tags.Date_Day = dateParsed.day || null
+			tags.DiscNumber = Number(nativeTags?.TPOS) || null
+			tags.Genre = nativeTags?.TCON || null
+			tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || null
+			tags.Title = nativeTags?.TIT2 || null
+			tags.Track = Number(nativeTags?.TRCK) || Number(nativeTags?.track) || null
+
+			tags.BitRate = metadata.format.bitrate / 1000 || null
+			tags.Duration = truncToDecimalPointFn(metadata.format.duration, 3) || null
+			tags.LastModified = STATS.mtimeMs
+			tags.SampleRate = metadata.format.sampleRate || null
+			tags.Size = STATS.size
+
+			tags.PlayCount = 0
+
+			resolve(tags)
 		})
-
-		let tags: SongType = {
-			ID: stringHash(filePath),
-			Extension: 'mp3',
-			SourceFile: filePath,
-			Directory:getDirectoryFn(filePath),
-		}
-
-		const STATS = fs.statSync(filePath)
-		let nativeTags: Mp3TagType = mergeNatives(METADATA.native)
-
-		let dateParsed = getDate(String(nativeTags.TDRC || nativeTags.TYER))
-
-		tags.Album = nativeTags?.TALB || null
-		tags.AlbumArtist = nativeTags?.TPE2 || null
-		tags.Artist = nativeTags?.TPE1 || null
-		tags.Comment = nativeTags?.COMM?.text || null
-		tags.Composer = nativeTags?.TCOM || null
-		tags.Date_Year = dateParsed.year || null
-		tags.Date_Month = dateParsed.month || null
-		tags.Date_Day = dateParsed.day || null
-		tags.DiscNumber = Number(nativeTags?.TPOS) || null
-		tags.Genre = nativeTags?.TCON || null
-		tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || null
-		tags.Title = nativeTags?.TIT2 || null
-		tags.Track = Number(nativeTags?.TRCK) || Number(nativeTags?.track) || null
-
-		tags.BitRate = METADATA.format.bitrate / 1000 || null
-		tags.Duration = truncToDecimalPointFn(METADATA.format.duration, 3) || null
-		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = METADATA.format.sampleRate || null
-		tags.Size = STATS.size
-
-		tags.PlayCount = 0
-
-		resolve(tags)
 	})
 }
 

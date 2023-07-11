@@ -3,7 +3,7 @@ const stringHash = require('string-hash')
 import generateId from '../functions/generateId.fn'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
-import { getWorker } from '../services/workers.service'
+import { getWorker, useWorker } from '../services/workers.service'
 import { EditTag } from '../../types/editTag.type'
 import { FlacTagType } from '../../types/flacTagType'
 import { SongType } from '../../types/song.type'
@@ -11,76 +11,35 @@ import { SongType } from '../../types/song.type'
 import { Worker } from 'worker_threads'
 import getDirectoryFn from '../functions/getDirectory.fn'
 
-// const mm = require('music-metadata')
-
 /********************** Write Flac Tags **********************/
-let ffmpegDeferredPromise: any = undefined
-let ffmpegDeferredPromiseId: string
-
 let ffmpegWorker: Worker
-getWorker('ffmpeg').then(worker => {
-	ffmpegWorker = worker
-
-	ffmpegWorker.on('message', async (response: any) => {
-		if (response.id === ffmpegDeferredPromiseId) {
-			// TODO Add Size matching check just in case
-
-			if (fs.existsSync(response.tempFileName)) {
-				fs.unlinkSync(response.filePath)
-				fs.renameSync(response.tempFileName, response.filePath)
-			}
-
-			ffmpegDeferredPromise(response.status)
-		}
-	})
-})
+getWorker('ffmpeg').then(worker => (ffmpegWorker = worker))
 
 export function writeFlacTags(filePath: string, newTags: any): Promise<any> {
 	return new Promise((resolve, reject) => {
-		ffmpegDeferredPromise = resolve
-		ffmpegDeferredPromiseId = generateId()
-
 		let ffmpegString = objectToFfmpegString(newTags)
 		let tempFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
 
 		let command = `-i "${filePath}"  -map 0 -y -codec copy ${ffmpegString} "${tempFileName}"`
 
-		ffmpegWorker?.postMessage({ id: ffmpegDeferredPromiseId, filePath, tempFileName, command })
+		useWorker({ filePath, tempFileName, command }, ffmpegWorker).then(response => {
+			fs.access(response.results.tempFileName, err => {
+				if (!err) {
+					fs.unlink(response.results.filePath, () => {
+						fs.rename(response.results.tempFileName, response.results.filePath, () => {
+							resolve(response)
+						})
+					})
+				}
+			})
+		})
 	})
 }
-
-/* export function writeFlacTags(filePath: string, newTags: any) {
-	return new Promise((resolve, reject) => {
-
-		resolve('')
-
-		// let ffmpegMetatagString = objectToFfmpegString(newTags)
-		// let templFileName = filePath.replace(/(\.flac)$/, '.temp.flac')
-
-		// exec(
-		// 	`"${ffmpegPath}" -i "${filePath}"  -map 0 -y -codec copy ${ffmpegMetatagString} "${templFileName}" && mv "${templFileName}" "${filePath}"`,
-		// 	(error, stdout, stderr) => {}
-		// ).on('close', () => {
-		// 	resolve('Done')
-		// })
-	})
-} */
 
 /********************** Get Flac Tags **********************/
 let mmWorker: Worker
 
-getWorker('musicMetadata').then(worker => {
-	mmWorker = worker
-
-	mmWorker.on('message', data => {
-		if (deferredPromise.has(data.filePath)) {
-			deferredPromise.get(data.filePath)(data.metadata)
-			deferredPromise.delete(data.filePath)
-		}
-	})
-})
-
-let deferredPromise: Map<string, any> = new Map<string, any>()
+getWorker('musicMetadata').then(worker => (mmWorker = worker))
 
 export async function getFlacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
@@ -88,47 +47,46 @@ export async function getFlacTags(filePath: string): Promise<SongType> {
 			return reject('File not found')
 		}
 
-		const METADATA: any = await new Promise((resolve, reject) => {
-			deferredPromise.set(filePath, resolve)
-			mmWorker?.postMessage(filePath)
+		useWorker({ filePath }, mmWorker).then(response => {
+			const metadata = response.results.metadata
+
+			let tags: SongType = {
+				ID: stringHash(filePath),
+				Extension: 'flac',
+				SourceFile: filePath,
+				Directory: getDirectoryFn(filePath)
+			}
+
+			const STATS = fs.statSync(filePath)
+			let nativeTags: FlacTagType = mergeNatives(metadata.native)
+
+			let dateParsed = getDate(String(nativeTags.DATE))
+
+			tags.Album = nativeTags?.ALBUM || null
+			tags.AlbumArtist = nativeTags?.ALBUMARTIST || null
+			tags.Artist = nativeTags?.ARTIST || null
+			tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || null
+			tags.Composer = nativeTags?.COMPOSER || null
+			tags.Date_Year = dateParsed.year || null
+			tags.Date_Month = dateParsed.month || null
+			tags.Date_Day = dateParsed.day || null
+			tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
+			tags.Genre = nativeTags?.GENRE || null
+			tags.Rating = Number(nativeTags?.RATING) || null
+			tags.Title = nativeTags?.TITLE || null
+			tags.Track = Number(nativeTags?.TRACKNUMBER) || null
+
+			tags.BitDepth = metadata.format.bitsPerSample || null
+			tags.BitRate = metadata.format.bitrate / 1000 || null
+			tags.Duration = truncToDecimalPointFn(metadata.format.duration, 3) || null
+			tags.LastModified = STATS.mtimeMs
+			tags.SampleRate = metadata.format.sampleRate || null
+			tags.Size = STATS.size
+
+			tags.PlayCount = 0
+
+			resolve(tags)
 		})
-
-		let tags: SongType = {
-			ID: stringHash(filePath),
-			Extension: 'flac',
-			SourceFile: filePath,
-			Directory: getDirectoryFn(filePath)
-		}
-
-		const STATS = fs.statSync(filePath)
-		let nativeTags: FlacTagType = mergeNatives(METADATA.native)
-
-		let dateParsed = getDate(String(nativeTags.DATE))
-
-		tags.Album = nativeTags?.ALBUM || null
-		tags.AlbumArtist = nativeTags?.ALBUMARTIST || null
-		tags.Artist = nativeTags?.ARTIST || null
-		tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || null
-		tags.Composer = nativeTags?.COMPOSER || null
-		tags.Date_Year = dateParsed.year || null
-		tags.Date_Month = dateParsed.month || null
-		tags.Date_Day = dateParsed.day || null
-		tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
-		tags.Genre = nativeTags?.GENRE || null
-		tags.Rating = Number(nativeTags?.RATING) || null
-		tags.Title = nativeTags?.TITLE || null
-		tags.Track = Number(nativeTags?.TRACKNUMBER) || null
-
-		tags.BitDepth = METADATA.format.bitsPerSample || null
-		tags.BitRate = METADATA.format.bitrate / 1000 || null
-		tags.Duration = truncToDecimalPointFn(METADATA.format.duration, 3) || null
-		tags.LastModified = STATS.mtimeMs
-		tags.SampleRate = METADATA.format.sampleRate || null
-		tags.Size = STATS.size
-
-		tags.PlayCount = 0
-
-		resolve(tags)
 	})
 }
 

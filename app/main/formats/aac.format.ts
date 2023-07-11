@@ -12,9 +12,7 @@ import getDirectoryFn from '../functions/getDirectory.fn'
 /********************** Write Aac Tags **********************/
 let exifToolWriteWorker: Worker
 
-getWorker('exifToolWrite').then(worker => {
-	exifToolWriteWorker = worker
-})
+getWorker('exifToolWrite').then(worker => (exifToolWriteWorker = worker))
 
 export function writeAacTags(filePath: string, newTags: any): Promise<any> {
 	return new Promise(async (resolve, reject) => {
@@ -29,9 +27,7 @@ export function writeAacTags(filePath: string, newTags: any): Promise<any> {
 /********************** Read Aac Tags **********************/
 let exifToolReadWorker: Worker
 
-getWorker('exifToolRead').then(worker => {
-	exifToolReadWorker = worker
-})
+getWorker('exifToolRead').then(worker => (exifToolReadWorker = worker))
 
 export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
@@ -44,7 +40,9 @@ export function getAacTags(filePath: string): Promise<SongType> {
 
 			const STATS = fs.statSync(filePath)
 
-			let dateParsed = getDate(String(metadata.ContentCreateDate || metadata.CreateDate))
+			let dateParsed = getDate(
+				String(metadata.ContentCreateDate?.rawValue || metadata.ContentCreateDate || metadata.CreateDate)
+			)
 
 			if (!isNaN(metadata.Rating)) metadata.RatingPercent = metadata.Rating
 

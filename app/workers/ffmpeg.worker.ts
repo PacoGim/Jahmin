@@ -12,8 +12,8 @@ let ffmpegBinary = fs.readdirSync(ffmpegPath)
 
 ffmpegPath = pathJoin(ffmpegPath, ffmpegBinary[0])
 
-parentPort?.on('message', message => {
-	let { id, filePath, tempFileName, command } = message
+parentPort?.on('message', data => {
+	let { filePath, tempFileName, command, workerCallId } = data
 
 	let status = -1
 
@@ -24,6 +24,13 @@ parentPort?.on('message', message => {
 			status = 0
 		}
 
-		parentPort?.postMessage({ id, filePath, tempFileName, status })
+		parentPort?.postMessage({
+			results: {
+				workerCallId,
+				filePath,
+				tempFileName,
+				status
+			}
+		})
 	})
 })

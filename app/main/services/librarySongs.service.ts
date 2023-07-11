@@ -36,12 +36,6 @@ let dbWorker: Worker
 
 getWorker('database').then(worker => {
 	dbWorker = worker
-
-	// dbWorker.on('message', (response: any) => {
-	// if (response.type !== 'read') {
-	// console.log(response)
-	// }
-	// })
 })
 
 export async function fetchSongsTag() {
@@ -63,9 +57,6 @@ export async function fetchSongsTag() {
 		.sort((a, b) => a.localeCompare(b))
 
 	let queryId = generateId()
-
-	// queryId?: string
-	// queryData: { select: string[]; where?: { [key: string]: string }[]; group?: string[]; order?: string[] }
 
 	dbWorker.postMessage({
 		type: 'read',
@@ -199,7 +190,6 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 			// setTimeout(() => {
 			// watchPaths([task.path])
 			// }, 10000)
-
 			getTask(processIndex, processesRunning)
 		})
 }
