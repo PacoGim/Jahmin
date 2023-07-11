@@ -7335,7 +7335,7 @@ var app = (function () {
     let elementMap = writable(new Map());
     let windowResize = writable(undefined);
     /********************** ConfigLayout **********************/
-    let layoutToShow = writable('Library');
+    let layoutToShow = writable('Config');
     let configOptionSelected = writable('Song List Tags');
     let mainAudioElement = writable(undefined);
     let altAudioElement = writable(undefined);
