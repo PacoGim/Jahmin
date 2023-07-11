@@ -29,7 +29,7 @@ export type UserOptionsType = {
 	lyricsStyle: LyricsStyle
 	showDynamicArtists: boolean
 	showExtensionsIcons: boolean
-	dateOrder: ('year' | 'month' | 'day')[]
+	dateOrder: ('year' | 'month' | 'day' | '')[]
 }
 
 export enum ThemeOptions {

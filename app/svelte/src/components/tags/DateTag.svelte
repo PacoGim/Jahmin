@@ -2,15 +2,23 @@
 	import { onMount } from 'svelte'
 	import type { PartialSongType } from '../../../../types/song.type'
 	import numberZeroPad from '../../functions/numberZeroPad'
+	import { dateOrderConfig } from '../../stores/config.store'
 
 	export let song: PartialSongType
 
 	let thisElement: HTMLElement
 
-	let dateTagOrder = ['year', 'month', 'day']
+	$: if (thisElement) createDateElement($dateOrderConfig)
 
-	function createDateElement(date) {
+	function createDateElement(dateTagOrder) {
+		let date = {
+			year: song.Date_Year,
+			month: song.Date_Month,
+			day: song.Date_Day
+		}
+
 		let finalString = ''
+
 		dateTagOrder.forEach((value, index) => {
 			if (date[value] === null) {
 				switch (value) {
@@ -34,15 +42,19 @@
 				}
 			}
 
-			if (index !== dateTagOrder.length - 1) {
+			if (value !== '') {
 				finalString += '/'
-			} else if (index === dateTagOrder.length - 1) {
-				monospaceData(finalString, thisElement)
+			}
+
+			if (dateTagOrder.length - 1 === index) {
+				finalString = finalString.substring(finalString.length - 1, 0)
 			}
 		})
+		monospaceData(finalString, thisElement)
 	}
 
 	function monospaceData(value: string, element: HTMLElement) {
+		element.innerHTML = ''
 		for (let char of value) {
 			if (char !== '/') {
 				let newElement = document.createElement('char')
@@ -55,11 +67,7 @@
 	}
 
 	onMount(() => {
-		createDateElement({
-			year: song.Date_Year,
-			month: song.Date_Month,
-			day: song.Date_Day
-		})
+		createDateElement($dateOrderConfig)
 	})
 </script>
 
