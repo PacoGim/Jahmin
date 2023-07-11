@@ -37,11 +37,11 @@ let dbWorker: Worker
 getWorker('database').then(worker => {
 	dbWorker = worker
 
-	dbWorker.on('message', (response: any) => {
-		if (response.type !== 'read') {
-			// console.log(response)
-		}
-	})
+	// dbWorker.on('message', (response: any) => {
+	// if (response.type !== 'read') {
+	// console.log(response)
+	// }
+	// })
 })
 
 export async function fetchSongsTag() {
@@ -169,10 +169,10 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 	}
 
 	updateSongTagsFn(task.path, { ...newTags })
-		.then(result => {
-			// Result can be 0 | 1 | -1
+		.then(response => {
+			// Response can be 0 | 1 | -1
 			// -1 means error.
-			if (result === -1) {
+			if (response === -1) {
 				// sendWebContentsFn('web-storage', {
 				// 	type: task.type,
 				// 	data: undefined
@@ -183,13 +183,14 @@ async function handleUpdateTask(task: any, processIndex: number, processesRunnin
 					delete newTags.popularimeter
 				}
 
-				// sendWebContentsFn('web-storage', {
-				// 	type: task.type,
-				// 	data: {
-				// 		id: hashFn(task.path, 'number'),
-				// 		newTags
-				// 	}
-				// })
+				dbWorker.postMessage({
+					type: 'update',
+					data: {
+						queryId: null,
+						songId: hashFn(task.path, 'number'),
+						newTags
+					}
+				})
 			}
 		})
 		.catch()

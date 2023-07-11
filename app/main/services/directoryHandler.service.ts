@@ -1,20 +1,23 @@
 import { SongType } from '../../types/song.type'
 import { getConfig, saveConfig } from './config.service'
-import  sendWebContentsFn from '../functions/sendWebContents.fn'
+import sendWebContentsFn from '../functions/sendWebContents.fn'
 import { fetchSongsTag } from './librarySongs.service'
 
 export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-add' | 'remove-exclude', dbSongs: SongType[]) {
 	let config = getConfig()
 
+	let foldersToAdd = config.directories.add || []
+	let foldersToExclude = config.directories.exclude || []
+
 	filePaths.forEach((filePath: string) => {
-		if (type === 'add' && config.directories.add.includes(filePath) === false) {
-			config.directories.add.push(filePath)
-		} else if (type === 'exclude' && config.directories.exclude.includes(filePath) === false) {
-			config.directories.exclude.push(filePath)
-		} else if (type === 'remove-add' && config.directories.add.includes(filePath) === true) {
-			config.directories.add.splice(config.directories.add.indexOf(filePath), 1)
-		} else if (type === 'remove-exclude' && config.directories.exclude.includes(filePath) === true) {
-			config.directories.exclude.splice(config.directories.exclude.indexOf(filePath), 1)
+		if (type === 'add' && foldersToAdd.includes(filePath) === false) {
+			foldersToAdd.push(filePath)
+		} else if (type === 'exclude' && foldersToExclude.includes(filePath) === false) {
+			foldersToExclude.push(filePath)
+		} else if (type === 'remove-add' && foldersToAdd.includes(filePath) === true) {
+			foldersToAdd.splice(foldersToAdd.indexOf(filePath), 1)
+		} else if (type === 'remove-exclude' && foldersToExclude.includes(filePath) === true) {
+			foldersToExclude.splice(foldersToExclude.indexOf(filePath), 1)
 		}
 	})
 
@@ -22,5 +25,5 @@ export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-
 
 	sendWebContentsFn('selected-directories', config.directories)
 
-	fetchSongsTag(dbSongs)
+	fetchSongsTag()
 }

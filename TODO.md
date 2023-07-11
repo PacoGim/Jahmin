@@ -23,7 +23,7 @@
 
 * Remove the possible null from the ui
 
-* !!!!!! Wrong date reading for m4a !!!!!!
+* !!!!!! exifToolWrite too many listeners !!!!!!
 * Webp covers disappear the window not focused
 
 on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabindex="-1" role="button"

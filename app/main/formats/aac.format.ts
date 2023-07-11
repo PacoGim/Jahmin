@@ -2,7 +2,7 @@ import * as fs from 'fs'
 const stringHash = require('string-hash')
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
-import { getWorker } from '../services/workers.service'
+import { getWorker, useWorker } from '../services/workers.service'
 import { EditTag } from '../../types/editTag.type'
 import { SongType } from '../../types/song.type'
 
@@ -10,48 +10,28 @@ import { Worker } from 'worker_threads'
 import getDirectoryFn from '../functions/getDirectory.fn'
 
 /********************** Write Aac Tags **********************/
-let tagWriteDeferredPromise: any = undefined
-
 let exifToolWriteWorker: Worker
 
 getWorker('exifToolWrite').then(worker => {
 	exifToolWriteWorker = worker
-
-	exifToolWriteWorker.on('message', (response: any) => {
-		tagWriteDeferredPromise(response)
-	})
 })
 
 export function writeAacTags(filePath: string, newTags: any): Promise<any> {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		newTags = normalizeNewTags(newTags)
 
-		tagWriteDeferredPromise = resolve
-
-		getWorker('exifToolWrite').then(worker => {
-			exifToolWriteWorker = worker
-
-			exifToolWriteWorker.on('message', (response: any) => {
-				tagWriteDeferredPromise(response)
-			})
+		useWorker({ filePath, newTags }, exifToolWriteWorker).then(response => {
+			resolve(response)
 		})
-
-		exifToolWriteWorker?.postMessage({ filePath, newTags })
 	})
 }
 
 /********************** Read Aac Tags **********************/
 let exifToolReadWorker: Worker
+
 getWorker('exifToolRead').then(worker => {
 	exifToolReadWorker = worker
-
-	exifToolReadWorker.on('message', (response: any) => {
-		tagReadDeferredPromises.get(response.filePath)(response.metadata)
-		tagReadDeferredPromises.delete(response.filePath)
-	})
 })
-
-let tagReadDeferredPromises: Map<string, any> = new Map<string, any>()
 
 export function getAacTags(filePath: string): Promise<SongType> {
 	return new Promise(async (resolve, reject) => {
@@ -59,43 +39,42 @@ export function getAacTags(filePath: string): Promise<SongType> {
 			return reject('File not found')
 		}
 
-		const METADATA: any = await new Promise((resolve, reject) => {
-			tagReadDeferredPromises.set(filePath, resolve)
-			exifToolReadWorker?.postMessage(filePath)
-		})
+		useWorker({ filePath }, exifToolReadWorker).then(response => {
+			const metadata = response.results.metadata
 
-		const STATS = fs.statSync(filePath)
+			const STATS = fs.statSync(filePath)
 
-		let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate))
+			let dateParsed = getDate(String(metadata.ContentCreateDate || metadata.CreateDate))
 
-		if (!isNaN(METADATA.Rating)) METADATA.RatingPercent = METADATA.Rating
+			if (!isNaN(metadata.Rating)) metadata.RatingPercent = metadata.Rating
 
-		resolve({
-			ID: stringHash(filePath),
-			Directory:getDirectoryFn(filePath),
-			Extension: METADATA.FileTypeExtension,
-			SourceFile: filePath,
-			Album: METADATA.Album || null,
-			AlbumArtist: METADATA.AlbumArtist || null,
-			Artist: METADATA.Artist || null,
-			Comment: METADATA.Comment || null,
-			Composer: METADATA.Composer || null,
-			Date_Year: dateParsed.year || null,
-			Date_Month: dateParsed.month || null,
-			DiscNumber: METADATA.DiskNumber || null,
-			Date_Day: dateParsed.day || null,
-			Genre: METADATA.Genre || null,
-			Rating: METADATA.RatingPercent || METADATA.Rating || null,
-			Title: METADATA.Title || null,
-			//@ts-expect-error
-			Track: getTrack(METADATA.TrackNumber, METADATA.Track) || null,
-			BitDepth: METADATA.AudioBitsPerSample || null,
-			BitRate: getBitRate(METADATA.AvgBitrate) || null,
-			Duration: truncToDecimalPointFn(METADATA.Duration, 3) || null,
-			LastModified: STATS.mtimeMs,
-			SampleRate: METADATA.AudioSampleRate || null,
-			Size: STATS.size,
-			PlayCount: 0
+			resolve({
+				ID: stringHash(filePath),
+				Directory: getDirectoryFn(filePath),
+				Extension: metadata.FileTypeExtension,
+				SourceFile: filePath,
+				Album: metadata.Album || null,
+				AlbumArtist: metadata.AlbumArtist || null,
+				Artist: metadata.Artist || null,
+				Comment: metadata.Comment || null,
+				Composer: metadata.Composer || null,
+				Date_Year: dateParsed.year || null,
+				Date_Month: dateParsed.month || null,
+				DiscNumber: metadata.DiskNumber || null,
+				Date_Day: dateParsed.day || null,
+				Genre: metadata.Genre || null,
+				Rating: metadata.RatingPercent || metadata.Rating || null,
+				Title: metadata.Title || null,
+				//@ts-expect-error
+				Track: getTrack(metadata.TrackNumber, metadata.Track) || null,
+				BitDepth: metadata.AudioBitsPerSample || null,
+				BitRate: getBitRate(metadata.AvgBitrate) || null,
+				Duration: truncToDecimalPointFn(metadata.Duration, 3) || null,
+				LastModified: STATS.mtimeMs,
+				SampleRate: metadata.AudioSampleRate || null,
+				Size: STATS.size,
+				PlayCount: 0
+			})
 		})
 	})
 }

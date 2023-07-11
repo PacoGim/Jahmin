@@ -2,6 +2,7 @@ import { Worker } from 'worker_threads'
 import { join as pathJoin } from 'path'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
+import generateId from '../functions/generateId.fn'
 
 let workersName = [
 	'exifToolRead',
@@ -68,6 +69,32 @@ export function killAllWorkers() {
 
 export function killWorker(workerName: WorkersNameType) {
 	workers.filter(worker => worker.name === workerName).forEach(worker => worker.worker.terminate())
+}
+
+export async function useWorker(message: any, worker: Worker):Promise<any> {
+	// Generate a unique ID for the workerCall
+	message.workerCallId = generateId()
+
+	// Create a new Promise to return the result of the read operation
+	const result = await new Promise(resolve => {
+		// Define a listener function for the 'message' event on the worker
+		function listener(response: any) {
+			if (message.workerCallId === response.results.workerCallId) {
+				// If they do, remove the listener from the worker and resolve the Promise with the response
+				worker.removeListener('message', listener)
+				return resolve(response)
+			}
+		}
+
+		// Add the listener to the worker
+		worker.on('message', listener)
+
+		// Send a message to the worker to perform the read operation
+		worker.postMessage(message)
+	})
+
+	// Return the result of the read operation
+	return result
 }
 
 type WorkerType = {

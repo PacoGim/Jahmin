@@ -56,7 +56,9 @@
 	<tag-name>{getTagNameFromValue(tag.value)}</tag-name>
 	<select bind:value={$songListTagConfig[index].value}>
 		{#each songListTagsVar as tag, index (index)}
-			<option value={tag.value}>{tag.name}</option>
+			{#if !$songListTagConfig.find(item => item.value === tag.value)}
+				<option value={tag.value}>{tag.name}</option>
+			{/if}
 		{/each}
 	</select>
 	<tag-empty-space />

@@ -3,11 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.killWorker = exports.killAllWorkers = exports.getWorker = void 0;
+exports.useWorker = exports.killWorker = exports.killAllWorkers = exports.getWorker = void 0;
 const worker_threads_1 = require("worker_threads");
 const path_1 = require("path");
 const getAppDataPath_fn_1 = __importDefault(require("../functions/getAppDataPath.fn"));
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
+const generateId_fn_1 = __importDefault(require("../functions/generateId.fn"));
 let workersName = [
     'exifToolRead',
     'exifToolWrite',
@@ -64,3 +65,25 @@ function killWorker(workerName) {
     workers.filter(worker => worker.name === workerName).forEach(worker => worker.worker.terminate());
 }
 exports.killWorker = killWorker;
+async function useWorker(message, worker) {
+    // Generate a unique ID for the workerCall
+    message.workerCallId = (0, generateId_fn_1.default)();
+    // Create a new Promise to return the result of the read operation
+    const result = await new Promise(resolve => {
+        // Define a listener function for the 'message' event on the worker
+        function listener(response) {
+            if (message.workerCallId === response.results.workerCallId) {
+                // If they do, remove the listener from the worker and resolve the Promise with the response
+                worker.removeListener('message', listener);
+                return resolve(response);
+            }
+        }
+        // Add the listener to the worker
+        worker.on('message', listener);
+        // Send a message to the worker to perform the read operation
+        worker.postMessage(message);
+    });
+    // Return the result of the read operation
+    return result;
+}
+exports.useWorker = useWorker;

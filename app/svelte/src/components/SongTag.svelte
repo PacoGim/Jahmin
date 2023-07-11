@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
+
+	import type { PartialSongType } from '../../../types/song.type'
+
 	import parseDuration from '../functions/parseDuration.fn'
 
 	import RatingTag from './tags/RatingTag.svelte'
@@ -7,15 +10,18 @@
 	import TitleTag from './tags/TitleTag.svelte'
 	import PlayCountTag from './tags/PlayCountTag.svelte'
 	import SizeTag from './tags/SizeTag.svelte'
-	import type { PartialSongType } from '../../../types/song.type'
 	import BitRateTag from './tags/BitRateTag.svelte'
 	import CommentTag from './tags/CommentTag.svelte'
 	import GenericTag from './tags/GenericTag.svelte'
+	import DateTag from './tags/DateTag.svelte'
 
 	export let tag
 	export let song: PartialSongType
 
 	let dispatch = createEventDispatcher()
+
+
+
 </script>
 
 <song-tag style="justify-self: {tag.align}">
@@ -35,6 +41,8 @@
 		<BitRateTag bitRate={song.BitRate} />
 	{:else if tag.value === 'Comment'}
 		<CommentTag comment={song.Comment} />
+	{:else if tag.value === 'Date'}
+		<DateTag {song} />
 	{:else}
 		<GenericTag tagValue={song[tag.value]} />
 	{/if}

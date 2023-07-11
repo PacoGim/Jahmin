@@ -8,22 +8,24 @@ const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebConten
 const librarySongs_service_1 = require("./librarySongs.service");
 function default_1(filePaths, type, dbSongs) {
     let config = (0, config_service_1.getConfig)();
+    let foldersToAdd = config.directories.add || [];
+    let foldersToExclude = config.directories.exclude || [];
     filePaths.forEach((filePath) => {
-        if (type === 'add' && config.directories.add.includes(filePath) === false) {
-            config.directories.add.push(filePath);
+        if (type === 'add' && foldersToAdd.includes(filePath) === false) {
+            foldersToAdd.push(filePath);
         }
-        else if (type === 'exclude' && config.directories.exclude.includes(filePath) === false) {
-            config.directories.exclude.push(filePath);
+        else if (type === 'exclude' && foldersToExclude.includes(filePath) === false) {
+            foldersToExclude.push(filePath);
         }
-        else if (type === 'remove-add' && config.directories.add.includes(filePath) === true) {
-            config.directories.add.splice(config.directories.add.indexOf(filePath), 1);
+        else if (type === 'remove-add' && foldersToAdd.includes(filePath) === true) {
+            foldersToAdd.splice(foldersToAdd.indexOf(filePath), 1);
         }
-        else if (type === 'remove-exclude' && config.directories.exclude.includes(filePath) === true) {
-            config.directories.exclude.splice(config.directories.exclude.indexOf(filePath), 1);
+        else if (type === 'remove-exclude' && foldersToExclude.includes(filePath) === true) {
+            foldersToExclude.splice(foldersToExclude.indexOf(filePath), 1);
         }
     });
     (0, config_service_1.saveConfig)(config);
     (0, sendWebContents_fn_1.default)('selected-directories', config.directories);
-    (0, librarySongs_service_1.fetchSongsTag)(dbSongs);
+    (0, librarySongs_service_1.fetchSongsTag)();
 }
 exports.default = default_1;

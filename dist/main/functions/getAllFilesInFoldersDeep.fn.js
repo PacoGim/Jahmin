@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-function getAllFilesInFoldersDeep(rootDirectory) {
+function getAllFilesInFoldersDeep(rootDirectory = []) {
     let allFiles = [];
     rootDirectory.forEach(rootDirectory => {
         let files = fs.readdirSync(rootDirectory);

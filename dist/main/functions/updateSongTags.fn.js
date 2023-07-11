@@ -19,13 +19,13 @@ function default_1(songPath, newTags) {
         if (extension === 'opus') {
             (0, opus_format_1.writeOpusTags)(songPath, newTags)
                 .then(response => {
-                resolve(response);
+                resolve(response.results.status);
             })
                 .catch(err => reject(err));
         }
         else if (extension === 'mp3') {
             (0, mp3_format_1.writeMp3Tags)(songPath, newTags)
-                .then(response => resolve(response))
+                .then(response => resolve(response.results.status))
                 .catch(err => reject(err));
         }
         else if (extension === 'flac') {
@@ -35,7 +35,7 @@ function default_1(songPath, newTags) {
         }
         else if (extension === 'm4a') {
             (0, aac_format_1.writeAacTags)(songPath, newTags)
-                .then(response => resolve(response))
+                .then(response => resolve(response.results.status))
                 .catch(err => reject(err));
         }
         else {

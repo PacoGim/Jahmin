@@ -18,12 +18,12 @@ export default function (songPath: string, newTags: any): Promise<0 | 1 | -1> {
 		if (extension === 'opus') {
 			writeOpusTags(songPath, newTags)
 				.then(response => {
-					resolve(response)
+					resolve(response.results.status)
 				})
 				.catch(err => reject(err))
 		} else if (extension === 'mp3') {
 			writeMp3Tags(songPath, newTags)
-				.then(response => resolve(response))
+				.then(response => resolve(response.results.status))
 				.catch(err => reject(err))
 		} else if (extension === 'flac') {
 			writeFlacTags(songPath, newTags)
@@ -31,7 +31,7 @@ export default function (songPath: string, newTags: any): Promise<0 | 1 | -1> {
 				.catch(err => reject(err))
 		} else if (extension === 'm4a') {
 			writeAacTags(songPath, newTags)
-				.then(response => resolve(response))
+				.then(response => resolve(response.results.status))
 				.catch(err => reject(err))
 		} else {
 			return reject(new Error('Invalid file path'))

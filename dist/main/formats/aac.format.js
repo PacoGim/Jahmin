@@ -34,25 +34,16 @@ const truncToDecimalPoint_fn_1 = __importDefault(require("../functions/truncToDe
 const workers_service_1 = require("../services/workers.service");
 const getDirectory_fn_1 = __importDefault(require("../functions/getDirectory.fn"));
 /********************** Write Aac Tags **********************/
-let tagWriteDeferredPromise = undefined;
 let exifToolWriteWorker;
 (0, workers_service_1.getWorker)('exifToolWrite').then(worker => {
     exifToolWriteWorker = worker;
-    exifToolWriteWorker.on('message', (response) => {
-        tagWriteDeferredPromise(response);
-    });
 });
 function writeAacTags(filePath, newTags) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         newTags = normalizeNewTags(newTags);
-        tagWriteDeferredPromise = resolve;
-        (0, workers_service_1.getWorker)('exifToolWrite').then(worker => {
-            exifToolWriteWorker = worker;
-            exifToolWriteWorker.on('message', (response) => {
-                tagWriteDeferredPromise(response);
-            });
+        (0, workers_service_1.useWorker)({ filePath, newTags }, exifToolWriteWorker).then(response => {
+            resolve(response);
         });
-        exifToolWriteWorker?.postMessage({ filePath, newTags });
     });
 }
 exports.writeAacTags = writeAacTags;
@@ -60,51 +51,45 @@ exports.writeAacTags = writeAacTags;
 let exifToolReadWorker;
 (0, workers_service_1.getWorker)('exifToolRead').then(worker => {
     exifToolReadWorker = worker;
-    exifToolReadWorker.on('message', (response) => {
-        tagReadDeferredPromises.get(response.filePath)(response.metadata);
-        tagReadDeferredPromises.delete(response.filePath);
-    });
 });
-let tagReadDeferredPromises = new Map();
 function getAacTags(filePath) {
     return new Promise(async (resolve, reject) => {
         if (!fs.existsSync(filePath)) {
             return reject('File not found');
         }
-        const METADATA = await new Promise((resolve, reject) => {
-            tagReadDeferredPromises.set(filePath, resolve);
-            exifToolReadWorker?.postMessage(filePath);
-        });
-        const STATS = fs.statSync(filePath);
-        let dateParsed = getDate(String(METADATA.CreateDate || METADATA.ContentCreateDate));
-        if (!isNaN(METADATA.Rating))
-            METADATA.RatingPercent = METADATA.Rating;
-        resolve({
-            ID: stringHash(filePath),
-            Directory: (0, getDirectory_fn_1.default)(filePath),
-            Extension: METADATA.FileTypeExtension,
-            SourceFile: filePath,
-            Album: METADATA.Album || null,
-            AlbumArtist: METADATA.AlbumArtist || null,
-            Artist: METADATA.Artist || null,
-            Comment: METADATA.Comment || null,
-            Composer: METADATA.Composer || null,
-            Date_Year: dateParsed.year || null,
-            Date_Month: dateParsed.month || null,
-            DiscNumber: METADATA.DiskNumber || null,
-            Date_Day: dateParsed.day || null,
-            Genre: METADATA.Genre || null,
-            Rating: METADATA.RatingPercent || METADATA.Rating || null,
-            Title: METADATA.Title || null,
-            //@ts-expect-error
-            Track: getTrack(METADATA.TrackNumber, METADATA.Track) || null,
-            BitDepth: METADATA.AudioBitsPerSample || null,
-            BitRate: getBitRate(METADATA.AvgBitrate) || null,
-            Duration: (0, truncToDecimalPoint_fn_1.default)(METADATA.Duration, 3) || null,
-            LastModified: STATS.mtimeMs,
-            SampleRate: METADATA.AudioSampleRate || null,
-            Size: STATS.size,
-            PlayCount: 0
+        (0, workers_service_1.useWorker)({ filePath }, exifToolReadWorker).then(response => {
+            const metadata = response.results.metadata;
+            const STATS = fs.statSync(filePath);
+            let dateParsed = getDate(String(metadata.ContentCreateDate || metadata.CreateDate));
+            if (!isNaN(metadata.Rating))
+                metadata.RatingPercent = metadata.Rating;
+            resolve({
+                ID: stringHash(filePath),
+                Directory: (0, getDirectory_fn_1.default)(filePath),
+                Extension: metadata.FileTypeExtension,
+                SourceFile: filePath,
+                Album: metadata.Album || null,
+                AlbumArtist: metadata.AlbumArtist || null,
+                Artist: metadata.Artist || null,
+                Comment: metadata.Comment || null,
+                Composer: metadata.Composer || null,
+                Date_Year: dateParsed.year || null,
+                Date_Month: dateParsed.month || null,
+                DiscNumber: metadata.DiskNumber || null,
+                Date_Day: dateParsed.day || null,
+                Genre: metadata.Genre || null,
+                Rating: metadata.RatingPercent || metadata.Rating || null,
+                Title: metadata.Title || null,
+                //@ts-expect-error
+                Track: getTrack(metadata.TrackNumber, metadata.Track) || null,
+                BitDepth: metadata.AudioBitsPerSample || null,
+                BitRate: getBitRate(metadata.AvgBitrate) || null,
+                Duration: (0, truncToDecimalPoint_fn_1.default)(metadata.Duration, 3) || null,
+                LastModified: STATS.mtimeMs,
+                SampleRate: metadata.AudioSampleRate || null,
+                Size: STATS.size,
+                PlayCount: 0
+            });
         });
     });
 }

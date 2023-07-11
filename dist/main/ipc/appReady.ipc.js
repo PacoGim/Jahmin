@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebContents.fn"));
+const librarySongs_service_1 = require("../services/librarySongs.service");
 let isAppReady = false;
 function default_1(ipcMain) {
     ipcMain.on('app-ready', () => {
@@ -13,6 +14,7 @@ function default_1(ipcMain) {
         isAppReady = true;
         (0, sendWebContents_fn_1.default)('get-all-songs-from-renderer', undefined);
         registerGlobalShortcuts();
+        (0, librarySongs_service_1.fetchSongsTag)();
     });
 }
 exports.default = default_1;

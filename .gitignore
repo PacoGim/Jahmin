@@ -1,3 +1,12 @@
+# Built Files
+dist/main/formats
+dist/main/functions
+dist/main/ipc
+dist/main/services
+dist/main/workers
+dist/svelte/bundle.js
+dist/svelte/bundle.js.map
+
 # Logs
 logs
 *.log

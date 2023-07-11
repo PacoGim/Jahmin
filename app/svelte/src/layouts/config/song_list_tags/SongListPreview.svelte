@@ -1,10 +1,17 @@
 <script lang="ts">
 	import SongTag from '../../../components/SongTag.svelte'
 	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
-	import { showDynamicArtistsConfig, showExtensionsIconsConfig, songListTagConfig } from '../../../stores/config.store'
+	import {
+		dateOrderConfig,
+		showDynamicArtistsConfig,
+		showExtensionsIconsConfig,
+		songListTagConfig
+	} from '../../../stores/config.store'
 	import type { PartialSongType } from '../../../../../types/song.type'
 	import ToggleIcon from '../../../icons/ToggleIcon.svelte'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
+	import OptionSection from '../../../components/OptionSection.svelte'
+	import traduceFn from '../../../functions/traduce.fn'
 
 	let gridStyle = ''
 
@@ -35,6 +42,8 @@
 		gridStyle = tagToGridStyleFn($songListTagConfig)
 	}
 
+	// $: console.log($dateOrderConfig)
+
 	function toggleDynamicArtists() {
 		updateConfigFn({
 			userOptions: {
@@ -50,11 +59,28 @@
 			}
 		})
 	}
+
+	function toggleDateSelect(index: number, value: 'year' | 'day' | 'month') {
+		if ($dateOrderConfig[index] === value) {
+			$dateOrderConfig[index] = ''
+		} else {
+			$dateOrderConfig[index] = value
+		}
+
+		if ($dateOrderConfig.every(item => item === '')) {
+			$dateOrderConfig[0] = 'year'
+		}
+
+		updateConfigFn({
+			userOptions: {
+				dateOrder: $dateOrderConfig
+			}
+		})
+	}
 </script>
 
 <song-list-preview>
 	<grid-tags style="grid-auto-columns:{gridStyle};">
-	<!-- <grid-tags> -->
 		{#each $songListTagConfig as selectedTag, index (index)}
 			<SongTag song={sampleSong} tag={selectedTag} />
 		{/each}
@@ -71,6 +97,20 @@
 			<span>Extension Icon <ToggleIcon toggle={$showExtensionsIconsConfig ? 'on' : 'off'} /></span>
 		</button>
 	</toggle-extension-icons>
+
+	{#if $songListTagConfig.findIndex(item => item.value === 'Date') !== -1}
+		<date-select>
+			<button on:click={() => toggleDateSelect(0, 'year')}>
+				<span> Year <ToggleIcon toggle={$dateOrderConfig.indexOf('year') !== -1 ? 'on' : 'off'} /> </span>
+			</button>
+			<button on:click={() => toggleDateSelect(1, 'month')}>
+				<span> Month <ToggleIcon toggle={$dateOrderConfig.indexOf('month') !== -1 ? 'on' : 'off'} /></span>
+			</button>
+			<button on:click={() => toggleDateSelect(2, 'day')}>
+				<span> Day <ToggleIcon toggle={$dateOrderConfig.indexOf('day') !== -1 ? 'on' : 'off'} /></span>
+			</button>
+		</date-select>
+	{/if}
 </song-list-preview>
 
 <style>
@@ -85,20 +125,19 @@
 	}
 
 	grid-tags {
-		/* align-items: center; */
-		/* display: grid; */
-		/* grid-template-columns: 1fr 1fr; */
 		width: 100%;
 
 		padding: 1rem;
+		margin-bottom: 1rem;
 
 		background-color: var(--color-fg-1);
 		color: var(--color-bg-1);
 
 		display: grid;
 		grid-template-rows: auto;
-		/* grid-auto-columns: minmax(min-content, max-content) auto minmax(min-content, max-content)minmax(min-content, max-content)minmax(min-content, max-content); */
 		grid-auto-flow: column;
+
+		border-radius: 10px;
 	}
 
 	.toggleButton {

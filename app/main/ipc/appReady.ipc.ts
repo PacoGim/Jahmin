@@ -1,5 +1,6 @@
 import { globalShortcut } from 'electron'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
+import { fetchSongsTag } from '../services/librarySongs.service'
 
 let isAppReady = false
 
@@ -12,6 +13,8 @@ export default function (ipcMain: Electron.IpcMain) {
 		sendWebContentsFn('get-all-songs-from-renderer', undefined)
 
 		registerGlobalShortcuts()
+
+		fetchSongsTag()
 	})
 }
 

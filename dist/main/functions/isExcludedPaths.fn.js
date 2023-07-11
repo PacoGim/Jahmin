@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function default_1(path, excludedPaths) {
+function default_1(path, excludedPaths = []) {
     let isExcluded = false;
     for (let excludedPath of excludedPaths) {
         if (path.includes(excludedPath)) {

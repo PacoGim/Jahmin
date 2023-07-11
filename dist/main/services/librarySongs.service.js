@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reloadAlbumData = exports.getTaskQueueLength = exports.getMaxTaskQueueLength = exports.stopSongsUpdating = exports.sendSongSyncQueueProgress = exports.addToTaskQueue = exports.fetchSongsTag = exports.maxTaskQueueLength = void 0;
-//@ts-nocheck
 const os_1 = require("os");
 /********************** Services **********************/
 const workers_service_1 = require("./workers.service");
@@ -14,6 +13,7 @@ const sendWebContents_fn_1 = __importDefault(require("../functions/sendWebConten
 const sortByOrder_fn_1 = __importDefault(require("../functions/sortByOrder.fn"));
 const getSongTags_fn_1 = __importDefault(require("../functions/getSongTags.fn"));
 const updateSongTags_fn_1 = __importDefault(require("../functions/updateSongTags.fn"));
+const hashString_fn_1 = __importDefault(require("../functions/hashString.fn"));
 const isExcludedPaths_fn_1 = __importDefault(require("../functions/isExcludedPaths.fn"));
 const removeDuplicateObjectsFromArray_fn_1 = __importDefault(require("../functions/removeDuplicateObjectsFromArray.fn"));
 const getAllFilesInFoldersDeep_fn_1 = __importDefault(require("../functions/getAllFilesInFoldersDeep.fn"));
@@ -28,11 +28,11 @@ let lastProcessTime = undefined;
 let dbWorker;
 (0, workers_service_1.getWorker)('database').then(worker => {
     dbWorker = worker;
-    dbWorker.on('message', (response) => {
-        if (response.type !== 'read') {
-            // console.log(response)
-        }
-    });
+    // dbWorker.on('message', (response: any) => {
+    // if (response.type !== 'read') {
+    // console.log(response)
+    // }
+    // })
 });
 async function fetchSongsTag() {
     const config = (0, config_service_1.getConfig)();
@@ -139,10 +139,10 @@ async function handleUpdateTask(task, processIndex, processesRunning) {
         console.log('newTags', newTags);
     }
     (0, updateSongTags_fn_1.default)(task.path, { ...newTags })
-        .then(result => {
-        // Result can be 0 | 1 | -1
+        .then(response => {
+        // Response can be 0 | 1 | -1
         // -1 means error.
-        if (result === -1) {
+        if (response === -1) {
             // sendWebContentsFn('web-storage', {
             // 	type: task.type,
             // 	data: undefined
@@ -153,13 +153,14 @@ async function handleUpdateTask(task, processIndex, processesRunning) {
             if (newTags?.popularimeter) {
                 delete newTags.popularimeter;
             }
-            // sendWebContentsFn('web-storage', {
-            // 	type: task.type,
-            // 	data: {
-            // 		id: hashFn(task.path, 'number'),
-            // 		newTags
-            // 	}
-            // })
+            dbWorker.postMessage({
+                type: 'update',
+                data: {
+                    queryId: null,
+                    songId: (0, hashString_fn_1.default)(task.path, 'number'),
+                    newTags
+                }
+            });
         }
     })
         .catch()

@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-export default function getAllFilesInFoldersDeep(rootDirectory: string[]) {
+export default function getAllFilesInFoldersDeep(rootDirectory: string[]=[]) {
 	let allFiles: string[] = []
 
 	rootDirectory.forEach(rootDirectory => {

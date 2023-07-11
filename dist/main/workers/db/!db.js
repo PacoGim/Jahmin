@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTaskToQueue = void 0;
 const bulkInsert_fn_1 = __importDefault(require("../db/bulkInsert.fn"));
+const bulkUpdate_fn_1 = __importDefault(require("./bulkUpdate.fn"));
 const sqlite3 = require('sqlite3').verbose();
 let taskQueue = [];
 let isQueueRunning = false;
@@ -42,7 +43,7 @@ function runQueue() {
         }
         if (updateSongQueue.length > 0) {
             // Run Bulk Update
-            // await bulkUpdateSongsFn(updateSongQueue.map(task => task.object))
+            yield (0, bulkUpdate_fn_1.default)(updateSongQueue.map(task => task.data));
         }
         setTimeout(() => {
             runQueue();

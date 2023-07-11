@@ -15,6 +15,7 @@ export let alwaysShowAlbumOverlayConfig: Writable<boolean> = writable(false)
 export let showDynamicArtistsConfig: Writable<boolean> = writable(true)
 export let showExtensionsIconsConfig: Writable<boolean> = writable(true)
 export let pauseAnimatedArtWhenAppUnfocusedConfig: Writable<boolean> = writable(true)
+export let dateOrderConfig: Writable<ConfigType['userOptions']['dateOrder']> = writable([])
 
 config.subscribe(value => {
 	if (get(groupByConfig) !== value?.group.groupBy) {
@@ -63,5 +64,9 @@ config.subscribe(value => {
 
 	if (get(pauseAnimatedArtWhenAppUnfocusedConfig) !== value?.userOptions.pauseAnimatedArtWhenAppUnfocused) {
 		pauseAnimatedArtWhenAppUnfocusedConfig.set(value?.userOptions.pauseAnimatedArtWhenAppUnfocused)
+	}
+
+	if (get(dateOrderConfig) !== value?.userOptions.dateOrder) {
+		dateOrderConfig.set(value?.userOptions.dateOrder)
 	}
 })

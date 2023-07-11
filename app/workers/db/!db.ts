@@ -1,6 +1,7 @@
 import { sqlite3 } from 'sqlite3'
 import { SongType } from '../../types/song.type'
 import bulkInsertFn from '../db/bulkInsert.fn'
+import bulkUpdateFn from './bulkUpdate.fn'
 
 type DataType = { type: 'create' | 'read' | 'update' | 'delete'; data: SongType }
 
@@ -41,7 +42,7 @@ async function runQueue() {
 
 	if (updateSongQueue.length > 0) {
 		// Run Bulk Update
-		// await bulkUpdateSongsFn(updateSongQueue.map(task => task.object))
+		await bulkUpdateFn(updateSongQueue.map(task => task.data))
 	}
 
 	setTimeout(() => {
