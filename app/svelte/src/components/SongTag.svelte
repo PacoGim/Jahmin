@@ -19,9 +19,6 @@
 	export let song: PartialSongType
 
 	let dispatch = createEventDispatcher()
-
-
-
 </script>
 
 <song-tag style="justify-self: {tag.align}">

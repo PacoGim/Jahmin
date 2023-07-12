@@ -8,7 +8,7 @@
 
 	let thisElement: HTMLElement
 
-	$: if (thisElement) createDateElement($dateOrderConfig)
+	$: if (thisElement && song) createDateElement($dateOrderConfig)
 
 	function createDateElement(dateTagOrder) {
 		let date = {

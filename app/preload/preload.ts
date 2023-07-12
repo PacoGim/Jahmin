@@ -67,7 +67,8 @@ const ipcFunctions = {
 	onConfirmLyricsDeletion: (callback: any) => ipcRenderer.on('confirm-lyrics-deletion', callback),
 	onDatabaseUpdate: (callback: any) => ipcRenderer.on('database-update', callback),
 	/********************** Database **********************/
-	bulkRead
+	bulkRead,
+	updatePlayCount
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
@@ -85,6 +86,21 @@ function bulkRead(data: {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('bulk-read', data)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function updatePlayCount(
+	songId: number,
+	type: 'reset' | 'increment'
+): Promise<{
+	songId: number
+	newPlayCount: number
+}> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('update-play-count', songId, type)
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})

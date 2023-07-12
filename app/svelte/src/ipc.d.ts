@@ -85,6 +85,13 @@ declare global {
 					data: SongType[]
 				}
 			}>
+			updatePlayCount: (
+				songId: number,
+				type: 'reset' | 'increment'
+			) => Promise<{
+				ID: number
+				PlayCount: number
+			}>
 		}
 	}
 }

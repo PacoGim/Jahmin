@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import incrementPlayCountFn from '../db/incrementPlayCount.fn'
 	import findNextValidSongFn from '../functions/findNextValidSong.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 	import { hash } from '../functions/hashString.fn'
@@ -33,6 +32,8 @@
 	import { config } from '../stores/config.store'
 	import equalizerService from '../services/equalizer/!equalizer.service'
 	import setMediaSessionDataFn from '../functions/setMediaSessionData.fn'
+	import updatePlayCountFn from '../functions/updatePlayCount.fn'
+	import getElementDatasetFn from '../functions/getElementDataset.fn'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -291,20 +292,18 @@
 			audioElements.alt.isPlaying = true
 		})
 
-		$mainAudioElement.addEventListener('ended', () => {
-			incrementPlayCountFn(
-				$playbackStore.find(song => song.ID === +audioElements.main.domElement.getAttribute('data-song-id')).ID
-			)
+		$mainAudioElement.addEventListener('ended', e => {
+			updatePlayCountFn(getElementDatasetFn(e).songId || 0, 'increment')
+
 			audioElements.main.isPlaying = false
 
 			audioElements.main.isPreloaded = false
 			audioElements.main.isPreloading = false
 		})
 
-		$altAudioElement.addEventListener('ended', () => {
-			incrementPlayCountFn(
-				$playbackStore.find(song => song.ID === +audioElements.alt.domElement.getAttribute('data-song-id')).ID
-			)
+		$altAudioElement.addEventListener('ended', e => {
+			updatePlayCountFn(getElementDatasetFn(e).songId || 0, 'increment')
+
 			audioElements.alt.isPlaying = false
 
 			audioElements.alt.isPreloaded = false

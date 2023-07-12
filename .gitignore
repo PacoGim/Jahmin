@@ -1,5 +1,6 @@
 # Built Files
 dist/main/formats
+dist/main/preload
 dist/main/functions
 dist/main/ipc
 dist/main/services

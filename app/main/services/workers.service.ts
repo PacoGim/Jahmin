@@ -75,8 +75,6 @@ export async function useWorker(message: any, worker: Worker):Promise<any> {
 	// Generate a unique ID for the workerCall
 	message.workerCallId = generateId()
 
-	// console.log(message)
-
 	// Create a new Promise to return the result of the read operation
 	const result = await new Promise(resolve => {
 		// Define a listener function for the 'message' event on the worker

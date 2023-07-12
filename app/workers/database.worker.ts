@@ -3,12 +3,13 @@ import { addTaskToQueue } from './db/!db.js'
 import initDBFn from './db/initDB.fn.js'
 import { eventEmitter } from './db/dbVersion.fn.js'
 import { selectGeneric } from './db/bulkRead.fn.js'
+import updatePlayCountFn from './db/updatePlayCount.fn.js'
 
 type MessageType = {
 	type: 'initDb' | 'create' | 'update' | 'delete'
+	workerCallId: string
 	data:
 		| {
-				queryId: string
 				queryData: {
 					select: string[]
 					andWhere?: { [key: string]: string }[]
@@ -37,6 +38,9 @@ parentPort!.on('message', msg => {
 		case 'read':
 			read(msg)
 			break
+		case 'update-play-count':
+			updatePlayCount(msg)
+			break
 	}
 })
 
@@ -60,9 +64,18 @@ function delete_(msg: MessageType) {
 }
 
 function read(msg: MessageType) {
-	selectGeneric({ ...msg.data.queryData, queryId: msg.data.queryId }).then(data => {
+	selectGeneric({ ...msg.data.queryData, workerCallId: msg.workerCallId }).then(data => {
 		parentPort!.postMessage({
 			type: 'read',
+			results: data
+		})
+	})
+}
+
+function updatePlayCount(msg: MessageType) {
+	updatePlayCountFn({ ...msg.data.queryData, workerCallId: msg.workerCallId }).then(data => {
+		parentPort!.postMessage({
+			type: 'update-play-count',
 			results: data
 		})
 	})

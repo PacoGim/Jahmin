@@ -2,7 +2,7 @@ import { SongType } from '../../types/song.type'
 import { getDb } from './initDB.fn'
 
 export function selectGeneric(queryData: {
-	queryId: string
+	workerCallId: string
 	select: string[]
 	where?: { [key: string]: string }[]
 	group?: string[]
@@ -17,7 +17,7 @@ export function selectGeneric(queryData: {
 			}
 
 			resolve({
-				queryId: queryData.queryId,
+				workerCallId: queryData.workerCallId,
 				data: songs
 			})
 		})
