@@ -23,6 +23,8 @@
 		songSyncQueueProgress
 	} from '../stores/main.store'
 
+	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
+
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
 	})
@@ -80,11 +82,21 @@
 	window.ipc.onAlbumPlayNow(async (_, data: { songList: SongType[]; clickedAlbum: string; selectedAlbumsDir: string[] }) => {
 		// If the album clicked is not included in the list of selected albums, only add the clicked album to the list.
 		if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
-			let songs = await getAlbumSongsFn(data.clickedAlbum)
+			let bulkReadResponse: DatabaseResponseType = await window.ipc.bulkRead({
+				queryData: {
+					select: ['*'],
+					andWhere: [
+						{
+							Directory: data.clickedAlbum
+						}
+					],
+					order: [`${$config.userOptions.sortBy} ${$config.userOptions.sortOrder}`]
+				}
+			})
 
-			let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+			let songs = bulkReadResponse.results.data
 
-			setNewPlaybackFn(data.clickedAlbum, sortedSongs, undefined, { playNow: true })
+			setNewPlaybackFn(data.clickedAlbum, songs, undefined, { playNow: true })
 
 			$selectedAlbumsDir = [data.clickedAlbum]
 		} else {

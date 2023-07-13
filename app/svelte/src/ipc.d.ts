@@ -5,6 +5,7 @@ import type { EqualizerProfileType } from '../../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../../types/returnMessage.type'
 import type { PromiseResolveType } from '../../types/promiseResolve.type'
 import { SongType } from '../../types/song.type'
+import { DatabaseResponseType } from '../../types/databaseWorkerMessage.type'
 
 export {}
 declare global {
@@ -78,13 +79,7 @@ declare global {
 					group?: string[]
 					order?: string[]
 				}
-			}) => Promise<{
-				type: 'read'
-				results: {
-					queryId: string
-					data: SongType[]
-				}
-			}>
+			}) => Promise<DatabaseResponseType>
 			updatePlayCount: (
 				songId: number,
 				type: 'reset' | 'increment'

@@ -5,13 +5,13 @@ import getGroupNameContextMenuTemplateFn from './getGroupNameContextMenuTemplate
 import getSongListContextMenuTemplateFn from './getSongListContextMenuTemplate.fn'
 import getLyricsContainerCtxMenuTemplateFn from './getLyricsContainerCtxMenuTemplate.fn'
 
-export function loadContextMenu(event: any, menuToOpen: string, data: any) {
+export async function loadContextMenu(event: any, menuToOpen: string, data: any) {
 	let template: any = []
 
 	if (menuToOpen === 'AlbumContextMenu') {
 		template = getAlbumContextMenuTemplateFn(data)
 	} else if (menuToOpen === 'SongListContextMenu') {
-		template = getSongListContextMenuTemplateFn(data)
+		template = await getSongListContextMenuTemplateFn(data)
 	} else if (menuToOpen === 'GroupNameContextMenu') {
 		template = getGroupNameContextMenuTemplateFn(data)
 	} else if (menuToOpen === 'LyricsContainerContextMenu') {

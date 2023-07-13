@@ -35,8 +35,6 @@ function buildSqliteQuery(queryData: {
 }) {
 	let query = `SELECT ${queryData.select.join(',')} FROM songs`
 
-	console.log(queryData)
-
 	if (queryData.andWhere && queryData.andWhere.length > 0) {
 		query += ` WHERE ${queryData.andWhere
 			.map(where => {

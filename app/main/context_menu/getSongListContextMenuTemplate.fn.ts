@@ -7,6 +7,7 @@ import { saveLyrics } from '../services/lyrics.service'
 import addSeparatorFn from './functions/addSeparator.fn'
 import { Worker } from 'worker_threads'
 import { getWorker, useWorker } from '../services/workers.service'
+import { DatabaseResponseType } from '../../types/databaseWorkerMessage.type'
 
 type dataType = {
 	selectedSongsId: number[]
@@ -18,110 +19,111 @@ let worker: Worker
 
 getWorker('database').then(w => (worker = w))
 
-export default async function (data: dataType) {
-	let template: MenuItemConstructorOptions[] = []
+export default function (data: dataType) {
+	return new Promise(async (resolve, reject) => {
+		let template: MenuItemConstructorOptions[] = []
 
-	let { selectedSongsId, clickedSongId } = data
+		let { selectedSongsId, clickedSongId } = data
 
-	let selectedSongsData: any[] = await useWorker(
-		{
-			type: 'read',
-			data: {
-				queryData: {
-					select: ['*'],
-					orWhere: selectedSongsId.map(item => {
-						return { ID: item }
-					})
+		let selectedSongsDatabaseResponse: DatabaseResponseType = await useWorker(
+			{
+				type: 'read',
+				data: {
+					queryData: {
+						select: ['SourceFile'],
+						orWhere: selectedSongsId.map(item => {
+							return { ID: item }
+						})
+					}
 				}
-			}
-		},
-		worker
-	)
+			},
+			worker
+		)
 
-	let clickedSongData: any = await useWorker(
-		{
-			type: 'read',
-			data: {
-				queryData: {
-					select: ['*'],
-					andWhere: [{ ID: clickedSongId }]
+		let clickedSongDatabaseResponse: DatabaseResponseType = await useWorker(
+			{
+				type: 'read',
+				data: {
+					queryData: {
+						select: ['SourceFile', 'Title', 'Artist'],
+						andWhere: [{ ID: clickedSongId }]
+					}
 				}
-			}
-		},
-		worker
-	)
+			},
+			worker
+		)
 
+		let selectedSongsData = selectedSongsDatabaseResponse?.results?.data
+		let clickedSongData = clickedSongDatabaseResponse?.results?.data?.[0]
 
+		// If songs selected or a song has been clicked.
+		if (selectedSongsId.length !== 0 || clickedSongId !== undefined) {
+			template.push({
+				label: 'Enable',
+				click: () => {
+					handleEnableDisableSongs({ enable: true }, selectedSongsData, clickedSongData)
+				}
+			})
 
-	// If songs selected or a song has been clicked.
-	if (selectedSongsId.length !== 0 || clickedSongId !== undefined) {
+			template.push({
+				label: 'Disable',
+				click: () => {
+					handleEnableDisableSongs({ enable: false }, selectedSongsData, clickedSongData)
+				}
+			})
+
+			addSeparatorFn(template)
+		}
+
 		template.push({
-			label: 'Enable',
+			label: 'Reveal in Folder',
+			enabled: clickedSongData !== undefined,
 			click: () => {
-				handleEnableDisableSongs({ enable: true }, selectedSongsData, clickedSongData)
+				if (clickedSongData !== undefined) {
+					shell.showItemInFolder(clickedSongData.SourceFile)
+				}
 			}
 		})
 
 		template.push({
-			label: 'Disable',
-			click: () => {
-				handleEnableDisableSongs({ enable: false }, selectedSongsData, clickedSongData)
-			}
+			label: 'Songs to Show',
+			type: 'submenu',
+			submenu: getSongAmountMenu()
 		})
 
 		addSeparatorFn(template)
-	}
-
-	template.push({
-		label: 'Reveal in Folder',
-		enabled: clickedSongData !== undefined,
-		click: () => {
-			if (clickedSongData !== undefined) {
-				shell.showItemInFolder(clickedSongData.SourceFile)
-			}
-		}
-	})
-
-	template.push({
-		label: 'Songs to Show',
-		type: 'submenu',
-		submenu: getSongAmountMenu()
-	})
-
-	addSeparatorFn(template)
-
-	template.push({
-		label: 'Sort by',
-		type: 'submenu',
-		submenu: getSortMenu()
-	})
-
-	if (clickedSongData !== undefined) {
-		addSeparatorFn(template)
 
 		template.push({
-			label: 'Show/Edit Lyrics',
-			click: () => editLyrics(clickedSongData!)
+			label: 'Sort by',
+			type: 'submenu',
+			submenu: getSortMenu()
 		})
-	}
 
-	template.push({
-		label: 'Add to playback',
-		click: () => {
-			sendWebContentsFn('song-add-to-playback', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
+		if (clickedSongData !== undefined) {
+			addSeparatorFn(template)
+
+			template.push({
+				label: 'Show/Edit Lyrics',
+				click: () => editLyrics(clickedSongData!)
+			})
 		}
+
+		template.push({
+			label: 'Add to playback',
+			click: () => {
+				sendWebContentsFn('song-add-to-playback', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
+			}
+		})
+
+		template.push({
+			label: 'Play after',
+			click: () => {
+				sendWebContentsFn('song-play-after', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
+			}
+		})
+
+		resolve(template)
 	})
-
-	template.push({
-		label: 'Play after',
-		click: () => {
-			sendWebContentsFn('song-play-after', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
-		}
-	})
-
-	console.log(template)
-
-	return template
 }
 
 function editLyrics(song: SongType) {
