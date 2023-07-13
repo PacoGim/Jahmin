@@ -4,6 +4,8 @@ import getAppDataPathFn from '../functions/getAppDataPath.fn'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import generateId from '../functions/generateId.fn'
 
+import type { DatabaseMessageType } from '../../types/databaseWorkerMessage.type'
+
 let workersName = [
 	'exifToolRead',
 	'exifToolWrite',
@@ -71,7 +73,7 @@ export function killWorker(workerName: WorkersNameType) {
 	workers.filter(worker => worker.name === workerName).forEach(worker => worker.worker.terminate())
 }
 
-export async function useWorker(message: any, worker: Worker):Promise<any> {
+export async function useWorker(message: any | DatabaseMessageType, worker: Worker): Promise<any> {
 	// Generate a unique ID for the workerCall
 	message.workerCallId = generateId()
 

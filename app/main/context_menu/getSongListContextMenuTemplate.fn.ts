@@ -5,20 +5,56 @@ import { SongType } from '../../types/song.type'
 import { saveLyrics } from '../services/lyrics.service'
 
 import addSeparatorFn from './functions/addSeparator.fn'
+import { Worker } from 'worker_threads'
+import { getWorker, useWorker } from '../services/workers.service'
 
 type dataType = {
-	selectedSongsData: SongType[]
-	clickedSongData: SongType | undefined
+	selectedSongsId: number[]
+	clickedSongId: number | undefined
 	albumRootDir: string
 }
 
-export default function (data: dataType) {
+let worker: Worker
+
+getWorker('database').then(w => (worker = w))
+
+export default async function (data: dataType) {
 	let template: MenuItemConstructorOptions[] = []
 
-	let { selectedSongsData, clickedSongData } = data
+	let { selectedSongsId, clickedSongId } = data
+
+	let selectedSongsData: any[] = await useWorker(
+		{
+			type: 'read',
+			data: {
+				queryData: {
+					select: ['*'],
+					orWhere: selectedSongsId.map(item => {
+						return { ID: item }
+					})
+				}
+			}
+		},
+		worker
+	)
+
+	let clickedSongData: any = await useWorker(
+		{
+			type: 'read',
+			data: {
+				queryData: {
+					select: ['*'],
+					andWhere: [{ ID: clickedSongId }]
+				}
+			}
+		},
+		worker
+	)
+
+
 
 	// If songs selected or a song has been clicked.
-	if (selectedSongsData.length !== 0 || clickedSongData !== undefined) {
+	if (selectedSongsId.length !== 0 || clickedSongId !== undefined) {
 		template.push({
 			label: 'Enable',
 			click: () => {
@@ -72,16 +108,18 @@ export default function (data: dataType) {
 	template.push({
 		label: 'Add to playback',
 		click: () => {
-			sendWebContentsFn('song-add-to-playback', { clickedSong: data.clickedSongData, selectedSongs: data.selectedSongsData })
+			sendWebContentsFn('song-add-to-playback', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
 		}
 	})
 
 	template.push({
 		label: 'Play after',
 		click: () => {
-			sendWebContentsFn('song-play-after', { clickedSong: data.clickedSongData, selectedSongs: data.selectedSongsData })
+			sendWebContentsFn('song-play-after', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
 		}
 	})
+
+	console.log(template)
 
 	return template
 }
@@ -222,5 +260,3 @@ function cutString(str: string, maxLength: number) {
 		return str
 	}
 }
-
-

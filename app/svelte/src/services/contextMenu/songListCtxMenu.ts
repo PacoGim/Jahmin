@@ -8,22 +8,14 @@ export default async function (e: MouseEvent) {
 		.find((path: HTMLElement) => path.tagName === 'SONG-LIST-ITEM') as HTMLElement
 
 	let clickedSongId = clickedSongItem?.dataset.id
-	let clickedSongData = undefined
 
 	let selectedSongsId: number[] = get(selectedSongsStore)
-	let selectedSongsData = []
 
-	if (clickedSongId) {
-		activeSongStore.set(Number(clickedSongId))
-		clickedSongData = await bulkGetSongsFn([Number(clickedSongId)])
-		clickedSongData = clickedSongData[0]
-	}
-
-	selectedSongsData = await bulkGetSongsFn(selectedSongsId)
+	if (clickedSongId) activeSongStore.set(Number(clickedSongId))
 
 	window.ipc.showContextMenu('SongListContextMenu', {
 		albumRootDir: get(selectedAlbumDir),
-		selectedSongsData,
-		clickedSongData: clickedSongData
+		selectedSongsId,
+		clickedSongId
 	})
 }

@@ -11,6 +11,8 @@ export function selectGeneric(queryData: {
 	return new Promise((resolve, reject) => {
 		let sqliteQuery = buildSqliteQuery(queryData)
 
+		console.log(sqliteQuery)
+
 		getDb().all(sqliteQuery, [], (err, songs: SongType[]) => {
 			if (err) {
 				return reject(err)
@@ -33,7 +35,9 @@ function buildSqliteQuery(queryData: {
 }) {
 	let query = `SELECT ${queryData.select.join(',')} FROM songs`
 
-	if (queryData.andWhere) {
+	console.log(queryData)
+
+	if (queryData.andWhere && queryData.andWhere.length > 0) {
 		query += ` WHERE ${queryData.andWhere
 			.map(where => {
 				if (where[Object.keys(where)[0]] === 'not null') {
@@ -45,7 +49,7 @@ function buildSqliteQuery(queryData: {
 			.join(' AND ')}`
 	}
 
-	if (queryData.orWhere) {
+	if (queryData.orWhere && queryData.orWhere.length > 0) {
 		query += ` WHERE ${queryData.orWhere
 			.map(where => {
 				if (where[Object.keys(where)[0]] === 'not null') {
