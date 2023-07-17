@@ -40,7 +40,7 @@ export default function (data: any) {
 	})
 
 	template.push({
-		label: data.keyModifier === 'altKey' ? 'Play After (Force add)' : 'Play After',
+		label: data.keyModifier === 'altKey' ? 'Play After Current Song (Force add)' : 'Play After Current Song',
 		click: () => {
 			sendWebContentsFn('album-play-after', {
 				songList: data.songList,

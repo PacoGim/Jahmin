@@ -25,20 +25,26 @@ export default function (data: dataType) {
 
 		let { selectedSongsId, clickedSongId } = data
 
-		let selectedSongsDatabaseResponse: DatabaseResponseType = await useWorker(
-			{
-				type: 'read',
-				data: {
-					queryData: {
-						select: ['SourceFile'],
-						orWhere: selectedSongsId.map(item => {
-							return { ID: item }
-						})
+		// If selected song id is empty don't query the db and set the selected db response to []
+
+		let selectedSongsDatabaseResponse: DatabaseResponseType | undefined = undefined
+
+		if (selectedSongsId.length !== 0) {
+			selectedSongsDatabaseResponse = await useWorker(
+				{
+					type: 'read',
+					data: {
+						queryData: {
+							select: ['SourceFile'],
+							orWhere: selectedSongsId.map(item => {
+								return { ID: item }
+							})
+						}
 					}
-				}
-			},
-			worker
-		)
+				},
+				worker
+			)
+		}
 
 		let clickedSongDatabaseResponse: DatabaseResponseType = await useWorker(
 			{
@@ -53,7 +59,7 @@ export default function (data: dataType) {
 			worker
 		)
 
-		let selectedSongsData = selectedSongsDatabaseResponse?.results?.data
+		let selectedSongsData = selectedSongsDatabaseResponse?.results?.data || []
 		let clickedSongData = clickedSongDatabaseResponse?.results?.data?.[0]
 
 		// If songs selected or a song has been clicked.
