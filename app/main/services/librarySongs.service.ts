@@ -5,7 +5,7 @@ import { Worker } from 'worker_threads'
 import { SongType } from '../../types/song.type'
 
 /********************** Services **********************/
-import { getWorker } from './workers.service'
+import { getWorker, useWorker } from './workers.service'
 import { getConfig } from './config.service'
 import { startChokidarWatch, watchPaths } from './chokidar.service'
 
@@ -34,9 +34,10 @@ let lastProcessTime: number | undefined = undefined
 
 let dbWorker: Worker
 
-getWorker('database').then(worker => {
-	dbWorker = worker
-})
+let songFilterWorker: Worker
+
+getWorker('database').then(worker => (dbWorker = worker))
+getWorker('songFilter').then(worker => (songFilterWorker = worker))
 
 export async function fetchSongsTag() {
 	const config = getConfig()
@@ -56,24 +57,20 @@ export async function fetchSongsTag() {
 		.filter(file => isAudioFileFn(file))
 		.sort((a, b) => a.localeCompare(b))
 
-	let queryId = generateId()
+	// let queryId = generateId()
 
-	dbWorker.postMessage({
-		type: 'read',
-		data: {
-			queryId,
-			queryData: {
-				select: ['SourceFile']
+	useWorker(
+		{
+			type: 'read',
+			data: {
+				queryData: {
+					select: ['SourceFile']
+				}
 			}
-		}
-	})
-
-	dbWorker.on('message', (response: any) => {
-		if (response.type === 'read') {
-			if (queryId === response.results.queryId) {
-				filterSongs(audioFiles, response.results.data)
-			}
-		}
+		},
+		dbWorker
+	).then(response => {
+		filterSongs(audioFiles, response.results.data)
 	})
 
 	// startChokidarWatch(config.directories.add, config.directories.exclude)
@@ -254,7 +251,16 @@ export function stopSongsUpdating() {
 }
 
 async function filterSongs(audioFilesFound: string[] = [], dbSongs: { SourceFile: string }[]) {
-	let worker = (await getWorker('songFilter')) as Worker
+	useWorker(
+		{
+			data: { dbSongs, userSongs: audioFilesFound }
+		},
+		songFilterWorker
+	).then(response => {
+		console.log(response)
+	})
+
+	/*let worker = (await getWorker('songFilter')) as Worker
 
 	worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
 		if (data.type === 'songsToAdd') {
@@ -272,6 +278,8 @@ async function filterSongs(audioFilesFound: string[] = [], dbSongs: { SourceFile
 		dbSongs,
 		userSongs: audioFilesFound
 	})
+
+	*/
 }
 
 export function getMaxTaskQueueLength() {

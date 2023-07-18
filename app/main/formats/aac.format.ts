@@ -56,10 +56,10 @@ export function getAacTags(filePath: string): Promise<SongType> {
 				Artist: metadata.Artist || null,
 				Comment: metadata.Comment || null,
 				Composer: metadata.Composer || null,
-				Date_Year: dateParsed.year || null,
-				Date_Month: dateParsed.month || null,
+				DateYear: dateParsed.year || null,
+				DateMonth: dateParsed.month || null,
 				DiscNumber: metadata.DiskNumber || null,
-				Date_Day: dateParsed.day || null,
+				DateDay: dateParsed.day || null,
 				Genre: metadata.Genre || null,
 				Rating: metadata.RatingPercent || metadata.Rating || null,
 				Title: metadata.Title || null,
@@ -82,18 +82,18 @@ function normalizeNewTags(newTags: EditTag) {
 	if (newTags.Track !== undefined) renameObjectKey(newTags, 'Track', 'TrackNumber')
 	// if (newTags.Rating !== undefined) renameObjectKey(newTags, 'Rating', 'RatingPercent')
 
-	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
-		newTags.AllDates = `${newTags.Date_Year || '0000'} ${newTags.Date_Month || '00'} ${newTags.Date_Day || '00'}`
+	if (newTags.DateYear || newTags.DateMonth || newTags.DateDay) {
+		newTags.AllDates = `${newTags.DateYear || '0000'} ${newTags.DateMonth || '00'} ${newTags.DateDay || '00'}`
 
-		if (newTags.Date_Year && newTags.Date_Month) {
+		if (newTags.DateYear && newTags.DateMonth) {
 			newTags.ContentCreateDate = new Date(
-				`${newTags.Date_Year}:${Number(newTags.Date_Month) + 1}:${newTags.Date_Day || 1}`
+				`${newTags.DateYear}:${Number(newTags.DateMonth) + 1}:${newTags.DateDay || 1}`
 			).toUTCString()
 		}
 
-		delete newTags.Date_Year
-		delete newTags.Date_Month
-		delete newTags.Date_Day
+		delete newTags.DateYear
+		delete newTags.DateMonth
+		delete newTags.DateDay
 	}
 
 	return newTags

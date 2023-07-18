@@ -55,9 +55,9 @@ export async function getMp3Tags(filePath: string): Promise<SongType> {
 			tags.Artist = nativeTags?.TPE1 || null
 			tags.Comment = nativeTags?.COMM?.text || null
 			tags.Composer = nativeTags?.TCOM || null
-			tags.Date_Year = dateParsed.year || null
-			tags.Date_Month = dateParsed.month || null
-			tags.Date_Day = dateParsed.day || null
+			tags.DateYear = dateParsed.year || null
+			tags.DateMonth = dateParsed.month || null
+			tags.DateDay = dateParsed.day || null
 			tags.DiscNumber = Number(nativeTags?.TPOS) || null
 			tags.Genre = nativeTags?.TCON || null
 			tags.Rating = convertRating('Jahmin', nativeTags?.POPM?.rating) || null
@@ -95,12 +95,12 @@ function normalizeNewTags(newTags: EditTag) {
 		}
 	}
 
-	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
-		newTags.TDRC = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`
+	if (newTags.DateYear || newTags.DateMonth || newTags.DateDay) {
+		newTags.TDRC = `${newTags.DateYear || '0000'}/${newTags.DateMonth || '00'}/${newTags.DateDay || '00'}`
 
-		delete newTags.Date_Year
-		delete newTags.Date_Month
-		delete newTags.Date_Day
+		delete newTags.DateYear
+		delete newTags.DateMonth
+		delete newTags.DateDay
 	}
 
 	if (newTags.Rating) {
@@ -186,9 +186,9 @@ function mergeNatives(native: any) {
 // 				tags['AlbumArtist'] = dataTags['album_artist']
 // 				tags['Composer'] = dataTags['composer']
 // 				tags['DiscNumber'] = dataTags['disc'] !== undefined ? Number(dataTags['disc']) : undefined
-// 				tags['Date_Year'] = dateParsed['year']
-// 				tags['Date_Month'] = dateParsed['month']
-// 				tags['Date_Day'] = dateParsed['day']
+// 				tags['DateYear'] = dateParsed['year']
+// 				tags['DateMonth'] = dateParsed['month']
+// 				tags['DateDay'] = dateParsed['day']
 // 				tags['Track'] = Number(dataTags['track'])
 
 // 				tags['LastModified'] = fs.statSync(filePath).mtimeMs

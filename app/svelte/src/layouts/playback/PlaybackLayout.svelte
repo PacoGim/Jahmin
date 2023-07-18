@@ -10,7 +10,7 @@
 	import type { SongType } from '../../../../types/song.type'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
-  import limitCharactersFn from '../../functions/limitCharacters.fn'
+	import limitCharactersFn from '../../functions/limitCharacters.fn'
 
 	$: if ($playbackStore.length > 0) {
 	}
@@ -95,7 +95,7 @@
 				{#each tempTags as tag, index (index)}
 					<song-data data-tag={tag}>
 						{#if $playingSongStore.ID === song.ID && index === 0}
-							<PlayButton customSize="0.75rem" customMargins="0 0.5rem 0 0" customColor="currentColor"/>
+							<PlayButton customSize="0.75rem" customMargins="0 0.5rem 0 0" customColor="currentColor" />
 						{/if}
 
 						{limitCharactersFn(song[tag], 75)}

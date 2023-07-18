@@ -13,9 +13,9 @@ export type SongType = {
 	Rating?: number | null // Modifiable
 	Comment?: string | null // Modifiable
 	DiscNumber?: number | null // Modifiable
-	Date_Year?: number | null // Modifiable
-	Date_Month?: number | null // Modifiable
-	Date_Day?: number | null // Modifiable
+	DateYear?: number | null // Modifiable
+	DateMonth?: number | null // Modifiable
+	DateDay?: number | null // Modifiable
 	SourceFile: string
 	Extension?: string
 	Size?: number

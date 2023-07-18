@@ -3,9 +3,19 @@ import sendWebContentsFn from '../functions/sendWebContents.fn'
 
 import verifyFolderTegrityFn from '../functions/verifyFolderTegrity.fn'
 import addSeparatorFn from './functions/addSeparator.fn'
+import { getWorker, useWorker } from '../services/workers.service'
+import { Worker } from 'worker_threads'
+import { getConfig } from '../services/config.service'
+import { DatabaseResponseType } from '../../types/databaseWorkerMessage.type'
+
+let worker: Worker
+
+getWorker('database').then(w => (worker = w))
 
 export default function (data: any) {
 	let template: MenuItemConstructorOptions[] = []
+
+	let config = getConfig()
 
 	template.push({
 		label: `Show Folder`,
@@ -41,9 +51,29 @@ export default function (data: any) {
 
 	template.push({
 		label: data.keyModifier === 'altKey' ? 'Play After Current Song (Force add)' : 'Play After Current Song',
-		click: () => {
+		click: async () => {
+			let bulkReadResponse: DatabaseResponseType = await useWorker(
+				{
+					type: 'read',
+					data: {
+						queryData: {
+							select: ['*'],
+							andWhere: [
+								{
+									Directory: data.albumRootDir
+								}
+							],
+							order: [`${config.userOptions.sortBy} ${config.userOptions.sortOrder}`]
+						}
+					}
+				},
+				worker
+			)
+
+			let songs = bulkReadResponse.results.data
+
 			sendWebContentsFn('album-play-after', {
-				songList: data.songList,
+				songs,
 				clickedAlbum: data.albumRootDir,
 				selectedAlbumsDir: data.selectedAlbumsDir,
 				keyModifier: data.keyModifier

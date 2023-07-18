@@ -23,9 +23,9 @@
 		Comment:
 			'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla libero fugiat consequuntur illo, vero repellendus dolores adipisci dolorum expedita. Quasi adipisci ut ratione molestiae minus quisquam exercitationem dicta in quos architecto nisi odit placeat, asperiores laboriosam illum? Neque porro illum eius nemo iste dolorem totam consectetur voluptatem fugiat, molestias temporibus!',
 		Composer: 'Mike Shinoda',
-		Date_Day: 15,
-		Date_Month: 6,
-		Date_Year: 2018,
+		DateDay: 15,
+		DateMonth: 6,
+		DateYear: 2018,
 		DiscNumber: 1,
 		Duration: 204,
 		Extension: 'opus',

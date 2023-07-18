@@ -12,9 +12,9 @@
 
 	function createDateElement(dateTagOrder) {
 		let date = {
-			year: song.Date_Year,
-			month: song.Date_Month,
-			day: song.Date_Day
+			year: song.DateYear,
+			month: song.DateMonth,
+			day: song.DateDay
 		}
 
 		let finalString = ''

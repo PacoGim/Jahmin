@@ -25,9 +25,9 @@ export default function (data: dataType) {
 
 		let { selectedSongsId, clickedSongId } = data
 
-		// If selected song id is empty don't query the db and set the selected db response to []
-
 		let selectedSongsDatabaseResponse: DatabaseResponseType | undefined = undefined
+
+		let config = getConfig()
 
 		if (selectedSongsId.length !== 0) {
 			selectedSongsDatabaseResponse = await useWorker(
@@ -35,10 +35,11 @@ export default function (data: dataType) {
 					type: 'read',
 					data: {
 						queryData: {
-							select: ['SourceFile'],
+							select: ['*'],
 							orWhere: selectedSongsId.map(item => {
 								return { ID: item }
-							})
+							}),
+							order: [`${config.userOptions.sortBy} ${config.userOptions.sortOrder}`]
 						}
 					}
 				},
@@ -51,7 +52,7 @@ export default function (data: dataType) {
 				type: 'read',
 				data: {
 					queryData: {
-						select: ['SourceFile', 'Title', 'Artist'],
+						select: ['*'],
 						andWhere: [{ ID: clickedSongId }]
 					}
 				}
@@ -59,8 +60,8 @@ export default function (data: dataType) {
 			worker
 		)
 
-		let selectedSongsData = selectedSongsDatabaseResponse?.results?.data || []
-		let clickedSongData = clickedSongDatabaseResponse?.results?.data?.[0]
+		let selectedSongsData: SongType[] = selectedSongsDatabaseResponse?.results?.data || []
+		let clickedSongData: SongType = clickedSongDatabaseResponse?.results?.data?.[0]
 
 		// If songs selected or a song has been clicked.
 		if (selectedSongsId.length !== 0 || clickedSongId !== undefined) {
@@ -114,10 +115,38 @@ export default function (data: dataType) {
 			})
 		}
 
+		/*
+			async() => {
+
+				let bulkReadResponse: DatabaseResponseType = await useWorker({
+					queryData: {
+						select: ['*'],
+						andWhere: [
+							{
+								Directory: data.clickedAlbum
+							}
+						],
+						order: [`${config.userOptions.sortBy} ${config.userOptions.sortOrder}`]
+					}
+				},worker)
+
+				let songs = bulkReadResponse.results.data
+
+
+		*/
+
 		template.push({
 			label: 'Add to playback',
 			click: () => {
-				sendWebContentsFn('song-add-to-playback', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
+				let songsToAddToPlayback: SongType[] = []
+
+				if (!selectedSongsData.find(song => song.ID === clickedSongId)) {
+					songsToAddToPlayback.push(clickedSongData)
+				} else {
+					songsToAddToPlayback = selectedSongsData
+				}
+
+				sendWebContentsFn('song-add-to-playback', { songsToAddToPlayback })
 			}
 		})
 

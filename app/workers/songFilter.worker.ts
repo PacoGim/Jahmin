@@ -6,26 +6,29 @@ type FilterSongData = {
 	userSongs: string[]
 }
 
-parentPort?.on('message', (data: FilterSongData) => {
-	let { userSongs, dbSongs } = data
+parentPort?.on('message', (msg:any) => {
 
-	let dbSourceFiles = dbSongs.map(song => song.SourceFile)
+	let { userSongs, dbSongs } = msg.data
 
-	let songsToAdd = userSongs
-		.filter(songPath => dbSourceFiles.indexOf(songPath) === -1)
-		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+	console.log(msg)
 
-	parentPort?.postMessage({
-		type: 'songsToAdd',
-		songs: songsToAdd
-	})
+	// let dbSourceFiles = dbSongs.map(song => song.SourceFile)
 
-	let songsToDelete = dbSourceFiles
-		.filter(songPath => userSongs.indexOf(songPath) === -1)
-		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+	// let songsToAdd = userSongs
+	// 	.filter(songPath => dbSourceFiles.indexOf(songPath) === -1)
+	// 	.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
-	parentPort?.postMessage({
-		type: 'songsToDelete',
-		songs: songsToDelete
-	})
+	// parentPort?.postMessage({
+	// 	type: 'songsToAdd',
+	// 	songs: songsToAdd
+	// })
+
+	// let songsToDelete = dbSourceFiles
+	// 	.filter(songPath => userSongs.indexOf(songPath) === -1)
+	// 	.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+	// parentPort?.postMessage({
+	// 	type: 'songsToDelete',
+	// 	songs: songsToDelete
+	// })
 })

@@ -15,7 +15,7 @@ export class JahminDb extends Dexie {
 
 		this.version(2).stores({
 			songs:
-				'ID,PlayCount,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,Date_Year,Date_Month,Date_Day,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
+				'ID,PlayCount,Album,AlbumArtist,Artist,Composer,Genre,Title,Track,Rating,Comment,DiscNumber,DateYear,DateMonth,DateDay,SourceFile,Extension,Size,Duration,SampleRate,LastModified,BitRate,BitDepth'
 		})
 
 		this.version(3).stores({})

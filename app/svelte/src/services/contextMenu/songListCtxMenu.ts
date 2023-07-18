@@ -7,11 +7,11 @@ export default async function (e: MouseEvent) {
 		.composedPath()
 		.find((path: HTMLElement) => path.tagName === 'SONG-LIST-ITEM') as HTMLElement
 
-	let clickedSongId = clickedSongItem?.dataset.id
+	let clickedSongId = Number(clickedSongItem?.dataset.id)
 
 	let selectedSongsId: number[] = get(selectedSongsStore)
 
-	if (clickedSongId) activeSongStore.set(Number(clickedSongId))
+	if (clickedSongId) activeSongStore.set(clickedSongId)
 
 	window.ipc.showContextMenu('SongListContextMenu', {
 		albumRootDir: get(selectedAlbumDir),

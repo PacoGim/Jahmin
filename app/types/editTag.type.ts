@@ -5,9 +5,9 @@ export type EditTag = {
 	Comment?: string
 	Composer?: string
 	Artist?: string
-	Date_Day?: number
-	Date_Month?: number
-	Date_Year?: number
+	DateDay?: number
+	DateMonth?: number
+	DateYear?: number
 	DiscNumber?: number
 	Genre?: string
 	Rating?: number

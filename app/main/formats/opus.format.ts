@@ -73,9 +73,9 @@ export async function getOpusTags(filePath: string): Promise<SongType> {
 					tags.Artist = nativeTags?.ARTIST || null
 					tags.Comment = nativeTags?.DESCRIPTION || nativeTags?.COMMENT || null
 					tags.Composer = nativeTags?.COMPOSER || null
-					tags.Date_Year = dateParsed.year || null
-					tags.Date_Month = dateParsed.month || null
-					tags.Date_Day = dateParsed.day || null
+					tags.DateYear = dateParsed.year || null
+					tags.DateMonth = dateParsed.month || null
+					tags.DateDay = dateParsed.day || null
 					tags.DiscNumber = Number(nativeTags?.DISCNUMBER) || null
 					tags.Genre = nativeTags?.GENRE || null
 					tags.Rating = Number(nativeTags?.RATING) || null
@@ -168,12 +168,12 @@ function objectToFfmpegString(newTags: EditTag) {
 	// if (newTags.DiscNumber) renameObjectKey(newTags, 'DiscNumber', 'disc')
 	// if (newTags.AlbumArtist) renameObjectKey(newTags, 'AlbumArtist', 'Album_Artist')
 
-	if (newTags.Date_Year || newTags.Date_Month || newTags.Date_Day) {
-		newTags.Date = `${newTags.Date_Year || '0000'}/${newTags.Date_Month || '00'}/${newTags.Date_Day || '00'}`
+	if (newTags.DateYear || newTags.DateMonth || newTags.DateDay) {
+		newTags.Date = `${newTags.DateYear || '0000'}/${newTags.DateMonth || '00'}/${newTags.DateDay || '00'}`
 
-		delete newTags.Date_Year
-		delete newTags.Date_Month
-		delete newTags.Date_Day
+		delete newTags.DateYear
+		delete newTags.DateMonth
+		delete newTags.DateDay
 	}
 
 	for (let key in newTags) {

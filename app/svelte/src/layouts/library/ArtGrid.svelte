@@ -47,7 +47,7 @@
 		window.ipc
 			.bulkRead({
 				queryData: {
-					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'Directory', 'Date_Year'],
+					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'Directory', 'DateYear'],
 					andWhere: whereQuery,
 					group: ['Album'],
 					order: ['Album'] //TODO add the proper sorting here and in Player middleware

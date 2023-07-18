@@ -21,8 +21,8 @@ export default function (songs: SongType[]) {
 		}
 
 		const stmt = getDb().prepare(`INSERT INTO songs (
-      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, Date_Year, Date_Month, Date_Day, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth, Directory
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`)
+      ID, PlayCount, Album, AlbumArtist, Artist, Composer, Genre, Title, Track, Rating, Comment, DiscNumber, DateYear, DateMonth, DateDay, SourceFile, Extension, Size, Duration, SampleRate, LastModified, BitRate, BitDepth, Directory, IsEnabled
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 
 		for (const row of songs) {
 			stmt.run(
@@ -38,9 +38,9 @@ export default function (songs: SongType[]) {
 				row.Rating,
 				row.Comment,
 				row.DiscNumber,
-				row.Date_Year,
-				row.Date_Month,
-				row.Date_Day,
+				row.DateYear,
+				row.DateMonth,
+				row.DateDay,
 				row.SourceFile,
 				row.Extension,
 				row.Size,
@@ -49,13 +49,13 @@ export default function (songs: SongType[]) {
 				row.LastModified,
 				row.BitRate,
 				row.BitDepth,
-				row.Directory
+				row.Directory,
+				null //IsEnabled
 			)
 		}
 
 		stmt.finalize(() => {
 			updateVersion()
-			// console.log(songs.length)
 			resolve(songs)
 		})
 	})

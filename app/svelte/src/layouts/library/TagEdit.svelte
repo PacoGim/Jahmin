@@ -324,19 +324,19 @@
 		<textarea bind:value={bindingTags.Comment} />
 	</tag-container>
 
-	<tag-container data-tag="Date_Year" data-type="number">
+	<tag-container data-tag="DateYear" data-type="number">
 		<tag-name>Year <UndoIcon /> </tag-name>
-		<textarea bind:value={bindingTags.Date_Year} />
+		<textarea bind:value={bindingTags.DateYear} />
 	</tag-container>
 
-	<tag-container data-tag="Date_Month" data-type="number">
+	<tag-container data-tag="DateMonth" data-type="number">
 		<tag-name>Month <UndoIcon /> </tag-name>
-		<textarea bind:value={bindingTags.Date_Month} />
+		<textarea bind:value={bindingTags.DateMonth} />
 	</tag-container>
 
-	<tag-container data-tag="Date_Day" data-type="number">
+	<tag-container data-tag="DateDay" data-type="number">
 		<tag-name>Day <UndoIcon /> </tag-name>
-		<textarea bind:value={bindingTags.Date_Day} />
+		<textarea bind:value={bindingTags.DateDay} />
 	</tag-container>
 
 	<tag-container data-tag="Rating">
@@ -524,18 +524,18 @@
 		grid-area: tag-comment;
 	}
 
-	tag-container[data-tag='Date_Year'] {
+	tag-container[data-tag='DateYear'] {
 		grid-area: tag-date-year;
 		margin-right: 0.25rem;
 	}
 
-	tag-container[data-tag='Date_Month'] {
+	tag-container[data-tag='DateMonth'] {
 		grid-area: tag-date-month;
 		margin-right: 0.25rem;
 		margin-left: 0.25rem;
 	}
 
-	tag-container[data-tag='Date_Day'] {
+	tag-container[data-tag='DateDay'] {
 		grid-area: tag-date-day;
 		margin-left: 0.25rem;
 	}

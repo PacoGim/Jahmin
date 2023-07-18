@@ -236,7 +236,7 @@ function normalizeGroupNames(groups: string[]) {
 			case 'Disc #':
 				return 'DiscNumber'
 			case 'Year':
-				return 'Date_Year'
+				return 'DateYear'
 			default:
 				return group
 		}

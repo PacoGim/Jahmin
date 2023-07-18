@@ -11,10 +11,10 @@ export default function (db: Database) {
     Artist TEXT,
     Comment TEXT,
     Composer TEXT,
-    Date_Year INTEGER,
-    Date_Month INTEGER,
+    DateYear INTEGER,
+    DateMonth INTEGER,
     DiscNumber INTEGER,
-    Date_Day INTEGER,
+    DateDay INTEGER,
     Genre TEXT,
     Rating TEXT,
     Title TEXT,
@@ -26,7 +26,8 @@ export default function (db: Database) {
     SampleRate INTEGER,
     Size INTEGER,
     PlayCount INTEGER,
-    Directory TEXT
+    Directory TEXT,
+    IsEnabled INTEGER CHECK (IsEnabled IN (0, 1))
     )`)
 	console.timeEnd('Inside Create table fn')
 }

@@ -25,6 +25,10 @@
 
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
 
+	$: if ($playbackStore.length > 0) {
+
+	}
+
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
 	})
@@ -106,15 +110,22 @@
 
 	window.ipc.onAlbumAddToPlayback(
 		async (_, data: { songList: SongType[]; clickedAlbum: string; selectedAlbumsDir: string[]; keyModifier }) => {
-			let songListToAdd = undefined
-
+			let songListToAdd: SongType[] = []
 			// If the album clicked is not included in the list of selected albums, only add the clicked album to the list.
 			if (!data.selectedAlbumsDir.includes(data.clickedAlbum)) {
-				let songs = await getAlbumSongsFn(data.clickedAlbum)
+				let bulkReadResponse: DatabaseResponseType = await window.ipc.bulkRead({
+					queryData: {
+						select: ['*'],
+						andWhere: [
+							{
+								Directory: data.clickedAlbum
+							}
+						],
+						order: [`${$config.userOptions.sortBy} ${$config.userOptions.sortOrder}`]
+					}
+				})
 
-				let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-
-				songListToAdd = sortedSongs
+				songListToAdd = bulkReadResponse.results.data
 			} else {
 				songListToAdd = data.songList
 			}
@@ -130,31 +141,17 @@
 		}
 	)
 
-	window.ipc.onAlbumPlayAfter(async (_, rootDir) => {
-		let songs = await getAlbumSongsFn(rootDir)
-
-		let sortedSongs = sortSongsArrayFn(songs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-
-		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
-
-		let arrayCopy = [...$playbackStore]
-
-		arrayCopy.splice(currentPlayingSongIndex, 0, ...sortedSongs)
-
-		$playbackStore = arrayCopy
-	})
-
-	window.ipc.onSongAddToPlayback(async (_, data) => {
-		let selectedSongs = data.selectedSongs
-		let clickedSong = data.clickedSong
-
-		if (selectedSongs.findIndex(song => song.ID === clickedSong.ID) === -1) {
-			selectedSongs.push(clickedSong)
+	window.ipc.onAlbumPlayAfter(
+		(_, data: { songs: SongType[]; clickedAlbum: string; selectedAlbumsDir: string[]; keyModifier }) => {
+			let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
+			let arrayCopy = [...$playbackStore]
+			arrayCopy.splice(currentPlayingSongIndex, 0, ...data.songs)
+			$playbackStore = arrayCopy
 		}
+	)
 
-		let sortedSongs = sortSongsArrayFn(selectedSongs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
-
-		$playbackStore.push(...sortedSongs)
+	window.ipc.onSongAddToPlayback(async (_, data: { songsToAddToPlayback: SongType[] }) => {
+		$playbackStore = [...$playbackStore, ...data.songsToAddToPlayback]
 	})
 
 	window.ipc.onSongPlayAfter(async (_, data) => {
