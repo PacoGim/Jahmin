@@ -18,7 +18,6 @@ export function selectGeneric(queryData: {
 			}
 
 			resolve({
-				workerCallId: queryData.workerCallId,
 				data: songs
 			})
 		})

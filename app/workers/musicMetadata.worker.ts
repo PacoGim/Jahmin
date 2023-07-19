@@ -7,8 +7,8 @@ parentPort?.on('message', async data => {
 
 	mm.parseFile(data.filePath).then((metadata: any) => {
 		parentPort?.postMessage({
+			workerCallId: data.workerCallId,
 			results: {
-				workerCallId: data.workerCallId,
 				filePath: data.filePath,
 				metadata,
 				status: 1

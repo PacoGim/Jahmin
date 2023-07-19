@@ -7,8 +7,8 @@ parentPort?.on('message', data => {
 		.write(data.filePath, data.newTags, ['-overwrite_original'])
 		.then(() => {
 			parentPort?.postMessage({
+				workerCallId: data.workerCallId,
 				results: {
-					workerCallId: data.workerCallId,
 					filePath: data.filePath,
 					status: 1
 				}
@@ -16,8 +16,8 @@ parentPort?.on('message', data => {
 		})
 		.catch(err => {
 			parentPort?.postMessage({
+				workerCallId: data.workerCallId,
 				results: {
-					workerCallId: data.workerCallId,
 					filePath: data.filePath,
 					status: -1
 				}

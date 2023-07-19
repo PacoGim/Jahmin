@@ -15,7 +15,6 @@ export default function (data: { update: { PlayCount: number }; where: { ID: num
 			} else {
 				// Otherwise, resolve the Promise with an object containing the workerCallId and updated data
 				resolve({
-					workerCallId: data.workerCallId,
 					data: {
 						ID: data.where.ID,
 						PlayCount: data.update.PlayCount

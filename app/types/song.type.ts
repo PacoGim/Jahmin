@@ -24,7 +24,7 @@ export type SongType = {
 	LastModified?: number
 	BitRate?: number | null
 	BitDepth?: number | null
-	isEnabled?: boolean
+	IsEnabled?: 0 | 1 | null
 }
 
 export type PartialSongType = Partial<SongType>

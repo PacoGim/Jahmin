@@ -81,7 +81,7 @@ export async function useWorker(message: any | DatabaseMessageType, worker: Work
 	const result = await new Promise(resolve => {
 		// Define a listener function for the 'message' event on the worker
 		function listener(response: any) {
-			if (message.workerCallId === response.results.workerCallId) {
+			if (message.workerCallId === response.workerCallId) {
 				// If they do, remove the listener from the worker and resolve the Promise with the response
 				worker.removeListener('message', listener)
 				return resolve(response)

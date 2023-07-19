@@ -25,8 +25,8 @@ parentPort?.on('message', data => {
 		}
 
 		parentPort?.postMessage({
+			workerCallId,
 			results: {
-				workerCallId,
 				filePath,
 				tempFileName,
 				status

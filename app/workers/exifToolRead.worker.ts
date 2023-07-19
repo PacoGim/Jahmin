@@ -5,8 +5,8 @@ const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
 parentPort?.on('message', data => {
 	exiftool.read(data.filePath).then((metadata: any) => {
 		parentPort?.postMessage({
+			workerCallId: data.workerCallId,
 			results: {
-				workerCallId: data.workerCallId,
 				filePath: data.filePath,
 				metadata,
 				status: 1

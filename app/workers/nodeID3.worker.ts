@@ -5,16 +5,16 @@ parentPort?.on('message', data => {
 	NodeID3.update(data.newTags, data.filePath, {}, err => {
 		if (err) {
 			parentPort?.postMessage({
+				workerCallId: data.workerCallId,
 				results: {
-					workerCallId: data.workerCallId,
 					filePath: data.filePath,
 					status: -1
 				}
 			})
 		} else {
 			parentPort?.postMessage({
+				workerCallId: data.workerCallId,
 				results: {
-					workerCallId: data.workerCallId,
 					filePath: data.filePath,
 					status: 1
 				}

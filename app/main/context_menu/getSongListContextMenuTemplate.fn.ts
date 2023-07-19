@@ -9,6 +9,8 @@ import { Worker } from 'worker_threads'
 import { getWorker, useWorker } from '../services/workers.service'
 import { DatabaseResponseType } from '../../types/databaseWorkerMessage.type'
 
+import handleEnableDisableSongsFn from '../functions/handleEnableDisableSongs.fn'
+
 type dataType = {
 	selectedSongsId: number[]
 	clickedSongId: number | undefined
@@ -65,19 +67,40 @@ export default function (data: dataType) {
 
 		// If songs selected or a song has been clicked.
 		if (selectedSongsId.length !== 0 || clickedSongId !== undefined) {
-			template.push({
-				label: 'Enable',
-				click: () => {
-					handleEnableDisableSongs({ enable: true }, selectedSongsData, clickedSongData)
-				}
-			})
+			let labelToShow: 'enable' | 'disable' | 'both' = 'enable'
+			let songsToEnableDisable: SongType[] = []
 
-			template.push({
-				label: 'Disable',
-				click: () => {
-					handleEnableDisableSongs({ enable: false }, selectedSongsData, clickedSongData)
+			if (selectedSongsId.indexOf(clickedSongId!) === -1) {
+				labelToShow = clickedSongData.IsEnabled === 1 ? 'disable' : 'enable'
+				songsToEnableDisable = [clickedSongData]
+			} else {
+				if (selectedSongsData.every(song => song.IsEnabled === 1)) {
+					labelToShow = 'disable'
+				} else if (selectedSongsData.every(song => song.IsEnabled === 0 || song.IsEnabled === null)) {
+					labelToShow = 'enable'
+				} else {
+					labelToShow = 'both'
 				}
-			})
+				songsToEnableDisable = selectedSongsData
+			}
+
+			if (['enable', 'both'].includes(labelToShow)) {
+				template.push({
+					label: 'Enable',
+					click: () => {
+						handleEnableDisableSongsFn({ enable: true }, songsToEnableDisable)
+					}
+				})
+			}
+
+			if (['disable', 'both'].includes(labelToShow)) {
+				template.push({
+					label: 'Disable',
+					click: () => {
+						handleEnableDisableSongsFn({ enable: false }, songsToEnableDisable)
+					}
+				})
+			}
 
 			addSeparatorFn(template)
 		}
@@ -140,7 +163,7 @@ export default function (data: dataType) {
 			click: () => {
 				let songsToAddToPlayback: SongType[] = []
 
-				if (!selectedSongsData.find(song => song.ID === clickedSongId)) {
+				if (selectedSongsId.indexOf(clickedSongId!) === -1) {
 					songsToAddToPlayback.push(clickedSongData)
 				} else {
 					songsToAddToPlayback = selectedSongsData
@@ -165,38 +188,6 @@ function editLyrics(song: SongType) {
 	saveLyrics('SaveLyricsFromContextMenu', song.Title, song.Artist).then(() => {
 		sendWebContentsFn('show-lyrics', { title: song.Title, artist: song.Artist })
 	})
-}
-
-function handleEnableDisableSongs(
-	{ enable }: { enable: boolean },
-	selectedSongs: SongType[],
-	clickedSong: SongType | undefined
-) {
-	let isClickedSongInSelectedSongs = selectedSongs.find(song => song.ID === clickedSong?.ID) ? true : false
-
-	if (isClickedSongInSelectedSongs === false && clickedSong !== undefined) {
-		clickedSong.isEnabled = enable
-
-		selectedSongs.push(clickedSong)
-	} else if (selectedSongs.length !== 0) {
-		selectedSongs.forEach(song => {
-			song.isEnabled = enable
-		})
-	}
-
-	selectedSongs
-		.filter(song => song.hasOwnProperty('isEnabled'))
-		.forEach(song => {
-			sendWebContentsFn('web-storage', {
-				type: 'update',
-				data: {
-					id: song.ID,
-					newTags: {
-						isEnabled: song.isEnabled
-					}
-				}
-			})
-		})
 }
 
 function getSongAmountMenu() {

@@ -251,35 +251,21 @@ export function stopSongsUpdating() {
 }
 
 async function filterSongs(audioFilesFound: string[] = [], dbSongs: { SourceFile: string }[]) {
-	useWorker(
-		{
-			data: { dbSongs, userSongs: audioFilesFound }
-		},
-		songFilterWorker
-	).then(response => {
-		console.log(response)
+	// Use a worker to filter songs to add to the database
+	useWorker({ type: 'add', data: { userSongs: audioFilesFound, dbSongs } }, songFilterWorker).then(response => {
+		// For each song returned by the worker, add it to the task queue for insertion
+		response.results.songs.forEach((songPath: string) => {
+			process.nextTick(() => addToTaskQueue(songPath, 'insert'))
+		})
+
+		// Use a worker to filter songs to delete from the database
+		useWorker({ type: 'delete', data: { userSongs: audioFilesFound, dbSongs } }, songFilterWorker).then(response => {
+			// For each song returned by the worker, add it to the task queue for deletion
+			response.results.songs.forEach((songPath: string) => {
+				process.nextTick(() => addToTaskQueue(songPath, 'delete'))
+			})
+		})
 	})
-
-	/*let worker = (await getWorker('songFilter')) as Worker
-
-	worker.on('message', (data: { type: 'songsToAdd' | 'songsToDelete'; songs: string[] }) => {
-		if (data.type === 'songsToAdd') {
-			data.songs.forEach(songPath => process.nextTick(() => addToTaskQueue(songPath, 'insert')))
-		}
-
-		if (data.type === 'songsToDelete') {
-			if (data.songs.length > 0) {
-				// sendWebContentsFn('web-storage-bulk-delete', data.songs)
-			}
-		}
-	})
-
-	worker.postMessage({
-		dbSongs,
-		userSongs: audioFilesFound
-	})
-
-	*/
 }
 
 export function getMaxTaskQueueLength() {

@@ -67,7 +67,7 @@
 	data-index={index}
 	style="grid-auto-columns:{gridStyle};"
 	class="
-	{song.isEnabled === false ? 'disabled' : ''}
+	{song.IsEnabled === 0 ? 'disabled' : ''}
 	{$playingSongStore?.ID === song.ID ? 'playing' : ''}
 	{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
 >
