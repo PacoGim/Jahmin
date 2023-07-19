@@ -126,7 +126,7 @@
 			fileNotFoundCheck(song)
 
 			// If the song is disabled, finds the next enabled song to play.
-			if (song.isEnabled === false) {
+			if (song.IsEnabled === 0) {
 				// Gets the current song index in the playlist.
 				let currentSongIndex = $playbackStore.findIndex(song => song.SourceFile === songUrl)
 

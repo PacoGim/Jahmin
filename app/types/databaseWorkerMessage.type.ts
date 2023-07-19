@@ -1,5 +1,5 @@
 export type DatabaseResponseType = {
-	type: 'initDb' | 'create' | 'update' | 'delete'
+	type: 'initDb' | 'create' | 'update' | 'delete'|'update-is-enabled'
 	results: {
 		workerCallId: string
 		data: any

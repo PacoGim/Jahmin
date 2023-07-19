@@ -8,7 +8,7 @@ export default function (currentSongIndex: number, songList: SongType[]): SongTy
 	let cutArray = playbackArrayCopy.splice(currentSongIndex + 1)
 
 	// Finds the first enabled song in the array.
-	let nextSong = cutArray.find(song => song.isEnabled !== false)
+	let nextSong = cutArray.find(song => song.IsEnabled !== 0)
 
 	return nextSong
 }

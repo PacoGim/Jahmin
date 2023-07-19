@@ -74,13 +74,7 @@ function updatePlayCount(msg: DatabaseMessageType) {
 }
 
 function updateIsEnabled(msg: DatabaseMessageType) {
-	updateIsEnabledFn({ ...msg.data.queryData, workerCallId: msg.workerCallId }).then(data => {
-		parentPort!.postMessage({
-			type: msg.type,
-			workerCallId: msg.workerCallId,
-			results: data
-		})
-	})
+	updateIsEnabledFn({ ...msg.data.queryData, workerCallId: msg.workerCallId })
 }
 
 function initDb(msg: DatabaseMessageType) {

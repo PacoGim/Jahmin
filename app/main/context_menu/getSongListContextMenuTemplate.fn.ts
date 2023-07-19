@@ -71,12 +71,12 @@ export default function (data: dataType) {
 			let songsToEnableDisable: SongType[] = []
 
 			if (selectedSongsId.indexOf(clickedSongId!) === -1) {
-				labelToShow = clickedSongData.IsEnabled === 1 ? 'disable' : 'enable'
+				labelToShow = [1, null].includes(clickedSongData.IsEnabled!) ? 'disable' : 'enable'
 				songsToEnableDisable = [clickedSongData]
 			} else {
-				if (selectedSongsData.every(song => song.IsEnabled === 1)) {
+				if (selectedSongsData.every(song => song.IsEnabled === 1 || song.IsEnabled === null)) {
 					labelToShow = 'disable'
-				} else if (selectedSongsData.every(song => song.IsEnabled === 0 || song.IsEnabled === null)) {
+				} else if (selectedSongsData.every(song => song.IsEnabled === 0)) {
 					labelToShow = 'enable'
 				} else {
 					labelToShow = 'both'

@@ -44,7 +44,7 @@
 	function buildGridStyle() {
 		let tempGridStyle = tagToGridStyleFn($songListTagConfig)
 
-		if (song.isEnabled === false) {
+		if (song.IsEnabled === 0) {
 			tempGridStyle = 'minmax(min-content, max-content) ' + tempGridStyle
 		}
 
