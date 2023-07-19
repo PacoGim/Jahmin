@@ -1,5 +1,5 @@
 import { PartialSongType } from '../../types/song.type'
-import { updateVersion } from './dbVersion.fn';
+import { updateVersion } from './dbVersion.fn'
 import { getDb } from './initDB.fn'
 
 export default function (songs: { songId: string | number; newTags: PartialSongType }[]) {

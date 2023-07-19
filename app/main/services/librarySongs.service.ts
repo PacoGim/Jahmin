@@ -57,8 +57,6 @@ export async function fetchSongsTag() {
 		.filter(file => isAudioFileFn(file))
 		.sort((a, b) => a.localeCompare(b))
 
-	// let queryId = generateId()
-
 	useWorker(
 		{
 			type: 'read',
@@ -138,6 +136,12 @@ function getTask(processIndex: number, processesRunning: boolean[]) {
 	} else if (task.type === 'external-update') {
 		handleExternalUpdateTask(task, processIndex, processesRunning)
 	} else if (task.type === 'delete') {
+		dbWorker.postMessage({
+			type: 'delete',
+			data: task.path
+		})
+
+		// console.log(task)
 		// sendWebContentsFn('web-storage', {
 		// 	type: 'delete',
 		// 	data: hashFn(task.path, 'number')

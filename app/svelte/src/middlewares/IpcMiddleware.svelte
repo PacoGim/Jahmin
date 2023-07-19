@@ -24,7 +24,6 @@
 	} from '../stores/main.store'
 
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
-	import updateEnableDisableFn from '../functions/updateEnableDisable.fn'
 
 	$: if ($playbackStore.length > 0) {
 	}

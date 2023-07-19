@@ -349,7 +349,7 @@
 	</album-art>
 
 	<button-container>
-		<ThreeDButton
+		<button
 			on:buttonClick={() => undoAllTags()}
 			addShadow={false}
 			disabled={isEmptyObject(newTags)}
@@ -359,9 +359,9 @@
 		>
 			<UndoIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;" />
 			Cancel
-		</ThreeDButton>
+		</button>
 
-		<ThreeDButton
+		<button
 			on:buttonClick={() => {
 				updateSongs(songsToEdit, newTags)
 				hideToggleIcons()
@@ -374,16 +374,16 @@
 		>
 			<UpdateIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 			Update
-		</ThreeDButton>
+		</button>
 	</button-container>
 </tag-edit-svlt>
 
 <style>
 	tag-edit-svlt {
-		/* line-height: 17px; */
 		background-color: rgba(255, 255, 255, 0.05);
 
-		overflow-y: overlay;
+		overflow: hidden;
+		overflow-y: scroll;
 		display: grid;
 		height: 100%;
 
@@ -555,8 +555,10 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-evenly;
-		/* align-items: end; */
 		margin: 0.5rem 0;
+	}
+	button-container button {
+		height: fit-content;
 	}
 
 	:global(tag-suggestions) {

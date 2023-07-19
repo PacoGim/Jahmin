@@ -9,6 +9,7 @@ dist/main/types
 dist/main/context_menu
 dist/svelte/bundle.js
 dist/svelte/bundle.js.map
+dist/svelte/bundle.css
 dist/types
 
 # Logs
