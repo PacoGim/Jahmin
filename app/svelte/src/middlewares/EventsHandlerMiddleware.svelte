@@ -10,7 +10,7 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
-	import { config } from '../stores/config.store'
+	import { config, groupByConfig, groupByValuesConfig } from '../stores/config.store'
 
 	import {
 		albumPlayingDirStore,
@@ -89,23 +89,22 @@
 
 		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
 
-		let groupByValuesLocalStorage = parseJsonFn(localStorage.getItem('GroupByValues'))
+		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig[0]]}`)
 
-		if (!isArrayEqualFn(groupByValuesLocalStorage, $config.group.groupByValues)) {
-			$triggerGroupingChangeEvent = groupByValuesLocalStorage
-		}
+		groupElement.click()
+
+		groupElement.scrollIntoView({ block: 'center', behavior: 'smooth' })
 
 		$triggerScrollToSongEvent = playingSong.ID
 		$selectedSongsStore = [playingSong.ID]
 
 		setTimeout(() => {
 			scrollToAlbumFn($albumPlayingDirStore, 'not-smooth-scroll')
-		}, 250)
+		}, 1000)
 	}
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		// Get all song from albums
-
 		const rootDir = element.getAttribute('rootDir')
 
 		if (evtType === 'dblclick') {
@@ -159,7 +158,6 @@
 	}
 
 	function saveGroupingConfig() {
-		localStorage.setItem('GroupByValues', JSON.stringify($config.group.groupByValues))
 		// Saves the grouping
 		updateConfigFn(
 			{

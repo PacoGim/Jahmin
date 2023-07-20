@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { SongType } from '../../../../types/song.type'
 	import SongListItem from '../../components/SongListItem.svelte'
 	import generateId from '../../functions/generateId.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -16,7 +17,7 @@
 	} from '../../stores/main.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 
-	let songsToShow = []
+	let songsToShow: SongType[] = []
 	let scrollAmount = 0
 	let previousScrollAmount = undefined
 
@@ -31,7 +32,7 @@
 		$songListStore
 		$songAmountConfig
 		previousScrollAmount = undefined
-		trimSongArray()
+		// trimSongArray()
 	}
 
 	$: {
@@ -60,15 +61,15 @@
 	}
 
 	// Trims the current song array to show a limited amount of songs.
-	function trimSongArray() {
-		if (scrollAmount !== previousScrollAmount) {
-			songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
+	// function trimSongArray() {
+		// if (scrollAmount !== previousScrollAmount) {
+		// 	songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
 
-			if (songsToShow.length > 0) {
-				previousScrollAmount = scrollAmount
-			}
-		}
-	}
+		// 	if (songsToShow.length > 0) {
+		// 		previousScrollAmount = scrollAmount
+		// 	}
+		// }
+	// }
 
 	function setScrollAmount(amount) {
 		if ($songListStore.length <= 0) {
@@ -83,7 +84,7 @@
 
 		scrollAmount = amount
 
-		trimSongArray()
+		// trimSongArray()
 
 		setScrollProgress()
 	}
@@ -133,8 +134,7 @@
 	role="button"
 >
 	<song-list>
-		<!-- TODO Remove generatedID -->
-		{#each songsToShow as song, index (generateId())}
+		{#each $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig) as song, index (song.ID)}
 			<SongListItem {song} {index} />
 		{/each}
 	</song-list>

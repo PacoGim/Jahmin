@@ -12,8 +12,6 @@
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 	import tagEditSuggestionFn from '../../services/tagEditSuggestion.fn'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
-	import findNextValidSongFn from '../../functions/findNextValidSong.fn'
-	import ThreeDButton from '../../components/ThreeDButton.svelte'
 
 	let songsToEdit: PartialSongType[] = []
 	let groupedTags: PartialSongType = {}
@@ -24,21 +22,13 @@
 
 	$: {
 		$songListStore
-		setupSongs('songListStoreUpdate')
-	}
-
-	$: {
 		$selectedSongsStore
-		setupSongs('selectedSongsStoreUpdate')
+		setupSongs()
 	}
 
 	$: newTags = getObjectDifference(groupedTags, bindingTags)
 
-	function setupSongs(from: string) {
-		if (from === 'songListStoreUpdate' && $songSyncQueueProgress.currentLength > 1) {
-			return
-		}
-
+	function setupSongs() {
 		songsToEdit = filterSongsToEdit($songListStore, $selectedSongsStore)
 		groupedTags = groupSongsByValues(songsToEdit)
 		bindingTags = Object.assign({}, groupedTags)
@@ -349,28 +339,18 @@
 	</album-art>
 
 	<button-container>
-		<button
-			on:buttonClick={() => undoAllTags()}
-			addShadow={false}
-			disabled={isEmptyObject(newTags)}
-			colorName="dangerRed"
-			fontSize=".8rem"
-			paddingX=".5rem"
-		>
+		<button on:click={() => undoAllTags()} disabled={isEmptyObject(newTags)}>
 			<UndoIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;opacity: 1;" />
 			Cancel
 		</button>
 
 		<button
-			on:buttonClick={() => {
+			on:click={() => {
 				updateSongs(songsToEdit, newTags)
 				hideToggleIcons()
 				$elementMap = undefined
 			}}
-			fontSize=".8rem"
-			paddingX=".5rem"
 			disabled={isEmptyObject(newTags)}
-			addShadow={false}
 		>
 			<UpdateIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 			Update

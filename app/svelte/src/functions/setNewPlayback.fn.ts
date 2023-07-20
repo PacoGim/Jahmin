@@ -47,7 +47,9 @@ export default async function (
 
 	songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }])
 
-	triggerScrollToSongEvent.set(songToPlay.ID)
+	setTimeout(() => {
+		triggerScrollToSongEvent.set(songToPlay.ID)
+	}, 1000)
 
 	// getAlbumColorsFn(rootDir).then(color => {
 	// 	applyColorSchemeFn(color)

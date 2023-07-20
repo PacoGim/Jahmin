@@ -47,10 +47,10 @@
 		window.ipc
 			.bulkRead({
 				queryData: {
-					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'Directory', 'DateYear'],
+					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'DateYear', 'Directory'],
 					andWhere: whereQuery,
-					group: ['Album'],
-					order: ['Album'] //TODO add the proper sorting here and in Player middleware
+					group: ['Directory'],
+					order: ['Directory'] //TODO add the proper sorting here and in Player middleware
 				}
 			})
 			.then(response => {

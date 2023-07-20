@@ -54,9 +54,10 @@
 			>
 
 			<!-- {#if $selectedGroups[index]} -->
-			{#each groupedSongs as groupValue}
+			{#each groupedSongs as groupValue, index (index)}
 				<group-value
-					class={$groupByValuesConfig[index] === groupValue ? 'selected' : null}
+					class={$groupByValuesConfig[0] === groupValue ? 'selected' : null}
+					id="group-{groupValue}"
 					on:click={setNewGroupValue(groupValue)}
 					on:keypress={setNewGroupValue(groupValue)}
 					tabindex="-1"
@@ -95,7 +96,7 @@
 		overflow-y: auto;
 		flex-direction: column;
 		/* width: min-content; */
-		border-right: 2px solid rgba(255, 255, 255, 0.05);
+		/* border-right: 2px solid rgba(255, 255, 255, 0.05); */
 
 		width: 150px;
 		/* border-right: 1px var(--color-bg-2) solid; */

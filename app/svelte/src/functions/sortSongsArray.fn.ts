@@ -3,8 +3,6 @@ import type { SongType } from '../../../types/song.type'
 export default (songs: SongType[], tag, order: 'asc' | 'desc' = 'desc', group = undefined) => {
 	let songsArrayCopy = [...songs]
 
-	// console.log(tag,order,group)
-
 	if (['Duration', 'Track', 'Size', 'Sample Rate', 'Rating', 'Disc #', 'BitRate', 'PlayCount','SampleRate'].includes(tag)) {
 		if (order === 'asc') {
 			songsArrayCopy.sort((a, b) => Number(a[tag] || 0) - Number(b[tag] || 0))
@@ -44,8 +42,6 @@ export default (songs: SongType[], tag, order: 'asc' | 'desc' = 'desc', group = 
 			songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index])
 		})
 	}
-
-	console.log(songsArrayCopy)
 
 	return songsArrayCopy
 }

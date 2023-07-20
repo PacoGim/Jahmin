@@ -7,12 +7,8 @@
 
 	import { dbVersionStore, playbackStore, selectedAlbumsDir, songListStore } from '../stores/main.store'
 
-	let allSongs = []
-
 	$: fillSongList($selectedAlbumsDir)
 	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir) : null
-
-	$: $songListStore = allSongs
 
 	$: {
 		if ($selectedAlbumsDir !== undefined) {
@@ -22,7 +18,7 @@
 
 	function fillSongList(albumRootDirList: string[] = []) {
 		if (albumRootDirList.length === 0) {
-			allSongs = []
+			songListStore.set([])
 			return
 		}
 
@@ -39,9 +35,9 @@
 				}
 			})
 			.then(response => {
-				if (JSON.stringify(allSongs) !== JSON.stringify(response.results.data)) {
-					allSongs = []
-					allSongs = [...allSongs, ...response.results.data]
+				// If the songs from the db is different from the songs in the song list store, update it.
+				if (JSON.stringify($songListStore) !== JSON.stringify(response.results.data)) {
+					songListStore.set(response.results.data)
 				}
 			})
 	}
@@ -58,7 +54,6 @@
 
 		let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile)
 
-		$songListStore = songList
 		$playbackStore = songList
 
 		setNewPlaybackFn(lastPlayedSongDirectory, songList, lastPlayedSongId, {
@@ -74,7 +69,9 @@
 			}
 		})
 
-		scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
+		setTimeout(() => {
+			scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
+		}, 1000)
 	}
 
 	onMount(() => {
