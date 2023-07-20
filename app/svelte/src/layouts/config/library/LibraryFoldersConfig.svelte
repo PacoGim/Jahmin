@@ -1,7 +1,5 @@
 <script lang="ts">
 	import OptionSectionCompact from '../../../components/OptionSectionCompact.svelte'
-	import ThreeDButton from '../../../components/ThreeDButton.svelte'
-	import getAllSongsFn from '../../../db/getAllSongs.fn'
 	import traduceFn from '../../../functions/traduce.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
@@ -12,10 +10,11 @@
 <OptionSectionCompact title={traduceFn('Is the library missing songs?')}>
 	<button
 		on:click={() => {
-			getAllSongsFn().then(songs => {
-				window.ipc.sendAllSongsToMain(songs)
-				$layoutToShow = 'Library'
-			})
+			// TODO Migrate to new db
+			// getAllSongsFn().then(songs => {
+			// 	window.ipc.sendAllSongsToMain(songs)
+			// 	$layoutToShow = 'Library'
+			// })
 		}}>{traduceFn('Reload the library')}</button
 	>
 </OptionSectionCompact>
@@ -27,17 +26,19 @@
 			{#each $config.directories.add || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
-					<button on:click={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}>
+					<!-- TODO Migrate to new db -->
+					<!-- <button on:click={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}> -->
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 						{traduceFn('Remove')}
-					</button>
+					<!-- </button> -->
 				</section-directory>
 			{/each}
 		{/if}
 	</section-body>
 	<button
 		on:click={async () => {
-			window.ipc.selectDirectories('add', await getAllSongsFn())
+			// TODO Migrate to new db
+			// window.ipc.selectDirectories('add', await getAllSongsFn())
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
@@ -52,13 +53,13 @@
 			{#each $config.directories.exclude || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
-					<button
+					<!--TODO Migrate to new db <button
 						class="danger"
 						on:click={async () => window.ipc.removeDirectory(directory, 'remove-exclude', await getAllSongsFn())}
-					>
+					> -->
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 						{traduceFn('Remove')}
-					</button>
+					<!-- </button> -->
 				</section-directory>
 			{/each}
 		{/if}
@@ -66,7 +67,8 @@
 	<button
 		class="info"
 		on:click={async () => {
-			window.ipc.selectDirectories('exclude', await getAllSongsFn())
+			// TODO Migrate to new db
+			// window.ipc.selectDirectories('exclude', await getAllSongsFn())
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />

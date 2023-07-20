@@ -48,7 +48,7 @@ async function runQueue() {
 
 	setTimeout(() => {
 		runQueue()
-	}, 1000)
+	}, 500)
 }
 
 export function addTaskToQueue(data: DataType, type: 'create' | 'update' | 'delete' | 'external-update') {

@@ -1,9 +1,5 @@
 <script lang="ts">
 	import type { SongType } from '../../../types/song.type'
-	import { addTaskToQueue } from '../db/!db'
-	import bulkDeleteSongsFn from '../db/bulkDeleteSongs.fn'
-	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
-	import getAllSongsFn from '../db/getAllSongs.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 	import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
@@ -32,16 +28,6 @@
 		dbVersionStore.set(response)
 	})
 
-	window.ipc.onGetAllSongsFromRenderer(() => {
-		getAllSongsFn().then(songs => {
-			window.ipc.sendAllSongsToMain(songs)
-		})
-	})
-
-	window.ipc.handleWebStorage((_, response) => {
-		addTaskToQueue(response.data, response.type)
-	})
-
 	window.ipc.handleNewImageArt((_, data) => {
 		handleArtService.handleNewImageArt(data)
 	})
@@ -60,10 +46,6 @@
 
 	window.ipc.onArtQueueChange((_, artQueueLength) => {
 		$artCompressQueueLength = artQueueLength
-	})
-
-	window.ipc.onWebStorageBulkDelete((_, songsToDelete) => {
-		bulkDeleteSongsFn(songsToDelete)
 	})
 
 	window.ipc.onShowLyrics((_, data) => {

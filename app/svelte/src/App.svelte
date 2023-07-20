@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { liveQuery } from 'dexie'
 
 	/********************** Services **********************/
 	import onAppMountedService from './services/onAppMounted.service'
@@ -24,9 +23,7 @@
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import EventsHandlerMiddleware from './middlewares/EventsHandlerMiddleware.svelte'
 
-	import { getDB } from './db/!dbObject'
-
-	import { dbSongsStore, layoutToShow } from './stores/main.store'
+	import { layoutToShow } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 	import { confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import PromptService from './svelte_services/PromptService.svelte'
@@ -34,12 +31,6 @@
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
 	import LyricsLayout from './layouts/lyrics/!LyricsLayout.svelte'
-
-	liveQuery(async () => {
-		return await getDB().songs.toArray()
-	}).subscribe(songs => {
-		$dbSongsStore = songs
-	})
 
 	onMount(() => {
 		onAppMountedService()

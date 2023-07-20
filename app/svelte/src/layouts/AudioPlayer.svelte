@@ -27,7 +27,6 @@
 	import encodeURLFn from '../functions/encodeURL.fn'
 	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
 	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
-	import { addTaskToQueue } from '../db/!db'
 	import nextSongFn from '../functions/nextSong.fn'
 	import { config } from '../stores/config.store'
 	import equalizerService from '../services/equalizer/!equalizer.service'
@@ -331,7 +330,9 @@
 						[
 							'<button style="color:#fff;border:solid 2px #fff;">Delete from library</button>',
 							function () {
-								addTaskToQueue(song.ID, 'delete')
+								// TODO Add this to the new db
+								// addTaskToQueue(song.ID, 'delete')
+
 								nextSongFn()
 							},
 							false

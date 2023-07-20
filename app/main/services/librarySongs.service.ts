@@ -54,7 +54,6 @@ export async function fetchSongsTag() {
 
 	let audioFiles = filesInFolders
 		.filter(path => isExcludedPathsFn(path, config.directories.exclude))
-		.filter(file => isAudioFileFn(file))
 		.sort((a, b) => a.localeCompare(b))
 
 	useWorker(

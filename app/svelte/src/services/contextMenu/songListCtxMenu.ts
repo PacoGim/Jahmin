@@ -1,6 +1,5 @@
 import { get } from 'svelte/store'
 import { activeSongStore, selectedAlbumDir, selectedSongsStore } from '../../stores/main.store'
-import bulkGetSongsFn from '../../db/bulkGetSongs.fn'
 
 export default async function (e: MouseEvent) {
 	let clickedSongItem: HTMLElement = e

@@ -1,22 +1,26 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 
-export default function getAllFilesInFoldersDeep(rootDirectory: string[]=[]) {
-	let allFiles: string[] = []
+export default function (directories: string[] = []) {
+	const audioFilePaths = directories.flatMap(folder => findAudioFiles(folder))
 
-	rootDirectory.forEach(rootDirectory => {
-		let files = fs.readdirSync(rootDirectory)
+	return audioFilePaths
+}
 
-		files.forEach(file => {
-			let filePath = path.join(rootDirectory, file)
+function findAudioFiles(directory: string, filePaths: string[] = []) {
+	const files = fs.readdirSync(directory)
 
-			if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-				allFiles = allFiles.concat(getAllFilesInFoldersDeep([filePath]))
-			} else {
-				allFiles.push(filePath)
-			}
-		})
+	files.forEach(file => {
+		const filePath = path.join(directory, file)
+		const stat = fs.statSync(filePath)
+
+		if (stat.isDirectory()) {
+			findAudioFiles(filePath, filePaths)
+		} else if (allowedSongExtensionsVar.includes(path.extname(file).slice(1))) {
+			filePaths.push(filePath)
+		}
 	})
 
-	return allFiles
+	return filePaths
 }

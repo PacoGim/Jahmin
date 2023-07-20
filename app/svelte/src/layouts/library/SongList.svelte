@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SongListItem from '../../components/SongListItem.svelte'
+	import generateId from '../../functions/generateId.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 	import { songAmountConfig } from '../../stores/config.store'
@@ -132,7 +133,8 @@
 	role="button"
 >
 	<song-list>
-		{#each songsToShow as song, index (song.ID)}
+		<!-- TODO Remove generatedID -->
+		{#each songsToShow as song, index (generateId())}
 			<SongListItem {song} {index} />
 		{/each}
 	</song-list>

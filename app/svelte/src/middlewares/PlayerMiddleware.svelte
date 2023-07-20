@@ -1,24 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import type { SongType } from '../../../types/song.type'
-	import getAlbumSongsFn from '../db/getAlbumSongs.fn'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
-	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
-	import { config } from '../stores/config.store'
-
-	import {
-		dbVersionStore,
-		playbackStore,
-		playingSongStore,
-		selectedAlbumDir,
-		selectedAlbumsDir,
-		songListStore,
-		triggerScrollToSongEvent
-	} from '../stores/main.store'
-	import setMediaSessionDataFn from '../functions/setMediaSessionData.fn'
+	import { dbVersionStore, playbackStore, selectedAlbumsDir, songListStore } from '../stores/main.store'
 
 	let allSongs = []
 

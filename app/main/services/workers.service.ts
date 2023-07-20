@@ -44,7 +44,7 @@ export function getWorker(workerName: WorkersNameType): Promise<Worker> {
 			resolve(worker?.worker)
 		}
 
-		console.log(`T:${workers.length} - Worker called: ${workerName}`)
+		// console.log(`T:${workers.length} - Worker called: ${workerName}`)
 	})
 }
 
