@@ -21,6 +21,7 @@ import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn
 import isAudioFileFn from '../functions/isAudioFile.fn'
 import getAppDataPathFn from '../functions/getAppDataPath.fn'
 import generateId from '../functions/generateId.fn'
+import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 
 export let maxTaskQueueLength: number = 0
 
@@ -50,7 +51,7 @@ export async function fetchSongsTag() {
 	taskQueue = []
 	maxTaskQueueLength = 0
 
-	let filesInFolders = getAllFilesInFoldersDeepFn(config.directories.add)
+	let filesInFolders = getAllFilesInFoldersDeepFn(config.directories.add, allowedSongExtensionsVar)
 
 	let audioFiles = filesInFolders
 		.filter(path => isExcludedPathsFn(path, config.directories.exclude))
@@ -70,7 +71,7 @@ export async function fetchSongsTag() {
 		filterSongs(audioFiles, response.results.data)
 	})
 
-	// startChokidarWatch(config.directories.add, config.directories.exclude)
+	startChokidarWatch(config.directories.add, config.directories.exclude)
 }
 
 // Splits excecution based on the amount of cpus.
@@ -198,6 +199,8 @@ async function handleExternalUpdateTask(task: any, processIndex: number, process
 	let newTags: any = undefined
 
 	newTags = await getSongTagsFn(task.path).catch()
+
+	console.log(newTags)
 
 	// sendWebContentsFn('web-storage', {
 	// 	type: task.type,

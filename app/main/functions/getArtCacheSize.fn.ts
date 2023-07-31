@@ -9,7 +9,7 @@ export default function () {
 		let artFolderPath = path.join(getAppDataFn(), 'arts')
 
 		if (fs.existsSync(artFolderPath)) {
-			let files = getAllFilesInFoldersDeep([artFolderPath])
+			let files = getAllFilesInFoldersDeep([artFolderPath], ['webp'])
 			let sumSizes = 0
 
 			files.forEach(filePath => {

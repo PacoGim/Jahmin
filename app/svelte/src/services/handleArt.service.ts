@@ -121,6 +121,7 @@ function handleNewVideoArt(data) {
 	if (document.hasFocus() === true) {
 		// Plays the video art.
 		// TODO add config check here
+
 		videoElement.play()
 	}
 }

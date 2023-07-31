@@ -7,9 +7,10 @@
 	import { reloadArts } from '../stores/main.store'
 
 	export let intersectionRoot = undefined
-	export let imageSourceLocation = ''
+	export let imageSourceLocation = undefined
+	export let from = ''
 
-	let elementId = ''
+	let elementId = undefined
 	let element: HTMLElement = undefined
 	let elementWidth = 0
 	let elementHeight = 0
@@ -19,15 +20,26 @@
 		elementId = generateId()
 	}
 
-	$: {
-		if (element !== undefined) {
-			let { height, width } = calculateElementArtSizeFn(element.parentElement, { keepSquare: true })
-			elementHeight = height
-			elementWidth = width
+	$: if (element !== undefined && imageSourceLocation !== undefined) configArt()
 
-			if (imageSourceLocation) {
-				loadArt(imageSourceLocation, elementId, intersectionRoot, elementHeight, elementWidth)
-			}
+	function configArt() {
+		let height
+		let width
+
+		if (from === 'ArtGrid') {
+			height = $config.userOptions.artSize
+			width = $config.userOptions.artSize
+		} else {
+			let elementSize = calculateElementArtSizeFn(element.parentElement, { keepSquare: true })
+			height = elementSize.height
+			width = elementSize.width
+		}
+
+		elementHeight = height
+		elementWidth = width
+
+		if (imageSourceLocation) {
+			loadArt(imageSourceLocation, elementId, intersectionRoot, elementHeight, elementWidth)
 		}
 	}
 

@@ -1,14 +1,13 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 
-export default function (directories: string[] = []) {
-	const audioFilePaths = directories.flatMap(folder => findAudioFiles(folder))
+export default function (directories: string[] = [], extensionsToKeep: string[]) {
+	const filePaths = directories.flatMap(folder => findFiles(folder, extensionsToKeep))
 
-	return audioFilePaths
+	return filePaths
 }
 
-function findAudioFiles(directory: string, filePaths: string[] = []) {
+function findFiles(directory: string, extensionsToKeep: string[], filePaths: string[] = []) {
 	const files = fs.readdirSync(directory)
 
 	files.forEach(file => {
@@ -16,8 +15,8 @@ function findAudioFiles(directory: string, filePaths: string[] = []) {
 		const stat = fs.statSync(filePath)
 
 		if (stat.isDirectory()) {
-			findAudioFiles(filePath, filePaths)
-		} else if (allowedSongExtensionsVar.includes(path.extname(file).slice(1))) {
+			findFiles(filePath, extensionsToKeep, filePaths)
+		} else if (extensionsToKeep.includes(path.extname(file).slice(1))) {
 			filePaths.push(filePath)
 		}
 	})

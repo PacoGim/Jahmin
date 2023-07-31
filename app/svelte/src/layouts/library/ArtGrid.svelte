@@ -106,7 +106,7 @@
 
 <art-grid-svlt>
 	{#each albums || [] as album (album.ID)}
-		<Album {album} />
+		<Album {album} from='ArtGrid' />
 	{/each}
 </art-grid-svlt>
 

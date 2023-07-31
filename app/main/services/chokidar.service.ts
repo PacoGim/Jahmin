@@ -7,7 +7,7 @@ let foundPaths: string[] = []
 
 let ignoredPaths: string[] = []
 
-export function startChokidarWatch(rootDirectories: string[], excludeDirectories: string[] = []) {
+export function startChokidarWatch(rootDirectories: string[] = [], excludeDirectories: string[] = []) {
 	if (watcher) {
 		watcher.close()
 		watcher = undefined

@@ -48,7 +48,7 @@ export let windowResize: Writable<number> = writable(undefined)
 
 /********************** ConfigLayout **********************/
 export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics'> = writable('Library')
-export let configOptionSelected: Writable<'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'> = writable('Song List Tags')
+export let configOptionSelected: Writable<'Appearance' | 'Equalizer' | 'Library' | 'Song List Tags'> = writable('Appearance')
 
 export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)

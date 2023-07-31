@@ -5,6 +5,7 @@
 	import AlbumArt from './AlbumArt.svelte'
 
 	export let album: AlbumType
+	export let from = ''
 </script>
 
 <album
@@ -12,7 +13,7 @@
 	rootDir={album.Directory}
 	class={$selectedAlbumsDir?.includes(album?.Directory) ? 'selected' : ''}
 >
-	<AlbumArt imageSourceLocation={album.Directory} intersectionRoot="art-grid-svlt" />
+	<AlbumArt imageSourceLocation={album.Directory} {from} intersectionRoot="art-grid-svlt" />
 
 	<overlay-gradient />
 

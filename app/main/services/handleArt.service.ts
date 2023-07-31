@@ -89,10 +89,9 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 	if (!fs.existsSync(embeddedArtDirectory)) fs.mkdirSync(embeddedArtDirectory, { recursive: true })
 
 	let embeddedArtPath =
-		getAllFilesInFoldersDeepFn([embeddedArtDirectory])
-			.filter(file => !file.endsWith('.webp'))
-			.filter(file => !file.endsWith('.DS_Store'))
-			.filter(file => file.endsWith(fileNameHash))[0] || undefined
+		getAllFilesInFoldersDeepFn([embeddedArtDirectory], ['webp']).filter(file => file.endsWith(fileNameHash))[0] || undefined
+
+	console.log(embeddedArtPath)
 
 	if (embeddedArtPath) {
 		let finalArtPath = path.join(getDirectoryFn(embeddedArtPath), 'cover.webp')
