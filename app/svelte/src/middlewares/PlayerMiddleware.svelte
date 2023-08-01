@@ -6,6 +6,7 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import { dbVersionStore, playbackStore, selectedAlbumsDir, songListStore } from '../stores/main.store'
+	import { groupByConfig } from '../stores/config.store'
 
 	$: fillSongList($selectedAlbumsDir)
 	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir) : null
@@ -17,8 +18,9 @@
 	}
 
 	function fillSongList(albumRootDirList: string[] = []) {
+		songListStore.set([])
+
 		if (albumRootDirList.length === 0) {
-			songListStore.set([])
 			return
 		}
 
@@ -69,8 +71,11 @@
 			}
 		})
 
+
 		setTimeout(() => {
 			scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
+			// let groupElement: HTMLElement = document.querySelector(`#group-${lastPlayedSong[$groupByConfig]}`)
+			// groupElement.click()
 		}, 1000)
 	}
 

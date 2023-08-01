@@ -97,7 +97,7 @@
     "@tsconfig/svelte": "^3.0.0",
     "@types/dompurify": "^3.0.2",
     "@types/jsdom": "^21.1.1",
-    "@types/node": "^18.11.18",
+    "@types/node": "^20.4.5",
     "@types/sharp": "^0.31.1",
     "@types/spark-md5": "^3.0.2",
     "@types/xxhashjs": "^0.2.2",
@@ -113,7 +113,7 @@
     "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^7.0.0",
     "svelte": "^4.1.1",
-    "svelte-check": "^3.0.3",
+    "svelte-check": "^3.4.6",
     "svelte-preprocess": "^5.0.1",
     "tslib": "^2.4.1",
     "typescript": "^5.0.4"

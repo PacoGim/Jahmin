@@ -66,6 +66,7 @@ const ipcFunctions = {
 	onLyricsDeleted: (callback: any) => ipcRenderer.on('lyrics-deleted', callback),
 	onConfirmLyricsDeletion: (callback: any) => ipcRenderer.on('confirm-lyrics-deletion', callback),
 	onDatabaseUpdate: (callback: any) => ipcRenderer.on('database-update', callback),
+	onGroupSelected: (callback: any) => ipcRenderer.on('group-selected', callback),
 	/********************** Database **********************/
 	bulkRead,
 	updatePlayCount

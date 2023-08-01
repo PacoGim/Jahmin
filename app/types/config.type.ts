@@ -39,8 +39,8 @@ export enum ThemeOptions {
 }
 
 type GroupType = {
-	groupBy: string[]
-	groupByValues: string[]
+	groupBy: string
+	groupByValue: string
 }
 
 export type BoundsType = {

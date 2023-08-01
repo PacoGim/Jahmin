@@ -48,8 +48,8 @@ export function saveConfig(newConfig: PartialConfigType | any) {
 function getDefaultConfigFile(): ConfigType {
 	return {
 		group: {
-			groupBy: ['Genre'],
-			groupByValues: []
+			groupBy: 'Genre',
+			groupByValue: ''
 		},
 		directories: {
 			add: [],

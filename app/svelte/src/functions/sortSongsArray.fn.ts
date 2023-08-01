@@ -38,9 +38,9 @@ export default (songs: SongType[], tag, order: 'asc' | 'desc' = 'desc', group = 
 	}
 
 	if (group) {
-		group.groupBy.forEach((_, index) => {
-			songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy[index]] === group.groupByValues[index])
-		})
+		// group.groupBy.forEach((_, index) => {
+			songsArrayCopy = songsArrayCopy.filter(song => song[group.groupBy] === group.groupByValue)
+		// })
 	}
 
 	return songsArrayCopy

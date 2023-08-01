@@ -7,7 +7,7 @@ export default function (configFile: ConfigType, defaultConfigFile: ConfigType) 
 
 	configFile.userOptions = definedDefaults(configFile.userOptions, defaultConfigFile.userOptions) as UserOptionsType
 
-	if (configFile?.group?.groupBy === undefined || configFile?.group?.groupBy?.length === 0) {
+	if (configFile?.group?.groupBy === undefined) {
 		configFile.group = defaultConfigFile.group
 	}
 

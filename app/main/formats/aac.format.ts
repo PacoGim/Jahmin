@@ -46,6 +46,14 @@ export function getAacTags(filePath: string): Promise<SongType> {
 
 			if (!isNaN(metadata.Rating)) metadata.RatingPercent = metadata.Rating
 
+			console.log('--------------')
+			console.log('--------------')
+			console.log('--------------')
+			console.log('--------------')
+			console.log('--------------')
+			console.log('--------------')
+			console.log(metadata)
+
 			resolve({
 				ID: stringHash(filePath),
 				Directory: getDirectoryFn(filePath),
@@ -94,6 +102,11 @@ function normalizeNewTags(newTags: EditTag) {
 		delete newTags.DateYear
 		delete newTags.DateMonth
 		delete newTags.DateDay
+	}
+
+	if (newTags.Rating) {
+		newTags.RatingPercent = newTags.Rating
+		delete newTags.Rating
 	}
 
 	return newTags

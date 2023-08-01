@@ -3,8 +3,8 @@ import type { ConfigType } from '../../../types/config.type'
 
 export let config: Writable<ConfigType | undefined> = writable(undefined)
 
-export let groupByConfig: Writable<string[]> = writable([])
-export let groupByValuesConfig: Writable<string[]> = writable([])
+export let groupByConfig: Writable<string> = writable('')
+export let groupByValueConfig: Writable<string> = writable('')
 export let songAmountConfig: Writable<number> = writable(0)
 export let themeConfig: Writable<string> = writable('')
 export let gridGapConfig: Writable<number> = writable(0)
@@ -22,8 +22,8 @@ config.subscribe(value => {
 		groupByConfig.set(value?.group.groupBy)
 	}
 
-	if (get(groupByValuesConfig) !== value?.group.groupByValues) {
-		groupByValuesConfig.set(value?.group.groupByValues)
+	if (get(groupByValueConfig) !== value?.group.groupByValue) {
+		groupByValueConfig.set(value?.group.groupByValue)
 	}
 
 	if (get(songAmountConfig) !== value?.userOptions?.songAmount) {

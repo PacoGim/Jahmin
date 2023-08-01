@@ -4,7 +4,7 @@
 	import Album from '../../components/Album.svelte'
 
 	import { dbSongsStore, dbVersionStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
-	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValuesConfig } from '../../stores/config.store'
+	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
 	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -18,11 +18,11 @@
 	$: if ($artSizeConfig !== undefined) cssVariablesService.set('art-dimension', `${$artSizeConfig}px`)
 	$: if ($gridGapConfig !== undefined) cssVariablesService.set('grid-gap', `${$gridGapConfig}px`)
 
-	$: if (/* Add the db versioning later */ $groupByConfig || $groupByValuesConfig) {
-		updateArtGridAlbums($groupByConfig, $groupByValuesConfig)
+	$: if (/* Add the db versioning later */ $groupByConfig || $groupByValueConfig) {
+		updateArtGridAlbums($groupByConfig, $groupByValueConfig)
 	}
 
-	$: $dbVersionStore !== 0 ? updateArtGridAlbums($groupByConfig, $groupByValuesConfig) : null
+	$: $dbVersionStore !== 0 ? updateArtGridAlbums($groupByConfig, $groupByValueConfig) : null
 
 	$: {
 		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('art-grid-svlt')) {
@@ -30,7 +30,7 @@
 		}
 	}
 
-	function updateArtGridAlbums(groupBy, groupByValues) {
+	function updateArtGridAlbums(groupBy, groupByValue) {
 		let whereQuery: any = [
 			{
 				Album: 'not null'
@@ -39,7 +39,7 @@
 
 		for (let index in groupBy) {
 			let tempWhere = {}
-			tempWhere[groupBy[index]] = groupByValues[index]
+			tempWhere[groupBy] = groupByValue
 
 			whereQuery.push(tempWhere)
 		}
@@ -66,7 +66,7 @@
 
 		$config.group.groupBy.forEach((group, index) => {
 			songsFiltered = $dbSongsStore.filter(song => {
-				return song[$config.group.groupBy[index]] === $config.group.groupByValues[index]
+				return song[$config.group.groupBy[index]] === $config.group.groupByValue[index]
 			})
 		})
 
@@ -93,14 +93,14 @@
 	onMount(() => {
 		// Whenever a filter is selected resets the scroll to top. Can't do it in reactive statement because querySelector gives undefined.
 		//TODO Improve this part.
-		/* 	groupByValuesConfigObserver = groupByValuesConfig.subscribe(() => {
+		/* 	groupByValueConfigObserver = groupByValueConfig.subscribe(() => {
 			document.querySelector('art-grid-svlt').scrollTop = 0
 		}) */
 		// console.log('Hello?')
 	})
 
 	onDestroy(() => {
-		// groupByValuesConfigObserver()
+		// groupByValueConfigObserver()
 	})
 </script>
 

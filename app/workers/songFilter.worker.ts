@@ -11,6 +11,7 @@ parentPort?.on(
 			let songsToAdd = userSongs
 				.filter(songPath => dbSourceFiles.indexOf(songPath) === -1)
 				.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
 			parentPort?.postMessage({
 				type: msg.type,
 				workerCallId: msg.workerCallId,

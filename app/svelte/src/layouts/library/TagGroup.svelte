@@ -1,74 +1,71 @@
 <script lang="ts">
 	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
-	import { groupByConfig, groupByValuesConfig } from '../../stores/config.store'
+	import { groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
 	import updateConfigFn from '../../functions/updateConfig.fn'
 	import { dbVersionStore } from '../../stores/main.store'
 
 	let groupedSongs = []
 
+	$:{
+		console.log($groupByConfig)
+		console.log($groupByValueConfig)
+	}
+
 	$: groupSongs($groupByConfig)
 	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig) : null
 
-	function groupSongs(groupBy: string[]) {
+	function groupSongs(groupBy: string) {
 		// For now, for the sake of finishing the app, multiple grouping is not going to be implemented, but the app will be ready for it later (Using an array of strings instead of just a string)
 		window.ipc
 			.bulkRead({
 				queryData: {
-					select: [`distinct ${groupBy[0]}`],
-					order: [groupBy[0]]
+					select: [`distinct ${groupBy}`],
+					order: [groupBy]
 				}
 			})
 			.then(response => {
 				let result = response?.results?.data
 
 				if (result.length > 0) {
-					groupedSongs = result.map(item => item[groupBy[0]])
+					groupedSongs = result.map(item => item[groupBy])
 				}
 			})
 	}
 
 	function setNewGroupValue(groupValue) {
-		updateConfigFn({
-			group: {
-				groupByValues: [groupValue]
-			}
-		})
+		$groupByValueConfig = groupValue
 	}
 </script>
 
 <tag-group-svlt>
-	{#each $groupByConfig || [] as group, index (index)}
-		<group-svlt data-index={index}>
-			<group-name
-				on:click={e => handleContextMenuEvent(e)}
-				on:keypress={e => handleContextMenuEvent(e)}
+	<group-svlt>
+		<group-name
+			on:click={e => handleContextMenuEvent(e)}
+			on:keypress={e => handleContextMenuEvent(e)}
+			tabindex="-1"
+			role="button"
+		>
+			<button>
+				{$groupByConfig}
+			</button></group-name
+		>
+
+		<!-- {#if $selectedGroups[index]} -->
+		{#each groupedSongs as groupValue, index (index)}
+			<group-value
+				class={$groupByValueConfig === groupValue ? 'selected' : null}
+				id="group-{groupValue}"
+				on:click={setNewGroupValue(groupValue)}
+				on:keypress={setNewGroupValue(groupValue)}
 				tabindex="-1"
 				role="button"
-				data-name={group}
-				data-index={index}
 			>
-				<button>
-					{group}
-				</button></group-name
-			>
-
-			<!-- {#if $selectedGroups[index]} -->
-			{#each groupedSongs as groupValue, index (index)}
-				<group-value
-					class={$groupByValuesConfig[0] === groupValue ? 'selected' : null}
-					id="group-{groupValue}"
-					on:click={setNewGroupValue(groupValue)}
-					on:keypress={setNewGroupValue(groupValue)}
-					tabindex="-1"
-					role="button"
-				>
-					{groupValue}
-				</group-value>
-			{/each}
-			<!-- {/if} -->
-		</group-svlt>
-	{/each}
+				{groupValue}
+			</group-value>
+		{/each}
+		<!-- {/if} -->
+	</group-svlt>
 </tag-group-svlt>
 
 <style>

@@ -1,13 +1,10 @@
 import { cpus } from 'os'
 import { Worker } from 'worker_threads'
 
-/********************** Types **********************/
-import { SongType } from '../../types/song.type'
-
 /********************** Services **********************/
 import { getWorker, useWorker } from './workers.service'
 import { getConfig } from './config.service'
-import { startChokidarWatch, watchPaths } from './chokidar.service'
+import { startChokidarWatch } from './chokidar.service'
 
 /********************** Functions **********************/
 import sendWebContentsFn from '../functions/sendWebContents.fn'
@@ -18,9 +15,6 @@ import hashFn from '../functions/hashString.fn'
 import isExcludedPathsFn from '../functions/isExcludedPaths.fn'
 import removeDuplicateObjectsFromArrayFn from '../functions/removeDuplicateObjectsFromArray.fn'
 import getAllFilesInFoldersDeepFn from '../functions/getAllFilesInFoldersDeep.fn'
-import isAudioFileFn from '../functions/isAudioFile.fn'
-import getAppDataPathFn from '../functions/getAppDataPath.fn'
-import generateId from '../functions/generateId.fn'
 import allowedSongExtensionsVar from '../global/allowedSongExtensions.var'
 
 export let maxTaskQueueLength: number = 0
@@ -200,7 +194,17 @@ async function handleExternalUpdateTask(task: any, processIndex: number, process
 
 	newTags = await getSongTagsFn(task.path).catch()
 
-	console.log(newTags)
+	// console.log(task, processIndex)
+
+	// console.log(newTags)
+	dbWorker.postMessage({
+		type: 'update',
+		data: {
+			queryId: null,
+			songId: hashFn(task.path, 'number'),
+			newTags
+		}
+	})
 
 	// sendWebContentsFn('web-storage', {
 	// 	type: task.type,

@@ -10,7 +10,7 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
-	import { config, groupByConfig, groupByValuesConfig } from '../stores/config.store'
+	import { config, groupByConfig, groupByValueConfig } from '../stores/config.store'
 
 	import {
 		albumPlayingDirStore,
@@ -89,11 +89,11 @@
 
 		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
 
-		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig[0]]}`)
+		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig]}`)
 
 		groupElement.click()
 
-		groupElement.scrollIntoView({ block: 'center', behavior: 'smooth' })
+		groupElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
 
 		$triggerScrollToSongEvent = playingSong.ID
 		$selectedSongsStore = [playingSong.ID]
@@ -125,6 +125,8 @@
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
+
+
 			if ($keyModifier === 'ctrlKey') {
 				$selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)
 			} else {
@@ -163,7 +165,7 @@
 			{
 				group: {
 					groupBy: $config.group.groupBy,
-					groupByValues: $config.group.groupByValues
+					groupByValue: $config.group.groupByValue
 				}
 			},
 			{ doUpdateLocalConfig: false }

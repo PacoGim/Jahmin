@@ -34,7 +34,6 @@ export function startChokidarWatch(rootDirectories: string[] = [], excludeDirect
 
 			if (!isAudioFileFn(path)) return
 
-			// console.log(eventName, path)
 			if (eventName === 'change' && ignoredPaths.indexOf(path) === -1) {
 				addToTaskQueue(path, 'external-update')
 			} else if (eventName === 'change') {

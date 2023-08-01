@@ -13,6 +13,9 @@ import type { SongType } from '../../../types/song.type'
 import applyColorSchemeFn from './applyColorScheme.fn'
 import getAlbumColorsFn from './getAlbumColors.fn'
 import shuffleArrayFn from './shuffleArray.fn'
+import updateConfigFn from './updateConfig.fn'
+import { groupByConfig } from '../stores/config.store'
+import { get } from 'svelte/store'
 
 export default async function (
 	rootDir: string,
@@ -46,6 +49,12 @@ export default async function (
 	albumPlayingDirStore.set(rootDir)
 
 	songToPlayUrlStore.set([songToPlay.SourceFile, { playNow }])
+
+	updateConfigFn({
+		group: {
+			groupByValue: songToPlay[get(groupByConfig)] as string
+		}
+	})
 
 	setTimeout(() => {
 		triggerScrollToSongEvent.set(songToPlay.ID)

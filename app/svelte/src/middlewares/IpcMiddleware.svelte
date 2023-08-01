@@ -162,6 +162,14 @@
 		})
 	})
 
+	window.ipc.onGroupSelected((_, data) => {
+		updateConfigFn({
+			group: {
+				groupBy: data.groupName
+			}
+		})
+	})
+
 	// Global shortcuts
 	window.ipc.onMediaKeyPressed((_, mediaKeyPressed) => {
 		if (mediaKeyPressed === 'MediaNextTrack') {
