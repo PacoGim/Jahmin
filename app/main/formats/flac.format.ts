@@ -1,6 +1,5 @@
 import * as fs from 'fs'
 const stringHash = require('string-hash')
-import generateId from '../functions/generateId.fn'
 import { renameObjectKey } from '../functions/renameObjectKey.fn'
 import truncToDecimalPointFn from '../functions/truncToDecimalPoint.fn'
 import { getWorker, useWorker } from '../services/workers.service'

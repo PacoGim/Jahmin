@@ -91,8 +91,6 @@ function handleFileArt(filePath: string, elementId: string, size: number) {
 	let embeddedArtPath =
 		getAllFilesInFoldersDeepFn([embeddedArtDirectory], ['webp']).filter(file => file.endsWith(fileNameHash))[0] || undefined
 
-	console.log(embeddedArtPath)
-
 	if (embeddedArtPath) {
 		let finalArtPath = path.join(getDirectoryFn(embeddedArtPath), 'cover.webp')
 

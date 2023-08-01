@@ -5,7 +5,7 @@ import { getConfig } from '../services/config.service'
 export default function () {
 	let template: MenuItemConstructorOptions[] = []
 
-	let tags = ['Artist', 'Genre', 'Composer', 'Year', 'Disc #', 'Extension']
+	let tags = ['Artist', 'Genre', 'Composer', 'Year', 'Extension']
 
 	let groupName = getConfig().group?.groupBy || 'Genre'
 

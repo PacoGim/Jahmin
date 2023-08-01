@@ -2,20 +2,20 @@
 	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
 	import { groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
-	import updateConfigFn from '../../functions/updateConfig.fn'
 	import { dbVersionStore } from '../../stores/main.store'
+	import { afterUpdate } from 'svelte'
 
 	let groupedSongs = []
-
-	$:{
-		console.log($groupByConfig)
-		console.log($groupByValueConfig)
-	}
+	let stopAfterUpdate = false
 
 	$: groupSongs($groupByConfig)
 	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig) : null
 
 	function groupSongs(groupBy: string) {
+		if (groupBy === 'Year') {
+			groupBy = 'DateYear'
+		}
+
 		// For now, for the sake of finishing the app, multiple grouping is not going to be implemented, but the app will be ready for it later (Using an array of strings instead of just a string)
 		window.ipc
 			.bulkRead({
@@ -36,6 +36,20 @@
 	function setNewGroupValue(groupValue) {
 		$groupByValueConfig = groupValue
 	}
+
+	// After each update cycle
+	afterUpdate(() => {
+		if (stopAfterUpdate === false) {
+			// Gets the group element.
+			let groupElement: HTMLElement = document.querySelector(`#group-${$groupByValueConfig}`)
+			// If the group element doesn't exist yet.
+			if (groupElement !== null) {
+				stopAfterUpdate = true
+				// The element exists, then it scrolls smoothly to it.
+				groupElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+			}
+		}
+	})
 </script>
 
 <tag-group-svlt>
@@ -51,7 +65,6 @@
 			</button></group-name
 		>
 
-		<!-- {#if $selectedGroups[index]} -->
 		{#each groupedSongs as groupValue, index (index)}
 			<group-value
 				class={$groupByValueConfig === groupValue ? 'selected' : null}
@@ -64,7 +77,6 @@
 				{groupValue}
 			</group-value>
 		{/each}
-		<!-- {/if} -->
 	</group-svlt>
 </tag-group-svlt>
 

@@ -6,10 +6,9 @@ import { getConfig } from '../services/config.service'
 import getFileExtensionFn from './getFileExtension.fn'
 import getAllowedArtsFn from './getAllowedArts.fn'
 import { animatedFormats, imageFormats, videoFormats } from '../global/allowedArts.var'
-import { getWorker } from '../services/workers.service'
+import { getWorker, useWorker } from '../services/workers.service'
 
 import { Worker } from 'worker_threads'
-import generateId from './generateId.fn'
 import getAppDataPathFn from './getAppDataPath.fn'
 
 let contrastRatioConfig = getConfig().userOptions.contrastRatio || 4.5
@@ -18,7 +17,7 @@ let previousContrastRatio: number | undefined = undefined
 
 let ffmpegImageWorker: Worker
 
-let ffmpegDeferredPromises: Map<string, any> = new Map()
+getWorker('ffmpegImage').then(worker => (ffmpegImageWorker = worker))
 
 export async function getAlbumColors(
 	folderPath: string,
@@ -38,16 +37,18 @@ export async function getAlbumColors(
 		let imageArts = allowedArtFiles.filter(file => imageFormats.includes(getFileExtensionFn(file)))
 
 		if (videoArts.length !== 0 || animatedArts.length !== 0) {
-			let promiseId = generateId()
-
-			ffmpegDeferredPromises.set(promiseId, resolve)
-
-			ffmpegImageWorker.postMessage({
-				id: promiseId,
-				type: 'handle-art-color',
-				appDataPath: getAppDataPathFn(),
-				contrastRatio,
-				artPath: [...videoArts, ...animatedArts][0]
+			useWorker(
+				{
+					type: 'handle-art-color',
+					appDataPath: getAppDataPathFn(),
+					contrastRatio,
+					artPath: [...videoArts, ...animatedArts][0]
+				},
+				ffmpegImageWorker
+			).then(response => {
+				getArtColorFromArtPath(response.fileBuffer, response.contrastRatio).then((hslColorObject: ColorType | undefined) => {
+					resolve(hslColorObject)
+				})
 			})
 		}
 
@@ -260,15 +261,15 @@ function hexToHsl(hex: string) {
 }
 
 /********************** Workers **********************/
-getWorker('ffmpegImage').then(worker => {
-	if (!ffmpegImageWorker) {
-		ffmpegImageWorker = worker
+// getWorker('ffmpegImage').then(worker => {
+// 	if (!ffmpegImageWorker) {
+// 		ffmpegImageWorker = worker
 
-		ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse)
-	}
-})
+// 		ffmpegImageWorker.on('message', handleFfmpegImageWorkerResponse)
+// 	}
+// })
 
-function handleFfmpegImageWorkerResponse(data: any) {
+/* function handleFfmpegImageWorkerResponse(data: any) {
 	if (data.type === 'handle-art-color') {
 		getArtColorFromArtPath(data.fileBuffer, data.contrastRatio).then((hslColorObject: ColorType | undefined) => {
 			ffmpegDeferredPromises.get(data.id)(hslColorObject)
@@ -276,3 +277,4 @@ function handleFfmpegImageWorkerResponse(data: any) {
 		})
 	}
 }
+ */

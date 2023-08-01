@@ -30,11 +30,11 @@
 
 <style>
 	:global(body[theme='Day']) album.selected {
-		box-shadow: 0 0 10px 5px hsl(38, 100%, 78%), 0 0 0 5px hsla(38, 100%, 81%, 0.5);
+		box-shadow: inset 0 0 0 3px transparent, 0 0 10px 5px hsl(38, 100%, 78%), 0 0 0 5px hsla(38, 100%, 81%, 0.5);
 	}
 
 	:global(body[theme='Night']) album.selected {
-		box-shadow: 0 0 10px 5px #ffffff, 0 0 0 5px rgba(255, 255, 255, 0.5);
+		box-shadow: inset 0 0 0 3px transparent, 0 0 10px 5px #ffffff, 0 0 0 5px rgba(255, 255, 255, 0.5);
 	}
 
 	album.selected {
@@ -42,15 +42,13 @@
 	}
 
 	album {
-		/* margin: var(--grid-gap); */
-
 		color: #fff;
 		position: relative;
 		display: grid;
 
-		box-shadow: none;
+		box-shadow: inset 0 0 0 3px #fff;
 
-		transition: box-shadow 300ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+		transition: box-shadow 500ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
 
 		cursor: pointer;
 		height: var(--art-dimension);

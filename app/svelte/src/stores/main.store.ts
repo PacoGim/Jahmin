@@ -1,4 +1,4 @@
-import { writable, type Writable } from 'svelte/store'
+import { get, writable, type Writable } from 'svelte/store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 
 export let os: Writable<string> = writable(undefined)
@@ -6,7 +6,7 @@ export let langFile: Writable<Object> = writable(undefined)
 export let isAppIdle: Writable<boolean> = writable(false)
 
 // List to show within Song List component.
-export let songListStore: Writable<SongType[]> = writable(undefined)
+export let songListStore: Writable<SongType[]> = writable([])
 export let selectedAlbumDir: Writable<string | undefined> = writable(undefined)
 export let selectedAlbumsDir: Writable<string[] | undefined> = writable([])
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
@@ -90,7 +90,12 @@ export let reloadArts: Writable<number> = writable(Math.random())
 
 export let songLyricsSelected: Writable<{ title: string; artist: string }> = writable(undefined)
 
+export function setSelectedAlbumsDir(newSelectedAlbumsDir: string[] | undefined) {
+	if (newSelectedAlbumsDir.toString() !== get(selectedAlbumsDir).toString()) {
+		selectedAlbumsDir.set(newSelectedAlbumsDir)
+	}
+}
+
 layoutToShow.subscribe(layoutName => {
 	document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin'
 })
-

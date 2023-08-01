@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { SongType } from '../../../../types/song.type'
 	import SongListItem from '../../components/SongListItem.svelte'
-	import generateId from '../../functions/generateId.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
 	import { songAmountConfig } from '../../stores/config.store'

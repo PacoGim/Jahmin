@@ -67,6 +67,7 @@ const ipcFunctions = {
 	onConfirmLyricsDeletion: (callback: any) => ipcRenderer.on('confirm-lyrics-deletion', callback),
 	onDatabaseUpdate: (callback: any) => ipcRenderer.on('database-update', callback),
 	onGroupSelected: (callback: any) => ipcRenderer.on('group-selected', callback),
+	onSortsongs: (callback: any) => ipcRenderer.on('sort-songs', callback),
 	/********************** Database **********************/
 	bulkRead,
 	updatePlayCount
@@ -283,8 +284,4 @@ function getArtCacheSize(): Promise<string> {
 			.then(result => resolve(result))
 			.catch(err => reject(err))
 	})
-}
-
-function generateId() {
-	return BigInt(`${String(Math.random()).substring(2)}${Date.now()}`).toString(36)
 }

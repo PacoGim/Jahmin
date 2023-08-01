@@ -5,16 +5,13 @@
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
-	import { dbVersionStore, playbackStore, selectedAlbumsDir, songListStore } from '../stores/main.store'
-	import { groupByConfig } from '../stores/config.store'
+	import { dbVersionStore, playbackStore, selectedAlbumsDir, setSelectedAlbumsDir, songListStore } from '../stores/main.store'
 
 	$: fillSongList($selectedAlbumsDir)
 	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir) : null
 
-	$: {
-		if ($selectedAlbumsDir !== undefined) {
-			localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir))
-		}
+	$: if ($selectedAlbumsDir !== undefined) {
+		localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir))
 	}
 
 	function fillSongList(albumRootDirList: string[] = []) {
@@ -71,11 +68,8 @@
 			}
 		})
 
-
 		setTimeout(() => {
 			scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
-			// let groupElement: HTMLElement = document.querySelector(`#group-${lastPlayedSong[$groupByConfig]}`)
-			// groupElement.click()
 		}, 1000)
 	}
 

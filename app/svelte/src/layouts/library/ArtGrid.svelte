@@ -3,14 +3,11 @@
 
 	import Album from '../../components/Album.svelte'
 
-	import { dbSongsStore, dbVersionStore, elementMap, keyModifier, keyPressed, selectedAlbumsDir } from '../../stores/main.store'
+	import { dbVersionStore, elementMap, keyModifier, keyPressed, setSelectedAlbumsDir } from '../../stores/main.store'
 	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
-	import groupSongsByAlbumFn from '../../functions/groupSongsByAlbum.fn'
 	import cssVariablesService from '../../services/cssVariables.service'
-	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import { hash } from '../../functions/hashString.fn'
-	import getDynamicAlbumArtistsFn from '../../functions/getDynamicAlbumArtists.fn'
 
 	let albums
 
@@ -26,7 +23,7 @@
 
 	$: {
 		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('art-grid-svlt')) {
-			selecteAllAlbums()
+			selectAllAlbums()
 		}
 	}
 
@@ -37,8 +34,13 @@
 			}
 		]
 
-		for (let index in groupBy) {
+		if (groupByValue) {
 			let tempWhere = {}
+
+			if (groupBy === 'Year') {
+				groupBy = 'DateYear'
+			}
+
 			tempWhere[groupBy] = groupByValue
 
 			whereQuery.push(tempWhere)
@@ -50,7 +52,7 @@
 					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'DateYear', 'Directory'],
 					andWhere: whereQuery,
 					group: ['Directory'],
-					order: ['Directory'] //TODO add the proper sorting here and in Player middleware
+					order: ['Directory']
 				}
 			})
 			.then(response => {
@@ -78,7 +80,7 @@
 		}) */
 	}
 
-	function selecteAllAlbums() {
+	function selectAllAlbums() {
 		let albumElements = document.querySelectorAll('art-grid-svlt album')
 		let albumElementsRootDir = []
 
@@ -87,7 +89,9 @@
 			albumElementsRootDir.push(albumRootDir)
 		})
 
-		$selectedAlbumsDir = [...albumElementsRootDir]
+		setSelectedAlbumsDir([...albumElementsRootDir])
+
+		// $selectedAlbumsDir = [...albumElementsRootDir]
 	}
 
 	onMount(() => {
@@ -106,7 +110,7 @@
 
 <art-grid-svlt>
 	{#each albums || [] as album (album.ID)}
-		<Album {album} from='ArtGrid' />
+		<Album {album} from="ArtGrid" />
 	{/each}
 </art-grid-svlt>
 

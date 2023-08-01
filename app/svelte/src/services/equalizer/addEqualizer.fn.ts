@@ -1,6 +1,5 @@
 import { get } from 'svelte/store'
 import type { PromptStateType } from '../../../../types/promptState.type'
-import generateId from '../../functions/generateId.fn'
 import validateFileNameFn from '../../functions/validateFileName.fn'
 import { promptService } from '../../stores/service.store'
 import type { EqualizerProfileType } from '../../../../types/equalizerProfile.type'

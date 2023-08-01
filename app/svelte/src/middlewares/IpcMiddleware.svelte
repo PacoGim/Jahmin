@@ -16,6 +16,7 @@
 		playbackStore,
 		playingSongStore,
 		selectedAlbumsDir,
+		setSelectedAlbumsDir,
 		songSyncQueueProgress
 	} from '../stores/main.store'
 
@@ -83,7 +84,8 @@
 
 			setNewPlaybackFn(data.clickedAlbum, songs, undefined, { playNow: true })
 
-			$selectedAlbumsDir = [data.clickedAlbum]
+			setSelectedAlbumsDir([data.clickedAlbum])
+			// $selectedAlbumsDir = [data.clickedAlbum]
 		} else {
 			setNewPlaybackFn(getDirectoryFn(data.songList[0].SourceFile), data.songList, data.songList[0].ID, { playNow: true })
 		}
@@ -168,6 +170,10 @@
 				groupBy: data.groupName
 			}
 		})
+	})
+
+	window.ipc.onSortsongs((_, data) => {
+		console.log(data)
 	})
 
 	// Global shortcuts

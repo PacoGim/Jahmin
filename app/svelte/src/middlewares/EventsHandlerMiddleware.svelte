@@ -24,7 +24,10 @@
 		triggerGroupingChangeEvent,
 		triggerScrollToSongEvent,
 		selectedAlbumsDir,
-		keyModifier
+		keyModifier,
+
+		setSelectedAlbumsDir
+
 	} from '../stores/main.store'
 	import updateConfigFn from '../functions/updateConfig.fn'
 
@@ -59,7 +62,8 @@
 		}
 
 		if (mainElementClicked[0] === 'art-grid-svlt') {
-			$selectedAlbumsDir = [getDirectoryFn($playingSongStore?.SourceFile)]
+			setSelectedAlbumsDir([getDirectoryFn($playingSongStore?.SourceFile)])
+			// $selectedAlbumsDir = [getDirectoryFn($playingSongStore?.SourceFile)]
 		}
 	}
 
@@ -84,8 +88,9 @@
 		$layoutToShow = 'Library'
 		let playingSong = $playingSongStore
 
-		$selectedAlbumsDir = [$albumPlayingDirStore]
-		$selectedAlbumDir = $albumPlayingDirStore
+		setSelectedAlbumsDir([$albumPlayingDirStore])
+		// $selectedAlbumsDir = [$albumPlayingDirStore]
+		// $selectedAlbumDir = $albumPlayingDirStore
 
 		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
 
@@ -128,9 +133,11 @@
 
 
 			if ($keyModifier === 'ctrlKey') {
-				$selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)
+				setSelectedAlbumsDir(toggleArrayElementFn($selectedAlbumsDir, rootDir))
+				// $selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)
 			} else {
-				$selectedAlbumsDir = [rootDir]
+				setSelectedAlbumsDir([rootDir])
+				// $selectedAlbumsDir = [rootDir]
 			}
 
 			$selectedAlbumDir = rootDir

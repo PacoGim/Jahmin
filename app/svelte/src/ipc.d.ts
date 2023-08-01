@@ -70,6 +70,7 @@ declare global {
 			onConfirmLyricsDeletion: (callback: any) => void
 			onDatabaseUpdate: (callback: any) => void
 			onGroupSelected: (callback: any) => void
+			onSortsongs: (callback: any) => void
 			/********************** Database **********************/
 			bulkRead: (data: {
 				queryId?: string

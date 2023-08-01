@@ -12,7 +12,7 @@ export default function(elementId: string, intersectionRoot: string) {
 			{
 				root: document.querySelector(intersectionRoot),
 				threshold: 0,
-				rootMargin: '200% 0px 200% 0px'
+				rootMargin: '50% 0px 50% 0px'
 			}
 		)
 

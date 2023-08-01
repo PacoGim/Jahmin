@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 export default function generateId() {
-	return BigInt(`${String(Math.random()).substring(2)}${Date.now()}`).toString(36)
+	return uuidv4()
 }

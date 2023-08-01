@@ -40,17 +40,20 @@ function handleArtCompression(message: any) {
 					artPath,
 					elementId,
 					type,
+					workerCallId: message.workerCallId,
 					artAlt: Buffer.from(fs.readFileSync(tempFilePath)).toString('base64')
 				})
 
-				fs.unlink(tempFilePath, () => {})
+				setTimeout(() => {
+					fs.unlink(tempFilePath, () => {})
+				}, 1000)
 			}
 		}
 	)
 }
 
 function handleArtColor(message: any) {
-	let { id, type, artPath,contrastRatio, appDataPath } = message
+	let { id, type, artPath, contrastRatio, appDataPath } = message
 
 	let tempFolder = pathJoin(appDataPath, '/temp')
 
@@ -64,12 +67,13 @@ function handleArtColor(message: any) {
 		if (code === 1) {
 			parentPort?.postMessage({
 				type,
-				id,
 				contrastRatio,
+				workerCallId: message.workerCallId,
 				fileBuffer: Buffer.from(fs.readFileSync(tempFilePath))
 			})
-
-			fs.unlink(tempFilePath, () => {})
+			setTimeout(() => {
+				fs.unlink(tempFilePath, () => {})
+			}, 1000)
 		}
 	})
 }
