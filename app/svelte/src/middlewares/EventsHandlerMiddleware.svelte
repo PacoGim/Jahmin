@@ -92,7 +92,7 @@
 		// $selectedAlbumsDir = [$albumPlayingDirStore]
 		// $selectedAlbumDir = $albumPlayingDirStore
 
-		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
+		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.songSort.sortBy, $config.userOptions.songSort.sortOrder)
 
 		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig]}`)
 
@@ -121,7 +121,7 @@
 							Directory: rootDir
 						}
 					],
-					order: [`${$config.userOptions.sortBy} ${$config.userOptions.sortOrder}`]
+					order: [`${$config.userOptions.songSort.sortBy} ${$config.userOptions.songSort.sortOrder}`]
 				}
 			})
 

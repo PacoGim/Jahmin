@@ -16,7 +16,7 @@ export default function (db: Database) {
     DiscNumber INTEGER,
     DateDay INTEGER,
     Genre TEXT,
-    Rating TEXT,
+    Rating INTEGER,
     Title TEXT,
     Track INTEGER,
     BitDepth INTEGER,

@@ -48,7 +48,7 @@
 	<ControlBar />
 	<StatusBar />
 
-	<current-window-svlt>
+	<current-window-svlt class={$layoutToShow}>
 		{#if $layoutToShow === 'Library'}
 			<LibraryLayout />
 		{:else if $layoutToShow === 'Config'}
@@ -86,5 +86,9 @@
 		height: calc(100vh - 64px - 32px);
 		overflow-y: auto;
 		overflow-x: hidden;
+	}
+
+	current-window-svlt.Playback {
+		overflow-y: hidden;
 	}
 </style>

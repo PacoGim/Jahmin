@@ -6,15 +6,17 @@
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import { dbVersionStore, playbackStore, selectedAlbumsDir, setSelectedAlbumsDir, songListStore } from '../stores/main.store'
+	import { songSortConfig } from '../stores/config.store'
+	import type { ConfigType } from '../../../types/config.type'
 
-	$: fillSongList($selectedAlbumsDir)
-	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir) : null
+	$: fillSongList($selectedAlbumsDir, $songSortConfig)
+	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir, $songSortConfig) : null
 
 	$: if ($selectedAlbumsDir !== undefined) {
 		localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir))
 	}
 
-	function fillSongList(albumRootDirList: string[] = []) {
+	function fillSongList(albumRootDirList: string[] = [], sorting: ConfigType['userOptions']['songSort']) {
 		songListStore.set([])
 
 		if (albumRootDirList.length === 0) {
@@ -30,7 +32,7 @@
 				queryData: {
 					select: ['*'],
 					orWhere: whereQuery,
-					order: ['Album', 'Track'] //TODO add the proper sorting here and in art grid
+					order: [`${sorting.sortBy} ${sorting.sortOrder}`]
 				}
 			})
 			.then(response => {

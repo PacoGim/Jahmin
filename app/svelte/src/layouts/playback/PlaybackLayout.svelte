@@ -1,7 +1,7 @@
 <script lang="ts">
 	import cssVariablesService from '../../services/cssVariables.service'
 
-	import { playbackStore, playingSongStore } from '../../stores/main.store'
+	import { playbackStore, playingSongStore, windowResize } from '../../stores/main.store'
 	import traduceFn from '../../functions/traduce.fn'
 	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
 	import { config } from '../../stores/config.store'
@@ -10,17 +10,23 @@
 	import type { SongType } from '../../../../types/song.type'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
-	import limitCharactersFn from '../../functions/limitCharacters.fn'
+	import { tick } from 'svelte'
 
-	$: if ($playbackStore.length > 0) {
-	}
+	let tempTags = ['Track', 'Title', 'SampleRate', 'Album','Rating']
+	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $config.userOptions.songSort.sortBy
+	let tagToSortByOrder =
+		(localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $config.userOptions.songSort.sortOrder
 
-	let tempTags = ['Track', 'Title', 'SampleRate', 'Album']
-	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $config.userOptions.sortBy
-	let tagToSortByOrder = (localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $config.userOptions.sortOrder
+	let scrollAmount = 0
+	let songsAmount = 0
 
 	$: {
 		cssVariablesService.set('temp-tags-qt', tempTags.length)
+	}
+
+	$: {
+		$windowResize
+		calcSongAmount()
 	}
 
 	function renameTagName(tagName) {
@@ -43,16 +49,19 @@
 
 		if (tag === 'Reset') {
 			//TODO, add a user customized album sorting
-			$playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder).sort(
-				(a, b) => getDirectoryFn(a.SourceFile).localeCompare(getDirectoryFn(b.SourceFile))
-			)
+			$playbackStore = sortSongsArrayFn(
+				$playbackStore,
+				$config.userOptions.songSort.sortBy,
+				$config.userOptions.songSort.sortOrder
+			).sort((a, b) => getDirectoryFn(a.SourceFile).localeCompare(getDirectoryFn(b.SourceFile)))
 
-			tagToSortBy = $config.userOptions.sortBy
-			tagToSortByOrder = $config.userOptions.sortOrder
+			tagToSortBy = $config.userOptions.songSort.sortBy
+			tagToSortByOrder = $config.userOptions.songSort.sortOrder
 		} else {
 			$playbackStore = sortSongsArrayFn($playbackStore, tagToSortBy, tagToSortByOrder)
 		}
 
+		scrollAmount = 0
 		localStorage.setItem('PlaybackTagToSortBy', tagToSortBy)
 		localStorage.setItem('PlaybackTagToSortByOrder', tagToSortByOrder)
 	}
@@ -60,9 +69,33 @@
 	function playDoubleClickedSong(song: SongType) {
 		$songToPlayUrlStore = [song.SourceFile, { playNow: true }]
 	}
+
+	function scrollContainer(e: WheelEvent) {
+		let newScrollAmount = scrollAmount + Math.sign(e.deltaY)
+
+		if (newScrollAmount < 0) {
+			scrollAmount = 0
+		} else if (newScrollAmount + songsAmount >= $playbackStore.length) {
+			scrollAmount = $playbackStore.length - songsAmount
+		} else {
+			scrollAmount = newScrollAmount
+		}
+	}
+
+	function calcSongAmount() {
+		let currentWindow = document.querySelector('current-window-svlt')
+
+		if (currentWindow === null) {
+			tick().then(() => {
+				calcSongAmount()
+			})
+		} else {
+			songsAmount = Math.trunc((currentWindow.getClientRects()[0].height - 38) / 38)
+		}
+	}
 </script>
 
-<playback-layout>
+<playback-layout on:mousewheel={scrollContainer}>
 	<song-list-grid>
 		<tag-row>
 			{#each tempTags as tag, index (index)}
@@ -90,32 +123,57 @@
 			>
 		</tag-row>
 
-		{#each $playbackStore || [] as song, index (index)}
-			<song-row on:dblclick={() => playDoubleClickedSong(song)}>
+		{#each $playbackStore.slice(scrollAmount, songsAmount + scrollAmount) || [] as song, index (index)}
+			<song-row on:dblclick={() => playDoubleClickedSong(song)} role="button" tabindex="0">
 				{#each tempTags as tag, index (index)}
 					<song-data data-tag={tag}>
 						{#if $playingSongStore.ID === song.ID && index === 0}
 							<PlayButton customSize="0.75rem" customMargins="0 0.5rem 0 0" customColor="currentColor" />
 						{/if}
 
-						{limitCharactersFn(song[tag], 75)}
+						{song[tag]}
+						<!-- {limitCharactersFn(song[tag], 75)} -->
 					</song-data>
 				{/each}
 				<blank-data />
 			</song-row>
 		{/each}
 	</song-list-grid>
+
+	<go-back-up
+		on:click={() => (scrollAmount = 0)}
+		on:keypress={() => (scrollAmount = 0)}
+		class:hide={scrollAmount < 10}
+		role="button"
+		tabindex="0"
+	>
+		<span>Go back up</span>
+		<arrow-up>▲</arrow-up>
+	</go-back-up>
 </playback-layout>
 
 <style>
+	playback-layout {
+		position: relative;
+	}
 	song-list-grid {
 		display: grid;
 		grid-template-columns: repeat(var(--temp-tags-qt), minmax(0px, max-content)) auto;
+		height: 100%;
 	}
 
 	song-row {
 		display: contents;
 		cursor: pointer;
+
+		min-width: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	song-row > * {
+		height: 38px;
 	}
 
 	tag-row {
@@ -123,6 +181,9 @@
 	}
 
 	song-tag {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		text-align: center;
 		padding: 0.5rem 0.75rem;
 		font-variation-settings: 'wght' 700;
@@ -131,6 +192,11 @@
 	}
 
 	song-tag icon-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		margin-left: .25rem;
 		transition: opacity 300ms linear;
 	}
 
@@ -140,15 +206,26 @@
 
 	song-tag[data-selected='false'] icon-container {
 		opacity: 0;
+		max-width: 0px;
+	}
+
+	:global(song-tag[data-selected='false'] icon-container svg) {
+		max-width: 0px;
 	}
 
 	song-row song-data {
 		padding: 0.5rem 0.75rem;
 		text-align: center;
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
+		display: block;
+		/* flex-direction: row; */
+		/* align-items: center; */
+		/* justify-content: center; */
+		max-width: 300px;
+
+		/* flex: 1; */
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	song-row:nth-child(even) song-data,
@@ -172,5 +249,37 @@
 		font-variation-settings: 'wght' 700;
 		cursor: pointer;
 		background-color: var(--color-bg-2);
+	}
+
+	go-back-up {
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+
+		font-size: 0.9rem;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		color: #fff;
+		background-color: var(--color-accent-1);
+
+		padding: 0.25rem 0.5rem;
+		border-radius: 3px;
+		font-variation-settings: 'wght' 700;
+
+		cursor: pointer;
+
+		transition: opacity 300ms ease-in-out;
+	}
+
+	go-back-up arrow-up {
+		margin-left: 0.25rem;
+	}
+
+	go-back-up.hide {
+		opacity: 0;
+		pointer-events: none;
 	}
 </style>

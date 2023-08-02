@@ -13,7 +13,7 @@ export async function loadContextMenu(event: any, menuToOpen: string, data: any)
 	} else if (menuToOpen === 'SongListContextMenu') {
 		template = await getSongListContextMenuTemplateFn(data)
 	} else if (menuToOpen === 'GroupNameContextMenu') {
-		template = getGroupNameContextMenuTemplateFn(data)
+		template = getGroupNameContextMenuTemplateFn()
 	} else if (menuToOpen === 'LyricsContainerContextMenu') {
 		template = getLyricsContainerCtxMenuTemplateFn(data)
 	}

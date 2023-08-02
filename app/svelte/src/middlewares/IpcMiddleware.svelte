@@ -7,7 +7,7 @@
 	import updateConfigFn from '../functions/updateConfig.fn'
 	import handleArtService from '../services/handleArt.service'
 	import mediaKeyControlsService from '../services/mediaKeyControls.service'
-	import { config, songAmountConfig } from '../stores/config.store'
+	import { config } from '../stores/config.store'
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
 		artCompressQueueLength,
@@ -15,15 +15,11 @@
 		layoutToShow,
 		playbackStore,
 		playingSongStore,
-		selectedAlbumsDir,
 		setSelectedAlbumsDir,
 		songSyncQueueProgress
 	} from '../stores/main.store'
 
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
-
-	$: if ($playbackStore.length > 0) {
-	}
 
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
@@ -76,7 +72,7 @@
 							Directory: data.clickedAlbum
 						}
 					],
-					order: [`${$config.userOptions.sortBy} ${$config.userOptions.sortOrder}`]
+					order: [`${$config.userOptions.songSort.sortBy} ${$config.userOptions.songSort.sortOrder}`]
 				}
 			})
 
@@ -104,7 +100,7 @@
 								Directory: data.clickedAlbum
 							}
 						],
-						order: [`${$config.userOptions.sortBy} ${$config.userOptions.sortOrder}`]
+						order: [`${$config.userOptions.songSort.sortBy} ${$config.userOptions.songSort.sortOrder}`]
 					}
 				})
 
@@ -145,7 +141,12 @@
 			selectedSongs.push(clickedSong)
 		}
 
-		let sortedSongs = sortSongsArrayFn(selectedSongs, $config.userOptions.sortBy, $config.userOptions.sortOrder, $config.group)
+		let sortedSongs = sortSongsArrayFn(
+			selectedSongs,
+			$config.userOptions.songSort.sortBy,
+			$config.userOptions.songSort.sortOrder,
+			$config.group
+		)
 
 		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
 
@@ -173,7 +174,14 @@
 	})
 
 	window.ipc.onSortsongs((_, data) => {
-		console.log(data)
+		updateConfigFn({
+			userOptions: {
+				songSort: {
+					sortBy: data.tag,
+					sortOrder: data.order
+				}
+			}
+		})
 	})
 
 	// Global shortcuts

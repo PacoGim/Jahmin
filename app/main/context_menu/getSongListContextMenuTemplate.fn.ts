@@ -41,7 +41,7 @@ export default function (data: dataType) {
 							orWhere: selectedSongsId.map(item => {
 								return { ID: item }
 							}),
-							order: [`${config.userOptions.sortBy} ${config.userOptions.sortOrder}`]
+							order: [`${config?.userOptions?.songSort?.sortBy} ${config?.userOptions?.songSort?.sortOrder}`]
 						}
 					}
 				},
@@ -219,8 +219,8 @@ function getSortMenu() {
 	options?.splice(options.indexOf('PlayCount'), 1, 'Play Count')
 	options?.splice(options.indexOf('SampleRate'), 1, 'Sample Rate')
 
-	let sortByConfig = getConfig().userOptions.sortBy
-	let sortOrderConfig = getConfig().userOptions.sortOrder
+	let sortByConfig = getConfig()?.userOptions?.songSort?.sortBy
+	let sortOrderConfig = getConfig()?.userOptions?.songSort?.sortOrder
 
 	if (options === undefined) {
 		options = [

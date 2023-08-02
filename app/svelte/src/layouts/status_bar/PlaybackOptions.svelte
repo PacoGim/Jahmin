@@ -31,7 +31,7 @@
 				$playbackStore = shuffledArray
 			} else {
 				$isSongShuffleEnabledStore = false
-				$playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.sortBy, $config.userOptions.sortOrder)
+				$playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.songSort.sortBy, $config.userOptions.songSort.sortOrder)
 			}
 		}
 	}

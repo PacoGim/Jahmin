@@ -128,7 +128,7 @@
 	function onTableHeaderClick(evt: MouseEvent) {
 		let tdElement = evt.composedPath().filter((element: HTMLElement) => element.tagName === 'TD')[0] as HTMLElement
 
-		$playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.sortOrder)
+		$playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.songSort.sortOrder)
 	}
 
 	function calculateScroll(evt) {

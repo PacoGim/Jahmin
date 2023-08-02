@@ -21,8 +21,6 @@ export type UserOptionsType = {
 	artSize: number
 	contrastRatio: number
 	fontSize: number
-	sortBy: string
-	sortOrder: 'asc' | 'desc'
 	pauseAnimatedArtWhenAppUnfocused: boolean
 	alwaysShowAlbumOverlay: boolean
 	isFullscreen: boolean
@@ -30,6 +28,10 @@ export type UserOptionsType = {
 	showDynamicArtists: boolean
 	showExtensionsIcons: boolean
 	dateOrder: ('year' | 'month' | 'day' | '')[]
+	songSort: {
+		sortBy: string
+		sortOrder: 'asc' | 'desc'
+	}
 }
 
 export enum ThemeOptions {

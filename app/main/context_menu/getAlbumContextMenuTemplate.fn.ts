@@ -63,7 +63,7 @@ export default function (data: any) {
 									Directory: data.albumRootDir
 								}
 							],
-							order: [`${config.userOptions.sortBy} ${config.userOptions.sortOrder}`]
+							order: [`${config?.userOptions?.songSort?.sortBy} ${config?.userOptions?.songSort?.sortOrder}`]
 						}
 					}
 				},

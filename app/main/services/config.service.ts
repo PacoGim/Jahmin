@@ -64,8 +64,6 @@ function getDefaultConfigFile(): ConfigType {
 			gridGap: 16,
 			contrastRatio: 4.5,
 			fontSize: 16,
-			sortBy: 'Track',
-			sortOrder: 'asc',
 			pauseAnimatedArtWhenAppUnfocused: true,
 			alwaysShowAlbumOverlay: false,
 			showDynamicArtists: true,
@@ -73,6 +71,10 @@ function getDefaultConfigFile(): ConfigType {
 			dateOrder: ['year'],
 			isFullscreen: false,
 			equalizerHash: '3qu',
+			songSort: {
+				sortBy: 'Track',
+				sortOrder: 'asc'
+			},
 			lyricsStyle: {
 				fontSize: 16,
 				fontWeight: 500,
