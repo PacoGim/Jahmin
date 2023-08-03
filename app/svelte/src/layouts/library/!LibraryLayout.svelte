@@ -28,7 +28,7 @@
 	<TagGroup />
 	<SongList />
 	<TagEdit />
-	<SongListBackground />
+	<!-- <SongListBackground /> -->
 </library-layout>
 
 <style>

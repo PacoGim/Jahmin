@@ -102,27 +102,29 @@
 
 		$tagGroupEvents.push({
 			trigger: 'scroll',
-			data: {
-				playingSong
-			}
+			options: {
+				behavior: 'instant',
+				block: 'nearest'
+			},
+			query: `#group-${CSS.escape(String(playingSong[$groupByConfig]))}`
 		})
 
 		$tagGroupEvents = $tagGroupEvents
 
 		$tagGroupEvents.push({
 			trigger: 'click',
-			data: {
-				playingSong
-			}
+			query: `#group-${CSS.escape(String(playingSong[$groupByConfig]))}`
 		})
 
 		$tagGroupEvents = $tagGroupEvents
 
 		$artGridEvents.push({
 			trigger: 'scroll',
-			data: {
-				rootDir: $albumPlayingDirStore
-			}
+			options: {
+				behavior: 'instant',
+				block: 'center'
+			},
+			query: `[rootDir="${CSS.escape($albumPlayingDirStore)}"]`
 		})
 
 		$artGridEvents = $artGridEvents

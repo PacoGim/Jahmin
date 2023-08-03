@@ -76,7 +76,10 @@
 	function scrollContainer(e: WheelEvent) {
 		let newScrollAmount = scrollAmount + Math.sign(e.deltaY)
 
-		if (newScrollAmount < 0) {
+		if ($playbackStore.length <= songsAmount) {
+			scrollAmount = 0
+			scrollProgressValue = 0
+		} else if (newScrollAmount < 0) {
 			scrollAmount = 0
 			scrollProgressValue = 0
 		} else if (newScrollAmount + songsAmount >= $playbackStore.length) {
@@ -102,7 +105,7 @@
 </script>
 
 <playback-layout on:mousewheel={scrollContainer}>
-	<song-list-grid>
+	<song-list-grid style={``}>
 		<tag-row>
 			{#each tempTags as tag, index (index)}
 				<song-tag
@@ -163,7 +166,6 @@
 		<arrow-up>▲</arrow-up>
 	</go-back-up>
 
-	<!-- 100 / playbackStore.length * scrollAmount -->
 	<scroll-area>
 		<scroll-progress style={`height:${scrollProgressValue}%;`} />
 	</scroll-area>
@@ -184,7 +186,7 @@
 		position: absolute;
 		background-color: var(--color-accent-1);
 		width: 4px;
-		margin:0 3px;
+		margin: 0 3px;
 
 		border-radius: 100vmax;
 	}
@@ -195,6 +197,7 @@
 	song-list-grid {
 		display: grid;
 		grid-template-columns: repeat(var(--temp-tags-qt), minmax(0px, max-content)) auto;
+		grid-template-rows: repeat(auto-fill, 38px);
 		height: 100%;
 	}
 

@@ -13,7 +13,7 @@
 	$: groupSongs($groupByConfig)
 	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig) : null
 
-	$: handleComponentsEventsFn($tagGroupEvents, 'TagGroup')
+	$: handleComponentsEventsFn($tagGroupEvents)
 
 	function groupSongs(groupBy: string) {
 		if (groupBy === 'Year') {
@@ -43,7 +43,7 @@
 
 	// After each update cycle
 	afterUpdate(() => {
-		handleComponentsEventsFn($tagGroupEvents, 'TagGroup')
+		handleComponentsEventsFn($tagGroupEvents)
 
 		// console.log($tagGroupEvents)
 

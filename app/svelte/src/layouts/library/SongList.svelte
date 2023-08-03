@@ -15,6 +15,7 @@
 		triggerScrollToSongEvent
 	} from '../../stores/main.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
+	import SongListBackground from './SongListBackground.svelte'
 
 	let songsToShow: SongType[] = []
 	let scrollAmount = 0
@@ -138,15 +139,19 @@
 		{/each}
 	</song-list>
 	<SongListScrollBar on:songListBarScrolled={onSongListBarScrolled} />
+	<SongListBackground />
 </song-list-svlt>
 
 <style>
 	song-list-svlt {
+		position: relative;
 		color: #fff;
 		grid-area: song-list-svlt;
 		display: grid;
 		grid-template-columns: auto max-content;
 		z-index: 2;
+
+		position: relative;
 	}
 
 	song-list {

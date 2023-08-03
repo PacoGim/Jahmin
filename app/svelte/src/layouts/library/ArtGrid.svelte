@@ -29,7 +29,7 @@
 		}
 	}
 
-	$: handleComponentsEventsFn($artGridEvents, 'ArtGrid')
+	$: handleComponentsEventsFn($artGridEvents)
 
 	function updateArtGridAlbums(groupBy, groupByValue) {
 		let whereQuery: any = [
@@ -113,7 +113,7 @@
 
 	// Run this function after each update cycle
 	afterUpdate(() => {
-		handleComponentsEventsFn($artGridEvents, 'ArtGrid')
+		handleComponentsEventsFn($artGridEvents)
 	})
 </script>
 
