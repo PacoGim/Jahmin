@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { afterUpdate, onMount } from 'svelte'
 
 	/********************** Services **********************/
 	import onAppMountedService from './services/onAppMounted.service'

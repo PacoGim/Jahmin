@@ -1,5 +1,7 @@
 <script lang="ts">
+	import handleComponentsEventsFn from '../../functions/handleComponentsEvents.fn'
 	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
+	import { tagGroupEvents } from '../../stores/componentsEvents.store'
 	import { groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
 	import { dbVersionStore } from '../../stores/main.store'
@@ -10,6 +12,8 @@
 
 	$: groupSongs($groupByConfig)
 	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig) : null
+
+	$: handleComponentsEventsFn($tagGroupEvents, 'TagGroup')
 
 	function groupSongs(groupBy: string) {
 		if (groupBy === 'Year') {
@@ -39,7 +43,11 @@
 
 	// After each update cycle
 	afterUpdate(() => {
-		if (stopAfterUpdate === false) {
+		handleComponentsEventsFn($tagGroupEvents, 'TagGroup')
+
+		// console.log($tagGroupEvents)
+
+		/* 		if (stopAfterUpdate === false) {
 			// Gets the group element.
 			let groupElement: HTMLElement = document.querySelector(`#group-${$groupByValueConfig}`)
 			// If the group element doesn't exist yet.
@@ -48,7 +56,7 @@
 				// The element exists, then it scrolls smoothly to it.
 				groupElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
 			}
-		}
+		} */
 	})
 </script>
 

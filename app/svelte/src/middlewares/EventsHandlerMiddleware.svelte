@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { onMount, tick } from 'svelte'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 
 	import isArrayEqualFn from '../functions/isArrayEqual.fn'
@@ -25,11 +25,11 @@
 		triggerScrollToSongEvent,
 		selectedAlbumsDir,
 		keyModifier,
-
 		setSelectedAlbumsDir
-
 	} from '../stores/main.store'
 	import updateConfigFn from '../functions/updateConfig.fn'
+	import { artGridEvents, tagGroupEvents } from '../stores/componentsEvents.store'
+	import { get } from 'svelte/store'
 
 	function handleClickEvents(evt: MouseEvent) {
 		$elementMap = new Map<string, HTMLElement>()
@@ -86,27 +86,63 @@
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
 	function setAlbumBackInView() {
 		$layoutToShow = 'Library'
+
 		let playingSong = $playingSongStore
 
 		setSelectedAlbumsDir([$albumPlayingDirStore])
-		// $selectedAlbumsDir = [$albumPlayingDirStore]
-		// $selectedAlbumDir = $albumPlayingDirStore
 
-		$songListStore = sortSongsArrayFn($playbackStore, $config.userOptions.songSort.sortBy, $config.userOptions.songSort.sortOrder)
-
-		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig]}`)
-
-		groupElement.click()
-
-		groupElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+		$songListStore = sortSongsArrayFn(
+			$playbackStore,
+			$config.userOptions.songSort.sortBy,
+			$config.userOptions.songSort.sortOrder
+		)
 
 		$triggerScrollToSongEvent = playingSong.ID
 		$selectedSongsStore = [playingSong.ID]
 
-		setTimeout(() => {
-			scrollToAlbumFn($albumPlayingDirStore, 'not-smooth-scroll')
-		}, 1000)
+		$tagGroupEvents.push({
+			trigger: 'scroll',
+			data: {
+				playingSong
+			}
+		})
+
+		$tagGroupEvents = $tagGroupEvents
+
+		$tagGroupEvents.push({
+			trigger: 'click',
+			data: {
+				playingSong
+			}
+		})
+
+		$tagGroupEvents = $tagGroupEvents
+
+		$artGridEvents.push({
+			trigger: 'scroll',
+			data: {
+				rootDir: $albumPlayingDirStore
+			}
+		})
+
+		$artGridEvents = $artGridEvents
 	}
+
+	/* 	function clickGroupElement(playingSong) {
+		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig]}`)
+
+		if (groupElement === null) {
+			tick().then(() => {
+				setTimeout(() => {
+					clickGroupElement(playingSong)
+				}, 100)
+			})
+		} else {
+			groupElement.click()
+
+			groupElement.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+		}
+	} */
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
 		// Get all song from albums
@@ -130,8 +166,6 @@
 			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
-
-
 			if ($keyModifier === 'ctrlKey') {
 				setSelectedAlbumsDir(toggleArrayElementFn($selectedAlbumsDir, rootDir))
 				// $selectedAlbumsDir = toggleArrayElementFn($selectedAlbumsDir, rootDir)

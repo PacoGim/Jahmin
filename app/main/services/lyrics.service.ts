@@ -7,6 +7,10 @@ import type { PromiseResolveType } from '../../types/promiseResolve.type'
 
 let lyricsFolderPath = path.join(getAppDataPathFn(), 'lyrics')
 
+if (!fs.existsSync(lyricsFolderPath)) {
+	fs.mkdirSync(lyricsFolderPath, { recursive: true })
+}
+
 function saveLyrics(
 	lyrics: string | 'SaveLyricsFromContextMenu',
 	songTitle: string | null | undefined,
@@ -23,10 +27,6 @@ function saveLyrics(
 		let lyricsPath = getCleanFileName(`${songTitle}.${songArtist}` + '.txt')
 
 		let lyricsFullPath = path.join(lyricsFolderPath, lyricsPath)
-
-		if (!fs.existsSync(lyricsFolderPath)) {
-			fs.mkdirSync(lyricsFolderPath, { recursive: true })
-		}
 
 		if (lyrics === 'SaveLyricsFromContextMenu' && fs.existsSync(lyricsFullPath)) {
 			return resolve({

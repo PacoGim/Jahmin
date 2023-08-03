@@ -12,13 +12,15 @@
 	import PlayButton from '../components/PlayButton.svelte'
 	import { tick } from 'svelte'
 
-	let tempTags = ['Track', 'Title', 'SampleRate', 'Album','Rating']
+	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Rating']
 	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $config.userOptions.songSort.sortBy
 	let tagToSortByOrder =
 		(localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $config.userOptions.songSort.sortOrder
 
 	let scrollAmount = 0
 	let songsAmount = 0
+
+	let scrollProgressValue = 0
 
 	$: {
 		cssVariablesService.set('temp-tags-qt', tempTags.length)
@@ -49,6 +51,7 @@
 
 		if (tag === 'Reset') {
 			//TODO, add a user customized album sorting
+			// Double sorting???
 			$playbackStore = sortSongsArrayFn(
 				$playbackStore,
 				$config.userOptions.songSort.sortBy,
@@ -75,10 +78,13 @@
 
 		if (newScrollAmount < 0) {
 			scrollAmount = 0
+			scrollProgressValue = 0
 		} else if (newScrollAmount + songsAmount >= $playbackStore.length) {
 			scrollAmount = $playbackStore.length - songsAmount
+			scrollProgressValue = 100
 		} else {
 			scrollAmount = newScrollAmount
+			scrollProgressValue = (100 / $playbackStore.length) * scrollAmount
 		}
 	}
 
@@ -141,8 +147,14 @@
 	</song-list-grid>
 
 	<go-back-up
-		on:click={() => (scrollAmount = 0)}
-		on:keypress={() => (scrollAmount = 0)}
+		on:click={() => {
+			scrollAmount = 0
+			scrollProgressValue = 0
+		}}
+		on:keypress={() => {
+			scrollAmount = 0
+			scrollProgressValue = 0
+		}}
 		class:hide={scrollAmount < 10}
 		role="button"
 		tabindex="0"
@@ -150,9 +162,33 @@
 		<span>Go back up</span>
 		<arrow-up>▲</arrow-up>
 	</go-back-up>
+
+	<!-- 100 / playbackStore.length * scrollAmount -->
+	<scroll-area>
+		<scroll-progress style={`height:${scrollProgressValue}%;`} />
+	</scroll-area>
 </playback-layout>
 
 <style>
+	scroll-area {
+		display: block;
+		background-color: rgba(128, 128, 128, 0.5);
+		position: absolute;
+		height: 100%;
+		width: 10px;
+		right: 0;
+		bottom: 0;
+	}
+
+	scroll-area scroll-progress {
+		position: absolute;
+		background-color: var(--color-accent-1);
+		width: 4px;
+		margin:0 3px;
+
+		border-radius: 100vmax;
+	}
+
 	playback-layout {
 		position: relative;
 	}
@@ -196,7 +232,7 @@
 		align-items: center;
 		justify-content: center;
 		text-align: center;
-		margin-left: .25rem;
+		margin-left: 0.25rem;
 		transition: opacity 300ms linear;
 	}
 

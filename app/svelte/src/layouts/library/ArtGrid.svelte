@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte'
+	import { afterUpdate, onDestroy, onMount } from 'svelte'
 
 	import Album from '../../components/Album.svelte'
 
@@ -8,6 +8,8 @@
 
 	import cssVariablesService from '../../services/cssVariables.service'
 	import { hash } from '../../functions/hashString.fn'
+	import { artGridEvents } from '../../stores/componentsEvents.store'
+	import handleComponentsEventsFn from '../../functions/handleComponentsEvents.fn'
 
 	let albums
 
@@ -26,6 +28,8 @@
 			selectAllAlbums()
 		}
 	}
+
+	$: handleComponentsEventsFn($artGridEvents, 'ArtGrid')
 
 	function updateArtGridAlbums(groupBy, groupByValue) {
 		let whereQuery: any = [
@@ -105,6 +109,11 @@
 
 	onDestroy(() => {
 		// groupByValueConfigObserver()
+	})
+
+	// Run this function after each update cycle
+	afterUpdate(() => {
+		handleComponentsEventsFn($artGridEvents, 'ArtGrid')
 	})
 </script>
 
