@@ -5,6 +5,8 @@
 
 	import { playingSongStore, selectedAlbumsDir, windowResize } from '../../stores/main.store'
 
+	export let width = '100%'
+
 	let imageSourceLocation = ''
 
 	$: findImage($selectedAlbumsDir, $playingSongStore)
@@ -18,7 +20,7 @@
 	}
 </script>
 
-<song-list-background-svlt>
+<song-list-background-svlt style={`width: ${width || '100%'}`}>
 	{#key $windowResize}
 		<backdrop />
 	{/key}
@@ -33,7 +35,7 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		width: 100%;
+		/* width: 100%; */
 		height: 100%;
 
 		pointer-events: none;

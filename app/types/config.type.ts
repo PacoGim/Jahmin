@@ -3,13 +3,18 @@ export type ConfigType = {
 	directories: PartialDirectoriesType
 	group?: PartialGroupType
 	groupOnlyByFolder?: boolean
-	songListTags?: any[]
+	songListTags?: SongListTagType[]
 	userOptions: PartialUserOptionsType
 }
 
 type DirectoriesType = {
 	add: string[]
 	exclude: string[]
+}
+
+type SongListTagType = {
+	width: number
+	value: string
 }
 
 export type UserOptionsType = {

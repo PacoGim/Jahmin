@@ -62,10 +62,10 @@
 
 <!-- {isSongPlaying === true ? 'playing' : ''} -->
 <!-- style="grid-template-columns:{gridStyle};" -->
+<!-- style="grid-auto-columns:{gridStyle};" -->
 <song-list-item
 	data-id={song.ID}
 	data-index={index}
-	style="grid-auto-columns:{gridStyle};"
 	class="
 	{song.IsEnabled === 0 ? 'disabled' : ''}
 	{$playingSongStore?.ID === song.ID ? 'playing' : ''}
@@ -102,9 +102,18 @@
 		transition-duration: 250ms, 500ms, 500ms;
 		transition-timing-function: ease-in-out;
 
-		display: grid;
-		grid-template-rows: auto;
-		grid-auto-flow: column;
+
+
+		/* display: grid; */
+		/* grid-template-rows: auto; */
+		/* grid-auto-flow: column; */
+
+		display: flex;
+		flex-direction: row;
+	}
+
+	:global(song-list-item song-tag) {
+		max-width: 200px;
 	}
 
 	song-list-item:first-of-type {

@@ -9,7 +9,8 @@
 </script>
 
 <comment-tag>
-	{formatComment(comment)}
+	<!-- {formatComment(comment)} -->
+	{comment}
 </comment-tag>
 
 <style>

@@ -82,31 +82,14 @@ function getDefaultConfigFile(): ConfigType {
 			}
 		},
 		songListTags: [
+			{ width: 100, value: 'Track' },
+			{ width: 100, value: 'Title' },
 			{
-				align: 'center',
-				value: 'Track',
-				isExpanded: false
+				width: 100,
+				value: 'PlayCount'
 			},
-			{
-				align: 'left',
-				value: 'Title',
-				isExpanded: true
-			},
-			{
-				align: 'center',
-				value: 'PlayCount',
-				isExpanded: false
-			},
-			{
-				align: 'center',
-				value: 'Rating',
-				isExpanded: false
-			},
-			{
-				align: 'left',
-				value: 'Duration',
-				isExpanded: false
-			}
+			{ width: 100, value: 'Rating' },
+			{ width: 100, value: 'Duration' }
 		]
 	}
 }
