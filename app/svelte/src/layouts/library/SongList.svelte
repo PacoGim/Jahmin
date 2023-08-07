@@ -8,8 +8,11 @@
 
 	import {
 		elementMap,
+		isMouseDown,
 		keyModifier,
 		keyPressed,
+		mousePosition,
+		playingSongStore,
 		selectedAlbumDir,
 		selectedSongsStore,
 		songListStore,
@@ -17,6 +20,8 @@
 	} from '../../stores/main.store'
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 	import SongListBackground from './SongListBackground.svelte'
+	import updateConfigFn from '../../functions/updateConfig.fn'
+	import SongTag from '../../components/SongTag.svelte'
 
 	let songsToShow: SongType[] = []
 	let scrollAmount = 0
@@ -25,6 +30,10 @@
 	let dataContainerElement
 
 	let dataContainerWidth
+
+	let saveConfigDebounce = undefined
+
+	let scrolledAmount = 0
 
 	$: {
 		$selectedAlbumDir
@@ -135,7 +144,7 @@
 			getComputedStyle(document.body).getPropertyValue('--song-list-item-height').replace('px', '')
 		)
 
-		cssVariablesService.set('song-list-svlt-height', `${songAmount * songListItemHeight + 16}px`)
+		cssVariablesService.set('song-list-svlt-height', `${songAmount * songListItemHeight + 16 + 30}px`)
 	}
 
 	function scrollContainer(e: WheelEvent) {
@@ -168,38 +177,74 @@
 	// 	}, 2000)
 	// })
 
-	let elementActive = undefined
+	let elementActive: HTMLElement = undefined
+	let elementPosX: number = undefined
 
-	function handleOnMouseDownEvent(e: MouseEvent) {
-		let element = e.target as HTMLElement
+	function handleOnMouseDownEvent(evt: MouseEvent) {
+		let element = evt.target as HTMLElement
 
 		if (element.nodeName !== 'DATA-SEPARATOR') return
 
+		elementPosX = evt.pageX
 		elementActive = element
 	}
 
-	function handleOnMouseMoveEvent(e: MouseEvent) {
-		// console.log(e)
-
-		console.log(Math.sign(e.pageX - elementActive.getClientRects()[0].x))
-	}
-
 	function handleOnMouseUpEvent(e: MouseEvent) {
-		// elementActive=undefined
+		elementPosX = undefined
 	}
+
+	function handleScrollEvent(e: MouseEvent) {
+		let element = e.target as HTMLElement
+
+		scrolledAmount = element.scrollLeft
+	}
+
+	mousePosition.subscribe(value => {
+		if (elementPosX !== undefined && $isMouseDown === true) {
+			let newPosX = value.x - elementPosX
+
+			elementPosX = elementPosX + newPosX
+
+			let tag = elementActive.dataset.tag
+
+			let tagIndex = $songListTagConfig.findIndex(item => item.value === tag)
+
+			let currentTag = $songListTagConfig[tagIndex]
+
+			let newSize = currentTag.width + newPosX
+
+			if (newSize <= 50) {
+				newSize = 50
+			}
+
+			currentTag.width = newSize
+
+			$songListTagConfig[tagIndex] = currentTag
+
+			clearTimeout(saveConfigDebounce)
+			saveConfigDebounce = setTimeout(() => {
+				updateConfigFn(
+					{
+						songListTags: $songListTagConfig
+					},
+					{ doUpdateLocalConfig: false }
+				)
+			}, 1000)
+		}
+	})
 </script>
 
 <song-list-svlt
 	on:mousewheel={e => scrollContainer(e)}
 	on:click={e => songListClickEventHandlerService(e)}
 	on:keypress={e => songListClickEventHandlerService(e)}
+	on:scroll={handleScrollEvent}
 	tabindex="-1"
 	role="button"
 >
 	<data-container
 		bind:this={dataContainerElement}
 		on:mousedown={handleOnMouseDownEvent}
-		on:mousemove={handleOnMouseMoveEvent}
 		on:mouseup={handleOnMouseUpEvent}
 		role="button"
 		tabindex="0"
@@ -215,9 +260,18 @@
 
 		<data-body>
 			{#each $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig) as song, index (song.ID)}
-				<data-row>
+				<data-row
+					data-id={song.ID}
+					data-index={index}
+					class="
+				{song.IsEnabled === 0 ? 'disabled' : ''}
+				{$playingSongStore.ID === song.ID ? 'playing' : ''}
+				{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
+				>
 					{#each $songListTagConfig as tag, index (index)}
-						<data-value style={`width: ${tag.width}px;`}>{song[tag.value]}</data-value>
+						<data-value style={`width: ${tag.width}px;`}>
+							<SongTag {song} {tag} />
+						</data-value>
 						<data-separator data-tag={tag.value} />
 					{/each}
 				</data-row>
@@ -225,19 +279,25 @@
 		</data-body>
 	</data-container>
 
-	<SongListBackground width={`${dataContainerWidth}px`} />
+	<SongListBackground width={`${dataContainerWidth + 16}px`} />
+	<SongListScrollBar on:songListBarScrolled={onSongListBarScrolled} {scrolledAmount} />
 </song-list-svlt>
 
 <style>
+	song-list-svlt {
+		position: relative;
+	}
 	data-separator {
 		display: inline-block;
-		width: 10px;
-		background-color: red;
-		margin-right: 0.25rem;
+		width: 2px;
+		background-color: transparent;
+		margin: 0 0.25rem;
 		cursor: col-resize;
 	}
 	data-container {
-		--width: 50px;
+		margin: 0 1rem;
+
+		/* margin-right: 1rem; */
 	}
 	data-row {
 		display: flex;
@@ -245,10 +305,60 @@
 
 	data-value {
 		display: inline-block;
-
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	data-container data-row data-value {
+		text-align: left;
+	}
+	data-container data-row data-value {
+		padding: 0.25rem 0.5rem;
+	}
+
+	data-container data-header data-row data-value {
+		font-variation-settings: 'wght' 700;
+	}
+
+	data-container data-header data-separator {
+		transition: background-color 350ms linear;
+	}
+	data-container data-header:hover data-separator {
+		background-color: #fff;
+	}
+
+	data-container data-body data-row data-separator {
+		background-color: transparent;
+		pointer-events: none;
+	}
+
+	data-container data-body data-row {
+		cursor: pointer;
+		min-height: var(--song-list-item-height);
+		max-height: var(--song-list-item-height);
+		height: var(--song-list-item-height);
+
+		display: flex;
+		align-items: center;
+
+		border: 0.125rem transparent solid;
+		background-clip: padding-box;
+		padding: 0.5rem 0.5rem;
+		user-select: none;
+		border-radius: 10px;
+		transition-property: font-variation-settings, background-color, box-shadow;
+		transition-duration: 250ms, 500ms, 500ms;
+		transition-timing-function: ease-in-out;
+	}
+
+	data-container data-body data-row:hover {
+		background-color: rgba(255, 255, 255, 0.05);
+	}
+
+	data-container data-body data-row.playing {
+		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
+		box-shadow: inset 0px 0px 0 2px rgba(255, 255, 255, 0.5);
 	}
 
 	song-list-svlt {
@@ -256,19 +366,11 @@
 		color: #fff;
 		grid-area: song-list-svlt;
 		display: grid;
-		/* grid-template-columns: auto max-content; */
 		z-index: 2;
 
 		position: relative;
 
 		overflow: scroll;
-
-		/* background-color: red; */
 		overflow-y: hidden;
-		/* overflow-x: scroll; */
-	}
-
-	song-list {
-		padding: 8px;
 	}
 </style>

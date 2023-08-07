@@ -5,6 +5,8 @@
 
 	const dispatch = createEventDispatcher()
 
+	export let scrolledAmount = 0
+
 	let isMouseDownInScroll = false
 
 	// Improves detection by reducing the amount of times the mousemove event is triggered and dispatches and event.
@@ -78,17 +80,26 @@
 	})
 </script>
 
-<song-list-scroll-bar>
-	<scrollbar-fill />
-</song-list-scroll-bar>
+<scroll-bar-container style={`right: calc(0px - ${scrolledAmount}px);`}>
+	<song-list-scroll-bar>
+		<scrollbar-fill />
+	</song-list-scroll-bar>
+</scroll-bar-container>
 
 <style>
+	scroll-bar-container {
+		display: block;
+		height: 100%;
+		position: absolute;
+	}
 	song-list-scroll-bar {
 		display: block;
 		width: 1rem;
 		background-color: rgba(255, 255, 255, 0.15);
 
 		cursor: grab;
+
+		height: 100%;
 	}
 	song-list-scroll-bar:active {
 		cursor: grabbing;

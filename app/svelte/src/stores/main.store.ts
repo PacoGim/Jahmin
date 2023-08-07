@@ -36,9 +36,13 @@ export let selectedSongsStore: Writable<number[]> = writable([])
 export let dbSongsStore: Writable<SongType[]> = writable([])
 export let dbVersionStore: Writable<number | undefined> = writable(0)
 
-/********************** Keyboard Events **********************/
+/********************** Keyboard/Mouse Events **********************/
 export let keyPressed: Writable<string | undefined> = writable(undefined)
 export let keyModifier: Writable<'altKey' | 'ctrlKey' | 'shiftKey' | undefined> = writable(undefined)
+export let mousePosition: Writable<{ x: number; y: number } | undefined> = writable(undefined)
+export let isMouseDown: Writable<boolean> = writable(false)
+
+/********************** Playback **********************/
 
 export let appTitle: Writable<string> = writable('Jahmin')
 

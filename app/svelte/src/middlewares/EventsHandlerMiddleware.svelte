@@ -40,6 +40,13 @@
 			}
 		})
 
+		/*
+			song-list-svlt
+			data-container
+			data-body
+			data-row
+		*/
+
 		const mainElementClicked = $elementMap.entries().next().value
 
 		const imgElement = $elementMap.get('img')
@@ -51,7 +58,17 @@
 		const artElement = $elementMap.get('art-svlt')
 		const artGridElement = $elementMap.get('art-grid-svlt')
 
+		const dataRowElement =
+			$elementMap.get('song-list-svlt') &&
+			$elementMap.get('data-container') &&
+			$elementMap.get('data-body') &&
+			$elementMap.get('data-row')
+				? $elementMap.get('data-row')
+				: undefined
+
 		if (albumElement) handleAlbumEvent(albumElement, evt.type)
+
+		if (dataRowElement) handleSongListItemEvent(dataRowElement, evt.type)
 
 		if (songListItemElement) handleSongListItemEvent(songListItemElement, evt.type)
 

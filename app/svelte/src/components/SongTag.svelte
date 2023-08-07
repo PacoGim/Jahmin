@@ -47,15 +47,6 @@
 
 <style>
 	song-tag {
-		margin: 0 0.5rem;
 
-		white-space: nowrap;
-	}
-
-	song-tag {
-		/* display: -webkit-box;
-		-webkit-line-clamp: 1;
-		-webkit-box-orient: vertical;
-		overflow: hidden; */
 	}
 </style>

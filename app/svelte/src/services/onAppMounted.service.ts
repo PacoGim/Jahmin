@@ -7,9 +7,11 @@ import {
 	currentAudioElement,
 	externalSongProgressChange,
 	isAppIdle,
+	isMouseDown,
 	keyModifier,
 	keyPressed,
 	layoutToShow,
+	mousePosition,
 	playbackStore,
 	selectedAlbumsDir,
 	windowResize
@@ -84,12 +86,22 @@ export default function () {
 		keyModifier.set(undefined)
 	})
 
-	window.addEventListener('mousemove', () => {
+	window.addEventListener('mousemove', (evt: MouseEvent) => {
+		mousePosition.set({ x: evt.pageX, y: evt.pageY })
+
 		isAppIdle.set(false)
 
 		clearTimeout(appIdleDebounce)
 
 		appIdleDebounce = getAppIdleDebounce()
+	})
+
+	window.addEventListener('mouseup', (evt: MouseEvent) => {
+		isMouseDown.set(false)
+	})
+
+	window.addEventListener('mousedown', (evt: MouseEvent) => {
+		isMouseDown.set(true)
 	})
 
 	// Prevents scroll with spacebar.

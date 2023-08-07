@@ -102,7 +102,7 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		margin: 0 0.5rem;
+		/* margin: 0 0.5rem; */
 	}
 
 	rating-tag:hover img.delete-star {
