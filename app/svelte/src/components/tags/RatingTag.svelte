@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
+	import type { PartialSongType } from '../../../../types/song.type'
 
 	const dispatch = createEventDispatcher()
 
-	export let songRating = 0
 	export let hook
 	export let klass: '' | 'tag-edit-star' = ''
+	export let song: PartialSongType
 
 	let starRating = 0
 	let starRatingTemp = 0 // Keeps track of the user selected rating.
 	let starElementWidth: number = undefined
 
-	$: convertRating(songRating)
+	$: convertRating(song?.Rating || 0)
 
 	function convertRating(fnSongRating: number) {
 		// Converts 0-100 Rating to 0-10
@@ -49,8 +50,8 @@
 </script>
 
 <rating-tag
-	on:click={dispatch('starChange', { rating: starRating * 10 })}
-	on:keypress={dispatch('starChange', { rating: starRating * 10 })}
+	on:click={dispatch('starChange', { rating: starRating * 10, song })}
+	on:keypress={dispatch('starChange', { rating: starRating * 10, song })}
 	tabindex="-1"
 	role="button"
 	class={klass}

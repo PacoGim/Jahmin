@@ -4,7 +4,7 @@ import { activeSongStore, selectedAlbumDir, selectedSongsStore } from '../../sto
 export default async function (e: MouseEvent) {
 	let clickedSongItem: HTMLElement = e
 		.composedPath()
-		.find((path: HTMLElement) => path.tagName === 'SONG-LIST-ITEM') as HTMLElement
+		.find((path: HTMLElement) => path.tagName === 'DATA-ROW') as HTMLElement
 
 	let clickedSongId = Number(clickedSongItem?.dataset.id)
 

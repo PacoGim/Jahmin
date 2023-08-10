@@ -8,7 +8,7 @@ export default function (e: MouseEvent) {
 		altKey: e.altKey
 	}
 
-	let element = getElementFromEvent(e, 'SONG-LIST-ITEM')
+	let element = getElementFromEvent(e, 'DATA-ROW')
 
 	if (element === undefined) return
 

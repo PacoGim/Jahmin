@@ -1,16 +1,12 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte'
+	import { onMount } from 'svelte'
 	import getDirectoryFn from '../functions/getDirectory.fn'
 
-	import isArrayEqualFn from '../functions/isArrayEqual.fn'
-	import parseJsonFn from '../functions/parseJson.fn'
-
-	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
-	import { config, groupByConfig, groupByValueConfig } from '../stores/config.store'
+	import { config, groupByConfig } from '../stores/config.store'
 
 	import {
 		albumPlayingDirStore,
@@ -21,7 +17,6 @@
 		selectedAlbumDir,
 		selectedSongsStore,
 		songListStore,
-		triggerGroupingChangeEvent,
 		triggerScrollToSongEvent,
 		selectedAlbumsDir,
 		keyModifier,
@@ -29,7 +24,6 @@
 	} from '../stores/main.store'
 	import updateConfigFn from '../functions/updateConfig.fn'
 	import { artGridEvents, tagGroupEvents } from '../stores/componentsEvents.store'
-	import { get } from 'svelte/store'
 
 	function handleClickEvents(evt: MouseEvent) {
 		$elementMap = new Map<string, HTMLElement>()
@@ -40,19 +34,13 @@
 			}
 		})
 
-		/*
-			song-list-svlt
-			data-container
-			data-body
-			data-row
-		*/
-
 		const mainElementClicked = $elementMap.entries().next().value
 
 		const imgElement = $elementMap.get('img')
 		const albumElement = $elementMap.get('album')
 		const songListItemElement = $elementMap.get('song-list-item') //! true
 		const songListElement = $elementMap.get('song-list') //! false
+		const songListSvltElement = $elementMap.get('song-list-svlt') //! false
 		const controlBarElement = $elementMap.get('control-bar-svlt')
 		const tagEditElement = $elementMap.get('tag-edit-svlt') //! false
 		const artElement = $elementMap.get('art-svlt')
@@ -74,31 +62,14 @@
 
 		if (artElement && controlBarElement) setAlbumBackInView()
 
-		if (songListElement === undefined && tagEditElement === undefined) {
+		if (songListSvltElement === undefined && tagEditElement === undefined) {
 			$selectedSongsStore = []
 		}
 
 		if (mainElementClicked[0] === 'art-grid-svlt') {
 			setSelectedAlbumsDir([getDirectoryFn($playingSongStore?.SourceFile)])
-			// $selectedAlbumsDir = [getDirectoryFn($playingSongStore?.SourceFile)]
 		}
 	}
-
-	// function handleKeyboardEvents(evt: KeyboardEvent) {
-	// 	let keyModifier = {
-	// 		ctrl: evt.ctrlKey || evt.metaKey,
-	// 		shift: evt.shiftKey,
-	// 		alt: evt.altKey
-	// 	}
-
-	// 	if (evt.key === 'a' && keyModifier.ctrl === true) {
-	// 		const songListElement = $elementMap.get('song-list')
-
-	// 		if (songListElement) {
-	// 			$selectedSongsStore = [...$songListStore.map(song => song.ID)]
-	// 		}
-	// 	}
-	// }
 
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
 	function setAlbumBackInView() {

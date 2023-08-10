@@ -10,7 +10,7 @@ export async function handleContextMenuEvent(e: MouseEvent) {
 
 	if (pathsName.includes('ALBUM')) albumContextMenu(e)
 
-	if (pathsName.includes('SONG-LIST')) songListCtxMenu(e)
+	if (pathsName.includes('SONG-LIST-SVLT')) songListCtxMenu(e)
 
 	if (pathsName.includes('GROUP-NAME')) groupNameCtxMenu(e)
 

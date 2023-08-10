@@ -72,45 +72,11 @@
 		}, 100)
 	}
 
-	/* 	afterUpdate(() => {
-	})*/
-
-	// tick().then(() => {
-	// 	let dataContainerElement = document.querySelector('data-container')
-
-	// 	console.log(dataContainerElement)
-	// })
+	$: console.log('selectedSongsStore', $selectedSongsStore)
 
 	function selectAllSongs() {
-		const songListElement = $elementMap.get('song-list')
-
-		if (songListElement) {
-			$selectedSongsStore = [...$songListStore.map(song => song.ID)]
-		}
+		$selectedSongsStore = [...$songListStore.map(song => song.ID)]
 	}
-
-	// Trims the current song array to show a limited amount of songs.
-	// function trimSongArray() {
-	// if (scrollAmount !== previousScrollAmount) {
-	// 	songsToShow = $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig)
-
-	// 	if (songsToShow.length > 0) {
-	// 		previousScrollAmount = scrollAmount
-	// 	}
-	// }
-	// }
-
-	/*
-			<!-- <song-list> -->
-	<!-- {#each $songListStore.slice(scrollAmount, scrollAmount + $songAmountConfig) as song, index (song.ID)} -->
-	<!-- <SongListItem {song} {index} /> -->
-	<!-- {/each} -->
-	<!-- </song-list> -->
-	<!-- <SongListScrollBar on:songListBarScrolled={onSongListBarScrolled} /> -->
-	<!-- <SongListBackground /> -->
-	<!-- </song-list> -->
-
-	*/
 
 	function setScrollAmount(amount) {
 		if ($songListStore.length <= 0) {
@@ -166,16 +132,10 @@
 		}
 	}
 
-	// $: console.log($songListTagConfig)
-
-	// onMount(() => {
-	// 	setTimeout(() => {
-	// 		$songListTagConfig[0] = {
-	// 			value: 'Track',
-	// 			width: 500
-	// 		}
-	// 	}, 2000)
-	// })
+	function setStar(starChangeEvent) {
+		let eventDetails: { rating: number; song: SongType } = starChangeEvent.detail
+		window.ipc.updateSongs([eventDetails.song], { Rating: eventDetails.rating })
+	}
 
 	let elementActive: HTMLElement = undefined
 	let elementPosX: number = undefined
@@ -263,14 +223,13 @@
 				<data-row
 					data-id={song.ID}
 					data-index={index}
-					class="
-				{song.IsEnabled === 0 ? 'disabled' : ''}
-				{$playingSongStore.ID === song.ID ? 'playing' : ''}
-				{$selectedSongsStore.includes(song.ID) ? 'selected' : ''}"
+					class:selected={$selectedSongsStore.includes(song.ID)}
+					class:disabled={song.IsEnabled === 0}
+					class:playing={$playingSongStore.ID === song.ID}
 				>
 					{#each $songListTagConfig as tag, index (index)}
 						<data-value style={`width: ${tag.width}px;`}>
-							<SongTag {song} {tag} />
+							<SongTag {song} {tag} on:starChange={setStar} />
 						</data-value>
 						<data-separator data-tag={tag.value} />
 					{/each}
@@ -356,9 +315,27 @@
 		background-color: rgba(255, 255, 255, 0.05);
 	}
 
+	data-container data-body data-row.selected {
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+
 	data-container data-body data-row.playing {
 		font-variation-settings: 'wght' calc(var(--default-weight) + 300);
 		box-shadow: inset 0px 0px 0 2px rgba(255, 255, 255, 0.5);
+	}
+
+	data-container data-body data-row.disabled {
+		background-image: linear-gradient(
+			45deg,
+			rgba(255, 255, 255, 0) 25%,
+			rgba(255, 255, 255, 0.1) 25%,
+			rgba(255, 255, 255, 0.1) 50%,
+			rgba(255, 255, 255, 0) 50%,
+			rgba(255, 255, 255, 0) 75%,
+			rgba(255, 255, 255, 0.1) 75%,
+			rgba(255, 255, 255, 0.1) 100%
+		);
+		background-size: 28.28px 28.28px;
 	}
 
 	song-list-svlt {

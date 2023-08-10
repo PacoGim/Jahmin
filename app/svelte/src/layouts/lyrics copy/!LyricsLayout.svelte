@@ -98,7 +98,7 @@
 
 	function deleteLyrics() {
 		window.ipc.deleteLyrics($songLyricsSelected.title, $songLyricsSelected.artist).then(response => {
-			if (response.isError === true) {
+			if (response.code === -1) {
 				notifyService.error(response.message)
 			} else {
 				notifyService.success(response.message)

@@ -25,7 +25,7 @@
 	{#if tag.value === 'Title'}
 		<TitleTag {song} />
 	{:else if tag.value === 'Rating'}
-		<RatingTag on:starChange={evt => dispatch('starChange', evt.detail)} songRating={song.Rating} hook="song-list-item" />
+		<RatingTag on:starChange={evt => dispatch('starChange', evt.detail)} {song} hook="song-list-svlt" />
 	{:else if tag.value === 'Duration'}
 		{parseDuration(song.Duration)}
 	{:else if tag.value === 'PlayCount'}
@@ -47,6 +47,5 @@
 
 <style>
 	song-tag {
-
 	}
 </style>

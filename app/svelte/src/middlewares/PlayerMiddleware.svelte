@@ -16,8 +16,13 @@
 		localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir))
 	}
 
+	let lastSelectedAlbums = ''
+
 	function fillSongList(albumRootDirList: string[] = [], sorting: ConfigType['userOptions']['songSort']) {
-		songListStore.set([])
+		if (JSON.stringify($selectedAlbumsDir) !== lastSelectedAlbums) {
+			songListStore.set([])
+			lastSelectedAlbums = JSON.stringify($selectedAlbumsDir)
+		}
 
 		if (albumRootDirList.length === 0) {
 			return
