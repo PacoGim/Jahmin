@@ -11,7 +11,6 @@ import { startIPC } from './services/ipc.service'
 import path from 'path'
 
 import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.fn'
-import { setMaxListeners } from 'events'
 
 let browserWindow: BrowserWindow
 
@@ -74,6 +73,11 @@ function createWindow() {
 			})
 		})
 }
+
+process.on('uncaughtException', function (error) {
+	// Handle the error here
+	app.quit()
+})
 
 export function getMainWindow() {
 	return browserWindow

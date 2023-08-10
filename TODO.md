@@ -23,3 +23,4 @@ on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabinde
 
 
 * Fix massive app freeze at app launch.
+* App behaves unexpectedly on Mac when app "closed" and re opened.
