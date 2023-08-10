@@ -1,4 +1,7 @@
 # Built Files
+dist/main/main.js
+dist/main/global
+dist/main/db
 dist/main/formats
 dist/main/preload
 dist/main/functions

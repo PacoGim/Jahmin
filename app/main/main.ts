@@ -25,6 +25,7 @@ chokidarWatch([
 })
 
 app.whenReady().then(() => {
+	console.time('App Startup')
 	createWindow()
 	startIPC()
 

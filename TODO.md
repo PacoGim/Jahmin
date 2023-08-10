@@ -22,3 +22,4 @@
 on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabindex="-1" role="button"
 
 
+* Fix massive app freeze at app launch.

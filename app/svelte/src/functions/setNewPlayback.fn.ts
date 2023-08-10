@@ -10,8 +10,6 @@ import {
 } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { SongType } from '../../../types/song.type'
-import applyColorSchemeFn from './applyColorScheme.fn'
-import getAlbumColorsFn from './getAlbumColors.fn'
 import shuffleArrayFn from './shuffleArray.fn'
 import updateConfigFn from './updateConfig.fn'
 import { groupByConfig } from '../stores/config.store'
@@ -27,13 +25,22 @@ export default async function (
 
 	if (songToPlay === undefined) return
 
-	let isSongShuffleEnabled = false
+	let isSongShuffleEnabled = get(isSongShuffleEnabledStore)
 
-	isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))()
+	// isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))()
 
 	if (isSongShuffleEnabled) {
 		let shuffledArray = shuffleArrayFn(playbackSongs)
-		songToPlay = shuffledArray[0]
+
+		if (songIdToPlay !== undefined) {
+			let songToPlayIndex = shuffledArray.findIndex(song => song.ID === songIdToPlay)
+
+			songToPlay = shuffledArray.splice(songToPlayIndex, 1)[0]
+
+			shuffledArray.unshift(songToPlay)
+		} else {
+			songToPlay = shuffledArray[0]
+		}
 		playbackStore.set(shuffledArray)
 	} else {
 		playbackStore.set(playbackSongs)

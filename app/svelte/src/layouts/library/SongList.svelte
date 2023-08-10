@@ -72,8 +72,6 @@
 		}, 100)
 	}
 
-	$: console.log('selectedSongsStore', $selectedSongsStore)
-
 	function selectAllSongs() {
 		$selectedSongsStore = [...$songListStore.map(song => song.ID)]
 	}
@@ -110,7 +108,7 @@
 			getComputedStyle(document.body).getPropertyValue('--song-list-item-height').replace('px', '')
 		)
 
-		cssVariablesService.set('song-list-svlt-height', `${songAmount * songListItemHeight + 16 + 30}px`)
+		cssVariablesService.set('song-list-svlt-height', `${songAmount * songListItemHeight + 16 + 42}px`)
 	}
 
 	function scrollContainer(e: WheelEvent) {
@@ -173,8 +171,8 @@
 
 			let newSize = currentTag.width + newPosX
 
-			if (newSize <= 50) {
-				newSize = 50
+			if (newSize <= 25) {
+				newSize = 25
 			}
 
 			currentTag.width = newSize
@@ -253,11 +251,7 @@
 		margin: 0 0.25rem;
 		cursor: col-resize;
 	}
-	data-container {
-		margin: 0 1rem;
 
-		/* margin-right: 1rem; */
-	}
 	data-row {
 		display: flex;
 	}
@@ -271,17 +265,19 @@
 
 	data-container data-row data-value {
 		text-align: left;
-	}
-	data-container data-row data-value {
 		padding: 0.25rem 0.5rem;
 	}
 
 	data-container data-header data-row data-value {
 		font-variation-settings: 'wght' 700;
+		text-align: center;
+		/* background-color: red; */
 	}
 
 	data-container data-header data-separator {
 		transition: background-color 350ms linear;
+
+		/* background-color: green; */
 	}
 	data-container data-header:hover data-separator {
 		background-color: #fff;
@@ -301,15 +297,26 @@
 		display: flex;
 		align-items: center;
 
-		border: 0.125rem transparent solid;
 		background-clip: padding-box;
-		padding: 0.5rem 0.5rem;
 		user-select: none;
 		border-radius: 10px;
 		transition-property: font-variation-settings, background-color, box-shadow;
 		transition-duration: 250ms, 500ms, 500ms;
 		transition-timing-function: ease-in-out;
 	}
+
+	data-container data-header data-row {
+		padding-bottom: 0;
+	}
+
+	data-container data-row {
+		border: 0.125rem transparent solid;
+		padding: 0.5rem 0.5rem;
+	}
+
+	/* data-container data-body data-row data-value { */
+		/* background-color: blue; */
+	/* } */
 
 	data-container data-body data-row:hover {
 		background-color: rgba(255, 255, 255, 0.05);
