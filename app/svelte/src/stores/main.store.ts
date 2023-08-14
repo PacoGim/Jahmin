@@ -58,6 +58,9 @@ export let mainAudioElement: Writable<HTMLAudioElement | undefined> = writable(u
 export let altAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let currentAudioElement: Writable<HTMLAudioElement | undefined> = writable(undefined)
 
+/********************** Song search  **********************/
+export let userSearch: Writable<string> = writable('')
+
 /********************** Song Group **********************/
 export let selectedGroups: Writable<any> = writable([])
 

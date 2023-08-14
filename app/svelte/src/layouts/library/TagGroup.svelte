@@ -4,18 +4,18 @@
 	import { tagGroupEvents } from '../../stores/componentsEvents.store'
 	import { groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
-	import { dbVersionStore } from '../../stores/main.store'
+	import { dbVersionStore, userSearch } from '../../stores/main.store'
 	import { afterUpdate } from 'svelte'
 
 	let groupedSongs = []
 	let stopAfterUpdate = false
 
-	$: groupSongs($groupByConfig)
-	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig) : null
+	$: groupSongs($groupByConfig, $userSearch)
+	$: $dbVersionStore !== 0 ? groupSongs($groupByConfig, $userSearch) : null
 
 	$: handleComponentsEventsFn($tagGroupEvents)
 
-	function groupSongs(groupBy: string) {
+	function groupSongs(groupBy: string, userSearch: string) {
 		if (groupBy === 'Year') {
 			groupBy = 'DateYear'
 		}
@@ -25,7 +25,8 @@
 			.bulkRead({
 				queryData: {
 					select: [`distinct ${groupBy}`],
-					order: [groupBy]
+					order: [groupBy],
+					search: userSearch
 				}
 			})
 			.then(response => {

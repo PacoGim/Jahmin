@@ -11,6 +11,7 @@ import { startIPC } from './services/ipc.service'
 import path from 'path'
 
 import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.fn'
+import { killAllWorkers } from './services/workers.service'
 
 let browserWindow: BrowserWindow
 
@@ -44,6 +45,7 @@ app.whenReady().then(() => {
 app.on('will-quit', () => {
 	// Unregister all shortcuts.
 	globalShortcut.unregisterAll()
+	killAllWorkers()
 })
 
 function createWindow() {
@@ -74,6 +76,7 @@ function createWindow() {
 		})
 }
 
+// It doesn't work. Maybe try to kill of workers.
 process.on('uncaughtException', function (error) {
 	// Handle the error here
 	app.quit()

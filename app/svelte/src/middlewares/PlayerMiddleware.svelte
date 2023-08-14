@@ -5,12 +5,19 @@
 	import scrollToAlbumFn from '../functions/scrollToAlbum.fn'
 	import setNewPlaybackFn from '../functions/setNewPlayback.fn'
 
-	import { dbVersionStore, playbackStore, selectedAlbumsDir, setSelectedAlbumsDir, songListStore } from '../stores/main.store'
+	import {
+		dbVersionStore,
+		playbackStore,
+		selectedAlbumsDir,
+		setSelectedAlbumsDir,
+		songListStore,
+		userSearch
+	} from '../stores/main.store'
 	import { songSortConfig } from '../stores/config.store'
 	import type { ConfigType } from '../../../types/config.type'
 
-	$: fillSongList($selectedAlbumsDir, $songSortConfig)
-	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir, $songSortConfig) : null
+	$: fillSongList($selectedAlbumsDir, $songSortConfig, $userSearch)
+	$: $dbVersionStore !== 0 ? fillSongList($selectedAlbumsDir, $songSortConfig, $userSearch) : null
 
 	$: if ($selectedAlbumsDir !== undefined) {
 		localStorage.setItem('SelectedAlbumsDir', JSON.stringify($selectedAlbumsDir))
@@ -18,7 +25,7 @@
 
 	let lastSelectedAlbums = ''
 
-	function fillSongList(albumRootDirList: string[] = [], sorting: ConfigType['userOptions']['songSort']) {
+	function fillSongList(albumRootDirList: string[] = [], sorting: ConfigType['userOptions']['songSort'], userSearch) {
 		if (JSON.stringify($selectedAlbumsDir) !== lastSelectedAlbums) {
 			songListStore.set([])
 			lastSelectedAlbums = JSON.stringify($selectedAlbumsDir)
@@ -37,7 +44,8 @@
 				queryData: {
 					select: ['*'],
 					orWhere: whereQuery,
-					order: [`${sorting.sortBy} ${sorting.sortOrder}`]
+					order: [`${sorting.sortBy} ${sorting.sortOrder}`],
+					search: userSearch
 				}
 			})
 			.then(response => {

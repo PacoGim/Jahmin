@@ -16,7 +16,7 @@ export default function (ipcMain: Electron.IpcMain) {
 
 		registerGlobalShortcuts()
 
-		// fetchSongsTag()
+		fetchSongsTag()
 	})
 }
 

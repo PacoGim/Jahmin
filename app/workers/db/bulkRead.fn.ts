@@ -7,6 +7,7 @@ export function selectGeneric(queryData: {
 	where?: { [key: string]: string }[]
 	group?: string[]
 	order?: string[]
+	search?: string
 }) {
 	return new Promise((resolve, reject) => {
 		let sqliteQuery = buildSqliteQuery(queryData)
@@ -30,8 +31,24 @@ function buildSqliteQuery(queryData: {
 	orWhere?: { [key: string]: string }[]
 	group?: string[]
 	order?: string[]
+	search?: string
 }) {
 	let query = `SELECT ${queryData.select.join(',')} FROM songs`
+
+	let columNames = [
+		'Extension',
+		'SourceFile',
+		'Album',
+		'AlbumArtist',
+		'Artist',
+		'Comment',
+		'Composer',
+		'DateYear',
+		'DateMonth',
+		'DateDay',
+		'Genre',
+		'Title'
+	]
 
 	if (queryData.andWhere && queryData.andWhere.length > 0) {
 		query += ` WHERE ${queryData.andWhere
@@ -39,6 +56,7 @@ function buildSqliteQuery(queryData: {
 				if (where[Object.keys(where)[0]] === 'not null') {
 					return `${Object.keys(where)[0]} is not null`
 				} else {
+					columNames.splice(columNames.indexOf(Object.keys(where)[0]), 1)
 					return `${Object.keys(where)[0]} = "${where[Object.keys(where)[0]]}"`
 				}
 			})
@@ -51,10 +69,16 @@ function buildSqliteQuery(queryData: {
 				if (where[Object.keys(where)[0]] === 'not null') {
 					return `${Object.keys(where)[0]} is not null`
 				} else {
+					columNames.splice(columNames.indexOf(Object.keys(where)[0]), 1)
 					return `${Object.keys(where)[0]} = "${where[Object.keys(where)[0]]}"`
 				}
 			})
 			.join(' OR ')}`
+	}
+
+	if (queryData.search !== '' && queryData.search !== undefined && queryData.search !== null) {
+		const whereClause = columNames.map(name => `${name} LIKE '%${queryData.search}%'`).join(' OR ')
+		query += query.indexOf(' WHERE ') === -1 ? ` WHERE ${whereClause}` : ` AND (${whereClause})`
 	}
 
 	if (queryData.group) {

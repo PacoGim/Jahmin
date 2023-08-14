@@ -3,7 +3,14 @@
 
 	import Album from '../../components/Album.svelte'
 
-	import { dbVersionStore, elementMap, keyModifier, keyPressed, setSelectedAlbumsDir } from '../../stores/main.store'
+	import {
+		dbVersionStore,
+		elementMap,
+		keyModifier,
+		keyPressed,
+		setSelectedAlbumsDir,
+		userSearch
+	} from '../../stores/main.store'
 	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
 	import cssVariablesService from '../../services/cssVariables.service'
@@ -18,10 +25,10 @@
 	$: if ($gridGapConfig !== undefined) cssVariablesService.set('grid-gap', `${$gridGapConfig}px`)
 
 	$: if (/* Add the db versioning later */ $groupByConfig || $groupByValueConfig) {
-		updateArtGridAlbums($groupByConfig, $groupByValueConfig)
+		updateArtGridAlbums($groupByConfig, $groupByValueConfig, $userSearch)
 	}
 
-	$: $dbVersionStore !== 0 ? updateArtGridAlbums($groupByConfig, $groupByValueConfig) : null
+	$: $dbVersionStore !== 0 ? updateArtGridAlbums($groupByConfig, $groupByValueConfig, $userSearch) : null
 
 	$: {
 		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('art-grid-svlt')) {
@@ -31,7 +38,7 @@
 
 	$: handleComponentsEventsFn($artGridEvents)
 
-	function updateArtGridAlbums(groupBy, groupByValue) {
+	function updateArtGridAlbums(groupBy, groupByValue, userSearch) {
 		let whereQuery: any = [
 			{
 				Album: 'not null'
@@ -56,7 +63,8 @@
 					select: ['Sourcefile', 'Album', 'AlbumArtist', 'Artist', 'DateYear', 'Directory'],
 					andWhere: whereQuery,
 					group: ['Directory'],
-					order: ['Directory']
+					order: ['Directory'],
+					search: userSearch
 				}
 			})
 			.then(response => {

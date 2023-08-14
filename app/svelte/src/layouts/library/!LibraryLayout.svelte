@@ -11,6 +11,7 @@
 	import SongListBackground from './SongListBackground.svelte'
 	import TagEdit from './TagEdit.svelte'
 	import TagGroup from './TagGroup.svelte'
+	import Search from './Search.svelte'
 
 	$: if ($fontSizeConfig !== undefined) {
 		cssVariablesService.set('font-size', `${$fontSizeConfig}px`)
@@ -28,7 +29,7 @@
 	<TagGroup />
 	<SongList />
 	<TagEdit />
-	<!-- <SongListBackground /> -->
+	<Search/>
 </library-layout>
 
 <style>
@@ -37,8 +38,9 @@
 
 		display: grid;
 		grid-template-columns: max-content auto 256px;
-		grid-template-rows: auto var(--song-list-svlt-height);
+		grid-template-rows: auto auto var(--song-list-svlt-height);
 		grid-template-areas:
+			'tag-group-svlt art-grid-svlt search-svlt'
 			'tag-group-svlt art-grid-svlt tag-edit-svlt'
 			'tag-group-svlt song-list-svlt tag-edit-svlt';
 	}

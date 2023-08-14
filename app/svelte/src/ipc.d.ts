@@ -80,6 +80,7 @@ declare global {
 					orWhere?: { [key: string]: string }[]
 					group?: string[]
 					order?: string[]
+					search?: string
 				}
 			}) => Promise<DatabaseResponseType>
 			updatePlayCount: (

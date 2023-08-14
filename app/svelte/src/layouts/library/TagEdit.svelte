@@ -331,7 +331,7 @@
 
 	<tag-container data-tag="Rating">
 		<tag-name>Rating <UndoIcon /> </tag-name>
-		<RatingTag on:starChange={setStar} songRating={Number(bindingTags.Rating)} hook="tag-edit-svlt" klass="tag-edit-star" />
+		<RatingTag on:starChange={setStar} song={bindingTags} hook="tag-edit-svlt" klass="tag-edit-star" />
 	</tag-container>
 
 	<album-art>
