@@ -34,7 +34,7 @@
 		}
 
 		if (songToPlay) {
-			setNewPlaybackFn(getDirectoryFn(songToPlay.SourceFile), newPlayback, songToPlay.ID, { playNow: true })
+			setNewPlaybackFn(getDirectoryFn(songToPlay.SourceFile), newPlayback, songToPlay.ID, { playNow: true }, { shuffle: false })
 		}
 	}
 

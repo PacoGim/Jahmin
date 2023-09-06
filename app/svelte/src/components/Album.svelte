@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { AlbumType } from '../../../types/album.type'
 	import { selectedAlbumsDir } from '../stores/main.store'
-	import { config } from '../stores/config.store'
+	import { configStore } from '../stores/config.store'
 	import AlbumArt from './AlbumArt.svelte'
 
 	export let album: AlbumType
@@ -9,7 +9,7 @@
 </script>
 
 <album
-	alwaysShowOverlay={$config.userOptions.alwaysShowAlbumOverlay}
+	alwaysShowOverlay={$configStore.userOptions.alwaysShowAlbumOverlay}
 	rootDir={album.Directory}
 	class={$selectedAlbumsDir?.includes(album?.Directory) ? 'selected' : ''}
 >

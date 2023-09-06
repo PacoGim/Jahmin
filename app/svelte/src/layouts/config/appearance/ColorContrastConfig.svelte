@@ -5,11 +5,11 @@
 	import traduceFn from '../../../functions/traduce.fn'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import notifyService from '../../../services/notify.service'
-	import { config } from '../../../stores/config.store'
+	import { configStore } from '../../../stores/config.store'
 	// import { contrastRatioConfig } from '../../../stores/config.store'
 	import { albumPlayingDirStore, keyPressed } from '../../../stores/main.store'
 
-	let colorContrastRangeValue = $config.userOptions.contrastRatio
+	let colorContrastRangeValue = $configStore.userOptions.contrastRatio
 
 	$: {
 		$albumPlayingDirStore

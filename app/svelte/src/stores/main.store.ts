@@ -22,10 +22,6 @@ export let playbackCursor: Writable<[number, boolean]> = writable([0, false])
 export let triggerScrollToSongEvent: Writable<number> = writable(0)
 export let triggerGroupingChangeEvent: Writable<string[]> = writable([])
 
-export let isSongShuffleEnabledStore: Writable<boolean> = writable(false)
-export let isSongRepeatEnabledStore: Writable<boolean> = writable(false)
-export let isPlaybackRepeatEnabledStore: Writable<boolean> = writable(false)
-
 // List to keep track of songs to play.
 export let playbackStore: Writable<SongType[]> = writable([])
 

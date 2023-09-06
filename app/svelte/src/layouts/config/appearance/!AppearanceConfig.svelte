@@ -4,7 +4,7 @@
 	import traduceFn from '../../../functions/traduce.fn'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import ToggleIcon from '../../../icons/ToggleIcon.svelte'
-	import { config, pauseAnimatedArtWhenAppUnfocusedConfig } from '../../../stores/config.store'
+	import { configStore, pauseAnimatedArtWhenAppUnfocusedConfig } from '../../../stores/config.store'
 	import AlwaysShowAlbumOverlay from './AlwaysShowAlbumOverlay.svelte'
 
 	import ColorContrastConfig from './ColorContrastConfig.svelte'
@@ -30,15 +30,15 @@
 	</OptionSection>
 
 	<OptionSection title={'Other Options'}>
-		<OptionSectionCompact title={traduceFn('Font Size : ${fontSize}', { fontSize: $config.userOptions.fontSize })}>
+		<OptionSectionCompact title={traduceFn('Font Size : ${fontSize}', { fontSize: $configStore.userOptions.fontSize })}>
 			<FontSizeConfig />
 		</OptionSectionCompact>
 
-		<OptionSectionCompact title={traduceFn('Grid Art Size : ${artSize}', { artSize: $config.userOptions.artSize })}>
+		<OptionSectionCompact title={traduceFn('Grid Art Size : ${artSize}', { artSize: $configStore.userOptions.artSize })}>
 			<GridArtSize />
 		</OptionSectionCompact>
 
-		<OptionSectionCompact title={traduceFn('Grid Art Gap : ${gridGap}', { gridGap: $config.userOptions.gridGap })}>
+		<OptionSectionCompact title={traduceFn('Grid Art Gap : ${gridGap}', { gridGap: $configStore.userOptions.gridGap })}>
 			<GridGapSize />
 		</OptionSectionCompact>
 

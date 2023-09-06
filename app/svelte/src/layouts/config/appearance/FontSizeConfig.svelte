@@ -1,6 +1,6 @@
 <script lang="ts">
 	import updateConfigFn from '../../../functions/updateConfig.fn'
-	import { config } from '../../../stores/config.store'
+	import { configStore } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
 
@@ -13,11 +13,11 @@
 			max: 18,
 			step: 1,
 			minStep: 0.25,
-			value: Number($config.userOptions.fontSize),
+			value: Number($configStore.userOptions.fontSize),
 			confirmButtonText: 'Confirm',
 			cancelButtonText: 'Close',
 			onChange: value => {
-				$config.userOptions.fontSize = value
+				$configStore.userOptions.fontSize = value
 			},
 			onConfirm: newFontSize => {
 				saveFontSize(newFontSize)

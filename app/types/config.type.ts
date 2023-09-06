@@ -37,6 +37,7 @@ export type UserOptionsType = {
 		sortBy: string
 		sortOrder: 'asc' | 'desc'
 	}
+	playback: PartialPlaybackOptionsType
 }
 
 export enum ThemeOptions {
@@ -63,8 +64,15 @@ type LyricsStyle = {
 	textAlignment: number
 }
 
+type PlaybackOptionsType = {
+	shuffle: boolean
+	repeatList: boolean
+	repeatCurrent: boolean
+}
+
 type PartialUserOptionsType = Partial<UserOptionsType>
 type PartialDirectoriesType = Partial<DirectoriesType>
 type PartialGroupType = Partial<GroupType>
+type PartialPlaybackOptionsType = Partial<PlaybackOptionsType>
 
 export type PartialConfigType = Partial<ConfigType>

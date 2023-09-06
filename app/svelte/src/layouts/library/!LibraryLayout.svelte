@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
-	import { groupSongs } from '../../services/groupSongs.service'
 	import { dbSongsStore } from '../../stores/main.store'
-	import { config, fontSizeConfig } from '../../stores/config.store'
+	import { fontSizeConfig } from '../../stores/config.store'
 
 	import ArtGrid from './ArtGrid.svelte'
 	import NoSong from './NoSong.svelte'

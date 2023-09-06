@@ -46,14 +46,6 @@ export function getAacTags(filePath: string): Promise<SongType> {
 
 			if (!isNaN(metadata.Rating)) metadata.RatingPercent = metadata.Rating
 
-			console.log('--------------')
-			console.log('--------------')
-			console.log('--------------')
-			console.log('--------------')
-			console.log('--------------')
-			console.log('--------------')
-			console.log(metadata)
-
 			resolve({
 				ID: stringHash(filePath),
 				Directory: getDirectoryFn(filePath),

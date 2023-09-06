@@ -1,6 +1,6 @@
 <script lang="ts">
   import updateConfigFn from '../../../functions/updateConfig.fn'
-	import { config } from '../../../stores/config.store'
+	import { configStore } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
 
@@ -13,7 +13,7 @@
 			max: 64,
 			step: 2,
 			minStep: 1,
-			value: Number($config.userOptions.gridGap),
+			value: Number($configStore.userOptions.gridGap),
 			confirmButtonText: 'Confirm',
 			cancelButtonText: 'Close',
 			onChange: value => {
@@ -30,7 +30,7 @@
 	}
 
 	function updateGridGapSize(newGridGap: number) {
-		$config.userOptions.gridGap = newGridGap
+		$configStore.userOptions.gridGap = newGridGap
 	}
 
 	function saveGridGapSize(newGridGap: number) {

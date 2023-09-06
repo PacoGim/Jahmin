@@ -3,7 +3,7 @@
 	import generateId from '../functions/generateId.fn'
 
 	import intersectionObserverFn from '../functions/intersectionObserver.fn'
-	import { config } from '../stores/config.store'
+	import { configStore } from '../stores/config.store'
 	import { reloadArts } from '../stores/main.store'
 
 	export let intersectionRoot = undefined
@@ -27,8 +27,8 @@
 		let width
 
 		if (from === 'ArtGrid') {
-			height = $config.userOptions.artSize
-			width = $config.userOptions.artSize
+			height = $configStore.userOptions.artSize
+			width = $configStore.userOptions.artSize
 		} else {
 			let elementSize = calculateElementArtSizeFn(element.parentElement, { keepSquare: true })
 			height = elementSize.height

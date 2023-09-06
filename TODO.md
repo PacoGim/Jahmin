@@ -26,11 +26,11 @@ Add an auto 5 star if song reached end
 
 on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabindex="-1" role="button"
 
+* Redo album click in status bar
 
 * Fix massive app freeze at app launch.
-* App behaves unexpectedly on Mac when app "closed" and re opened.
 
-* Bug: When sorting song list with a different album selected | Changing songs to show -> the song list and all the ui resets to the currently playing song.
+* App behaves unexpectedly on Mac when app "closed" and re opened.
 
 * (Not important) Wrong waveform color sometimes
 

@@ -2,7 +2,7 @@
 	import isElementInViewportFn from '../../../functions/isElementInViewport.fn'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import UpdateIcon from '../../../icons/UpdateIcon.svelte'
-	import { config } from '../../../stores/config.store'
+	import { configStore } from '../../../stores/config.store'
 	// import { artSizeConfig } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 	import { rangeInputService } from '../../../stores/service.store'
@@ -16,7 +16,7 @@
 			max: 256,
 			step: 8,
 			minStep: 1,
-			value: Number($config.userOptions.artSize),
+			value: Number($configStore.userOptions.artSize),
 			confirmButtonText: 'Confirm',
 			cancelButtonText: 'Close',
 			onChange: value => {
@@ -33,7 +33,7 @@
 	}
 
 	function updateArtSize(newArtSize) {
-		$config.userOptions.artSize = newArtSize
+		$configStore.userOptions.artSize = newArtSize
 
 		document.querySelectorAll('art-grid-svlt album art-svlt').forEach((element: HTMLElement) => {
 			element.style.height = `${newArtSize}px`

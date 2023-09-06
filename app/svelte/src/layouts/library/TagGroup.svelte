@@ -1,5 +1,6 @@
 <script lang="ts">
 	import handleComponentsEventsFn from '../../functions/handleComponentsEvents.fn'
+	import updateConfigFn from '../../functions/updateConfig.fn'
 	import { handleContextMenuEvent } from '../../services/contextMenu/!contextMenu.service'
 	import { tagGroupEvents } from '../../stores/componentsEvents.store'
 	import { groupByConfig, groupByValueConfig } from '../../stores/config.store'
@@ -39,7 +40,11 @@
 	}
 
 	function setNewGroupValue(groupValue) {
-		$groupByValueConfig = groupValue
+		updateConfigFn({
+			group: {
+				groupByValue: groupValue
+			}
+		})
 	}
 
 	// After each update cycle

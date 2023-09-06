@@ -1,15 +1,15 @@
 import { get } from 'svelte/store'
 import type { ConfigType, PartialConfigType } from '../../../types/config.type'
-import { config } from '../stores/config.store'
+import { configStore } from '../stores/config.store'
 
 export default function (newConfig: PartialConfigType, { doUpdateLocalConfig } = { doUpdateLocalConfig: true }) {
 	return new Promise((resolve, reject) => {
 		if (doUpdateLocalConfig === true) {
 			let mergedConfig
 
-			mergedConfig = mergeConfig(get(config), newConfig)
+			mergedConfig = mergeConfig(get(configStore), newConfig)
 
-			config.set(mergedConfig)
+			configStore.set(mergedConfig)
 		}
 
 		window.ipc.saveConfig(newConfig).then(() => {

@@ -3,7 +3,7 @@
 	import traduceFn from '../../../functions/traduce.fn'
 	import AddIcon from '../../../icons/AddIcon.svelte'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
-	import { config } from '../../../stores/config.store'
+	import { configStore } from '../../../stores/config.store'
 	import { layoutToShow } from '../../../stores/main.store'
 </script>
 
@@ -22,8 +22,8 @@
 <add-folder-config class="section-main">
 	<section-title>{traduceFn('Add Folder to Library')}</section-title>
 	<section-body>
-		{#if $config.directories}
-			{#each $config.directories.add || [] as directory, index (index)}
+		{#if $configStore.directories}
+			{#each $configStore.directories.add || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
 
@@ -48,8 +48,8 @@
 <exclude-folder-config class="section-main">
 	<section-title>{traduceFn('Exclude Folder from Library')}</section-title>
 	<section-body>
-		{#if $config.directories}
-			{#each $config.directories.exclude || [] as directory, index (index)}
+		{#if $configStore.directories}
+			{#each $configStore.directories.exclude || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
 					<button class="danger" on:click={async () => window.ipc.removeDirectory(directory, 'remove-exclude')}>

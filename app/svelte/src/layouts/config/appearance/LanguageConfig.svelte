@@ -1,10 +1,10 @@
 <script lang="ts">
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import TranslateIcon from '../../../icons/TranslateIcon.svelte'
-	import { config } from '../../../stores/config.store'
+	import { configStore } from '../../../stores/config.store'
 	import { currentSongProgressStore, isPlaying } from '../../../stores/main.store'
 
-	let currentLanguage = $config.userOptions.language
+	let currentLanguage = $configStore.userOptions.language
 
 	function languageChanged() {
 		updateConfigFn({

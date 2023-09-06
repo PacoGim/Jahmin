@@ -1,7 +1,7 @@
 import { writable, type Writable, get } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
 
-export let config: Writable<ConfigType | undefined> = writable(undefined)
+export let configStore: Writable<ConfigType | undefined> = writable(undefined)
 
 export let groupByConfig: Writable<string> = writable('')
 export let groupByValueConfig: Writable<string> = writable('')
@@ -17,8 +17,11 @@ export let showExtensionsIconsConfig: Writable<boolean> = writable(true)
 export let pauseAnimatedArtWhenAppUnfocusedConfig: Writable<boolean> = writable(true)
 export let dateOrderConfig: Writable<ConfigType['userOptions']['dateOrder']> = writable([])
 export let songSortConfig: Writable<ConfigType['userOptions']['songSort']> = writable()
+export let playbackShuffleConfig: Writable<ConfigType['userOptions']['playback']['shuffle']> = writable()
+export let playbackRepeatListConfig: Writable<ConfigType['userOptions']['playback']['repeatList']> = writable()
+export let playbackRepeatCurrentConfig: Writable<ConfigType['userOptions']['playback']['repeatCurrent']> = writable()
 
-config.subscribe(value => {
+configStore.subscribe(value => {
 	if (get(groupByConfig) !== value?.group.groupBy) {
 		groupByConfig.set(value?.group.groupBy)
 	}
@@ -73,5 +76,17 @@ config.subscribe(value => {
 
 	if (get(songSortConfig) !== value?.userOptions.songSort) {
 		songSortConfig.set(value?.userOptions.songSort)
+	}
+
+	if (get(playbackShuffleConfig) !== value?.userOptions.playback.shuffle) {
+		playbackShuffleConfig.set(value?.userOptions.playback.shuffle)
+	}
+
+	if (get(playbackRepeatListConfig) !== value?.userOptions.playback.repeatList) {
+		playbackRepeatListConfig.set(value?.userOptions.playback.repeatList)
+	}
+
+	if (get(playbackRepeatCurrentConfig) !== value?.userOptions.playback.repeatCurrent) {
+		playbackRepeatCurrentConfig.set(value?.userOptions.playback.repeatCurrent)
 	}
 })

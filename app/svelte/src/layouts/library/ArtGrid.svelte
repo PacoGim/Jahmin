@@ -11,7 +11,7 @@
 		setSelectedAlbumsDir,
 		userSearch
 	} from '../../stores/main.store'
-	import { artSizeConfig, gridGapConfig, config, groupByConfig, groupByValueConfig } from '../../stores/config.store'
+	import { artSizeConfig, gridGapConfig, groupByConfig, groupByValueConfig } from '../../stores/config.store'
 
 	import cssVariablesService from '../../services/cssVariables.service'
 	import { hash } from '../../functions/hashString.fn'
@@ -24,7 +24,7 @@
 	$: if ($artSizeConfig !== undefined) cssVariablesService.set('art-dimension', `${$artSizeConfig}px`)
 	$: if ($gridGapConfig !== undefined) cssVariablesService.set('grid-gap', `${$gridGapConfig}px`)
 
-	$: if (/* Add the db versioning later */ $groupByConfig || $groupByValueConfig) {
+	$: if (/* Add the db versioning later */ $groupByConfig || groupByValueConfig) {
 		updateArtGridAlbums($groupByConfig, $groupByValueConfig, $userSearch)
 	}
 

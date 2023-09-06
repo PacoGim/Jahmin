@@ -4,7 +4,7 @@
 	import LyricsControls from './LyricsControls.svelte'
 	import LyricsReadEdit from './LyricsReadEdit.svelte'
 	import LyricsTextControls from './LyricsTextControls.svelte'
-	import { config } from '../../stores/config.store'
+	import { configStore } from '../../stores/config.store'
 	import { onMount } from 'svelte'
 	import { playingSongStore } from '../../stores/main.store'
 	import { onNewLyrics } from '../../stores/crosscall.store'
@@ -13,9 +13,9 @@
 
 	let lyricsMode: 'Read' | 'Edit' | 'Disabled' = 'Read'
 
-	let fontWeight = $config.userOptions.lyricsStyle.fontWeight
-	let fontSize = $config.userOptions.lyricsStyle.fontSize
-	let textAlignment = $config.userOptions.lyricsStyle.textAlignment
+	let fontWeight = $configStore.userOptions.lyricsStyle.fontWeight
+	let fontSize = $configStore.userOptions.lyricsStyle.fontSize
+	let textAlignment = $configStore.userOptions.lyricsStyle.textAlignment
 
 	let selectedLyrics = null
 

@@ -70,9 +70,15 @@
 
 		$playbackStore = songList
 
-		setNewPlaybackFn(lastPlayedSongDirectory, songList, lastPlayedSongId, {
-			playNow: false
-		})
+		setNewPlaybackFn(
+			lastPlayedSongDirectory,
+			songList,
+			lastPlayedSongId,
+			{
+				playNow: false
+			},
+			{ shuffle: false }
+		)
 
 		songList.forEach(song => {
 			let songDirectory = getDirectoryFn(song.SourceFile)

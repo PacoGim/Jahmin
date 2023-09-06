@@ -1,39 +1,66 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import shuffleArrayFn from '../../functions/shuffleArray.fn'
 	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
 	import RepeatIcon from '../../icons/RepeatIcon.svelte'
 	import RepeatOneIcon from '../../icons/RepeatOneIcon.svelte'
 	import ShuffleIcon from '../../icons/ShuffleIcon.svelte'
-	import { config } from '../../stores/config.store'
 	import {
-		isPlaybackRepeatEnabledStore,
-		isSongRepeatEnabledStore,
-		isSongShuffleEnabledStore,
-		playbackStore,
-		playingSongStore,
-		songListStore
-	} from '../../stores/main.store'
+		configStore,
+		playbackRepeatCurrentConfig,
+		playbackRepeatListConfig,
+		playbackShuffleConfig
+	} from '../../stores/config.store'
+	import { playbackStore } from '../../stores/main.store'
+	import shuffleSongsFn from '../../functions/shuffleSongs.fn'
+	import updateConfigFn from '../../functions/updateConfig.fn'
 
 	function shuffleSongs(evt: Event) {
 		if (evt.type === 'click') {
-			if ($isSongShuffleEnabledStore === false) {
-				$isSongShuffleEnabledStore = true
-				let shuffledArray = shuffleArrayFn($songListStore)
+			if ($playbackShuffleConfig === false) {
+				updateConfigFn({
+					userOptions: {
+						playback: {
+							shuffle: true
+						}
+					}
+				})
 
-				let removedSong = shuffledArray.splice(
-					shuffledArray.findIndex(song => song.ID === $playingSongStore.ID),
-					1
-				)
-
-				shuffledArray.unshift(removedSong[0])
-
-				$playbackStore = shuffledArray
+				shuffleSongsFn()
 			} else {
-				$isSongShuffleEnabledStore = false
-				$playbackStore = sortSongsArrayFn($playbackStore, $config.userOptions.songSort.sortBy, $config.userOptions.songSort.sortOrder)
+				updateConfigFn({
+					userOptions: {
+						playback: {
+							shuffle: false
+						}
+					}
+				})
+				$playbackStore = sortSongsArrayFn(
+					$playbackStore,
+					$configStore.userOptions.songSort.sortBy,
+					$configStore.userOptions.songSort.sortOrder
+				)
 			}
 		}
+	}
+
+	function updateRepeatCurrent() {
+		updateConfigFn({
+			userOptions: {
+				playback: {
+					repeatCurrent: !$playbackRepeatCurrentConfig
+				}
+			}
+		})
+	}
+
+	function updateRepeatList() {
+		updateConfigFn({
+			userOptions: {
+				playback: {
+					repeatList: !$playbackRepeatListConfig
+				}
+			}
+		})
 	}
 
 	onMount(() => {
@@ -46,28 +73,28 @@
 </script>
 
 <playback-options>
-	<option-icon class="shuffle" data-is-active={$isSongShuffleEnabledStore}>
-		<ShuffleIcon style="height: 1.25rem;fill:var(--art-color-{$isSongShuffleEnabledStore === true ? 'light' : 'dark'})" />
+	<option-icon class="shuffle" data-is-active={$playbackShuffleConfig}>
+		<ShuffleIcon style="height: 1.25rem;fill:var(--art-color-{$playbackShuffleConfig === true ? 'light' : 'dark'})" />
 	</option-icon>
 
 	<option-icon
-		data-is-active={$isPlaybackRepeatEnabledStore}
-		on:click={() => ($isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore)}
-		on:keypress={() => ($isPlaybackRepeatEnabledStore = !$isPlaybackRepeatEnabledStore)}
+		data-is-active={$playbackRepeatListConfig}
+		on:click={() => updateRepeatList()}
+		on:keypress={() => updateRepeatList()}
 		tabindex="-1"
 		role="button"
 	>
-		<RepeatIcon style="height: 1.25rem;fill:var(--art-color-{$isPlaybackRepeatEnabledStore === true ? 'light' : 'dark'})" />
+		<RepeatIcon style="height: 1.25rem;fill:var(--art-color-{$playbackRepeatListConfig === true ? 'light' : 'dark'})" />
 	</option-icon>
 
 	<option-icon
-		data-is-active={$isSongRepeatEnabledStore}
-		on:click={() => ($isSongRepeatEnabledStore = !$isSongRepeatEnabledStore)}
-		on:keypress={() => ($isSongRepeatEnabledStore = !$isSongRepeatEnabledStore)}
+		data-is-active={$playbackRepeatCurrentConfig}
+		on:click={() => updateRepeatCurrent()}
+		on:keypress={() => updateRepeatCurrent()}
 		tabindex="-1"
 		role="button"
 	>
-		<RepeatOneIcon style="height: 1.25rem;fill:var(--art-color-{$isSongRepeatEnabledStore === true ? 'light' : 'dark'})" />
+		<RepeatOneIcon style="height: 1.25rem;fill:var(--art-color-{$playbackRepeatCurrentConfig === true ? 'light' : 'dark'})" />
 	</option-icon>
 </playback-options>
 

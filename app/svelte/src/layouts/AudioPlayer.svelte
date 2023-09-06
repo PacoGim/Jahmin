@@ -15,11 +15,8 @@
 		playbackStore,
 		playingSongStore,
 		isPlaying,
-		isSongRepeatEnabledStore,
-		isPlaybackRepeatEnabledStore,
 		currentSongDurationStore,
-		currentSongProgressStore,
-		isSongShuffleEnabledStore
+		currentSongProgressStore
 	} from '../stores/main.store'
 
 	import { currentPlayerTime, songToPlayUrlStore } from '../stores/player.store'
@@ -28,11 +25,17 @@
 	import getAlbumColorsFn from '../functions/getAlbumColors.fn'
 	import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 	import nextSongFn from '../functions/nextSong.fn'
-	import { config } from '../stores/config.store'
+	import {
+		configStore,
+		playbackRepeatCurrentConfig,
+		playbackRepeatListConfig,
+		playbackShuffleConfig
+	} from '../stores/config.store'
 	import equalizerService from '../services/equalizer/!equalizer.service'
 	import setMediaSessionDataFn from '../functions/setMediaSessionData.fn'
 	import updatePlayCountFn from '../functions/updatePlayCount.fn'
 	import getElementDatasetFn from '../functions/getElementDataset.fn'
+	import shuffleSongsFn from '../functions/shuffleSongs.fn'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
@@ -57,9 +60,9 @@
 	let isMounted = false
 
 	$: {
-		$isSongShuffleEnabledStore
-		$isSongRepeatEnabledStore
-		$isPlaybackRepeatEnabledStore
+		$playbackShuffleConfig
+		$playbackRepeatCurrentConfig
+		$playbackRepeatListConfig
 		$playbackStore
 		listenPlaybackChangers()
 	}
@@ -175,7 +178,7 @@
 
 		$playingSongStore = song
 
-		getAlbumColorsFn(songRootFolder, $config.userOptions.contrastRatio).then(color => {
+		getAlbumColorsFn(songRootFolder, $configStore.userOptions.contrastRatio).then(color => {
 			applyColorSchemeFn(color)
 		})
 
@@ -246,7 +249,16 @@
 					}
 
 					if (err.message.includes('The element has no supported sources')) {
-						fileNotFoundCheck(song)
+						if (audioElements.alt.isPlaying === false && audioElements.main.isPlaying === false) {
+							// Playback is done
+
+							if ($playbackShuffleConfig === true) {
+								shuffleSongsFn()
+								nextSongFn()
+							}
+						} else {
+							fileNotFoundCheck(song)
+						}
 					}
 				})
 		}
@@ -257,10 +269,10 @@
 
 		let nextSongToPlay = undefined
 
-		if ($isSongRepeatEnabledStore === true) {
+		if ($playbackRepeatCurrentConfig === true) {
 			// If Song Repeat Enabled
 			nextSongToPlay = songList[songIndex]
-		} else if ($isPlaybackRepeatEnabledStore === true) {
+		} else if ($playbackRepeatListConfig === true) {
 			// If Playback Repeat Enabled
 
 			// If there is no more songs in playback list, then the first song in the list is played.

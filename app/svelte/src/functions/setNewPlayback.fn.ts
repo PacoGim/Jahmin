@@ -3,33 +3,28 @@ import {
 	albumPlayingDirStore,
 	currentSongDurationStore,
 	currentSongProgressStore,
-	isSongShuffleEnabledStore,
 	playbackStore,
-	playingSongStore,
-	triggerScrollToSongEvent
+	playingSongStore
 } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { SongType } from '../../../types/song.type'
 import shuffleArrayFn from './shuffleArray.fn'
 import updateConfigFn from './updateConfig.fn'
-import { groupByConfig } from '../stores/config.store'
+import { groupByConfig, playbackShuffleConfig } from '../stores/config.store'
 import { get } from 'svelte/store'
 
 export default async function (
 	rootDir: string,
 	playbackSongs: SongType[],
 	songIdToPlay: number | undefined,
-	{ playNow }: { playNow: boolean }
+	{ playNow }: { playNow: boolean },
+	{ shuffle }: { shuffle: boolean }
 ) {
 	let songToPlay = songIdToPlay !== undefined ? playbackSongs.find(song => song.ID === songIdToPlay) : playbackSongs[0]
 
 	if (songToPlay === undefined) return
 
-	let isSongShuffleEnabled = get(isSongShuffleEnabledStore)
-
-	// isSongShuffleEnabledStore.subscribe(_ => (isSongShuffleEnabled = _))()
-
-	if (isSongShuffleEnabled) {
+	if (shuffle) {
 		let shuffledArray = shuffleArrayFn(playbackSongs)
 
 		if (songIdToPlay !== undefined) {
@@ -64,8 +59,8 @@ export default async function (
 	})
 
 	// setTimeout(() => {
-		// console.log(123)
-		// triggerScrollToSongEvent.set(songToPlay.ID)
+	// console.log(123)
+	// triggerScrollToSongEvent.set(songToPlay.ID)
 	// }, 1000)
 
 	// getAlbumColorsFn(rootDir).then(color => {

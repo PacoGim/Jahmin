@@ -79,6 +79,11 @@ function getDefaultConfigFile(): ConfigType {
 				fontSize: 16,
 				fontWeight: 500,
 				textAlignment: 0
+			},
+			playback: {
+				shuffle: false,
+				repeatList: false,
+				repeatCurrent: false
 			}
 		},
 		songListTags: [

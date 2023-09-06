@@ -1,5 +1,5 @@
 import { get } from 'svelte/store'
-import { config } from '../stores/config.store'
+import { configStore } from '../stores/config.store'
 import { langFile } from '../stores/main.store'
 
 import DOMPurify from 'dompurify'
@@ -7,7 +7,7 @@ import DOMPurify from 'dompurify'
 export default function (stringToTraduce: string, values: object = undefined) {
 	if (!stringToTraduce) return stringToTraduce
 
-	let language = get(config)?.userOptions?.language
+	let language = get(configStore)?.userOptions?.language
 	let traduced = undefined
 
 	if (language === 'english') {

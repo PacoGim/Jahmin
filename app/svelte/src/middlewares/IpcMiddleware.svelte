@@ -7,7 +7,7 @@
 	import updateConfigFn from '../functions/updateConfig.fn'
 	import handleArtService from '../services/handleArt.service'
 	import mediaKeyControlsService from '../services/mediaKeyControls.service'
-	import { config } from '../stores/config.store'
+	import { configStore, playbackShuffleConfig } from '../stores/config.store'
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
 		artCompressQueueLength,
@@ -20,6 +20,7 @@
 	} from '../stores/main.store'
 
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
+	import getRandomNumberBetweenTwoValuesFn from '../functions/getRandomNumberBetweenTwoValues.fn'
 
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
@@ -55,7 +56,7 @@
 	})
 
 	window.ipc.onSelectedDirectories((_, data) => {
-		$config.directories = {
+		$configStore.directories = {
 			add: data.add,
 			exclude: data.exclude
 		}
@@ -72,18 +73,26 @@
 							Directory: data.clickedAlbum
 						}
 					],
-					order: [`${$config.userOptions.songSort.sortBy} ${$config.userOptions.songSort.sortOrder}`]
+					order: [`${$configStore.userOptions.songSort.sortBy} ${$configStore.userOptions.songSort.sortOrder}`]
 				}
 			})
 
 			let songs = bulkReadResponse.results.data
 
-			setNewPlaybackFn(data.clickedAlbum, songs, undefined, { playNow: true })
+			setNewPlaybackFn(data.clickedAlbum, songs, undefined, { playNow: true }, { shuffle: $playbackShuffleConfig })
 
 			setSelectedAlbumsDir([data.clickedAlbum])
 			// $selectedAlbumsDir = [data.clickedAlbum]
 		} else {
-			setNewPlaybackFn(getDirectoryFn(data.songList[0].SourceFile), data.songList, data.songList[0].ID, { playNow: true })
+			setNewPlaybackFn(
+				getDirectoryFn(data.songList[0].SourceFile),
+				data.songList,
+				$playbackShuffleConfig === true
+					? data.songList[getRandomNumberBetweenTwoValuesFn(0, data.songList.length - 1)].ID
+					: data.songList[0].ID,
+				{ playNow: true },
+				{ shuffle: $playbackShuffleConfig }
+			)
 		}
 	})
 
@@ -100,7 +109,7 @@
 								Directory: data.clickedAlbum
 							}
 						],
-						order: [`${$config.userOptions.songSort.sortBy} ${$config.userOptions.songSort.sortOrder}`]
+						order: [`${$configStore.userOptions.songSort.sortBy} ${$configStore.userOptions.songSort.sortOrder}`]
 					}
 				})
 
@@ -143,9 +152,9 @@
 
 		let sortedSongs = sortSongsArrayFn(
 			selectedSongs,
-			$config.userOptions.songSort.sortBy,
-			$config.userOptions.songSort.sortOrder,
-			$config.group
+			$configStore.userOptions.songSort.sortBy,
+			$configStore.userOptions.songSort.sortOrder,
+			$configStore.group
 		)
 
 		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
@@ -191,7 +200,7 @@
 		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
 			mediaKeyControlsService.previousMedia()
 		} else if (mediaKeyPressed === 'MediaPreviousTrackForce') {
-			mediaKeyControlsService.previousMedia({force:true})
+			mediaKeyControlsService.previousMedia({ force: true })
 		} else if (mediaKeyPressed === 'MediaPlayPause') {
 			mediaKeyControlsService.togglePlayPauseMedia()
 		}

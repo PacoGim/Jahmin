@@ -6,7 +6,7 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
-	import { config, groupByConfig } from '../stores/config.store'
+	import { configStore, groupByConfig, playbackShuffleConfig } from '../stores/config.store'
 
 	import {
 		albumPlayingDirStore,
@@ -81,8 +81,8 @@
 
 		$songListStore = sortSongsArrayFn(
 			$playbackStore,
-			$config.userOptions.songSort.sortBy,
-			$config.userOptions.songSort.sortOrder
+			$configStore.userOptions.songSort.sortBy,
+			$configStore.userOptions.songSort.sortOrder
 		)
 
 		$triggerScrollToSongEvent = playingSong.ID
@@ -147,13 +147,13 @@
 							Directory: rootDir
 						}
 					],
-					order: [`${$config.userOptions.songSort.sortBy} ${$config.userOptions.songSort.sortOrder}`]
+					order: [`${$configStore.userOptions.songSort.sortBy} ${$configStore.userOptions.songSort.sortOrder}`]
 				}
 			})
 
 			let sortedSongs = dbSongs.results.data
 
-			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true })
+			setNewPlaybackFn(rootDir, sortedSongs, undefined, { playNow: true }, { shuffle: $playbackShuffleConfig })
 			saveGroupingConfig()
 		} else if (evtType === 'click') {
 			if ($keyModifier === 'ctrlKey') {
@@ -184,7 +184,7 @@
 		const songId = +element.dataset.id
 
 		if (evtType === 'dblclick') {
-			setNewPlaybackFn($selectedAlbumDir, $songListStore, songId, { playNow: true })
+			setNewPlaybackFn($selectedAlbumDir, $songListStore, songId, { playNow: true },  { shuffle: $playbackShuffleConfig })
 
 			saveGroupingConfig()
 		}
@@ -195,8 +195,8 @@
 		updateConfigFn(
 			{
 				group: {
-					groupBy: $config.group.groupBy,
-					groupByValue: $config.group.groupByValue
+					groupBy: $configStore.group.groupBy,
+					groupByValue: $configStore.group.groupByValue
 				}
 			},
 			{ doUpdateLocalConfig: false }

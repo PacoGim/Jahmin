@@ -4,7 +4,7 @@
 	import { playbackStore, playingSongStore, windowResize } from '../../stores/main.store'
 	import traduceFn from '../../functions/traduce.fn'
 	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
-	import { config } from '../../stores/config.store'
+	import { configStore } from '../../stores/config.store'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import CaretIcon from '../../icons/CaretIcon.svelte'
 	import type { SongType } from '../../../../types/song.type'
@@ -13,9 +13,9 @@
 	import { tick } from 'svelte'
 
 	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Rating']
-	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $config.userOptions.songSort.sortBy
+	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $configStore.userOptions.songSort.sortBy
 	let tagToSortByOrder =
-		(localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $config.userOptions.songSort.sortOrder
+		(localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $configStore.userOptions.songSort.sortOrder
 
 	let scrollAmount = 0
 	let songsAmount = 0
@@ -54,12 +54,12 @@
 			// Double sorting???
 			$playbackStore = sortSongsArrayFn(
 				$playbackStore,
-				$config.userOptions.songSort.sortBy,
-				$config.userOptions.songSort.sortOrder
+				$configStore.userOptions.songSort.sortBy,
+				$configStore.userOptions.songSort.sortOrder
 			).sort((a, b) => getDirectoryFn(a.SourceFile).localeCompare(getDirectoryFn(b.SourceFile)))
 
-			tagToSortBy = $config.userOptions.songSort.sortBy
-			tagToSortByOrder = $config.userOptions.songSort.sortOrder
+			tagToSortBy = $configStore.userOptions.songSort.sortBy
+			tagToSortByOrder = $configStore.userOptions.songSort.sortOrder
 		} else {
 			$playbackStore = sortSongsArrayFn($playbackStore, tagToSortBy, tagToSortByOrder)
 		}

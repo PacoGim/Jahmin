@@ -1,14 +1,12 @@
 import { get } from 'svelte/store'
-import { config } from '../../stores/config.store'
+import { configStore } from '../../stores/config.store'
 import { currentEqHash, equalizerProfiles, selectedEqName } from '../../stores/equalizer.store'
 import type { EqualizerProfileType } from '../../../../types/equalizerProfile.type'
 
 export default function (): Promise<EqualizerProfileType> {
 	return new Promise((resolve, reject) => {
 		window.ipc.getEqualizers().then(equalizers => {
-			let localConfig = get(config)
-
-			let equalizerFound = equalizers.find(x => x.hash === localConfig.userOptions.equalizerHash)
+			let equalizerFound = equalizers.find(x => x.hash === get(configStore).userOptions.equalizerHash)
 
 			if (equalizerFound) {
 				equalizers = equalizers.sort((a, b) => a.name.localeCompare(b.name))
