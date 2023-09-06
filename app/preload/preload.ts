@@ -37,13 +37,15 @@ const ipcFunctions = {
 	updateSongs: (songs: PartialSongType[], newTags: any) => ipcRenderer.send('update-songs', songs, newTags),
 	compressSingleSongAlbumArt: (path: string, artSize: string, albumId: string) =>
 		ipcRenderer.send('compress-single-song-album-art', path, albumId, artSize),
-	selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => ipcRenderer.send('select-directories', type, songs),
+	selectDirectories: (type: 'add' | 'exclude') => ipcRenderer.send('select-directories', type),
 	removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) =>
 		ipcRenderer.send('remove-directory', directory, type, songs),
 	handleArt: (filePath: string, elementId: string, size: number) => ipcRenderer.send('handle-art', filePath, elementId, size),
 	verifyFolderTegrity: (folderRoot: string) => ipcRenderer.send('verify-folder-tegrity', folderRoot),
 	reloadApp: () => ipcRenderer.send('reload-app'),
 	openGeniusWebpage: (songTitle: string, songArtist: string) => ipcRenderer.send('open-genius-webpage', songTitle, songArtist),
+	setPlayerInfo: (songTitle: string, songArtist: string, isPlaying: boolean) =>
+		ipcRenderer.send('set-player-info', songTitle, songArtist, isPlaying),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),

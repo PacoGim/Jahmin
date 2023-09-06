@@ -3,7 +3,7 @@ import { getConfig, saveConfig } from './config.service'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
 import { fetchSongsTag } from './librarySongs.service'
 
-export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-add' | 'remove-exclude', dbSongs: SongType[]) {
+export default function (filePaths: string[], type: 'add' | 'exclude' | 'remove-add' | 'remove-exclude') {
 	let config = getConfig()
 
 	let foldersToAdd = config.directories.add || []

@@ -1,12 +1,14 @@
 import {
 	currentAudioElement,
 	currentSongProgressStore,
+	isAppIdle,
 	playbackStore,
 	playingSongStore,
 	triggerScrollToSongEvent
 } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
+import { get } from 'svelte/store'
 
 // let currentAudioElementLocal: HTMLAudioElement = undefined
 
@@ -40,6 +42,6 @@ export default function () {
 	} else {
 		songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }])
 
-		triggerScrollToSongEvent.set(nextSong.ID)
+		if (get(isAppIdle) === true) triggerScrollToSongEvent.set(nextSong.ID)
 	}
 }

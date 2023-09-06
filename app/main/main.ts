@@ -13,6 +13,8 @@ import path from 'path'
 import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.fn'
 import { killAllWorkers } from './services/workers.service'
 
+import getDockMenuFn from './functions/getDockMenu.fn'
+
 let browserWindow: BrowserWindow
 
 chokidarWatch([
@@ -25,7 +27,6 @@ chokidarWatch([
 })
 
 app.whenReady().then(() => {
-	console.time('App Startup')
 	createWindow()
 	startIPC()
 
@@ -40,6 +41,10 @@ app.whenReady().then(() => {
 	app.on('window-all-closed', () => {
 		if (process.platform !== 'darwin') app.quit()
 	})
+
+	if (process.platform === 'darwin') {
+		app.dock.setMenu(getDockMenuFn())
+	}
 })
 
 app.on('will-quit', () => {

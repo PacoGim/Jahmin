@@ -190,6 +190,8 @@
 			mediaKeyControlsService.nextMedia()
 		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
 			mediaKeyControlsService.previousMedia()
+		} else if (mediaKeyPressed === 'MediaPreviousTrackForce') {
+			mediaKeyControlsService.previousMedia({force:true})
 		} else if (mediaKeyPressed === 'MediaPlayPause') {
 			mediaKeyControlsService.togglePlayPauseMedia()
 		}

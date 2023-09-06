@@ -63,9 +63,10 @@ export default async function (
 		}
 	})
 
-	setTimeout(() => {
-		triggerScrollToSongEvent.set(songToPlay.ID)
-	}, 1000)
+	// setTimeout(() => {
+		// console.log(123)
+		// triggerScrollToSongEvent.set(songToPlay.ID)
+	// }, 1000)
 
 	// getAlbumColorsFn(rootDir).then(color => {
 	// 	applyColorSchemeFn(color)

@@ -49,21 +49,15 @@
 		// trimSongArray()
 	}
 
-	$: {
-		changeSongListHeight($songAmountConfig)
+	$: changeSongListHeight($songAmountConfig)
+
+	$: if ($triggerScrollToSongEvent !== 0) {
+		setScrollAmountFromSong($triggerScrollToSongEvent)
+		$triggerScrollToSongEvent = 0
 	}
 
-	$: {
-		if ($triggerScrollToSongEvent !== 0) {
-			setScrollAmountFromSong($triggerScrollToSongEvent)
-			$triggerScrollToSongEvent = 0
-		}
-	}
-
-	$: {
-		if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('song-list-svlt')) {
-			selectAllSongs()
-		}
+	$: if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('song-list-svlt')) {
+		selectAllSongs()
 	}
 
 	$: if ($songListTagConfig && dataContainerElement) {
@@ -315,7 +309,7 @@
 	}
 
 	/* data-container data-body data-row data-value { */
-		/* background-color: blue; */
+	/* background-color: blue; */
 	/* } */
 
 	data-container data-body data-row:hover {

@@ -22,27 +22,21 @@
 
 	let skipDurationTimeout = undefined
 
-	$: {
-		if (playerProgressFillElement !== undefined) {
-			if ($isPlaying) {
-				resumeProgress()
-			} else {
-				stopProgress()
-			}
+	$: if (playerProgressFillElement !== undefined) {
+		if ($isPlaying) {
+			resumeProgress()
+		} else {
+			stopProgress()
 		}
 	}
 
-	$: {
-		if ($playingSongStore !== undefined) {
-			setProgressFromNewSong($playingSongStore)
-		}
+	$: if ($playingSongStore !== undefined) {
+		setProgressFromNewSong($playingSongStore)
 	}
 
-	$: {
-		if ($externalSongProgressChange !== undefined) {
-			setProgress($externalSongProgressChange, $playingSongStore.Duration)
-			$externalSongProgressChange = undefined
-		}
+	$: if ($externalSongProgressChange !== undefined) {
+		setProgress($externalSongProgressChange, $playingSongStore.Duration)
+		$externalSongProgressChange = undefined
 	}
 
 	function hookPlayerProgressEvents() {
@@ -156,7 +150,6 @@
 
 		display: grid;
 		width: 100%;
-		/* margin: 0 1rem; */
 		height: calc(100% - 1rem);
 		border: 2px solid var(--art-color-base);
 

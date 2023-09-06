@@ -40,12 +40,13 @@ declare global {
 			compressAlbumArt
 			updateSongs
 			compressSingleSongAlbumArt
-			selectDirectories: (type: 'add' | 'exclude', songs: SongType[]) => void
-			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude', songs: SongType[]) => void
+			selectDirectories: (type: 'add' | 'exclude') => void
+			removeDirectory: (directory: string, type: 'remove-add' | 'remove-exclude') => void
 			handleArt: (filePath: string, elementId: string, size: number) => void
 			verifyFolderTegrity: (folderRoot: string) => void
 			reloadApp: () => void
 			openGeniusWebpage: (songTitle: string, songArtist: string) => void
+			setPlayerInfo: (songTitle: string, songArtist: string, isPlaying: boolean) => void
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt

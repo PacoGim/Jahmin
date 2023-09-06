@@ -106,3 +106,15 @@ export function setSelectedAlbumsDir(newSelectedAlbumsDir: string[] | undefined)
 layoutToShow.subscribe(layoutName => {
 	document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin'
 })
+
+isPlaying.subscribe(value => {
+	if (value) {
+		window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
+	}
+})
+
+playingSongStore.subscribe(song => {
+	if (song) {
+		window.ipc.setPlayerInfo(song?.Title, song?.Artist, get(isPlaying))
+	}
+})

@@ -29,9 +29,13 @@ on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabinde
 
 * Fix massive app freeze at app launch.
 * App behaves unexpectedly on Mac when app "closed" and re opened.
-* Prevent autoscroll song list when double click a song?
+
 * Bug: When sorting song list with a different album selected | Changing songs to show -> the song list and all the ui resets to the currently playing song.
-* Bug: The song progress doesn't update when app minimized
-* Adding new directories doesn't work?
-* Clicking on the album art on the status bar gives yields unexpected results (Blank song list?)
-* When seeking in os widget, the change is not reflected in the song progress
+
+* (Not important) Wrong waveform color sometimes
+
+* (Too complicated to fix for now) The song progress doesn't update when app minimized
+
+* (Not Important) When seeking in os widget, the change is not reflected in the song progress
+
+* (Can't reproduce, needs more attention) Clicking on the album art on the status bar gives yields unexpected results (Blank song list?)

@@ -10,7 +10,7 @@
 <OptionSectionCompact title={traduceFn('Is the library missing songs?')}>
 	<button
 		on:click={() => {
-			// TODO Migrate to new db
+			//TODO Create a different way to trigger that
 			// getAllSongsFn().then(songs => {
 			// 	window.ipc.sendAllSongsToMain(songs)
 			// 	$layoutToShow = 'Library'
@@ -26,19 +26,18 @@
 			{#each $config.directories.add || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
-					<!-- TODO Migrate to new db -->
-					<!-- <button on:click={async () => window.ipc.removeDirectory(directory, 'remove-add', await getAllSongsFn())}> -->
+
+					<button on:click={async () => window.ipc.removeDirectory(directory, 'remove-add')}>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 						{traduceFn('Remove')}
-					<!-- </button> -->
+					</button>
 				</section-directory>
 			{/each}
 		{/if}
 	</section-body>
 	<button
 		on:click={async () => {
-			// TODO Migrate to new db
-			// window.ipc.selectDirectories('add', await getAllSongsFn())
+			window.ipc.selectDirectories('add')
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
@@ -53,22 +52,18 @@
 			{#each $config.directories.exclude || [] as directory, index (index)}
 				<section-directory>
 					<directory-path>{directory}</directory-path>
-					<!--TODO Migrate to new db <button
-						class="danger"
-						on:click={async () => window.ipc.removeDirectory(directory, 'remove-exclude', await getAllSongsFn())}
-					> -->
+					<button class="danger" on:click={async () => window.ipc.removeDirectory(directory, 'remove-exclude')}>
 						<DeleteIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />
 						{traduceFn('Remove')}
-					<!-- </button> -->
-				</section-directory>
+					</button></section-directory
+				>
 			{/each}
 		{/if}
 	</section-body>
 	<button
 		class="info"
 		on:click={async () => {
-			// TODO Migrate to new db
-			// window.ipc.selectDirectories('exclude', await getAllSongsFn())
+			window.ipc.selectDirectories('exclude')
 		}}
 	>
 		<AddIcon style="height:1rem;width:auto;fill:#fff;margin-right:0.25rem;" />

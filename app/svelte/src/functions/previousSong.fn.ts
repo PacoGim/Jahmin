@@ -1,4 +1,11 @@
-import { playbackStore, currentAudioElement, playingSongStore, triggerScrollToSongEvent, externalSongProgressChange } from '../stores/main.store'
+import {
+	playbackStore,
+	currentAudioElement,
+	playingSongStore,
+	triggerScrollToSongEvent,
+	externalSongProgressChange,
+	isAppIdle
+} from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 import { get } from 'svelte/store'
@@ -13,7 +20,7 @@ let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
 	}
 })
 
-export default function () {
+export default function ({ force }: { force: boolean } = { force: false }) {
 	let playbackStoreValue: SongType[] = get(playbackStore)
 	let songPlayingLocal: PartialSongType = get(playingSongStore)
 
@@ -27,7 +34,10 @@ export default function () {
 		externalSongProgressChange.set(0)
 	}
 
-	if (previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2)) {
+	if (
+		force === true ||
+		(previousSong !== undefined && (currentAudioElementLocal === undefined || currentAudioElementLocal.currentTime <= 2))
+	) {
 		songToPlayUrlStore.set([previousSong.SourceFile, { playNow: true }])
 	} else {
 		if (currentAudioElementLocal !== undefined) {
@@ -37,6 +47,6 @@ export default function () {
 	}
 
 	if (previousSong !== undefined) {
-		triggerScrollToSongEvent.set(previousSong.ID)
+		if (get(isAppIdle) === true) triggerScrollToSongEvent.set(previousSong.ID)
 	}
 }
