@@ -4,11 +4,14 @@
   "version": "1.0.0",
   "description": "Jahmin",
   "main": "dist/main/main.js",
+  "author": {
+    "name": "Paco Gimeno",
+    "email": "PacoGimDev@gmail.com"
+  },
   "scripts": {
     "tsc-watch:main": "cd app/main && npx tsc --watch",
     "tsc-watch:preload": "cd app/preload && npx tsc --watch",
     "tsc-watch:workers": "cd app/workers && npx tsc --watch",
-    "electron": "electron --trace-warnings .",
     "svelte:dev": "cd app/svelte && npm run dev",
     "dev": "concurrently \"npm run tsc-watch:main\" \"npm run tsc-watch:preload\"  \"npm run tsc-watch:workers\" \"npm run svelte:dev\"",
     "start": "electron-forge start",
@@ -18,57 +21,13 @@
     "lint": "echo \"No linting configured\""
   },
   "keywords": [],
-  "author": {
-    "name": "Paco Gimeno",
-    "email": "PacoGimDev@gmail.com"
-  },
   "license": "MIT",
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "icon": "./dist/icons/logo"
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "electron_build",
-            "setupIcon": "./dist/icons/logo.ico"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin",
-            "linux"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {
-            "options": {
-              "maintainer": {
-                "name": "Paco Gimeno"
-              }
-            }
-          }
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
-  },
   "dependencies": {
-    "@sveltejs/svelte-virtual-list": "^3.0.1",
-    "bindings": "^1.5.0",
     "chokidar": "^3.5.3",
     "deepmerge": "^4.2.2",
     "dompurify": "^2.4.3",
     "electron-squirrel-startup": "^1.0.0",
     "exiftool-vendored": "^19.0.0",
-    "freezeframe": "^5.0.2",
     "fuse.js": "^6.6.2",
     "izitoast": "^1.4.0",
     "jsdom": "^22.0.0",
@@ -76,7 +35,6 @@
     "node-id3": "^0.2.5",
     "sanitize-filename": "^1.6.3",
     "sharp": "^0.31.3",
-    "sirv-cli": "^2.0.2",
     "sortablejs": "^1.15.0",
     "spark-md5": "^3.0.2",
     "sqlite3": "^5.1.6",
@@ -86,12 +44,13 @@
     "xxhashjs": "^0.2.2"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.4",
-    "@electron-forge/maker-deb": "^6.0.4",
-    "@electron-forge/maker-dmg": "6.0.4",
-    "@electron-forge/maker-rpm": "^6.0.4",
-    "@electron-forge/maker-squirrel": "^6.0.4",
-    "@electron-forge/maker-zip": "^6.0.4",
+    "@electron-forge/cli": "^6.4.1",
+    "@electron-forge/maker-deb": "^6.4.1",
+    "@electron-forge/maker-dmg": "^6.4.1",
+    "@electron-forge/maker-rpm": "^6.4.1",
+    "@electron-forge/maker-squirrel": "^6.4.1",
+    "@electron-forge/maker-zip": "^6.4.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^6.4.1",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-replace": "^5.0.2",
@@ -107,7 +66,7 @@
     "autoprefixer": "^10.4.13",
     "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
-    "electron": "^25.2.0",
+    "electron": "26.2.0",
     "postcss": "^8.4.21",
     "postcss-load-config": "^4.0.1",
     "rollup": "^2.77.4-1",
@@ -115,12 +74,12 @@
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^7.0.0",
+    "sirv-cli": "^2.0.2",
     "svelte": "^4.1.1",
     "svelte-check": "^3.4.6",
     "svelte-preprocess": "^5.0.1",
     "svelte-virtual-scroll-list": "^1.3.0",
     "svelte-window": "^1.2.5",
-    "tslib": "^2.4.1",
     "typescript": "^5.0.4"
   }
 }
