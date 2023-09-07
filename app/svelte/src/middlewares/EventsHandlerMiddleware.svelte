@@ -24,6 +24,8 @@
 	} from '../stores/main.store'
 	import updateConfigFn from '../functions/updateConfig.fn'
 	import { artGridEvents, tagGroupEvents } from '../stores/componentsEvents.store'
+	import waitFn from '../functions/wait.fn'
+	import type { SongType } from '../../../types/song.type'
 
 	function handleClickEvents(evt: MouseEvent) {
 		$elementMap = new Map<string, HTMLElement>()
@@ -72,21 +74,26 @@
 	}
 
 	// Applies the proper states that make the album visible (Proper grouping, song list, etc.).
-	function setAlbumBackInView() {
-		$layoutToShow = 'Library'
+	async function setAlbumBackInView() {
+		if ($layoutToShow !== 'Library') {
+			$layoutToShow = 'Library'
+			await waitFn(100)
+		}
 
 		let playingSong = $playingSongStore
 
-		setSelectedAlbumsDir([$albumPlayingDirStore])
+		let directoryList = $playbackStore.reduce((acc: string[], curr: SongType) => {
+			if (acc.indexOf(curr.Directory) === -1) {
+				acc.push(curr.Directory)
+			}
 
-		$songListStore = sortSongsArrayFn(
-			$playbackStore,
-			$configStore.userOptions.songSort.sortBy,
-			$configStore.userOptions.songSort.sortOrder
-		)
+			return acc
+		}, [])
 
+		setSelectedAlbumsDir(directoryList)
+
+		// 1!1111123easrxdrfxfr
 		$triggerScrollToSongEvent = playingSong.ID
-		$selectedSongsStore = [playingSong.ID]
 
 		$tagGroupEvents.push({
 			trigger: 'scroll',
@@ -96,8 +103,6 @@
 			},
 			query: `#group-${CSS.escape(String(playingSong[$groupByConfig]))}`
 		})
-
-		$tagGroupEvents = $tagGroupEvents
 
 		$tagGroupEvents.push({
 			trigger: 'click',
@@ -118,24 +123,7 @@
 		$artGridEvents = $artGridEvents
 	}
 
-	/* 	function clickGroupElement(playingSong) {
-		let groupElement: HTMLElement = document.querySelector(`#group-${playingSong[$groupByConfig]}`)
-
-		if (groupElement === null) {
-			tick().then(() => {
-				setTimeout(() => {
-					clickGroupElement(playingSong)
-				}, 100)
-			})
-		} else {
-			groupElement.click()
-
-			groupElement.scrollIntoView({ block: 'nearest', behavior: 'instant' })
-		}
-	} */
-
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
-		// Get all song from albums
 		const rootDir = element.getAttribute('rootDir')
 
 		if (evtType === 'dblclick') {
@@ -184,7 +172,7 @@
 		const songId = +element.dataset.id
 
 		if (evtType === 'dblclick') {
-			setNewPlaybackFn($selectedAlbumDir, $songListStore, songId, { playNow: true },  { shuffle: $playbackShuffleConfig })
+			setNewPlaybackFn($selectedAlbumDir, $songListStore, songId, { playNow: true }, { shuffle: $playbackShuffleConfig })
 
 			saveGroupingConfig()
 		}

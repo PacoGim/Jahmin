@@ -1,6 +1,7 @@
 import { Menu } from 'electron'
 import sendWebContentsFn from './sendWebContents.fn'
 import { getArtist, getIsPlaying, getTitle } from '../services/player.service'
+import limitCharactersFn from './limitCharacters.fn'
 
 export default function () {
 	return Menu.buildFromTemplate([
@@ -9,11 +10,11 @@ export default function () {
 			enabled: false
 		},
 		{
-			label: `   ${getTitle()}`,
+			label: `   ${limitCharactersFn(getTitle())}`,
 			enabled: false
 		},
 		{
-			label: `   ${getArtist()}`,
+			label: `   ${limitCharactersFn(getArtist())}`,
 			enabled: false
 		},
 		{

@@ -1,5 +1,6 @@
 import { MenuItemConstructorOptions, clipboard, shell } from 'electron'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
+import renameSongTagFn from '../functions/renameSongTag.fn'
 import { getConfig } from '../services/config.service'
 import { SongType } from '../../types/song.type'
 import { saveLyrics } from '../services/lyrics.service'
@@ -121,13 +122,13 @@ export default function (data: dataType) {
 			submenu: getSongAmountMenu()
 		})
 
-		addSeparatorFn(template)
+		// addSeparatorFn(template)
 
-		template.push({
-			label: 'Sort by',
-			type: 'submenu',
-			submenu: getSortMenu()
-		})
+		// template.push({
+		// 	label: 'Sort by',
+		// 	type: 'submenu',
+		// 	submenu: getSortMenu()
+		// })
 
 		if (clickedSongData !== undefined) {
 			addSeparatorFn(template)
@@ -137,26 +138,6 @@ export default function (data: dataType) {
 				click: () => editLyrics(clickedSongData!)
 			})
 		}
-
-		/*
-			async() => {
-
-				let bulkReadResponse: DatabaseResponseType = await useWorker({
-					queryData: {
-						select: ['*'],
-						andWhere: [
-							{
-								Directory: data.clickedAlbum
-							}
-						],
-						order: [`${config.userOptions.sortBy} ${config.userOptions.sortOrder}`]
-					}
-				},worker)
-
-				let songs = bulkReadResponse.results.data
-
-
-		*/
 
 		template.push({
 			label: 'Add to playback',
@@ -210,14 +191,10 @@ function getSongAmountMenu() {
 	return submenu
 }
 
-function getSortMenu() {
+/* function getSortMenu() {
 	let submenu: MenuItemConstructorOptions[] = []
 
 	let options = getConfig().songListTags?.map(tag => tag.value)
-
-	options?.splice(options.indexOf('DynamicArtists'), 1)
-	options?.splice(options.indexOf('PlayCount'), 1, 'Play Count')
-	options?.splice(options.indexOf('SampleRate'), 1, 'Sample Rate')
 
 	let sortByConfig = getConfig()?.userOptions?.songSort?.sortBy
 	let sortOrderConfig = getConfig()?.userOptions?.songSort?.sortOrder
@@ -233,6 +210,7 @@ function getSortMenu() {
 			'Duration',
 			'Extension',
 			'Genre',
+			'Play Count',
 			'Sample Rate',
 			'Size',
 			'BitRate',
@@ -242,6 +220,8 @@ function getSortMenu() {
 	}
 
 	options.forEach(option => {
+		option = renameSongTagFn(option)
+
 		submenu.push({
 			label: option,
 			type: 'submenu',
@@ -253,7 +233,7 @@ function getSortMenu() {
 					enabled: sortByConfig !== option || sortOrderConfig !== 'asc',
 					click: () => {
 						sendWebContentsFn('sort-songs', {
-							tag: option,
+							tag: renameSongTagFn(option),
 							order: 'asc'
 						})
 					}
@@ -265,7 +245,7 @@ function getSortMenu() {
 					enabled: sortByConfig !== option || sortOrderConfig !== 'desc',
 					click: () => {
 						sendWebContentsFn('sort-songs', {
-							tag: option,
+							tag: renameSongTagFn(option),
 							order: 'desc'
 						})
 					}
@@ -275,16 +255,4 @@ function getSortMenu() {
 	})
 
 	return submenu
-}
-
-function disableSongs(songs: SongType[]) {
-	// console.log(songs)
-}
-
-function cutString(str: string, maxLength: number) {
-	if (str.length > maxLength) {
-		return str.substring(0, maxLength) + '...'
-	} else {
-		return str
-	}
-}
+} */

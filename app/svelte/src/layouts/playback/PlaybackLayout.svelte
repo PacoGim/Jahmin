@@ -2,20 +2,20 @@
 	import cssVariablesService from '../../services/cssVariables.service'
 
 	import { playbackStore, playingSongStore, windowResize } from '../../stores/main.store'
-	import traduceFn from '../../functions/traduce.fn'
 	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
-	import { configStore } from '../../stores/config.store'
+	import { songSortConfig } from '../../stores/config.store'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
 	import CaretIcon from '../../icons/CaretIcon.svelte'
 	import type { SongType } from '../../../../types/song.type'
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
 	import { tick } from 'svelte'
+	import renameSongTagFn from '../../functions/renameSongTag.fn'
 
 	let tempTags = ['Track', 'Title', 'SampleRate', 'Album', 'Rating']
-	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $configStore.userOptions.songSort.sortBy
+	let tagToSortBy = localStorage.getItem('PlaybackTagToSortBy') || $songSortConfig.sortBy
 	let tagToSortByOrder =
-		(localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $configStore.userOptions.songSort.sortOrder
+		(localStorage.getItem('PlaybackTagToSortByOrder') as 'asc' | 'desc') || $songSortConfig.sortOrder
 
 	let scrollAmount = 0
 	let songsAmount = 0
@@ -31,16 +31,6 @@
 		calcSongAmount()
 	}
 
-	function renameTagName(tagName) {
-		let renamed =
-			{
-				Track: '#',
-				SampleRate: 'Sample Rate'
-			}[tagName] || tagName
-
-		return traduceFn(renamed)
-	}
-
 	function sortSongList(tag: string) {
 		if (tag === tagToSortBy) {
 			tagToSortByOrder = tagToSortByOrder === 'asc' ? 'desc' : 'asc'
@@ -54,12 +44,12 @@
 			// Double sorting???
 			$playbackStore = sortSongsArrayFn(
 				$playbackStore,
-				$configStore.userOptions.songSort.sortBy,
-				$configStore.userOptions.songSort.sortOrder
+				$songSortConfig.sortBy,
+				$songSortConfig.sortOrder
 			).sort((a, b) => getDirectoryFn(a.SourceFile).localeCompare(getDirectoryFn(b.SourceFile)))
 
-			tagToSortBy = $configStore.userOptions.songSort.sortBy
-			tagToSortByOrder = $configStore.userOptions.songSort.sortOrder
+			tagToSortBy = $songSortConfig.sortBy
+			tagToSortByOrder = $songSortConfig.sortOrder
 		} else {
 			$playbackStore = sortSongsArrayFn($playbackStore, tagToSortBy, tagToSortByOrder)
 		}
@@ -116,7 +106,7 @@
 					on:keypress={() => sortSongList(tag)}
 					tabindex="-1"
 					role="button"
-					>{renameTagName(tag)}
+					>{renameSongTagFn(tag)}
 
 					<icon-container>
 						<CaretIcon

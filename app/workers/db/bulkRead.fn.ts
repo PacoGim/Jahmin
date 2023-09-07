@@ -86,6 +86,11 @@ function buildSqliteQuery(queryData: {
 	}
 
 	if (queryData.order) {
+		if (queryData.order.indexOf('Track desc') === -1 && queryData.order.indexOf('Track asc') === -1) {
+
+			queryData.order.push('Track asc')
+		}
+
 		query += ` ORDER BY ${queryData.order.join(',')}`
 	}
 

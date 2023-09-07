@@ -7,7 +7,6 @@
 	import ArtGrid from './ArtGrid.svelte'
 	import NoSong from './NoSong.svelte'
 	import SongList from './SongList.svelte'
-	import SongListBackground from './SongListBackground.svelte'
 	import TagEdit from './TagEdit.svelte'
 	import TagGroup from './TagGroup.svelte'
 	import Search from './Search.svelte'
@@ -37,7 +36,7 @@
 
 		display: grid;
 		grid-template-columns: max-content auto 256px;
-		grid-template-rows: auto auto var(--song-list-svlt-height);
+		grid-template-rows: 48px auto var(--song-list-svlt-height);
 		grid-template-areas:
 			'tag-group-svlt art-grid-svlt search-svlt'
 			'tag-group-svlt art-grid-svlt tag-edit-svlt'

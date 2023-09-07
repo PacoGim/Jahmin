@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { afterUpdate, onMount, tick } from 'svelte'
 	import type { SongType } from '../../../../types/song.type'
-	import SongListItem from '../../components/SongListItem.svelte'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
-	import { songAmountConfig, songListTagConfig } from '../../stores/config.store'
+	import { configStore, songAmountConfig, songListTagConfig, songSortConfig } from '../../stores/config.store'
 
 	import {
 		elementMap,
@@ -22,8 +20,9 @@
 	import SongListBackground from './SongListBackground.svelte'
 	import updateConfigFn from '../../functions/updateConfig.fn'
 	import SongTag from '../../components/SongTag.svelte'
+	import renameSongTagFn from '../../functions/renameSongTag.fn'
+	import CaretIcon from '../../icons/CaretIcon.svelte'
 
-	let songsToShow: SongType[] = []
 	let scrollAmount = 0
 	let previousScrollAmount = undefined
 
@@ -151,6 +150,30 @@
 		scrolledAmount = element.scrollLeft
 	}
 
+	function updateSort(tagToSort) {
+		if ($songSortConfig.sortBy === tagToSort) {
+			if ($songSortConfig.sortOrder === 'asc') {
+				$songSortConfig.sortOrder = 'desc'
+			} else {
+				$songSortConfig.sortOrder = 'asc'
+			}
+		} else {
+			$songSortConfig = {
+				sortBy: tagToSort,
+				sortOrder: 'asc'
+			}
+		}
+
+		updateConfigFn(
+			{
+				userOptions: {
+					songSort: $songSortConfig
+				}
+			},
+			{ doUpdateLocalConfig: false }
+		)
+	}
+
 	mousePosition.subscribe(value => {
 		if (elementPosX !== undefined && $isMouseDown === true) {
 			let newPosX = value.x - elementPosX
@@ -204,7 +227,20 @@
 		<data-header>
 			<data-row>
 				{#each $songListTagConfig as tag, index (index)}
-					<data-value style={`width: ${tag.width}px;`}>{tag.value}</data-value>
+					<data-value
+						style={`width: ${tag.width}px;`}
+						onClick={() => updateSort(tag.value)}
+						data-selected={tag.value === $songSortConfig.sortBy}
+					>
+						{renameSongTagFn(tag.value)}
+						<icon-container>
+							<CaretIcon
+								style="fill: currentColor;height: 1rem; width: 1rem;transform: rotateZ({$songSortConfig.sortOrder === 'asc'
+									? '0'
+									: '180'}deg);"
+							/>
+						</icon-container>
+					</data-value>
 					<data-separator data-tag={tag.value} />
 				{/each}
 			</data-row>
@@ -263,9 +299,13 @@
 	}
 
 	data-container data-header data-row data-value {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
 		font-variation-settings: 'wght' 700;
 		text-align: center;
-		/* background-color: red; */
+		cursor: pointer;
 	}
 
 	data-container data-header data-separator {
@@ -350,5 +390,27 @@
 
 		overflow: scroll;
 		overflow-y: hidden;
+	}
+
+	data-container data-header data-row data-value icon-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		margin-left: 0.25rem;
+		transition: opacity 300ms linear;
+	}
+
+	data-container data-header data-row data-value[data-selected='true'] icon-container {
+		opacity: 1;
+	}
+
+	data-container data-header data-row data-value[data-selected='false'] icon-container {
+		opacity: 0;
+		max-width: 0px;
+	}
+
+	:global(data-container data-header data-row data-value[data-selected='false'] icon-container svg) {
+		max-width: 0px;
 	}
 </style>

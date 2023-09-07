@@ -50,9 +50,9 @@
 		padding: 0.5rem;
 		height: 2rem;
 		width: 2rem;
-		background-color: #87cefa;
+		background-color: var(--color-accent-1);
 		border-style: solid;
-		border-color: #87cefa;
+		border-color: var(--color-accent-1);
 
 		cursor: pointer;
 
@@ -67,19 +67,24 @@
 		height: 2rem;
 		padding: 0.25rem 0.5rem;
 
-		background-color: #f0f8ff;
+		background-color: #fff;
 		border-style: solid;
-		border-color: #87cefa;
+		border-color: var(--color-accent-1);
 		border-width: 2px 0 2px 0;
+		font-size: 1rem;
 
-		color: #054d7a;
+		font-variation-settings: 'wght' 500;
+
+		color: var(--color-accent-1);
 	}
 
 	icon-container.search {
+		border-radius: 2.5px 0 0 2.5px;
 		border-width: 2px 0 2px 2px;
 	}
 
 	icon-container.delete {
+		border-radius: 0 2.5px 2.5px 0;
 		border-width: 2px 2px 2px 0;
 	}
 

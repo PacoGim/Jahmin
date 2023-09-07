@@ -26,8 +26,6 @@ Add an auto 5 star if song reached end
 
 on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabindex="-1" role="button"
 
-* Redo album click in status bar
-
 * Fix massive app freeze at app launch.
 
 * App behaves unexpectedly on Mac when app "closed" and re opened.
