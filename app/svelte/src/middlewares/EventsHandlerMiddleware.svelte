@@ -6,7 +6,7 @@
 
 	import sortSongsArrayFn from '../functions/sortSongsArray.fn'
 	import toggleArrayElementFn from '../functions/toggleArrayElement.fn'
-	import { configStore, groupByConfig, playbackShuffleConfig } from '../stores/config.store'
+	import { configStore, groupByConfig, playbackShuffleConfig, songSortConfig } from '../stores/config.store'
 
 	import {
 		albumPlayingDirStore,
@@ -92,7 +92,7 @@
 
 		setSelectedAlbumsDir(directoryList)
 
-		// 1!1111123easrxdrfxfr
+		//TODO 1!1111123easrxdrfxfr
 		$triggerScrollToSongEvent = playingSong.ID
 
 		$tagGroupEvents.push({
@@ -135,7 +135,7 @@
 							Directory: rootDir
 						}
 					],
-					order: [`${$configStore.userOptions.songSort.sortBy} ${$configStore.userOptions.songSort.sortOrder}`]
+					order: [`${$songSortConfig.sortBy} ${$songSortConfig.sortOrder}`]
 				}
 			})
 

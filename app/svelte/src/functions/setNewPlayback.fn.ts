@@ -10,7 +10,7 @@ import { songToPlayUrlStore } from '../stores/player.store'
 import type { SongType } from '../../../types/song.type'
 import shuffleArrayFn from './shuffleArray.fn'
 import updateConfigFn from './updateConfig.fn'
-import { groupByConfig, playbackShuffleConfig } from '../stores/config.store'
+import { groupByConfig } from '../stores/config.store'
 import { get } from 'svelte/store'
 
 export default async function (

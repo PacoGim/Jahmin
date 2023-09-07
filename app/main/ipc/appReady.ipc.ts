@@ -8,8 +8,6 @@ export default function (ipcMain: Electron.IpcMain) {
 	ipcMain.on('app-ready', () => {
 		if (isAppReady === true) return
 
-		console.timeEnd('App Startup')
-
 		isAppReady = true
 
 		// sendWebContentsFn('get-all-songs-from-renderer', undefined)

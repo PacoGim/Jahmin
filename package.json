@@ -19,8 +19,8 @@
   },
   "keywords": [],
   "author": {
-    "name": "Francisco Gimeno",
-    "email": "franchills@tuta.io"
+    "name": "Paco Gimeno",
+    "email": "PacoGimDev@gmail.com"
   },
   "license": "MIT",
   "config": {
@@ -48,7 +48,7 @@
           "config": {
             "options": {
               "maintainer": {
-                "name": "Francisco Gimeno"
+                "name": "Paco Gimeno"
               }
             }
           }

@@ -8,7 +8,10 @@
 		configStore,
 		playbackRepeatCurrentConfig,
 		playbackRepeatListConfig,
-		playbackShuffleConfig
+		playbackShuffleConfig,
+
+		songSortConfig
+
 	} from '../../stores/config.store'
 	import { playbackStore } from '../../stores/main.store'
 	import shuffleSongsFn from '../../functions/shuffleSongs.fn'
@@ -36,8 +39,8 @@
 				})
 				$playbackStore = sortSongsArrayFn(
 					$playbackStore,
-					$configStore.userOptions.songSort.sortBy,
-					$configStore.userOptions.songSort.sortOrder
+					$songSortConfig.sortBy,
+					$songSortConfig.sortOrder
 				)
 			}
 		}

@@ -7,7 +7,7 @@
 	import updateConfigFn from '../functions/updateConfig.fn'
 	import handleArtService from '../services/handleArt.service'
 	import mediaKeyControlsService from '../services/mediaKeyControls.service'
-	import { configStore, playbackShuffleConfig } from '../stores/config.store'
+	import { configStore, playbackShuffleConfig, songSortConfig } from '../stores/config.store'
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
 		artCompressQueueLength,
@@ -73,7 +73,7 @@
 							Directory: data.clickedAlbum
 						}
 					],
-					order: [`${$configStore.userOptions.songSort.sortBy} ${$configStore.userOptions.songSort.sortOrder}`]
+					order: [`${$songSortConfig.sortBy} ${$songSortConfig.sortOrder}`]
 				}
 			})
 
@@ -109,7 +109,7 @@
 								Directory: data.clickedAlbum
 							}
 						],
-						order: [`${$configStore.userOptions.songSort.sortBy} ${$configStore.userOptions.songSort.sortOrder}`]
+						order: [`${$songSortConfig.sortBy} ${$songSortConfig.sortOrder}`]
 					}
 				})
 
@@ -150,12 +150,7 @@
 			selectedSongs.push(clickedSong)
 		}
 
-		let sortedSongs = sortSongsArrayFn(
-			selectedSongs,
-			$configStore.userOptions.songSort.sortBy,
-			$configStore.userOptions.songSort.sortOrder,
-			$configStore.group
-		)
+		let sortedSongs = sortSongsArrayFn(selectedSongs, $songSortConfig.sortBy, $songSortConfig.sortOrder, $configStore.group)
 
 		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
 

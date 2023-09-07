@@ -164,14 +164,11 @@
 			}
 		}
 
-		updateConfigFn(
-			{
-				userOptions: {
-					songSort: $songSortConfig
-				}
-			},
-			{ doUpdateLocalConfig: false }
-		)
+		updateConfigFn({
+			userOptions: {
+				songSort: $songSortConfig
+			}
+		})
 	}
 
 	mousePosition.subscribe(value => {

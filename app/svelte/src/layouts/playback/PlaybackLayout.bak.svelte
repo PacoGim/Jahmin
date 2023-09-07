@@ -10,7 +10,7 @@
 	import { songToPlayUrlStore } from '../../stores/player.store'
 	import PlayButton from '../components/PlayButton.svelte'
 	import sortSongsArrayFn from '../../functions/sortSongsArray.fn'
-	import { config } from '../../stores/config.store'
+	import { songSortConfig } from '../../stores/config.store'
 
 	$: if ($playbackStore.length > 0) {
 		createSortableList()
@@ -128,7 +128,7 @@
 	function onTableHeaderClick(evt: MouseEvent) {
 		let tdElement = evt.composedPath().filter((element: HTMLElement) => element.tagName === 'TD')[0] as HTMLElement
 
-		$playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $config.userOptions.songSort.sortOrder)
+		$playbackStore = sortSongsArrayFn($playbackStore, tdElement.innerHTML, $songSortConfig.sortOrder)
 	}
 
 	function calculateScroll(evt) {
