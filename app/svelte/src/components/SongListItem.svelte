@@ -8,28 +8,14 @@
 	import SongTag from './SongTag.svelte'
 	import tagToGridStyleFn from '../functions/tagToGridStyle.fn'
 	import PlayButton from '../layouts/components/PlayButton.svelte'
-	import { showDynamicArtistsConfig, songListTagConfig } from '../stores/config.store'
+	import { songListTagConfig } from '../stores/config.store'
 
 	export let song: SongType
 	export let index: number
 
 	let isSongPlaying = false
-	let gridStyle = ''
 
 	$: isSongPlaying = $playingSongStore?.ID === song?.ID
-
-	// $: {
-	// song
-	// setDynamicArtists()
-	// }
-
-	$: {
-		song
-		// TODO Potential problem here.
-		$songListTagConfig
-		isSongPlaying
-		buildGridStyle()
-	}
 
 	onMount(() => {
 		// let lastPlayedSongId = Number(localStorage.getItem('LastPlayedSongId'))
@@ -41,28 +27,11 @@
 		}
 	})
 
-	function buildGridStyle() {
-		let tempGridStyle = tagToGridStyleFn($songListTagConfig)
-
-		if (song.IsEnabled === 0) {
-			tempGridStyle = 'minmax(min-content, max-content) ' + tempGridStyle
-		}
-
-		if (isSongPlaying) {
-			tempGridStyle = 'minmax(min-content, max-content) ' + tempGridStyle
-		}
-
-		gridStyle = tempGridStyle
-	}
-
 	function setStar(starChangeEvent) {
 		window.ipc.updateSongs([song], { Rating: starChangeEvent.detail.rating })
 	}
 </script>
 
-<!-- {isSongPlaying === true ? 'playing' : ''} -->
-<!-- style="grid-template-columns:{gridStyle};" -->
-<!-- style="grid-auto-columns:{gridStyle};" -->
 <song-list-item
 	data-id={song.ID}
 	data-index={index}
@@ -101,8 +70,6 @@
 		transition-property: font-variation-settings, background-color, box-shadow;
 		transition-duration: 250ms, 500ms, 500ms;
 		transition-timing-function: ease-in-out;
-
-
 
 		/* display: grid; */
 		/* grid-template-rows: auto; */

@@ -325,7 +325,6 @@
 		max-height: var(--song-list-item-height);
 		height: var(--song-list-item-height);
 
-		display: flex;
 		align-items: center;
 
 		background-clip: padding-box;

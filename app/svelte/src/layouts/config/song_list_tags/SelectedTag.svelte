@@ -19,29 +19,24 @@
 		if ($songListTagConfig.length === 0) {
 			$songListTagConfig = [
 				{
-					align: 'center',
 					value: 'Track',
-					isExpanded: false
+					width: 100
 				},
 				{
-					align: 'left',
 					value: 'Title',
-					isExpanded: true
+					width: 100
 				},
 				{
-					align: 'center',
 					value: 'PlayCount',
-					isExpanded: false
+					width: 100
 				},
 				{
-					align: 'center',
 					value: 'Rating',
-					isExpanded: false
+					width: 100
 				},
 				{
-					align: 'left',
 					value: 'Duration',
-					isExpanded: false
+					width: 100
 				}
 			]
 		}
@@ -62,27 +57,6 @@
 		{/each}
 	</select>
 	<tag-empty-space />
-	<tag-expand data-is-expanded={$songListTagConfig[index].isExpanded}>
-		<input id="{index}-{tag.value}-expand" type="checkbox" bind:checked={$songListTagConfig[index].isExpanded} />
-		<label for="{index}-{tag.value}-expand">Expanded</label>
-	</tag-expand>
-
-	<tag-aligns data-is-active={$songListTagConfig[index].isExpanded}>
-		<tag-align-left class="tag-align">
-			<input id="{index}-{tag.value}-l" type="radio" bind:group={$songListTagConfig[index].align} value="start" />
-			<label for="{index}-{tag.value}-l">L</label>
-		</tag-align-left>
-
-		<tag-align-center class="tag-align">
-			<input id="{index}-{tag.value}-c" type="radio" bind:group={$songListTagConfig[index].align} value="center" />
-			<label for="{index}-{tag.value}-c">C</label>
-		</tag-align-center>
-
-		<tag-align-right class="tag-align">
-			<input id="{index}-{tag.value}-r" type="radio" bind:group={$songListTagConfig[index].align} value="end" />
-			<label for="{index}-{tag.value}-r">R</label>
-		</tag-align-right>
-	</tag-aligns>
 
 	<move-icon>
 		<MoveIcon style="height: 1.25rem;fill:var(--color-fg-1);margin:0 1rem;" />
@@ -140,92 +114,8 @@
 		height: 100%;
 	}
 
-	li tag-expand label {
-		cursor: pointer;
-		font-size: 0.9rem;
-		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
-		border: 2px solid var(--color-fg-1);
-		padding: 0.15rem 0.3rem;
-		border-radius: 3px;
-		margin-right: 1rem;
-
-		display: inline-block;
-
-		transition-property: background-color, color, border-color, transform;
-		transition-duration: 300ms;
-		transition-timing-function: linear;
-
-		transform: translateX(7.5rem);
-	}
-
-	li tag-expand[data-is-expanded='true'] label {
-		background-color: var(--color-accent-1);
-		color: var(--color-bg-1);
-		border-color: var(--color-accent-1);
-		transform: translateX(0rem);
-	}
-
-	li tag-expand input {
-		display: none;
-	}
-
-	li tag-aligns {
-		display: flex;
-		flex-direction: row;
-		width: calc(28 * 4px);
-		justify-content: space-around;
-	}
-
-	li tag-aligns .tag-align label {
-		height: 100%;
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		font-size: 0.9rem;
-		font-variation-settings: 'wght' calc(var(--default-weight) + 200);
-		border: 2px solid var(--color-fg-1);
-		border-radius: 3px;
-	}
-
 	:where(li tag-aligns .tag-align label) {
 		transition: transform 200ms ease-in-out;
-	}
-
-	li tag-aligns tag-align-left label {
-		transition-delay: 0ms;
-	}
-
-	li tag-aligns tag-align-center label {
-		transition-delay: 100ms;
-	}
-
-	li tag-aligns tag-align-right label {
-		transition-delay: 200ms;
-	}
-
-	li tag-aligns .tag-align {
-		display: block;
-		height: 28px;
-		width: 28px;
-	}
-
-	li tag-aligns[data-is-active='false'] .tag-align label {
-		transform: rotateY(90deg);
-	}
-	li tag-aligns[data-is-active='true'] .tag-align label {
-		transform: rotateY(0deg);
-	}
-
-	li tag-aligns .tag-align input:checked ~ label {
-		background-color: var(--color-accent-1);
-		color: var(--color-bg-1);
-		border-color: var(--color-accent-1);
-	}
-
-	li tag-aligns .tag-align input {
-		display: none;
 	}
 
 	li move-icon {

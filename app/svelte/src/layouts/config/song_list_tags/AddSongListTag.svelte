@@ -7,7 +7,7 @@
 
 	function addTag() {
 		if ($songListTagConfig.find(tag => tag.value === optionBind) === undefined) {
-			$songListTagConfig.push({ value: optionBind, isExpanded: false, align: 'center' })
+			$songListTagConfig.push({ value: optionBind, width: 100 })
 			$songListTagConfig = $songListTagConfig
 		}
 		optionBind = 'ChooseTag'

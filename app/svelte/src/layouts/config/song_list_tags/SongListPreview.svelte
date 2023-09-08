@@ -1,6 +1,5 @@
 <script lang="ts">
 	import SongTag from '../../../components/SongTag.svelte'
-	import tagToGridStyleFn from '../../../functions/tagToGridStyle.fn'
 	import {
 		dateOrderConfig,
 		showDynamicArtistsConfig,
@@ -10,8 +9,6 @@
 	import type { PartialSongType } from '../../../../../types/song.type'
 	import ToggleIcon from '../../../icons/ToggleIcon.svelte'
 	import updateConfigFn from '../../../functions/updateConfig.fn'
-	import OptionSection from '../../../components/OptionSection.svelte'
-	import traduceFn from '../../../functions/traduce.fn'
 
 	let gridStyle = ''
 
@@ -36,10 +33,6 @@
 		Title: 'Running From My Shadow',
 		Track: 13,
 		PlayCount: 10
-	}
-
-	$: {
-		gridStyle = tagToGridStyleFn($songListTagConfig)
 	}
 
 	// $: console.log($dateOrderConfig)
@@ -80,11 +73,16 @@
 </script>
 
 <song-list-preview>
-	<grid-tags style="grid-auto-columns:{gridStyle};">
-		{#each $songListTagConfig as selectedTag, index (index)}
-			<SongTag song={sampleSong} tag={selectedTag} />
-		{/each}
-	</grid-tags>
+	<data-body>
+		<data-row>
+			{#each $songListTagConfig as tag, index (index)}
+				<data-value style={`width: ${tag.width}px;`}>
+					<SongTag song={sampleSong} {tag} />
+				</data-value>
+				<data-separator data-tag={tag.value} />
+			{/each}
+		</data-row>
+	</data-body>
 
 	<enable-dynamic-artists class="toggleButton">
 		<button on:click={toggleDynamicArtists}>
@@ -124,22 +122,6 @@
 		margin-bottom: 1rem;
 	}
 
-	grid-tags {
-		width: 100%;
-
-		padding: 1rem;
-		margin-bottom: 1rem;
-
-		background-color: var(--color-fg-1);
-		color: var(--color-bg-1);
-
-		display: grid;
-		grid-template-rows: auto;
-		grid-auto-flow: column;
-
-		border-radius: 10px;
-	}
-
 	.toggleButton {
 		display: flex;
 		justify-content: center;
@@ -150,5 +132,54 @@
 	.toggleButton button span {
 		display: flex;
 		align-items: center;
+	}
+
+	data-body {
+		background-color: var(--color-fg-1);
+		color: var(--color-bg-1);
+		width: 100%;
+		padding: 1rem;
+		margin-bottom: 1rem;
+		border-radius: 10px;
+	}
+
+	data-body data-row {
+		cursor: pointer;
+		min-height: var(--song-list-item-height);
+		max-height: var(--song-list-item-height);
+		height: var(--song-list-item-height);
+
+		display: flex;
+		align-items: center;
+		justify-content: space-evenly;
+
+		background-clip: padding-box;
+		user-select: none;
+		border-radius: 10px;
+		transition-property: font-variation-settings, background-color, box-shadow;
+		transition-duration: 250ms, 500ms, 500ms;
+		transition-timing-function: ease-in-out;
+	}
+
+	data-value {
+		display: inline-block;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	data-container data-row data-value {
+		text-align: left;
+		padding: 0.25rem 0.5rem;
+	}
+
+	data-container data-header data-row data-value {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		font-variation-settings: 'wght' 700;
+		text-align: center;
+		cursor: pointer;
 	}
 </style>

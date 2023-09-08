@@ -16,7 +16,9 @@
 		playingSongStore,
 		isPlaying,
 		currentSongDurationStore,
-		currentSongProgressStore
+		currentSongProgressStore,
+		isAppIdle,
+		triggerScrollToSongEvent
 	} from '../stores/main.store'
 
 	import { currentPlayerTime, songToPlayUrlStore } from '../stores/player.store'
@@ -230,6 +232,8 @@
 			audioElements[altAudioName].domElement
 				.play()
 				.then(() => {
+					if ($isAppIdle === true) triggerScrollToSongEvent.set(song.ID)
+
 					$currentSongProgressStore = 0
 					setCurrentAudioElement(audioElements[altAudioName].domElement)
 					audioElements[altAudioName].isPlaying = true

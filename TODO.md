@@ -37,3 +37,5 @@ on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabinde
 * (Not Important) When seeking in os widget, the change is not reflected in the song progress
 
 * (Can't reproduce, needs more attention) Clicking on the album art on the status bar gives yields unexpected results (Blank song list?)
+
+* Song autoscroll doesn't work on app idle

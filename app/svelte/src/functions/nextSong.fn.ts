@@ -10,16 +10,6 @@ import { songToPlayUrlStore } from '../stores/player.store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 import { get } from 'svelte/store'
 
-// let currentAudioElementLocal: HTMLAudioElement = undefined
-
-// let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
-// 	if (value !== undefined) {
-// 		currentAudioElementLocal = value
-
-// 		currentAudioElementSubscription()
-// 	}
-// })
-
 export default function () {
 	let playbackStoreLocal: SongType[]
 	let songPlayingLocal: SongType | PartialSongType = undefined
@@ -42,6 +32,8 @@ export default function () {
 	} else {
 		songToPlayUrlStore.set([nextSong.SourceFile, { playNow: true }])
 
-		if (get(isAppIdle) === true) triggerScrollToSongEvent.set(nextSong.ID)
+		if (get(isAppIdle) === true) {
+			triggerScrollToSongEvent.set(nextSong.ID)
+		}
 	}
 }

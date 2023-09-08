@@ -188,5 +188,5 @@ function afterLanguageChangeReload() {
 function getAppIdleDebounce() {
 	return setTimeout(() => {
 		isAppIdle.set(true)
-	}, 60000)
+	}, 30000)
 }
