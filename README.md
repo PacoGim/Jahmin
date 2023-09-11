@@ -1,8 +1,6 @@
 <h1>Jahmin</h1>
 
-<img-container style="display:flex;justify-content:center;">
 <img src="https://raw.githubusercontent.com/PacoGim/PacoGim.github.io/main/public/img/jahmin_logo.svg" alt="Jahmin Logo" style="width:200px;"/>
-</img-container>
 
 ## Description
 
@@ -14,11 +12,10 @@ A multiplatform music player capable of handling 100k+ songs.
 
 #### Look closer to the amazing Shovel Knight animated album art!
 
-<video autoplay loop muted>
-<source src="https://github.com/PacoGim/Jahmin/assets/34577195/fe3eb002-1248-4fcb-8104-0a4b1b39fbda" >
-</video>
+<img src="https://i.imgur.com/U9wAzlf.gif" alt="Library"/>
 
 ## Tags Edit
+
 #### A built-in way to update the tags of the selected songs is available too!
 
 <img-container style="display:flex;justify-content:center;">
@@ -26,14 +23,15 @@ A multiplatform music player capable of handling 100k+ songs.
 </img-container>
 
 ## Search
+
 #### Search your library thanks to this handy search box!
+
 ##### Searching while recording a video is a bit too taxing on my PC, without the recording the search is much smoother.
 
-<video autoplay loop muted>
-<source src="https://github.com/PacoGim/Jahmin/assets/34577195/208e1b99-7d62-411a-b1be-46a70dc07940" >
-</video>
+<img src="https://i.imgur.com/jPoCdXy.gif" alt="Search"/>
 
 ## Playback
+
 #### Look and sort the current playback
 
 <img-container style="display:flex;justify-content:center;">
@@ -41,27 +39,35 @@ A multiplatform music player capable of handling 100k+ songs.
 </img-container>
 
 ## Lyrics
+
 #### Sing along with your favourite song with the Lyrics section
+
 #### Easily copy from any website and paste it in the app and save.
 
-<video autoplay loop muted>
-<source src="https://github.com/PacoGim/Jahmin/assets/34577195/0fa058d8-bdf3-4fe7-b810-683662337da9" >
-</video>
+<img src="https://i.imgur.com/oIe44yZ.gif" alt="Lyrics"/>
 
 ## Options
+
 ### Appearance
+
 - Day/Night mode
 - Color Contrast, is better to see it in action.
 - Grid Art Size
 - Grid Gap
 - Clean Art Cache
+
 ### Library
+
 - Add folders to library
 - Exclude folders from library
+
 ### Song List Tag
+
 - Choose which tag to show
 - Choose the order of the tags
+
 ### Equalizer
+
 - Save your own profiles
 - Download Community profiles
 - Test community profiles without downloading them
