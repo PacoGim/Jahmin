@@ -15,7 +15,7 @@ A multiplatform music player capable of handling 100k+ songs.
 #### Look closer to the amazing Shovel Knight animated album art!
 
 <video autoplay loop muted>
-<source src="https://github.com/PacoGim/Jahmin/assets/34577195/fd493a8d-a313-4563-bbb3-61042df8317b" >
+<source src="https://github.com/PacoGim/Jahmin/assets/34577195/fe3eb002-1248-4fcb-8104-0a4b1b39fbda" >
 </video>
 
 ## Tags Edit
@@ -30,7 +30,7 @@ A multiplatform music player capable of handling 100k+ songs.
 ##### Searching while recording a video is a bit too taxing on my PC, without the recording the search is much smoother.
 
 <video autoplay loop muted>
-<source src="https://github.com/PacoGim/Jahmin/assets/34577195/33f286e2-75d8-43a0-bb03-1137e5b088c9" >
+<source src="https://github.com/PacoGim/Jahmin/assets/34577195/208e1b99-7d62-411a-b1be-46a70dc07940" >
 </video>
 
 ## Playback
@@ -45,7 +45,7 @@ A multiplatform music player capable of handling 100k+ songs.
 #### Easily copy from any website and paste it in the app and save.
 
 <video autoplay loop muted>
-<source src="https://github.com/PacoGim/Jahmin/assets/34577195/40e57b46-e372-4089-aec2-1a3e53b7df9d" >
+<source src="https://github.com/PacoGim/Jahmin/assets/34577195/0fa058d8-bdf3-4fe7-b810-683662337da9" >
 </video>
 
 ## Options
