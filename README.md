@@ -12,7 +12,7 @@ A multiplatform music player capable of handling 100k+ songs.
 
 #### Look closer to the amazing Shovel Knight animated album art!
 
-<img src="https://i.imgur.com/U9wAzlf.gif" alt="Library"/>
+![](resources/Library.gif)
 
 ## Tags Edit
 
@@ -28,7 +28,7 @@ A multiplatform music player capable of handling 100k+ songs.
 
 ##### Searching while recording a video is a bit too taxing on my PC, without the recording the search is much smoother.
 
-<img src="https://i.imgur.com/jPoCdXy.gif" alt="Search"/>
+![](resources/Search.gif)
 
 ## Playback
 
@@ -44,7 +44,7 @@ A multiplatform music player capable of handling 100k+ songs.
 
 #### Easily copy from any website and paste it in the app and save.
 
-<img src="https://i.imgur.com/oIe44yZ.gif" alt="Lyrics"/>
+![](resources/Lyrics.gif)
 
 ## Options
 
