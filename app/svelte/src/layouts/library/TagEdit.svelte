@@ -536,6 +536,7 @@
 		flex-direction: row;
 		justify-content: space-evenly;
 		margin: 0.5rem 0;
+		align-self: end;
 	}
 	button-container button {
 		height: fit-content;

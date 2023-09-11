@@ -4,6 +4,7 @@
 	import SortableService from '../../../services/sortable.service'
 	import { onMount } from 'svelte'
 	import { songListTagConfig } from '../../../stores/config.store'
+	import type { ConfigType } from '../../../../../types/config.type'
 
 	$: if ($songListTagConfig.length > 0) createSortableList()
 
@@ -24,13 +25,12 @@
 
 		if (ulElement === undefined || ulElement === null) return
 
-		let newTags = []
+		let newTags: ConfigType['songListTags'] = []
 
 		ulElement.querySelectorAll('li').forEach(liElement => {
 			newTags.push({
-				align: liElement.dataset.align,
 				value: liElement.dataset.value,
-				isExpanded: liElement.dataset.isExpanded === 'true'
+				width: 100
 			})
 		})
 

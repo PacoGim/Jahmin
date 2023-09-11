@@ -66,19 +66,25 @@
 
 		let lastPlayedSong = songList.find(song => song.ID === lastPlayedSongId)
 
-		let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile)
+		if (lastPlayedSong !== undefined) {
+			let lastPlayedSongDirectory = getDirectoryFn(lastPlayedSong.SourceFile)
+
+			setNewPlaybackFn(
+				lastPlayedSongDirectory,
+				songList,
+				lastPlayedSongId,
+				{
+					playNow: false
+				},
+				{ shuffle: false }
+			)
+
+			setTimeout(() => {
+				scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
+			}, 1000)
+		}
 
 		$playbackStore = songList
-
-		setNewPlaybackFn(
-			lastPlayedSongDirectory,
-			songList,
-			lastPlayedSongId,
-			{
-				playNow: false
-			},
-			{ shuffle: false }
-		)
 
 		songList.forEach(song => {
 			let songDirectory = getDirectoryFn(song.SourceFile)
@@ -88,10 +94,6 @@
 				$selectedAlbumsDir = $selectedAlbumsDir
 			}
 		})
-
-		setTimeout(() => {
-			scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
-		}, 1000)
 	}
 
 	onMount(() => {

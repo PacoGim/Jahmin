@@ -250,7 +250,7 @@
 					data-index={index}
 					class:selected={$selectedSongsStore.includes(song.ID)}
 					class:disabled={song.IsEnabled === 0}
-					class:playing={$playingSongStore.ID === song.ID}
+					class:playing={$playingSongStore?.ID === song?.ID}
 				>
 					{#each $songListTagConfig as tag, index (index)}
 						<data-value style={`width: ${tag.width}px;`}>
