@@ -204,7 +204,7 @@
 		let altAudioName = this.id === 'main' ? 'alt' : 'main'
 
 		const currentTime /* in seconds */ = this.currentTime
-		const duration /* in seconds */ = this.duration
+		const duration /* in seconds */ = $playingSongStore.Duration
 
 		$currentSongDurationStore = duration
 		$currentSongProgressStore = currentTime

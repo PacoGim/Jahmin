@@ -11,6 +11,7 @@
 		selectedAlbumsDir,
 		setSelectedAlbumsDir,
 		songListStore,
+		triggerScrollToSongEvent,
 		userSearch
 	} from '../stores/main.store'
 	import { songSortConfig } from '../stores/config.store'
@@ -81,6 +82,7 @@
 
 			setTimeout(() => {
 				scrollToAlbumFn(lastPlayedSongDirectory, 'smooth-scroll')
+				$triggerScrollToSongEvent = lastPlayedSongId
 			}, 1000)
 		}
 
