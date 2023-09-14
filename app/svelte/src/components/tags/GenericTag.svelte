@@ -3,7 +3,7 @@
 </script>
 
 <generic-tag>
-	{tagValue}
+	{tagValue || ''}
 </generic-tag>
 
 <style>

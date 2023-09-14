@@ -5,7 +5,6 @@
 	import RepeatOneIcon from '../../icons/RepeatOneIcon.svelte'
 	import ShuffleIcon from '../../icons/ShuffleIcon.svelte'
 	import {
-		configStore,
 		playbackRepeatCurrentConfig,
 		playbackRepeatListConfig,
 		playbackShuffleConfig,

@@ -104,9 +104,7 @@ layoutToShow.subscribe(layoutName => {
 })
 
 isPlaying.subscribe(value => {
-	if (value) {
 		window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
-	}
 })
 
 playingSongStore.subscribe(song => {

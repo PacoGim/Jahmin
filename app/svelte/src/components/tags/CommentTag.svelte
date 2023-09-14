@@ -4,13 +4,13 @@
 	export let comment
 
 	function formatComment(value) {
-		return limitCharactersFn(value,50)
+		return limitCharactersFn(value, 50)
 	}
 </script>
 
 <comment-tag>
 	<!-- {formatComment(comment)} -->
-	{comment}
+	{comment || ''}
 </comment-tag>
 
 <style>

@@ -22,7 +22,7 @@
 	}
 
 	let tippySongInfoId = generateId()
-	let songInfo=''
+	let songInfo = ''
 
 	$: {
 		if ($playingSongStore) {

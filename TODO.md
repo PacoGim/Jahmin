@@ -38,8 +38,4 @@ on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabinde
 
 * (Can't reproduce, needs more attention) Clicking on the album art on the status bar gives yields unexpected results (Blank song list?)
 
-* Scroll to song when app starts
 * Fix nasty timing bug
-
-* Playcount doest not go up if it is the last song of the playback list
-* Remove the nulls

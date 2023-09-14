@@ -7,7 +7,7 @@
 </script>
 
 <title-tag>
-	{song.Title}
+	{song.Title || ''}
 	{#if $showDynamicArtistsConfig === true}
 		{getDynamicArtistsFn(song.Artist, song.AlbumArtist)}
 	{/if}

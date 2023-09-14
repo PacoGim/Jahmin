@@ -38,13 +38,25 @@
 	import updatePlayCountFn from '../functions/updatePlayCount.fn'
 	import getElementDatasetFn from '../functions/getElementDataset.fn'
 	import shuffleSongsFn from '../functions/shuffleSongs.fn'
+	import stopSongFn from '../functions/stopSong.fn'
 
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
 	// Default is 250ms -> (250ms / 1000ms = 0.25s).
 	const smoothTimeMs = 250 / 1000
 
-	let audioElements = {
+	type AudioElement = {
+		domElement: HTMLAudioElement
+		isPlaying: boolean
+		isPreloaded: boolean
+		isPreloading: boolean
+	}
+
+	let audioElements: {
+		[key: string]: AudioElement
+		main: AudioElement
+		alt: AudioElement
+	} = {
 		main: {
 			domElement: undefined,
 			isPlaying: false,
@@ -229,6 +241,25 @@
 		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
 			let song = $playbackStore.find(song => song.ID === +audioElements[altAudioName].domElement.getAttribute('data-song-id'))
 
+			let nextSongSrc = audioElements[altAudioName].domElement.getAttribute('src')
+
+			if (nextSongSrc === null) {
+				if (audioElements.alt.isPlaying === false && audioElements.main.isPlaying === false) {
+					// Playback is done
+
+					if ($playbackShuffleConfig === true) {
+						shuffleSongsFn()
+						nextSongFn()
+					}
+				} else if (song) {
+					fileNotFoundCheck(song)
+				} else {
+					stopSongFn()
+				}
+
+				return
+			}
+
 			audioElements[altAudioName].domElement
 				.play()
 				.then(() => {
@@ -251,19 +282,10 @@
 						audioElements[this.id].isPlaying = false
 						$songToPlayUrlStore = [previousPlayedSong.SourceFile, { playNow: false }]
 					}
+					// console.log(err)
+					// if (err.message.includes('The element has no supported sources')) {
 
-					if (err.message.includes('The element has no supported sources')) {
-						if (audioElements.alt.isPlaying === false && audioElements.main.isPlaying === false) {
-							// Playback is done
-
-							if ($playbackShuffleConfig === true) {
-								shuffleSongsFn()
-								nextSongFn()
-							}
-						} else {
-							fileNotFoundCheck(song)
-						}
-					}
+					// }
 				})
 		}
 	}
@@ -286,8 +308,13 @@
 			nextSongToPlay = findNextValidSongFn(songIndex, songList)
 		}
 
-		audioElements[nextAudioElementId].domElement.setAttribute('data-song-id', nextSongToPlay?.ID || '')
-		audioElements[nextAudioElementId].domElement.src = encodeURLFn(nextSongToPlay?.SourceFile) || ''
+		if (nextSongToPlay !== undefined) {
+			audioElements[nextAudioElementId].domElement.setAttribute('data-song-id', nextSongToPlay?.ID || '')
+			audioElements[nextAudioElementId].domElement.src = encodeURLFn(nextSongToPlay?.SourceFile) || ''
+		} else {
+			audioElements[nextAudioElementId].domElement.removeAttribute('data-song-id')
+			audioElements[nextAudioElementId].domElement.removeAttribute('src')
+		}
 	}
 
 	function hookEventListeners() {
