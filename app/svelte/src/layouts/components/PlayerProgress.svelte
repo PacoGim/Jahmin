@@ -1,22 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import nextSongFn from '../../functions/nextSong.fn'
 
 	import {
 		altAudioElement,
 		currentAudioElement,
 		currentSongDurationStore,
 		currentSongProgressStore,
-		externalSongProgressChange,
 		isPlaying,
 		mainAudioElement,
 		playingSongStore
 	} from '../../stores/main.store'
-
-	import type { PartialSongType, SongType } from '../../../../types/song.type'
-
-	let playerProgressFillElement: HTMLElement = undefined
-	let playerProgressElement: HTMLElement = undefined
 
 	let userChangedProgress: number = undefined
 
@@ -34,19 +27,20 @@
 
 	$: updatePlayerProgress(userChangedProgress)
 
-	$: calculateTransitionDuration($playingSongStore?.Duration)
-
 	$: {
 		if ($isPlaying === false) {
 			pauseTransition()
 		} else {
-			calculateTransition($currentSongProgressStore)
-
-			// calculateTransitionDuration($playingSongStore?.Duration)
+			playTransition($currentSongProgressStore)
 		}
 	}
 
 	$: calculateTransition(tempSecond)
+
+	$: if ($playingSongStore) {
+		transitionDuration = 0
+		currentProgressWidth = 0
+	}
 
 	function listenToTimeChange(evt: Event) {
 		let audioElement: HTMLAudioElement = evt.target as HTMLAudioElement
@@ -60,35 +54,31 @@
 		if (tempSecond !== currentTimeFloor) {
 			tempSecond = currentTimeFloor
 		}
-
-		// currentProgressWidth = Math.round((100 / $currentSongDurationStore) * $currentSongProgressStore || 0)
 	}
-
-	// $: console.log(transitionDuration, currentProgressWidth)
 
 	function calculateTransition(songProgress: number) {
 		let songDuration = $currentSongDurationStore
-		// let currentProgressPercent = (100 / songDuration) * songProgress
 
 		let songTimeLeft = songDuration - songProgress
 
-		transitionDuration = songTimeLeft
-	}
-
-	function calculateTransitionDuration(songDuration: number = 0) {
-		// transitionDuration = 50 * songDuration
+		return songTimeLeft
 	}
 
 	function pauseTransition() {
 		transitionDuration = 0
-		currentProgressWidth = Math.round((100 / $currentSongDurationStore) * $currentSongProgressStore || 0)
+		currentProgressWidth = (100 / $currentSongDurationStore) * $currentSongProgressStore || 0
+	}
+
+	function playTransition(currentSongProgress) {
+		transitionDuration = calculateTransition(currentSongProgress)
+		currentProgressWidth = 100
 	}
 
 	function updatePlayerProgress(newValue: number) {
 		if (isNaN(newValue)) return
 		if ($currentAudioElement === undefined) return
 
-		let newProgress = Math.round((100 / $currentSongDurationStore) * newValue)
+		let newProgress = (100 / $currentSongDurationStore) * newValue
 
 		$currentAudioElement.pause()
 		transitionDuration = 0
@@ -97,7 +87,7 @@
 		clearTimeout(pauseDebounce)
 		pauseDebounce = setTimeout(() => {
 			$currentAudioElement.play()
-			calculateTransition($currentSongProgressStore)
+			transitionDuration = calculateTransition($currentSongProgressStore)
 			currentProgressWidth = 100
 		}, 250)
 
@@ -108,7 +98,7 @@
 	onMount(() => {})
 </script>
 
-<player-progress bind:this={playerProgressElement}>
+<player-progress>
 	<input type="range" min="0" max={$currentSongDurationStore || 0} bind:value={userChangedProgress} />
 	<player-gloss />
 	<player-progress-fill style="width: {currentProgressWidth}%; transition-duration: {transitionDuration}s;" />
