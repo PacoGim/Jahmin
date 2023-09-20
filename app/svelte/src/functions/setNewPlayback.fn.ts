@@ -44,7 +44,7 @@ export default async function (
 	playingSongStore.set(songToPlay)
 
 	currentSongDurationStore.set(songToPlay.Duration)
-	currentSongProgressStore.set(0)
+	// currentSongProgressStore.set(0)
 
 	setWaveSource(songToPlay.SourceFile, rootDir, songToPlay.Duration)
 

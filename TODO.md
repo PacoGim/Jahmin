@@ -39,3 +39,9 @@ on:click={() => rebuildArtCache()} on:keypress={() => rebuildArtCache()} tabinde
 * (Can't reproduce, needs more attention) Clicking on the album art on the status bar gives yields unexpected results (Blank song list?)
 
 * Fix nasty timing bug
+
+* Add reset playcount
+
+* When playing a lot of super short audio, the player stops
+* Previous keybind doesn't reset the song but goes to the previous song
+* Try to figure why the cover don't load after the app is minimized for a long time

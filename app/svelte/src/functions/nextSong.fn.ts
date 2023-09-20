@@ -24,7 +24,7 @@ export default function () {
 
 	if (nextSong === undefined) {
 		let currentSong = playbackStoreLocal[currentSongIndex]
-		currentSongProgressStore.set(0)
+		// currentSongProgressStore.set(0)
 
 		if (currentSong?.SourceFile) {
 			songToPlayUrlStore.set([currentSong.SourceFile, { playNow: false }])

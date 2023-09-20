@@ -219,7 +219,7 @@
 		const duration /* in seconds */ = $playingSongStore.Duration
 
 		$currentSongDurationStore = duration
-		$currentSongProgressStore = currentTime
+		// $currentSongProgressStore = currentTime
 
 		// Update time only if the current audio element is playing.
 		if (audioElements[this.id].isPlaying === true) {
@@ -265,7 +265,7 @@
 				.then(() => {
 					if ($isAppIdle === true) triggerScrollToSongEvent.set(song.ID)
 
-					$currentSongProgressStore = 0
+					// $currentSongProgressStore = 0
 					setCurrentAudioElement(audioElements[altAudioName].domElement)
 					audioElements[altAudioName].isPlaying = true
 					updateCurrentSongData(song)

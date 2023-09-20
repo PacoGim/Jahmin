@@ -32,9 +32,7 @@
 		timeLeft: '00:00'
 	}
 
-	$: {
-		updateSongTime($currentSongDurationStore, $currentSongProgressStore)
-	}
+	$: updateSongTime($currentSongDurationStore, $currentSongProgressStore)
 
 	function updateSongTime(songDuration, songProgress) {
 		songTime = {
@@ -44,7 +42,7 @@
 		}
 	}
 
-/* 	function durationChanged(currentTime) {
+	/* 	function durationChanged(currentTime) {
 		let duration = $playingSongStore.Duration
 
 		// Rounds to 2 decimals.
@@ -100,7 +98,7 @@
 		background-color: var(--art-color-light);
 		color: var(--art-color-dark);
 
-		width: calc(100vw - 58px);/* 58px = Navbar width */
+		width: calc(100vw - 58px); /* 58px = Navbar width */
 
 		transition-property: background-color, color;
 		transition-duration: 300ms;
