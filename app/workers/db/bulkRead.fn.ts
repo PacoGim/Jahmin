@@ -77,7 +77,10 @@ function buildSqliteQuery(queryData: {
 	}
 
 	if (queryData.search !== '' && queryData.search !== undefined && queryData.search !== null) {
-		const whereClause = columNames.map(name => `${name} LIKE '%${queryData.search}%'`).join(' OR ')
+		queryData.search = queryData.search.replace(/"/g, '')
+
+		const whereClause = columNames.map(name => `${name} LIKE "%${queryData.search}%"`).join(' OR ')
+
 		query += query.indexOf(' WHERE ') === -1 ? ` WHERE ${whereClause}` : ` AND (${whereClause})`
 	}
 
@@ -87,7 +90,6 @@ function buildSqliteQuery(queryData: {
 
 	if (queryData.order) {
 		if (queryData.order.indexOf('Track desc') === -1 && queryData.order.indexOf('Track asc') === -1) {
-
 			queryData.order.push('Track asc')
 		}
 

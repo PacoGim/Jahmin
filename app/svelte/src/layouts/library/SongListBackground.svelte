@@ -49,7 +49,7 @@
 		width: 100%;
 		background-color: rgba(0, 0, 0, 0.33);
 		backdrop-filter: blur(200px);
-		z-index: 0;
+		z-index: 1;
 	}
 	:global(song-list-background-svlt art-svlt:not(:has(*))) {
 		background-image: none !important;
