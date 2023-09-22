@@ -133,6 +133,7 @@
 
 <style>
 	art-grid-svlt {
+		position: relative;
 		padding: var(--grid-gap);
 
 		overflow-y: auto;

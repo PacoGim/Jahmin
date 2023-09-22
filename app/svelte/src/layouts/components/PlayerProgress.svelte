@@ -20,6 +20,9 @@
 	let transitionDuration = 0
 	let currentProgressWidth = 0
 
+	let playerProgressFillElement: HTMLElement = undefined
+	let inputElement: HTMLInputElement = undefined
+
 	$: if ($altAudioElement !== undefined && $mainAudioElement !== undefined) {
 		$mainAudioElement.addEventListener('timeupdate', listenToTimeChange)
 		$altAudioElement.addEventListener('timeupdate', listenToTimeChange)
@@ -31,11 +34,9 @@
 		if ($isPlaying === false) {
 			pauseTransition()
 		} else {
-			playTransition($currentSongProgressStore)
+			playTransition()
 		}
 	}
-
-	$: calculateTransition(tempSecond)
 
 	$: if ($playingSongStore) {
 		transitionDuration = 0
@@ -51,15 +52,29 @@
 
 		let currentTimeFloor = Math.floor(audioElement.currentTime)
 
+		const currentWidth = playerProgressFillElement.getBoundingClientRect().width
+		const maxWidth = inputElement.getBoundingClientRect().width
+		const percentCompleted = Math.round((100 / maxWidth) * currentWidth)
+
+		const currentSongProgress = Math.round((100 / $currentSongDurationStore) * $currentSongProgressStore)
+
 		if (tempSecond !== currentTimeFloor) {
+			if (currentSongProgress !== percentCompleted && currentSongProgress - 1 !== percentCompleted) {
+				transitionDuration = 0
+				currentProgressWidth = (100 / $currentSongDurationStore) * $currentSongProgressStore || 0
+
+				setTimeout(() => {
+					currentProgressWidth = 100
+					transitionDuration = calculateTransition()
+				}, 100)
+			}
+
 			tempSecond = currentTimeFloor
 		}
 	}
 
-	function calculateTransition(songProgress: number) {
-		let songDuration = $currentSongDurationStore
-
-		let songTimeLeft = songDuration - songProgress
+	function calculateTransition() {
+		let songTimeLeft = $currentSongDurationStore - $currentSongProgressStore
 
 		return songTimeLeft
 	}
@@ -69,9 +84,13 @@
 		currentProgressWidth = (100 / $currentSongDurationStore) * $currentSongProgressStore || 0
 	}
 
-	function playTransition(currentSongProgress) {
-		transitionDuration = calculateTransition(currentSongProgress)
-		currentProgressWidth = 100
+	function playTransition() {
+		pauseTransition()
+
+		setTimeout(() => {
+			currentProgressWidth = 100
+			transitionDuration = calculateTransition()
+		}, 100)
 	}
 
 	function updatePlayerProgress(newValue: number) {
@@ -87,21 +106,22 @@
 		clearTimeout(pauseDebounce)
 		pauseDebounce = setTimeout(() => {
 			$currentAudioElement.play()
-			transitionDuration = calculateTransition($currentSongProgressStore)
+			transitionDuration = calculateTransition()
 			currentProgressWidth = 100
 		}, 250)
 
 		$currentAudioElement.currentTime = newValue
 		$currentSongProgressStore = newValue
 	}
-
-	onMount(() => {})
 </script>
 
 <player-progress>
-	<input type="range" min="0" max={$currentSongDurationStore || 0} bind:value={userChangedProgress} />
+	<input bind:this={inputElement} type="range" min="0" max={$currentSongDurationStore || 0} bind:value={userChangedProgress} />
 	<player-gloss />
-	<player-progress-fill style="width: {currentProgressWidth}%; transition-duration: {transitionDuration}s;" />
+	<player-progress-fill
+		bind:this={playerProgressFillElement}
+		style="width: {currentProgressWidth}%; transition-duration: {transitionDuration}s;"
+	/>
 	<div id="waveform-data" />
 </player-progress>
 

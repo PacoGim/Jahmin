@@ -67,12 +67,7 @@
 		grid-row: 1;
 		display: block;
 
-		/* opacity: 0; */
-
-		/* background-image: url('../assets/img/disc-line.svg'); */
 		background-size: cover;
-
-		/* background-color: hsla(0, 0%, 50%, 0.5); */
 	}
 
 	:global(art-svlt img, art-svlt video) {
