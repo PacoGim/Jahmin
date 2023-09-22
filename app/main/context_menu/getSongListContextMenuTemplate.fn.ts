@@ -161,6 +161,20 @@ export default function (data: dataType) {
 			}
 		})
 
+		template.push({
+			label: 'Reset play count',
+			click: () => {
+				if (selectedSongsData.find(song => song.ID === clickedSongData?.ID)) {
+					// Reset playcount of all selected songs
+					sendWebContentsFn('reset-song-play-count', selectedSongsData)
+				} else {
+					// Only reset playcount of the clickedSongData
+					sendWebContentsFn('reset-song-play-count', [clickedSongData])
+				}
+			}
+		})
+
+		/********************** Template Done **********************/
 		resolve(template)
 	})
 }

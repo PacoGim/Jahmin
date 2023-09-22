@@ -21,6 +21,7 @@
 
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
 	import getRandomNumberBetweenTwoValuesFn from '../functions/getRandomNumberBetweenTwoValues.fn'
+	import updatePlayCountFn from '../functions/updatePlayCount.fn'
 
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
@@ -205,5 +206,11 @@
 		if (globalShortcutsRegistered === false) {
 			registerMediaKeysFn()
 		}
+	})
+
+	window.ipc.onResetSongPlayCount((_, songs) => {
+		songs.forEach(song => {
+			updatePlayCountFn(song.ID, 'reset')
+		})
 	})
 </script>

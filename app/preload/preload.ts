@@ -70,6 +70,7 @@ const ipcFunctions = {
 	onDatabaseUpdate: (callback: any) => ipcRenderer.on('database-update', callback),
 	onGroupSelected: (callback: any) => ipcRenderer.on('group-selected', callback),
 	onSortsongs: (callback: any) => ipcRenderer.on('sort-songs', callback),
+	onResetSongPlayCount: (callback: any) => ipcRenderer.on('reset-song-play-count', callback),
 	/********************** Database **********************/
 	bulkRead,
 	updatePlayCount
