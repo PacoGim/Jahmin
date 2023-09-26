@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte'
 	import { songListTagConfig } from '../../../stores/config.store'
 	import type { ConfigType } from '../../../../../types/config.type'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 
 	$: if ($songListTagConfig.length > 0) createSortableList()
 
@@ -34,7 +35,11 @@
 			})
 		})
 
-		$songListTagConfig = [...newTags]
+		// $songListTagConfig = [...newTags]
+
+		updateConfigFn({
+			songListTags: [...newTags]
+		})
 	}
 
 	onMount(() => {

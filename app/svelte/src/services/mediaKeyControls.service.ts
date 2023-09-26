@@ -6,8 +6,8 @@ function nextMedia() {
 	nextSongFn()
 }
 
-function previousMedia({ force }: { force: boolean } = { force: false }) {
-	previousSongFn({force:true})
+function previousMedia() {
+	previousSongFn()
 }
 
 function togglePlayPauseMedia() {

@@ -146,20 +146,35 @@
 	window.ipc.onSongPlayAfter(async (_, data) => {
 		let selectedSongs = data.selectedSongs
 		let clickedSong = data.clickedSong
+		let allSongs = []
 
 		if (selectedSongs.findIndex(song => song.ID === clickedSong.ID) === -1) {
-			selectedSongs.push(clickedSong)
+			allSongs = [clickedSong]
+		} else {
+			allSongs = sortSongsArrayFn(selectedSongs, $songSortConfig.sortBy, $songSortConfig.sortOrder, $configStore.group)
 		}
-
-		let sortedSongs = sortSongsArrayFn(selectedSongs, $songSortConfig.sortBy, $songSortConfig.sortOrder, $configStore.group)
 
 		let currentPlayingSongIndex = $playbackStore.findIndex(song => song.ID === $playingSongStore.ID) + 1 || 0
 
 		let arrayCopy = [...$playbackStore]
 
-		arrayCopy.splice(currentPlayingSongIndex, 0, ...sortedSongs)
+		arrayCopy.splice(currentPlayingSongIndex, 0, ...allSongs)
 
 		$playbackStore = arrayCopy
+	})
+
+	window.ipc.onSongPlayNow(async (_, data) => {
+		let selectedSongs: SongType[] = data.selectedSongs
+		let clickedSong: SongType = data.clickedSong
+		let allSongs: SongType[] = []
+
+		if (selectedSongs.findIndex(song => song.ID === clickedSong.ID) === -1) {
+			allSongs = [clickedSong]
+		} else {
+			allSongs = sortSongsArrayFn(selectedSongs, $songSortConfig.sortBy, $songSortConfig.sortOrder, $configStore.group)
+		}
+
+		setNewPlaybackFn(allSongs[0].Directory, allSongs, undefined, { playNow: true }, { shuffle: $playbackShuffleConfig })
 	})
 
 	window.ipc.onChangeSongAmount((_, data) => {
@@ -196,7 +211,7 @@
 		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
 			mediaKeyControlsService.previousMedia()
 		} else if (mediaKeyPressed === 'MediaPreviousTrackForce') {
-			mediaKeyControlsService.previousMedia({ force: true })
+			mediaKeyControlsService.previousMedia()
 		} else if (mediaKeyPressed === 'MediaPlayPause') {
 			mediaKeyControlsService.togglePlayPauseMedia()
 		}

@@ -1,5 +1,6 @@
 import { writable, type Writable, get } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
+import compareObjectsFn from '../functions/compareObjects.fn'
 
 export let configStore: Writable<ConfigType | undefined> = writable(undefined)
 
@@ -50,7 +51,7 @@ configStore.subscribe(value => {
 		fontSizeConfig.set(value?.userOptions?.fontSize)
 	}
 
-	if (get(songListTagConfig) !== value?.songListTags) {
+	if (!compareObjectsFn(get(songListTagConfig), value?.songListTags)) {
 		songListTagConfig.set(value?.songListTags)
 	}
 
@@ -74,7 +75,7 @@ configStore.subscribe(value => {
 		dateOrderConfig.set(value?.userOptions.dateOrder)
 	}
 
-	if (get(songSortConfig) !== value?.userOptions.songSort) {
+	if (!compareObjectsFn(get(songSortConfig), value?.userOptions.songSort)) {
 		songSortConfig.set(value?.userOptions.songSort)
 	}
 

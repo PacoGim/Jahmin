@@ -5,7 +5,6 @@ import parseJsonFn from '../functions/parseJson.fn'
 import {
 	configOptionSelected,
 	currentAudioElement,
-	externalSongProgressChange,
 	isAppIdle,
 	isMouseDown,
 	keyModifier,
@@ -22,6 +21,7 @@ import { runThemeHandler } from './themeHandler.service'
 import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVariables.fn'
 import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 import { pauseAnimatedArtWhenAppUnfocusedConfig } from '../stores/config.store'
+import { stopPlayerProgressFunction } from '../stores/functions.store'
 
 let appIdleDebounce = getAppIdleDebounce()
 
@@ -170,7 +170,6 @@ function afterLanguageChangeReload() {
 			audioPlayer.addEventListener('loadeddata', () => {
 				let audioElement = get(currentAudioElement)
 
-				externalSongProgressChange.set(afterReload.duration)
 				audioElement.currentTime = afterReload.duration
 
 				if (afterReload.wasPlaying === true) {

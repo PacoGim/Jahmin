@@ -35,8 +35,6 @@
 		PlayCount: 10
 	}
 
-	// $: console.log($dateOrderConfig)
-
 	function toggleDynamicArtists() {
 		updateConfigFn({
 			userOptions: {
@@ -129,9 +127,16 @@
 		margin-top: 1rem;
 	}
 
+	.toggleButton button{
+		display: flex;
+		align-items: center;
+		flex-direction: row;
+	}
+
 	.toggleButton button span {
 		display: flex;
 		align-items: center;
+		flex-direction: row;
 	}
 
 	data-body {

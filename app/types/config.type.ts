@@ -29,7 +29,7 @@ export type UserOptionsType = {
 	pauseAnimatedArtWhenAppUnfocused: boolean
 	alwaysShowAlbumOverlay: boolean
 	isFullscreen: boolean
-	lyricsStyle: LyricsStyle
+	lyricsStyle: PartialLyricsStyleType
 	showDynamicArtists: boolean
 	showExtensionsIcons: boolean
 	dateOrder: ('year' | 'month' | 'day' | '')[]
@@ -58,7 +58,7 @@ export type BoundsType = {
 	width: number
 }
 
-type LyricsStyle = {
+type LyricsStyleType = {
 	fontWeight: number
 	fontSize: number
 	textAlignment: number
@@ -74,5 +74,6 @@ type PartialUserOptionsType = Partial<UserOptionsType>
 type PartialDirectoriesType = Partial<DirectoriesType>
 type PartialGroupType = Partial<GroupType>
 type PartialPlaybackOptionsType = Partial<PlaybackOptionsType>
+type PartialLyricsStyleType = Partial<LyricsStyleType>
 
 export type PartialConfigType = Partial<ConfigType>

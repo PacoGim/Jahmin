@@ -1,14 +1,8 @@
-import {
-	playbackStore,
-	currentAudioElement,
-	playingSongStore,
-	triggerScrollToSongEvent,
-	externalSongProgressChange,
-	isAppIdle
-} from '../stores/main.store'
+import { playbackStore, currentAudioElement, playingSongStore, triggerScrollToSongEvent, isAppIdle } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 import { get } from 'svelte/store'
+import { stopPlayerProgressFunction } from '../stores/functions.store'
 
 let currentAudioElementLocal: HTMLAudioElement = undefined
 
@@ -31,7 +25,6 @@ export default function ({ force }: { force: boolean } = { force: false }) {
 
 	if (previousSong === undefined && currentAudioElementLocal !== undefined) {
 		currentAudioElementLocal.currentTime = 0
-		externalSongProgressChange.set(0)
 	}
 
 	if (
@@ -42,7 +35,6 @@ export default function ({ force }: { force: boolean } = { force: false }) {
 	} else {
 		if (currentAudioElementLocal !== undefined) {
 			currentAudioElementLocal.currentTime = 0
-			externalSongProgressChange.set(0)
 		}
 	}
 

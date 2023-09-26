@@ -43,7 +43,7 @@
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
 	// Default is 250ms -> (250ms / 1000ms = 0.25s).
-	const smoothTimeMs = 250 / 1000
+	const smoothTimeSec = 250 / 1000
 
 	type AudioElement = {
 		domElement: HTMLAudioElement
@@ -238,7 +238,7 @@
 
 		////////// Audio Pre Plays Here \\\\\\\\\\
 		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
-		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeMs) {
+		if (audioElements[altAudioName].isPlaying === false && currentTime >= duration - smoothTimeSec) {
 			let song = $playbackStore.find(song => song.ID === +audioElements[altAudioName].domElement.getAttribute('data-song-id'))
 
 			let nextSongSrc = audioElements[altAudioName].domElement.getAttribute('src')
@@ -254,7 +254,10 @@
 				} else if (song) {
 					fileNotFoundCheck(song)
 				} else {
-					stopSongFn()
+					// The end of the song list has been reached
+					setTimeout(() => {
+						stopSongFn()
+					}, smoothTimeSec * 1000)
 				}
 
 				return

@@ -1,4 +1,5 @@
-import { altAudioElement, currentAudioElement, externalSongProgressChange, mainAudioElement } from '../stores/main.store'
+import { stopPlayerProgressFunction } from '../stores/functions.store'
+import { altAudioElement, currentAudioElement, mainAudioElement } from '../stores/main.store'
 
 import { get } from 'svelte/store'
 
@@ -13,8 +14,7 @@ let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
 })
 
 export default function () {
-	currentAudioElementLocal.currentTime = 0
-	externalSongProgressChange.set(0)
+	get(stopPlayerProgressFunction)()
 	get(mainAudioElement).pause()
 	get(altAudioElement).pause()
 }

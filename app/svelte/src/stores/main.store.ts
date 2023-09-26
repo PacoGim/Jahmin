@@ -12,7 +12,6 @@ export let selectedAlbumsDir: Writable<string[] | undefined> = writable([])
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
-export let externalSongProgressChange: Writable<number> = writable(undefined)
 export let playingSongStore: Writable<PartialSongType | SongType | undefined> = writable(undefined)
 
 // Number = index of the playbackStore to play
@@ -100,11 +99,11 @@ export function setSelectedAlbumsDir(newSelectedAlbumsDir: string[] | undefined)
 }
 
 layoutToShow.subscribe(layoutName => {
-	document.title = layoutName ? `Jahmin · ${layoutName}` : 'Jahmin'
+	document.title = layoutName ? `Jahmin ${layoutName}` : 'Jahmin'
 })
 
 isPlaying.subscribe(value => {
-		window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
+	window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
 })
 
 playingSongStore.subscribe(song => {

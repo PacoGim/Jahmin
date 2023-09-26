@@ -59,9 +59,8 @@
 		{#if lyricsMode !== 'Disabled'}
 			<!-- ▼▼▼▼▼▼▼▼▼▼ If the lyrics mode is not Disabled (Lyrics selected) ▼▼▼▼▼▼▼▼▼▼ -->
 			<textarea
-				style="text-align:{['left', 'center', 'right'][
-					textAlignment
-				]};font-size: {fontSize}px;line-height: {fontSize}px;font-variation-settings:'wght' {fontWeight};"
+				style="text-align:{['left', 'center', 'right'][textAlignment]};font-size: {fontSize}px;line-height: {fontSize +
+					8}px;font-variation-settings:'wght' {fontWeight};"
 				bind:value={lyrics}
 				disabled={lyricsMode === 'Read' ? true : false}
 			/>
@@ -75,7 +74,11 @@
 
 					<container-body>
 						<p>{traduceFn('You can select lyrics on the left panel')}</p>
-						<p>{@html traduceFn("If you don't have any lyrics yet, you can right click a song and click on <bold>Show/Edit Lyrics</bold>")}</p>
+						<p>
+							{@html traduceFn(
+								"If you don't have any lyrics yet, you can right click a song and click on <bold>Show/Edit Lyrics</bold>"
+							)}
+						</p>
 					</container-body>
 				</container>
 			</no-lyrics-selected>

@@ -62,6 +62,7 @@ const ipcFunctions = {
 	onAlbumPlayNow: (callback: any) => ipcRenderer.on('album-play-now', callback),
 	onSongAddToPlayback: (callback: any) => ipcRenderer.on('song-add-to-playback', callback),
 	onSongPlayAfter: (callback: any) => ipcRenderer.on('song-play-after', callback),
+	onSongPlayNow: (callback: any) => ipcRenderer.on('song-play-now', callback),
 	onChangeSongAmount: (callback: any) => ipcRenderer.on('change-song-amount', callback),
 	onMediaKeyPressed: (callback: any) => ipcRenderer.on('media-key-pressed', callback),
 	onGlobalShortcutsRegistered: (callback: any) => ipcRenderer.on('global-shortcuts-registered', callback),

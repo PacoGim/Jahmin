@@ -10,6 +10,8 @@
 		mainAudioElement,
 		playingSongStore
 	} from '../../stores/main.store'
+	import { stopPlayerProgressFunction } from '../../stores/functions.store'
+	import type { PartialSongType, SongType } from '../../../../types/song.type'
 
 	let userChangedProgress: number = undefined
 
@@ -38,9 +40,17 @@
 		}
 	}
 
-	$: if ($playingSongStore) {
+	$: if ($playingSongStore) newSongProgress()
+
+	function newSongProgress() {
+		let newProgress = 0
 		transitionDuration = 0
-		currentProgressWidth = 0
+		currentProgressWidth = newProgress
+		$currentSongProgressStore = 0
+
+		if ($isPlaying) {
+			playTransition()
+		}
 	}
 
 	function listenToTimeChange(evt: Event) {
@@ -93,6 +103,19 @@
 		}, 100)
 	}
 
+	function stopPlayerProgress() {
+		if ($currentAudioElement === undefined) return
+
+		let newProgress = 0
+
+		$currentAudioElement.pause()
+		transitionDuration = 0
+		currentProgressWidth = newProgress
+
+		$currentAudioElement.currentTime = 0
+		$currentSongProgressStore = 0
+	}
+
 	function updatePlayerProgress(newValue: number) {
 		if (isNaN(newValue)) return
 		if ($currentAudioElement === undefined) return
@@ -113,6 +136,10 @@
 		$currentAudioElement.currentTime = newValue
 		$currentSongProgressStore = newValue
 	}
+
+	onMount(() => {
+		stopPlayerProgressFunction.set(stopPlayerProgress)
+	})
 </script>
 
 <player-progress>

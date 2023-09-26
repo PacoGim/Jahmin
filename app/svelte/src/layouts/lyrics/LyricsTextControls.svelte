@@ -153,7 +153,7 @@
 
 		box-shadow: inset 0 0 0 2px var(--color-accent-1);
 
-		transition: all 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+		transition: all 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 	}
 
 	:global(range-input.active) {

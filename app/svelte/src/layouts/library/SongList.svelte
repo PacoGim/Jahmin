@@ -35,6 +35,10 @@
 	let scrolledAmount = 0
 
 	$: {
+		console.log($songListTagConfig)
+	}
+
+	$: {
 		$selectedAlbumDir
 		previousScrollAmount = undefined
 		setScrollAmount(0)
@@ -158,17 +162,22 @@
 				$songSortConfig.sortOrder = 'asc'
 			}
 		} else {
+			let order: 'asc' | 'desc' = ['Rating', 'PlayCount', 'BitRate', 'SampleRate', 'Size'].includes(tagToSort) ? 'desc' : 'asc'
+
 			$songSortConfig = {
 				sortBy: tagToSort,
-				sortOrder: 'asc'
+				sortOrder: order
 			}
 		}
 
-		updateConfigFn({
-			userOptions: {
-				songSort: $songSortConfig
-			}
-		})
+		updateConfigFn(
+			{
+				userOptions: {
+					songSort: $songSortConfig
+				}
+			},
+			{ doUpdateLocalConfig: false }
+		)
 	}
 
 	mousePosition.subscribe(value => {
@@ -232,7 +241,7 @@
 						{renameSongTagFn(tag.value)}
 						<icon-container>
 							<CaretIcon
-								style="fill: currentColor;height: 1rem; width: 1rem;transform: rotateZ({$songSortConfig.sortOrder === 'asc'
+								style="fill: currentColor;height: 1rem; width: 1rem;transform: rotateZ({$songSortConfig.sortOrder === 'desc'
 									? '0'
 									: '180'}deg);"
 							/>

@@ -137,6 +137,8 @@ export default function (data: dataType) {
 				label: 'Show/Edit Lyrics',
 				click: () => editLyrics(clickedSongData!)
 			})
+
+			addSeparatorFn(template)
 		}
 
 		template.push({
@@ -158,6 +160,13 @@ export default function (data: dataType) {
 			label: 'Play after',
 			click: () => {
 				sendWebContentsFn('song-play-after', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
+			}
+		})
+
+		template.push({
+			label: 'Play now',
+			click: () => {
+				sendWebContentsFn('song-play-now', { clickedSong: clickedSongData, selectedSongs: selectedSongsData })
 			}
 		})
 
