@@ -1,8 +1,22 @@
-import { writable, type Writable, get } from 'svelte/store'
+import { writable, type Writable, get, type Readable, readable, derived } from 'svelte/store'
 import type { ConfigType } from '../../../types/config.type'
 import compareObjectsFn from '../functions/compareObjects.fn'
 
 export let configStore: Writable<ConfigType | undefined> = writable(undefined)
+
+const privateSongListTagConfig: Writable<ConfigType['songListTags']> = writable()
+
+export const songListTagConfig: Readable<ConfigType['songListTags']> = derived(
+	privateSongListTagConfig,
+	$privateSongListTagConfig => $privateSongListTagConfig
+)
+
+const privateSongSortConfig: Writable<ConfigType['userOptions']['songSort']> = writable()
+
+export const songSortConfig: Readable<ConfigType['userOptions']['songSort']> = derived(
+	privateSongSortConfig,
+	$privateSongSortConfig => $privateSongSortConfig
+)
 
 export let groupByConfig: Writable<string> = writable('')
 export let groupByValueConfig: Writable<string> = writable('')
@@ -11,13 +25,12 @@ export let themeConfig: Writable<string> = writable('')
 export let gridGapConfig: Writable<number> = writable(0)
 export let artSizeConfig: Writable<number> = writable(0)
 export let fontSizeConfig: Writable<number> = writable(0)
-export let songListTagConfig: Writable<ConfigType['songListTags']> = writable([])
 export let alwaysShowAlbumOverlayConfig: Writable<boolean> = writable(false)
 export let showDynamicArtistsConfig: Writable<boolean> = writable(true)
 export let showExtensionsIconsConfig: Writable<boolean> = writable(true)
 export let pauseAnimatedArtWhenAppUnfocusedConfig: Writable<boolean> = writable(true)
 export let dateOrderConfig: Writable<ConfigType['userOptions']['dateOrder']> = writable([])
-export let songSortConfig: Writable<ConfigType['userOptions']['songSort']> = writable()
+
 export let playbackShuffleConfig: Writable<ConfigType['userOptions']['playback']['shuffle']> = writable()
 export let playbackRepeatListConfig: Writable<ConfigType['userOptions']['playback']['repeatList']> = writable()
 export let playbackRepeatCurrentConfig: Writable<ConfigType['userOptions']['playback']['repeatCurrent']> = writable()
@@ -51,10 +64,6 @@ configStore.subscribe(value => {
 		fontSizeConfig.set(value?.userOptions?.fontSize)
 	}
 
-	if (!compareObjectsFn(get(songListTagConfig), value?.songListTags)) {
-		songListTagConfig.set(value?.songListTags)
-	}
-
 	if (get(alwaysShowAlbumOverlayConfig) !== value?.userOptions.alwaysShowAlbumOverlay) {
 		alwaysShowAlbumOverlayConfig.set(value?.userOptions.alwaysShowAlbumOverlay)
 	}
@@ -75,8 +84,12 @@ configStore.subscribe(value => {
 		dateOrderConfig.set(value?.userOptions.dateOrder)
 	}
 
-	if (!compareObjectsFn(get(songSortConfig), value?.userOptions.songSort)) {
-		songSortConfig.set(value?.userOptions.songSort)
+	if (!compareObjectsFn(get(privateSongListTagConfig), value?.songListTags)) {
+		privateSongListTagConfig.set(value?.songListTags)
+	}
+
+	if (!compareObjectsFn(get(privateSongSortConfig), value?.userOptions.songSort)) {
+		privateSongSortConfig.set(value?.userOptions.songSort)
 	}
 
 	if (get(playbackShuffleConfig) !== value?.userOptions.playback.shuffle) {

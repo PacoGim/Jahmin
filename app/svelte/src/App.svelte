@@ -23,7 +23,7 @@
 	import ConfigLayout from './layouts/config/ConfigLayout.svelte'
 	import EventsHandlerMiddleware from './middlewares/EventsHandlerMiddleware.svelte'
 
-	import { layoutToShow} from './stores/main.store'
+	import { layoutToShow } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 	import { confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import PromptService from './svelte_services/PromptService.svelte'

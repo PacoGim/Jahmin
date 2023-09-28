@@ -1,4 +1,5 @@
 <script lang="ts">
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import songListTagsVar from '../../../global/songListTags.var'
 	import DeleteIcon from '../../../icons/DeleteIcon.svelte'
 
@@ -13,11 +14,13 @@
 	}
 
 	function removeTagFromTagList(tagIndex: number) {
-		// Remove tag from config
-		$songListTagConfig.splice(tagIndex, 1)
+		let tagListCopy = [...$songListTagConfig]
 
-		if ($songListTagConfig.length === 0) {
-			$songListTagConfig = [
+		// Remove tag from config
+		tagListCopy.splice(tagIndex, 1)
+
+		if (tagListCopy.length === 0) {
+			tagListCopy = [
 				{
 					value: 'Track',
 					width: 100
@@ -41,7 +44,9 @@
 			]
 		}
 
-		$songListTagConfig = $songListTagConfig
+		updateConfigFn({
+			songListTags: tagListCopy
+		})
 	}
 </script>
 

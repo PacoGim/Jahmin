@@ -1,5 +1,7 @@
 export default function (tagName: string) {
 	switch (tagName) {
+		case 'Track':
+			return '#'
 		case 'SampleRate':
 			return 'Sample Rate'
 		case 'Sample Rate':

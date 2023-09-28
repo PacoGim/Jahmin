@@ -11,9 +11,11 @@
 
 	let isMounted = false
 
-	$: saveSelectedTagsToConfig($songListTagConfig)
+	// $: saveSelectedTagsToConfig($songListTagConfig)
 
-	function saveSelectedTagsToConfig(newSelectedTags: ConfigType['songListTags']) {
+
+
+/* 	function saveSelectedTagsToConfig(newSelectedTags: ConfigType['songListTags']) {
 		if (isMounted === true) {
 			updateConfigFn(
 				{
@@ -22,7 +24,7 @@
 				{ doUpdateLocalConfig: false }
 			)
 		}
-	}
+	} */
 
 	onMount(() => {
 		isMounted = true

@@ -35,8 +35,6 @@
 			})
 		})
 
-		// $songListTagConfig = [...newTags]
-
 		updateConfigFn({
 			songListTags: [...newTags]
 		})

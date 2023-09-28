@@ -2,7 +2,8 @@
 	import type { SongType } from '../../../../types/song.type'
 	import cssVariablesService from '../../services/cssVariables.service'
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
-	import { configStore, songAmountConfig, songListTagConfig, songSortConfig } from '../../stores/config.store'
+	import { songAmountConfig, songListTagConfig, songSortConfig } from '../../stores/config.store'
+	import type { ConfigType } from '../../../../types/config.type'
 
 	import {
 		elementMap,
@@ -16,6 +17,7 @@
 		songListStore,
 		triggerScrollToSongEvent
 	} from '../../stores/main.store'
+
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 	import SongListBackground from './SongListBackground.svelte'
 	import updateConfigFn from '../../functions/updateConfig.fn'
@@ -35,10 +37,6 @@
 	let scrolledAmount = 0
 
 	$: {
-		console.log($songListTagConfig)
-	}
-
-	$: {
 		$selectedAlbumDir
 		previousScrollAmount = undefined
 		setScrollAmount(0)
@@ -49,7 +47,6 @@
 		$songListStore
 		$songAmountConfig
 		previousScrollAmount = undefined
-		// trimSongArray()
 	}
 
 	$: changeSongListHeight($songAmountConfig)
@@ -63,11 +60,17 @@
 		selectAllSongs()
 	}
 
-	$: if ($songListTagConfig && dataContainerElement) {
+	$: if (copyListTag && dataContainerElement) {
 		setTimeout(() => {
 			dataContainerWidth = dataContainerElement.getClientRects()[0].width
 		}, 100)
 	}
+
+	let copyListTag: ConfigType['songListTags']
+
+	songListTagConfig.subscribe(value => {
+		copyListTag = JSON.parse(JSON.stringify(value))
+	})
 
 	function selectAllSongs() {
 		$selectedSongsStore = [...$songListStore.map(song => song.ID)]
@@ -85,8 +88,6 @@
 		}
 
 		scrollAmount = amount
-
-		// trimSongArray()
 
 		setScrollProgress()
 	}
@@ -155,29 +156,28 @@
 	}
 
 	function updateSort(tagToSort) {
-		if ($songSortConfig.sortBy === tagToSort) {
-			if ($songSortConfig.sortOrder === 'asc') {
-				$songSortConfig.sortOrder = 'desc'
+		let copySongSort = { ...$songSortConfig }
+
+		if (copySongSort.sortBy === tagToSort) {
+			if (copySongSort.sortOrder === 'asc') {
+				copySongSort.sortOrder = 'desc'
 			} else {
-				$songSortConfig.sortOrder = 'asc'
+				copySongSort.sortOrder = 'asc'
 			}
 		} else {
 			let order: 'asc' | 'desc' = ['Rating', 'PlayCount', 'BitRate', 'SampleRate', 'Size'].includes(tagToSort) ? 'desc' : 'asc'
 
-			$songSortConfig = {
+			copySongSort = {
 				sortBy: tagToSort,
 				sortOrder: order
 			}
 		}
 
-		updateConfigFn(
-			{
-				userOptions: {
-					songSort: $songSortConfig
-				}
-			},
-			{ doUpdateLocalConfig: false }
-		)
+		updateConfigFn({
+			userOptions: {
+				songSort: copySongSort
+			}
+		})
 	}
 
 	mousePosition.subscribe(value => {
@@ -188,9 +188,9 @@
 
 			let tag = elementActive.dataset.tag
 
-			let tagIndex = $songListTagConfig.findIndex(item => item.value === tag)
+			let tagIndex = copyListTag.findIndex(item => item.value === tag)
 
-			let currentTag = $songListTagConfig[tagIndex]
+			let currentTag = copyListTag[tagIndex]
 
 			let newSize = currentTag.width + newPosX
 
@@ -200,16 +200,15 @@
 
 			currentTag.width = newSize
 
-			$songListTagConfig[tagIndex] = currentTag
+			copyListTag[tagIndex] = currentTag
+
+			copyListTag = copyListTag
 
 			clearTimeout(saveConfigDebounce)
 			saveConfigDebounce = setTimeout(() => {
-				updateConfigFn(
-					{
-						songListTags: $songListTagConfig
-					},
-					{ doUpdateLocalConfig: false }
-				)
+				updateConfigFn({
+					songListTags: copyListTag
+				})
 			}, 1000)
 		}
 	})
@@ -232,7 +231,7 @@
 	>
 		<data-header>
 			<data-row>
-				{#each $songListTagConfig as tag, index (index)}
+				{#each copyListTag as tag, index (index)}
 					<data-value
 						style={`width: ${tag.width}px;`}
 						onClick={() => updateSort(tag.value)}
@@ -261,7 +260,7 @@
 					class:disabled={song.IsEnabled === 0}
 					class:playing={$playingSongStore?.ID === song?.ID}
 				>
-					{#each $songListTagConfig as tag, index (index)}
+					{#each copyListTag as tag, index (index)}
 						<data-value style={`width: ${tag.width}px;`}>
 							<SongTag {song} {tag} on:starChange={setStar} />
 						</data-value>
@@ -280,11 +279,37 @@
 	song-list-svlt {
 		position: relative;
 	}
+
 	data-separator {
+		position: relative;
 		display: inline-block;
 		width: 2px;
+		border-top: none;
+		border-bottom: none;
 		background-color: transparent;
 		margin: 0 0.25rem;
+		cursor: col-resize;
+	}
+
+	data-separator::before {
+		position: absolute;
+		content: '';
+		transform: translateX(-2px);
+		background-color: transparent;
+		height: 100%;
+		width: 2px;
+		display: inline-block;
+		cursor: col-resize;
+	}
+
+	data-separator::after {
+		content: '';
+		position: absolute;
+		transform: translateX(2px);
+		background-color: transparent;
+		height: 100%;
+		width: 2px;
+		display: inline-block;
 		cursor: col-resize;
 	}
 
@@ -316,8 +341,6 @@
 
 	data-container data-header data-separator {
 		transition: background-color 350ms linear;
-
-		/* background-color: green; */
 	}
 	data-container data-header:hover data-separator {
 		background-color: #fff;

@@ -2,13 +2,18 @@
 	import songListTagsVar from '../../../global/songListTags.var'
 	import type { SelectedTagNameType } from '../../../../../types/selectedTag.type'
 	import { songListTagConfig } from '../../../stores/config.store'
+	import updateConfigFn from '../../../functions/updateConfig.fn'
 
 	let optionBind: SelectedTagNameType = 'ChooseTag'
 
 	function addTag() {
 		if ($songListTagConfig.find(tag => tag.value === optionBind) === undefined) {
-			$songListTagConfig.push({ value: optionBind, width: 100 })
-			$songListTagConfig = $songListTagConfig
+			let listTagCopy = [...$songListTagConfig]
+			listTagCopy.push({ value: optionBind, width: 100 })
+
+			updateConfigFn({
+				songListTags: listTagCopy
+			})
 		}
 		optionBind = 'ChooseTag'
 	}

@@ -22,3 +22,9 @@
 * When playing a lot of super short audio, the player stops
 
 * (Hard to reproduce) Try to figure why the cover don't load after the app is minimized for a long time
+
+* If:
+  Play album
+  Add album to playback
+  Then randomize twice
+  The added album is removed from playlist

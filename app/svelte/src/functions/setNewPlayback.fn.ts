@@ -2,7 +2,6 @@ import { setWaveSource } from '../services/waveform.service'
 import {
 	albumPlayingDirStore,
 	currentSongDurationStore,
-	currentSongProgressStore,
 	playbackStore,
 	playingSongStore
 } from '../stores/main.store'
