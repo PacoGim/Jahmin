@@ -46,6 +46,7 @@ const ipcFunctions = {
 	openGeniusWebpage: (songTitle: string, songArtist: string) => ipcRenderer.send('open-genius-webpage', songTitle, songArtist),
 	setPlayerInfo: (songTitle: string, songArtist: string, isPlaying: boolean) =>
 		ipcRenderer.send('set-player-info', songTitle, songArtist, isPlaying),
+	setProgressBar: (progress: number) => ipcRenderer.send('set-progress-bar', progress),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),

@@ -219,7 +219,6 @@
 		const duration /* in seconds */ = $playingSongStore.Duration
 
 		$currentSongDurationStore = duration
-		// $currentSongProgressStore = currentTime
 
 		// Update time only if the current audio element is playing.
 		if (audioElements[this.id].isPlaying === true) {

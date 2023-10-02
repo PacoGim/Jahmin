@@ -12,6 +12,7 @@
 	} from '../../stores/main.store'
 	import { stopPlayerProgressFunction } from '../../stores/functions.store'
 	import type { PartialSongType, SongType } from '../../../../types/song.type'
+	import { currentPlayerTime } from '../../stores/player.store'
 
 	let userChangedProgress: number = undefined
 
@@ -41,6 +42,8 @@
 	}
 
 	$: if ($playingSongStore) newSongProgress()
+
+	$: window.ipc.setProgressBar((100 / $currentSongDurationStore) * $currentPlayerTime || 0)
 
 	function newSongProgress() {
 		let newProgress = 0

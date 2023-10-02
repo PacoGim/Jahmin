@@ -15,6 +15,7 @@ export async function startIPC() {
 	await (await import('../ipc/reloadApp.ipc')).default(ipcMain)
 	await (await import('../ipc/openGeniusWebpage.ipc')).default(ipcMain)
 	await (await import('../ipc/setPlayerInfo.ipc')).default(ipcMain)
+	await (await import('../ipc/setProgressBar.ipc')).default(ipcMain)
 
 	/********************** Two-way **********************/
 	await (await import('../ipc/configGet.ipc')).default(ipcMain)

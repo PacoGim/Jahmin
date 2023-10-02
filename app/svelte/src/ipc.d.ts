@@ -47,6 +47,7 @@ declare global {
 			reloadApp: () => void
 			openGeniusWebpage: (songTitle: string, songArtist: string) => void
 			setPlayerInfo: (songTitle: string, songArtist: string, isPlaying: boolean) => void
+			setProgressBar: (progress: number) => void
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt
