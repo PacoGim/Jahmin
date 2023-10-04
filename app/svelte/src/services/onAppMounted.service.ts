@@ -21,7 +21,8 @@ import { runThemeHandler } from './themeHandler.service'
 import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVariables.fn'
 import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 import { pauseAnimatedArtWhenAppUnfocusedConfig } from '../stores/config.store'
-import { stopPlayerProgressFunction } from '../stores/functions.store'
+import { setPlayerProgressFunction, stopPlayerProgressFunction } from '../stores/functions.store'
+import { currentPlayerTime } from '../stores/player.store'
 
 let appIdleDebounce = getAppIdleDebounce()
 
@@ -167,19 +168,20 @@ function afterLanguageChangeReload() {
 		layoutToShow.set('Config')
 
 		currentAudioElement.subscribe(audioPlayer => {
-			audioPlayer.addEventListener('loadeddata', () => {
-				let audioElement = get(currentAudioElement)
+			const controller = new AbortController()
+			const signal = controller.signal
+			audioPlayer.addEventListener(
+				'loadeddata',
+				() => {
+					if (afterReload.wasPlaying === true) {
+						get(setPlayerProgressFunction)(afterReload.duration, { playNow: true })
+					}
 
-				audioElement.currentTime = afterReload.duration
-
-				if (afterReload.wasPlaying === true) {
-					let volume = localStorage.getItem('volume')
-					audioElement.volume = Number(volume)
-					audioPlayer.play()
-				}
-
-				localStorage.setItem('afterReload', undefined)
-			})
+					localStorage.setItem('afterReload', undefined)
+					controller.abort()
+				},
+				{ signal }
+			)
 		})()
 	}
 }

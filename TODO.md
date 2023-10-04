@@ -23,6 +23,8 @@
 
 * (Hard to reproduce) Try to figure why the cover don't load after the app is minimized for a long time
 
+* (Important) Check if a song is actualy playing
+
 * If:
   Play album
   Add album to playback

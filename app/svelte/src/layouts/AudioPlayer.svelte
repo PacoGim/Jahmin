@@ -16,7 +16,6 @@
 		playingSongStore,
 		isPlaying,
 		currentSongDurationStore,
-		currentSongProgressStore,
 		isAppIdle,
 		triggerScrollToSongEvent
 	} from '../stores/main.store'

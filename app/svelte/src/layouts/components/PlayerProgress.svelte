@@ -10,8 +10,7 @@
 		mainAudioElement,
 		playingSongStore
 	} from '../../stores/main.store'
-	import { stopPlayerProgressFunction } from '../../stores/functions.store'
-	import type { PartialSongType, SongType } from '../../../../types/song.type'
+	import { setPlayerProgressFunction, stopPlayerProgressFunction } from '../../stores/functions.store'
 	import { currentPlayerTime } from '../../stores/player.store'
 
 	let userChangedProgress: number = undefined
@@ -31,7 +30,7 @@
 		$altAudioElement.addEventListener('timeupdate', listenToTimeChange)
 	}
 
-	$: updatePlayerProgress(userChangedProgress)
+	$: setPlayerProgress(userChangedProgress, { playNow: true })
 
 	$: {
 		if ($isPlaying === false) {
@@ -45,14 +44,21 @@
 
 	$: window.ipc.setProgressBar((100 / $currentSongDurationStore) * $currentPlayerTime || 0)
 
+	$: {
+		console.log($currentAudioElement?.currentTime)
+	}
+
 	function newSongProgress() {
-		let newProgress = 0
-		transitionDuration = 0
-		currentProgressWidth = newProgress
-		$currentSongProgressStore = 0
+		// let newProgress = 0
+		// transitionDuration = 0
+		// currentProgressWidth = newProgress
+		// $currentSongProgressStore = 0
 
 		if ($isPlaying) {
 			playTransition()
+			setPlayerProgress(0, { playNow: true })
+		} else {
+			setPlayerProgress(0, { playNow: false })
 		}
 	}
 
@@ -119,7 +125,7 @@
 		$currentSongProgressStore = 0
 	}
 
-	function updatePlayerProgress(newValue: number) {
+	function setPlayerProgress(newValue: number, { playNow }: { playNow: boolean }) {
 		if (isNaN(newValue)) return
 		if ($currentAudioElement === undefined) return
 
@@ -129,12 +135,15 @@
 		transitionDuration = 0
 		currentProgressWidth = newProgress
 
-		clearTimeout(pauseDebounce)
-		pauseDebounce = setTimeout(() => {
-			$currentAudioElement.play()
-			transitionDuration = calculateTransition()
-			currentProgressWidth = 100
-		}, 250)
+		if (playNow) {
+			clearTimeout(pauseDebounce)
+			pauseDebounce = setTimeout(() => {
+				$currentAudioElement.play()
+
+				transitionDuration = calculateTransition()
+				currentProgressWidth = 100
+			}, 250)
+		}
 
 		$currentAudioElement.currentTime = newValue
 		$currentSongProgressStore = newValue
@@ -142,6 +151,7 @@
 
 	onMount(() => {
 		stopPlayerProgressFunction.set(stopPlayerProgress)
+		setPlayerProgressFunction.set(setPlayerProgress)
 	})
 </script>
 
