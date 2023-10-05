@@ -1,15 +1,32 @@
 <script lang="ts">
-	let isShowConfirmDownloadPrompt = false
-	let isShowDownloadProgress = true
+	import { onMount } from 'svelte'
 
-	function handleYesButtonClick() {
-		isShowDownloadProgress = true
-		isShowConfirmDownloadPrompt = false
-	}
+	let isShowConfirmDownloadPrompt = true
+	let isShowDownloadProgress = false
+
+	let currentDownloadPercent = 0
 
 	export function showConfirmDownloadPrompt() {
 		isShowConfirmDownloadPrompt = true
 	}
+
+	function handleYesButtonClick() {
+		isShowDownloadProgress = true
+		isShowConfirmDownloadPrompt = false
+		window.ipc.startFfmpegDownload()
+	}
+
+	onMount(() => {
+		setTimeout(() => {
+			//@ts-expect-error
+			document.querySelector('confirm-download-prompt button.confirm').click()
+		}, 1000)
+
+		window.ipc.onFfmpegDownload((_, result) => {
+			console.log(result)
+			currentDownloadPercent = result
+		})
+	})
 </script>
 
 <download-ffmpeg-svlt class:hide={isShowConfirmDownloadPrompt === false && isShowDownloadProgress === false}>
@@ -30,10 +47,10 @@
 		<prompt-body>
 			<download-info>
 				<info-text> Downloading </info-text>
-				<info-percent-done> 50% </info-percent-done>
+				<info-percent-done> {currentDownloadPercent}% </info-percent-done>
 			</download-info>
 			<progress-bar>
-				<progress-fill />
+				<progress-fill style="width: {currentDownloadPercent}%;" />
 			</progress-bar>
 		</prompt-body>
 		<prompt-buttons>
@@ -56,18 +73,14 @@
 		background-color: rgba(0, 0, 0, 0.5);
 	}
 
-	download-ffmpeg-svlt.hide {
-		display: none;
-	}
-
 	.prompt {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		background-color: var(--color-bg-1);
 		color: var(--color-fg-2);
-		border: 5px solid var(--color-fg-2);
-		border-radius: 10px;
+		box-shadow: 0px 0px 100px 0px #000;
+		border-radius: 6px;
 		padding: 2rem;
 		text-align: center;
 		font-size: 1.12rem;
@@ -76,7 +89,7 @@
 		min-width: 500px;
 	}
 
-	confirm-download-prompt.hide {
+	.hide {
 		display: none;
 	}
 
@@ -118,16 +131,16 @@
 		width: 66%;
 		border-radius: 100vmax;
 		margin: 0 auto;
-		background-color: red;
+		background-color: var(--color-accent-3);
 	}
 
 	progress-fill {
 		margin: 0 2px;
 		display: block;
 		height: 8px;
-		width: 50%;
+		/* width: 50%; */
 		border-radius: 100vmax;
-		background-color: blue;
+		background-color: #fff;
 	}
 
 	download-info {

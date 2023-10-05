@@ -47,6 +47,7 @@ const ipcFunctions = {
 	setPlayerInfo: (songTitle: string, songArtist: string, isPlaying: boolean) =>
 		ipcRenderer.send('set-player-info', songTitle, songArtist, isPlaying),
 	setProgressBar: (progress: number) => ipcRenderer.send('set-progress-bar', progress),
+	startFfmpegDownload: () => ipcRenderer.send('start-ffmpeg-download'),
 	/********************** Main to Renderer **********************/
 	onGetAllSongsFromRenderer: (callback: any) => ipcRenderer.on('get-all-songs-from-renderer', callback),
 	handleWebStorage: (callback: any) => ipcRenderer.on('web-storage', callback),
@@ -74,6 +75,7 @@ const ipcFunctions = {
 	onSortsongs: (callback: any) => ipcRenderer.on('sort-songs', callback),
 	onResetSongPlayCount: (callback: any) => ipcRenderer.on('reset-song-play-count', callback),
 	onShowDownloadFfmpegPrompt: (callback: any) => ipcRenderer.on('show-download-ffmpeg-prompt', callback),
+	onFfmpegDownload: (callback: any) => ipcRenderer.on('ffmpeg-download', callback),
 	/********************** Database **********************/
 	bulkRead,
 	updatePlayCount

@@ -48,6 +48,7 @@ declare global {
 			openGeniusWebpage: (songTitle: string, songArtist: string) => void
 			setPlayerInfo: (songTitle: string, songArtist: string, isPlaying: boolean) => void
 			setProgressBar: (progress: number) => void
+			startFfmpegDownload: () => void
 			/********************** Main to Renderer **********************/
 			handleNewImageArt
 			handleNewVideoArt
@@ -76,6 +77,7 @@ declare global {
 			onSortsongs: (callback: any) => void
 			onResetSongPlayCount: (callback: any) => void
 			onShowDownloadFfmpegPrompt: (callback: any) => void
+			onFfmpegDownload: (callback: any) => void
 			/********************** Database **********************/
 			bulkRead: (data: {
 				queryId?: string
