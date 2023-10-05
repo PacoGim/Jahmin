@@ -1,6 +1,8 @@
 import { globalShortcut } from 'electron'
 import sendWebContentsFn from '../functions/sendWebContents.fn'
+
 import { fetchSongsTag } from '../services/librarySongs.service'
+import ffmpegBinaryHandlerService from '../services/ffmpegBinaryHandler.service'
 
 let isAppReady = false
 
@@ -15,6 +17,17 @@ export default function (ipcMain: Electron.IpcMain) {
 		registerGlobalShortcuts()
 
 		fetchSongsTag()
+
+		ffmpegBinaryHandlerService.checkIfRightVersionFfmpegAvailable().then((response: string | null | 'SIGKILL') => {
+			if (response === null) {
+				// Ask the user to download ffmpeg
+				sendWebContentsFn('show-download-ffmpeg-prompt', response)
+			} else if (response === 'SIGKILL') {
+				// Do something, don't know what yet
+			} else {
+				// Everything is fine
+			}
+		})
 	})
 }
 

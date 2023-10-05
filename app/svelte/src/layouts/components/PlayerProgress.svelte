@@ -44,10 +44,6 @@
 
 	$: window.ipc.setProgressBar((100 / $currentSongDurationStore) * $currentPlayerTime || 0)
 
-	$: {
-		console.log($currentAudioElement?.currentTime)
-	}
-
 	function newSongProgress() {
 		// let newProgress = 0
 		// transitionDuration = 0

@@ -75,6 +75,7 @@ declare global {
 			onGroupSelected: (callback: any) => void
 			onSortsongs: (callback: any) => void
 			onResetSongPlayCount: (callback: any) => void
+			onShowDownloadFfmpegPrompt: (callback: any) => void
 			/********************** Database **********************/
 			bulkRead: (data: {
 				queryId?: string

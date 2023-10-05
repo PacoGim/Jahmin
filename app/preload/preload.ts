@@ -73,6 +73,7 @@ const ipcFunctions = {
 	onGroupSelected: (callback: any) => ipcRenderer.on('group-selected', callback),
 	onSortsongs: (callback: any) => ipcRenderer.on('sort-songs', callback),
 	onResetSongPlayCount: (callback: any) => ipcRenderer.on('reset-song-play-count', callback),
+	onShowDownloadFfmpegPrompt: (callback: any) => ipcRenderer.on('show-download-ffmpeg-prompt', callback),
 	/********************** Database **********************/
 	bulkRead,
 	updatePlayCount
