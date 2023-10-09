@@ -11,9 +11,11 @@ export function selectGeneric(queryData: {
 }) {
 	return new Promise((resolve, reject) => {
 		let sqliteQuery = buildSqliteQuery(queryData)
-		// console.log(sqliteQuery)
+		console.log(sqliteQuery)
 
+		// console.time('Get DB - ' + sqliteQuery)
 		getDb().all(sqliteQuery, [], (err, songs: SongType[]) => {
+			// console.timeEnd('Get DB - ' + sqliteQuery)
 			if (err) {
 				return reject(err)
 			}

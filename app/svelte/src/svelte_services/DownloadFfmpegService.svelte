@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	let isShowConfirmDownloadPrompt = true
+	let isShowConfirmDownloadPrompt = false
 	let isShowDownloadProgress = false
 
-	let currentDownloadPercent = 0
+	let ffmpegDownloadStatus = {
+		operation: 'Waiting',
+		progress: 0
+	}
 
 	export function showConfirmDownloadPrompt() {
 		isShowConfirmDownloadPrompt = true
@@ -17,14 +20,12 @@
 	}
 
 	onMount(() => {
-		setTimeout(() => {
-			//@ts-expect-error
-			document.querySelector('confirm-download-prompt button.confirm').click()
-		}, 1000)
-
 		window.ipc.onFfmpegDownload((_, result) => {
-			console.log(result)
-			currentDownloadPercent = result
+			ffmpegDownloadStatus = result
+
+			if (result.operation === 'Process done') {
+				isShowDownloadProgress = false
+			}
 		})
 	})
 </script>
@@ -46,11 +47,11 @@
 		<prompt-title> Ffmpeg is soon downloading </prompt-title>
 		<prompt-body>
 			<download-info>
-				<info-text> Downloading </info-text>
-				<info-percent-done> {currentDownloadPercent}% </info-percent-done>
+				<info-text> {ffmpegDownloadStatus.operation} </info-text>
+				<info-percent-done> {ffmpegDownloadStatus.progress}% </info-percent-done>
 			</download-info>
 			<progress-bar>
-				<progress-fill style="width: {currentDownloadPercent}%;" />
+				<progress-fill style="width: {ffmpegDownloadStatus.progress}%;" />
 			</progress-bar>
 		</prompt-body>
 		<prompt-buttons>
