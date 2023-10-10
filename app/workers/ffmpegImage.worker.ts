@@ -1,13 +1,12 @@
 import { parentPort } from 'worker_threads'
 import { spawn } from 'child_process'
-import { join, join as pathJoin } from 'path'
-// import getOsFn from '../functions/getOs.fn'
+import { join as pathJoin } from 'path'
+import getOsFn from '../functions/getOs.fn'
 import generateIdFn from '../functions/generateId.fn'
-import fs, { existsSync } from 'fs'
+import fs from 'fs'
 
-// let os /* Operating system */ = getOsFn()
 
-// let ffmpegPath = pathJoin(__dirname, `../../binaries/${os}/ffmpeg`)
+let ffmpegPath = pathJoin(__dirname, `../../bin/ffmpeg`)
 
 parentPort?.on('message', message => {
 	if (message.type === 'handle-art-compression') {
@@ -30,12 +29,6 @@ function handleArtCompression(message: any) {
 
 	if (!fs.existsSync(tempFolder)) {
 		fs.mkdirSync(tempFolder, { recursive: true })
-	}
-
-	const ffmpegPath = join(appDataPath, 'ffmpeg/ffmpeg')
-
-	if (!existsSync(ffmpegPath)) {
-		return
 	}
 
 	spawn(`"${ffmpegPath}" -i "${artPath}" -vf scale=${size * 2}:${size * 2} "${tempFilePath}"`, [], { shell: true }).on(
@@ -67,12 +60,6 @@ function handleArtColor(message: any) {
 
 	if (!fs.existsSync(tempFolder)) {
 		fs.mkdirSync(tempFolder, { recursive: true })
-	}
-
-	const ffmpegPath = join(appDataPath, 'ffmpeg/ffmpeg')
-
-	if (!existsSync(ffmpegPath)) {
-		return
 	}
 
 	spawn(`"${ffmpegPath}" -i "${artPath}" "${tempFilePath}"`, [], { shell: true }).on('close', code => {

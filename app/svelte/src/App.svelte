@@ -27,7 +27,6 @@
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
 	import {
 		confirmService,
-		downloadFfmpegService,
 		promptService,
 		rangeInputService,
 		storageService
@@ -37,7 +36,6 @@
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
 	import LyricsLayout from './layouts/lyrics/!LyricsLayout.svelte'
-	import DownloadFfmpegService from './svelte_services/DownloadFfmpegService.svelte'
 
 	onMount(() => {
 		onAppMountedService()
@@ -72,7 +70,6 @@
 <ConfirmService bind:this={$confirmService} />
 <RangeInputService bind:this={$rangeInputService} />
 <StorageService bind:this={$storageService} />
-<DownloadFfmpegService bind:this={$downloadFfmpegService} />
 
 <style>
 	search-container {

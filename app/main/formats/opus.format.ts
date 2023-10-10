@@ -9,8 +9,6 @@ import { SongType } from '../../types/song.type'
 
 import { Worker } from 'worker_threads'
 import getDirectoryFn from '../functions/getDirectory.fn'
-import getAppDataPathFn from '../functions/getAppDataPath.fn'
-import sendWebContentsFn from '../functions/sendWebContents.fn'
 
 /********************** Write Opus Tags **********************/
 let ffmpegWorker: Worker
@@ -24,7 +22,7 @@ export function writeOpusTags(filePath: string, newTags: any): Promise<any> {
 
 		let command = `-i "${filePath}" -y -map_metadata 0:s:a:0 -codec copy ${ffmpegString} "${tempFileName}"`
 
-		useWorker({ filePath, tempFileName, command, appDataPath: getAppDataPathFn() }, ffmpegWorker).then(response => {
+		useWorker({ filePath, tempFileName, command }, ffmpegWorker).then(response => {
 			fs.access(response.results.tempFileName, err => {
 				if (!err) {
 					fs.unlink(response.results.filePath, () => {

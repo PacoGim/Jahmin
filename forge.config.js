@@ -3,7 +3,7 @@ module.exports = {
 		asar: false,
 		icon: './dist/icons/logo',
 		ignore: file => {
-			if (file.includes('dist/binaries/win32/ffmpeg.exe')) {
+			if (file.includes('resources')) {
 				return true
 			}
 			if (file.includes('.git')) {

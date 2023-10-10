@@ -22,7 +22,6 @@
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
 	import getRandomNumberBetweenTwoValuesFn from '../functions/getRandomNumberBetweenTwoValues.fn'
 	import updatePlayCountFn from '../functions/updatePlayCount.fn'
-	import { downloadFfmpegService } from '../stores/service.store'
 
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
@@ -228,11 +227,5 @@
 		songs.forEach(song => {
 			updatePlayCountFn(song.ID, 'reset')
 		})
-	})
-
-	window.ipc.onShowDownloadFfmpegPrompt((_, result) => {
-		if (result === null) {
-			$downloadFfmpegService.showConfirmDownloadPrompt()
-		}
 	})
 </script>
