@@ -1,19 +1,29 @@
 import { parentPort } from 'worker_threads'
 import { spawn } from 'child_process'
-import { join as pathJoin } from 'path'
-import fs from 'fs'
-import getOsFn from '../functions/getOs.fn'
+import path from 'path'
+import { existsSync } from 'fs'
+// import sendWebContentsFn from '../main/functions/sendWebContents.fn'
 
-let os /* Operating system */ = getOsFn()
+// import { join as pathJoin } from 'path'
+// import fs from 'fs'
+// import getOsFn from '../functions/getOs.fn'
 
-let ffmpegPath = pathJoin(__dirname, `../../binaries/${os}`)
+// let os /* Operating system */ = getOsFn()
 
-let ffmpegBinary = fs.readdirSync(ffmpegPath)
+// let ffmpegPath = pathJoin(__dirname, `../../binaries/${os}`)
 
-ffmpegPath = pathJoin(ffmpegPath, ffmpegBinary[0])
+// let ffmpegBinary = fs.readdirSync(ffmpegPath)
+
+// ffmpegPath = pathJoin(ffmpegPath, ffmpegBinary[0])
 
 parentPort?.on('message', data => {
-	let { filePath, tempFileName, command, workerCallId } = data
+	let { filePath, tempFileName, command, workerCallId, appDataPath } = data
+
+	const ffmpegPath = path.join(appDataPath, 'ffmpeg/ffmpeg')
+
+	if (!existsSync(ffmpegPath)) {
+		return
+	}
 
 	let status = -1
 

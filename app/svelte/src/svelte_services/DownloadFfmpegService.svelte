@@ -39,7 +39,7 @@
 		</prompt-body>
 		<prompt-buttons>
 			<button class="confirm" on:click={handleYesButtonClick}>Yes</button>
-			<button class="cancel">No</button>
+			<button class="cancel" on:click={() => (isShowConfirmDownloadPrompt = false)}>No</button>
 		</prompt-buttons>
 	</confirm-download-prompt>
 

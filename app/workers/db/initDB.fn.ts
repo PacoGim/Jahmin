@@ -25,6 +25,10 @@ export default function (appDataPath: string) {
 	})
 
 	createTableFn(db)
+
+	db.addListener('error', err => {
+		console.log(err)
+	})
 }
 
 export function getDb() {

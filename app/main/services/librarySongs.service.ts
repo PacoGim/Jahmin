@@ -113,13 +113,6 @@ function getTask(processIndex: number, processesRunning: boolean[]) {
 					type: 'create',
 					data: tags
 				})
-
-				// console.log(tags?.Title, ' ', tags?.ID % 4)
-
-				// sendWebContentsFn('web-storage', {
-				// 	type: 'insert',
-				// 	data: tags
-				// })
 			})
 			.catch()
 			.finally(() => {
