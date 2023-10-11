@@ -17,6 +17,15 @@ import getDockMenuFn from './functions/getDockMenu.fn'
 
 let browserWindow: BrowserWindow
 
+
+if(process.platform==='win32'){
+	if(require('electron-squirrel-startup')){
+		app.quit()
+	}
+}
+
+/*
+
 chokidarWatch([
 	path.join(__dirname, '../svelte'),
 	path.join(__dirname, '../index.html'),
@@ -25,6 +34,7 @@ chokidarWatch([
 ]).on('change', () => {
 	getMainWindow().reload()
 })
+*/
 
 app.whenReady().then(() => {
 	createWindow()

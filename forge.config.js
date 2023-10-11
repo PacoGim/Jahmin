@@ -22,7 +22,9 @@ module.exports = {
 		},
 		{
 			name: '@electron-forge/maker-squirrel',
-			config: {}
+			config: {
+				loadingGif: './resources/forge_assets/jahmin_install_loading.gif'
+			}
 		},
 		{
 			name: '@electron-forge/maker-deb',
