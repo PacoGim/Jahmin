@@ -28,7 +28,10 @@ module.exports = {
 		},
 		{
 			name: '@electron-forge/maker-deb',
-			config: {}
+			config: {
+				productName: 'Jahmin',
+				name: 'Jahmin'
+			}
 		},
 		{
 			name: '@electron-forge/maker-rpm',
