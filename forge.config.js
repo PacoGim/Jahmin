@@ -3,9 +3,9 @@ module.exports = {
 		asar: false,
 		icon: './dist/icons/logo',
 		ignore: file => {
-			if (file.includes('resources')) {
-				return true
-			}
+			// if (file.includes('resources')) {
+			// 	return true
+			// }
 			if (file.includes('.git')) {
 				return true
 			}

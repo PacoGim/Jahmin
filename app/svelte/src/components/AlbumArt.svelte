@@ -44,7 +44,7 @@
 	}
 
 	function loadArt(artPath, elementId, intersectionRoot, height, width) {
-		let size = height || width
+		let size = Math.round(height || width)
 
 		if (intersectionRoot !== undefined) {
 			intersectionObserverFn(elementId, intersectionRoot).then(() => {
