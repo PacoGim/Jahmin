@@ -45,6 +45,18 @@
 				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
 		/>
 	</nav-button>
+	<nav-button
+		on:click={() => ($layoutToShow = 'Playlist')}
+		on:keypress={() => ($layoutToShow = 'Playlist')}
+		tabindex="-1"
+		role="button"
+	>
+		<SpeakIcon
+			style="{$layoutToShow === 'Playlist'
+				? `fill:hsl(var(--art-hue), var(--art-saturation), 80%);`
+				: 'fill:hsl(var(--art-hue), var(--art-saturation), 10%);'};height: var(--icon-size);width: var(--icon-size);padding: .5rem;"
+		/>
+	</nav-button>
 	<separator />
 	<nav-button
 		class="configButton"
@@ -66,7 +78,7 @@
 		grid-area: navigation-svlt;
 
 		display: grid;
-		grid-template-rows: repeat(3, max-content) auto max-content;
+		grid-template-rows: repeat(4, max-content) auto max-content;
 
 		border-right: 2px solid rgba(255, 255, 255, 0.05);
 

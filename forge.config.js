@@ -1,4 +1,4 @@
-const appIcon='./dist/icons/logo'
+const appIcon = './dist/icons/logo'
 
 module.exports = {
 	packagerConfig: {
@@ -26,8 +26,8 @@ module.exports = {
 			name: '@electron-forge/maker-squirrel',
 			config: {
 				loadingGif: './resources/forge_assets/jahmin_install_loading.gif',
-				iconUrl:'https://raw.githubusercontent.com/PacoGim/Jahmin/main/dist/icons/logo.ico',
-				setupIcon:'dist/icons/logo.ico',
+				iconUrl: 'https://raw.githubusercontent.com/PacoGim/Jahmin/main/dist/icons/logo.ico',
+				setupIcon: 'dist/icons/logo.ico'
 			}
 		},
 		{

@@ -36,6 +36,7 @@
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
 	import StorageService from './svelte_services/StorageService.svelte'
 	import LyricsLayout from './layouts/lyrics/!LyricsLayout.svelte'
+	import PlaylistLayout from './layouts/playlist/!PlaylistLayout.svelte'
 
 	onMount(() => {
 		onAppMountedService()
@@ -62,6 +63,8 @@
 			<PlaybackLayout />
 		{:else if $layoutToShow === 'Lyrics'}
 			<LyricsLayout />
+		{:else if $layoutToShow === 'Playlist'}
+			<PlaylistLayout />
 		{/if}
 	</current-window-svlt>
 </main-app>

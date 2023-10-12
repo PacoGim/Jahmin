@@ -78,7 +78,7 @@
     "autoprefixer": "^10.4.13",
     "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
-    "electron": "^26.3.0",
+    "electron": "^27.0.0",
     "electron-wix-msi": "^5.0.0",
     "postcss": "^8.4.21",
     "postcss-load-config": "^4.0.1",

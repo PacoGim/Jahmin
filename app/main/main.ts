@@ -24,7 +24,6 @@ if(process.platform==='win32'){
 	}
 }
 
-/*
 
 chokidarWatch([
 	path.join(__dirname, '../svelte'),
@@ -34,7 +33,7 @@ chokidarWatch([
 ]).on('change', () => {
 	getMainWindow().reload()
 })
-*/
+
 
 app.whenReady().then(() => {
 	createWindow()
