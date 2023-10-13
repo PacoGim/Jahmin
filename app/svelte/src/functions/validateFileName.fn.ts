@@ -1,4 +1,5 @@
 import sanitizeFilePath from 'sanitize-filename'
+import validateSafeFileCharsFn from './validateSafeFileChars.fn'
 
 export default function (input: string): { isValid: boolean; errorMessage?: string } {
 	if (input === 'Default') {
@@ -10,7 +11,7 @@ export default function (input: string): { isValid: boolean; errorMessage?: stri
 	}
 
 	if (sanitizeFilePath(input) !== input) {
-		return { isValid: false, errorMessage: 'Avoid weird characters pretty please.' }
+		return validateSafeFileCharsFn(input)
 	}
 
 	return { isValid: true }

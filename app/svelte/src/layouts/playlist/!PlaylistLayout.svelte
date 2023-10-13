@@ -3,11 +3,13 @@
 	import PlaylistSongList from './PlaylistSongList.svelte'
 
 	let playlist = []
+
+	let selectedPlaylistName = undefined
 </script>
 
 <playlist-svlt>
-	<PlaylistList />
-	<PlaylistSongList />
+	<PlaylistList on:selectedPlaylist={event => (selectedPlaylistName = event.detail)} />
+	<PlaylistSongList playlistName={selectedPlaylistName} />
 	<!--
     1. List creation
       New playlist

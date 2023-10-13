@@ -87,7 +87,13 @@
 	}
 </script>
 
-<prompt-svlt show={isPromptVisible} on:click={e => handleOutsidePromptClick(e)} on:keypress={e => handleOutsidePromptClick(e)} tabindex="-1" role="button">
+<prompt-svlt
+	show={isPromptVisible}
+	on:click={e => handleOutsidePromptClick(e)}
+	on:keypress={e => handleOutsidePromptClick(e)}
+	tabindex="-1"
+	role="button"
+>
 	<prompt-content>
 		<prompt-close on:click={() => closePrompt()} on:keypress={() => closePrompt()} tabindex="-1" role="button">x</prompt-close>
 		<prompt-title>{promptState.title}</prompt-title>

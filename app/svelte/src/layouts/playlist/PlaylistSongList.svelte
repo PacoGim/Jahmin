@@ -1,4 +1,11 @@
 <script lang="ts">
+	export let playlistName = undefined
+
+	$: if (playlistName) fetchPlaylistSongs(playlistName)
+
+	function fetchPlaylistSongs(playlistName: string) {
+		console.log(playlistName)
+	}
 </script>
 
 <playlist-song-list-svlt>

@@ -4,6 +4,7 @@ import type { ConfigType } from '../types/config.type'
 import type { PartialSongType, SongType } from '../types/song.type'
 import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../types/returnMessage.type'
+import type { PromiseResolveType } from '../types/promiseResolve.type'
 
 const ipcFunctions = {
 	/********************** Renderer to Main (two-way) **********************/
@@ -27,6 +28,8 @@ const ipcFunctions = {
 	getOs,
 	getLangFile,
 	getCommunityEqualizerProfiles,
+	createNewPlaylist,
+	fetchPlaylistList,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -94,6 +97,24 @@ function bulkRead(data: {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('bulk-read', data)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function createNewPlaylist(playlistName: string): Promise<PromiseResolveType> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('create-new-playlist', playlistName)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function fetchPlaylistList(playlistName: string): Promise<PromiseResolveType> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('fetch-playlist-list', playlistName)
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})
