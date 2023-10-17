@@ -1,16 +1,10 @@
-import {
-	currentAudioElement,
-	currentSongProgressStore,
-	isAppIdle,
-	playbackStore,
-	playingSongStore,
-	triggerScrollToSongEvent
-} from '../stores/main.store'
+import { isAppIdle, playbackStore, playingSongStore, triggerScrollToSongEvent } from '../stores/main.store'
 import { songToPlayUrlStore } from '../stores/player.store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 import { get } from 'svelte/store'
 
 export default function () {
+	console.log('Next song function kickin')
 	let playbackStoreLocal: SongType[]
 	let songPlayingLocal: SongType | PartialSongType = undefined
 

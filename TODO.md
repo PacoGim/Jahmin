@@ -25,6 +25,9 @@
 
 * (Important) Check if a song is actualy playing
 
+* Run album check when the user switches album and doesn't switch again for x sec timer then ->
+* Don't update song if the new tags are already in the song
+
 * If:
   Play album
   Add album to playback

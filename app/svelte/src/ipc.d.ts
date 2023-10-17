@@ -34,6 +34,7 @@ declare global {
 			getCommunityEqualizerProfiles: () => Promise<EqualizerProfileType[]>
 			createNewPlaylist: (newPlaylistName: string) => Promise<PromiseResolveType>
 			fetchPlaylistList: () => Promise<PromiseResolveType>
+			fetchPlaylistSongs: (playlistName: string) => Promise<PromiseResolveType>
 			/********************** Renderer to Main (one-way) **********************/
 			sendAppReady
 			sendAllSongsToMain: (songs: SongType[]) => void

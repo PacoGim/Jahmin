@@ -30,6 +30,7 @@ const ipcFunctions = {
 	getCommunityEqualizerProfiles,
 	createNewPlaylist,
 	fetchPlaylistList,
+	fetchPlaylistSongs,
 	/********************** Renderer to Main (one-way) **********************/
 	sendAppReady: () => ipcRenderer.send('app-ready'),
 	sendAllSongsToMain: (songs: any) => ipcRenderer.send('send-all-songs-to-main', songs),
@@ -111,10 +112,19 @@ function createNewPlaylist(playlistName: string): Promise<PromiseResolveType> {
 	})
 }
 
-function fetchPlaylistList(playlistName: string): Promise<PromiseResolveType> {
+function fetchPlaylistList(): Promise<PromiseResolveType> {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
-			.invoke('fetch-playlist-list', playlistName)
+			.invoke('fetch-playlist-list')
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function fetchPlaylistSongs(playlistName: string): Promise<PromiseResolveType> {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('fetch-playlist-songs', playlistName)
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})

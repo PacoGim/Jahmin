@@ -247,6 +247,8 @@
 
 					if ($playbackShuffleConfig === true) {
 						shuffleSongsFn()
+
+						console.log('About to skip song!!!!')
 						nextSongFn()
 					}
 				} else if (song) {

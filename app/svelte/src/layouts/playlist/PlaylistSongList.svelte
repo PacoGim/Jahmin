@@ -5,6 +5,10 @@
 
 	function fetchPlaylistSongs(playlistName: string) {
 		console.log(playlistName)
+
+		window.ipc.fetchPlaylistSongs(playlistName).then(result => {
+			console.log(result)
+		})
 	}
 </script>
 
