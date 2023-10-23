@@ -18,6 +18,10 @@ Works on Windows, MacOS (Intel and Apple Silicon) and Linux.
 
 · Tags can be edited in the app.
 
+· In real time equalizer edit.
+
+· Super powerful and efficient song search.
+
 ## Library
 
 #### The library album art size and grid gap is customizable. It also allows animated covers (mp4, gif, webm and more).
