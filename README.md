@@ -5,6 +5,13 @@
 ## Description
 
 A multiplatform music player capable of handling 100k+ songs.
+It uses Electron JS, Svelte, Typescript and SQLite3.
+Works on Windows, MacOS (Intel and Apple Silicon) and Linux.
+
+· Keeps the user experience lag free while the app reads an imports the music metadata thanks to the heavy use of WebWorkers.
+· Animated covers.
+· A huge amount of user configuration.
+· Tags can be edited in the app.
 
 ## Library
 
