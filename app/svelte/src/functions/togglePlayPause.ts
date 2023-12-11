@@ -1,18 +1,18 @@
 import { get } from 'svelte/store'
-import { currentAudioElement, isPlaying, playingSongStore } from '../stores/main.store'
-import { songToPlayUrlStore } from '../stores/player.store'
+import { isPlaying, playingSongStore } from '../stores/main.store'
+import { currentAudioPlayer, songToPlayUrlStore } from '../stores/player.store'
 
 export default function () {
 	let isPlayingLocal = get(isPlaying)
-	let currentAudioElementLocal = get(currentAudioElement)
+	let currentAudioPlayerLocal = get(currentAudioPlayer)
 	let songToPlayUrlStoreLocal = get(songToPlayUrlStore)
 	let playingSongStoreLocal = get(playingSongStore)
 
 	if (isPlayingLocal) {
-		currentAudioElementLocal.pause()
+		currentAudioPlayerLocal.pause()
 	} else {
-		if (currentAudioElementLocal !== undefined && currentAudioElementLocal.src !== '') {
-			currentAudioElementLocal.play().catch()
+		if (currentAudioPlayerLocal !== undefined && currentAudioPlayerLocal.src !== '') {
+			currentAudioPlayerLocal.play().catch()
 		} else {
 			songToPlayUrlStoreLocal = [playingSongStoreLocal.SourceFile, { playNow: true }]
 		}

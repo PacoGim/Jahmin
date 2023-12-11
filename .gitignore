@@ -15,6 +15,7 @@ dist/svelte/bundle.js.map
 dist/svelte/bundle.css
 dist/types
 bin
+app_builds
 
 # Logs
 logs

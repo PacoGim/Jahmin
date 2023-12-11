@@ -23,14 +23,16 @@ if (process.platform === 'win32') {
 	}
 }
 
-chokidarWatch([
-	path.join(__dirname, '../svelte'),
-	path.join(__dirname, '../index.html'),
-	path.join(__dirname, '../assets'),
-	path.join(__dirname, './i18n')
-]).on('change', () => {
-	getMainWindow().reload()
-})
+if (process.env.NODE_ENV === 'development') {
+	chokidarWatch([
+		path.join(__dirname, '../svelte'),
+		path.join(__dirname, '../index.html'),
+		path.join(__dirname, '../assets'),
+		path.join(__dirname, './i18n')
+	]).on('change', () => {
+		getMainWindow().reload()
+	})
+}
 
 app.whenReady().then(() => {
 	createWindow()

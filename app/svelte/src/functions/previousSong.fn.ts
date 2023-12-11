@@ -1,12 +1,12 @@
-import { playbackStore, currentAudioElement, playingSongStore, triggerScrollToSongEvent, isAppIdle } from '../stores/main.store'
-import { songToPlayUrlStore } from '../stores/player.store'
+import { playbackStore, playingSongStore, triggerScrollToSongEvent, isAppIdle } from '../stores/main.store'
+import { currentAudioPlayer, songToPlayUrlStore } from '../stores/player.store'
 import type { PartialSongType, SongType } from '../../../types/song.type'
 import { get } from 'svelte/store'
 import { stopPlayerProgressFunction } from '../stores/functions.store'
 
 let currentAudioElementLocal: HTMLAudioElement = undefined
 
-let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
+let currentAudioElementSubscription = currentAudioPlayer.subscribe(value => {
 	if (value !== undefined) {
 		currentAudioElementLocal = value
 

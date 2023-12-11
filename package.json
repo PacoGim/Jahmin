@@ -20,9 +20,9 @@
     "svelte:build": "cd app/svelte && npm run build",
     "build:all": "npm run svelte:build && npm run tsc:build",
     "dev": "concurrently \"npm run tsc-watch:main\" \"npm run tsc-watch:preload\"  \"npm run tsc-watch:workers\" \"npm run svelte:dev\"",
-    "start": "electron-forge start",
+    "start": "NODE_ENV=development electron-forge start",
     "package": "electron-forge package",
-    "make": "node ./downloadFfmpeg.js && npm prune && npm run build:all && electron-forge make",
+    "make": "NODE_ENV=production rm -rf ./app_builds && rm -rf ./out && node ./downloadFfmpeg.js && npm prune && npm run build:all && electron-forge make && mv ./out ./app_builds",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },

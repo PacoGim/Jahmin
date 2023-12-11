@@ -4,7 +4,6 @@ import applyColorSchemeFn from '../functions/applyColorScheme.fn'
 import parseJsonFn from '../functions/parseJson.fn'
 import {
 	configOptionSelected,
-	currentAudioElement,
 	isAppIdle,
 	isMouseDown,
 	keyModifier,
@@ -22,7 +21,7 @@ import setElementSizeToCssVariablesFn from '../functions/setElementSizeToCssVari
 import registerMediaKeysFn from '../functions/registerMediaKeys.fn'
 import { pauseAnimatedArtWhenAppUnfocusedConfig } from '../stores/config.store'
 import { setPlayerProgressFunction, stopPlayerProgressFunction } from '../stores/functions.store'
-import { currentPlayerTime } from '../stores/player.store'
+import { currentAudioPlayer, currentPlayerTime } from '../stores/player.store'
 
 let appIdleDebounce = getAppIdleDebounce()
 
@@ -167,7 +166,7 @@ function afterLanguageChangeReload() {
 		configOptionSelected.set('Appearance')
 		layoutToShow.set('Config')
 
-		currentAudioElement.subscribe(audioPlayer => {
+		currentAudioPlayer.subscribe(audioPlayer => {
 			const controller = new AbortController()
 			const signal = controller.signal
 			audioPlayer.addEventListener(

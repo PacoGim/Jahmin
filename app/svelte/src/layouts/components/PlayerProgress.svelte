@@ -1,17 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	import {
-		altAudioElement,
-		currentAudioElement,
-		currentSongDurationStore,
-		currentSongProgressStore,
-		isPlaying,
-		mainAudioElement,
-		playingSongStore
-	} from '../../stores/main.store'
+	import { currentSongDurationStore, currentSongProgressStore, isPlaying, playingSongStore } from '../../stores/main.store'
 	import { setPlayerProgressFunction, stopPlayerProgressFunction } from '../../stores/functions.store'
-	import { currentPlayerTime } from '../../stores/player.store'
+	import { altAudioPlayer, currentAudioPlayer, currentPlayerTime, mainAudioPlayer } from '../../stores/player.store'
 
 	let userChangedProgress: number = undefined
 
@@ -25,9 +17,9 @@
 	let playerProgressFillElement: HTMLElement = undefined
 	let inputElement: HTMLInputElement = undefined
 
-	$: if ($altAudioElement !== undefined && $mainAudioElement !== undefined) {
-		$mainAudioElement.addEventListener('timeupdate', listenToTimeChange)
-		$altAudioElement.addEventListener('timeupdate', listenToTimeChange)
+	$: if ($altAudioPlayer !== undefined && $mainAudioPlayer !== undefined) {
+		$mainAudioPlayer.addEventListener('timeupdate', listenToTimeChange)
+		$altAudioPlayer.addEventListener('timeupdate', listenToTimeChange)
 	}
 
 	$: setPlayerProgress(userChangedProgress, { playNow: true })
@@ -109,39 +101,39 @@
 	}
 
 	function stopPlayerProgress() {
-		if ($currentAudioElement === undefined) return
+		if ($currentAudioPlayer === undefined) return
 
 		let newProgress = 0
 
-		$currentAudioElement.pause()
+		$currentAudioPlayer.pause()
 		transitionDuration = 0
 		currentProgressWidth = newProgress
 
-		$currentAudioElement.currentTime = 0
+		$currentAudioPlayer.currentTime = 0
 		$currentSongProgressStore = 0
 	}
 
 	function setPlayerProgress(newValue: number, { playNow }: { playNow: boolean }) {
 		if (isNaN(newValue)) return
-		if ($currentAudioElement === undefined) return
+		if ($currentAudioPlayer === undefined) return
 
 		let newProgress = (100 / $currentSongDurationStore) * newValue
 
-		$currentAudioElement.pause()
+		$currentAudioPlayer.pause()
 		transitionDuration = 0
 		currentProgressWidth = newProgress
 
 		if (playNow) {
 			clearTimeout(pauseDebounce)
 			pauseDebounce = setTimeout(() => {
-				$currentAudioElement.play()
+				$currentAudioPlayer.play()
 
 				transitionDuration = calculateTransition()
 				currentProgressWidth = 100
 			}, 250)
 		}
 
-		$currentAudioElement.currentTime = newValue
+		$currentAudioPlayer.currentTime = newValue
 		$currentSongProgressStore = newValue
 	}
 
@@ -217,7 +209,9 @@
 
 		transition: width 0ms linear;
 
-		box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.25), inset -1px 0px 5px 0px rgba(0, 0, 0, 0.25);
+		box-shadow:
+			1px 0px 5px 0px rgba(0, 0, 0, 0.25),
+			inset -1px 0px 5px 0px rgba(0, 0, 0, 0.25);
 		border-right: 2px solid #fff;
 	}
 

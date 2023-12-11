@@ -1,12 +1,13 @@
 <script lang="ts">
 	import cssVariablesService from '../../services/cssVariables.service'
-	import { keyPressed, mainAudioElement, altAudioElement } from '../../stores/main.store'
+	import { keyPressed } from '../../stores/main.store'
+	import { mainAudioPlayer, altAudioPlayer } from '../../stores/player.store'
 
 	let hasVolumeFromStorageLoaded: boolean = false
 
 	let saveVolumeDebounce: NodeJS.Timeout = undefined
 
-	$: if (hasVolumeFromStorageLoaded === false && $mainAudioElement !== undefined && $altAudioElement !== undefined) {
+	$: if (hasVolumeFromStorageLoaded === false && $mainAudioPlayer !== undefined && $altAudioPlayer !== undefined) {
 		hasVolumeFromStorageLoaded = true
 		setTimeout(() => {
 			loadVolumeFromLocalStorage()
@@ -40,8 +41,8 @@
 	}
 
 	function setAudioElementVolume(newVolume: number) {
-		$mainAudioElement.volume = newVolume
-		$altAudioElement.volume = newVolume
+		$mainAudioPlayer.volume = newVolume
+		$altAudioPlayer.volume = newVolume
 	}
 
 	function updateVolumeBarVisual(newVolume: number) {
@@ -174,6 +175,9 @@
 			hsl(var(--art-hue), var(--art-saturation), var(--art-lightness-dark))
 		);
 		border-radius: 25px;
-		box-shadow: inset 0 0 0 2px #fff, inset 0 0 5px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.2);
+		box-shadow:
+			inset 0 0 0 2px #fff,
+			inset 0 0 5px 0 rgba(0, 0, 0, 0.2),
+			0 0 10px 0 rgba(0, 0, 0, 0.2);
 	}
 </style>
