@@ -1,20 +1,20 @@
 import { stopPlayerProgressFunction } from '../stores/functions.store'
-import { altAudioElement, currentAudioElement, mainAudioElement } from '../stores/main.store'
+import { altAudioPlayer, currentAudioPlayer, mainAudioPlayer } from '../stores/player.store'
 
 import { get } from 'svelte/store'
 
-let currentAudioElementLocal: HTMLAudioElement = undefined
+let currentAudioPlayerLocal: HTMLAudioElement = undefined
 
-let currentAudioElementSubscription = currentAudioElement.subscribe(value => {
+let currentAudioPlayerSubscription = currentAudioPlayer.subscribe(value => {
 	if (value !== undefined) {
-		currentAudioElementLocal = value
+		currentAudioPlayerLocal = value
 
-		currentAudioElementSubscription()
+		currentAudioPlayerSubscription()
 	}
 })
 
 export default function () {
 	get(stopPlayerProgressFunction)()
-	get(mainAudioElement).pause()
-	get(altAudioElement).pause()
+	get(mainAudioPlayer).pause()
+	get(altAudioPlayer).pause()
 }

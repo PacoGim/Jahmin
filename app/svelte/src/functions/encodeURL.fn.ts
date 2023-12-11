@@ -1,5 +1,4 @@
-export default function (url: string | undefined) {
-	if (url === undefined) return undefined
+export default function (url: string) {
 	url = encodeURI(url)
 	url = url.replace('#', '%23')
 

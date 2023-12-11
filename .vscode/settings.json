@@ -1,0 +1,4 @@
+{
+	"npm.exclude": ["**/node_modules.nosync/**", "**/node_modules/**", "**/app_builds/**", "**/app/svelte"],
+	"npm.scriptExplorerExclude": ["tsc:build", "tsc-watch", "svelte:", "lint", "publish", "package", "build:all"]
+}

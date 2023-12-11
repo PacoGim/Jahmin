@@ -5,10 +5,14 @@
 	import type { SongType } from '../../../types/song.type'
 
 	/********************** Stores **********************/
-	import { playbackStore } from '../stores/main.store'
+	import { currentSongDurationStore, playbackStore } from '../stores/main.store'
 	import {
 		altAudioPlayer,
 		altAudioPlayerState,
+		audioPlayerStates,
+		currentAudioPlayer,
+		currentAudioPlayerName,
+		currentPlayerTime,
 		mainAudioPlayer,
 		mainAudioPlayerState,
 		songToPlayUrlStore
@@ -28,9 +32,6 @@
 
 	$: startPlayingSong($songToPlayUrlStore[0] /* Song Url to Play */, $songToPlayUrlStore[1] /* Play now boolean */)
 
-	$: console.log($mainAudioPlayerState)
-	$: console.log($altAudioPlayerState)
-
 	function startPlayingSong(songUrl: string | undefined, { playNow }: { playNow: boolean }) {
 		if (isMounted === false) return
 		if (songUrl === undefined) return
@@ -43,6 +44,7 @@
 
 		// Sets the source of the audio player to the song url
 		$mainAudioPlayer.setAttribute('src', encodeURLFn(songData.SourceFile))
+		$mainAudioPlayer.setAttribute('data-song-id', songData.ID.toString())
 
 		// If playNow is set to true, then play the song
 		if (playNow === true) {
@@ -91,6 +93,35 @@
 		})
 	}
 
+	function onAudioPlayerTimeUpdate(this: HTMLAudioElement, evt: Event) {
+		const element = this as HTMLAudioElement
+		const name = element.id
+		const altName = name === 'main' ? 'alt' : 'main'
+
+		if (name !== $currentAudioPlayerName) {
+			return
+		}
+
+		const currentTime = Math.round(element.currentTime || 0)
+		const duration = Math.round(element.duration || 0)
+
+		$currentSongDurationStore = duration
+		$currentPlayerTime = currentTime
+
+		console.log(audioPlayerStates[altName])
+
+		////////// Audio Preloads Here \\\\\\\\\\
+		if (audioPlayerStates[altName].isPreloaded === false && audioPlayerStates[altName].isPreloading === false) {
+			audioPlayerStates[altName].isPreloading = true
+
+			let songId = Number(this.dataset.songId)
+
+			let currentSongIndex = $playbackStore.findIndex(song => song.ID === songId)
+
+
+		}
+	}
+
 	function hookEventListeners() {
 		$mainAudioPlayer.addEventListener('playing', () => {
 			$mainAudioPlayerState.isPlaying = true
@@ -99,12 +130,13 @@
 		$altAudioPlayer.addEventListener('playing', () => {
 			$altAudioPlayerState.isPlaying = true
 		})
+
+		$mainAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
+		$altAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
 	}
 
 	onMount(() => {
 		isMounted = true
-
-		$mainAudioPlayer.volume = 0.01
 
 		hookEventListeners()
 	})

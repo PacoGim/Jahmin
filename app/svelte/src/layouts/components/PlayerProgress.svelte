@@ -119,7 +119,8 @@
 
 		let newProgress = (100 / $currentSongDurationStore) * newValue
 
-		$currentAudioPlayer.pause()
+		//TODO This bit causes an error when playing a song
+		// $currentAudioPlayer.pause()
 		transitionDuration = 0
 		currentProgressWidth = newProgress
 
