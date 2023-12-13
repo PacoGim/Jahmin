@@ -2,7 +2,8 @@
 	import updateConfigFn from '../../../functions/updateConfig.fn'
 	import TranslateIcon from '../../../icons/TranslateIcon.svelte'
 	import { configStore } from '../../../stores/config.store'
-	import { currentSongProgressStore, isPlaying } from '../../../stores/main.store'
+	import { currentSongProgressStore } from '../../../stores/main.store'
+	import { isPlaying } from '../../../stores/player.store'
 
 	let currentLanguage = $configStore.userOptions.language
 

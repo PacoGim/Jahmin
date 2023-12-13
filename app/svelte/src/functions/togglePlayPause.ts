@@ -1,7 +1,8 @@
 import { get } from 'svelte/store'
-import { isPlaying, playingSongStore } from '../stores/main.store'
-import { currentAudioPlayer, songToPlayUrlStore } from '../stores/player.store'
+import { playingSongStore } from '../stores/main.store'
+import { isPlaying, currentAudioPlayer, songToPlayUrlStore } from '../stores/player.store'
 
+// TODO Check typescript issues here
 export default function () {
 	let isPlayingLocal = get(isPlaying)
 	let currentAudioPlayerLocal = get(currentAudioPlayer)

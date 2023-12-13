@@ -1,9 +1,10 @@
 <script lang="ts">
+	// TODO Check TS errors here
 	import { onMount } from 'svelte'
 
-	import { currentSongDurationStore, currentSongProgressStore, isPlaying, playingSongStore } from '../../stores/main.store'
+	import { currentSongDurationStore, currentSongProgressStore, playingSongStore } from '../../stores/main.store'
 	import { setPlayerProgressFunction, stopPlayerProgressFunction } from '../../stores/functions.store'
-	import { altAudioPlayer, currentAudioPlayer, currentPlayerTime, mainAudioPlayer } from '../../stores/player.store'
+	import { altAudioPlayer, currentAudioPlayer, currentPlayerTime, isPlaying, mainAudioPlayer } from '../../stores/player.store'
 
 	let userChangedProgress: number = undefined
 

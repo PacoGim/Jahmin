@@ -55,9 +55,6 @@ export let userSearch: Writable<string> = writable('')
 /********************** Song Group **********************/
 export let selectedGroups: Writable<any> = writable([])
 
-// Allows to share with the rest of the app whether the player is playing or not.
-export let isPlaying: Writable<boolean> = writable(false)
-
 export let albumArtMapStore: Writable<
 	Map<
 		string | number,
@@ -98,12 +95,11 @@ layoutToShow.subscribe(layoutName => {
 	document.title = layoutName ? `Jahmin ${layoutName}` : 'Jahmin'
 })
 
-isPlaying.subscribe(value => {
-	window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
-})
+
 
 playingSongStore.subscribe(song => {
 	if (song) {
-		window.ipc.setPlayerInfo(song?.Title, song?.Artist, get(isPlaying))
+		// window.ipc.setPlayerInfo(song?.Title, song?.Artist, get(isPlaying))
+		window.ipc.setPlayerInfo(song?.Title, song?.Artist)
 	}
 })

@@ -13,6 +13,7 @@
 		currentAudioPlayer,
 		currentAudioPlayerName,
 		currentPlayerTime,
+		isPlaying,
 		mainAudioPlayer,
 		mainAudioPlayerState,
 		songToPlayUrlStore
@@ -27,12 +28,24 @@
 
 	let isMounted = false
 
+	let audioPlayerInterval: any = undefined
+
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
 	// Default is 250ms -> (250ms / 1000ms = 0.25s).
 	const smoothTimeSec = 250 / 1000
 
 	$: startPlayingSong($songToPlayUrlStore[0] /* Song Url to Play */, $songToPlayUrlStore[1] /* Play now boolean */)
+
+	$: console.log($isPlaying)
+
+	isPlaying.subscribe(value => {
+		if (value === true) {
+			controlPlayerInterval('startInterval')
+		} else {
+			controlPlayerInterval('stopInterval')
+		}
+	})
 
 	function startPlayingSong(songUrl: string | undefined, { playNow }: { playNow: boolean }) {
 		if (isMounted === false) return
@@ -95,59 +108,6 @@
 		})
 	}
 
-	let stop = false
-	/*
-	function onAudioPlayerTimeUpdate(this: HTMLAudioElement, evt: Event) {
-		const element = this as HTMLAudioElement
-		const name = element.id
-		const altName = name === 'main' ? 'alt' : 'main'
-
-		if (name !== $currentAudioPlayerName) {
-			return
-		}
-
-		const currentTime = Number(element.currentTime.toFixed(2)) || 0
-		const duration = Number(element.duration.toFixed(2)) || 0
-
-		// No song is probably playing at this point but it might have started loading. We don't want to continue if the duration is 0
-		if (duration === 0) return
-
-		$currentSongDurationStore = duration
-		$currentPlayerTime = currentTime
-
-		// console.log(audioPlayerStates[altName])
-
-		////////// Audio Preloads Here \\\\\\\\\\
-		if (audioPlayerStates[altName].isPreloaded === false && audioPlayerStates[altName].isPreloading === false) {
-			audioPlayerStates[altName].isPreloading = true
-
-			let songId = Number(this.dataset.songId)
-
-			let currentSongIndex = $playbackStore.findIndex(song => song.ID === songId)
-
-			preLoadNextSong(altName, currentSongIndex, $playbackStore)
-		}
-
-		////////// Audio Pre Plays Here \\\\\\\\\\
-		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
-
-		let timeRemaining = Number((duration - currentTime).toFixed(2))
-
-		console.log(timeRemaining, smoothTimeSec, timeRemaining <= smoothTimeSec)
-		// console.log(stop)
-
-		if (timeRemaining <= smoothTimeSec && stop === false) {
-			stop = true
-
-			setTimeout(() => {
-				console.log('Start Pre Playing Next Song')
-
-				console.log(Number(element.duration.toFixed(2)) - Number(element.currentTime.toFixed(2)))
-			}, 500)
-		}
-	}
-
-	 */
 	function preLoadNextSong(audioPlayerName: string, songIndex: number, songList: SongType[]) {
 		let nextSongToPlay = undefined
 
@@ -179,11 +139,13 @@
 		return $mainAudioPlayer
 	}
 
-	function getCustomTimer() {
+	function getAudioPlayerInterval() {
 		return setInterval(() => {
 			const element = getAudioPlayer($currentAudioPlayerName)
 			const name = element.id
 			const altName = name === 'main' ? 'alt' : 'main'
+
+			console.count('Interval')
 
 			if (name !== $currentAudioPlayerName) {
 				return
@@ -216,31 +178,48 @@
 
 			let timeRemaining = Number((duration - currentTime).toFixed(2))
 
-			// console.log(stop)
-
-			if (timeRemaining <= 1 && audioPlayerStates[altName].isPlaying === false) {
-				audioPlayerStates[altName].isPlaying = true
+			if (timeRemaining <= 1 && $audioPlayerStates[altName].isPlaying === false) {
+				$audioPlayerStates[altName].isPlaying = true
 
 				const timeoutTime = (timeRemaining - smoothTimeSec) * 1000
 
 				setTimeout(() => {
-					console.log('Start Pre Playing Next Song')
-
 					console.log('!!!!!!', Number(element.duration.toFixed(2)) - Number(element.currentTime.toFixed(2)))
+
+					let altPlayerSrc = getAudioPlayer(altName).getAttribute('src')
+
+					if (altPlayerSrc === null || altPlayerSrc === undefined) {
+					} else {
+						getAudioPlayer(altName)
+							.play()
+							.then(() => {
+								console.log('Alt player playing')
+
+								$currentAudioPlayerName = altName
+								$audioPlayerStates[altName].isPlaying = true
+							})
+							.catch(err => {
+								songPlayingError(altPlayerSrc!, err)
+							})
+					}
 				}, timeoutTime)
 			}
 		}, 250)
 	}
 
-	let startTimer = undefined
+	// TODO Move the preload to a different function
+
+	function controlPlayerInterval(value: 'startInterval' | 'stopInterval') {
+		if (value === 'startInterval') {
+			audioPlayerInterval = getAudioPlayerInterval()
+		} else if (value === 'stopInterval') {
+			clearInterval(audioPlayerInterval)
+		}
+	}
 
 	function hookEventListeners() {
 		$mainAudioPlayer.addEventListener('playing', () => {
 			$mainAudioPlayerState.isPlaying = true
-
-			clearInterval(startTimer)
-			// Add custom timer
-			startTimer = getCustomTimer()
 		})
 
 		$mainAudioPlayer.addEventListener('ended', () => {

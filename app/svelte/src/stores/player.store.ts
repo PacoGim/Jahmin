@@ -19,17 +19,36 @@ export let altAudioPlayerState: Writable<AudioPlayerStateType> = writable({
 	isPreloading: false
 })
 
-export let audioPlayerStates: {
+export let audioPlayerStates: Writable<{
 	[key: string]: AudioPlayerStateType
 	main: AudioPlayerStateType
 	alt: AudioPlayerStateType
-} = {
+}> = writable({
 	main: get(mainAudioPlayerState),
 	alt: get(altAudioPlayerState)
-}
+})
 
 export let currentAudioPlayer: Writable<HTMLAudioElement | undefined> = writable(undefined)
 export let currentAudioPlayerName: Writable<'main' | 'alt'> = writable()
+
+// Allows to share with the rest of the app whether the player is playing or not.
+export let isPlaying: Writable<boolean> = writable(false)
+
+mainAudioPlayerState.subscribe(value => {
+	if (value.isPlaying === false && get(altAudioPlayerState).isPlaying === false) {
+		isPlaying.set(false)
+	} else if (value.isPlaying === true) {
+		isPlaying.set(true)
+	}
+})
+
+altAudioPlayerState.subscribe(value => {
+	if (value.isPlaying === false && get(mainAudioPlayerState).isPlaying === false) {
+		isPlaying.set(false)
+	} else if (value.isPlaying === true) {
+		isPlaying.set(true)
+	}
+})
 
 // Listens to a name change. When the name changes, the current player is set to either main or alt player
 currentAudioPlayerName.subscribe(value => {
@@ -47,6 +66,10 @@ let mainAudioPlayerUnsubscribe = mainAudioPlayer.subscribe(value => {
 		mainAudioPlayerUnsubscribe()
 	}
 })
+
+// isPlaying.subscribe(value => {
+// 	window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
+// })
 
 type AudioPlayerStateType = {
 	isPlaying: boolean

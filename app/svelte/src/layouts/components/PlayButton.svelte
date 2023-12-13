@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isPlaying } from '../../stores/main.store'
+	import { isPlaying } from '../../stores/player.store'
 
 	import togglePlayPauseFn from '../../functions/togglePlayPause'
 
