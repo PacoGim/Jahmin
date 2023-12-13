@@ -22,6 +22,8 @@
 	import doFileExistsFn from '../functions/doFileExists.fn'
 	import updateSongDataFn from '../functions/updateSongData.fn'
 	import encodeURLFn from '../functions/encodeURL.fn'
+	import { playbackRepeatCurrentConfig, playbackRepeatListConfig } from '../stores/config.store'
+	import findNextValidSongFn from '../functions/findNextValidSong.fn'
 
 	let isMounted = false
 
@@ -93,6 +95,8 @@
 		})
 	}
 
+	let stop = false
+	/*
 	function onAudioPlayerTimeUpdate(this: HTMLAudioElement, evt: Event) {
 		const element = this as HTMLAudioElement
 		const name = element.id
@@ -102,13 +106,16 @@
 			return
 		}
 
-		const currentTime = Math.round(element.currentTime || 0)
-		const duration = Math.round(element.duration || 0)
+		const currentTime = Number(element.currentTime.toFixed(2)) || 0
+		const duration = Number(element.duration.toFixed(2)) || 0
+
+		// No song is probably playing at this point but it might have started loading. We don't want to continue if the duration is 0
+		if (duration === 0) return
 
 		$currentSongDurationStore = duration
 		$currentPlayerTime = currentTime
 
-		console.log(audioPlayerStates[altName])
+		// console.log(audioPlayerStates[altName])
 
 		////////// Audio Preloads Here \\\\\\\\\\
 		if (audioPlayerStates[altName].isPreloaded === false && audioPlayerStates[altName].isPreloading === false) {
@@ -118,21 +125,144 @@
 
 			let currentSongIndex = $playbackStore.findIndex(song => song.ID === songId)
 
+			preLoadNextSong(altName, currentSongIndex, $playbackStore)
+		}
 
+		////////// Audio Pre Plays Here \\\\\\\\\\
+		// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
+
+		let timeRemaining = Number((duration - currentTime).toFixed(2))
+
+		console.log(timeRemaining, smoothTimeSec, timeRemaining <= smoothTimeSec)
+		// console.log(stop)
+
+		if (timeRemaining <= smoothTimeSec && stop === false) {
+			stop = true
+
+			setTimeout(() => {
+				console.log('Start Pre Playing Next Song')
+
+				console.log(Number(element.duration.toFixed(2)) - Number(element.currentTime.toFixed(2)))
+			}, 500)
 		}
 	}
+
+	 */
+	function preLoadNextSong(audioPlayerName: string, songIndex: number, songList: SongType[]) {
+		let nextSongToPlay = undefined
+
+		if ($playbackRepeatCurrentConfig === true) {
+			// If Song Repeat Enabled
+			nextSongToPlay = songList[songIndex]
+		} else if ($playbackRepeatListConfig === true) {
+			// If Playback Repeat Enabled
+
+			// If there is no more songs in playback list, then the first song in the list is played.
+			nextSongToPlay = findNextValidSongFn(songIndex, songList) || findNextValidSongFn(-1, songList)
+		} else {
+			// Song Repeat Disabled && If Playback Repeat Disabled
+			nextSongToPlay = findNextValidSongFn(songIndex, songList)
+		}
+
+		if (nextSongToPlay !== undefined) {
+			getAudioPlayer(audioPlayerName).setAttribute('src', encodeURLFn(nextSongToPlay.SourceFile))
+			getAudioPlayer(audioPlayerName).setAttribute('data-song-id', nextSongToPlay.ID.toString())
+		} else {
+			// Playback is done
+		}
+	}
+
+	function getAudioPlayer(audioplayerName: string): HTMLAudioElement {
+		if (audioplayerName === 'alt') {
+			return $altAudioPlayer
+		}
+		return $mainAudioPlayer
+	}
+
+	function getCustomTimer() {
+		return setInterval(() => {
+			const element = getAudioPlayer($currentAudioPlayerName)
+			const name = element.id
+			const altName = name === 'main' ? 'alt' : 'main'
+
+			if (name !== $currentAudioPlayerName) {
+				return
+			}
+
+			const currentTime = Number(element.currentTime.toFixed(2)) || 0
+			const duration = Number(element.duration.toFixed(2)) || 0
+
+			// No song is probably playing at this point but it might have started loading. We don't want to continue if the duration is 0
+			if (duration === 0) return
+
+			$currentSongDurationStore = duration
+			$currentPlayerTime = currentTime
+
+			// console.log(audioPlayerStates[altName])
+
+			////////// Audio Preloads Here \\\\\\\\\\
+			if (audioPlayerStates[altName].isPreloaded === false && audioPlayerStates[altName].isPreloading === false) {
+				audioPlayerStates[altName].isPreloading = true
+
+				let songId = Number(element.dataset.songId)
+
+				let currentSongIndex = $playbackStore.findIndex(song => song.ID === songId)
+
+				preLoadNextSong(altName, currentSongIndex, $playbackStore)
+			}
+
+			////////// Audio Pre Plays Here \\\\\\\\\\
+			// If the current alt audio element is not yet playing and the current time is greater than the duration minus the smooth time, then the next song is played.
+
+			let timeRemaining = Number((duration - currentTime).toFixed(2))
+
+			// console.log(stop)
+
+			if (timeRemaining <= 1 && audioPlayerStates[altName].isPlaying === false) {
+				audioPlayerStates[altName].isPlaying = true
+
+				const timeoutTime = (timeRemaining - smoothTimeSec) * 1000
+
+				setTimeout(() => {
+					console.log('Start Pre Playing Next Song')
+
+					console.log('!!!!!!', Number(element.duration.toFixed(2)) - Number(element.currentTime.toFixed(2)))
+				}, timeoutTime)
+			}
+		}, 250)
+	}
+
+	let startTimer = undefined
 
 	function hookEventListeners() {
 		$mainAudioPlayer.addEventListener('playing', () => {
 			$mainAudioPlayerState.isPlaying = true
+
+			clearInterval(startTimer)
+			// Add custom timer
+			startTimer = getCustomTimer()
+		})
+
+		$mainAudioPlayer.addEventListener('ended', () => {
+			// Remove custom timer
 		})
 
 		$altAudioPlayer.addEventListener('playing', () => {
 			$altAudioPlayerState.isPlaying = true
 		})
 
-		$mainAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
-		$altAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
+		// $mainAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
+		// $altAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
+
+		$altAudioPlayer.addEventListener('canplaythrough', () => {
+			$altAudioPlayerState.isPreloaded = true
+			$altAudioPlayerState.isPreloading = false
+		})
+
+		$mainAudioPlayer.addEventListener('canplaythrough', () => {
+			$mainAudioPlayerState.isPreloaded = true
+			$mainAudioPlayerState.isPreloading = false
+		})
 	}
 
 	onMount(() => {
