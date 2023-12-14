@@ -23,21 +23,27 @@
 	import doFileExistsFn from '../functions/doFileExists.fn'
 	import updateSongDataFn from '../functions/updateSongData.fn'
 	import encodeURLFn from '../functions/encodeURL.fn'
-	import { playbackRepeatCurrentConfig, playbackRepeatListConfig } from '../stores/config.store'
+	import { playbackRepeatCurrentConfig, playbackRepeatListConfig, playbackShuffleConfig } from '../stores/config.store'
 	import findNextValidSongFn from '../functions/findNextValidSong.fn'
+	import shuffleSongsFn from '../functions/shuffleSongs.fn'
+	import nextSongFn from '../functions/nextSong.fn'
 
 	let isMounted = false
 
 	let audioPlayerInterval: any = undefined
 
+	let endOfPlayback = false
+
 	// Time when the next song will start playing before the end of the playing song.
 	// Makes songs audio overlap at the end to get a nice smooth transition between songs.
-	// Default is 250ms -> (250ms / 1000ms = 0.25s).
-	const smoothTimeSec = 250 / 1000
+	// Default is 50ms -> (50ms / 1000ms = 0.25s).
+	const smoothTimeSec = 50 / 1000
 
 	$: startPlayingSong($songToPlayUrlStore[0] /* Song Url to Play */, $songToPlayUrlStore[1] /* Play now boolean */)
 
-	$: console.log($isPlaying)
+	$: if ($isPlaying === false && endOfPlayback === true) {
+		afterPlaybackIsOver()
+	}
 
 	isPlaying.subscribe(value => {
 		if (value === true) {
@@ -46,6 +52,18 @@
 			controlPlayerInterval('stopInterval')
 		}
 	})
+
+	function afterPlaybackIsOver() {
+		endOfPlayback = false
+
+		/* 		if ($playbackRepeatListConfig === true) {
+			if ($playbackShuffleConfig === true) {
+				shuffleSongsFn()
+				console.log('About to skip song!!!!')
+				nextSongFn()
+			}
+		} */
+	}
 
 	function startPlayingSong(songUrl: string | undefined, { playNow }: { playNow: boolean }) {
 		if (isMounted === false) return
@@ -128,7 +146,9 @@
 			getAudioPlayer(audioPlayerName).setAttribute('src', encodeURLFn(nextSongToPlay.SourceFile))
 			getAudioPlayer(audioPlayerName).setAttribute('data-song-id', nextSongToPlay.ID.toString())
 		} else {
-			// Playback is done
+			// No more songs in playback
+			console.log('No more songs in playback')
+			endOfPlayback = true
 		}
 	}
 
@@ -145,7 +165,7 @@
 			const name = element.id
 			const altName = name === 'main' ? 'alt' : 'main'
 
-			console.count('Interval')
+			// console.count('Interval')
 
 			if (name !== $currentAudioPlayerName) {
 				return
@@ -163,8 +183,8 @@
 			// console.log(audioPlayerStates[altName])
 
 			////////// Audio Preloads Here \\\\\\\\\\
-			if (audioPlayerStates[altName].isPreloaded === false && audioPlayerStates[altName].isPreloading === false) {
-				audioPlayerStates[altName].isPreloading = true
+			if ($audioPlayerStates[altName].isPreloaded === false && $audioPlayerStates[altName].isPreloading === false) {
+				$audioPlayerStates[altName].isPreloading = true
 
 				let songId = Number(element.dataset.songId)
 
@@ -189,6 +209,7 @@
 					let altPlayerSrc = getAudioPlayer(altName).getAttribute('src')
 
 					if (altPlayerSrc === null || altPlayerSrc === undefined) {
+						console.log('Alt player src is null or undefined')
 					} else {
 						getAudioPlayer(altName)
 							.play()
@@ -199,7 +220,9 @@
 								$audioPlayerStates[altName].isPlaying = true
 							})
 							.catch(err => {
-								songPlayingError(altPlayerSrc!, err)
+								console.log(err)
+
+								// songPlayingError(altPlayerSrc!, err)
 							})
 					}
 				}, timeoutTime)
@@ -222,14 +245,25 @@
 			$mainAudioPlayerState.isPlaying = true
 		})
 
-		$mainAudioPlayer.addEventListener('ended', () => {
-			// Remove custom timer
-		})
-
 		$altAudioPlayer.addEventListener('playing', () => {
 			$altAudioPlayerState.isPlaying = true
 		})
 
+		$mainAudioPlayer.addEventListener('ended', evt => {
+			console.log('Main Player Done')
+			$mainAudioPlayerState.isPlaying = false
+			let element = evt.target as HTMLAudioElement
+			let songId = element.dataset.songId
+
+			console.log(songId)
+		})
+
+		$altAudioPlayer.addEventListener('ended', evt => {
+			console.log('Alt Player Done')
+			$altAudioPlayerState.isPlaying = false
+			let element = evt.target as HTMLAudioElement
+			let songId = element.dataset.songId
+		})
 		// $mainAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
 		// $altAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
 
