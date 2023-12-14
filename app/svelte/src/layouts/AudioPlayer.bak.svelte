@@ -341,7 +341,6 @@
 			updatePlayCountFn(getElementDatasetFn(e).songId || 0, 'increment')
 
 			audioElements.main.isPlaying = false
-
 			audioElements.main.isPreloaded = false
 			audioElements.main.isPreloading = false
 		})

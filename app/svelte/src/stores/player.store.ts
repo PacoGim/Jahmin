@@ -35,6 +35,8 @@ export let currentAudioPlayerName: Writable<'main' | 'alt'> = writable()
 export let isPlaying: Writable<boolean> = writable(false)
 
 mainAudioPlayerState.subscribe(value => {
+	get(audioPlayerStates).main = value
+
 	if (value.isPlaying === false && get(altAudioPlayerState).isPlaying === false) {
 		isPlaying.set(false)
 	} else if (value.isPlaying === true) {
@@ -43,6 +45,8 @@ mainAudioPlayerState.subscribe(value => {
 })
 
 altAudioPlayerState.subscribe(value => {
+	get(audioPlayerStates).alt = value
+
 	if (value.isPlaying === false && get(mainAudioPlayerState).isPlaying === false) {
 		isPlaying.set(false)
 	} else if (value.isPlaying === true) {

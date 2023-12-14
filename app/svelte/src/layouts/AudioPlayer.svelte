@@ -46,6 +46,7 @@
 	}
 
 	isPlaying.subscribe(value => {
+		console.log(value)
 		if (value === true) {
 			controlPlayerInterval('startInterval')
 		} else {
@@ -148,6 +149,7 @@
 		} else {
 			// No more songs in playback
 			console.log('No more songs in playback')
+			getAudioPlayer(audioPlayerName).removeAttribute('src')
 			endOfPlayback = true
 		}
 	}
@@ -165,7 +167,7 @@
 			const name = element.id
 			const altName = name === 'main' ? 'alt' : 'main'
 
-			// console.count('Interval')
+			console.log(altName)
 
 			if (name !== $currentAudioPlayerName) {
 				return
@@ -210,14 +212,19 @@
 
 					if (altPlayerSrc === null || altPlayerSrc === undefined) {
 						console.log('Alt player src is null or undefined')
+						$audioPlayerStates[altName].isPlaying = false
 					} else {
 						getAudioPlayer(altName)
 							.play()
 							.then(() => {
-								console.log('Alt player playing')
-
 								$currentAudioPlayerName = altName
-								$audioPlayerStates[altName].isPlaying = true
+
+								let songId = Number(getAudioPlayer(altName).dataset.songId)
+
+								// Gets the song data from the playback store (has all the songs data)
+								let songData: SongType | undefined = $playbackStore.find(song => song.ID === songId)
+
+								updateSongDataFn(songData)
 							})
 							.catch(err => {
 								console.log(err)
@@ -233,6 +240,7 @@
 	// TODO Move the preload to a different function
 
 	function controlPlayerInterval(value: 'startInterval' | 'stopInterval') {
+		console.log(value)
 		if (value === 'startInterval') {
 			audioPlayerInterval = getAudioPlayerInterval()
 		} else if (value === 'stopInterval') {
@@ -255,6 +263,12 @@
 			let element = evt.target as HTMLAudioElement
 			let songId = element.dataset.songId
 
+			$mainAudioPlayerState = {
+				isPlaying: false,
+				isPreloaded: false,
+				isPreloading: false
+			}
+
 			console.log(songId)
 		})
 
@@ -263,9 +277,15 @@
 			$altAudioPlayerState.isPlaying = false
 			let element = evt.target as HTMLAudioElement
 			let songId = element.dataset.songId
+
+			$altAudioPlayerState = {
+				isPlaying: false,
+				isPreloaded: false,
+				isPreloading: false
+			}
+
+			console.log(songId)
 		})
-		// $mainAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
-		// $altAudioPlayer.addEventListener('timeupdate', onAudioPlayerTimeUpdate)
 
 		$altAudioPlayer.addEventListener('canplaythrough', () => {
 			$altAudioPlayerState.isPreloaded = true
