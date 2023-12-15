@@ -28,6 +28,8 @@
 * Run album check when the user switches album and doesn't switch again for x sec timer then ->
 * Don't update song if the new tags are already in the song
 
+* When updating a song (like rating) the song can't play until the end
+
 * If:
   Play album
   Add album to playback

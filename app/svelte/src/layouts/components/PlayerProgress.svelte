@@ -6,9 +6,9 @@
 	import { setPlayerProgressFunction, stopPlayerProgressFunction } from '../../stores/functions.store'
 	import { altAudioPlayer, currentAudioPlayer, currentPlayerTime, isPlaying, mainAudioPlayer } from '../../stores/player.store'
 
-	let userChangedProgress: number = undefined
+	let userChangedProgress: number | undefined = undefined
 
-	let pauseDebounce: NodeJS.Timeout = undefined
+	let pauseDebounce: NodeJS.Timeout | undefined = undefined
 
 	let tempSecond = undefined
 
@@ -28,7 +28,7 @@
 	$: {
 		if ($isPlaying === false) {
 			pauseTransition()
-		} else {
+		} else if ($isPlaying === true) {
 			playTransition()
 		}
 	}
@@ -128,7 +128,7 @@
 		if (playNow) {
 			clearTimeout(pauseDebounce)
 			pauseDebounce = setTimeout(() => {
-				$currentAudioPlayer.play()
+				$currentAudioPlayer!.play()
 
 				transitionDuration = calculateTransition()
 				currentProgressWidth = 100

@@ -5,7 +5,13 @@
 	import type { SongType } from '../../../types/song.type'
 
 	/********************** Stores **********************/
-	import { currentSongDurationStore, playbackStore } from '../stores/main.store'
+	import {
+		currentSongDurationStore,
+		isAppIdle,
+		playbackStore,
+		playingSongStore,
+		triggerScrollToSongEvent
+	} from '../stores/main.store'
 	import {
 		altAudioPlayer,
 		altAudioPlayerState,
@@ -20,13 +26,16 @@
 	} from '../stores/player.store'
 
 	/********************** Functions **********************/
-	import doFileExistsFn from '../functions/doFileExists.fn'
+	import doesFileExistFn from '../functions/doesFileExist.fn'
 	import updateSongDataFn from '../functions/updateSongData.fn'
 	import encodeURLFn from '../functions/encodeURL.fn'
 	import { playbackRepeatCurrentConfig, playbackRepeatListConfig, playbackShuffleConfig } from '../stores/config.store'
 	import findNextValidSongFn from '../functions/findNextValidSong.fn'
 	import shuffleSongsFn from '../functions/shuffleSongs.fn'
 	import nextSongFn from '../functions/nextSong.fn'
+	import updatePlayCountFn from '../functions/updatePlayCount.fn'
+	import fileNotFoundCheck from '../functions/songNotFound.fn'
+	import songNotFoundFn from '../functions/songNotFound.fn'
 
 	let isMounted = false
 
@@ -45,8 +54,14 @@
 		afterPlaybackIsOver()
 	}
 
+	$: {
+		$playbackShuffleConfig
+		$playbackRepeatCurrentConfig
+		$playbackStore
+		listenPlaybackChangers()
+	}
+
 	isPlaying.subscribe(value => {
-		console.log(value)
 		if (value === true) {
 			controlPlayerInterval('startInterval')
 		} else {
@@ -54,16 +69,30 @@
 		}
 	})
 
+	function listenPlaybackChangers() {
+		if (isMounted === false) return
+
+		const altName = $currentAudioPlayerName === 'main' ? 'alt' : 'main'
+
+		const songId = Number($currentAudioPlayer?.dataset.songId)
+
+		preLoadNextSong(
+			altName,
+			$playbackStore.findIndex(song => song.ID === songId),
+			$playbackStore
+		)
+	}
+
 	function afterPlaybackIsOver() {
 		endOfPlayback = false
 
-		/* 		if ($playbackRepeatListConfig === true) {
-			if ($playbackShuffleConfig === true) {
-				shuffleSongsFn()
-				console.log('About to skip song!!!!')
-				nextSongFn()
+		if ($playbackRepeatListConfig === true) {
+			if ($playbackShuffleConfig) {
+				shuffleSongsFn().then(() => nextSongFn())
+			} else {
+				startPlayingSong($playbackStore[0].SourceFile, { playNow: true })
 			}
-		} */
+		}
 	}
 
 	function startPlayingSong(songUrl: string | undefined, { playNow }: { playNow: boolean }) {
@@ -76,8 +105,12 @@
 		// If the song data is undefined, then the song is not in the playback store
 		if (songData === undefined) return
 
+		$currentAudioPlayerName = 'main'
+
 		// Sets the source of the audio player to the song url
+
 		$mainAudioPlayer.setAttribute('src', encodeURLFn(songData.SourceFile))
+
 		$mainAudioPlayer.setAttribute('data-song-id', songData.ID.toString())
 
 		// If playNow is set to true, then play the song
@@ -102,6 +135,10 @@
 	function afterSongPlays(songData: SongType) {
 		updateSongDataFn(songData)
 
+		$altAudioPlayer.pause()
+		$altAudioPlayer.removeAttribute('src')
+		$altAudioPlayer.setAttribute('data-song-id', '')
+
 		$mainAudioPlayerState = {
 			isPlaying: true,
 			isPreloaded: true,
@@ -118,7 +155,7 @@
 	function songPlayingError(songUrl: string, error: any) {
 		console.log('Song playing error: ', songUrl)
 
-		doFileExistsFn(songUrl).then(result => {
+		doesFileExistFn(songUrl).then(result => {
 			if (result === false) {
 				console.log('Song does not exist: ', songUrl)
 			} else {
@@ -128,27 +165,33 @@
 	}
 
 	function preLoadNextSong(audioPlayerName: string, songIndex: number, songList: SongType[]) {
-		let nextSongToPlay = undefined
+		let nextSongToPlay: SongType | undefined = undefined
 
 		if ($playbackRepeatCurrentConfig === true) {
 			// If Song Repeat Enabled
 			nextSongToPlay = songList[songIndex]
-		} else if ($playbackRepeatListConfig === true) {
+			/*	} else if ($playbackRepeatListConfig === true) {
 			// If Playback Repeat Enabled
 
 			// If there is no more songs in playback list, then the first song in the list is played.
-			nextSongToPlay = findNextValidSongFn(songIndex, songList) || findNextValidSongFn(-1, songList)
+			nextSongToPlay = findNextValidSongFn(songIndex, songList) || findNextValidSongFn(-1, songList)*/
 		} else {
 			// Song Repeat Disabled && If Playback Repeat Disabled
 			nextSongToPlay = findNextValidSongFn(songIndex, songList)
 		}
 
 		if (nextSongToPlay !== undefined) {
-			getAudioPlayer(audioPlayerName).setAttribute('src', encodeURLFn(nextSongToPlay.SourceFile))
-			getAudioPlayer(audioPlayerName).setAttribute('data-song-id', nextSongToPlay.ID.toString())
+			doesFileExistFn(nextSongToPlay.SourceFile).then(result => {
+				if (result === true) {
+					getAudioPlayer(audioPlayerName).setAttribute('src', encodeURLFn(nextSongToPlay!.SourceFile))
+					getAudioPlayer(audioPlayerName).setAttribute('data-song-id', nextSongToPlay!.ID.toString())
+				} else {
+					// Song does not exist
+					songNotFoundFn(nextSongToPlay!)
+				}
+			})
 		} else {
 			// No more songs in playback
-			console.log('No more songs in playback')
 			getAudioPlayer(audioPlayerName).removeAttribute('src')
 			endOfPlayback = true
 		}
@@ -167,8 +210,6 @@
 			const name = element.id
 			const altName = name === 'main' ? 'alt' : 'main'
 
-			console.log(altName)
-
 			if (name !== $currentAudioPlayerName) {
 				return
 			}
@@ -181,8 +222,6 @@
 
 			$currentSongDurationStore = duration
 			$currentPlayerTime = currentTime
-
-			// console.log(audioPlayerStates[altName])
 
 			////////// Audio Preloads Here \\\\\\\\\\
 			if ($audioPlayerStates[altName].isPreloaded === false && $audioPlayerStates[altName].isPreloading === false) {
@@ -206,13 +245,15 @@
 				const timeoutTime = (timeRemaining - smoothTimeSec) * 1000
 
 				setTimeout(() => {
-					console.log('!!!!!!', Number(element.duration.toFixed(2)) - Number(element.currentTime.toFixed(2)))
-
 					let altPlayerSrc = getAudioPlayer(altName).getAttribute('src')
 
 					if (altPlayerSrc === null || altPlayerSrc === undefined) {
-						console.log('Alt player src is null or undefined')
 						$audioPlayerStates[altName].isPlaying = false
+
+						// console.log('Song missing?')
+
+						// console.log('No more songs in playback')
+						// fileNotFoundCheck(song)
 					} else {
 						getAudioPlayer(altName)
 							.play()
@@ -224,12 +265,27 @@
 								// Gets the song data from the playback store (has all the songs data)
 								let songData: SongType | undefined = $playbackStore.find(song => song.ID === songId)
 
+								if (songData === undefined) return
+
 								updateSongDataFn(songData)
+
+								if ($isAppIdle === true) triggerScrollToSongEvent.set(songId)
 							})
 							.catch(err => {
-								console.log(err)
+								/*
+									// If next song gives and error, gets back the "previous" song being played.
+					let previousPlayedSong = $playbackStore.find(
+						song => song.ID === +audioElements[this.id].domElement.getAttribute('data-song-id')
+					)
 
-								// songPlayingError(altPlayerSrc!, err)
+					// If the "previous" song is found, stop the previous audio player and set the previous as the playing one.
+					// The objectif is to keep the overall app in a working state if an error was found.
+					if (previousPlayedSong) {
+						audioElements[this.id].isPlaying = false
+						$songToPlayUrlStore = [previousPlayedSong.SourceFile, { playNow: false }]
+					}
+								*/
+								songPlayingError(altPlayerSrc!, err)
 							})
 					}
 				}, timeoutTime)
@@ -237,10 +293,8 @@
 		}, 250)
 	}
 
-	// TODO Move the preload to a different function
-
+	// Function to control the audio player interval
 	function controlPlayerInterval(value: 'startInterval' | 'stopInterval') {
-		console.log(value)
 		if (value === 'startInterval') {
 			audioPlayerInterval = getAudioPlayerInterval()
 		} else if (value === 'stopInterval') {
@@ -257,11 +311,18 @@
 			$altAudioPlayerState.isPlaying = true
 		})
 
+		$mainAudioPlayer.addEventListener('pause', () => {
+			$mainAudioPlayerState.isPlaying = false
+		})
+
+		$altAudioPlayer.addEventListener('pause', () => {
+			$altAudioPlayerState.isPlaying = false
+		})
+
 		$mainAudioPlayer.addEventListener('ended', evt => {
-			console.log('Main Player Done')
 			$mainAudioPlayerState.isPlaying = false
 			let element = evt.target as HTMLAudioElement
-			let songId = element.dataset.songId
+			let songId = Number(element.dataset.songId)
 
 			$mainAudioPlayerState = {
 				isPlaying: false,
@@ -269,14 +330,13 @@
 				isPreloading: false
 			}
 
-			console.log(songId)
+			updatePlayCountFn(songId || 0, 'increment')
 		})
 
 		$altAudioPlayer.addEventListener('ended', evt => {
-			console.log('Alt Player Done')
 			$altAudioPlayerState.isPlaying = false
 			let element = evt.target as HTMLAudioElement
-			let songId = element.dataset.songId
+			let songId = Number(element.dataset.songId)
 
 			$altAudioPlayerState = {
 				isPlaying: false,
@@ -284,7 +344,7 @@
 				isPreloading: false
 			}
 
-			console.log(songId)
+			updatePlayCountFn(songId || 0, 'increment')
 		})
 
 		$altAudioPlayer.addEventListener('canplaythrough', () => {

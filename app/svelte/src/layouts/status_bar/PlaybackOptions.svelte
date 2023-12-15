@@ -8,9 +8,7 @@
 		playbackRepeatCurrentConfig,
 		playbackRepeatListConfig,
 		playbackShuffleConfig,
-
 		songSortConfig
-
 	} from '../../stores/config.store'
 	import { playbackStore } from '../../stores/main.store'
 	import shuffleSongsFn from '../../functions/shuffleSongs.fn'
@@ -36,11 +34,8 @@
 						}
 					}
 				})
-				$playbackStore = sortSongsArrayFn(
-					$playbackStore,
-					$songSortConfig.sortBy,
-					$songSortConfig.sortOrder
-				)
+
+				$playbackStore = sortSongsArrayFn($playbackStore, $songSortConfig?.sortBy, $songSortConfig?.sortOrder)
 			}
 		}
 	}
@@ -66,7 +61,7 @@
 	}
 
 	onMount(() => {
-		let shuffleSongsElement = document.querySelector('.shuffle')
+		let shuffleSongsElement = document.querySelector('.shuffle')!
 
 		;['click', 'contextmenu'].forEach(evtType => {
 			shuffleSongsElement.addEventListener(evtType, evt => shuffleSongs(evt))
