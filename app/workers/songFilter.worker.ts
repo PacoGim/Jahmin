@@ -5,11 +5,11 @@ parentPort?.on(
 	'message',
 	(msg: { type: 'add' | 'delete'; workerCallId: string; data: { userSongs: string[]; dbSongs: SongType[] } }) => {
 		let { userSongs, dbSongs } = msg.data
-		let dbSourceFiles = dbSongs.map(song => song.SourceFile)
+		let dbSourceFiles = new Set(dbSongs.map(song => song.SourceFile))
 
 		if (msg.type === 'add') {
 			let songsToAdd = userSongs
-				.filter(songPath => dbSourceFiles.indexOf(songPath) === -1)
+				.filter(songPath => !dbSourceFiles.has(songPath))
 				.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
 			parentPort?.postMessage({
@@ -20,7 +20,7 @@ parentPort?.on(
 				}
 			})
 		} else if (msg.type === 'delete') {
-			let songsToDelete = dbSourceFiles.filter(songPath => userSongs.indexOf(songPath) === -1)
+			let songsToDelete = Array.from(dbSourceFiles).filter(songPath => userSongs.indexOf(songPath) === -1)
 			parentPort?.postMessage({
 				type: msg.type,
 				workerCallId: msg.workerCallId,
@@ -31,3 +31,5 @@ parentPort?.on(
 		}
 	}
 )
+
+function findSongsToAdd() {}
