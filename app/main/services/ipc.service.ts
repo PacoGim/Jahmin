@@ -44,4 +44,5 @@ export async function startIPC() {
 	/********************** Database **********************/
 	await (await import('../ipc/database/bulkRead.ipc')).default(ipcMain)
 	await (await import('../ipc/database/updatePlayCount.ipc')).default(ipcMain)
+	await (await import('../ipc/database/closeDb.ipc')).default(ipcMain)
 }

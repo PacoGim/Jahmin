@@ -98,6 +98,7 @@ declare global {
 				ID: number
 				PlayCount: number
 			}>
+			closeDb: () => Promise<>
 		}
 	}
 }

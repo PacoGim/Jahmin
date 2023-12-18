@@ -29,6 +29,9 @@
 * Don't update song if the new tags are already in the song
 
 * When updating a song (like rating) the song can't play until the end
+* Important, detect when the app is fully idle (no user interaction and no songs playing for a certain amount of time).
+  -> When idle detected, close the db completely
+  -> When a user interaction is detected, init the db again
 
 * If:
   Play album

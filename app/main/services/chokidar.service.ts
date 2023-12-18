@@ -65,3 +65,8 @@ export function watchPaths(paths: string[]) {
 		}
 	})
 }
+
+export function killWatcher() {
+	watcher?.close()
+	watcher = undefined
+}

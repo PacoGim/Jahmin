@@ -80,7 +80,8 @@ const ipcFunctions = {
 	onResetSongPlayCount: (callback: any) => ipcRenderer.on('reset-song-play-count', callback),
 	/********************** Database **********************/
 	bulkRead,
-	updatePlayCount
+	updatePlayCount,
+	closeDb
 }
 
 contextBridge.exposeInMainWorld('ipc', ipcFunctions)
@@ -98,6 +99,15 @@ function bulkRead(data: {
 	return new Promise((resolve, reject) => {
 		ipcRenderer
 			.invoke('bulk-read', data)
+			.then(response => resolve(response))
+			.catch(err => reject(err))
+	})
+}
+
+function closeDb() {
+	return new Promise((resolve, reject) => {
+		ipcRenderer
+			.invoke('close-db')
 			.then(response => resolve(response))
 			.catch(err => reject(err))
 	})

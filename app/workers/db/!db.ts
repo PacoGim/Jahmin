@@ -1,4 +1,4 @@
-import { sqlite3 } from 'sqlite3'
+// import { sqlite3 } from 'sqlite3'
 import { SongType } from '../../types/song.type'
 import bulkInsertFn from '../db/bulkInsert.fn'
 import bulkUpdateFn from './bulkUpdate.fn'
@@ -6,7 +6,7 @@ import bulkDeleteFn from './bulkDelete.fn'
 
 type DataType = { type: 'create' | 'read' | 'update' | 'delete'; data: SongType }
 
-const sqlite3: sqlite3 = require('sqlite3').verbose()
+// // // const sqlite3: sqlite3 = require('sqlite3').verbose()
 
 let taskQueue: {
 	type: 'create' | 'update' | 'delete' | 'external-update'

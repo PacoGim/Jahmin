@@ -14,6 +14,7 @@ import calculateWindowBoundariesFn from './functions/calculateWindowBoundaries.f
 import { killAllWorkers } from './services/workers.service'
 
 import getDockMenuFn from './functions/getDockMenu.fn'
+import { killWatcher } from './services/chokidar.service'
 
 let browserWindow: BrowserWindow
 
@@ -57,9 +58,9 @@ app.whenReady().then(() => {
 
 app.on('will-quit', () => {
 	// Unregister all shortcuts.
-
 	globalShortcut.unregisterAll()
 	killAllWorkers()
+	killWatcher()
 })
 
 function createWindow() {

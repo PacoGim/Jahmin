@@ -25,12 +25,7 @@
 
 	import { layoutToShow } from './stores/main.store'
 	import PlaybackLayout from './layouts/playback/PlaybackLayout.svelte'
-	import {
-		confirmService,
-		promptService,
-		rangeInputService,
-		storageService
-	} from './stores/service.store'
+	import { confirmService, promptService, rangeInputService, storageService } from './stores/service.store'
 	import PromptService from './svelte_services/PromptService.svelte'
 	import ConfirmService from './svelte_services/ConfirmService.svelte'
 	import RangeInputService from './svelte_services/RangeInputService.svelte'
@@ -75,11 +70,11 @@
 <StorageService bind:this={$storageService} />
 
 <style>
-	search-container {
+/* 	search-container {
 		position: fixed;
 		top: 0;
 		right: 0;
-	}
+	} */
 
 	main-app {
 		display: grid;
