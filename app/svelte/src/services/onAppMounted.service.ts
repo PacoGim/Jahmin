@@ -25,17 +25,17 @@ import { currentAudioPlayer, currentPlayerTime } from '../stores/player.store'
 
 let appIdleDebounce = getAppIdleDebounce()
 
-function flickTheme(flickToDay = true) {
-	if (flickToDay === true) {
-		document.querySelector('body').setAttribute('theme', 'Night')
-	} else {
-		document.querySelector('body').setAttribute('theme', 'Day')
-	}
+// function flickTheme(flickToDay = true) {
+// 	if (flickToDay === true) {
+// 		document.querySelector('body').setAttribute('theme', 'Night')
+// 	} else {
+// 		document.querySelector('body').setAttribute('theme', 'Day')
+// 	}
 
-	setTimeout(() => {
-		flickTheme(!flickToDay)
-	}, 3000)
-}
+// 	setTimeout(() => {
+// 		flickTheme(!flickToDay)
+// 	}, 3000)
+// }
 
 export default function () {
 	setElementSizeToCssVariablesFn()

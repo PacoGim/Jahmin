@@ -9,7 +9,6 @@
 		currentSongDurationStore,
 		isAppIdle,
 		playbackStore,
-		playingSongStore,
 		triggerScrollToSongEvent
 	} from '../stores/main.store'
 	import {
@@ -34,8 +33,8 @@
 	import shuffleSongsFn from '../functions/shuffleSongs.fn'
 	import nextSongFn from '../functions/nextSong.fn'
 	import updatePlayCountFn from '../functions/updatePlayCount.fn'
-	import fileNotFoundCheck from '../functions/songNotFound.fn'
 	import songNotFoundFn from '../functions/songNotFound.fn'
+	import { get } from 'svelte/store'
 
 	let isMounted = false
 
@@ -57,7 +56,6 @@
 	$: {
 		$playbackShuffleConfig
 		$playbackRepeatCurrentConfig
-		$playbackStore
 		listenPlaybackChangers()
 	}
 
@@ -180,11 +178,21 @@
 			nextSongToPlay = findNextValidSongFn(songIndex, songList)
 		}
 
+		console.log('****************')
+		console.log('****************')
+		console.log('****************')
+
 		if (nextSongToPlay !== undefined) {
 			doesFileExistFn(nextSongToPlay.SourceFile).then(result => {
+				console.log(result)
+
 				if (result === true) {
-					getAudioPlayer(audioPlayerName).setAttribute('src', encodeURLFn(nextSongToPlay!.SourceFile))
-					getAudioPlayer(audioPlayerName).setAttribute('data-song-id', nextSongToPlay!.ID.toString())
+					console.log('src: ', audioPlayerName, encodeURLFn(nextSongToPlay!.SourceFile))
+					let element = getAudioPlayer(audioPlayerName)
+
+					element.setAttribute('src', encodeURLFn(nextSongToPlay!.SourceFile))
+					element.setAttribute('data-song-id', nextSongToPlay!.ID.toString())
+					console.log(element)
 				} else {
 					// Song does not exist
 					songNotFoundFn(nextSongToPlay!)
@@ -195,13 +203,17 @@
 			getAudioPlayer(audioPlayerName).removeAttribute('src')
 			endOfPlayback = true
 		}
+		console.log('****************')
+		console.log('****************')
+		console.log('****************')
 	}
 
 	function getAudioPlayer(audioplayerName: string): HTMLAudioElement {
 		if (audioplayerName === 'alt') {
-			return $altAudioPlayer
+			return get(altAudioPlayer)
+		} else {
+			return get(mainAudioPlayer)
 		}
-		return $mainAudioPlayer
 	}
 
 	function getAudioPlayerInterval() {
