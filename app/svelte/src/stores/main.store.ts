@@ -1,14 +1,15 @@
 import { get, writable, type Writable } from 'svelte/store'
 import type { SongType } from '../../../types/song.type'
+import { isPlaying } from './player.store'
 
-export let os: Writable<string> = writable(undefined)
-export let langFile: Writable<Object> = writable(undefined)
+export let os: Writable<string> = writable('')
+export let langFile: Writable<Object> = writable('')
 export let isAppIdle: Writable<boolean> = writable(false)
 
 // List to show within Song List component.
 export let songListStore: Writable<SongType[]> = writable([])
-export let selectedAlbumDir: Writable<string | undefined> = writable(undefined)
-export let selectedAlbumsDir: Writable<string[] | undefined> = writable([])
+export let selectedAlbumDir: Writable<string> = writable('')
+export let selectedAlbumsDir: Writable<string[]> = writable([])
 export let albumPlayingDirStore: Writable<string | undefined> = writable(undefined)
 export let currentSongDurationStore: Writable<number> = writable(0)
 export let currentSongProgressStore: Writable<number> = writable(0)
@@ -43,7 +44,7 @@ export let appTitle: Writable<string> = writable('Jahmin')
 
 export let elementMap: Writable<Map<string, HTMLElement> | undefined> = writable(new Map<string, HTMLElement>())
 
-export let windowResize: Writable<number> = writable(undefined)
+export let windowResize: Writable<number> = writable(0)
 
 /********************** ConfigLayout **********************/
 export let layoutToShow: Writable<'Library' | 'Playback' | 'Config' | 'Lyrics' | 'Playlist'> = writable('Library')
@@ -83,9 +84,11 @@ export let songListItemElement: Writable<HTMLElement | undefined> = writable(und
 
 export let reloadArts: Writable<number> = writable(Math.random())
 
-export let songLyricsSelected: Writable<{ title: string; artist: string }> = writable(undefined)
+export let songLyricsSelected: Writable<{ title: string; artist: string } | undefined> = writable(undefined)
 
 export function setSelectedAlbumsDir(newSelectedAlbumsDir: string[] | undefined) {
+	if (newSelectedAlbumsDir === undefined) return
+
 	if (newSelectedAlbumsDir.toString() !== get(selectedAlbumsDir).toString()) {
 		selectedAlbumsDir.set(newSelectedAlbumsDir)
 	}
@@ -95,11 +98,8 @@ layoutToShow.subscribe(layoutName => {
 	document.title = layoutName ? `Jahmin ${layoutName}` : 'Jahmin'
 })
 
-
-
 playingSongStore.subscribe(song => {
 	if (song) {
-		// window.ipc.setPlayerInfo(song?.Title, song?.Artist, get(isPlaying))
-		window.ipc.setPlayerInfo(song?.Title, song?.Artist)
+		window.ipc.setPlayerInfo(song?.Title || '', song?.Artist || '', get(isPlaying))
 	}
 })

@@ -31,53 +31,56 @@ export let showExtensionsIconsConfig: Writable<boolean> = writable(true)
 export let pauseAnimatedArtWhenAppUnfocusedConfig: Writable<boolean> = writable(true)
 export let dateOrderConfig: Writable<ConfigType['userOptions']['dateOrder']> = writable([])
 
+//@ts-expect-error A partial inside a partial triggers this error
 export let playbackShuffleConfig: Writable<ConfigType['userOptions']['playback']['shuffle']> = writable()
+//@ts-expect-error A partial inside a partial triggers this error
 export let playbackRepeatListConfig: Writable<ConfigType['userOptions']['playback']['repeatList']> = writable()
+//@ts-expect-error A partial inside a partial triggers this error
 export let playbackRepeatCurrentConfig: Writable<ConfigType['userOptions']['playback']['repeatCurrent']> = writable()
 
 configStore.subscribe(value => {
-	if (get(groupByConfig) !== value?.group.groupBy) {
-		groupByConfig.set(value?.group.groupBy)
+	if (get(groupByConfig) !== value?.group?.groupBy) {
+		groupByConfig.set(value?.group?.groupBy || '')
 	}
 
-	if (get(groupByValueConfig) !== value?.group.groupByValue) {
-		groupByValueConfig.set(value?.group.groupByValue)
+	if (get(groupByValueConfig) !== value?.group?.groupByValue) {
+		groupByValueConfig.set(value?.group?.groupByValue || '')
 	}
 
 	if (get(songAmountConfig) !== value?.userOptions?.songAmount) {
-		songAmountConfig.set(value?.userOptions?.songAmount)
+		songAmountConfig.set(value?.userOptions?.songAmount || 7)
 	}
 
 	if (get(themeConfig) !== value?.userOptions?.theme) {
-		themeConfig.set(value?.userOptions?.theme)
+		themeConfig.set(value?.userOptions?.theme || 'SystemBased')
 	}
 
 	if (get(gridGapConfig) !== value?.userOptions?.gridGap) {
-		gridGapConfig.set(value?.userOptions?.gridGap)
+		gridGapConfig.set(value?.userOptions?.gridGap || 16)
 	}
 
 	if (get(artSizeConfig) !== value?.userOptions?.artSize) {
-		artSizeConfig.set(value?.userOptions?.artSize)
+		artSizeConfig.set(value?.userOptions?.artSize || 128)
 	}
 
 	if (get(fontSizeConfig) !== value?.userOptions?.fontSize) {
-		fontSizeConfig.set(value?.userOptions?.fontSize)
+		fontSizeConfig.set(value?.userOptions?.fontSize || 16)
 	}
 
 	if (get(alwaysShowAlbumOverlayConfig) !== value?.userOptions.alwaysShowAlbumOverlay) {
-		alwaysShowAlbumOverlayConfig.set(value?.userOptions.alwaysShowAlbumOverlay)
+		alwaysShowAlbumOverlayConfig.set(value?.userOptions.alwaysShowAlbumOverlay || false)
 	}
 
 	if (get(showDynamicArtistsConfig) !== value?.userOptions.showDynamicArtists) {
-		showDynamicArtistsConfig.set(value?.userOptions.showDynamicArtists)
+		showDynamicArtistsConfig.set(value?.userOptions.showDynamicArtists || true)
 	}
 
 	if (get(showExtensionsIconsConfig) !== value?.userOptions.showExtensionsIcons) {
-		showExtensionsIconsConfig.set(value?.userOptions.showExtensionsIcons)
+		showExtensionsIconsConfig.set(value?.userOptions.showExtensionsIcons || true)
 	}
 
 	if (get(pauseAnimatedArtWhenAppUnfocusedConfig) !== value?.userOptions.pauseAnimatedArtWhenAppUnfocused) {
-		pauseAnimatedArtWhenAppUnfocusedConfig.set(value?.userOptions.pauseAnimatedArtWhenAppUnfocused)
+		pauseAnimatedArtWhenAppUnfocusedConfig.set(value?.userOptions.pauseAnimatedArtWhenAppUnfocused || true)
 	}
 
 	if (get(dateOrderConfig) !== value?.userOptions.dateOrder) {
@@ -92,15 +95,15 @@ configStore.subscribe(value => {
 		privateSongSortConfig.set(value?.userOptions.songSort)
 	}
 
-	if (get(playbackShuffleConfig) !== value?.userOptions.playback.shuffle) {
-		playbackShuffleConfig.set(value?.userOptions.playback.shuffle)
+	if (get(playbackShuffleConfig) !== value?.userOptions?.playback?.shuffle) {
+		playbackShuffleConfig.set(value?.userOptions?.playback?.shuffle || false)
 	}
 
-	if (get(playbackRepeatListConfig) !== value?.userOptions.playback.repeatList) {
-		playbackRepeatListConfig.set(value?.userOptions.playback.repeatList)
+	if (get(playbackRepeatListConfig) !== value?.userOptions?.playback?.repeatList) {
+		playbackRepeatListConfig.set(value?.userOptions?.playback?.repeatList || false)
 	}
 
-	if (get(playbackRepeatCurrentConfig) !== value?.userOptions.playback.repeatCurrent) {
-		playbackRepeatCurrentConfig.set(value?.userOptions.playback.repeatCurrent)
+	if (get(playbackRepeatCurrentConfig) !== value?.userOptions?.playback?.repeatCurrent) {
+		playbackRepeatCurrentConfig.set(value?.userOptions?.playback?.repeatCurrent || false)
 	}
 })

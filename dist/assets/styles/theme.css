@@ -45,9 +45,9 @@ body[theme='Night'] {
 	--theme-fg-2: #9a99b9;
 	--theme-fg-3: #696a8e;
 
-	--theme-bg-1: #353452;
-	--theme-bg-2: #2f2e4e;
-	--theme-bg-3: #282747;
+	--theme-bg-1: hsl(220, 20%, 10%);
+	--theme-bg-2: hsl(220, 20%, 15%);
+	--theme-bg-3: hsl(220, 20%, 20%);
 
 	--theme-accent: #6674d1;
 

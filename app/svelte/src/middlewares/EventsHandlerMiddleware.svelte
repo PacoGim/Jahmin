@@ -92,9 +92,6 @@
 
 		setSelectedAlbumsDir(directoryList)
 
-		//TODO 1!1111123easrxdrfxfr
-		$triggerScrollToSongEvent = playingSong.ID
-
 		$tagGroupEvents.push({
 			trigger: 'scroll',
 			options: {
@@ -121,6 +118,9 @@
 		})
 
 		$artGridEvents = $artGridEvents
+
+		await waitFn(100)
+		$triggerScrollToSongEvent = playingSong?.ID || 0
 	}
 
 	async function handleAlbumEvent(element: HTMLElement, evtType: string) {
@@ -169,7 +169,7 @@
 	}
 
 	function handleSongListItemEvent(element: HTMLElement, evtType: string) {
-		const songId = +element.dataset.id
+		const songId = Number(element.dataset.id)
 
 		if (evtType === 'dblclick') {
 			setNewPlaybackFn($selectedAlbumDir, $songListStore, songId, { playNow: true }, { shuffle: $playbackShuffleConfig })

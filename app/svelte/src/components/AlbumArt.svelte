@@ -7,7 +7,7 @@
 	import { reloadArts } from '../stores/main.store'
 
 	export let intersectionRoot = undefined
-	export let imageSourceLocation = undefined
+	export let imageSourceLocation: string | undefined = undefined
 	export let from = ''
 
 	let elementId = undefined

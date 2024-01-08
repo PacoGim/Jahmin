@@ -58,7 +58,7 @@ function getDefaultConfigFile(): ConfigType {
 		groupOnlyByFolder: false,
 		userOptions: {
 			language: 'english',
-			songAmount: 8,
+			songAmount: 7,
 			theme: ThemeOptions.SystemBased,
 			artSize: 128,
 			gridGap: 16,

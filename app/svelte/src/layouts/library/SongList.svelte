@@ -28,11 +28,11 @@
 	let scrollAmount = 0
 	let previousScrollAmount = undefined
 
-	let dataContainerElement
+	let dataContainerElement: HTMLElement
 
-	let dataContainerWidth
+	let dataContainerWidth: number
 
-	let saveConfigDebounce = undefined
+	let saveConfigDebounce: NodeJS.Timeout | undefined = undefined
 
 	let scrolledAmount = 0
 
@@ -56,7 +56,7 @@
 		$triggerScrollToSongEvent = 0
 	}
 
-	$: if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap.get('song-list-svlt')) {
+	$: if ($keyModifier === 'ctrlKey' && $keyPressed === 'a' && $elementMap?.get('song-list-svlt')) {
 		selectAllSongs()
 	}
 
@@ -76,7 +76,7 @@
 		$selectedSongsStore = [...$songListStore.map(song => song.ID)]
 	}
 
-	function setScrollAmount(amount) {
+	function setScrollAmount(amount: number) {
 		if ($songListStore.length <= 0) {
 			return
 		}
@@ -92,7 +92,7 @@
 		setScrollProgress()
 	}
 
-	function onSongListBarScrolled(event) {
+	function onSongListBarScrolled(event: CustomEvent) {
 		setScrollAmount(event.detail)
 	}
 
@@ -101,7 +101,7 @@
 		cssVariablesService.set('scrollbar-fill', `${scrollValue}%`)
 	}
 
-	function changeSongListHeight(songAmount) {
+	function changeSongListHeight(songAmount: number) {
 		let songListItemHeight = Number(
 			getComputedStyle(document.body).getPropertyValue('--song-list-item-height').replace('px', '')
 		)
@@ -114,7 +114,7 @@
 	}
 
 	// Manages to "scroll" to the proper song on demand.
-	function setScrollAmountFromSong(songId) {
+	function setScrollAmountFromSong(songId: number) {
 		let songIndex = $songListStore.findIndex(song => song.ID === songId)
 
 		let differenceAmount = Math.floor($songAmountConfig / 2)
@@ -128,13 +128,13 @@
 		}
 	}
 
-	function setStar(starChangeEvent) {
+	function setStar(starChangeEvent: CustomEvent) {
 		let eventDetails: { rating: number; song: SongType } = starChangeEvent.detail
 		window.ipc.updateSongs([eventDetails.song], { Rating: eventDetails.rating })
 	}
 
-	let elementActive: HTMLElement = undefined
-	let elementPosX: number = undefined
+	let elementActive: HTMLElement | undefined = undefined
+	let elementPosX: number | undefined = undefined
 
 	function handleOnMouseDownEvent(evt: MouseEvent) {
 		let element = evt.target as HTMLElement
@@ -155,20 +155,24 @@
 		scrolledAmount = element.scrollLeft
 	}
 
-	function updateSort(tagToSort) {
-		let copySongSort = { ...$songSortConfig }
+	function updateSort(tagToSortName: string) {
+		let copySongSort = { ...$songSortConfig } as ConfigType['userOptions']['songSort']
 
-		if (copySongSort.sortBy === tagToSort) {
+		if (copySongSort === undefined) return
+
+		if (copySongSort.sortBy === tagToSortName) {
 			if (copySongSort.sortOrder === 'asc') {
 				copySongSort.sortOrder = 'desc'
 			} else {
 				copySongSort.sortOrder = 'asc'
 			}
 		} else {
-			let order: 'asc' | 'desc' = ['Rating', 'PlayCount', 'BitRate', 'SampleRate', 'Size'].includes(tagToSort) ? 'desc' : 'asc'
+			let order: 'asc' | 'desc' = ['Rating', 'PlayCount', 'BitRate', 'SampleRate', 'Size'].includes(tagToSortName)
+				? 'desc'
+				: 'asc'
 
 			copySongSort = {
-				sortBy: tagToSort,
+				sortBy: tagToSortName,
 				sortOrder: order
 			}
 		}
@@ -181,12 +185,12 @@
 	}
 
 	mousePosition.subscribe(value => {
-		if (elementPosX !== undefined && $isMouseDown === true) {
-			let newPosX = value.x - elementPosX
+		if (elementPosX !== undefined && $isMouseDown === true && copyListTag !== undefined && value) {
+			let newPosX = value?.x - elementPosX
 
 			elementPosX = elementPosX + newPosX
 
-			let tag = elementActive.dataset.tag
+			let tag = elementActive?.dataset.tag
 
 			let tagIndex = copyListTag.findIndex(item => item.value === tag)
 
@@ -215,9 +219,9 @@
 </script>
 
 <song-list-svlt
-	on:mousewheel={e => scrollContainer(e)}
-	on:click={e => songListClickEventHandlerService(e)}
-	on:keypress={e => songListClickEventHandlerService(e)}
+	on:mousewheel={scrollContainer}
+	on:click={songListClickEventHandlerService}
+	on:keypress={songListClickEventHandlerService}
 	on:scroll={handleScrollEvent}
 	tabindex="-1"
 	role="button"
@@ -231,16 +235,16 @@
 	>
 		<data-header>
 			<data-row>
-				{#each copyListTag as tag, index (index)}
+				{#each copyListTag || [] as tag, index (index)}
 					<data-value
 						style={`width: ${tag.width}px;`}
 						onClick={() => updateSort(tag.value)}
-						data-selected={tag.value === $songSortConfig.sortBy}
+						data-selected={tag.value === $songSortConfig?.sortBy}
 					>
 						{renameSongTagFn(tag.value)}
 						<icon-container>
 							<CaretIcon
-								style="fill: currentColor;height: 1rem; width: 1rem;transform: rotateZ({$songSortConfig.sortOrder === 'desc'
+								style="fill: currentColor;height: 1rem; width: 1rem;transform: rotateZ({$songSortConfig?.sortOrder === 'desc'
 									? '0'
 									: '180'}deg);"
 							/>
@@ -260,7 +264,7 @@
 					class:disabled={song.IsEnabled === 0}
 					class:playing={$playingSongStore?.ID === song?.ID}
 				>
-					{#each copyListTag as tag, index (index)}
+					{#each copyListTag || [] as tag, index (index)}
 						<data-value style={`width: ${tag.width}px;`}>
 							<SongTag {song} {tag} on:starChange={setStar} />
 						</data-value>

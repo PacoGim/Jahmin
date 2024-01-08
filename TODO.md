@@ -1,39 +1,36 @@
 ## TODO
-* Reload album data & check album art.
-* Quick Play.
+- The play/pause icon next to the playing song in the song list doesn't show up anymore
 
-* Fix covers not working when song others than opus
+- When clicking previous in the dock icon thinggy, it should force the previous song and not set the current song time to 0
 
-* Playcount dynamic colors doesn't work in first launch
+- Play / pause doesn't work in right click dock
 
-* Webp covers disappear the window not focused
+- The shift key seems to be pressed sometimes and prevents chossing only one album. Gotta add a better way to check for shift keys and more
 
-* Disabling songs while playing are not updated. If song 1 is playing, then the next songs are loaded, if one of the loaded song is disabled, it is not reflected in the list.
+- Fix massive app freeze at app launch.
 
-* Colors error when switch from settings to library
-* If the playback has twice the same song in a row it will not play the next song
+- Reload album data & check album art.
 
-* Fix massive app freeze at app launch.
+- Quick Play.
 
-* (Not important) Wrong waveform color sometimes
+- Fix covers not working when song others than opus
 
-* Fix nasty timing bug
+- Webp covers disappear the window not focused
 
-* When playing a lot of super short audio, the player stops
+- Disabling songs while playing are not updated. If song 1 is playing, then the next songs are loaded, if one of the loaded song is disabled, it is not reflected in the list.
 
-* (Hard to reproduce) Try to figure why the cover don't load after the app is minimized for a long time
+- If the playback has twice the same song in a row it will not play the next song
 
-* (Important) Check if a song is actualy playing
+- (Not important) Wrong waveform color sometimes
 
-* Run album check when the user switches album and doesn't switch again for x sec timer then ->
-* Don't update song if the new tags are already in the song
+- When playing a lot of super short audio, the player stops
 
-* When updating a song (like rating) the song can't play until the end
-* Important, detect when the app is fully idle (no user interaction and no songs playing for a certain amount of time).
-  -> When idle detected, close the db completely
-  -> When a user interaction is detected, init the db again
+- Run album check when the user switches album and doesn't switch again for x sec timer then ->
+- Don't update song if the new tags are already in the song
 
-* If:
+- When updating a song (like rating) the song can't play until the end
+
+- If:
   Play album
   Add album to playback
   Then randomize twice

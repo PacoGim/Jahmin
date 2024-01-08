@@ -1,4 +1,4 @@
-export default function (songArtist: string, songAlbumArtist: string) {
+export default function (songArtist: string | undefined | null, songAlbumArtist: string | undefined | null) {
 	if (!songArtist || !songAlbumArtist) {
 		return ''
 	}

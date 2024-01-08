@@ -8,6 +8,8 @@ import { groupByConfig } from '../stores/config.store'
 import { get } from 'svelte/store'
 import findNextValidSongFn from './findNextValidSong.fn'
 import notifyService from '../services/notify.service'
+import getAlbumColorsFn from './getAlbumColors.fn'
+import applyColorSchemeFn from './applyColorScheme.fn'
 
 export default async function setNewPlaybackFn(
 	rootDir: string,
@@ -77,7 +79,7 @@ export default async function setNewPlaybackFn(
 	// triggerScrollToSongEvent.set(songToPlay.ID)
 	// }, 1000)
 
-	// getAlbumColorsFn(rootDir).then(color => {
-	// 	applyColorSchemeFn(color)
-	// })
+	getAlbumColorsFn(rootDir).then(color => {
+		applyColorSchemeFn(color)
+	})
 }

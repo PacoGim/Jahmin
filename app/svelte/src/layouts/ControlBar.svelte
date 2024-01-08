@@ -34,7 +34,7 @@
 
 	$: updateSongTime($currentSongDurationStore, $currentSongProgressStore)
 
-	function updateSongTime(songDuration, songProgress) {
+	function updateSongTime(songDuration: number, songProgress: number) {
 		songTime = {
 			currentTime: parseDuration(songProgress),
 			duration: parseDuration(songDuration),

@@ -5,12 +5,8 @@
 	import type { SongType } from '../../../types/song.type'
 
 	/********************** Stores **********************/
-	import {
-		currentSongDurationStore,
-		isAppIdle,
-		playbackStore,
-		triggerScrollToSongEvent
-	} from '../stores/main.store'
+	import { currentSongDurationStore, isAppIdle, playbackStore, triggerScrollToSongEvent } from '../stores/main.store'
+
 	import {
 		altAudioPlayer,
 		altAudioPlayerState,

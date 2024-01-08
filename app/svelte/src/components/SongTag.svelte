@@ -15,7 +15,7 @@
 	import GenericTag from './tags/GenericTag.svelte'
 	import DateTag from './tags/DateTag.svelte'
 
-	export let tag
+	export let tag: { value: string; align: string }
 	export let song: PartialSongType
 
 	let dispatch = createEventDispatcher()
@@ -27,7 +27,7 @@
 	{:else if tag.value === 'Rating'}
 		<RatingTag on:starChange={evt => dispatch('starChange', evt.detail)} {song} hook="song-list-svlt" />
 	{:else if tag.value === 'Duration'}
-		{parseDuration(song.Duration)}
+		{parseDuration(song.Duration || 0)}
 	{:else if tag.value === 'PlayCount'}
 		<PlayCountTag {song} />
 	{:else if tag.value === 'Extension'}

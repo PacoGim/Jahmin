@@ -1,4 +1,4 @@
-export default function (object1: Object, object2: Object) {
+export default function (object1: Object | undefined, object2: Object | undefined) {
 	let object1String = ''
 	let object2String = ''
 
