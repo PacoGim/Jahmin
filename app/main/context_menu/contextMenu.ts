@@ -3,6 +3,7 @@ import { Menu, BrowserWindow } from 'electron'
 import getAlbumContextMenuTemplateFn from './getAlbumContextMenuTemplate.fn'
 import getGroupNameContextMenuTemplateFn from './getGroupNameContextMenuTemplate.fn'
 import getSongListContextMenuTemplateFn from './getSongListContextMenuTemplate.fn'
+import getSongListHeaderContextMenuTemplateFn from './getSongListHeaderContextMenuTemplate.fn'
 import getLyricsContainerCtxMenuTemplateFn from './getLyricsContainerCtxMenuTemplate.fn'
 
 export async function loadContextMenu(event: any, menuToOpen: string, data: any) {
@@ -16,6 +17,8 @@ export async function loadContextMenu(event: any, menuToOpen: string, data: any)
 		template = getGroupNameContextMenuTemplateFn()
 	} else if (menuToOpen === 'LyricsContainerContextMenu') {
 		template = getLyricsContainerCtxMenuTemplateFn(data)
+	} else if (menuToOpen === 'SongListHeaderContextMenu') {
+		template = getSongListHeaderContextMenuTemplateFn()
 	}
 
 	const menu = Menu.buildFromTemplate(template)

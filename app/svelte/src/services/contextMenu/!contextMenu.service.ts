@@ -3,6 +3,7 @@ import albumContextMenu from './albumCtxMenu'
 import groupNameCtxMenu from './groupNameCtxMenu'
 import songListCtxMenu from './songListCtxMenu'
 import path from 'path'
+import songListHeaderCtxMenu from './songListHeaderCtxMenu'
 
 export async function handleContextMenuEvent(e: MouseEvent) {
 	e.preventDefault()
@@ -16,7 +17,7 @@ export async function handleContextMenuEvent(e: MouseEvent) {
 		if (pathsName.includes('DATA-BODY')) {
 			songListCtxMenu(e)
 		} else if (pathsName.includes('DATA-HEADER')) {
-			//
+			songListHeaderCtxMenu(e)
 		}
 	}
 

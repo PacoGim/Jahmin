@@ -78,6 +78,7 @@ const ipcFunctions = {
 	onGroupSelected: (callback: any) => ipcRenderer.on('group-selected', callback),
 	onSortsongs: (callback: any) => ipcRenderer.on('sort-songs', callback),
 	onResetSongPlayCount: (callback: any) => ipcRenderer.on('reset-song-play-count', callback),
+	onResetColumnsWidth: (callback: any) => ipcRenderer.on('reset-columns-width', callback),
 	/********************** Database **********************/
 	bulkRead,
 	updatePlayCount,

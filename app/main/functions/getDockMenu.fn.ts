@@ -22,12 +22,10 @@ export default function () {
 		},
 		{
 			label: getIsPlaying() === true ? 'Pause' : 'Play',
-
 			click: () => {
 				sendWebContentsFn('media-key-pressed', 'MediaPlayPause')
 			}
 		},
-
 		{
 			label: 'Next',
 			click: () => {

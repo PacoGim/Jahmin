@@ -10,6 +10,10 @@ function previousMedia() {
 	previousSongFn()
 }
 
+function previousMediaForce() {
+	previousSongFn({ force: true })
+}
+
 function togglePlayPauseMedia() {
 	togglePlayPause()
 }
@@ -17,5 +21,6 @@ function togglePlayPauseMedia() {
 export default {
 	nextMedia,
 	previousMedia,
+	previousMediaForce,
 	togglePlayPauseMedia
 }

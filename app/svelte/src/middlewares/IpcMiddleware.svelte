@@ -7,7 +7,7 @@
 	import updateConfigFn from '../functions/updateConfig.fn'
 	import handleArtService from '../services/handleArt.service'
 	import mediaKeyControlsService from '../services/mediaKeyControls.service'
-	import { configStore, playbackShuffleConfig, songSortConfig } from '../stores/config.store'
+	import { configStore, playbackShuffleConfig, songListTagConfig, songSortConfig } from '../stores/config.store'
 	import { onNewLyrics } from '../stores/crosscall.store'
 	import {
 		artCompressQueueLength,
@@ -22,6 +22,7 @@
 	import type { DatabaseResponseType } from '../../../types/databaseWorkerMessage.type'
 	import getRandomNumberBetweenTwoValuesFn from '../functions/getRandomNumberBetweenTwoValues.fn'
 	import updatePlayCountFn from '../functions/updatePlayCount.fn'
+	import { get } from 'svelte/store'
 
 	window.ipc.onDatabaseUpdate((_, response) => {
 		dbVersionStore.set(response)
@@ -205,13 +206,13 @@
 	})
 
 	// Global shortcuts
-	window.ipc.onMediaKeyPressed((_, mediaKeyPressed) => {
+	window.ipc.onMediaKeyPressed((_:any, mediaKeyPressed:string) => {
 		if (mediaKeyPressed === 'MediaNextTrack') {
 			mediaKeyControlsService.nextMedia()
 		} else if (mediaKeyPressed === 'MediaPreviousTrack') {
 			mediaKeyControlsService.previousMedia()
 		} else if (mediaKeyPressed === 'MediaPreviousTrackForce') {
-			mediaKeyControlsService.previousMedia()
+			mediaKeyControlsService.previousMediaForce()
 		} else if (mediaKeyPressed === 'MediaPlayPause') {
 			mediaKeyControlsService.togglePlayPauseMedia()
 		}
@@ -226,6 +227,18 @@
 	window.ipc.onResetSongPlayCount((_, songs) => {
 		songs.forEach(song => {
 			updatePlayCountFn(song.ID, 'reset')
+		})
+	})
+
+	window.ipc.onResetColumnsWidth(() => {
+		let songListTagConfigLocal = JSON.parse(JSON.stringify(get(songListTagConfig)))
+
+		songListTagConfigLocal.forEach(tag => {
+			tag.width = 100
+		})
+
+		updateConfigFn({
+			songListTags: songListTagConfigLocal
 		})
 	})
 </script>

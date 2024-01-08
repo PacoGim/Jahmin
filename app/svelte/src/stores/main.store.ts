@@ -103,3 +103,10 @@ playingSongStore.subscribe(song => {
 		window.ipc.setPlayerInfo(song?.Title || '', song?.Artist || '', get(isPlaying))
 	}
 })
+
+isPlaying.subscribe(isPlayingValue => {
+	let songTitle = get(playingSongStore)?.Title || ''
+	let songArtist = get(playingSongStore)?.Artist || ''
+
+	window.ipc.setPlayerInfo(songTitle, songArtist, isPlayingValue)
+})

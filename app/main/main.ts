@@ -68,7 +68,9 @@ function createWindow() {
 
 	browserWindow = new BrowserWindow(getWindowOptionsFn(config))
 
-	browserWindow.webContents.openDevTools()
+	if (process.env.NODE_ENV === 'development') {
+		browserWindow.webContents.openDevTools()
+	}
 
 	browserWindow.loadFile(path.join(__dirname, '../index.html'))
 
@@ -90,12 +92,6 @@ function createWindow() {
 			})
 		})
 }
-
-// It doesn't work. Maybe try to kill of workers.
-process.on('uncaughtException', function (error) {
-	// Handle the error here
-	app.quit()
-})
 
 export function getMainWindow() {
 	return browserWindow

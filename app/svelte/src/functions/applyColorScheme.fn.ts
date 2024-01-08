@@ -7,10 +7,6 @@ export default function (color: {
 	lightnessDark: number
 	saturation: number
 }) {
-
-	console.log('--------------')
-	console.log(color)
-
 	cssVariablesService.set('art-hue', color.hue)
 	cssVariablesService.set('art-saturation', color.saturation + '%')
 

@@ -1,6 +1,7 @@
 import { get, writable, type Writable } from 'svelte/store'
 import { context, sourceAltAudio, sourceMainAudio } from './equalizer.store'
 import EqualizerService from '../services/equalizer/!equalizer.service'
+import { playingSongStore } from './main.store'
 
 export let songToPlayUrlStore: Writable<[string | undefined, { playNow: boolean }]> = writable([undefined, { playNow: false }])
 
@@ -101,10 +102,6 @@ function areBothPlayersReady() {
 		}
 	}
 }
-
-// isPlaying.subscribe(value => {
-// 	window.ipc.setPlayerInfo(get(playingSongStore)?.Title, get(playingSongStore)?.Artist, value)
-// })
 
 type AudioPlayerStateType = {
 	isPlaying: boolean

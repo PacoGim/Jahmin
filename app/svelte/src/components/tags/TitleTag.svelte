@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
 	import type { PartialSongType } from '../../../../types/song.type'
 	import getDynamicArtistsFn from '../../functions/getDynamicArtists.fn'
 	import { showDynamicArtistsConfig } from '../../stores/config.store'
@@ -7,19 +6,11 @@
 	import PlayButton from '../../layouts/components/PlayButton.svelte'
 
 	export let song: PartialSongType
-
-	onMount(() => {
-		console.log(song.ID)
-		console.log($playingSongStore?.ID)
-	})
 </script>
 
 <title-tag>
-
-	<play-pause-button>
-
-		<PlayButton customColor="#fff" customSize="16px" />
-
+	<play-pause-button class:playing={song.ID === $playingSongStore?.ID}>
+		<PlayButton customColor="#fff" customSize="12px" customMargins="0px 5px 0 0" />
 	</play-pause-button>
 
 	{song.Title || ''}
@@ -38,5 +29,15 @@
 		/* display: flex; */
 		/* align-items: center; */
 		max-height: 22px;
+	}
+
+	play-pause-button {
+		opacity: 0;
+
+		transition: opacity 300ms ease-in-out;
+	}
+
+	play-pause-button.playing {
+		opacity: 1;
 	}
 </style>

@@ -15,6 +15,7 @@ type DirectoriesType = {
 type SongListTagType = {
 	width: number
 	value: string
+	align: string
 }
 
 export type UserOptionsType = {

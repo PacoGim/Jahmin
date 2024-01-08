@@ -1,4 +1,8 @@
-export default function (json: string): any {
+export default function (json: string | null): any {
+	if (json === null) {
+		return undefined
+	}
+
 	try {
 		return JSON.parse(json)
 	} catch (e) {

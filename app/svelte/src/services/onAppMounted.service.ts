@@ -25,18 +25,6 @@ import { currentAudioPlayer, currentPlayerTime } from '../stores/player.store'
 
 let appIdleDebounce = getAppIdleDebounce()
 
-// function flickTheme(flickToDay = true) {
-// 	if (flickToDay === true) {
-// 		document.querySelector('body').setAttribute('theme', 'Night')
-// 	} else {
-// 		document.querySelector('body').setAttribute('theme', 'Day')
-// 	}
-
-// 	setTimeout(() => {
-// 		flickTheme(!flickToDay)
-// 	}, 3000)
-// }
-
 export default function () {
 	setElementSizeToCssVariablesFn()
 
@@ -81,6 +69,11 @@ export default function () {
 		}
 	})
 
+	window.addEventListener('blur', () => {
+		keyPressed.set(undefined)
+		keyModifier.set(undefined)
+	})
+
 	window.addEventListener('keyup', () => {
 		keyPressed.set(undefined)
 		keyModifier.set(undefined)
@@ -113,11 +106,11 @@ export default function () {
 
 	window.addEventListener('blur', () => {
 		if (get(pauseAnimatedArtWhenAppUnfocusedConfig) === true) {
-			document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
+			document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement | any) => {
 				videoElement.pause()
 			})
 
-			document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement) => {
+			document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement | any) => {
 				let art: HTMLElement = artElement.querySelector('.animated')
 				let staticArt: HTMLElement = artElement.querySelector('.static')
 
@@ -128,11 +121,11 @@ export default function () {
 	})
 
 	window.addEventListener('focus', () => {
-		document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement) => {
+		document.querySelectorAll('art-svlt video').forEach((videoElement: HTMLVideoElement | any) => {
 			videoElement.play()
 		})
 
-		document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement) => {
+		document.querySelectorAll('art-svlt art-animation').forEach((artElement: HTMLElement | any) => {
 			let art: HTMLElement = artElement.querySelector('.animated')
 			let staticArt: HTMLElement = artElement.querySelector('.static')
 
@@ -142,7 +135,7 @@ export default function () {
 	})
 
 	playbackStore.subscribe(value => {
-		let selectedAlbumsDirLocal: string[] = undefined
+		let selectedAlbumsDirLocal: string[] | undefined = undefined
 
 		selectedAlbumsDir.subscribe(value => (selectedAlbumsDirLocal = value || []))()
 
@@ -169,6 +162,10 @@ function afterLanguageChangeReload() {
 		currentAudioPlayer.subscribe(audioPlayer => {
 			const controller = new AbortController()
 			const signal = controller.signal
+
+			if (audioPlayer === undefined) return
+
+			// The loadeddata event needs to be fired only once. So we use the signal to abort the event listener after it has been fired.
 			audioPlayer.addEventListener(
 				'loadeddata',
 				() => {
@@ -176,7 +173,7 @@ function afterLanguageChangeReload() {
 						get(setPlayerProgressFunction)(afterReload.duration, { playNow: true })
 					}
 
-					localStorage.setItem('afterReload', undefined)
+					localStorage.setItem('afterReload', '')
 					controller.abort()
 				},
 				{ signal }

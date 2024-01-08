@@ -1,10 +1,16 @@
 <script lang="ts">
-	import type { SongType } from '../../../../types/song.type'
-	import cssVariablesService from '../../services/cssVariables.service'
+	import { onDestroy, onMount } from 'svelte'
+
+	/********************** Services **********************/
 	import songListClickEventHandlerService from '../../services/songListClickEventHandler.service'
-	import { songAmountConfig, songListTagConfig, songSortConfig } from '../../stores/config.store'
+	import cssVariablesService from '../../services/cssVariables.service'
+
+	/********************** Types **********************/
+	import type { SongType } from '../../../../types/song.type'
 	import type { ConfigType } from '../../../../types/config.type'
 
+	/********************** Store **********************/
+	import { songAmountConfig, songListTagConfig, songSortConfig } from '../../stores/config.store'
 	import {
 		elementMap,
 		isMouseDown,
@@ -18,12 +24,15 @@
 		triggerScrollToSongEvent
 	} from '../../stores/main.store'
 
+	/********************** Components **********************/
 	import SongListScrollBar from '../components/SongListScrollBar.svelte'
 	import SongListBackground from './SongListBackground.svelte'
-	import updateConfigFn from '../../functions/updateConfig.fn'
 	import SongTag from '../../components/SongTag.svelte'
-	import renameSongTagFn from '../../functions/renameSongTag.fn'
 	import CaretIcon from '../../icons/CaretIcon.svelte'
+
+	/********************** Functions **********************/
+	import updateConfigFn from '../../functions/updateConfig.fn'
+	import renameSongTagFn from '../../functions/renameSongTag.fn'
 
 	let scrollAmount = 0
 	let previousScrollAmount = undefined
@@ -35,6 +44,11 @@
 	let saveConfigDebounce: NodeJS.Timeout | undefined = undefined
 
 	let scrolledAmount = 0
+
+	let copyListTag: ConfigType['songListTags']
+
+	let elementActive: HTMLElement | undefined = undefined
+	let elementPosX: number | undefined = undefined
 
 	$: {
 		$selectedAlbumDir
@@ -66,10 +80,41 @@
 		}, 100)
 	}
 
-	let copyListTag: ConfigType['songListTags']
-
-	songListTagConfig.subscribe(value => {
+	const songListTagConfigSubscriptionInvalidate = songListTagConfig.subscribe(value => {
 		copyListTag = JSON.parse(JSON.stringify(value))
+	})
+
+	const mousePositionSubscriptionInvalidate = mousePosition.subscribe(value => {
+		if (elementPosX !== undefined && $isMouseDown === true && copyListTag !== undefined && value) {
+			let newPosX = value?.x - elementPosX
+
+			elementPosX = elementPosX + newPosX
+
+			let tag = elementActive?.dataset.tag
+
+			let tagIndex = copyListTag.findIndex(item => item.value === tag)
+
+			let currentTag = copyListTag[tagIndex]
+
+			let newSize = currentTag.width + newPosX
+
+			if (newSize <= 25) {
+				newSize = 25
+			}
+
+			currentTag.width = newSize
+
+			copyListTag[tagIndex] = currentTag
+
+			copyListTag = copyListTag
+
+			clearTimeout(saveConfigDebounce)
+			saveConfigDebounce = setTimeout(() => {
+				updateConfigFn({
+					songListTags: copyListTag
+				})
+			}, 1000)
+		}
 	})
 
 	function selectAllSongs() {
@@ -133,9 +178,6 @@
 		window.ipc.updateSongs([eventDetails.song], { Rating: eventDetails.rating })
 	}
 
-	let elementActive: HTMLElement | undefined = undefined
-	let elementPosX: number | undefined = undefined
-
 	function handleOnMouseDownEvent(evt: MouseEvent) {
 		let element = evt.target as HTMLElement
 
@@ -184,37 +226,9 @@
 		})
 	}
 
-	mousePosition.subscribe(value => {
-		if (elementPosX !== undefined && $isMouseDown === true && copyListTag !== undefined && value) {
-			let newPosX = value?.x - elementPosX
-
-			elementPosX = elementPosX + newPosX
-
-			let tag = elementActive?.dataset.tag
-
-			let tagIndex = copyListTag.findIndex(item => item.value === tag)
-
-			let currentTag = copyListTag[tagIndex]
-
-			let newSize = currentTag.width + newPosX
-
-			if (newSize <= 25) {
-				newSize = 25
-			}
-
-			currentTag.width = newSize
-
-			copyListTag[tagIndex] = currentTag
-
-			copyListTag = copyListTag
-
-			clearTimeout(saveConfigDebounce)
-			saveConfigDebounce = setTimeout(() => {
-				updateConfigFn({
-					songListTags: copyListTag
-				})
-			}, 1000)
-		}
+	onDestroy(() => {
+		songListTagConfigSubscriptionInvalidate()
+		mousePositionSubscriptionInvalidate()
 	})
 </script>
 
