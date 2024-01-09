@@ -5,7 +5,13 @@
 	import type { SongType } from '../../../types/song.type'
 
 	/********************** Stores **********************/
-	import { currentSongDurationStore, isAppIdle, playbackStore, triggerScrollToSongEvent } from '../stores/main.store'
+	import {
+		currentSongDurationStore,
+		isAppIdle,
+		playbackStore,
+		playingSongStore,
+		triggerScrollToSongEvent
+	} from '../stores/main.store'
 
 	import {
 		altAudioPlayer,
@@ -147,7 +153,9 @@
 	}
 
 	function songPlayingError(songUrl: string, error: any) {
+		console.log('****************')
 		console.log('Song playing error: ', songUrl)
+		console.log(error)
 
 		doesFileExistFn(songUrl).then(result => {
 			if (result === false) {
@@ -174,21 +182,13 @@
 			nextSongToPlay = findNextValidSongFn(songIndex, songList)
 		}
 
-		console.log('****************')
-		console.log('****************')
-		console.log('****************')
-
 		if (nextSongToPlay !== undefined) {
 			doesFileExistFn(nextSongToPlay.SourceFile).then(result => {
-				console.log(result)
-
 				if (result === true) {
-					console.log('src: ', audioPlayerName, encodeURLFn(nextSongToPlay!.SourceFile))
 					let element = getAudioPlayer(audioPlayerName)
 
 					element.setAttribute('src', encodeURLFn(nextSongToPlay!.SourceFile))
 					element.setAttribute('data-song-id', nextSongToPlay!.ID.toString())
-					console.log(element)
 				} else {
 					// Song does not exist
 					songNotFoundFn(nextSongToPlay!)
@@ -199,9 +199,6 @@
 			getAudioPlayer(audioPlayerName).removeAttribute('src')
 			endOfPlayback = true
 		}
-		console.log('****************')
-		console.log('****************')
-		console.log('****************')
 	}
 
 	function getAudioPlayer(audioplayerName: string): HTMLAudioElement {
@@ -218,12 +215,12 @@
 			const name = element.id
 			const altName = name === 'main' ? 'alt' : 'main'
 
-			if (name !== $currentAudioPlayerName) {
-				return
-			}
+			if (name !== $currentAudioPlayerName) return
 
 			const currentTime = Number(element.currentTime.toFixed(2)) || 0
 			const duration = Number(element.duration.toFixed(2)) || 0
+
+			console.log(element.duration, element.getAttribute('src'))
 
 			// No song is probably playing at this point but it might have started loading. We don't want to continue if the duration is 0
 			if (duration === 0) return

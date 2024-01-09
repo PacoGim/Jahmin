@@ -128,7 +128,9 @@
 		if (playNow) {
 			clearTimeout(pauseDebounce)
 			pauseDebounce = setTimeout(() => {
-				$currentAudioPlayer!.play()
+				$currentAudioPlayer!.play().catch(()=>{
+					console.log($currentAudioPlayer?.getAttribute('src'))
+				})
 
 				transitionDuration = calculateTransition()
 				currentProgressWidth = 100

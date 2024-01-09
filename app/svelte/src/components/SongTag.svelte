@@ -15,13 +15,13 @@
 	import GenericTag from './tags/GenericTag.svelte'
 	import DateTag from './tags/DateTag.svelte'
 
-	export let tag: { value: string; align: string }
+	export let tag: { value: string }
 	export let song: PartialSongType
 
 	let dispatch = createEventDispatcher()
 </script>
 
-<song-tag style="justify-self: {tag.align}">
+<song-tag>
 	{#if tag.value === 'Title'}
 		<TitleTag {song} />
 	{:else if tag.value === 'Rating'}
@@ -44,8 +44,3 @@
 		<GenericTag tagValue={song[tag.value]} />
 	{/if}
 </song-tag>
-
-<style>
-	song-tag {
-	}
-</style>
