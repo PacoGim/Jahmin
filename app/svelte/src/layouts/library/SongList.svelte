@@ -33,6 +33,7 @@
 	/********************** Functions **********************/
 	import updateConfigFn from '../../functions/updateConfig.fn'
 	import renameSongTagFn from '../../functions/renameSongTag.fn'
+	import updateSongsFilesFn from '../../functions/updateSongsFiles.fn'
 
 	let scrollAmount = 0
 	let previousScrollAmount = undefined
@@ -175,7 +176,7 @@
 
 	function setStar(starChangeEvent: CustomEvent) {
 		let eventDetails: { rating: number; song: SongType } = starChangeEvent.detail
-		window.ipc.updateSongs([eventDetails.song], { Rating: eventDetails.rating })
+		updateSongsFilesFn([eventDetails.song], { Rating: eventDetails.rating })
 	}
 
 	function handleOnMouseDownEvent(evt: MouseEvent) {

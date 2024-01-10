@@ -35,6 +35,7 @@ While this makes sense to why it causes a streaming audio to fail after a while 
 ---
 
 ### Others :
+- Add again the window.ipc.setPlayerInfo in the store or wherever.
 
 - Fix massive app freeze at app launch.
 

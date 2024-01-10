@@ -1,6 +1,6 @@
 import { get, writable, type Writable } from 'svelte/store'
 import type { SongType } from '../../../types/song.type'
-import { isPlaying } from './player.store'
+// import { isPlaying } from './player.store'
 
 export let os: Writable<string> = writable('')
 export let langFile: Writable<Object> = writable('')
@@ -98,15 +98,15 @@ layoutToShow.subscribe(layoutName => {
 	document.title = layoutName ? `Jahmin ${layoutName}` : 'Jahmin'
 })
 
-playingSongStore.subscribe(song => {
-	if (song) {
-		window.ipc.setPlayerInfo(song?.Title || '', song?.Artist || '', get(isPlaying))
-	}
-})
+// playingSongStore.subscribe(song => {
+// 	if (song) {
+// 		window.ipc.setPlayerInfo(song?.Title || '', song?.Artist || '', get(isPlaying))
+// 	}
+// })
 
-isPlaying.subscribe(isPlayingValue => {
-	let songTitle = get(playingSongStore)?.Title || ''
-	let songArtist = get(playingSongStore)?.Artist || ''
+// isPlaying.subscribe(isPlayingValue => {
+// 	let songTitle = get(playingSongStore)?.Title || ''
+// 	let songArtist = get(playingSongStore)?.Artist || ''
 
-	window.ipc.setPlayerInfo(songTitle, songArtist, isPlayingValue)
-})
+// 	window.ipc.setPlayerInfo(songTitle, songArtist, isPlayingValue)
+// })

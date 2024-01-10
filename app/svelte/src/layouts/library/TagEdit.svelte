@@ -12,6 +12,7 @@
 	import { isEmptyObject } from '../../functions/isEmptyObject.fn'
 	import tagEditSuggestionFn from '../../services/tagEditSuggestion.fn'
 	import getDirectoryFn from '../../functions/getDirectory.fn'
+	import updateSongsFilesFn from '../../functions/updateSongsFiles.fn'
 
 	let songsToEdit: PartialSongType[] = []
 	let groupedTags: PartialSongType = {}
@@ -256,7 +257,7 @@
 			}
 		})
 
-		window.ipc.updateSongs(cleanList, newTags)
+		updateSongsFilesFn(cleanList, newTags)
 	}
 
 	onMount(() => {

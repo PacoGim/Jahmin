@@ -2,7 +2,6 @@ import lyricsContainerCtxMenu from './lyricsContainerCtxMenu'
 import albumContextMenu from './albumCtxMenu'
 import groupNameCtxMenu from './groupNameCtxMenu'
 import songListCtxMenu from './songListCtxMenu'
-import path from 'path'
 import songListHeaderCtxMenu from './songListHeaderCtxMenu'
 
 export async function handleContextMenuEvent(e: MouseEvent) {
