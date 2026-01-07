@@ -1,10 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
+import { pathToFileURL } from 'url'
+
 import type { ConfigType } from '../types/config.type'
 import type { PartialSongType, SongType } from '../types/song.type'
 import type { EqualizerProfileType } from '../types/equalizerProfile.type'
 import type { ReturnMessageType } from '../types/returnMessage.type'
 import type { PromiseResolveType } from '../types/promiseResolve.type'
+
+contextBridge.exposeInMainWorld('media', {
+	toFileUrl: (filePath: string) => pathToFileURL(filePath).href
+})
 
 const ipcFunctions = {
 	/********************** Renderer to Main (two-way) **********************/

@@ -1,5 +1,3 @@
-import { pathToFileURL } from 'url'
-
-export default function toFileUrl(filePath: string): string {
-	return pathToFileURL(filePath).href
+export default function (url: string) {
+	return window.media.toFileUrl(url)
 }
