@@ -1,6 +1,5 @@
-export default function (url: string) {
-	url = encodeURI(url)
-	url = url.replace('#', '%23')
+import { pathToFileURL } from 'url'
 
-	return url
+export default function toFileUrl(filePath: string): string {
+	return pathToFileURL(filePath).href
 }
